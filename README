@@ -1,0 +1,18 @@
+The server folder contains basically the code for the registry interface. 
+	The most important file is called the 'server.py' containing the implementation of the operations of the API. 
+	There are two files containing python dictionaries which are used to save and reload cache information about the authority hierarchies. 
+	The 'slice' and 'component' folders contain the keys of each authority in hierarchy.
+
+The gui directory is the client part. 
+	There is a GUI in java, but the authentication logic and function calls are all in a file called 'clientstub.py'. This file is found in 'gui/JavaApplication1/client_osaka' directory. 
+	'client_osaka' and 'client_keiko' are just two example client folders that we use to test the interfaces.
+
+util folder contains almost all of the core code. 
+	'tree.py' is important for setting up a hierarchy of authorities corresponding to PlanetLab sites. As noted before, you can find the generated hierarchy under the folder in server folder, with names 'slice' and 'component' folders.
+	sec folder under util is the security module. 'sec.py' contains both the authentication/authorization related functions (used while a new connection is being established), also certificate related functions (credentials creation, etc). 
+	Other files are util code for PlanetLab to GENI conversion logic, database and exceptions.
+
+Contact me at ssevinc@cs.princeton.edu for more information.
+Soner Sevinc
+
+

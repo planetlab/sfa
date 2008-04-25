@@ -43,20 +43,6 @@ shell = Shell(globals = globals())             # Add all the API methods to the 
 
 class GENIServer(SSL.SSLServer):
 
-    #NOTE: 
-    #	step1: The caller first makes a discovery call.
-    #	step2: If the hrn is not managed by this interface, the appropriate child wrapper URL is returned.
-    #	step3: Else, DOMAIN_NAME is returned.
-    #	step4: Then, the caller does the call with authentication and authorization elements.
-    #	step5: The interface handles the call: 
-    #			- Check if HRN is in the same database, or another db (again handled by this interface)
-    #			- Perform the call in appropriate database in appropriate table.
-    #			- For remote databases, ensure security. 
-
-    #NOTE: For all calls below, if the parameter dbinfo that points to the db/tabe to act shows a different db than the interface tree's root, then 
-    #the PL calls should also reflect that; the PL calls should be made to that db. Currently PL API db configuration is static, and there is no problem now 
-    #since all nodes in interface tree reside at the same database
-
     #record is the record to be registered
     #dbinfo is the information showing the relevant tables to act (db and table name), in the subtree this interface manages
     def register(self, record, dbinfo):
