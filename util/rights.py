@@ -1,0 +1,56 @@
+privilege_table = {"authority": ["*"],
+                   "refresh": ["remove", "update"],
+                   "resolve": ["resolve", "list", "getcredential"],
+                   "sa": ["*"],
+                   "embed": ["getticket", "createslice", "deleteslice", "updateslice"],
+                   "bind": ["getticket", "loanresources"],
+                   "control": ["updateslice", "stopslice", "startslice", "deleteslice"],
+                   "info": ["listslices", "listcomponentresources", "getsliceresources"],
+                   "ma": ["*"]}
+
+class Right:
+   def __init__(self, kind):
+      self.kind = kind
+
+   def can_perform(self, op_name):
+      allowed_ops = privilege_table.get(self.kind.lower(), None)
+      if not allowed_ops:
+         return False
+
+      # if "*" is specified, then all ops are permitted
+      if "*" in allowed_ops:
+         return True
+
+      return (op_name.lower() in allowed_ops)
+
+class RightList:
+    def __init__(self, string=None):
+        self.rights = []
+        if string:
+            self.load_from_string(string)
+
+    def load_from_string(self, string):
+        self.rights = []
+
+        # none == no rights, so leave the list empty
+        if not string:
+            return
+
+        parts = string.split(",")
+        for part in parts:
+            self.rights.append(Right(part))
+
+    def save_to_string(self):
+        right_names = []
+        for right in self.rights:
+            right_names.append(right.kind)
+
+        return ",".join(right_names)
+
+    def can_perform(self, op_name):
+        for right in self.rights:
+            if right.can_perform(op_name):
+                return True
+        return False
+
+
