@@ -285,8 +285,10 @@ class Sec:
         self.mode = mode
         file_list = os.listdir(TOP_LEVEL_CERTS_DIR)
         for auth_file in file_list:
-            self.top_level_certs.append(X509.load_cert(TOP_LEVEL_CERTS_DIR+"/"+auth_file))
-            
+            # XXX SMBAKER: fix .svn directory
+            if os.path.isfile(os.path.join(TOP_LEVEL_CERTS_DIR, auth_file)):
+                self.top_level_certs.append(X509.load_cert(TOP_LEVEL_CERTS_DIR+"/"+auth_file))
+
         self.id_file = id_file
         self.id_key_file = id_key_file
         self.my_cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(id_file).read())
@@ -406,7 +408,8 @@ class Sec:
             elif trusted_auth == False:
                 return 3
             return 0
-        except:
+        except Exception, e:
+            print "Exception in verify_accounting:", e
             return 4
      
     #   - exchange the credential chains, store peer's credential in peer.cred
@@ -446,7 +449,8 @@ class Sec:
                     credstr = c_pem.get_ext("subjectAltName").get_value().split('http://')[1]
                     peer_cred.info_certs.append(get_cred_info(credstr))
                     peer_cred.cert_chain.append(c_pem)
-            except:
+            except Exception, e:
+                print "Exception in exchange_credential:", e
                 print "No valid chain received.\n"
                 return 1
             #if structure is ok, go on with other checks
@@ -550,7 +554,7 @@ class Sec:
                             allow = True
                             break
                         elif is_self_op and opname + '_self' in operation_set[interface['lbl']] and acc.get_hrn() == target_hrn:
-                            allow_self = true
+                            allow_self = True
                 #if operation is allowed in name, perform additional checks for parameters
                 if allow or allow_self:
                     if opname == 'update':
@@ -562,7 +566,8 @@ class Sec:
                 return True
             else:
                 return False
-        except:
+        except Exception, e:
+            print "exception in check_authorization:", e
             return False
 
     def auth_protocol(self, conn):
