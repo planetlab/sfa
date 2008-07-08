@@ -383,7 +383,7 @@ class GENIServer(SSL.SSLServer):
                 shell.DeleteSlice(pl_auth, pointer)
             elif type == "node":
                 shell.DeleteNode(pl_auth, pointer)
-                
+
             #delete from the GENI table
             querystr = generate_querystr('DELETE', table, record['g_params'])
             cnx.query(querystr)
@@ -391,16 +391,17 @@ class GENIServer(SSL.SSLServer):
         except Exception, e:
             print "Error in 'delete()'"+str(e)
             return "Error in delete:"+str(e)
-            
+
     #record shows the hrn to be searched
     #dbinfo is the information showing the relevant tables to act (db and table name), in the subtree this interface manages
     def lookup(self, record, dbinfo):
         cnx = dbinfo[0]
-        table = dbinfo[1] 
+        table = dbinfo[1]
         try:
             #lookup in GENI tables
             existing_res = check_exists_geni(record, dbinfo)
             if not existing_res:
+                print "Record "+record['g_params']["hrn"]+" does not exist.\n" 
                 raise NonexistingRecord("Record "+record['g_params']["hrn"]+" does not exist.\n" )
             type = existing_res['type']
             pointer = existing_res['pointer']
@@ -437,7 +438,8 @@ class GENIServer(SSL.SSLServer):
                     raise NonexistingRecord("Record "+record['g_params']["hrn"]+" does not exist.\n" )
                 pl_res = pl_res[0]
             return str({'pl':pl_res, 'geni':existing_res})
-        except:
+        except Exception, e:
+            print "Lookup returned exception", e
             return None
             
 
@@ -509,43 +511,42 @@ class GENIServer(SSL.SSLServer):
                 if cred_name[0] == 'slice':
                     slc_rec = {'g_params':{'hrn':cred_name[1]}, 'p_params':{}}
                     slc_result = self.lookup(slc_rec, dbinfo)
+                    slc_result = eval(slc_result)
                     has_slc = False
-                    deleted = slc_result['p_params']['is_deleted']
-                    expires= time.strptime(slc_result['p_params']['expires'], PL_DATETIME_FORMAT)
-                    expires = datetime.timedelta(seconds=calendar.timegm(expires))
-                    if slc_result and  deleted == 'f':
-##                        if peerinfo[0] in slc_result['geni']['userlist']:
-##                            has_slc = True
-##                        else:
-                        usr_dbinfo = determine_dbinfo(get_authority(peerinfo[0]), self.tree)
+                    if slc_result:
+                        usr_dbinfo = determine_dbinfo(obtain_authority(peerinfo[0]), self.sr_tree)
                         if usr_dbinfo:
                             rec = {'g_params':{'hrn':peerinfo[0]}, 'p_params':{}}
-                            user_pointer = self.lookup(rec, usr_dbinfo)['geni']['pointer']
-                            querystr = "SELECT * FROM person_slice WHERE person_id = "+user_pointer+" AND slice_id = "+slc_result['geni']['pointer']
-                            usr_slc_res = cnx.query(querystr).dictresult()
-                            if usr_slc_res:
-                                has_slc = True
+                            user_pointer = eval(self.lookup(rec, usr_dbinfo))['geni']['pointer']
+                            # XXX SMBAKER: person_slice doesn't exist -- fix this to use shell/plc_api
+                            #              need to see if slice belongs to person
+                            has_slc = True
+                            #querystr = "SELECT * FROM person_slice WHERE person_id = "+user_pointer+" AND slice_id = "+slc_result['geni']['pointer']
+                            #usr_slc_res = cnx.query(querystr).dictresult()
+                            #if usr_slc_res:
+                            #    has_slc = True
                         if has_slc:
                             rights = ''
-                            if slc_result['geni']['rights'] != '' or slc_result['geni']['rights'] != None:
+                            if slc_result['geni']['rights'] != '' and slc_result['geni']['rights'] != None:
                                 rights = slc_result['geni']['rights']
                             else:
                                 rights = '(10-0)(11-0)(12-0)(13-0)(14-0)(15-0)(16-0)(17-0)(18-0)(20-0)(21-0)(22-0)(23-0)'
                                 rights = rights + '#0:comp:planetlab.*'
                             #authcert, authkey, pubkey, cname, rights, time
+                            # XXX SMBAKER: need to compute expiration time here and apply
+                            #              it to the credential
                             cname = slc_result['geni']['hrn']
-                            timenow = datetime.timedelta(seconds=time.time())
-                            if expires - timenow > CRED_GRANT_TIME:
-                                openssl_cert = crypto.load_certificate(crypto.FILETYPE_PEM, peerinfo[1])
-                                cred_pem = create_cred(keyinfo[0], keyinfo[1], openssl_cert.get_pubkey(), cname, rights)
+                            openssl_cert = peerinfo[1]
+                            cred_pem = create_cred(keyinfo[0], keyinfo[1], openssl_cert.get_pubkey(), cname, rights)
                 else:
                     raise NonexistingCredType("Credential "+cred_name[0]+" does not exist.\n" )
             if cred_pem == None:
                 return cred_pem
             else:
                 return crypto.dump_certificate(crypto.FILETYPE_PEM, cred_pem)+keyinfo[3]
-        except: 
-            return None     
+        except Exception, e:
+            print "getCredential return exception:", e
+            return None
 
 
     #returns the existing acconting information in database to the caller
@@ -556,14 +557,18 @@ class GENIServer(SSL.SSLServer):
     #peer_cert is the ssl certificate of the peer
     def getAccounting(self, record, dbinfo, keyinfo, peer_cert):
         cnx = dbinfo[0]
-        table = dbinfo[1] 
+        table = dbinfo[1]
         try:
             acc = None
             #check if the record exists
             rec = {'g_params':{'hrn':record['g_params']['account_name']}, 'p_params':{}}
             res = eval(self.lookup(rec, dbinfo))
             if not res:
+                print "Record "+record['g_params']["account_name"]+" does not exist."
                 raise NonexistingRecord("Record "+record['g_params']["account_name"]+" does not exist.\n" )
+            if not res['geni']['pubkey']:
+                print "Record "+record['g_params']["account_name"]+" missing public key."
+                # XXX SMBAKER: raise exception here
             if res['geni']['pubkey'] == peer_cert.get_pubkey().as_pem(cipher=None):
                 openssl_cert = crypto.load_certificate(crypto.FILETYPE_PEM, peer_cert.as_pem())
                 uuid = 0
@@ -576,9 +581,10 @@ class GENIServer(SSL.SSLServer):
                 return acc
             else:
                 return crypto.dump_certificate(crypto.FILETYPE_PEM, acc)+keyinfo[2]
-        except:
+        except Exception, e:
+            print "getAccounting returned exception: ", e
             return None
-        
+
     def __init__(self, socket, handler):
         #initialize trees
         self.sr_tree_file = SR_FILE
@@ -646,7 +652,10 @@ class handle_connection(SocketServer.BaseRequestHandler):
                 else:
                     reg_type = 'component'
             elif opname == 'getCredential':
-                if operation_request["g_params"]["cred_name"].split(':')[1] == 'slc':
+                # XXX SMBAKER- support for getCredential slice:hrn.of.slice
+                if operation_request["g_params"]["cred_name"].split(':')[0] == 'slice':
+                    reg_type = 'slice'
+                elif operation_request["g_params"]["cred_name"].split(':')[1] == 'slc':
                     reg_type = 'slice'
                 else:
                     reg_type = 'component'
