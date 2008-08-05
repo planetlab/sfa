@@ -1,16 +1,32 @@
+# cert.py
+#
+# a general purpose class for dealing with certificates
+#
+# this class serves as an interface between a lower-level X.509 certificate
+# library such as pyOpenSSL or M2Crypto. Currently both of these libraries
+# are being used due to lack of functionality in pyOpenSSL and some apparant
+# bugs in M2Crypto
+
 from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
 from M2Crypto import EVP
 
+# Keypair
+#
+# represents a private/public key pair, or a public key
+
 class Keypair:
    key = None       # public/private keypair
    m2key = None     # public key (m2crypto format)
 
-   def __init__(self, create=False):
+   def __init__(self, create=False, string=None, filename=None):
       if create:
          self.create()
-      pass
+      if string:
+         self.load_from_string(string)
+      if filename:
+         self.load_from_file(filename)
 
    def create(self):
       self.key = crypto.PKey()
@@ -38,6 +54,19 @@ class Keypair:
    def get_openssl_pkey(self):
       return self.key
 
+   def is_same(self, pkey):
+      return self.as_pem() == pkey.as_pem()
+
+# Certificate
+#
+# Represents an X.509 certificate. Support is included for a list of
+# certificates by use of a "parent" member. See load_from_string() and
+# save_to_string() for insight into how a recursive chain of certs is
+# serialized.
+#
+# Certificates support an application-defined "data" field, which is
+# stored in the subjectAltName field of the X.509 certificate.
+
 class Certificate:
    digest = "md5"
 
@@ -63,12 +92,15 @@ class Certificate:
        self.cert.gmtime_adj_notBefore(0)
        self.cert.gmtime_adj_notAfter(60*60*24*365*5) # five years
 
+   def load_from_pyopenssl_x509(self, x509):
+       self.cert = x509
+
    def load_from_string(self, string):
        # if it is a chain of multiple certs, then split off the first one and
        # load it
        parts = string.split("-----parent-----", 1)
        self.cert = crypto.load_certificate(crypto.FILETYPE_PEM, parts[0])
-       
+
        # if there are more certs, then create a parent and let the parent load
        # itself from the remainder of the string
        if len(parts) > 1:
@@ -147,7 +179,7 @@ class Certificate:
        self.cert.add_extensions([ext])
 
    def get_extension(self, name):
-       # pyOpenSSL does not have a way to get certificates
+       # pyOpenSSL does not have a way to get extensions
        m2x509 = X509.load_cert_string(self.save_to_string())
        value = m2x509.get_ext(name).get_value()
        return value
@@ -196,6 +228,9 @@ class Certificate:
        # except:
        #   return 0
 
+   def is_pubkey(self, pkey):
+       return self.get_pubkey().is_same(pkey)
+
    def is_signed_by_cert(self, cert):
        k = cert.get_pubkey()
        result = self.verify(k)
@@ -208,8 +243,15 @@ class Certificate:
         return self.parent
 
    def verify_chain(self, trusted_certs = None):
+        # Verify a chain of certificates. Each certificate must be signed by
+        # the public key contained in it's parent. The chain is recursed
+        # until a certificate is found that is signed by a trusted root.
+
+        # TODO: verify expiration time
+
         # if this cert is signed by a trusted_cert, then we are set
         for trusted_cert in trusted_certs:
+            # TODO: verify expiration of trusted_cert ?
             if self.is_signed_by_cert(trusted_cert):
                 #print self.get_subject(), "is signed by a root"
                 return True

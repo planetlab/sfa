@@ -1,3 +1,10 @@
+# credential.py
+#
+# implements GENI credentials
+#
+# Credentials are layered on top of certificates, and are essentially a
+# certificate that stores a tuple of parameters.
+
 from cert import *
 from rights import *
 from gid import *
@@ -5,6 +12,10 @@ import xmlrpclib
 
 # Credential is a tuple:
 #     (GIDCaller, GIDObject, LifeTime, Privileges, Delegate)
+#
+# These fields are encoded using xmlrpc into the subjectAltName field of the
+# x509 certificate. Note: Call encode() once the fields have been filled in
+# to perform this encoding.
 
 class Credential(Certificate):
     uuid = None

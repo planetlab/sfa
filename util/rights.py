@@ -1,3 +1,11 @@
+# rights.py
+#
+# support for privileges according to GENI specification
+
+# privilege_table:
+#
+# a list of priviliges and what operations are allowed per privilege
+
 privilege_table = {"authority": ["*"],
                    "refresh": ["remove", "update"],
                    "resolve": ["resolve", "list", "getcredential"],
@@ -7,6 +15,8 @@ privilege_table = {"authority": ["*"],
                    "control": ["updateslice", "stopslice", "startslice", "deleteslice"],
                    "info": ["listslices", "listcomponentresources", "getsliceresources"],
                    "ma": ["*"]}
+
+# a "Right" is a single privilege.
 
 class Right:
    def __init__(self, kind):
@@ -22,6 +32,8 @@ class Right:
          return True
 
       return (op_name.lower() in allowed_ops)
+
+# a "RightList" is a list of privileges
 
 class RightList:
     def __init__(self, string=None):

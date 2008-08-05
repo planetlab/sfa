@@ -1,3 +1,7 @@
+# gid.py
+#
+# implements GENI GID
+
 from cert import *
 import uuid
 import xmlrpclib
@@ -47,9 +51,21 @@ class GID(Certificate):
             dict = xmlrpclib.loads(self.get_data())[0][0]
         else:
             dict = {}
-            
+
         self.uuid = dict.get("uuid", None)
         self.hrn = dict.get("hrn", None)
+
+    # XXX: I may have decided not to use this
+    def get_cache_key(self):
+        return self.get_cache_uuid() + self.get_cache_name()
+
+    # XXX: I may have decided not to use this
+    def get_cache_uuid(self):
+        return self.get_uuid()
+
+    # XXX: I may have decided not to use this
+    def get_cache_name(self):
+        return self.get_name()
 
 
 
