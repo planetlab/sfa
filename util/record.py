@@ -6,13 +6,13 @@
 
 from pg import DB
 
+GENI_TABLE_PREFIX = "geni$"
+
 # Record is a tuple (Name, GID, Type, Info)
 #    info is implemented as a pointer to a PLC record
-#    privkey is stored for convenience on the registry for entities which
-#        the registry holds their private keys
 
 class GeniRecord():
-    def __init__(self, name=None, gid=None, type=None, pointer=None, privkey=None, dict=None):
+    def __init__(self, name=None, gid=None, type=None, pointer=None, dict=None):
         self.dirty=True
         if name:
             self.set_name(name)
@@ -22,14 +22,11 @@ class GeniRecord():
             self.set_type(type)
         if pointer:
             self.set_pointer(pointer)
-        if privkey:
-            self.set_privkey(privkey)
         if dict:
             self.set_name(dict['name'])
             self.set_gid(dict['gid'])
             self.set_type(dict['type'])
             self.set_pointer(dict['pointer'])
-            self.set_privkey(dict['privkey'])
 
     def set_name(self, name):
         self.name = name
@@ -47,15 +44,11 @@ class GeniRecord():
         self.pointer = pointer
         self.dirty = True
 
-    def set_privkey(self, privkey):
-        self.privkey = privkey
-        self.dirty = True
-
     def get_key(self):
         return self.name + "#" + self.type
 
     def get_field_names(self):
-        return ["name", "gid", "type", "pointer", "privkey"]
+        return ["name", "gid", "type", "pointer"]
 
     def get_field_value_string(self, fieldname):
         if fieldname == "key":
@@ -85,22 +78,16 @@ class GeniRecord():
 # Represents a single table on a registry for a single authority.
 
 class GeniTable():
-    def __init__(self, create=False, hrn="unspecified.default.registry", cninfo=None, privkey=None, gid=None):
-        # XXX privkey/gid are necessary so the table can generate GIDs for its
-        #    records; might move that out of here as it doesn't seem the right place
+    def __init__(self, create=False, hrn="unspecified.default.registry", cninfo=None):
+        global GENI_TABLE_PREFIX
 
         self.hrn = hrn
 
         # pgsql doesn't like table names with "." in them, to replace it with "$"
-        self.tablename = self.hrn.replace(".", "$")
+        self.tablename = GENI_TABLE_PREFIX + self.hrn.replace(".", "$")
 
         # establish a connection to the pgsql server
-        self.cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])[
-
-        # the private key is necessary for creation of GIDs
-        self.privkey = privkey
-
-        self.gid = gid
+        self.cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
 
         # if asked to create the table, then create it
         if create:
@@ -112,7 +99,6 @@ class GeniTable():
                 name text, \
                 gid text, \
                 type text, \
-                privkey text, \
                 pointer integer);"
 
         self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
@@ -155,21 +141,16 @@ class GeniTable():
             result_rec_list.append(GeniRecord(dict=dict))
         return result_rec_list
 
-    def create_gid(self, hrn, uuid, pubkey):
-        gid = GID(subject=hrn, uuid=uuid, hrn=hrn)
-        gid.set_pubkey(pubkey)
-        gid.set_issuer(key=self.privkey, subject=self.hrn)
-        gid.set_parent(self.gid)
-        gid.encode()
-        gid.sign()
+def set_geni_table_prefix(x):
+    global GENI_TABLE_PREFIX
 
-        return gid
+    GENI_TABLE_PREFIX = x
 
-    def update_gid(self, record)
-        old_gid = GID(string = record.get_gid())
-        pubkey = old_gid.get_pubkey()
+def geni_records_purge(cninfo):
+    global GENI_TABLE_PREFIX 
 
-        gid = self.create_gid(old_gid.get_hrn(), old_gid.get_uuid(), old_gid.get_pubkey())
-
-        record.set_gid(gid.save_to_string())
-
+    cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
+    tableList = cnx.get_tables()
+    for table in tableList:
+        if table.startswith(GENI_TABLE_PREFIX):
+            cnx.query("DROP TABLE " + table)
