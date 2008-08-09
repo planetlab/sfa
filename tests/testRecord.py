@@ -3,6 +3,7 @@ import xmlrpclib
 from record import *
 from cert import *
 from gid import *
+from config import *
 
 class TestRecord(unittest.TestCase):
     def setUp(self):
@@ -14,16 +15,19 @@ class TestRecord(unittest.TestCase):
 class TestTable(unittest.TestCase):
 
     def setUp(self):
+        set_geni_table_prefix("testRecord$")
         self.reg_hrn = "test.table"
         self.rec_hrn = self.reg_hrn + "." + "record"
-        pass
 
-    def testCreate(self):
-        t = GeniTable(hrn = self.reg_hrn)
+    def test000_Purge(self):
+        geni_records_purge(get_default_dbinfo())
+
+    def test001_Create(self):
+        t = GeniTable(hrn = self.reg_hrn, cninfo=get_default_dbinfo())
         t.create()
 
-    def testInsert(self):
-        t = GeniTable(hrn = self.reg_hrn)
+    def test002_Insert(self):
+        t = GeniTable(hrn = self.reg_hrn, cninfo=get_default_dbinfo())
 
         k = Keypair(create=True)
         gid = GID(subject="scott.foo", uuid=create_uuid(), hrn=self.rec_hrn)
@@ -35,25 +39,25 @@ class TestTable(unittest.TestCase):
         r = GeniRecord(name=self.rec_hrn, gid=gid.save_to_string(), type="user", pointer=3)
         t.insert(r)
 
-    def testLookup(self):
-        t = GeniTable(hrn = self.reg_hrn)
+    def test003_Lookup(self):
+        t = GeniTable(hrn = self.reg_hrn, cninfo=get_default_dbinfo())
 
-        rec_list = t.lookup(self.rec_hrn)
+        rec_list = t.resolve("*", self.rec_hrn)
         self.assertEqual(len(rec_list), 1)
         r = rec_list[0]
         self.assertEqual(r.name, self.rec_hrn)
         self.assertEqual(r.pointer, 3)
 
-    def testUpdate(self):
-        t = GeniTable(hrn = self.reg_hrn)
+    def test004_Update(self):
+        t = GeniTable(hrn = self.reg_hrn, cninfo=get_default_dbinfo())
 
-        rec_list = t.lookup(self.rec_hrn)
+        rec_list = t.resolve("*", self.rec_hrn)
         r = rec_list[0]
 
         r.set_pointer(4)
         t.update(r)
 
-        rec_list = t.lookup(self.rec_hrn)
+        rec_list = t.resolve("*", self.rec_hrn)
         self.assertEqual(len(rec_list), 1)
         r = rec_list[0]
         self.assertEqual(r.name, self.rec_hrn)
