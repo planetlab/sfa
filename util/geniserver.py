@@ -163,6 +163,7 @@ class GeniServer():
     def decode_authentication(self, cred_string):
         self.client_cred = Credential(string = cred_string)
         self.client_gid = self.client_cred.get_gid_caller()
+        self.object_gid = self.client_cred.get_gid_object()
 
         # make sure the client_gid is not blank
         if not self.client_gid:

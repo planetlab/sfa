@@ -43,49 +43,65 @@ class Hierarchy():
     def __init__(self, basedir="."):
         self.basedir = basedir
 
-    # type = sa|ma
-    def get_auth_info(self, hrn, type, can_create=True):
+    def get_auth_filenames(self, hrn):
         leaf = get_leaf(hrn)
         parent_hrn = get_authority(hrn)
-        directory = os.path.join(self.basedir,
-                        os.path.join(type, hrn.replace(".", "/")))
+        directory = os.path.join(self.basedir, hrn.replace(".", "/"))
 
         gid_filename = os.path.join(directory, leaf+".gid")
         privkey_filename = os.path.join(directory, leaf+".pkey")
         dbinfo_filename = os.path.join(directory, leaf+".dbinfo")
 
-        if (not os.path.exists(gid_filename)) or \
-           (not os.path.exists(privkey_filename)) or \
-           (not os.path.exists(dbinfo_filename)):
+        return (directory, gid_filename, privkey_filename, dbinfo_filename)
+
+    def auth_exists(self, hrn):
+        (directory, gid_filename, privkey_filename, dbinfo_filename) = \
+            self.get_auth_filenames(hrn)
+
+        return os.path.exists(gid_filename) and \
+               os.path.exists(privkey_filename) and \
+               os.path.exists(dbinfo_filename)
+
+    def create_auth(self, hrn):
+        (directory, gid_filename, privkey_filename, dbinfo_filename) = \
+            self.get_auth_filenames(hrn)
+
+        # create the directory to hold the files
+        try:
+            os.makedirs(directory)
+        # if the path already exists then pass
+        except OSError, (errno, strerr):
+            if errno == 17:
+                pass
+
+        pkey = Keypair(create = True)
+        pkey.save_to_file(privkey_filename)
+
+        gid = self.create_gid(hrn, create_uuid(), pkey)
+        gid.save_to_file(gid_filename)
+
+        # XXX TODO: think up a better way for the dbinfo to work
+
+        dbinfo = get_default_dbinfo()
+        dbinfo_file = file(dbinfo_filename, "w")
+        dbinfo_file.write(str(dbinfo))
+        dbinfo_file.close()
+
+    def get_auth_info(self, hrn, can_create=True):
+        if not self.auth_exists(hrn):
             if not can_create:
-                return MissingAuthorityFiles(hrn)
+                return MissingAuthority(hrn)
 
-            # create the directory to hold the files
-            try:
-                os.makedirs(directory)
-            # if the path already exists then pass
-            except OSError, (errno, strerr):
-                if errno == 17:
-                    pass
+            self.create_auth(hrn)
 
-            pkey = Keypair(create = True)
-            pkey.save_to_file(privkey_filename)
-
-            gid = self.create_gid(type, hrn, create_uuid(), pkey)
-            gid.save_to_file(gid_filename)
-
-            # XXX TODO: think up a better way for the dbinfo to work
-
-            dbinfo = get_default_dbinfo()
-            dbinfo_file = file(dbinfo_filename, "w")
-            dbinfo_file.write(str(dbinfo))
-            dbinfo_file.close()
+        (directory, gid_filename, privkey_filename, dbinfo_filename) = \
+            self.get_auth_filenames(hrn)
 
         auth_info = AuthInfo(hrn, gid_filename, privkey_filename, dbinfo_filename)
 
         return auth_info
 
-    def create_gid(self, type, hrn, uuid, pkey):
+    def create_gid(self, hrn, uuid, pkey):
         parent_hrn = get_authority(hrn)
 
         gid = GID(subject=hrn, uuid=uuid)
@@ -96,7 +112,7 @@ class Hierarchy():
             gid.set_issuer(pkey, hrn)
         else:
             # we need the parent's private key in order to sign this GID
-            parent_auth_info = self.get_auth_info(parent_hrn, type)
+            parent_auth_info = self.get_auth_info(parent_hrn)
             gid.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
             gid.set_parent(parent_auth_info.get_gid_object())
 
@@ -105,7 +121,7 @@ class Hierarchy():
 
         return gid
 
-    def refresh_gid(self, type, gid, hrn=None, uuid=None, pubkey=None):
+    def refresh_gid(self, gid, hrn=None, uuid=None, pubkey=None):
         # TODO: compute expiration time of GID, refresh it if necessary
         gid_is_expired = False
 
@@ -118,7 +134,7 @@ class Hierarchy():
             if not pubkey:
                 pubkey = gid.get_pubkey()
 
-            gid = self.create_gid(type, hrn, uuid, pubkey)
+            gid = self.create_gid(hrn, uuid, pubkey)
 
         return gid
 

@@ -9,11 +9,16 @@ from pg import DB
 GENI_TABLE_PREFIX = "geni$"
 
 # Record is a tuple (Name, GID, Type, Info)
-#    info is implemented as a pointer to a PLC record
+#    info is comprised of the following sub-fields
+#        pointer = a pointer to the record in the PL database
+#        pl_info = planetlab-specific info (when talking to client)
+#        geni_info = geni-specific info (when talking to client)
 
 class GeniRecord():
     def __init__(self, name=None, gid=None, type=None, pointer=None, dict=None):
-        self.dirty=True
+        self.dirty = True
+        self.pl_info = None
+        self.geni_info = None
         if name:
             self.set_name(name)
         if gid:
@@ -27,6 +32,10 @@ class GeniRecord():
             self.set_gid(dict['gid'])
             self.set_type(dict['type'])
             self.set_pointer(dict['pointer'])
+            if "pl_info" in dict:
+               self.set_pl_info(dict["pl_info"])
+            if "geni_info" in dict:
+               self.set_geni_info(dict["geni_info"])
 
     def set_name(self, name):
         self.name = name
@@ -43,6 +52,29 @@ class GeniRecord():
     def set_pointer(self, pointer):
         self.pointer = pointer
         self.dirty = True
+
+    def set_pl_info(self, pl_info):
+        self.pl_info = pl_info
+        self.dirty = True
+
+    def set_geni_info(self, geni_info):
+        self.geni_info = geni_info
+        self.dirty = True
+
+    def get_pl_info(self):
+        if self.pl_info:
+            return self.pl_info
+        else:
+            return {}
+
+    def get_geni_info(self):
+        if self.geni_info:
+            return self.geni_info
+        else:
+            return {}
+
+    def get_pointer(self):
+        return pointer
 
     def get_key(self):
         return self.name + "#" + self.type
@@ -71,6 +103,13 @@ class GeniRecord():
         names = self.get_field_names()
         for name in names:
             dict[name] = self.getattr(name)
+
+        if self.pl_info:
+            dict['pl_info'] = self.pl_info
+
+        if self.geni_info:
+            dict['geni_info'] = self.geni_info
+
         return dict
 
 # GeniTable
@@ -93,6 +132,10 @@ class GeniTable():
         if create:
             self.create()
 
+    def exists(self):
+        tableList = self.cnx.get_tables()
+        return (self.tablename in tableList)
+
     def create(self):
         querystr = "CREATE TABLE " + self.tablename + " ( \
                 key text, \
@@ -103,6 +146,10 @@ class GeniTable():
 
         self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
         self.cnx.query(querystr)
+
+    def remove(self, record):
+        query_str = "DELETE FROM " + self.tablename + " WHERE key = '" + record.get_key() + "'"
+        self.cnx.quert(query_str)
 
     def insert(self, record):
         fieldnames = ["key"] + record.get_field_names()
@@ -125,7 +172,7 @@ class GeniTable():
         #print query_str
         self.cnx.query(query_str)
 
-    def resolve_raw(self, type, hrn):
+    def resolve_dict(self, type, hrn):
         query_str = "SELECT * FROM " + self.tablename + " WHERE name = '" + hrn + "'"
         dict_list = self.cnx.query(query_str).dictresult()
         result_dict_list = []
@@ -135,7 +182,19 @@ class GeniTable():
         return result_dict_list
 
     def resolve(self, type, hrn):
-        result_dict_list = self.resolve_raw(type, hrn)
+        result_dict_list = self.resolve_dict(type, hrn)
+        result_rec_list = []
+        for dict in result_dict_list:
+            result_rec_list.append(GeniRecord(dict=dict))
+        return result_rec_list
+
+    def list_dict(self):
+        query_str = "SELECT * FROM " + self.tablename
+        result_dict_list = self.cnx.query(query_str).dictresult()
+        return result_dict_list
+
+    def list(self):
+        result_dict_list = self.list_dict()
         result_rec_list = []
         for dict in result_dict_list:
             result_rec_list.append(GeniRecord(dict=dict))
@@ -147,7 +206,7 @@ def set_geni_table_prefix(x):
     GENI_TABLE_PREFIX = x
 
 def geni_records_purge(cninfo):
-    global GENI_TABLE_PREFIX 
+    global GENI_TABLE_PREFIX
 
     cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
     tableList = cnx.get_tables()
