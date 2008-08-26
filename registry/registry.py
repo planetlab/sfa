@@ -1,74 +1,77 @@
 import tempfile
 import os
 
+import sys
+
 from cert import *
 from gid import *
 from geniserver import *
 from excep import *
 from hierarchy import *
 from misc import *
+from record import *
 
-def get_pl_object_by_hrn(hrn):
-    # find the object in the planetlab database
-    pointer = None
-    if (type=="sa") or (type=="ma"):
-        authname = hrn_to_pl_authname(name):
-        pl_res = shell.GetSites(pl_auth, {'name': authname)
-        if pl_res:
-            site_info = pl_res[0]
-            pointer = auth_info['auth_id']
-            return (site_info, pointer)
-    elif (type=="slice"):
-        slicename = hrn_to_pl_slicename(name)
-        pl_res = shell.GetSlices(pl_auth, {'name': slicename)
-        if pl_res:
-            slice_info = pl_res[0]
-            pointer = slice_info['slice_id']
-            return (slice_info, pointer)
-    elif (type=="user"):
-        username = hrn_to_pl_username(name)
-        pl_res = shell.GetPersons(pl_auth, {'name': slicename)
-        if pl_res:
-            person_info = pl_res[0]
-            pointer = slice_info['person_id']
-            return (person_info, pointer)
-    elif (type=="component"):
-        node_name = hrn_to_pl_nodename(hrn)
-        pl_res = shell.GetNodes(pl_auth, {'name': nodename)
-        if pl_res:
-            node_info = pl_res[0]
-            pointer = node_info['node_id']
-            return (node_info, pointer)
-    else:
-        raise UnknownGeniType(type)
+def geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields):
+    if type=="user":
+        if not "email" in pl_fields:
+            if not "email" in geni_fields:
+                raise MissingGeniInfo("email")
+            pl_fields["email"] = geni_fields["email"]
 
-    return (None, None)
+        if not "first_name" in pl_fields:
+            pl_fields["first_name"] = "geni"
+
+        if not "last_name" in pl_fields:
+            pl_fields["last_name"] = hrn
+
 
 class Registry(GeniServer):
     def __init__(self, ip, port, key_file, cert_file):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
 
+        # get PL account settings from config module
+        self.pl_auth = get_pl_auth()
+
+        # connect to planetlab
+        if "Url" in self.pl_auth:
+            self.connect_remote_shell()
+        else:
+            self.connect_local_shell()
+
+    def connect_remote_shell(self):
+        import remoteshell
+        self.shell = remoteshell.RemoteShell()
+
+    def connect_local_shell(self):
+        import PLC.Shell
+        self.shell = PLC.Shell.Shell(globals = globals())
+
     def register_functions(self):
         GeniServer.register_functions(self)
+        self.server.register_function(self.create_gid)
         self.server.register_function(self.get_self_credential)
         self.server.register_function(self.get_credential)
         self.server.register_function(self.get_gid)
+        self.server.register_function(self.register)
+        self.server.register_function(self.remove)
+        self.server.register_function(self.update)
+        self.server.register_function(self.list)
+        self.server.register_function(self.resolve)
 
-    def get_auth_info(name):
-        return Hierarchy.get_auth_info(name)
+    def get_auth_info(self, name):
+        return AuthHierarchy.get_auth_info(name)
 
     def get_auth_table(self, auth_name):
-        auth_info = get_auth_info(name, can_create=False)
+        auth_info = self.get_auth_info(auth_name)
 
-        table = GeniTable(hrn = auth_name,
-                          auth_info.get_cninfo()
-                          auth_info.get_privkey_object()
-                          auth_info.get_gid_object())
+        table = GeniTable(hrn=auth_name,
+                          cninfo=auth_info.get_dbinfo())
 
         # if the table doesn't exist, then it means we haven't put any records
         # into this authority yet.
 
         if not table.exists():
+            report.trace("Registry: creating table for authority " + auth_name)
             table.create()
 
         return table
@@ -80,17 +83,60 @@ class Registry(GeniServer):
 
     def verify_object_belongs_to_me(self, name):
         auth_name = get_authority(name)
+        if not auth_name:
+            # the root authority belongs to the registry by default?
+            # TODO: is this true?
+            return
         self.verify_auth_belongs_to_me(auth_name)
 
-    def register(self, cred, name, record_dict):
-        self.decode_authentication(cred)
+    def verify_object_permission(self, name):
+        object_hrn = self.object_gid.get_hrn()
+        if object_hrn == name:
+            return
+        if name.startswith(object_hrn + "."):
+            return
+        raise PermissionError(name)
 
-        auth_name = get_authority(name)
-        auth_info = self.get_auth_info(auth_name)
-        table = self.get_auth_table(auth_name)
+    def fill_record_pl_info(self, record):
+        type = record.get_type()
+        pointer = record.get_pointer()
+
+        if (type == "sa") or (type == "ma"):
+            pl_res = self.shell.GetSites(self.pl_auth, [pointer])
+        elif (type == "slice"):
+            pl_res = self.shell.GetSlices(self.pl_auth, [pointer])
+        elif (type == "user"):
+            pl_res = self.shell.GetPersons(self.pl_auth, [pointer])
+        elif (type == "node"):
+            pl_res = self.shell.GetNodes(self.pl_auth, [pointer])
+        else:
+            raise UnknownGeniType(type)
+
+        if not pl_res:
+            # the planetlab record no longer exists
+            # TODO: delete the geni record ?
+            raise PlanetLabRecordDoesNotExist(record.get_name())
+
+        record.set_pl_info(pl_res[0])
+
+    def fill_record_geni_info(self, record):
+        pass
+
+    def fill_record_info(self, record):
+        self.fill_record_pl_info(record)
+        self.fill_record_geni_info(record)
+
+    def register(self, cred, record_dict):
+        self.decode_authentication(cred, "register")
 
         record = GeniRecord(dict = record_dict)
         type = record.get_type()
+        name = record.get_name()
+
+        auth_name = get_authority(name)
+        self.verify_object_permission(auth_name)
+        auth_info = self.get_auth_info(auth_name)
+        table = self.get_auth_table(auth_name)
 
         pkey = None
 
@@ -101,70 +147,89 @@ class Registry(GeniServer):
 
         if (type == "sa") or (type=="ma"):
             # update the tree
-            if not Hierarchy.auth_exists(name):
-                Hierarchy.create_auth(name)
+            if not AuthHierarchy.auth_exists(name):
+                AuthHierarchy.create_auth(name)
+
+            # authorities are special since they are managed by the registry
+            # rather than by the caller. We create our own GID for the
+            # authority rather than relying on the caller to supply one.
 
             # get the public key from the newly created authority
             child_auth_info = self.get_auth_info(name)
             pkey = child_auth_info.get_pkey_object()
+            gid = AuthHierarchy.create_gid(name, create_uuid(), pkey)
+            record.set_gid(gid.save_to_string())
 
             site_fields = record.get_pl_info()
-            pointer = shell.AddSite(pl_auth, site_fields)
+            pointer = self.shell.AddSite(self.pl_auth, site_fields)
             record.set_pointer(pointer)
 
         elif (type == "slice"):
             slice_fields = record.get_pl_info()
-            pointer = shell.AddSlice(pl_auth, slice_fields)
+            pointer = self.shell.AddSlice(self.pl_auth, slice_fields)
             record.set_pointer(pointer)
 
         elif (type == "user"):
-            # TODO: extract pkey from user_fields
+            # TODO: extract pkey from user_fields?
+            geni_fields = record.get_geni_info()
             user_fields = record.get_pl_info()
-            pointer = shell.AddPerson(pl_auth, user_fields)
+
+            geni_fields_to_pl_fields(type, name, geni_fields, user_fields)
+
+            pointer = self.shell.AddPerson(self.pl_auth, user_fields)
             record.set_pointer(pointer)
 
         elif (type == "node"):
             node_fields = record.get_pl_info()
-            pointer = shell.AddNode(pl_auth, login_base, node_fields)
+            pointer = self.shell.AddNode(self.pl_auth, login_base, node_fields)
             record.set_pointer(pointer)
 
         else:
             raise UnknownGeniType(type)
 
-        gid = Hierarchy.create_gid(name, create_uuid(), pkey)
-        record.set_gid(gid.save_to_string())
         table.insert(record)
 
+        return record.get_gid_object().save_to_string()
+
     def remove(self, cred, record_dict):
-        self.decode_authentication(cred)
+        self.decode_authentication(cred, "remove")
 
         record = GeniRecord(dict = record_dict)
         type = record.get_type()
+
+        self.verify_object_permission(record.get_name())
 
         auth_name = get_authority(record.get_name())
         table = self.get_auth_table(auth_name)
 
         # let's not trust that the caller has a well-formed record (a forged
         # pointer field could be a disaster), so look it up ourselves
-        record = table.resolve(type, record.get_name(), must_exist=True)[0]
+        record_list = table.resolve(type, record.get_name())
+        if not record_list:
+            raise RecordNotFound(name)
+        record = record_list[0]
 
         # TODO: sa, ma
         if type == "user":
-            shell.DeletePerson(pl_auth, record.get_pointer())
+            self.shell.DeletePerson(self.pl_auth, record.get_pointer())
         elif type == "slice":
-            shell.DeleteSlice(pl_auth, record.get_pointer())
+            self.shell.DeleteSlice(self.pl_auth, record.get_pointer())
         elif type == "node":
-            shell.DeleteNode(pl_auth, record.get_pointer())
+            self.shell.DeleteNode(self.pl_auth, record.get_pointer())
         else:
             raise UnknownGeniType(type)
 
-        table.remove(record_dict)
+        table.remove(record)
+
+        return True
 
     def update(self, cred, record_dict):
-        self.decode_authentication(cred)
+        self.decode_authentication(cred, "update")
 
         record = GeniRecord(dict = record_dict)
         type = record.get_type()
+
+        self.verify_object_permission(record.get_name())
 
         auth_name = get_authority(record.get_name())
         table = self.get_auth_table(auth_name)
@@ -174,46 +239,77 @@ class Registry(GeniServer):
         pointer = existing_record.get_pointer()
 
         if (type == "sa") or (type == "ma"):
-            shell.UpdateSite(pl_auth, pointer, record.get_pl_info())
+            self.shell.UpdateSite(self.pl_auth, pointer, record.get_pl_info())
 
         elif type == "slice":
-            shell.UpdateSlice(pl_auth, pointer, record.get_pl_info())
+            self.shell.UpdateSlice(self.pl_auth, pointer, record.get_pl_info())
 
         elif type == "user":
-            shell.UpdatePerson(pl_auth, pointer, record.get_pl_info())
+            self.shell.UpdatePerson(self.pl_auth, pointer, record.get_pl_info())
 
         elif type == "node":
-            shell.UpdateNode(pl_auth, pointer, record.get_pl_info())
+            self.shell.UpdateNode(self.pl_auth, pointer, record.get_pl_info())
 
         else:
             raise UnknownGeniType(type)
 
+    # TODO: List doesn't take an hrn and uses the hrn contained in the
+    #    objectGid of the credential. Does this mean the only way to list an
+    #    authority is by having a credential for that authority? 
     def list(self, cred):
-        self.decode_authentication(cred)
+        self.decode_authentication(cred, "list")
 
         auth_name = self.object_gid.get_hrn()
         table = self.get_auth_table(auth_name)
 
-        dict_list = table.list_dict()
+        records = table.list()
+
+        good_records = []
+        for record in records:
+            try:
+                self.fill_record_info(record)
+                good_records.append(record)
+            except PlanetLabRecordDoesNotExist:
+                # silently drop the ones that are missing in PL.
+                # is this the right thing to do?
+                report.error("ignoring geni record " + record.get_name() + " because pl record does not exist")
+                table.remove(record)
+
+        dicts = []
+        for record in good_records:
+            dicts.append(record.as_dict())
+
+        return dicts
 
         return dict_list
 
     def resolve_raw(self, type, name, must_exist=True):
         auth_name = get_authority(name)
 
-        table = get_auth_table(auth_name)
+        table = self.get_auth_table(auth_name)
 
         records = table.resolve(type, name)
 
         if (not records) and must_exist:
             raise RecordNotFound(name)
 
-        return records
+        good_records = []
+        for record in records:
+            try:
+                self.fill_record_info(record)
+                good_records.append(record)
+            except PlanetLabRecordDoesNotExist:
+                # silently drop the ones that are missing in PL.
+                # is this the right thing to do?
+                report.error("ignoring geni record " + record.get_hrn() + " because pl record does not exist")
+                table.remove(record)
 
-    def resolve(self, name):
-        self.decode_authentication(cred)
+        return good_records
 
-        records = self.resolve("*", name)
+    def resolve(self, cred, name):
+        self.decode_authentication(cred, "resolve")
+
+        records = self.resolve_raw("*", name)
         dicts = []
         for record in records:
             dicts.append(record.as_dict())
@@ -229,25 +325,57 @@ class Registry(GeniServer):
             gid_string_list.append(gid.save_to_string())
         return gid_string_list
 
+    def determine_rights(self, type, name):
+        rl = RightList()
+
+        # rights seem to be somewhat redundant with the type of the credential.
+        # For example, a "sa" credential implies the authority right, because
+        # a sa credential cannot be issued to a user who is not an owner of
+        # the authority
+
+        if type == "user":
+            rl.add("refresh")
+            rl.add("resolve")
+        elif type == "sa":
+            rl.add("authority")
+        elif type == "ma":
+            rl.add("authority")
+        elif type == "slice":
+            rl.add("embed")
+            rl.add("bind")
+            rl.add("control")
+        elif type == "component":
+            rl.add("operator")
+
+        return rl
+
+
     def get_self_credential(self, type, name):
         self.verify_object_belongs_to_me(name)
+
+        auth_hrn = get_authority(name)
+        auth_info = self.get_auth_info(auth_hrn)
 
         # find a record that matches
         records = self.resolve_raw(type, name, must_exist=True)
         record = records[0]
 
-        gid = record.get_gid()
+        gid = record.get_gid_object()
         peer_cert = self.server.peer_cert
         if not peer_cert.is_pubkey(gid.get_pubkey()):
            raise ConnectionKeyGIDMismatch(gid.get_subject())
 
         # create the credential
-        gid = found_record.get_gid()
+        gid = record.get_gid_object()
         cred = Credential(subject = gid.get_subject())
         cred.set_gid_caller(gid)
         cred.set_gid_object(gid)
-        cred.set_issuer(key=self.key, subject=auth_hrn)
+        cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         cred.set_pubkey(gid.get_pubkey())
+
+        rl = self.determine_rights(type, name)
+        cred.set_privileges(rl)
+
         cred.encode()
         cred.sign()
 
@@ -257,25 +385,53 @@ class Registry(GeniServer):
         if not cred:
             return get_self_credential(self, type, name)
 
-        self.decode_authentication(cred)
+        self.decode_authentication(cred, "getcredential")
 
         self.verify_object_belongs_to_me(name)
 
-        records = self.resolve(type, name, must_exist=True)
+        auth_hrn = get_authority(name)
+        auth_info = self.get_auth_info(auth_hrn)
+
+        records = self.resolve_raw(type, name, must_exist=True)
         record = records[0]
 
-        object_gid = record.get_gid()
+        # TODO: Check permission that self.client_cred can access the object
+
+        object_gid = record.get_gid_object()
         new_cred = Credential(subject = object_gid.get_subject())
         new_cred.set_gid_caller(self.client_gid)
         new_cred.set_gid_object(object_gid)
-        new_cred.set_issuer(key=self.key, cert=self.cert)
+        new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_cred.set_pubkey(object_gid.get_pubkey())
+
+        rl = self.determine_rights(type, name)
+        new_cred.set_privileges(rl)
+
         new_cred.encode()
         new_cred.sign()
 
         return new_cred.save_to_string()
 
+    def create_gid(self, cred, name, uuid, pubkey_str):
+        self.decode_authentication(cred, "getcredential")
+
+        self.verify_object_belongs_to_me(name)
+
+        self.verify_object_permission(name)
+
+        if uuid == None:
+            uuid = create_uuid()
+
+        pkey = Keypair()
+        pkey.load_pubkey_from_string(pubkey_str)
+        gid = AuthHierarchy.create_gid(name, uuid, pkey)
+
+        return gid.save_to_string() ### save_parents=True)
+
+
 if __name__ == "__main__":
+    global AuthHierarchy
+
     key_file = "server.key"
     cert_file = "server.cert"
 
@@ -289,6 +445,8 @@ if __name__ == "__main__":
         cert.set_pubkey(key)
         cert.sign()
         cert.save_to_file(cert_file)
+
+    AuthHierarchy = Hierarchy()
 
     s = Registry("localhost", 12345, key_file, cert_file)
     s.run()
