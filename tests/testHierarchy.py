@@ -1,5 +1,6 @@
 import unittest
 import os
+from excep import *
 from hierarchy import *
 from config import *
 
@@ -21,7 +22,10 @@ class TestHierarchy(unittest.TestCase):
 
         self.assertEqual(h.auth_exists(name), False)
 
-        auth_info = h.get_auth_info(name, can_create=True)
+        self.assertRaises(MissingAuthority, h.get_auth_info, name)
+
+        h.create_auth(name, create_parents=True)
+        auth_info = h.get_auth_info(name)
         self.assert_(auth_info)
 
         gid = auth_info.get_gid_object()
@@ -32,7 +36,7 @@ class TestHierarchy(unittest.TestCase):
         self.assert_(gid)
 
         # try to get it again, make sure it's still there
-        auth_info2 = h.get_auth_info(name, can_create=False)
+        auth_info2 = h.get_auth_info(name)
         self.assert_(auth_info2)
 
         gid = auth_info2.get_gid_object()
