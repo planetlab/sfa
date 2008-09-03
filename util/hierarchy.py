@@ -10,6 +10,7 @@
 #      *.DBINFO - database info
 
 import os
+import report
 from cert import *
 from gid import *
 from misc import *
@@ -62,7 +63,14 @@ class Hierarchy():
                os.path.exists(privkey_filename) and \
                os.path.exists(dbinfo_filename)
 
-    def create_auth(self, hrn):
+    def create_auth(self, hrn, create_parents=False):
+        report.trace("Hierarchy: creating authority: " + hrn)
+
+        # create the parent authority if necessary
+        parent_hrn = get_authority(hrn)
+        if (parent_hrn) and (not self.auth_exists(parent_hrn)) and (create_parents):
+            self.create_auth(parent_hrn, create_parents)
+
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \
             self.get_auth_filenames(hrn)
 
@@ -87,12 +95,11 @@ class Hierarchy():
         dbinfo_file.write(str(dbinfo))
         dbinfo_file.close()
 
-    def get_auth_info(self, hrn, can_create=True):
-        if not self.auth_exists(hrn):
-            if not can_create:
-                return MissingAuthority(hrn)
+    def get_auth_info(self, hrn):
+        #report.trace("Hierarchy: getting authority: " + hrn)
 
-            self.create_auth(hrn)
+        if not self.auth_exists(hrn):
+            raise MissingAuthority(hrn)
 
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \
             self.get_auth_filenames(hrn)
@@ -104,7 +111,7 @@ class Hierarchy():
     def create_gid(self, hrn, uuid, pkey):
         parent_hrn = get_authority(hrn)
 
-        gid = GID(subject=hrn, uuid=uuid)
+        gid = GID(subject=hrn, uuid=uuid, hrn=hrn)
 
         if not parent_hrn:
             # if there is no parent hrn, then it must be self-signed. this
@@ -117,6 +124,7 @@ class Hierarchy():
             gid.set_parent(parent_auth_info.get_gid_object())
 
         gid.set_pubkey(pkey)
+        gid.encode()
         gid.sign()
 
         return gid

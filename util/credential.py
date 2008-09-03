@@ -18,9 +18,6 @@ import xmlrpclib
 # to perform this encoding.
 
 class Credential(Certificate):
-    uuid = None
-    hrn = None
-
     gidCaller = None
     gidObject = None
     lifeTime = None
@@ -124,17 +121,34 @@ class Credential(Certificate):
 
     def verify_chain(self, trusted_certs = None):
         # do the normal certificate verification stuff
-        if not Certificate.verify_chain(self, trusted_certs):
-            return False
+        Certificate.verify_chain(self, trusted_certs)
 
         if parent:
             # make sure the parent delegated rights to the child
             if not parent.delegate:
-                return False
+                raise MissingDelegateBit(self.get_subject())
 
             # XXX todo: make sure child rights are a subset of parent rights
 
-        return True
+        return
+
+    def dump(self):
+        print "CREDENTIAL", self.get_subject()
+
+        print "      privs:", self.get_privileges().save_to_string()
+
+        print "  gidCaller:"
+        gidCaller = self.get_gid_caller()
+        if gidCaller:
+            gidCaller.dump(indent=8)
+
+        print "  gidObject:"
+        gidObject = self.get_gid_object()
+        if gidObject:
+            gidObject.dump(indent=8)
+
+        print "   delegate:", self.get_delegate()
+
 
 
 

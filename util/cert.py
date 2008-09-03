@@ -7,6 +7,8 @@
 # are being used due to lack of functionality in pyOpenSSL and some apparant
 # bugs in M2Crypto
 
+import os
+import tempfile
 from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
@@ -42,6 +44,41 @@ class Keypair:
    def load_from_string(self, string):
       self.key = crypto.load_privatekey(crypto.FILETYPE_PEM, string)
       self.m2key = M2Crypto.EVP.load_key_string(string)
+
+   def load_pubkey_from_file(self, filename):
+      # load the m2 public key
+      m2rsakey = M2Crypto.RSA.load_pub_key(filename)
+      self.m2key = M2Crypto.EVP.PKey()
+      self.m2key.assign_rsa(m2rsakey)
+
+      # create an m2 x509 cert
+      m2name = M2Crypto.X509.X509_Name()
+      m2name.add_entry_by_txt(field="CN", type=0x1001, entry="junk", len=-1, loc=-1, set=0)
+      m2x509 = M2Crypto.X509.X509()
+      m2x509.set_pubkey(self.m2key)
+      m2x509.set_serial_number(0)
+      m2x509.set_issuer_name(m2name)
+      m2x509.set_subject_name(m2name)
+      ASN1 = M2Crypto.ASN1.ASN1_UTCTIME()
+      ASN1.set_time(500)
+      m2x509.set_not_before(ASN1)
+      m2x509.set_not_after(ASN1)
+      junk_key = Keypair(create=True)
+      m2x509.sign(pkey=junk_key.get_m2_pkey(), md="sha1")
+
+      # convert the m2 x509 cert to a pyopenssl x509
+      m2pem = m2x509.as_pem()
+      pyx509 = crypto.load_certificate(crypto.FILETYPE_PEM, m2pem)
+
+      # get the pyopenssl pkey from the pyopenssl x509
+      self.key = pyx509.get_pubkey()
+
+   def load_pubkey_from_string(self, string):
+      (f, fn) = tempfile.mkstemp()
+      os.write(f, string)
+      os.close(f)
+      self.load_pubkey_from_file(fn)
+      os.remove(fn)
 
    def as_pem(self):
       return crypto.dump_privatekey(crypto.FILETYPE_PEM, self.key)
@@ -254,21 +291,19 @@ class Certificate:
             # TODO: verify expiration of trusted_cert ?
             if self.is_signed_by_cert(trusted_cert):
                 #print self.get_subject(), "is signed by a root"
-                return True
+                return
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
             #print self.get_subject(), "has no parent"
-            return False
+            raise MissingParent(self.get_subject())
 
         # if it wasn't signed by the parent...
         if not self.is_signed_by_cert(self.parent):
             #print self.get_subject(), "is not signed by parent"
-            return False
+            return NotSignedByParent(self.get_subject())
 
         # if the parent isn't verified...
-        if not self.parent.verify_chain(trusted_certs):
-            #print self.get_subject(), "parent does not verify"
-            return False
+        self.parent.verify_chain(trusted_certs)
 
-        return True
+        return

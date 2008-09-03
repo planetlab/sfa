@@ -55,17 +55,12 @@ class GID(Certificate):
         self.uuid = dict.get("uuid", None)
         self.hrn = dict.get("hrn", None)
 
-    # XXX: I may have decided not to use this
-    def get_cache_key(self):
-        return self.get_cache_uuid() + self.get_cache_name()
+    def dump(self, indent=0):
+        # TODO: implement indent
+        print " "*indent, " hrn:", self.get_hrn()
+        print " "*indent, "uuid:", self.get_uuid()
 
-    # XXX: I may have decided not to use this
-    def get_cache_uuid(self):
-        return self.get_uuid()
 
-    # XXX: I may have decided not to use this
-    def get_cache_name(self):
-        return self.get_name()
 
 
 
