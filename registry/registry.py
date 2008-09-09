@@ -7,12 +7,13 @@ from cert import *
 from gid import *
 from geniserver import *
 from excep import *
+from trustedroot import *
 from hierarchy import *
 from misc import *
 from record import *
 
 def geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields):
-    if type=="user":
+    if type == "user":
         if not "email" in pl_fields:
             if not "email" in geni_fields:
                 raise MissingGeniInfo("email")
@@ -24,6 +25,37 @@ def geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields):
         if not "last_name" in pl_fields:
             pl_fields["last_name"] = hrn
 
+    elif type == "slice":
+        if not "instantiation" in pl_fields:
+            pl_fields["instantiation"] = "plc-instantiated"
+        if not "name" in pl_fields:
+            pl_fields["name"] = hrn_to_pl_slicename(hrn)
+        if not "max_nodes" in pl_fields:
+            pl_fields["max_nodes"] = 10
+
+    elif type == "node":
+        if not "hostname" in pl_fields:
+            if not "dns" in geni_fields:
+                raise MissingGeniInfo("dns")
+            pl_fields["hostname"] = geni_fields["dns"]
+
+        if not "model" in pl_fields:
+            pl_fields["model"] = "geni"
+
+    elif type == "sa":
+        pl_fields["login_base"] = hrn_to_pl_login_base(hrn)
+
+        if not "name" in pl_fields:
+            pl_fields["name"] = hrn
+
+        if not "abbreviated_name" in pl_fields:
+            pl_fields["abbreviated_name"] = hrn
+
+        if not "enabled" in pl_fields:
+            pl_fields["enabled"] = True
+
+        if not "is_public" in pl_fields:
+            pl_fields["is_public"] = True
 
 class Registry(GeniServer):
     def __init__(self, ip, port, key_file, cert_file):
@@ -101,6 +133,12 @@ class Registry(GeniServer):
         type = record.get_type()
         pointer = record.get_pointer()
 
+        # records with pointer==-1 do not have plc info associated with them.
+        # for example, the top level authority records which are
+        # authorities, but not PL "sites"
+        if pointer == -1:
+            return
+
         if (type == "sa") or (type == "ma"):
             pl_res = self.shell.GetSites(self.pl_auth, [pointer])
         elif (type == "slice"):
@@ -141,7 +179,7 @@ class Registry(GeniServer):
         pkey = None
 
         # check if record already exists
-        existing_records = table.resolve(name, type)
+        existing_records = table.resolve(type, name)
         if existing_records:
             raise ExistingRecord(name)
 
@@ -154,23 +192,41 @@ class Registry(GeniServer):
             # rather than by the caller. We create our own GID for the
             # authority rather than relying on the caller to supply one.
 
-            # get the public key from the newly created authority
+            # get the GID from the newly created authority
             child_auth_info = self.get_auth_info(name)
-            pkey = child_auth_info.get_pkey_object()
-            gid = AuthHierarchy.create_gid(name, create_uuid(), pkey)
-            record.set_gid(gid.save_to_string())
+            gid = auth_info.get_gid_object()
+            record.set_gid(gid.save_to_string(save_parents=True))
 
+            geni_fields = record.get_geni_info()
             site_fields = record.get_pl_info()
-            pointer = self.shell.AddSite(self.pl_auth, site_fields)
+
+            # if registering a sa, see if a ma already exists
+            # if registering a ma, see if a sa already exists
+            if (type == "sa"):
+                other_rec = table.resolve("ma", record.get_name())
+            elif (type == "ma"):
+                other_rec = table.resolve("sa", record.get_name())
+
+            if other_rec:
+                print "linking ma and sa to the same plc site"
+                pointer = other_rec[0].get_pointer()
+            else:
+                geni_fields_to_pl_fields(type, name, geni_fields, site_fields)
+                print "adding site with fields", site_fields
+                pointer = self.shell.AddSite(self.pl_auth, site_fields)
+
             record.set_pointer(pointer)
 
         elif (type == "slice"):
+            geni_fields = record.get_geni_info()
             slice_fields = record.get_pl_info()
+
+            geni_fields_to_pl_fields(type, name, geni_fields, slice_fields)
+
             pointer = self.shell.AddSlice(self.pl_auth, slice_fields)
             record.set_pointer(pointer)
 
         elif (type == "user"):
-            # TODO: extract pkey from user_fields?
             geni_fields = record.get_geni_info()
             user_fields = record.get_pl_info()
 
@@ -180,7 +236,14 @@ class Registry(GeniServer):
             record.set_pointer(pointer)
 
         elif (type == "node"):
+            geni_fields = record.get_geni_info()
             node_fields = record.get_pl_info()
+
+            geni_fields_to_pl_fields(type, name, geni_fields, node_fields)
+
+            login_base = hrn_to_pl_login_base(auth_name)
+
+            print "calling addnode with", login_base, node_fields
             pointer = self.shell.AddNode(self.pl_auth, login_base, node_fields)
             record.set_pointer(pointer)
 
@@ -189,7 +252,7 @@ class Registry(GeniServer):
 
         table.insert(record)
 
-        return record.get_gid_object().save_to_string()
+        return record.get_gid_object().save_to_string(save_parents=True)
 
     def remove(self, cred, record_dict):
         self.decode_authentication(cred, "remove")
@@ -216,6 +279,20 @@ class Registry(GeniServer):
             self.shell.DeleteSlice(self.pl_auth, record.get_pointer())
         elif type == "node":
             self.shell.DeleteNode(self.pl_auth, record.get_pointer())
+        elif (type == "sa") or (type == "ma"):
+            if (type == "sa"):
+                other_rec = table.resolve("ma", record.get_name())
+            elif (type == "ma"):
+                other_rec = table.resolve("sa", record.get_name())
+
+            if other_rec:
+                # sa and ma both map to a site, so if we are deleting one
+                # but the other still exists, then do not delete the site
+                print "not removing site", record.get_name(), "because either sa or ma still exists"
+                pass
+            else:
+                print "removing site", record.get_name()
+                self.shell.DeleteSite(self.pl_auth, record.get_pointer())
         else:
             raise UnknownGeniType(type)
 
@@ -235,7 +312,11 @@ class Registry(GeniServer):
         table = self.get_auth_table(auth_name)
 
         # make sure the record exists
-        existing_record = table.resolve(type, record.get_name(), must_exist=True)[0]
+        existing_record_list = table.resolve(type, record.get_name())
+        if not existing_record_list:
+            raise RecordNotFound(record.get_name())
+
+        existing_record = existing_record_list[0]
         pointer = existing_record.get_pointer()
 
         if (type == "sa") or (type == "ma"):
@@ -301,7 +382,7 @@ class Registry(GeniServer):
             except PlanetLabRecordDoesNotExist:
                 # silently drop the ones that are missing in PL.
                 # is this the right thing to do?
-                report.error("ignoring geni record " + record.get_hrn() + " because pl record does not exist")
+                report.error("ignoring geni record " + record.get_name() + " because pl record does not exist")
                 table.remove(record)
 
         return good_records
@@ -317,12 +398,12 @@ class Registry(GeniServer):
         return dicts
 
     def get_gid(self, name):
-        self.verify_object_belongs_to_me(name) # XXX Fixme
+        self.verify_object_belongs_to_me(name)
         records = self.resolve_raw("*", name)
         gid_string_list = []
         for record in records:
             gid = record.get_gid()
-            gid_string_list.append(gid.save_to_string())
+            gid_string_list.append(gid.save_to_string(save_parents=True))
         return gid_string_list
 
     def determine_rights(self, type, name):
@@ -376,10 +457,12 @@ class Registry(GeniServer):
         rl = self.determine_rights(type, name)
         cred.set_privileges(rl)
 
+        cred.set_parent(AuthHierarchy.get_auth_cred(auth_hrn))
+
         cred.encode()
         cred.sign()
 
-        return cred.save_to_string()
+        return cred.save_to_string(save_parents=True)
 
     def get_credential(self, cred, type, name):
         if not cred:
@@ -407,10 +490,12 @@ class Registry(GeniServer):
         rl = self.determine_rights(type, name)
         new_cred.set_privileges(rl)
 
+        new_cred.set_parent(AuthHierarchy.get_auth_cred(auth_hrn))
+
         new_cred.encode()
         new_cred.sign()
 
-        return new_cred.save_to_string()
+        return new_cred.save_to_string(save_parents=True)
 
     def create_gid(self, cred, name, uuid, pubkey_str):
         self.decode_authentication(cred, "getcredential")
@@ -426,11 +511,12 @@ class Registry(GeniServer):
         pkey.load_pubkey_from_string(pubkey_str)
         gid = AuthHierarchy.create_gid(name, uuid, pkey)
 
-        return gid.save_to_string() ### save_parents=True)
+        return gid.save_to_string(save_parents=True)
 
 
 if __name__ == "__main__":
     global AuthHierarchy
+    global TrustedRoots
 
     key_file = "server.key"
     cert_file = "server.cert"
@@ -448,6 +534,9 @@ if __name__ == "__main__":
 
     AuthHierarchy = Hierarchy()
 
+    TrustedRoots = TrustedRootList()
+
     s = Registry("localhost", 12345, key_file, cert_file)
+    s.trusted_cert_list = TrustedRoots.get_list()
     s.run()
 

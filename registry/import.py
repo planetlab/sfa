@@ -3,8 +3,11 @@ import sys
 import tempfile
 
 from cert import *
+from trustedroot import *
 from hierarchy import *
 from record import *
+from genitable import *
+from misc import *
 
 shell = None
 
@@ -161,16 +164,45 @@ def import_site(parent_hrn, site):
         if slices:
             import_slice(hrn, slices[0])
 
+def create_top_level_auth_records(hrn):
+    parent_hrn = get_authority(hrn)
+
+    auth_info = AuthHierarchy.get_auth_info(parent_hrn)
+    table = get_auth_table(parent_hrn)
+
+    sa_record = table.resolve("sa", hrn)
+    if not sa_record:
+        sa_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="sa", pointer=-1)
+        report.trace("  inserting sa record for " + hrn)
+        table.insert(sa_record)
+
+    ma_record = table.resolve("ma", hrn)
+    if not ma_record:
+        ma_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="ma", pointer=-1)
+        report.trace("  inserting ma record for " + hrn)
+        table.insert(ma_record)
+
 def main():
     global AuthHierarchy
+    global TrustedRoots
 
     process_options()
 
     AuthHierarchy = Hierarchy()
+    TrustedRoots = TrustedRootList()
+
+    print "Import: creating top level authorities"
+
     if not AuthHierarchy.auth_exists(root_auth):
         AuthHierarchy.create_auth(root_auth)
+    #create_top_level_auth_records(root_auth)
     if not AuthHierarchy.auth_exists(level1_auth):
         AuthHierarchy.create_auth(level1_auth)
+    create_top_level_auth_records(level1_auth)
+
+    print "Import: adding", root_auth, "to trusted list"
+    root = AuthHierarchy.get_auth_info(root_auth)
+    TrustedRoots.add_gid(root.get_gid_object())
 
     connect_shell()
 

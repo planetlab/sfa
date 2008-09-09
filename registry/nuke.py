@@ -3,6 +3,7 @@ import sys
 
 from hierarchy import *
 from record import *
+from genitable import *
 from config import *
 
 def process_options():
