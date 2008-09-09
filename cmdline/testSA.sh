@@ -24,7 +24,6 @@ echo XXXXX -------------------------------------------------------------------
 echo XXXXX Create a private key
 python ./genicli.py --username testkey createKey
 
-
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Create a GID for a user
 python ./genicli.py --username root --credfile rootsa.cred --outfile testuser.gid createGid planetlab.us.pl.testuser None testkey.pkey
@@ -32,6 +31,10 @@ python ./genicli.py --username root --credfile rootsa.cred --outfile testuser.gi
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Create a GID for a slice
 python ./genicli.py --username root --credfile rootsa.cred --outfile testslice.gid createGid planetlab.us.pl.testslice1 None testkey.pkey
+
+echo XXXXX -------------------------------------------------------------------
+echo XXXXX Create a GID for a node
+python ./genicli.py --username root --credfile rootsa.cred --outfile testnode.gid createGid planetlab.us.pl.testnode1 None testkey.pkey
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Register a user
@@ -43,9 +46,28 @@ python ./genicli.py --username root --credfile rootsa.cred resolve planetlab.us.
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Register a slice
-python ./genicli.py --username root --credfile rootsa.cred --email test1234@test.com register slice planetlab.us.pl.testslice1 testslice.gid
+python ./genicli.py --username root --credfile rootsa.cred register slice planetlab.us.pl.testslice1 testslice.gid
+
+echo XXXXX -------------------------------------------------------------------
+echo XXXXX Resolve the test node
+python ./genicli.py --username root --credfile rootsa.cred resolve planetlab.us.pl.testslice1
+
+echo XXXXX -------------------------------------------------------------------
+echo XXXXX Register a node
+python ./genicli.py --username root --credfile rootsa.cred --ip 198.0.0.133 --dns testnode1.lan register node planetlab.us.pl.testnode1 testnode.gid
+
+echo XXXXX -------------------------------------------------------------------
+echo XXXXX Resolve the test node
+python ./genicli.py --username root --credfile rootsa.cred resolve planetlab.us.pl.testnode1
+
+echo XXXXX -------------------------------------------------------------------
+echo XXXXX Remove the test node
+python ./genicli.py --username root --credfile rootsa.cred remove node planetlab.us.pl.testnode1
+
+echo XXXXX -------------------------------------------------------------------
+echo XXXXX Remove the test slice
+python ./genicli.py --username root --credfile rootsa.cred remove slice planetlab.us.pl.testslice1
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Remove a user
-python ./genicli.py --username root --credfile rootsa.cred remove user planet\
-lab.us.pl.testuser
+python ./genicli.py --username root --credfile rootsa.cred remove user planetlab.us.pl.testuser

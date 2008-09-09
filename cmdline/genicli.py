@@ -6,7 +6,7 @@ import os
 from cert import *
 from geniclient import *
 
-long_opts = ["keyfile=", "help", "outfile=", "credfile=", "username=", "email="]
+long_opts = ["keyfile=", "help", "outfile=", "credfile=", "username=", "email=", "ip=", "dns=", "dump_parents", "server="]
 
 # default command line options
 username = "client"
@@ -19,10 +19,14 @@ cred_file = None
 cert_file = None
 out_file = None
 
+ip = None
+dns = None
 email = None
 uuid = None
 gid_pkey_fn = None
 gid_fn = None
+
+dump_parents = False
 
 leaf_name = None
 server_url = "https://localhost:12345/"
@@ -38,7 +42,11 @@ def showhelp():
    print "    --outfile        ... save response to a file"
    print "    --credfile       ... credential of user making call (or 'None')"
    print "    --keyfile        ... private key file of user making call"
-   print "    --email          ... email address"
+   print "    --email          ... email address (for registering users)"
+   print "    --ip             ... IP address (for registering nodes)"
+   print "    --dns            ... DNS address (for registering nodes)"
+   print "    --dump_parents   ... dump parents"
+   print "    --server         ... geni server (registry/component) to connect to"
    print "commands:"
    print "    resolve <hrn>"
    print "    dumpCredential"
@@ -48,6 +56,9 @@ def showhelp():
    print "    createGid <hrn> <uuid|None> <pubkey_fn>"
    print "    register <type> <hrn> <gid_filename>"
    print "    remove <type> <hrn>"
+   print "    update <type> <hrn>"
+   print "    startSlice"
+   print "    stopSlice"
 
 def process_options():
    global username
@@ -55,7 +66,9 @@ def process_options():
    global type, hrn
    global cert_file, cred_file
    global key_file, out_file
-   global uuid, pkey_fn, gid_fn, email, gid_pkey_fn
+   global uuid, pkey_fn, gid_fn, email, gid_pkey_fn, ip, dns
+   global dump_parents
+   global server_url
 
    (options, args) = getopt.getopt(sys.argv[1:], '', long_opts)
    for opt in options:
@@ -77,6 +90,14 @@ def process_options():
            key_file = val
        elif name == "--email":
            email = val
+       elif name == "--ip":
+           ip = val
+       elif name == "--dns":
+           dns = val
+       elif name == "--dump_parents":
+           dump_parents = True
+       elif name == "--server":
+           server_url = val
 
    if not args:
        print "no operation specified"
@@ -120,6 +141,12 @@ def process_options():
        type = args[1]
        hrn = args[2]
 
+   elif opname == "update":
+       if len(args) < 3:
+           print "syntax: update <type> <hrn>"
+       type = args[1]
+       hrn = args[2]
+
    leaf_name = get_leaf(username)
 
    if cert_file == None:
@@ -132,6 +159,7 @@ def process_options():
        cred_file = leaf_name + ".cred"
 
 def show_options():
+   print "   server:", server_url
    print " username:", username
    print "cert_file:", cert_file
    print " key_file:", key_file
@@ -227,7 +255,7 @@ def main():
       if result:
           for record in result:
               print "RESULT:"
-              record.dump()
+              record.dump(dump_parents=dump_parents)
       else:
           print "NO RESULT"
 
@@ -235,7 +263,7 @@ def main():
       result = client.get_credential(cred, type, hrn)
       if result:
           print "RESULT:"
-          result.dump()
+          result.dump(dump_parents=dump_parents)
           if out_file:
               file(out_file, "w").write(result.save_to_string(save_parents=True))
       else:
@@ -246,7 +274,7 @@ def main():
       if result:
           for record in result:
               print "RESULT:"
-              record.dump()
+              record.dump(dump_parents=dump_parents)
       else:
           print "NO RESULT"
 
@@ -257,7 +285,7 @@ def main():
        gid = client.create_gid(cred, hrn, uuid, pkey_string)
        if gid:
            print "RESULT:"
-           gid.dump()
+           gid.dump(dump_parents=dump_parents)
            if out_file:
                file(out_file,"w").write(gid.save_to_string(save_parents=True))
        else:
@@ -269,6 +297,15 @@ def main():
            if not email:
                print "ERROR: must specify --email <addr> when registering users"
            geni_info['email'] = email
+
+       if type == "node":
+           if not ip:
+               print "ERROR: must specify --ip <addr> when registering nodes"
+           geni_info['ip'] = ip
+           if not dns:
+               print "ERROR: must specify --dns <addr> when registering nodes"
+           geni_info['dns'] = dns
+
        gid = GID(filename=gid_fn)
        record = GeniRecord(name=hrn, gid=gid, type=type, pointer=-1)
        record.set_geni_info(geni_info)
@@ -290,6 +327,37 @@ def main():
 
        for record in matching_records:
            client.remove(cred,record)
+
+   elif (opname == "update"):
+       record_list = client.resolve(cred, hrn)
+       if not record_list:
+           print "no records match hrn"
+
+       matching_records = []
+       for record in record_list:
+           if record.get_type() == type:
+               matching_records.append(record)
+
+       if not matching_records:
+           print "records match hrn, but no records match type"
+
+       for record in matching_records:
+           geni_info = record.get_geni_info()
+
+           if email:
+               geni_info['email'] = email
+           if ip:
+               geni_info['ip'] = ip
+           if dns:
+               geni_info['dns'] = dns
+
+           client.update(cred, record)
+
+   elif (opname == "stopSlice"):
+       client.stop_slice(cred)
+
+   elif (opname == "startSlice"):
+       client.start_slice(cred)
 
    else:
       print "unknown operation: " + opname
