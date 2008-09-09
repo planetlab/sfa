@@ -11,6 +11,7 @@ from trustedroot import *
 from hierarchy import *
 from misc import *
 from record import *
+from genitable import *
 
 def geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields):
     if type == "user":
@@ -536,7 +537,7 @@ if __name__ == "__main__":
 
     TrustedRoots = TrustedRootList()
 
-    s = Registry("localhost", 12345, key_file, cert_file)
+    s = Registry("", 12345, key_file, cert_file)
     s.trusted_cert_list = TrustedRoots.get_list()
     s.run()
 
