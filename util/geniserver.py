@@ -9,6 +9,8 @@
 
 import SimpleXMLRPCServer
 
+import sys
+import traceback
 import SocketServer
 import BaseHTTPServer
 import SimpleHTTPServer
@@ -84,7 +86,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         """
         self.logRequests = logRequests
 
-        SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, None, None)
+        SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, True, None)
         SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         ctx.use_privatekey_file(key_file)
@@ -95,6 +97,20 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
                                                         self.socket_type))
         self.server_bind()
         self.server_activate()
+
+    # _dispatch
+    #
+    # Convert an exception on the server to a full stack trace and send it to
+    # the client.
+
+    def _dispatch(self, method, params):
+        try:
+            return SimpleXMLRPCServer.SimpleXMLRPCDispatcher._dispatch(self, method, params)
+        except:
+            # can't use format_exc() as it is not available in jython yet (even
+            # in trunk).
+            type, value, tb = sys.exc_info()
+            raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
 
 # SecureXMLRpcRequestHandler
 #
@@ -130,6 +146,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         except: # This should only happen if the module is buggy
             # internal error, report as HTTP server error
             self.send_response(500)
+
             self.end_headers()
         else:
             # got a valid XML RPC response
@@ -158,9 +175,10 @@ class GeniServer():
         self.key = Keypair(filename = key_file)
         self.cert = Certificate(filename = cert_file)
         self.server = SecureXMLRPCServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
+        self.trusted_cert_list = None
         self.register_functions()
 
-    def decode_authentication(self, cred_string):
+    def decode_authentication(self, cred_string, operation):
         self.client_cred = Credential(string = cred_string)
         self.client_gid = self.client_cred.get_gid_caller()
         self.object_gid = self.client_cred.get_gid_object()
@@ -173,6 +191,17 @@ class GeniServer():
         peer_cert = self.server.peer_cert
         if not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
             raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())
+
+        # make sure the client is allowed to perform the operation
+        if not self.client_cred.can_perform(operation):
+            raise InsufficientRights(operation)
+
+        if self.trusted_cert_list:
+            self.client_cred.verify_chain(self.trusted_cert_list)
+            if self.client_gid:
+                self.client_gid.verify_chain(self.trusted_cert_list)
+            if self.object_gid:
+                self.object_gid.verify_chain(self.trusted_cert_list)
 
     # register_functions override this to add more functions
     def register_functions(self):

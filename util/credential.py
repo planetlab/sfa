@@ -27,6 +27,9 @@ class Credential(Certificate):
     def __init__(self, create=False, subject=None, string=None, filename=None):
         Certificate.__init__(self, create, subject, string, filename)
 
+    def create_similar(self):
+        return Credential()
+
     def set_gid_caller(self, gid):
         self.gidCaller = gid
 
@@ -83,9 +86,9 @@ class Credential(Certificate):
                 "privileges": None,
                 "delegate": self.delegate}
         if self.gidCaller:
-            dict["gidCaller"] = self.gidCaller.save_to_string()
+            dict["gidCaller"] = self.gidCaller.save_to_string(save_parents=True)
         if self.gidObject:
-            dict["gidObject"] = self.gidObject.save_to_string()
+            dict["gidObject"] = self.gidObject.save_to_string(save_parents=True)
         if self.privileges:
             dict["privileges"] = self.privileges.save_to_string()
         str = xmlrpclib.dumps((dict,), allow_none=True)
@@ -123,16 +126,16 @@ class Credential(Certificate):
         # do the normal certificate verification stuff
         Certificate.verify_chain(self, trusted_certs)
 
-        if parent:
+        if self.parent:
             # make sure the parent delegated rights to the child
-            if not parent.delegate:
-                raise MissingDelegateBit(self.get_subject())
+            if not self.parent.get_delegate():
+                raise MissingDelegateBit(self.parent.get_subject())
 
             # XXX todo: make sure child rights are a subset of parent rights
 
         return
 
-    def dump(self):
+    def dump(self, dump_parents=False):
         print "CREDENTIAL", self.get_subject()
 
         print "      privs:", self.get_privileges().save_to_string()
@@ -140,14 +143,18 @@ class Credential(Certificate):
         print "  gidCaller:"
         gidCaller = self.get_gid_caller()
         if gidCaller:
-            gidCaller.dump(indent=8)
+            gidCaller.dump(8, dump_parents)
 
         print "  gidObject:"
         gidObject = self.get_gid_object()
         if gidObject:
-            gidObject.dump(indent=8)
+            gidObject.dump(8, dump_parents)
 
         print "   delegate:", self.get_delegate()
+
+        if self.parent and dump_parents:
+           print "PARENT",
+           self.parent.dump(dump_parents)
 
 
 
