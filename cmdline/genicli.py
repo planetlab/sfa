@@ -5,8 +5,9 @@ import sys
 import os
 from cert import *
 from geniclient import *
+from geniticket import *
 
-long_opts = ["keyfile=", "help", "outfile=", "credfile=", "username=", "email=", "ip=", "dns=", "dump_parents", "server="]
+long_opts = ["keyfile=", "help", "outfile=", "credfile=", "ticketfile=", "username=", "email=", "ip=", "dns=", "dump_parents", "server="]
 
 # default command line options
 username = "client"
@@ -18,6 +19,7 @@ key_file = None
 cred_file = None
 cert_file = None
 out_file = None
+ticket_file = None
 
 ip = None
 dns = None
@@ -39,9 +41,10 @@ def showhelp():
    print "syntax: cli <options> command <args>"
    print "options:"
    print "    --username       ... username (or hrn) of user making call"
-   print "    --outfile        ... save response to a file"
+   print "    --outfile       ... save response to a file"
    print "    --credfile       ... credential of user making call (or 'None')"
    print "    --keyfile        ... private key file of user making call"
+   print "    --ticketfile     ... filename of ticket (for redeemticket)"
    print "    --email          ... email address (for registering users)"
    print "    --ip             ... IP address (for registering nodes)"
    print "    --dns            ... DNS address (for registering nodes)"
@@ -59,13 +62,14 @@ def showhelp():
    print "    update <type> <hrn>"
    print "    startSlice"
    print "    stopSlice"
+   print "    listSlices"
 
 def process_options():
    global username
    global opname
    global type, hrn
    global cert_file, cred_file
-   global key_file, out_file
+   global key_file, out_file, ticket_file
    global uuid, pkey_fn, gid_fn, email, gid_pkey_fn, ip, dns
    global dump_parents
    global server_url
@@ -88,6 +92,8 @@ def process_options():
            cred_file = val
        elif name == "--keyfile":
            key_file = val
+       elif name == "--ticketfile":
+           ticket_file = val
        elif name == "--email":
            email = val
        elif name == "--ip":
@@ -146,6 +152,12 @@ def process_options():
            print "syntax: update <type> <hrn>"
        type = args[1]
        hrn = args[2]
+
+   elif opname == "getTicket":
+       if len(args) < 2:
+           print "syntax: getTicket <hrn>"
+           sys.exit(-1)
+       hrn = args[1]
 
    leaf_name = get_leaf(username)
 
@@ -236,7 +248,8 @@ def main():
        client = GeniClient(server_url, key_file, cert_file)
 
    # if a cred_file was specified, then load the credential
-   if (cred_file=="None") or (opname == "help") or (opname == "createKey"):
+   if (cred_file=="None") or (opname == "help") or (opname == "createKey") or \
+      (opname == "redeemTicket"):
       cred = None
    else:
       cred = Credential(filename = cred_file)
@@ -358,6 +371,33 @@ def main():
 
    elif (opname == "startSlice"):
        client.start_slice(cred)
+
+   elif (opname == "resetSlice"):
+       client.reset_slice(cred)
+
+   elif (opname == "deleteSlice"):
+       client.delete_slice(cred)
+
+   elif (opname == "listSlices"):
+       result = client.list_slices(cred)
+       print "RESULT:"
+       print "\n".join(result)
+       if out_file:
+           file(out_file,"w").write("\n".join(result))
+
+   elif (opname == "getTicket"):
+      result = client.get_ticket(cred, hrn, {})
+      if result:
+          print "RESULT:"
+          result.dump(dump_parents=dump_parents)
+          if out_file:
+              file(out_file,"w").write(result.save_to_string(save_parents=True))
+      else:
+          print "NO RESULT"
+
+   elif (opname == "redeemTicket"):
+       ticket = Ticket(filename = ticket_file)
+       result = client.redeem_ticket(ticket)
 
    else:
       print "unknown operation: " + opname
