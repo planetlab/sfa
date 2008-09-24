@@ -1,6 +1,6 @@
-# credential.py
+##
 #
-# implements GENI credentials
+# Implements Geni Credentials
 #
 # Credentials are layered on top of certificates, and are essentially a
 # certificate that stores a tuple of parameters.
@@ -10,6 +10,7 @@ from rights import *
 from gid import *
 import xmlrpclib
 
+##
 # Credential is a tuple:
 #     (GIDCaller, GIDObject, LifeTime, Privileges, Delegate)
 #
@@ -24,43 +25,85 @@ class Credential(Certificate):
     privileges = None
     delegate = False
 
+    ##
+    # Create a Credential object
+    #
+    # @param create If true, create a blank x509 certificate
+    # @param subject If subject!=None, create an x509 cert with the subject name
+    # @param string If string!=None, load the credential from the string
+    # @param filename If filename!=None, load the credential from the file
+
     def __init__(self, create=False, subject=None, string=None, filename=None):
         Certificate.__init__(self, create, subject, string, filename)
 
-    def create_similar(self):
-        return Credential()
+    ##
+    # set the GID of the caller
+    #
+    # @param gid GID object of the caller
 
     def set_gid_caller(self, gid):
         self.gidCaller = gid
+
+    ##
+    # get the GID of the object
 
     def get_gid_caller(self):
         if not self.gidCaller:
             self.decode()
         return self.gidCaller
 
+    ##
+    # set the GID of the object
+    #
+    # @param gid GID object of the object
+
     def set_gid_object(self, gid):
         self.gidObject = gid
+
+    ##
+    # get the GID of the object
 
     def get_gid_object(self):
         if not self.gidObject:
             self.decode()
         return self.gidObject
 
+    ##
+    # set the lifetime of this credential
+    #
+    # @param lifetime lifetime of credential
+
     def set_lifetime(self, lifeTime):
         self.lifeTime = lifeTime
+
+    ##
+    # get the lifetime of the credential
 
     def get_lifetime(self):
         if not self.lifeTime:
             self.decode()
         return self.lifeTime
 
+    ##
+    # set the delegate bit
+    #
+    # @param delegate boolean (True or False)
+
     def set_delegate(self, delegate):
         self.delegate = delegate
+
+    ##
+    # get the delegate bit
 
     def get_delegate(self):
         if not self.delegate:
             self.decode()
         return self.delegate
+
+    ##
+    # set the privileges
+    #
+    # @param privs either a comma-separated list of privileges of a RightList object
 
     def set_privileges(self, privs):
         if isinstance(privs, str):
@@ -68,16 +111,30 @@ class Credential(Certificate):
         else:
             self.privileges = privs
 
+    ##
+    # return the privileges as a RightList object
+
     def get_privileges(self):
         if not self.privileges:
             self.decode()
         return self.privileges
+
+    ##
+    # determine whether the credential allows a particular operation to be
+    # performed
+    #
+    # @param op_name string specifying name of operation ("lookup", "update", etc)
 
     def can_perform(self, op_name):
         rights = self.get_privileges()
         if not rights:
             return False
         return rights.can_perform(op_name)
+
+    ##
+    # Encode the attributes of the credential into a string and store that
+    # string in the alt-subject-name field of the X509 object. This should be
+    # done immediately before signing the credential.
 
     def encode(self):
         dict = {"gidCaller": None,
@@ -93,6 +150,11 @@ class Credential(Certificate):
             dict["privileges"] = self.privileges.save_to_string()
         str = xmlrpclib.dumps((dict,), allow_none=True)
         self.set_data(str)
+
+    ##
+    # Retrieve the attributes of the credential from the alt-subject-name field
+    # of the X509 certificate. This is automatically done by the various
+    # get_* methods of this class and should not need to be called explicitly.
 
     def decode(self):
         data = self.get_data()
@@ -122,6 +184,12 @@ class Credential(Certificate):
         else:
             self.gidObject = None
 
+    ##
+    # Verify that a chain of credentials is valid (see cert.py:verify). In
+    # addition to the checks for ordinary certificates, verification also
+    # ensures that the delegate bit was set by each parent in the chain. If
+    # a delegate bit was not set, then an exception is thrown.
+
     def verify_chain(self, trusted_certs = None):
         # do the normal certificate verification stuff
         Certificate.verify_chain(self, trusted_certs)
@@ -131,9 +199,17 @@ class Credential(Certificate):
             if not self.parent.get_delegate():
                 raise MissingDelegateBit(self.parent.get_subject())
 
-            # XXX todo: make sure child rights are a subset of parent rights
+            # make sure the rights given to the child are a subset of the
+            # parents rights
+            if not self.parent.get_privileges().is_superset(self.get_privileges()):
+                raise ChildRightsNotSubsetOfParent(self.get_subject())
 
         return
+
+    ##
+    # Dump the contents of a credential to stdout in human-readable format
+    #
+    # @param dump_parents If true, also dump the parent certificates
 
     def dump(self, dump_parents=False):
         print "CREDENTIAL", self.get_subject()
@@ -155,8 +231,4 @@ class Credential(Certificate):
         if self.parent and dump_parents:
            print "PARENT",
            self.parent.dump(dump_parents)
-
-
-
-
 

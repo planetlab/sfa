@@ -97,14 +97,33 @@ class MissingDelegateBit(Exception):
     def __str__(self):
         return repr(self.value)
 
-class MissingParent(Exception):
+class ChildRightsNotSubsetOfParent(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
-class NotSignedByParent(Exception):
+class CertMissingParent(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
+
+class CertNotSignedByParent(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class GidInvalidParentHrn(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class SliverDoesNotExist(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+

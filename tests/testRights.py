@@ -14,6 +14,22 @@ class TestRight(unittest.TestCase):
       self.assert_(right.can_perform("getticket"))
       self.assert_(not right.can_perform("resolve"))
 
+   def testIsSuperset(self):
+      pright = Right("sa")
+      cright = Right("embed")
+      self.assert_(pright.is_superset(cright))
+      self.assert_(not cright.is_superset(pright))
+
+      pright = Right("embed")
+      cright = Right("embed")
+      self.assert_(pright.is_superset(cright))
+      self.assert_(cright.is_superset(pright))
+
+      pright = Right("control")
+      cright = Right("embed")
+      self.assert_(not pright.is_superset(cright))
+      self.assert_(not cright.is_superset(pright))
+
 class TestRightList(unittest.TestCase):
     def setUp(self):
         pass
@@ -43,6 +59,27 @@ class TestRightList(unittest.TestCase):
         rightList = RightList(string="embed,resolve")
         self.assert_(rightList.can_perform("getticket"))
         self.assert_(rightList.can_perform("resolve"))
+
+    def testIsSuperset(self):
+        pRightList = RightList(string="sa")
+        cRightList = RightList(string="embed")
+        self.assert_(pRightList.is_superset(cRightList))
+        self.assert_(not cRightList.is_superset(pRightList))
+
+        pRightList = RightList(string="embed")
+        cRightList = RightList(string="embed")
+        self.assert_(pRightList.is_superset(cRightList))
+        self.assert_(cRightList.is_superset(pRightList))
+
+        pRightList = RightList(string="control")
+        cRightList = RightList(string="embed")
+        self.assert_(not pRightList.is_superset(cRightList))
+        self.assert_(not cRightList.is_superset(pRightList))
+
+        pRightList = RightList(string="control,sa")
+        cRightList = RightList(string="embed")
+        self.assert_(pRightList.is_superset(cRightList))
+        self.assert_(not cRightList.is_superset(pRightList))
 
 
 if __name__ == "__main__":

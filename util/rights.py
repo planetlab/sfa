@@ -12,7 +12,7 @@ privilege_table = {"authority": ["*"],
                    "sa": ["*"],
                    "embed": ["getticket", "createslice", "deleteslice", "updateslice"],
                    "bind": ["getticket", "loanresources"],
-                   "control": ["updateslice", "stopslice", "startslice", "deleteslice"],
+                   "control": ["updateslice", "stopslice", "startslice", "deleteslice", "resetslice"],
                    "info": ["listslices", "listcomponentresources", "getsliceresources"],
                    "ma": ["*"]}
 
@@ -33,6 +33,19 @@ class Right:
 
       return (op_name.lower() in allowed_ops)
 
+   def is_superset(self, child):
+      my_allowed_ops = privilege_table.get(self.kind.lower(), None)
+      child_allowed_ops = privilege_table.get(child.kind.lower(), None)
+
+      if "*" in my_allowed_ops:
+          return True
+
+      for right in child_allowed_ops:
+          if not right in my_allowed_ops:
+              return False
+
+      return True
+
 # a "RightList" is a list of privileges
 
 class RightList:
@@ -40,6 +53,11 @@ class RightList:
         self.rights = []
         if string:
             self.load_from_string(string)
+
+    def add(self, right):
+        if isinstance(right, str):
+            right = Right(kind = right)
+        self.rights.append(right)
 
     def load_from_string(self, string):
         self.rights = []
@@ -65,4 +83,13 @@ class RightList:
                 return True
         return False
 
+    def is_superset(self, child):
+        for child_right in child.rights:
+            allowed = False
+            for my_right in self.rights:
+                if my_right.is_superset(child_right):
+                    allowed = True
+            if not allowed:
+                return False
+        return True
 
