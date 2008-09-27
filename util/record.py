@@ -5,6 +5,7 @@
 # TODO: Use existing PLC database methods? or keep this separate?
 
 import report
+from gid import *
 
 # Record is a tuple (Name, GID, Type, Info)
 #    info is comprised of the following sub-fields

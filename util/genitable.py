@@ -72,8 +72,8 @@ class GeniTable():
         #print query_str
         self.cnx.query(query_str)
 
-    def resolve_dict(self, type, hrn):
-        query_str = "SELECT * FROM " + self.tablename + " WHERE name = '" + hrn + "'"
+    def find_dict(self, type, value, searchfield):
+        query_str = "SELECT * FROM " + self.tablename + " WHERE " + searchfield + " = '" + str(value) + "'"
         dict_list = self.cnx.query(query_str).dictresult()
         result_dict_list = []
         for dict in dict_list:
@@ -81,12 +81,18 @@ class GeniTable():
                result_dict_list.append(dict)
         return result_dict_list
 
-    def resolve(self, type, hrn):
-        result_dict_list = self.resolve_dict(type, hrn)
+    def find(self, type, value, searchfield):
+        result_dict_list = self.find_dict(type, value, searchfield)
         result_rec_list = []
         for dict in result_dict_list:
             result_rec_list.append(GeniRecord(dict=dict))
         return result_rec_list
+
+    def resolve_dict(self, type, hrn):
+        return self.find_dict(type, hrn, "name")
+
+    def resolve(self, type, hrn):
+        return self.find(type, hrn, "name")
 
     def list_dict(self):
         query_str = "SELECT * FROM " + self.tablename
