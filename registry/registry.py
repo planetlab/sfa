@@ -237,6 +237,19 @@ class Registry(GeniServer):
 
         record.set_pl_info(pl_res[0])
 
+    ##
+    # Look up user records given PLC user-ids. This is used as part of the
+    # process for reverse-mapping PLC records into Geni records.
+    #
+    # @param auth_table database table for the authority that holds the user records
+    # @param user_id_list list of user ids
+    # @param role either "*" or a string describing the role to look for ("pi", "user", ...)
+    #
+    # TODO: This function currently only searches one authority because it would
+    # be inefficient to brute-force search all authorities for a user id. The
+    # solution would likely be to implement a reverse mapping of user-id to
+    # (type, hrn) pairs.
+
     def lookup_users(self, auth_table, user_id_list, role="*"):
         record_list = []
         for person_id in user_id_list:
@@ -266,28 +279,51 @@ class Registry(GeniServer):
             geni_info['researcher'] = researchers
 
         elif (type == "sa"):
-            auth_table = self.get_auth_table(record.get_name())   
+            auth_table = self.get_auth_table(record.get_name())
             person_ids = record.pl_info.get("person_ids", [])
             pis = self.lookup_users(auth_table, person_ids, "pi")
             geni_info['pi'] = pis
+            # TODO: OrganizationName
 
         elif (type == "ma"):
-            auth_table = self.get_auth_table(record.get_name())   
+            auth_table = self.get_auth_table(record.get_name())
             person_ids = record.pl_info.get("person_ids", [])
             operators = self.lookup_users(auth_table, person_ids, "tech")
             geni_info['operator'] = operators
+            # TODO: OrganizationName
 
             auth_table = self.get_auth_table(record.get_name())
             person_ids = record.pl_info.get("person_ids", [])
             owners = self.lookup_users(auth_table, person_ids, "admin")
             geni_info['owner'] = owners
-            pass
+
+        elif (type == "node"):
+            geni_info['dns'] = record.pl_info.get("hostname", "")
+            # TODO: URI, LatLong, IP, DNS
+
+        elif (type == "user"):
+            geni_info['email'] = record.pl_info.get("email", "")
+            # TODO: PostalAddress, Phone
 
         record.set_geni_info(geni_info)
+
+    ##
+    # Given a Geni record, fill in the PLC-specific and Geni-specific fields
+    # in the record.
 
     def fill_record_info(self, record):
         self.fill_record_pl_info(record)
         self.fill_record_geni_info(record)
+
+    ##
+    # GENI API: register
+    #
+    # Register an object with the registry. In addition to being stored in the
+    # Geni database, the appropriate records will also be created in the
+    # PLC databases
+    #
+    # @param cred credential string
+    # @param record_dict dictionary containing record fields
 
     def register(self, cred, record_dict):
         self.decode_authentication(cred, "register")
@@ -379,6 +415,18 @@ class Registry(GeniServer):
 
         return record.get_gid_object().save_to_string(save_parents=True)
 
+    ##
+    # GENI API: remove
+    #
+    # Remove an object from the registry. If the object represents a PLC object,
+    # then the PLC records will also be removed.
+    #
+    # @param cred credential string
+    # @param record_dict dictionary containing record fields. The only relevant
+    #     fields of the record are 'name' and 'type', which are used to lookup
+    #     the current copy of the record in the Geni database, to make sure
+    #     that the appopriate record is removed.
+
     def remove(self, cred, record_dict):
         self.decode_authentication(cred, "remove")
 
@@ -425,6 +473,9 @@ class Registry(GeniServer):
 
         return True
 
+    ##
+    # GENI API: update
+
     def update(self, cred, record_dict):
         self.decode_authentication(cred, "update")
 
@@ -443,6 +494,8 @@ class Registry(GeniServer):
 
         existing_record = existing_record_list[0]
         pointer = existing_record.get_pointer()
+
+        # update the PLC information that was specified with the record
 
         if (type == "sa") or (type == "ma"):
             self.shell.UpdateSite(self.pl_auth, pointer, record.get_pl_info())
