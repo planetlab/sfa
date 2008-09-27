@@ -1,13 +1,14 @@
-# record.py
-#
-# implements support for geni records
+##
+# Implements support for geni records
 #
 # TODO: Use existing PLC database methods? or keep this separate?
+##
 
 import report
 from gid import *
 
-# Record is a tuple (Name, GID, Type, Info)
+##
+# GeniRecord is a tuple (Name, GID, Type, Info)
 #    info is comprised of the following sub-fields
 #        pointer = a pointer to the record in the PL database
 #        pl_info = planetlab-specific info (when talking to client)
