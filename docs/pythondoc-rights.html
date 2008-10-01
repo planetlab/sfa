@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The rights Module</title>
+</head>
+<body>
+<h1>The rights Module</h1>
+<p>This Module implements rights and lists of rights for the Geni wrapper. Rights
+are implemented by two classes:
+
+Right - represents a single right
+
+RightList - represents a list of rights
+
+A right may allow several different operations. For example, the &quot;info&quot; right
+allows &quot;listslices&quot;, &quot;listcomponentresources&quot;, etc.</p>
+<dl>
+<dt><a id='rights.privilege_table-variable' name='rights.privilege_table-variable'><b>privilege_table</b></a> (variable) [<a href='#rights.privilege_table-variable'>#</a>]</dt>
+<dd>
+<p>privilege_table is a list of priviliges and what operations are allowed
+per privilege.</p>
+</dd>
+<dt><b>Right(kind)</b> (class) [<a href='#rights.Right-class'>#</a>]</dt>
+<dd>
+<p>The Right class represents a single privilege.</p>
+<p>For more information about this class, see <a href='#rights.Right-class'><i>The Right Class</i></a>.</p>
+</dd>
+<dt><b>RightList(string=None)</b> (class) [<a href='#rights.RightList-class'>#</a>]</dt>
+<dd>
+<p>A RightList object represents a list of privileges.</p>
+<p>For more information about this class, see <a href='#rights.RightList-class'><i>The RightList Class</i></a>.</p>
+</dd>
+</dl>
+<h2><a id='rights.Right-class' name='rights.Right-class'>The Right Class</a></h2>
+<dl>
+<dt><b>Right(kind)</b> (class) [<a href='#rights.Right-class'>#</a>]</dt>
+<dd>
+<p>The Right class represents a single privilege.</p>
+</dd>
+<dt><a id='rights.Right.can_perform-method' name='rights.Right.can_perform-method'><b>can_perform(op_name)</b></a> [<a href='#rights.Right.can_perform-method'>#</a>]</dt>
+<dd>
+<p>Test to see if this right object is allowed to perform an operation.
+Returns True if the operation is allowed, False otherwise.</p>
+<dl>
+<dt><i>op_name</i></dt>
+<dd>
+is a string naming the operation. For example &quot;listslices&quot;.</dd>
+</dl><br />
+</dd>
+<dt><a id='rights.Right.is_superset-method' name='rights.Right.is_superset-method'><b>is_superset(child)</b></a> [<a href='#rights.Right.is_superset-method'>#</a>]</dt>
+<dd>
+<p>Test to see if this right is a superset of a child right. A right is a
+superset if every operating that is allowed by the child is also allowed
+by this object.</p>
+<dl>
+<dt><i>child</i></dt>
+<dd>
+is a Right object describing the child right</dd>
+</dl><br />
+</dd>
+</dl>
+<h2><a id='rights.RightList-class' name='rights.RightList-class'>The RightList Class</a></h2>
+<dl>
+<dt><b>RightList(string=None)</b> (class) [<a href='#rights.RightList-class'>#</a>]</dt>
+<dd>
+<p>A RightList object represents a list of privileges.</p>
+</dd>
+<dt><a id='rights.RightList.add-method' name='rights.RightList.add-method'><b>add(right)</b></a> [<a href='#rights.RightList.add-method'>#</a>]</dt>
+<dd>
+<p>Add a right to this list</p>
+<dl>
+<dt><i>right</i></dt>
+<dd>
+is either a Right object or a string describing the right</dd>
+</dl><br />
+</dd>
+<dt><a id='rights.RightList.can_perform-method' name='rights.RightList.can_perform-method'><b>can_perform(op_name)</b></a> [<a href='#rights.RightList.can_perform-method'>#</a>]</dt>
+<dd>
+<p>Check to see if some right in this list allows an operation. This is
+done by evaluating the can_perform function of each operation in the
+list.</p>
+<dl>
+<dt><i>op_name</i></dt>
+<dd>
+is an operation to check, for example &quot;listslices&quot;</dd>
+</dl><br />
+</dd>
+<dt><a id='rights.RightList.is_superset-method' name='rights.RightList.is_superset-method'><b>is_superset(child)</b></a> [<a href='#rights.RightList.is_superset-method'>#</a>]</dt>
+<dd>
+<p>Check to see if all of the rights in this rightlist are a superset
+of all the rights in a child rightlist. A rightlist is a superset
+if there is no operation in the child rightlist that cannot be
+performed in the parent rightlist.</p>
+<dl>
+<dt><i>child</i></dt>
+<dd>
+is a rightlist object describing the child</dd>
+</dl><br />
+</dd>
+<dt><a id='rights.RightList.load_from_string-method' name='rights.RightList.load_from_string-method'><b>load_from_string(string)</b></a> [<a href='#rights.RightList.load_from_string-method'>#</a>]</dt>
+<dd>
+<p>Load the rightlist object from a string</p>
+</dd>
+<dt><a id='rights.RightList.save_to_string-method' name='rights.RightList.save_to_string-method'><b>save_to_string()</b></a> [<a href='#rights.RightList.save_to_string-method'>#</a>]</dt>
+<dd>
+<p>Save the rightlist object to a string. It is saved in the format of a
+comma-separated list.</p>
+</dd>
+</dl>
+</body></html>
