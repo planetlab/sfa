@@ -1,7 +1,18 @@
 ##
 # Geni Registry Wrapper
 #
-# This wrapper implements the Geni Registry
+# This wrapper implements the Geni Registry.
+#
+# There are several items that need to be done before starting the registry.
+#
+# 1) Import the existing planetlab database, creating the
+# appropriate geni records. This is done by running the "import.py" tool.
+#
+# 2) Create a "trusted_roots" directory and place the certificate of the root
+# authority in that directory. Given the defaults in import.py, this certificate
+# would be named "planetlab.gid". For example,
+#
+#    mkdir trusted_roots; cp authorities/planetlab.gid trusted_roots/
 ##
 
 import tempfile
@@ -81,6 +92,14 @@ def geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields):
 #
 
 class Registry(GeniServer):
+    ##
+    # Create a new registry object.
+    #
+    # @param ip the ip address to listen on
+    # @param port the port to listen on
+    # @param key_file private key filename of registry
+    # @param cert_file certificate filename containing public key (could be a GID file)
+
     def __init__(self, ip, port, key_file, cert_file):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
 
