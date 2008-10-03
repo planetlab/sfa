@@ -5,10 +5,12 @@
 #
 # There are several items that need to be done before starting the registry.
 #
-# 1) Import the existing planetlab database, creating the
+# 1) Update util/config.py to match the parameters of your PLC installation. 
+#
+# 2) Import the existing planetlab database, creating the
 # appropriate geni records. This is done by running the "import.py" tool.
 #
-# 2) Create a "trusted_roots" directory and place the certificate of the root
+# 3) Create a "trusted_roots" directory and place the certificate of the root
 # authority in that directory. Given the defaults in import.py, this certificate
 # would be named "planetlab.gid". For example,
 #
