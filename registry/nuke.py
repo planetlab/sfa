@@ -1,3 +1,11 @@
+##
+# Delete all the database records for Geni. This tool is used to clean out Geni
+# records during testing.
+#
+# Authority info (maintained by the hierarchy module in a subdirectory tree)
+# is not purged by this tool and may be deleted by a command like 'rm'.
+##
+
 import getopt
 import sys
 

@@ -1,3 +1,17 @@
+##
+# Import PLC records into the Geni database. It is indended that this tool be
+# run once to create Geni records that reflect the current state of the
+# planetlab database.
+#
+# The import tool assumes that the existing PLC hierarchy should all be part
+# of "planetlab.us" (see the root_auth and level1_auth variables below).
+#
+# Public keys are extracted from the users' SSH keys automatically and used to
+# create GIDs. This is relatively experimental as a custom tool had to be
+# written to perform conversion from SSH to OpenSSL format. It only supports
+# RSA keys at this time, not DSA keys.
+##
+
 import getopt
 import sys
 import tempfile
@@ -10,6 +24,9 @@ from genitable import *
 from misc import *
 
 shell = None
+
+##
+# Two authorities are specified: the root authority and the level1 authority.
 
 root_auth = "planetlab"
 level1_auth = "planetlab.us"

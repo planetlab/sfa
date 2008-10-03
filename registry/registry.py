@@ -474,7 +474,20 @@ class Registry(GeniServer):
         return True
 
     ##
-    # GENI API: update
+    # GENI API: Register
+    #
+    # Update an object in the registry. Currently, this only updates the
+    # PLC information associated with the record. The Geni fields (name, type,
+    # GID) are fixed.
+    #
+    # The record is expected to have the pl_info field filled in with the data
+    # that should be updated.
+    #
+    # TODO: The geni_info member of the record should be parsed and the pl_info
+    # adjusted as necessary (add/remove users from a slice, etc)
+    #
+    # @param cred credential string specifying rights of the caller
+    # @param record a record dictionary to be updated
 
     def update(self, cred, record_dict):
         self.decode_authentication(cred, "update")
@@ -512,9 +525,17 @@ class Registry(GeniServer):
         else:
             raise UnknownGeniType(type)
 
+    ##
+    # List the records in an authority. The objectGID in the supplied credential
+    # should name the authority that will be listed.
+    #
     # TODO: List doesn't take an hrn and uses the hrn contained in the
     #    objectGid of the credential. Does this mean the only way to list an
-    #    authority is by having a credential for that authority? 
+    #    authority is by having a credential for that authority?
+    #
+    # @param cred credential string specifying rights of the caller
+    #
+    # @return list of record dictionaries
     def list(self, cred):
         self.decode_authentication(cred, "list")
 
@@ -542,6 +563,17 @@ class Registry(GeniServer):
 
         return dict_list
 
+    ##
+    # Resolve a record. This is an internal version of the Resolve API call
+    # and returns records in record object format rather than dictionaries
+    # that may be sent over XMLRPC.
+    #
+    # @param type type of record to resolve (user | sa | ma | slice | node)
+    # @param name human readable name of object
+    # @param must_exist if True, throw an exception if no records are found
+    #
+    # @return a list of record objects, or an empty list []
+
     def resolve_raw(self, type, name, must_exist=True):
         auth_name = get_authority(name)
 
@@ -565,6 +597,17 @@ class Registry(GeniServer):
 
         return good_records
 
+    ##
+    # GENI API: Resolve
+    #
+    # This is a wrapper around resolve_raw that converts records objects into
+    # dictionaries before returning them to the user.
+    #
+    # @param cred credential string authorizing the caller
+    # @param name human readable name to resolve
+    #
+    # @return a list of record dictionaries, or an empty list
+
     def resolve(self, cred, name):
         self.decode_authentication(cred, "resolve")
 
@@ -575,6 +618,17 @@ class Registry(GeniServer):
 
         return dicts
 
+    ##
+    # GENI API: get_gid
+    #
+    # Retrieve the GID for an object. This function looks up a record in the
+    # registry and returns the GID of the record if it exists.
+    # TODO: Is this function needed? It's a shortcut for Resolve()
+    #
+    # @param name hrn to look up
+    #
+    # @return the string representation of a GID object
+
     def get_gid(self, name):
         self.verify_object_belongs_to_me(name)
         records = self.resolve_raw("*", name)
@@ -583,6 +637,16 @@ class Registry(GeniServer):
             gid = record.get_gid()
             gid_string_list.append(gid.save_to_string(save_parents=True))
         return gid_string_list
+
+    ##
+    # Determine tje rights that an object should have. The rights are entirely
+    # dependent on the type of the object. For example, users automatically
+    # get "refresh", "resolve", and "info".
+    #
+    # @param type the type of the object (user | sa | ma | slice | node)
+    # @param name human readable name of the object (not used at this time)
+    #
+    # @return RightList object containing rights
 
     def determine_rights(self, type, name):
         rl = RightList()
@@ -610,6 +674,23 @@ class Registry(GeniServer):
 
         return rl
 
+    ##
+    # GENI API: Get_self_credential
+    #
+    # Get_self_credential a degenerate version of get_credential used by a
+    # client to get his initial credential when he doesn't have one. This is
+    # the same as get_credential(..., cred=None,...).
+    #
+    # The registry ensures that the client is the principal that is named by
+    # (type, name) by comparing the public key in the record's GID to the
+    # private key used to encrypt the client-side of the HTTPS connection. Thus
+    # it is impossible for one principal to retrieve another principal's
+    # credential without having the appropriate private key.
+    #
+    # @param type type of object (user | slice | sa | ma | node
+    # @param name human readable name of object
+    #
+    # @return the string representation of a credential object
 
     def get_self_credential(self, type, name):
         self.verify_object_belongs_to_me(name)
@@ -644,6 +725,19 @@ class Registry(GeniServer):
 
         return cred.save_to_string(save_parents=True)
 
+    ##
+    # GENI API: Get_credential
+    #
+    # Retrieve a credential for an object.
+    #
+    # If cred==None, then the behavior reverts to get_self_credential()
+    #
+    # @param cred credential object specifying rights of the caller
+    # @param type type of object (user | slice | sa | ma | node)
+    # @param name human readable name of object
+    #
+    # @return the string representation of a credental object
+
     def get_credential(self, cred, type, name):
         if not cred:
             return get_self_credential(self, type, name)
@@ -677,6 +771,20 @@ class Registry(GeniServer):
 
         return new_cred.save_to_string(save_parents=True)
 
+    ##
+    # GENI_API: Create_gid
+    #
+    # Create a new GID. For MAs and SAs that are physically located on the
+    # registry, this allows a owner/operator/PI to create a new GID and have it
+    # signed by his respective authority.
+    #
+    # @param cred credential of caller
+    # @param name hrn for new GID
+    # @param uuid unique identifier for new GID
+    # @param pkey_string public-key string (TODO: why is this a string and not a keypair object?)
+    #
+    # @return the string representation of a GID object
+
     def create_gid(self, cred, name, uuid, pubkey_str):
         self.decode_authentication(cred, "getcredential")
 
@@ -695,6 +803,18 @@ class Registry(GeniServer):
 
     # ------------------------------------------------------------------------
     # Component Interface
+
+    ##
+    # Convert a PLC record into the slice information that will be stored in
+    # a ticket. There are two parts to this information: attributes and
+    # rspec.
+    #
+    # Attributes are non-resource items, such as keys and the initscript
+    # Rspec is a set of resource specifications
+    #
+    # @param record a record object
+    #
+    # @return a tuple (attrs, rspec) of dictionaries
 
     def record_to_slice_info(self, record):
 
@@ -735,6 +855,22 @@ class Registry(GeniServer):
 
         return (attributes, rspec)
 
+    ##
+    # GENI API: get_ticket
+    #
+    # Retrieve a ticket. This operation is currently implemented on the
+    # registry (see SFA, engineering decisions), and is not implemented on
+    # components.
+    #
+    # The ticket is filled in with information from the PLC database. This
+    # information includes resources, and attributes such as user keys and
+    # initscripts.
+    #
+    # @param cred credential string
+    # @param name name of the slice to retrieve a ticket for
+    # @param rspec resource specification dictionary
+    #
+    # @return the string representation of a ticket object
 
     def get_ticket(self, cred, name, rspec):
         self.decode_authentication(cred, "getticket")

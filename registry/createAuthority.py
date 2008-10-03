@@ -1,3 +1,10 @@
+##
+# Create an authority via the hierarchy module.
+#
+# This tool was most likely used during development and is deprecated by the
+# import tool.
+##
+
 import getopt
 import sys
 
