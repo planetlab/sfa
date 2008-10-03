@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The hierarchy Module</title>
+</head>
+<body>
+<h1>The hierarchy Module</h1>
+<p>This module implements a hierarchy of authorities and performs a similar
+function as the &quot;tree&quot; module of the original geniwrapper prototype. An HRN
+is assumed to be a string of authorities separated by dots. For example,
+&quot;planetlab.us.arizona.bakers&quot;. Each component of the HRN is a different
+authority, with the last component being a leaf in the tree.
+
+Each authority is stored in a subdirectory on the registry. Inside this
+subdirectory are several files:
+     *.GID - GID file
+     *.PKEY - private key file
+     *.DBINFO - database info</p>
+<dl>
+<dt><b>AuthInfo(hrn, gid_filename, privkey_filename, dbinfo_filename)</b> (class) [<a href='#hierarchy.AuthInfo-class'>#</a>]</dt>
+<dd>
+<p>The AuthInfo class contains the information for an authority.</p>
+<p>For more information about this class, see <a href='#hierarchy.AuthInfo-class'><i>The AuthInfo Class</i></a>.</p>
+</dd>
+<dt><b>Hierarchy(basedir=&quot;.&quot;)</b> (class) [<a href='#hierarchy.Hierarchy-class'>#</a>]</dt>
+<dd>
+<p>The Hierarchy class is responsible for managing the tree of authorities.</p>
+<p>For more information about this class, see <a href='#hierarchy.Hierarchy-class'><i>The Hierarchy Class</i></a>.</p>
+</dd>
+</dl>
+<h2><a id='hierarchy.AuthInfo-class' name='hierarchy.AuthInfo-class'>The AuthInfo Class</a></h2>
+<dl>
+<dt><b>AuthInfo(hrn, gid_filename, privkey_filename, dbinfo_filename)</b> (class) [<a href='#hierarchy.AuthInfo-class'>#</a>]</dt>
+<dd>
+<p>The AuthInfo class contains the information for an authority. This information
+includes the GID, private key, and database connection information.</p>
+</dd>
+<dt><a id='hierarchy.AuthInfo.__init__-method' name='hierarchy.AuthInfo.__init__-method'><b>__init__(hrn, gid_filename, privkey_filename, dbinfo_filename)</b></a> [<a href='#hierarchy.AuthInfo.__init__-method'>#</a>]</dt>
+<dd>
+<p>Initialize and authority object.</p>
+<dl>
+<dt><i>hrn</i></dt>
+<dd>
+the human readable name of the authority</dd>
+<dt><i>gid_filename</i></dt>
+<dd>
+the filename containing the GID</dd>
+<dt><i>privkey_filename</i></dt>
+<dd>
+the filename containing the private key</dd>
+<dt><i>dbinfo_filename</i></dt>
+<dd>
+the filename containing the database info</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.AuthInfo.get_dbinfo-method' name='hierarchy.AuthInfo.get_dbinfo-method'><b>get_dbinfo()</b></a> [<a href='#hierarchy.AuthInfo.get_dbinfo-method'>#</a>]</dt>
+<dd>
+<p>Get the dbinfo in the form of a dictionary</p>
+</dd>
+<dt><a id='hierarchy.AuthInfo.get_gid_object-method' name='hierarchy.AuthInfo.get_gid_object-method'><b>get_gid_object()</b></a> [<a href='#hierarchy.AuthInfo.get_gid_object-method'>#</a>]</dt>
+<dd>
+<p>Get the GID in the form of a GID object</p>
+</dd>
+<dt><a id='hierarchy.AuthInfo.get_pkey_object-method' name='hierarchy.AuthInfo.get_pkey_object-method'><b>get_pkey_object()</b></a> [<a href='#hierarchy.AuthInfo.get_pkey_object-method'>#</a>]</dt>
+<dd>
+<p>Get the private key in the form of a Keypair object</p>
+</dd>
+<dt><a id='hierarchy.AuthInfo.set_gid_filename-method' name='hierarchy.AuthInfo.set_gid_filename-method'><b>set_gid_filename(fn)</b></a> [<a href='#hierarchy.AuthInfo.set_gid_filename-method'>#</a>]</dt>
+<dd>
+<p>Set the filename of the GID</p>
+<dl>
+<dt><i>fn</i></dt>
+<dd>
+filename of file containing GID</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.AuthInfo.update_gid_object-method' name='hierarchy.AuthInfo.update_gid_object-method'><b>update_gid_object(gid)</b></a> [<a href='#hierarchy.AuthInfo.update_gid_object-method'>#</a>]</dt>
+<dd>
+<p>Replace the GID with a new one. The file specified by gid_filename is
+overwritten with the new GID object</p>
+<dl>
+<dt><i>gid</i></dt>
+<dd>
+object containing new GID</dd>
+</dl><br />
+</dd>
+</dl>
+<h2><a id='hierarchy.Hierarchy-class' name='hierarchy.Hierarchy-class'>The Hierarchy Class</a></h2>
+<dl>
+<dt><b>Hierarchy(basedir=&quot;.&quot;)</b> (class) [<a href='#hierarchy.Hierarchy-class'>#</a>]</dt>
+<dd>
+<p>The Hierarchy class is responsible for managing the tree of authorities.
+Each authority is a node in the tree and exists as an AuthInfo object.
+
+The tree is stored on disk in a hierarchical manner than reflects the
+structure of the tree. Each authority is a subdirectory, and each subdirectory
+contains the GID, pkey, and dbinfo files for that authority (as well as
+subdirectories for each sub-authority)</p>
+</dd>
+<dt><a id='hierarchy.Hierarchy.auth_exists-method' name='hierarchy.Hierarchy.auth_exists-method'><b>auth_exists(hrn)</b></a> [<a href='#hierarchy.Hierarchy.auth_exists-method'>#</a>]</dt>
+<dd>
+<p>Check to see if an authority exists. An authority exists if it's disk
+files exist.</p>
+<dl>
+<dt><i>the</i></dt>
+<dd>
+human readable name of the authority to check</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.Hierarchy.create_auth-method' name='hierarchy.Hierarchy.create_auth-method'><b>create_auth(hrn, create_parents=False)</b></a> [<a href='#hierarchy.Hierarchy.create_auth-method'>#</a>]</dt>
+<dd>
+<p>Create an authority. A private key for the authority and the associated
+GID are created and signed by the parent authority.</p>
+<dl>
+<dt><i>hrn</i></dt>
+<dd>
+the human readable name of the authority to create</dd>
+<dt><i>create_parents</i></dt>
+<dd>
+if true, also create the parents if they do not exist</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.Hierarchy.create_gid-method' name='hierarchy.Hierarchy.create_gid-method'><b>create_gid(hrn, uuid, pkey)</b></a> [<a href='#hierarchy.Hierarchy.create_gid-method'>#</a>]</dt>
+<dd>
+<p>Create a new GID. The GID will be signed by the authority that is it's
+immediate parent in the hierarchy (and recursively, the parents' GID
+will be signed by its parent)</p>
+<dl>
+<dt><i>hrn</i></dt>
+<dd>
+the human readable name to store in the GID</dd>
+<dt><i>uuid</i></dt>
+<dd>
+the unique identifier to store in the GID</dd>
+<dt><i>pkey</i></dt>
+<dd>
+the public key to store in the GID</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.Hierarchy.get_auth_cred-method' name='hierarchy.Hierarchy.get_auth_cred-method'><b>get_auth_cred(hrn)</b></a> [<a href='#hierarchy.Hierarchy.get_auth_cred-method'>#</a>]</dt>
+<dd>
+<p>Retrieve an authority credential for an authority. The authority
+credential will contain the authority privilege and will be signed by
+the authority's parent.</p>
+<dl>
+<dt><i>hrn</i></dt>
+<dd>
+the human readable name of the authority</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.Hierarchy.get_auth_filenames-method' name='hierarchy.Hierarchy.get_auth_filenames-method'><b>get_auth_filenames(hrn)</b></a> [<a href='#hierarchy.Hierarchy.get_auth_filenames-method'>#</a>]</dt>
+<dd>
+<p>Given a hrn, return the filenames of the GID, private key, and dbinfo
+files.</p>
+<dl>
+<dt><i>hrn</i></dt>
+<dd>
+the human readable name of the authority</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.Hierarchy.get_auth_info-method' name='hierarchy.Hierarchy.get_auth_info-method'><b>get_auth_info(hrn)</b></a> [<a href='#hierarchy.Hierarchy.get_auth_info-method'>#</a>]</dt>
+<dd>
+<p>Return the AuthInfo object for the specified authority. If the authority
+does not exist, then an exception is thrown. As a side effect, disk files
+and a subdirectory may be created to store the authority.</p>
+<dl>
+<dt><i>hrn</i></dt>
+<dd>
+the human readable name of the authority to create.</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.Hierarchy.get_auth_ticket-method' name='hierarchy.Hierarchy.get_auth_ticket-method'><b>get_auth_ticket(hrn)</b></a> [<a href='#hierarchy.Hierarchy.get_auth_ticket-method'>#</a>]</dt>
+<dd>
+<p>Retrieve an authority ticket. An authority ticket is not actually a
+redeemable ticket, but only serves the purpose of being included as the
+parent of another ticket, in order to provide a chain of authentication
+for a ticket.
+
+This looks almost the same as get_auth_cred, but works for tickets
+XXX does similarity imply there should be more code re-use?</p>
+<dl>
+<dt><i>hrn</i></dt>
+<dd>
+the human readable name of the authority</dd>
+</dl><br />
+</dd>
+<dt><a id='hierarchy.Hierarchy.refresh_gid-method' name='hierarchy.Hierarchy.refresh_gid-method'><b>refresh_gid(gid, hrn=None, uuid=None, pubkey=None)</b></a> [<a href='#hierarchy.Hierarchy.refresh_gid-method'>#</a>]</dt>
+<dd>
+<p>Refresh a GID. The primary use of this function is to refresh the
+the expiration time of the GID. It may also be used to change the HRN,
+UUID, or Public key of the GID.</p>
+<dl>
+<dt><i>gid</i></dt>
+<dd>
+the GID to refresh</dd>
+<dt><i>hrn</i></dt>
+<dd>
+if !=None, change the hrn</dd>
+<dt><i>uuid</i></dt>
+<dd>
+if !=None, change the uuid</dd>
+<dt><i>pubkey</i></dt>
+<dd>
+if !=None, change the public key</dd>
+</dl><br />
+</dd>
+</dl>
+</body></html>

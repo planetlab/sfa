@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The record Module</title>
+</head>
+<body>
+<h1>The record Module</h1>
+<p>Implements support for geni records
+
+TODO: Use existing PLC database methods? or keep this separate?</p>
+<dl>
+<dt><b>GeniRecord(name=None, gid=None, type=None, pointer=None, dict=None)</b> (class) [<a href='#record.GeniRecord-class'>#</a>]</dt>
+<dd>
+<p>The GeniRecord class implements a Geni Record.</p>
+<p>For more information about this class, see <a href='#record.GeniRecord-class'><i>The GeniRecord Class</i></a>.</p>
+</dd>
+</dl>
+<h2><a id='record.GeniRecord-class' name='record.GeniRecord-class'>The GeniRecord Class</a></h2>
+<dl>
+<dt><b>GeniRecord(name=None, gid=None, type=None, pointer=None, dict=None)</b> (class) [<a href='#record.GeniRecord-class'>#</a>]</dt>
+<dd>
+<p>The GeniRecord class implements a Geni Record. A GeniRecord is a tuple
+(Name, GID, Type, Info).
+
+Name specifies the HRN of the object
+GID is the GID of the object
+Type is user | sa | ma | slice | component
+
+Info is comprised of the following sub-fields
+       pointer = a pointer to the record in the PL database
+       pl_info = planetlab-specific info (when talking to client)
+       geni_info = geni-specific info (when talking to client)
+
+The pointer is interpreted depending on the type of the record. For example,
+if the type==&quot;user&quot;, then pointer is assumed to be a person_id that indexes
+into the persons table.
+
+A given HRN may have more than one record, provided that the records are
+of different types. For example, planetlab.us.arizona may have both an SA
+and a MA record, but cannot have two SA records.</p>
+</dd>
+<dt><a id='record.GeniRecord.as_dict-method' name='record.GeniRecord.as_dict-method'><b>as_dict()</b></a> [<a href='#record.GeniRecord.as_dict-method'>#</a>]</dt>
+<dd>
+<p>Return the record in the form of a dictionary</p>
+</dd>
+<dt><a id='record.GeniRecord.dump-method' name='record.GeniRecord.dump-method'><b>dump(dump_parents=False)</b></a> [<a href='#record.GeniRecord.dump-method'>#</a>]</dt>
+<dd>
+<p>Dump the record to stdout</p>
+<dl>
+<dt><i>dump_parents</i></dt>
+<dd>
+if true, then the parents of the GID will be dumped</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.get_field_names-method' name='record.GeniRecord.get_field_names-method'><b>get_field_names()</b></a> [<a href='#record.GeniRecord.get_field_names-method'>#</a>]</dt>
+<dd>
+<p>Returns a list of field names in this record. pl_info, geni_info are not
+included because they are not part of the record that is stored in the
+database, but are rather computed values from other entities</p>
+</dd>
+<dt><a id='record.GeniRecord.get_field_value_string-method' name='record.GeniRecord.get_field_value_string-method'><b>get_field_value_string(fieldname)</b></a> [<a href='#record.GeniRecord.get_field_value_string-method'>#</a>]</dt>
+<dd>
+<p>Given a field name (&quot;name&quot;, &quot;gid&quot;, ...) return the value of that field.</p>
+<dl>
+<dt><i>name</i></dt>
+<dd>
+is the name of field to be returned</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.get_field_value_strings-method' name='record.GeniRecord.get_field_value_strings-method'><b>get_field_value_strings(fieldnames)</b></a> [<a href='#record.GeniRecord.get_field_value_strings-method'>#</a>]</dt>
+<dd>
+<p>Given a list of field names, return a list of values for those fields.</p>
+<dl>
+<dt><i>fieldnames</i></dt>
+<dd>
+is a list of field names</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.get_geni_info-method' name='record.GeniRecord.get_geni_info-method'><b>get_geni_info()</b></a> [<a href='#record.GeniRecord.get_geni_info-method'>#</a>]</dt>
+<dd>
+<p>Return the geni_info of the record, or an empty dictionary if none exists</p>
+</dd>
+<dt><a id='record.GeniRecord.get_gid_object-method' name='record.GeniRecord.get_gid_object-method'><b>get_gid_object()</b></a> [<a href='#record.GeniRecord.get_gid_object-method'>#</a>]</dt>
+<dd>
+<p>Return the GID of the record, in the form of a GID object
+TODO: not the best name for the function, because we have things called
+gidObjects in the Cred</p>
+</dd>
+<dt><a id='record.GeniRecord.get_key-method' name='record.GeniRecord.get_key-method'><b>get_key()</b></a> [<a href='#record.GeniRecord.get_key-method'>#</a>]</dt>
+<dd>
+<p>Return a key that uniquely identifies this record among all records in
+Geni. This key is used to uniquely identify the record in the Geni
+database.</p>
+</dd>
+<dt><a id='record.GeniRecord.get_name-method' name='record.GeniRecord.get_name-method'><b>get_name()</b></a> [<a href='#record.GeniRecord.get_name-method'>#</a>]</dt>
+<dd>
+<p>Return the name (HRN) of the record</p>
+</dd>
+<dt><a id='record.GeniRecord.get_pl_info-method' name='record.GeniRecord.get_pl_info-method'><b>get_pl_info()</b></a> [<a href='#record.GeniRecord.get_pl_info-method'>#</a>]</dt>
+<dd>
+<p>Return the pl_info of the record, or an empty dictionary if none exists</p>
+</dd>
+<dt><a id='record.GeniRecord.get_pointer-method' name='record.GeniRecord.get_pointer-method'><b>get_pointer()</b></a> [<a href='#record.GeniRecord.get_pointer-method'>#</a>]</dt>
+<dd>
+<p>Return the pointer of the record. The pointer is an integer that may be
+used to look up the record in the PLC database. The evaluation of pointer
+depends on the type of the record</p>
+</dd>
+<dt><a id='record.GeniRecord.get_type-method' name='record.GeniRecord.get_type-method'><b>get_type()</b></a> [<a href='#record.GeniRecord.get_type-method'>#</a>]</dt>
+<dd>
+<p>Return the type of the record</p>
+</dd>
+<dt><a id='record.GeniRecord.set_geni_info-method' name='record.GeniRecord.set_geni_info-method'><b>set_geni_info(geni_info)</b></a> [<a href='#record.GeniRecord.set_geni_info-method'>#</a>]</dt>
+<dd>
+<p>Set the geni info the record</p>
+<dl>
+<dt><i>geni_info</i></dt>
+<dd>
+is a dictionary containing geni info</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.set_gid-method' name='record.GeniRecord.set_gid-method'><b>set_gid(gid)</b></a> [<a href='#record.GeniRecord.set_gid-method'>#</a>]</dt>
+<dd>
+<p>Set the GID of the record</p>
+<dl>
+<dt><i>gid</i></dt>
+<dd>
+is a GID object or the string representation of a GID object</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.set_name-method' name='record.GeniRecord.set_name-method'><b>set_name(name)</b></a> [<a href='#record.GeniRecord.set_name-method'>#</a>]</dt>
+<dd>
+<p>Set the name of the record</p>
+<dl>
+<dt><i>name</i></dt>
+<dd>
+is a string containing the HRN</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.set_pl_info-method' name='record.GeniRecord.set_pl_info-method'><b>set_pl_info(pl_info)</b></a> [<a href='#record.GeniRecord.set_pl_info-method'>#</a>]</dt>
+<dd>
+<p>Set the PLC info of the record</p>
+<dl>
+<dt><i>pl_info</i></dt>
+<dd>
+is a dictionary containing planetlab info</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.set_pointer-method' name='record.GeniRecord.set_pointer-method'><b>set_pointer(pointer)</b></a> [<a href='#record.GeniRecord.set_pointer-method'>#</a>]</dt>
+<dd>
+<p>Set the pointer of the record</p>
+<dl>
+<dt><i>pointer</i></dt>
+<dd>
+is an integer containing the ID of a PLC record</dd>
+</dl><br />
+</dd>
+<dt><a id='record.GeniRecord.set_type-method' name='record.GeniRecord.set_type-method'><b>set_type(type)</b></a> [<a href='#record.GeniRecord.set_type-method'>#</a>]</dt>
+<dd>
+<p>Set the type of the record</p>
+<dl>
+<dt><i>type</i></dt>
+<dd>
+is a string: user | sa | ma | slice | component</dd>
+</dl><br />
+</dd>
+</dl>
+</body></html>

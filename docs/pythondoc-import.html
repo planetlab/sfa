@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The import Module</title>
+</head>
+<body>
+<h1>The import Module</h1>
+<p>Import PLC records into the Geni database. It is indended that this tool be
+run once to create Geni records that reflect the current state of the
+planetlab database.
+
+The import tool assumes that the existing PLC hierarchy should all be part
+of &quot;planetlab.us&quot; (see the root_auth and level1_auth variables below).
+
+Public keys are extracted from the users' SSH keys automatically and used to
+create GIDs. This is relatively experimental as a custom tool had to be
+written to perform conversion from SSH to OpenSSL format. It only supports
+RSA keys at this time, not DSA keys.</p>
+<dl>
+<dt><a id='import.root_auth-variable' name='import.root_auth-variable'><b>root_auth</b></a> (variable) [<a href='#import.root_auth-variable'>#</a>]</dt>
+<dd>
+<p>Two authorities are specified: the root authority and the level1 authority.</p>
+</dd>
+</dl>
+</body></html>
