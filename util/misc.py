@@ -20,7 +20,12 @@ def hrn_to_pl_slicename(hrn):
     parts = hrn.split(".")
     return parts[-2] + "_" + parts[-1]
 
+# assuming hrn is the hrn of an authority, return the plc authority name
 def hrn_to_pl_authname(hrn):
     parts = hrn.split(".")
     return parts[-1]
+
+# assuming hrn is the hrn of an authority, return the plc login_base
+def hrn_to_pl_login_base(hrn):
+    return hrn_to_pl_authname(hrn)
 

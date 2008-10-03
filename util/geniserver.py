@@ -1,11 +1,10 @@
-# geniserver.py
-#
-# geniwrapper server
-#
-# implements a general-purpose server layer for geni. This should be usable on
-# the registry, component, or other interfaces.
+##
+# This module implements a general-purpose server layer for geni.
+# The same basic server should be usable on the registry, component, or
+# other interfaces.
 #
 # TODO: investigate ways to combine this with existing PLC server?
+##
 
 import SimpleXMLRPCServer
 
@@ -23,9 +22,8 @@ from credential import *
 import socket, os
 from OpenSSL import SSL
 
-# verify_callback
-#
-# verification callback for pyOpenSSL. We do our own checking of keys because
+##
+# Verification callback for pyOpenSSL. We do our own checking of keys because
 # we have our own authentication spec. Thus we disable several of the normal
 # prohibitions that OpenSSL places on certificates
 
@@ -74,9 +72,8 @@ def verify_callback(conn, x509, err, depth, preverify):
 
     return 0
 
-# SecureXMLServer
-#
-# taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
+##
+# Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
 
 class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
     def __init__(self, server_address, HandlerClass, key_file, cert_file, logRequests=True):
@@ -112,8 +109,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
             type, value, tb = sys.exc_info()
             raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
 
-# SecureXMLRpcRequestHandler
-#
+##
 # taken from the web (XXX find reference). Implents HTTPS xmlrpc request handler
 
 class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
@@ -160,10 +156,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             self.wfile.flush()
             self.connection.shutdown() # Modified here!
 
-# GeniServer
-#
-# Class for a general purpose geni server.
-#
+##
 # Implements an HTTPS XML-RPC server. Generally it is expected that GENI
 # functions will take a credential string, which is passed to
 # decode_authentication. Decode_authentication() will verify the validity of
@@ -171,12 +164,27 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 # GID supplied in the credential.
 
 class GeniServer():
+
+    ##
+    # Create a new GeniServer object.
+    #
+    # @param ip the ip address to listen on
+    # @param port the port to listen on
+    # @param key_file private key filename of registry
+    # @param cert_file certificate filename containing public key (could be a GID file)
+
     def __init__(self, ip, port, key_file, cert_file):
         self.key = Keypair(filename = key_file)
         self.cert = Certificate(filename = cert_file)
         self.server = SecureXMLRPCServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
         self.trusted_cert_list = None
         self.register_functions()
+
+    ##
+    # Decode the credential string that was submitted by the caller. Several
+    # checks are performed to ensure that the credential is valid, and that the
+    # callerGID included in the credential matches the caller that is
+    # connected to the HTTPS connection.
 
     def decode_authentication(self, cred_string, operation):
         self.client_cred = Credential(string = cred_string)
@@ -203,14 +211,24 @@ class GeniServer():
             if self.object_gid:
                 self.object_gid.verify_chain(self.trusted_cert_list)
 
-    # register_functions override this to add more functions
+    ##
+    # Register functions that will be served by the XMLRPC server. This
+    # function should be overrided by each descendant class.
+
     def register_functions(self):
         self.server.register_function(self.noop)
+
+    ##
+    # Sample no-op server function. The no-op function decodes the credential
+    # that was passed to it.
 
     def noop(self, cred, anything):
         self.decode_authentication(cred)
 
         return anything
+
+    ##
+    # Execute the server, serving requests forever. 
 
     def run(self):
         self.server.serve_forever()

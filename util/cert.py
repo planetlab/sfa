@@ -193,13 +193,6 @@ class Certificate:
        self.cert = x509
 
    ##
-   # Return another instance of the same class.
-   # XXX: probably will be deleted, can use cls() function instead
-
-   def create_similar(self):
-       return Certificate()
-
-   ##
    # Load the certificate from a string
 
    def load_from_string(self, string):
@@ -211,7 +204,7 @@ class Certificate:
        # if there are more certs, then create a parent and let the parent load
        # itself from the remainder of the string
        if len(parts) > 1:
-           self.parent = self.create_similar()
+           self.parent = self.__class__()
            self.parent.load_from_string(parts[1])
 
    ##
@@ -429,7 +422,9 @@ class Certificate:
         return self.parent
 
    ##
-   # Verify a chain of certificates.
+   # Verification examines a chain of certificates to ensure that each parent
+   # signs the child, and that some certificate in the chain is signed by a
+   # trusted certificate.
    #
    # Verification is a basic recursion: <pre>
    #     if this_certificate was signed by trusted_certs:

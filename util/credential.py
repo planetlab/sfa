@@ -1,9 +1,9 @@
 ##
-#
 # Implements Geni Credentials
 #
 # Credentials are layered on top of certificates, and are essentially a
 # certificate that stores a tuple of parameters.
+##
 
 from cert import *
 from rights import *
@@ -189,6 +189,8 @@ class Credential(Certificate):
     # addition to the checks for ordinary certificates, verification also
     # ensures that the delegate bit was set by each parent in the chain. If
     # a delegate bit was not set, then an exception is thrown.
+    #
+    # Each credential must be a subset of the rights of the parent.
 
     def verify_chain(self, trusted_certs = None):
         # do the normal certificate verification stuff
