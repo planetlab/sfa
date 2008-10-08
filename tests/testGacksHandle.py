@@ -46,21 +46,70 @@ class TestGacksHandle(unittest.TestCase):
        self.assertEqual(h.timeStart, h2.timeStart)
        self.assertEqual(h.timeStop, h2.timeStop)
 
-   def testSplit(self):
+   def testSplitUnit(self):
        h = GacksHandle("cpu", 10, 15, 20, 25)
-       (h1, h2) = h.split(12,23)
+       parts = h.split_unit(12)
+       h1 = parts[0]
+       h2 = parts[1]
 
        self.assertEqual(h1.id, "cpu")
        self.assertEqual(h1.unitStart, 10)
        self.assertEqual(h1.unitStop, 12)
        self.assertEqual(h1.timeStart, 20)
-       self.assertEqual(h1.timeStop, 23)
+       self.assertEqual(h1.timeStop, 25)
 
        self.assertEqual(h2.id, "cpu")
        self.assertEqual(h2.unitStart, 12)
        self.assertEqual(h2.unitStop, 15)
+       self.assertEqual(h2.timeStart, 20)
+       self.assertEqual(h2.timeStop, 25)
+
+   def testSplitTime(self):
+       h = GacksHandle("cpu", 10, 15, 20, 25)
+       parts = h.split_time(23)
+       h1 = parts[0]
+       h2 = parts[1]
+
+       self.assertEqual(h1.id, "cpu")
+       self.assertEqual(h1.unitStart, 10)
+       self.assertEqual(h1.unitStop, 15)
+       self.assertEqual(h1.timeStart, 20)
+       self.assertEqual(h1.timeStop, 23)
+
+       self.assertEqual(h2.id, "cpu")
+       self.assertEqual(h2.unitStart, 10)
+       self.assertEqual(h2.unitStop, 15)
        self.assertEqual(h2.timeStart, 23)
        self.assertEqual(h2.timeStop, 25)
+
+   def testSplitSubset(self):
+       h = GacksHandle("cpu", 10, 15, 20, 25)
+
+       # split out a subset right in the middle
+       parts = h.clone().split_subset(12, 13, 22, 23)
+
+       self.assertEqual(len(parts), 5)
+       self.assert_(find_handle_in_list(parts, 10, 12, 20, 25)) # h1
+       self.assert_(find_handle_in_list(parts, 12, 13, 20, 22)) # h2
+       self.assert_(find_handle_in_list(parts, 12, 13, 23, 25)) # h3
+       self.assert_(find_handle_in_list(parts, 13, 15, 20, 25)) # h4
+       self.assert_(find_handle_in_list(parts, 12, 13, 22, 23)) # s
+
+       # split out a subset in the top left corner
+       parts = h.clone().split_subset(10, 13, 20, 23)
+
+       self.assertEqual(len(parts), 3)
+       self.assert_(find_handle_in_list(parts, 10, 13, 23, 25)) # h3
+       self.assert_(find_handle_in_list(parts, 13, 15, 20, 25)) # h4
+       self.assert_(find_handle_in_list(parts, 10, 13, 20, 23)) # s
+
+       # split out a subset in the bottom right corner
+       parts = h.clone().split_subset(12, 15, 22, 25)
+
+       self.assertEqual(len(parts), 3)
+       self.assert_(find_handle_in_list(parts, 10, 12, 20, 25)) # h1
+       self.assert_(find_handle_in_list(parts, 12, 15, 20, 22)) # h2
+       self.assert_(find_handle_in_list(parts, 12, 15, 22, 25)) # s
 
 class TestGacksRecord(unittest.TestCase):
    def setUp(self):
