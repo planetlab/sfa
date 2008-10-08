@@ -2,7 +2,7 @@ import unittest
 import xmlrpclib
 from cert import *
 
-class TestCert(unittest.TestCase):
+class TestKeypair(unittest.TestCase):
    def setUp(self):
       pass
 

@@ -185,14 +185,14 @@ class TestCert(unittest.TestCase):
       self.assert_(cert2.is_signed_by_cert(cert1))
       self.assert_(cert3.is_signed_by_cert(cert2))
 
-      self.assert_(cert3.verify_chain([cert_root]))
+      cert3.verify_chain([cert_root])
 
       # now save the chain to a string and load it into a new certificate
       str_chain = cert3.save_to_string(save_parents=True)
       cert4 = Certificate(string = str_chain)
 
       # verify the newly loaded chain still verifies
-      self.assert_(cert4.verify_chain([cert_root]))
+      cert4.verify_chain([cert_root])
 
       # verify the parentage
       self.assertEqual(cert4.get_parent().get_subject(), "two")
