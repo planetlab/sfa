@@ -24,6 +24,27 @@ import sys
 
 INFINITY = "inf" #sys.maxint
 
+def is_lesser_equal(x, y):
+    if x==y:
+        return True
+    if x==INFINITY:
+        return False
+    if y==INFINITY:
+        return True
+    return (x<y)
+
+def is_greater_equal(x, y):
+    if x==y:
+        return True
+    if y==INFINITY:
+        return False
+    if x==INFINITY:
+        return True
+    return (x>y)
+
+def interval_contains(start1, stop1, start2, stop2):
+    return is_lesser_equal(start1, start2) and is_greater_equal(stop1, stop2)
+
 class GacksHandle:
     def __init__(self, id=None, unitStart=0, unitStop=INFINITY, timeStart=0, timeStop=INFINITY, string=None):
         self.id = id
@@ -84,20 +105,131 @@ class GacksHandle:
         return GacksHandle(self.id, self.unitStart, self.unitStop,
                            self.timeStart, self.timeStop)
 
-    def split(self, unit=None, time=None):
+    def split_subset(self, suStart, suStop, stStart, stStop):
+        # an arbitrary rectangle can have a subset removed by slicing it into
+        # five pieces:
+        #    h1 = top
+        #    h2 = left
+        #    h3 = right
+        #    h4 = bottom
+        #    s = subset (middle) that was sliced out
+
         h1 = self.clone()
         h2 = self.clone()
+        h3 = self.clone()
+        h4 = self.clone()
+        s = self.clone()
 
-        if unit:
-            h1.unitStop = unit
-            h2.unitStart = unit
+        if not suStart:
+            suStart = self.unitStart
+        if not suStop:
+            suStop = self.unitStop
+        if not stStart:
+            stStart = self.timeStart
+        if not stStop:
+            stStop = self.timeStop
 
-        if time:
-            h1.timeStop = time
-            h2.timeStart = time
+        h1.unitStop = suStart
 
-        return (h1, h2)
+        h2.unitStart = suStart
+        h2.unitStop = suStop
+        h2.timeStop = stStart
 
+        h3.unitStart = suStart
+        h3.unitStop = suStop
+        h3.timeStart = stStop
+
+        h4.unitStart = suStop
+
+        s.unitStart = suStart
+        s.unitStop = suStop
+        s.timeStart = stStart
+        s.timeStop = stStop
+
+        results = [s, h1, h2, h3, h4]
+        valid_results = []
+        for result in results:
+            if result.get_quantity()>0 and result.get_duration()>0:
+                valid_results.append(result)
+
+        return valid_results
+
+    def split_subset_old(self, uStart, uStop, tStart, tStop):
+        results = [self]
+        if uStart:
+            results1 = []
+            for i in results:
+                results1.extend(i.split_unit(uStart))
+            results = results1
+        if uStop:
+            results1 = []
+            for i in results:
+                results1.extend(i.split_unit(uStop))
+            results = results1
+        if tStart:
+            results1 = []
+            for i in results:
+                results1.extend(i.split_time(tStart))
+            results = results1
+        if tStop:
+            results1 = []
+            for i in results:
+                results1.extend(i.split_time(tStop))
+            results = results1
+        return results
+
+    def split_unit(self, unit):
+        if is_lesser_equal(unit, self.unitStart) or is_greater_equal(unit, self.unitStop):
+            return [self]
+
+        h2 = self.clone()
+
+        self.unitStop = unit
+        h2.unitStart = unit
+
+        return [self, h2]
+
+    def split_time(self, time):
+        if is_lesser_equal(time, self.timeStart) or is_greater_equal(time, self.timeStop):
+            return [self]
+
+        h2 = self.clone()
+
+        self.timeStop = time
+        h2.timeStart = time
+
+        return [self, h2]
+
+    def is_superset(self, handle):
+        if self.id != handle.id:
+            return False
+
+        if not interval_contains(self.timeStart, self.timeStop, handle.timeStart, handle.timeStop):
+            return False
+
+        if not interval_contains(self.unitStart, self.unitStop, self.timeStart, self.timeStop):
+            return False
+
+        return True
+
+    def is_proper_superset(self, handle):
+        return self.is_superset(handle) and (not self.is_same_cell(handle))
+
+    def is_same_cell(self, handle):
+        return (self.id == handle.id) and \
+               (self.unitStart == handle.unitStart) and \
+               (self.unitStop == handle.unitStop) and \
+               (self.timeStart == handle.timeStart) and \
+               (self.timeStop == handle.timeStop)
+
+    def is_same(self, handle):
+        return self.is_same_cell(handle)
+
+    def is_in_list(self, handle_list):
+        for handle in handle_list:
+            if is_same(self, handle):
+                return True
+        return False
 
 class GacksRecord(GacksHandle):
     def __init__(self, id=None, unitStart=0, unitStop=INFINITY, timeStart=0, timeStop=INFINITY, allocatorHRNs=[], consumerHRN=None):
@@ -140,7 +272,10 @@ class GacksRecord(GacksHandle):
         self.allocatorHRNs.append(allocatorHRN)
 
     def get_allocators(self):
-        return self.allocatorHRNs[:]
+        return self.allocatorHRNs
+
+    def contains_allocator(self, allocatorHRN):
+        return (allocatorHRN in self.allocatorHRNs)
 
     def set_consumer(self, consumerHRN):
         self.consumerHRN = consumerHRN
@@ -148,4 +283,43 @@ class GacksRecord(GacksHandle):
     def get_consumer(self):
         return self.consumerHRN
 
+def strings_to_handles(strings):
 
+    # if given a newline-separated list of strings, then expand it into a list
+    if isinstance(strings, str):
+        expanded_strings = strings.split("\n")
+    elif isinstance(strings, list):
+        expanded_strings = strings
+    else:
+        raise TypeError
+
+    # eliminate any blank strings from the list
+    non_blank_strings = []
+    for string in expanded_strings:
+        if string:
+            non_blank_strings.append(string)
+
+    handles = []
+    for line in non_blank_strings:
+        handle = GacksHandle(string = rspec)
+        handles.append(handle)
+
+    return handles
+
+def handles_to_strings(handles):
+    strings = []
+    for handle in handles:
+        strings.append(handle.as_string())
+    return strings
+
+def rspec_to_handles(rspec):
+    return strings_to_handles(rspec)
+
+def find_handle_in_list(list, uStart, uStop, tStart, tStop):
+    for item in list:
+        if item.unitStart == uStart and \
+           item.unitStop == uStop and \
+           item.timeStart == tStart and \
+           item.timeStop == tStop:
+            return item
+    return None
