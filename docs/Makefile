@@ -6,3 +6,5 @@ doc:
 
 	pythondoc.py ../registry/registry.py ../registry/import.py \
                      ../registry/nuke.py
+
+	pythondoc.py ../component/component.py
