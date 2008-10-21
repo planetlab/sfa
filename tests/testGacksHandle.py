@@ -111,6 +111,18 @@ class TestGacksHandle(unittest.TestCase):
        self.assert_(find_handle_in_list(parts, 12, 15, 20, 22)) # h2
        self.assert_(find_handle_in_list(parts, 12, 15, 22, 25)) # s
 
+   def testDict(self):
+       h = GacksHandle("cpu", 10, 15, 20, 25)
+       d = h.as_dict()
+
+       h2 = GacksHandle(dict = d)
+       
+       self.assertEqual(h.id, h2.id)
+       self.assertEqual(h.unitStart, h2.unitStart)
+       self.assertEqual(h.unitStop, h2.unitStop)
+       self.assertEqual(h.timeStart, h2.timeStart)
+       self.assertEqual(h.timeStop, h2.timeStop)
+
 class TestGacksRecord(unittest.TestCase):
    def setUp(self):
        pass
@@ -166,6 +178,20 @@ class TestGacksRecord(unittest.TestCase):
    def testGetConsumer(self):
        r = GacksRecord("cpu", 10, 15, 20, 25, ["foo","bar"], "slice1")
        self.assertEqual(r.get_consumer(), "slice1")
+
+   def testTestDict(self):
+       r = GacksRecord("cpu", 10, 15, 20, 25, ["foo","bar"], "slice1")
+       d = r.as_dict()
+
+       r2 = GacksRecord(dict=d)
+
+       self.assertEqual(r.id, r2.id)
+       self.assertEqual(r.unitStart, r2.unitStart)
+       self.assertEqual(r.unitStop, r2.unitStop)
+       self.assertEqual(r.timeStart, r2.timeStart)
+       self.assertEqual(r.timeStop, r2.timeStop)
+       self.assertEqual(r.allocatorHRNs, r2.allocatorHRNs)
+       self.assertEqual(r.consumerHRN, r2.consumerHRN)
 
 
 
