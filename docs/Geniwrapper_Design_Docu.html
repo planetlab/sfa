@@ -463,14 +463,10 @@ ol.writely-toc-subheading {
 <div>
   The purpose of Geniwrapper is to provide a Geni-like interface around the
   existing planetlab infrastructure. The existing infrastructure consists of two
-  parts: planetlab central (PLC) and planetlab nodes. Geni consists of the
-  Registry, Slice, and Component Management interfaces.&nbsp;PLC and Planetlab
-  Nodes can be mapped into the Geni Registry and Geni Component
-  interfaces&nbsp;respectively. However, due to the nature of
-  planetlab,&nbsp;the&nbsp;Geni slice interface&nbsp;overlaps with PLC and
-  planetlab nodes. For example, PLC takes an active role in managing state on
-  planetlab nodes, and therefore some Geni component state exists on PLC,
-  leading to some slice interface APIs to exist on PLC.
+  parts: planetlab central (PLC) and planetlab nodes. Geni defines three 
+  interfaces: Registry, Slice, and Component Management.&nbsp; A part of the wrapper is co-located with PLC (it exports the Registry and Slice interfaces),
+  and a part of the wrapper is co-located with each node (it exports the Slice
+  and Management interfaces).
 </div>
 <div>
   &nbsp;
@@ -550,8 +546,7 @@ ol.writely-toc-subheading {
   between the&nbsp;plc wrapper and PLC uses the PLCAPI interface and as such,
   the&nbsp;plc wrapper can be run on a separate machine for ease of development.
   In addition to the Geni registry operations (register, update, ...),
-  the&nbsp;plc wrapper also implements slice operations, such as GetTicket, that
-  must be located on PLC due to SFA engineering decisions.
+  the&nbsp;plc wrapper also implements slice operations, such as GetTicket.
 </div>
 <div>
   &nbsp;
@@ -563,7 +558,7 @@ ol.writely-toc-subheading {
   &nbsp;
 </div>
 <div>
-  TODO: Slice interface shall be implemented in&nbsp;plc wrapper.
+  TODO: Most of the slice interface is yet to be implemented in&nbsp;plc wrapper.
 </div>
 <div>
   &nbsp;
@@ -578,8 +573,7 @@ ol.writely-toc-subheading {
   The component wrapper is located on planetlab nodes. It implements
   the&nbsp;slice interface, and the component management interface. Due to SFA
   engineering decisions, some&nbsp;slice operations (i.e. GetTicket) are
-  implemented in the&nbsp;plc wrapper&nbsp;and are unavaiable on
-  the&nbsp;component wrapper.
+  not supported in the&nbsp;component wrapper.
 </div>
 <div>
   &nbsp;
@@ -1084,7 +1078,7 @@ planetlab.us.princeton.foo.
   &nbsp;
 </div>
 <div>
-  Tickets are created by invoking GetTicket() on the Registry. The slice
+  Tickets are created by invoking GetTicket() on the plc wrapper. The slice
   attributes and rspec are taken from the planetlab slice database and represent
   the current state of the slice. As of yet, tickets do not include any concept
   of time -- a ticket represents the state of the slice at the current time
@@ -1094,7 +1088,7 @@ planetlab.us.princeton.foo.
   &nbsp;
 </div>
 <div>
-  Tickets are redeemed by invoking RedeemTicket() on the Registry. The
+  Tickets are redeemed by invoking RedeemTicket() on the slice interface. The
   attributes and spec are combined back into a planetlab slice record and handed
   off to the node manager.
 </div>
@@ -1513,9 +1507,9 @@ planetlab.us.princeton.foo.
 </div>
 <div>
   The design of the component differs from the plc wrapper in the respect that
-  the component wrapper must be located physically on the planetlab node that it
-  is responsible for. The component wrapper interacts directly with portions of
-  the node manager code on the node.
+  the component wrapper must be run in the same domain (VM) as the NM for the
+  node it is responsible for. That is, the component wrapper directly calls
+  the local node manager.
 </div>
 <div>
   &nbsp;
@@ -1543,11 +1537,10 @@ planetlab.us.princeton.foo.
   &nbsp;
 </div>
 <div>
-  The ticket interface is split between the PLC wrapper and the Component
-  wrapper. This is due to the SFA engineering decisions, specifically&nbsp;that
-  the authoritative copy of planetlab state is stored on PLC and only cached on
-  the components. Thus, GetTicket() is implemented on the Registry, and
-  RedeemTicket() is implemented on the component. Attempting to call GetTicket()
+  Mainpulating tickets is split between the PLC wrapper and the Component wrapper.
+  Specifically,&nbsp;the authoritative copy of planetlab state is stored on PLC and only cached on
+  the components. Thus, GetTicket() is implemented by the plc wrapper, and
+  RedeemTicket() is implemented by the component wrapper. Attempting to call GetTicket()
   on a component will fail.<br>
   <br>
   InstantiateSlice is not implemented, as that operation is a combination of
