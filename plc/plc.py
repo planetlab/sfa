@@ -1,11 +1,11 @@
 ##
-# Geni Registry Wrapper
+# Geni PLC Wrapper
 #
-# This wrapper implements the Geni Registry.
+# This wrapper implements the Geni Registry and Slice Interfaces.
 #
 # There are several items that need to be done before starting the registry.
 #
-# 1) Update util/config.py to match the parameters of your PLC installation. 
+# 1) Update util/config.py to match the parameters of your PLC installation.
 #
 # 2) Import the existing planetlab database, creating the
 # appropriate geni records. This is done by running the "import.py" tool.
@@ -143,8 +143,13 @@ class Registry(GeniServer):
         self.server.register_function(self.update)
         self.server.register_function(self.list)
         self.server.register_function(self.resolve)
-        # component interface
+        
+        # slice interface
         self.server.register_function(self.get_ticket)
+        self.server.register_function(self.start_slice)
+        self.server.register_function(self.stop_slice)
+        self.server.register_function(self.reset_slice)
+        self.server.register_function(self.delete_slice)
 
     ##
     # Given an authority name, return the information for that authority. This
@@ -823,7 +828,7 @@ class Registry(GeniServer):
         return gid.save_to_string(save_parents=True)
 
     # ------------------------------------------------------------------------
-    # Component Interface
+    # Slice Interface
 
     ##
     # Convert a PLC record into the slice information that will be stored in
@@ -929,6 +934,58 @@ class Registry(GeniServer):
         new_ticket.sign()
 
         return new_ticket.save_to_string(save_parents=True)
+
+    ##
+    # GENI API: stop_slice
+    #
+    # Stop a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
+
+    def stop_slice(self, cred_str):
+        self.decode_authentication(cred_str, "stopslice")
+        slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
+
+    ##
+    # GENI API: start_slice
+    #
+    # Start a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
+
+    def start_slice(self, cred_str):
+        self.decode_authentication(cred_str, "startslice")
+        slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
+        # TODO: start the slice
+
+    ##
+    # GENI API: reset_slice
+    #
+    # Reset a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
+
+    def reset_slice(self, cred_str):
+        self.decode_authentication(cred_str, "resetslice")
+        slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
+        # TODO: reset the slice
+
+    ##
+    # GENI API: delete_slice
+    #
+    # Delete a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
+
+    def delete_slice(self, cred_str):
+        self.decode_authentication(cred_str, "deleteslice")
+        slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
+        # TODO: delete the slice
+
 
 
 if __name__ == "__main__":
