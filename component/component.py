@@ -1,3 +1,10 @@
+##
+# Geni Component Wrapper
+#
+# This wrapper implements the Geni Slice and Mgmt Interfaces on a node.
+#
+##
+
 import tempfile
 import os
 
@@ -17,6 +24,9 @@ import database
 import sm
 import database
 
+##
+# ComponentManager is a GeniServer that serves slice and
+# management operations at a node.
 
 class ComponentManager(GeniServer):
     def __init__(self, ip, port, key_file, cert_file):

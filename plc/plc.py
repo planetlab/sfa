@@ -1,9 +1,10 @@
 ##
 # Geni PLC Wrapper
 #
-# This wrapper implements the Geni Registry and Slice Interfaces.
+# This wrapper implements the Geni Registry and Slice Interfaces on PLC.
 #
-# There are several items that need to be done before starting the registry.
+# There are several items that need to be done before starting the wrapper
+# server.
 #
 # 1) Update util/config.py to match the parameters of your PLC installation.
 #
@@ -88,10 +89,7 @@ def geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields):
             pl_fields["is_public"] = True
 
 ##
-# Registry is a GeniServer that serves registry requests. It also serves
-# component and slice operations that are implemented on the registry
-# due to SFA engineering decisions
-#
+# Registry is a GeniServer that serves registry and slice operations at PLC.
 
 class Registry(GeniServer):
     ##
@@ -829,6 +827,9 @@ class Registry(GeniServer):
 
     # ------------------------------------------------------------------------
     # Slice Interface
+    #
+    # All but get_ticket are currently stubbed out
+    #
 
     ##
     # Convert a PLC record into the slice information that will be stored in
@@ -884,8 +885,8 @@ class Registry(GeniServer):
     ##
     # GENI API: get_ticket
     #
-    # Retrieve a ticket. This operation is currently implemented on the
-    # registry (see SFA, engineering decisions), and is not implemented on
+    # Retrieve a ticket. This operation is currently implemented on PLC
+    # only (see SFA, engineering decisions); it is not implemented on
     # components.
     #
     # The ticket is filled in with information from the PLC database. This
@@ -946,6 +947,7 @@ class Registry(GeniServer):
     def stop_slice(self, cred_str):
         self.decode_authentication(cred_str, "stopslice")
         slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
+        # TODO: stop the slice
 
     ##
     # GENI API: start_slice
