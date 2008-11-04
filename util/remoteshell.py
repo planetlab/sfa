@@ -27,7 +27,8 @@ class RemoteShell:
 
         if not (key in self.servers):
             server = xmlrpclib.Server(url, verbose = 0, allow_none=True)
-            server.AdmAuthCheck(auth_opts)
+            #server.AdmAuthCheck(auth_opts)
+            server.AuthCheck(auth_opts)
             self.servers[key] = server
 
         server = self.servers[key]
@@ -36,7 +37,8 @@ class RemoteShell:
         for arg in args:
             arglist.append(repr(arg))
 
-        result = eval("server." + name + "(" + ",".join(arglist) + ")")
+        str = "server." + name + "(" + ",".join(arglist) + ")"
+        result = eval(str)
 
         return result
 
