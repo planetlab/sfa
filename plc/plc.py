@@ -241,6 +241,7 @@ class Registry(GeniServer):
         # for example, the top level authority records which are
         # authorities, but not PL "sites"
         if pointer == -1:
+            record.set_pl_info({})
             return
 
         if (type == "sa") or (type == "ma"):
@@ -541,7 +542,17 @@ class Registry(GeniServer):
             self.shell.UpdateSlice(self.pl_auth, pointer, record.get_pl_info())
 
         elif type == "user":
-            self.shell.UpdatePerson(self.pl_auth, pointer, record.get_pl_info())
+            # SMBAKER: UpdatePerson only allows a limited set of fields to be
+            #    updated. Ideally we should have a more generic way of doing
+            #    this. I copied the field names from UpdatePerson.py...
+            update_fields = {}
+            all_fields = record.get_pl_info()
+            for key in all_fields.keys():
+                if key in ['first_name', 'last_name', 'title', 'email',
+                           'password', 'phone', 'url', 'bio', 'accepted_aup',
+                           'enabled']:
+                    update_fields[key] = all_fields[key]
+            self.shell.UpdatePerson(self.pl_auth, pointer, update_fields)
 
         elif type == "node":
             self.shell.UpdateNode(self.pl_auth, pointer, record.get_pl_info())
