@@ -58,7 +58,7 @@ def geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields):
 
     elif type == "slice":
         if not "instantiation" in pl_fields:
-            pl_fields["instantiation"] = "plc-instantiated"
+            pl_fields["instantiation"] = "delegated"  # "plc-instantiated"
         if not "name" in pl_fields:
             pl_fields["name"] = hrn_to_pl_slicename(hrn)
         if not "max_nodes" in pl_fields:
@@ -870,6 +870,7 @@ class Registry(GeniServer):
         attributes['instantiation'] = record.pl_info['instantiation']
         attributes['vref'] = 'default'
         attributes['timestamp'] = time.time()
+        attributes['slice_id'] = record.pl_info['slice_id']
 
         rspec = {}
 
