@@ -7,8 +7,8 @@
 
 import tempfile
 import os
-
 import sys
+from xmlrpclib import ServerProxy
 
 from cert import *
 from gid import *
@@ -19,18 +19,26 @@ from misc import *
 from record import *
 from geniticket import *
 
-import accounts
-import database
-import sm
-import database
-
 ##
 # ComponentManager is a GeniServer that serves slice and
 # management operations at a node.
 
 class ComponentManager(GeniServer):
+
+    ##
+    # Create a new ComponentManager object.
+    #
+    # @param ip the ip address to listen on
+    # @param port the port to listen on
+    # @param key_file private key filename of registry
+    # @param cert_file certificate filename containing public key (could be a GID file)
+
     def __init__(self, ip, port, key_file, cert_file):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
+        self.nodemanager = ServerProxy('http://127.0.0.1:812/')
+
+    ##
+    # Register the server RPCs for the component
 
     def register_functions(self):
         GeniServer.register_functions(self)
@@ -42,19 +50,45 @@ class ComponentManager(GeniServer):
         self.server.register_function(self.redeem_ticket)
         self.server.register_function(self.reboot)
 
+    def sliver_exists(self, slicename):
+        dict = self.nodemanager.GetXIDs()
+        if slicename in dict.keys():
+            return True
+        else:
+            return False
+
+    # ------------------------------------------------------------------------
     # Slice Interface
+
+    ##
+    # Stop a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
 
     def stop_slice(self, cred_str):
         self.decode_authentication(cred_str, "stopslice")
         slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
         print "stopslice:", slicename
-        accounts.get(slicename).start()
+        self.nodemanager.Stop(slicename)
+
+    ##
+    # Start a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
 
     def start_slice(self, cred_str):
         self.decode_authentication(cred_str, "startslice")
         slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
         print "startslice:", slicename
-        accounts.get(slicename).start()
+        self.nodemanager.Start(slicename)
+
+    ##
+    # Reset a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
 
     def reset_slice(self, cred_str):
         self.decode_authentication(cred_str, "resetslice")
@@ -62,22 +96,32 @@ class ComponentManager(GeniServer):
         print "resetslice:", slicename
 
         # find the existing record for the slice
-        try:
-            rec = database.db[slicename]
-        except KeyError:
+        if not self.sliver_exists(slicename):
             raise SliverDoesNotExist(slicename)
 
-        accounts.get(slicename).stop()
-        accounts.get(slicename).ensure_destroyed()
-        accounts.get(slicename).ensure_created(rec)
+        self.nodemanager.ReCreate(slicename)
+
+    ##
+    # Delete a slice.
+    #
+    # @param cred a credential identifying the caller (callerGID) and the slice
+    #     (objectGID)
 
     def delete_slice(self, cred_str):
         self.decode_authentication(cred_str, "deleteslice")
         slicename = hrn_to_pl_slicename(self.object_gid.get_hrn())
         print "deleteslice:", slicename
-        accounts.get(slicename).ensure_destroyed()
+        self.nodemanager.Destroy(slicename)
 
-    # this is similar to geniserver.decode_authentication
+    ##
+    # Examine the ticket that was provided by the caller, check that it is
+    # signed and verified correctly. Throw an exception if something is
+    # wrong with the ticket.
+    #
+    # This is similar to geniserver.decode_authentication
+    #
+    # @param ticket_string the string representation of the ticket
+
     def decode_ticket(self, ticket_string):
         self.client_ticket = Ticket(string = ticket_string)
         self.client_gid = self.client_ticket.get_gid_caller()
@@ -99,28 +143,66 @@ class ComponentManager(GeniServer):
             if self.object_gid:
                 self.object_gid.verify_chain(self.trusted_cert_list)
 
-    def geni_ticket_to_plc_rec(self, ticket):
+    def geni_ticket_to_plc_ticket(self, ticket):
         ticket_attrs = ticket.get_attributes()
         ticket_rspec = ticket.get_rspec()
+
+        data = {}
         rec = {}
+        attr_list = []
+
+        # sort out the initscript... The NM expects to receive an initscript name
+        # and a dictionary of initscripts. NM ends up discarding the initscript
+        # name and sticking the contents in the slice record. (technically, this
+        # is what we started with, but we have to provide the data in the format
+        # that the NM expects)
+        if ticket_attrs.get("initscript", None):
+            initscript_name = ticket_attrs.get("name") + "_initscript"
+            initscript_body = ticket_attrs.get("initscript")
+            data["initscripts"] = {"name": initscript_name, "script": initscript_body}
+            attr_dict["initscript"] = initscript_name
+        else:
+            data["initscripts"] = {}
+
+        # copy the rspec attributes from the geniticket into the plticket
+        # attributes. The NM will later copy them back out and put them into
+        # the rspec field of the slice record
+        for itemname in ticket_rspec.keys():
+            attr = {"name": itemname, "value": ticket_rspec[itemname]}
+            attr_list.append(attr)
+
+        # NM expects to receive a list of key dictionaries containing the
+        # keys.
+        keys = []
+        for key in ticket_attrs.get("keys", []):
+            keys.append({"key": key})
+        rec["keys"] = keys
 
         rec["name"] = ticket_attrs.get("name")
-        rec["keys"] = '\n'.join(ticket_attrs.get("keys",[]))
-        rec["initscript"] = ticket_attrs.get("initscript", "")
-        rec["vref"] = ticket_attrs.get("vref", "default")
-        rec["timestamp"] = ticket_attrs.get("timestamp")    # should there be a default timestamp?
 
-        rspec = {}
-        rec['rspec'] = rspec
-        for resname, default_amt in sm.DEFAULT_ALLOCATION.iteritems():
-            try:
-                t = type(default_amt)
-                amt = t.__new__(t, ticket_attrs[resname])
-            except (KeyError, ValueError):
-                amt = default_amt
-            rspec[resname] = amt
+        rec["attributes"] = attr_list
+        rec["instantiation"] = ticket_attrs["instantiation"]
+        rec["slice_id"] = ticket_attrs["slice_id"]
 
-        return rec
+        # XXX - this shouldn't be hardcoded; use the actual slice name
+        rec["delegations"] = "pl_genicw"
+
+        data["timestamp"] = ticket_attrs.get("timestamp")
+        data["slivers"] = [rec]
+
+        return data
+
+    ##
+    # Redeem a ticket.
+    #
+    # The ticket is submitted to the node manager, and the slice is instantiated
+    # or updated as appropriate.
+    #
+    # TODO: This operation should return a sliver credential and indicate
+    # whether or not the component will accept only sliver credentials, or
+    # will accept both sliver and slice credentials.
+    #
+    # @param ticket_str the string representation of a ticket object
 
     def redeem_ticket(self, ticket_str):
         self.decode_ticket(ticket_str)
@@ -128,20 +210,39 @@ class ComponentManager(GeniServer):
 
         print "ticket received for", self.object_gid.get_hrn()
 
-        rec = self.geni_ticket_to_plc_rec(ticket)
+        pt = self.geni_ticket_to_plc_ticket(ticket)
 
-        print "record", rec
+        print "plticket", pt
 
-        database.db.deliver_record(rec)
+        str = xmlrpclib.dumps((pt,), allow_none=True)
+        self.nodemanager.AdminTicket(str)
 
-    # Slice Information
+        # TODO: should return a sliver credential
+
+    # ------------------------------------------------------------------------
+    # Slice Interface
+
+    ##
+    # List the slices on a component.
+    #
+    # @param cred_str string representation of a credential object that
+    #     authorizes the caller
+    #
+    # @return a list of slice names
 
     def list_slices(self, cred_str):
         self.decode_authentication(cred_str, "listslices")
-        slice_names = database.db.keys()
+        slice_names = self.nodemanager.GetXIDs().keys()
         return slice_names
 
+    # ------------------------------------------------------------------------
     # Management Interface
+
+    ##
+    # Reboot the component.
+    #
+    # @param cred_str string representation of a credential object that
+    #     authorizes the caller
 
     def reboot(self, cred_str):
         self.decode_authentication(cred_str, "reboot")
@@ -166,10 +267,6 @@ if __name__ == "__main__":
         cert.save_to_file(cert_file)
 
     TrustedRoots = TrustedRootList()
-
-    # XXX: does this conflict with the nodemanager's database? I don't think
-    # so because there are locks, but double check...
-    database.start()
 
     s = ComponentManager("", 12345, key_file, cert_file)
     s.trusted_cert_list = TrustedRoots.get_list()
