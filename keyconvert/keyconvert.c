@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>

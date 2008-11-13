@@ -1,5 +1,5 @@
 keyconvert:
-	gcc -o keyconvert keyconvert.c keyconvertmain.c b64decode.c /usr/lib/libcrypto.a
+	gcc -o keyconvert -lcrypto -ldl keyconvert.c keyconvertmain.c b64decode.c
 
 clean:
 	rm -rf keyconvert
