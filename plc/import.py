@@ -104,10 +104,16 @@ def get_pl_pubkey(key_id):
     else:
         return None
 
-def import_person(parent_hrn, person):
+def person_to_hrn(parent_hrn, person):
     personname = person['last_name'] + "_" + person['first_name']
-
+    personname = personname.replace(" ", "_")
+    personname = personname.replace(".", "_")
     hrn = parent_hrn + "." + personname
+    return hrn
+
+def import_person(parent_hrn, person):
+    hrn = person_to_hrn(parent_hrn, person)
+
     report.trace("Import: importing person " + hrn)
 
     table = get_auth_table(parent_hrn)
