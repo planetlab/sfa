@@ -31,6 +31,30 @@ shell = None
 root_auth = "planetlab"
 level1_auth = "planetlab.us"
 
+def un_unicode(str):
+   if isinstance(str, unicode):
+       return str.encode("ascii", "ignore")
+   else:
+       return str
+
+def cleanup_string(str):
+    # pgsql has a fit with strings that have high ascii in them, so filter it
+    # out when generating the hrns.
+    tmp = ""
+    for c in str:
+        if ord(c) < 128:
+            tmp = tmp + c
+    str = tmp
+
+    str = un_unicode(str)
+    str = str.replace(" ", "_")
+    str = str.replace(".", "_")
+    str = str.replace("(", "_")
+    str = str.replace("'", "_")
+    str = str.replace(")", "_")
+    str = str.replace('"', "_")
+    return str
+
 def process_options():
    global hrn
 
@@ -73,6 +97,10 @@ def get_pl_pubkey(key_id):
     if keys:
         key_str = keys[0]['key']
 
+        if "ssh-dss" in key_str:
+            print "XXX: DSA key encountered, ignoring"
+            return None
+
         # generate temporary files to hold the keys
         (ssh_f, ssh_fn) = tempfile.mkstemp()
         ssl_fn = tempfile.mktemp()
@@ -92,9 +120,11 @@ def get_pl_pubkey(key_id):
             return None
 
         k = Keypair()
-        k.load_pubkey_from_file(ssl_fn)
-
-        #sys.exit(-1)
+        try:
+            k.load_pubkey_from_file(ssl_fn)
+        except:
+            print "XXX: Error while converting key: ", key_str
+            k = None
 
         # remove the temporary files
         os.remove(ssh_fn)
@@ -106,13 +136,18 @@ def get_pl_pubkey(key_id):
 
 def person_to_hrn(parent_hrn, person):
     personname = person['last_name'] + "_" + person['first_name']
-    personname = personname.replace(" ", "_")
-    personname = personname.replace(".", "_")
+
+    personname = cleanup_string(personname)
+
     hrn = parent_hrn + "." + personname
     return hrn
 
 def import_person(parent_hrn, person):
     hrn = person_to_hrn(parent_hrn, person)
+
+    # ASN.1 will have problems with hrn's longer than 64 characters
+    if len(hrn) > 64:
+        hrn = hrn[:64]
 
     report.trace("Import: importing person " + hrn)
 
@@ -120,13 +155,22 @@ def import_person(parent_hrn, person):
 
     person_record = table.resolve("slice", hrn)
     if not person_record:
-        #pkey = Keypair(create=True)
         key_ids = person["key_ids"]
+
         if key_ids:
+            # get the user's private key from the SSH keys they have uploaded
+            # to planetlab
             pkey = get_pl_pubkey(key_ids[0])
         else:
+            # the user has no keys
             report.trace("   person " + hrn + " does not have a PL public key")
+            pkey = None
+
+        # if a key is unavailable, then we still need to put something in the
+        # user's GID. So make one up.
+        if not pkey:
             pkey = Keypair(create=True)
+
         person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         report.trace("  inserting user record for " + hrn)
@@ -134,6 +178,7 @@ def import_person(parent_hrn, person):
 
 def import_slice(parent_hrn, slice):
     slicename = slice['name'].split("_",1)[-1]
+    slicename = cleanup_string(slicename)
 
     if not slicename:
         report.error("Import_Slice: failed to parse slice name " + slice['name'])
@@ -153,7 +198,10 @@ def import_slice(parent_hrn, slice):
         table.insert(slice_record)
 
 def import_site(parent_hrn, site):
-    hrn = parent_hrn + "." + site['login_base']
+    sitename = site['login_base']
+    sitename = cleanup_string(sitename)
+
+    hrn = parent_hrn + "." + sitename
 
     report.trace("Import_Site: importing site " + hrn)
 
