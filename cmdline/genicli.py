@@ -7,7 +7,9 @@ from cert import *
 from geniclient import *
 from geniticket import *
 
-long_opts = ["keyfile=", "help", "outfile=", "credfile=", "ticketfile=", "username=", "email=", "ip=", "dns=", "dump_parents", "server="]
+long_opts = ["keyfile=", "help", "outfile=", "credfile=", "ticketfile=",
+             "username=", "email=", "ip=", "dns=", "dump_parents", "server=",
+             "filter="]
 
 # default command line options
 username = "client"
@@ -27,6 +29,7 @@ email = None
 uuid = None
 gid_pkey_fn = None
 gid_fn = None
+filter = None
 
 dump_parents = False
 
@@ -50,6 +53,7 @@ def showhelp():
    print "    --dns            ... DNS address (for registering nodes)"
    print "    --dump_parents   ... dump parents"
    print "    --server         ... geni server (registry/component) to connect to"
+   print "    --filter <type>  ... filter the results of a list operation (user | slice | node ...)"
    print "commands:"
    print "    resolve <hrn>"
    print "    dumpCredential"
@@ -73,6 +77,7 @@ def process_options():
    global uuid, pkey_fn, gid_fn, email, gid_pkey_fn, ip, dns
    global dump_parents
    global server_url
+   global filter
 
    (options, args) = getopt.getopt(sys.argv[1:], '', long_opts)
    for opt in options:
@@ -104,6 +109,8 @@ def process_options():
            dump_parents = True
        elif name == "--server":
            server_url = val
+       elif name == "--filter":
+           filter = val
 
    if not args:
        print "no operation specified"
@@ -285,6 +292,8 @@ def main():
    elif (opname == "list"):
       result = client.list(cred)
       if result:
+          if filter:
+              result = [r for r in result if r.type==filter]
           for record in result:
               print "RESULT:"
               record.dump(dump_parents=dump_parents)

@@ -18,13 +18,13 @@ USER_HRN=$PARENT_HRN.account_test
 
 # The following lines use Tony Mack's planetlab account on a live PLC
 # database (tony: copy your private key to tmack.pkey in the current directory)
-# USERNAME=tmack
-# PARENT_HRN=planetlab.us.princeton
-# USER_HRN=$PARENT_HRN.Mack_Tony
+USERNAME=tmack
+PARENT_HRN=planetlab.us.princeton
+USER_HRN=$PARENT_HRN.Mack_Tony
 
 PRIVKEY_FN=$USERNAME.pkey
 CRED_FN=$USERNAME.cred
-CERTN_FN=$USERNAME.cert
+CERT_FN=$USERNAME.cert
 
 rm -f $CRED_FN
 rm -f $CERT_FN
