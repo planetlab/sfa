@@ -197,6 +197,32 @@ def import_slice(parent_hrn, slice):
         report.trace("  inserting slice record for " + hrn)
         table.insert(slice_record)
 
+def import_node(parent_hrn, node):
+    nodename = node['hostname']
+    nodename = cleanup_string(nodename)
+
+    if not nodename:
+        report.error("Import_node: failed to parse node name " + node['hostname'])
+        return
+
+    hrn = parent_hrn + "." + nodename
+
+    # ASN.1 will have problems with hrn's longer than 64 characters
+    if len(hrn) > 64:
+        hrn = hrn[:64]
+
+    report.trace("Import: importing node " + hrn)
+
+    table = get_auth_table(parent_hrn)
+
+    node_record = table.resolve("node", hrn)
+    if not node_record:
+        pkey = Keypair(create=True)
+        node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
+        node_record = GeniRecord(name=hrn, gid=node_gid, type="node", pointer=node['node_id'])
+        report.trace("  inserting node record for " + hrn)
+        table.insert(node_record)
+
 def import_site(parent_hrn, site):
     sitename = site['login_base']
     sitename = cleanup_string(sitename)
@@ -234,6 +260,11 @@ def import_site(parent_hrn, site):
         slices = shell.GetSlices(pl_auth, [slice_id])
         if slices:
             import_slice(hrn, slices[0])
+
+    for node_id in site['node_ids']:
+        nodes = shell.GetNodes(pl_auth, [node_id])
+        if nodes:
+            import_node(hrn, nodes[0])
 
 def create_top_level_auth_records(hrn):
     parent_hrn = get_authority(hrn)
