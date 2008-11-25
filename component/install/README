@@ -1,0 +1,6 @@
+these things need to be installed in the root context of a node
+
+m2crypto.tar.gz and pyopenssl.tar.gz should be extracted as follows:
+  
+   tar -P -xzf m2crypto.tar.gz
+   tar -P -xzf pyopenssl.tar.gz
