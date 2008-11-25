@@ -26,22 +26,28 @@ PRIVKEY_FN=$USERNAME.pkey
 CRED_FN=$USERNAME.cred
 CERT_FN=$USERNAME.cert
 
+# The following URL is the URL of the plc wrapper. 
+
+PLC_URL=https://localhost:12345/
+
+# PLC_URL=https://198.0.0.132:12345/
+
 rm -f $CRED_FN
 rm -f $CERT_FN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Getting Credential
-python ./genicli.py --username $USERNAME --credfile None --outfile $CRED_FN getCredential user $USER_HRN
+python ./genicli.py --server $PLC_URL --username $USERNAME --credfile None --outfile $CRED_FN getCredential user $USER_HRN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Resolving Authority
-python ./genicli.py --username $USERNAME resolve $PARENT_HRN
+python ./genicli.py --server $PLC_URL --username $USERNAME resolve $PARENT_HRN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Resolving Self
-python ./genicli.py --username $USERNAME resolve $USER_HRN
+python ./genicli.py --server $PLC_URL --username $USERNAME resolve $USER_HRN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Update Self
-python ./genicli.py --username $USERNAME update user $USER_HRN
+python ./genicli.py --server $PLC_URL --username $USERNAME update user $USER_HRN
 
