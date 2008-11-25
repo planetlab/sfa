@@ -1,2 +1,4 @@
+source component_slice_config.sh
+
 echo connecting to node: $1
-ssh -i root_ssh_key.rsa root@$1
+ssh -i $KEY_FILE $USER@$1
