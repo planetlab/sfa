@@ -18,6 +18,12 @@ USER_HRN=$PARENT_HRN.Mack_Tony
 
 NODE_URL=https://198.0.0.131:12345/
 
+# The following URL is the URL of the plc wrapper.
+
+PLC_URL=https://localhost:12345/
+
+#PLC_URL=https://198.0.0.132:12345/
+
 SA_CRED_FN=rootsa.cred
 
 SLICE_KEY_NAME=testcw
@@ -37,35 +43,35 @@ rm -f $CERT_FN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Getting User Credential
-python ./genicli.py --username $USERNAME --credfile None --outfile $CRED_FN getCredential user $USER_HRN
+python ./genicli.py --server $PLC_URL --username $USERNAME --credfile None --outfile $CRED_FN getCredential user $USER_HRN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Create a private key
-python ./genicli.py --username $SLICE_KEY_NAME createKey
+python ./genicli.py --server $PLC_URL --username $SLICE_KEY_NAME createKey
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Getting SA Credential
-python ./genicli.py --username $USERNAME --outfile $SA_CRED_FN getCredential sa $PARENT_HRN
+python ./genicli.py --server $PLC_URL --username $USERNAME --outfile $SA_CRED_FN getCredential sa $PARENT_HRN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Create a GID for a slice
-python ./genicli.py --username $USERNAME --credfile $SA_CRED_FN --outfile $SLICE_GID_NAME createGid $SLICE_NAME None $SLICE_KEY_FN
+python ./genicli.py --server $PLC_URL --username $USERNAME --credfile $SA_CRED_FN --outfile $SLICE_GID_NAME createGid $SLICE_NAME None $SLICE_KEY_FN
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX If the test slice already exists, Remove the test slice
-python ./genicli.py --username $USERNAME --credfile $SA_CRED_FN remove slice $SLICE_NAME
+python ./genicli.py --server $PLC_URL --username $USERNAME --credfile $SA_CRED_FN remove slice $SLICE_NAME
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Register a slice
-python ./genicli.py --username $USERNAME --credfile $SA_CRED_FN register slice $SLICE_NAME $SLICE_GID_NAME
+python ./genicli.py --server $PLC_URL --username $USERNAME --credfile $SA_CRED_FN register slice $SLICE_NAME $SLICE_GID_NAME
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Get Slice Credential
-python ./genicli.py --username $USERNAME --outfile $SLICE_CRED_NAME getCredential slice $SLICE_NAME
+python ./genicli.py --server $PLC_URL --username $USERNAME --outfile $SLICE_CRED_NAME getCredential slice $SLICE_NAME
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Get a Ticket
-python ./genicli.py --username $USERNAME --credfile $SLICE_CRED_NAME --outfile $SLICE_TICKET_NAME getTicket $SLICE_NAME
+python ./genicli.py --server $PLC_URL --username $USERNAME --credfile $SLICE_CRED_NAME --outfile $SLICE_TICKET_NAME getTicket $SLICE_NAME
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Redeem a Ticket
