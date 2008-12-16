@@ -153,7 +153,7 @@ def import_person(parent_hrn, person):
 
     table = get_auth_table(parent_hrn)
 
-    person_record = table.resolve("slice", hrn)
+    person_record = table.resolve("user", hrn)
     if not person_record:
         key_ids = person["key_ids"]
 
