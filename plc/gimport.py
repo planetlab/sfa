@@ -29,7 +29,7 @@ shell = None
 # Two authorities are specified: the root authority and the level1 authority.
 
 root_auth = "planetlab"
-level1_auth = "planetlab"
+level1_auth = "planetlab.us"
 
 
 def un_unicode(str):
