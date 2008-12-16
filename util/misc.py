@@ -6,9 +6,7 @@ def get_leaf(hrn):
 
 def get_authority(hrn):
     parts = hrn.split(".")
-    if len(parts) > 1:	
-        return ".".join(parts[:-1])
-    return hrn	
+    return ".".join(parts[:-1])
 
 def get_auth_type(type):
     if (type=="slice") or (type=="user") or (type=="sa"):
