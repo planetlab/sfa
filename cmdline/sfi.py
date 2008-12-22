@@ -4,6 +4,7 @@
 
 import sys
 import os
+from cert import Keypair, Certificate
 from optparse import OptionParser
 
 def create_cmd_parser(command):
