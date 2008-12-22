@@ -4,7 +4,7 @@
 
 import sys
 import os
-from cert import Keypair, Certificate
+#from cert import Keypair, Certificate
 from optparse import OptionParser
 
 def create_cmd_parser(command):
@@ -46,6 +46,8 @@ def main():
         help="root registry", metavar="URL")
    parser.add_option("-s", "--slicemgr", dest="sm",
         help="slice manager", metavar="URL")
+   parser.add_option("-d", "--dir", dest="dir",
+        help="working directory", metavar="PATH")
    parser.add_option("-v", "--verbose",
         action="store_true", dest="verbose", default=False,
         help="verbose mode")
@@ -54,7 +56,7 @@ def main():
    command = args[0]
    (cmd_opts, cmd_args) = create_cmd_parser(command).parse_args(args[1:])
    if options.verbose :
-      print options.registry,options.sm,options.verbose
+      print options.registry,options.sm,options.dir,options.verbose
       print command
       if command in ("nodes", "resources"):
          print cmd_opts.format
