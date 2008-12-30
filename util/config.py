@@ -14,13 +14,45 @@
 # Note that Geniwrapper does not access any of the PLC databases directly via
 # a mysql connection; All PLC databases are accessed via PLCAPI.
 
+import os
+import sys
+
+# If we have been checked out into a directory at the same
+# level as myplc, where plc_config.py lives. If we are in a
+# MyPLC environment, plc_config.py has already been installed
+# in site-packages.
+myplc = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + \
+        os.sep + "myplc"
+
+class Config:
+    """
+    Parse the bash/Python/PHP version of the configuration file. Very
+    fast but no type conversions.
+    """
+
+    def __init__(self, file = "/etc/planetlab/plc_config"):
+        # Load plc_config
+        try:
+            execfile(file, self.__dict__)
+        except:
+            # Try myplc directory
+            try:
+                execfile(myplc + os.sep + "plc_config", self.__dict__)
+            except:
+                raise PLCAPIError("Could not find plc_config in " + \
+                                  file + ", " + \
+                                  myplc + os.sep + "plc_config")
+
+
+plcConfig = Config()
+
 def get_default_dbinfo():
-    dbinfo={}
-    dbinfo['dbname'] = 'planetlab4'
-    dbinfo['address'] = 'localhost'
-    dbinfo['port'] = 5432
-    dbinfo['user'] = 'pgsqluser'
-    dbinfo['password'] = '4c77b272-c892-4bdf-a833-dddeeee1a2ed'
+    dbinfo={ 'dbname' = plcConfig.PLC_DB_NAME,
+    'address' = plcConfig.PLC_DB_HOST,
+    'port' = plcConfig.PLC_DB_PORT,
+    'user' = plcConfig.PLC_DB_USER,
+    'password' = plcConfig.PLC_DB_PASSWORD
+	}
 
     return dbinfo
 
@@ -35,10 +67,10 @@ def get_default_dbinfo():
 # field from the dictionary. 
 
 def get_pl_auth():
-    pl_auth = {'Username': 'root@198.0.0.132',
+    pl_auth = {'Username': plcConfig.PLC_API_MAINTENANCE_USER,
     'AuthMethod': 'password',
-    'AuthString':  'root',
-    "Url": "https://localhost:443/PLCAPI/"
+    'AuthString':  plcConfig.PLC_MAINTENANCE_PASSWORD,
+    "Url": 'https://%s:%s%s' %(plcConfig.PLC_API_HOST, plcConfig.PLC_API_PORT, plcConfig.PLC_API_PATH)
     }
 
     return pl_auth
