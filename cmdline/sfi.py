@@ -5,8 +5,9 @@ from __future__ import with_statement
 
 import sys
 import os, os.path
-from cert import Keypair, Certificate, Credential
 from optparse import OptionParser
+from util.cert import Keypair, Certificate
+from util.credential import Credential
 from util.geniclient import GeniClient
 
 sfi_dir = os.path.expanduser("~/.sfi/")
