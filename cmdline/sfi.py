@@ -11,8 +11,8 @@ from util.credential import Credential
 from util.geniclient import GeniClient
 
 sfi_dir = os.path.expanduser("~/.sfi/")
-sm_chan = None
-reg_chan = None
+slicemgr = None
+registry = None
 user = None
 authority = None
 verbose = False
@@ -21,8 +21,8 @@ verbose = False
 # Establish Connection to SliceMgr and Registry Servers
 #
 def set_servers(options):
-   global sm_chan
-   global reg_chan
+   global slicemgr
+   global registry
    global user
    global authority
 
@@ -72,11 +72,11 @@ def set_servers(options):
    # Establish connection to server(s)
    # SliceMgr and Registry may be available on the same server
    if (sm_url == registry_url):
-      sm_chan = GeniClient(sm_url, key_file, cert_file)
-      reg_chan = sm_chan
+      slicemgr = GeniClient(sm_url, key_file, cert_file)
+      registry = slicemgr
    else:
-      sm_chan = GeniClient(sm_url, key_file, cert_file)
-      reg_chan = GeniClient(registry_url, key_file, cert_file)
+      slicemgr = GeniClient(sm_url, key_file, cert_file)
+      registry = GeniClient(registry_url, key_file, cert_file)
    return
 
 #
@@ -241,8 +241,6 @@ def create_cmd_parser(command):
 # Main: parse arguments and dispatch to command
 #
 def main():
-   global sm_chan
-   global reg_chan
    global verbose
 
    # Generate command line parser
@@ -255,9 +253,9 @@ def main():
    parser.add_option("-d", "--dir", dest="dir",
         help="working directory", metavar="PATH", default = sfi_dir)
    parser.add_option("-u", "--user", dest="user",
-        help="user name", metavar="USER_HRN", default=None)
+        help="user name", metavar="HRN", default=None)
    parser.add_option("-a", "--auth", dest="auth",
-        help="authority name", metavar="AUTH_HRN", default=None)
+        help="authority name", metavar="HRN", default=None)
    parser.add_option("-v", "--verbose",
         action="store_true", dest="verbose", default=False,
         help="verbose mode")
@@ -294,15 +292,15 @@ def main():
 
 # list entires in named authority registry
 def list(opts, args):
-   global reg_chan
+   global registry
    user_cred = get_user_cred()
-   result = reg_chan.list(user_cred, args[0])
+   result = registry.list(user_cred, args[0])
    display_record(opts.type, results)
    return
 
 # show named registry record
 def show(opts, args):
-   global reg_chan
+   global registry
    user_cred = get_user_cred() 
    result = reg_chan.resolve(user_cred, args[0])
    display_record(opts.type, results)
@@ -311,29 +309,29 @@ def show(opts, args):
 # removed named registry record
 #   - have to first retrieve the record to be removed
 def remove(opts, args):
-   global reg_chan
+   global registry
    auth_cred = get_auth_cred() 
-   results = reg_chan.resolve(auth_cred, args[0])
+   results = registry.resolve(auth_cred, args[0])
    record = filter_record(opts.type, results)
-   return reg_chan.remove(auth_cred, record)
+   return registry.remove(auth_cred, record)
 
 # add named registry record
 def add(opts, args):
-   global reg_chan
+   global registry
    auth_cred = get_auth_cred() 
    rec_file = get_record_file(args[1])
    with open(rec_file) as f:
       record = f.read()
-   return reg_chan.register(auth_cred, record)
+   return registry.register(auth_cred, record)
 
 # update named registry entry
 def update(opts, args):
-   global reg_chan
+   global registry
    user_cred = get_user_cred() 
    rec_file = get_record_file(args[1])
    with open(rec_file) as f:
       record = f.read()
-   return reg_chan.update(user_cred, record)
+   return registry.update(user_cred, record)
 
 #
 # Slice-related commands
@@ -341,69 +339,69 @@ def update(opts, args):
 
 # list available nodes
 def nodes(opts, args):
-   global sm_chan
+   global slicemgr
    user_cred = get_user_cred() 
    if (len(args) == 0):
       context = None
    else:
       context = args[0]
-   result = sm_chan.list_nodes(user_cred, context)
+   result = slicemgr.list_nodes(user_cred, context)
    display_rspec(opts.format, result)
    return
 
 # list instantiated slices
 def slices(opts, args):
-   global sm_chan
+   global slicemgr
    user_cred = get_user_cred() 
-   result = sm_chan.list_slices(user_cred)
+   result = slicemgr.list_slices(user_cred)
    display_rspec(opts.format, results)
    return
 
 # show rspec for named slice
 def resources(opts, args):
-   global sm_chan
+   global slicemgr
    slice_cred = get_slice_cred(args[0]) 
-   print "resources:", opts.format, args[0], sm_chan
-   result = sm_chan.get_resources(slice_cred, args[0])
+   result = slicemgr.get_resources(slice_cred, args[0])
    display_rspec(opts.format, result)
    return
 
 # created named slice with given rspec
 def create(opts, args):
-   global sm_chan
+   global slicemgr
    slice_cred = get_slice_cred(args[0]) 
    rspec_file = get_rspec_file(args[1])
    with open(rspec_file) as f:
       rspec = f.read()
-   return sm_chan.instantiate(slice_cred, rspec)
+   return slicemgr.instantiate(slice_cred, rspec)
 
 # delete named slice
 def delete(opts, args):
-   global sm_chan
+   global slicemgr
    slice_cred = get_slice_cred(args[0]) 
-   return sm_chan.delete_slice(slice_cred)
+   return slicemgr.delete_slice(slice_cred)
 
 # start named slice
 def start(opts, args):
-   global sm_chan
+   global slicemgr
    slice_cred = get_slice_cred(args[0]) 
-   return sm_chan.start_slice(slice_cred)
+   return slicemgr.start_slice(slice_cred)
 
 # stop named slice
 def stop(opts, args):
-   global sm_chan
+   global slicemgr
    slice_cred = get_slice_cred(args[0]) 
-   return sm_chan.stop_slice(slice_cred)
+   return slicemgr.stop_slice(slice_cred)
 
 # reset named slice
 def reset(opts, args):
-   global sm_chan
+   global slicemgr
    slice_cred = get_slice_cred(args[0]) 
-   return sm_chan.reset_slice(slice_cred)
+   return slicemgr.reset_slice(slice_cred)
 
 #
 #
 # Display and Filter RSpecs and Records
+#   - to be replace by EMF-generated routines
 #
 #
 
