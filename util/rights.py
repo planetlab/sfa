@@ -18,10 +18,10 @@ privilege_table = {"authority": ["*"],
                    "refresh": ["remove", "update"],
                    "resolve": ["resolve", "list", "getcredential"],
                    "sa": ["*"],
-                   "embed": ["getticket", "createslice", "deleteslice", "updateslice"],
+                   "embed": ["getticket", "redeemslice", "createslice", "deleteslice", "updateslice", "getsliceresources"],
                    "bind": ["getticket", "loanresources"],
-                   "control": ["updateslice", "stopslice", "startslice", "deleteslice", "resetslice"],
-                   "info": ["listslices", "listcomponentresources", "getsliceresources"],
+                   "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources"],
+                   "info": ["listslices", "listnodes"],
                    "ma": ["*"]}
 
 ##

@@ -70,13 +70,8 @@ def set_servers(options):
    cert_file = get_cert_file(key_file)
 
    # Establish connection to server(s)
-   # SliceMgr and Registry may be available on the same server
-   if (sm_url == registry_url):
-      slicemgr = GeniClient(sm_url, key_file, cert_file)
-      registry = slicemgr
-   else:
-      slicemgr = GeniClient(sm_url, key_file, cert_file)
-      registry = GeniClient(registry_url, key_file, cert_file)
+   slicemgr = GeniClient(sm_url, key_file, cert_file)
+   registry = GeniClient(registry_url, key_file, cert_file)
    return
 
 #
@@ -361,7 +356,7 @@ def slices(opts, args):
 def resources(opts, args):
    global slicemgr
    slice_cred = get_slice_cred(args[0]) 
-   result = slicemgr.get_resources(slice_cred, args[0])
+   result = slicemgr.get_slice_resources(slice_cred, args[0])
    display_rspec(opts.format, result)
    return
 
@@ -372,7 +367,7 @@ def create(opts, args):
    rspec_file = get_rspec_file(args[1])
    with open(rspec_file) as f:
       rspec = f.read()
-   return slicemgr.instantiate(slice_cred, rspec)
+   return slicemgr.create_slice(slice_cred, rspec)
 
 # delete named slice
 def delete(opts, args):

@@ -10,6 +10,7 @@ import SimpleXMLRPCServer
 
 import sys
 import traceback
+import threading
 import SocketServer
 import BaseHTTPServer
 import SimpleHTTPServer
@@ -104,8 +105,8 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         try:
             return SimpleXMLRPCServer.SimpleXMLRPCDispatcher._dispatch(self, method, params)
         except:
-            # can't use format_exc() as it is not available in jython yet (even
-            # in trunk).
+            # can't use format_exc() as it is not available in jython yet
+            # (evein in trunk).
             type, value, tb = sys.exc_info()
             raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
 
@@ -163,7 +164,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 # the credential, and verify that the user is using the key that matches the
 # GID supplied in the credential.
 
-class GeniServer():
+class GeniServer(threading.Thread):
 
     ##
     # Create a new GeniServer object.
@@ -171,7 +172,8 @@ class GeniServer():
     # @param ip the ip address to listen on
     # @param port the port to listen on
     # @param key_file private key filename of registry
-    # @param cert_file certificate filename containing public key (could be a GID file)
+    # @param cert_file certificate filename containing public key 
+    #   (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file):
         self.key = Keypair(filename = key_file)
@@ -195,7 +197,7 @@ class GeniServer():
         if not self.client_gid:
             raise MissingCallerGID(self.client_cred.get_subject())
 
-        # make sure the client_gid matches the certificate that the client is using
+        # make sure the client_gid matches client's certificate
         peer_cert = self.server.peer_cert
         if not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
             raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())
