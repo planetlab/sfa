@@ -12,28 +12,19 @@ class RemoteShell:
     def __init__(self):
         self.servers = {}
 
-    def get_default_opts(self):
-        dict = {}
-        dict['Role'] = "user"
-        dict['Url'] = "https://www.planet-lab.org:443/PLCAPI/"
-        return dict
-
     def call(self, name, pl_auth, *args):
-        auth_opts = self.get_default_opts().copy()
-        auth_opts.update(pl_auth)
 
-        url = auth_opts["Url"]
-        key = url + "#" + auth_opts["Username"]
+        key = pl_auth["Url"] + "#" + pl_auth["Username"]
 
         if not (key in self.servers):
             server = xmlrpclib.Server(url, verbose = 0, allow_none=True)
-            #server.AdmAuthCheck(auth_opts)
-            server.AuthCheck(auth_opts)
+            #server.AdmAuthCheck(pl_auth)
+            server.AuthCheck(pl_auth)
             self.servers[key] = server
 
         server = self.servers[key]
 
-        arglist = ["auth_opts"]
+        arglist = ["pl_auth"]
         for arg in args:
             arglist.append(repr(arg))
 
