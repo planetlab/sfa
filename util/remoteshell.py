@@ -17,7 +17,7 @@ class RemoteShell:
         key = pl_auth["Url"] + "#" + pl_auth["Username"]
 
         if not (key in self.servers):
-            server = xmlrpclib.Server(url, verbose = 0, allow_none=True)
+            server = xmlrpclib.Server(pl_auth["Url"], verbose = 0, allow_none=True)
             #server.AdmAuthCheck(pl_auth)
             server.AuthCheck(pl_auth)
             self.servers[key] = server
