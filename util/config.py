@@ -30,28 +30,41 @@ class Config:
     fast but no type conversions.
     """
 
-    def __init__(self, file = "/etc/planetlab/plc_config"):
+    def __init__(self, file = "/usr/share/geniwrapper/util/geni_config"):
         # Load plc_config
-        try:
-            execfile(file, self.__dict__)
-        except:
-            # Try myplc directory
-            try:
-                execfile(myplc + os.sep + "plc_config", self.__dict__)
-            except:
-                raise PLCAPIError("Could not find plc_config in " + \
-                                  file + ", " + \
-                                  myplc + os.sep + "plc_config")
+
+	loaded = False
+	path = os.path.dirname(os.path.abspath(__file__))
+	filename = file.split(os.sep)[-1]
+	alt_file = path + os.sep + filename
+	myplc_file = myplc + os.sep + filename
+	files = [file, alt_file, myplc_file]
+
+	for file in files:
+	    try: 
+		execfile(file, self.__dict__)
+		loaded = True
+	    except:
+	        pass
+
+	if not loaded:
+	    raise Exception, "Could not find config in " + ", ".join(files)
 
 
-plcConfig = Config()
+    def load(self, file):
+	try:
+	    execfile(file, self.__dict__)
+	except:
+	    raise Exception, "Could not find config in " + file
+
+plcConfig = Config("/etc/planetlab/plc_config")
 
 def get_default_dbinfo():
-    dbinfo = { 'dbname' : plcConfig.PLC_DB_NAME,
-        'address' : plcConfig.PLC_DB_HOST,
-        'port' : plcConfig.PLC_DB_PORT,
-        'user' : plcConfig.PLC_DB_USER,
-        'password' : plcConfig.PLC_DB_PASSWORD
+    dbinfo={ 'dbname' : plcConfig.PLC_DB_NAME,
+    'address' : plcConfig.PLC_DB_HOST,
+    'port' : plcConfig.PLC_DB_PORT,
+    'user' : plcConfig.PLC_DB_USER,
+    'password' : plcConfig.PLC_DB_PASSWORD
 	}
 
     return dbinfo
@@ -68,9 +81,9 @@ def get_default_dbinfo():
 
 def get_pl_auth():
     pl_auth = {'Username': plcConfig.PLC_API_MAINTENANCE_USER,
-        'AuthMethod': 'capability',
-        'AuthString':  plcConfig.PLC_API_MAINTENANCE_PASSWORD,
-        "Url": 'https://%s:%s%s' %(plcConfig.PLC_API_HOST, plcConfig.PLC_API_PORT, plcConfig.PLC_API_PATH)
+    'AuthMethod': 'capability',
+    'AuthString':  plcConfig.PLC_MAINTENANCE_PASSWORD,
+    "Url": 'https://%s:%s%s' %(plcConfig.PLC_API_HOST, plcConfig.PLC_API_PORT, plcConfig.PLC_API_PATH)
     }
 
     return pl_auth
