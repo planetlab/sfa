@@ -49,6 +49,12 @@ def verify_callback(conn, x509, err, depth, preverify):
     # that we aren't interested in, so we look out for those error messages
     # and ignore them
 
+    # XXX SMBAKER: I don't know what this error is, but it's being returned
+    # by newer pl nodes.
+    if err == 9:
+       #print "  X509_V_ERR_CERT_NOT_YET_VALID"
+       return 1
+
     # allow self-signed certificates
     if err == 18:
        #print "  X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT"
@@ -176,6 +182,7 @@ class GeniServer(threading.Thread):
     #   (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file):
+        threading.Thread.__init__(self)
         self.key = Keypair(filename = key_file)
         self.cert = Certificate(filename = cert_file)
         self.server = SecureXMLRPCServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
@@ -203,8 +210,9 @@ class GeniServer(threading.Thread):
             raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())
 
         # make sure the client is allowed to perform the operation
-        if not self.client_cred.can_perform(operation):
-            raise InsufficientRights(operation)
+        if operation:
+            if not self.client_cred.can_perform(operation):
+                raise InsufficientRights(operation)
 
         if self.trusted_cert_list:
             self.client_cred.verify_chain(self.trusted_cert_list)
