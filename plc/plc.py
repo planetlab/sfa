@@ -8,12 +8,15 @@
 # There are several items that need to be done before starting the wrapper
 # server.
 #
-# 1) Update util/config.py to match the parameters of your PLC installation.
+# NOTE:  Many configuration settings, including the PLC maintenance account
+# credentials, URI of the PLCAPI, and PLC DB URI and admin credentials are initialized
+# from your MyPLC configuration (/etc/planetlab/plc_config*).  Please make sure this information
+# is up to date and accurate.
 #
-# 2) Import the existing planetlab database, creating the
+# 1) Import the existing planetlab database, creating the
 #    appropriate geni records. This is done by running the "import.py" tool.
 #
-# 3) Create a "trusted_roots" directory and place the certificate of the root
+# 2) Create a "trusted_roots" directory and place the certificate of the root
 #    authority in that directory. Given the defaults in import.py, this
 #    certificate would be named "planetlab.gid". For example,
 #
