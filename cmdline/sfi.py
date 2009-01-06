@@ -223,13 +223,16 @@ def create_cmd_parser(command):
       % (command, cmdargs[command]))
    if command in ("nodes", "resources"):
       parser.add_option("-f", "--format", dest="format",type="choice",
-           help="output format (dns|ip|hrn|rspec)",default="rspec",
+           help="display format (dns|ip|hrn|rspec)",default="rspec",
            choices=("dns","ip","hrn","rspec"))
-   elif command in ("list", "show", "remove"):
+   if command in ("list", "show", "remove"):
       parser.add_option("-t", "--type", dest="type",type="choice",
            help="type filter (user|slice|sa|ma|node|aggregate)", 
            choices=("user","slice","sa","ma","node","aggregate", "all"),
            default="all")
+   if command in ("show", "nodes", "resources"):
+      parser.add_option("-o", "--output", dest="file",
+           help="output XML to file", metavar="FILE", default=None)
    return parser
 
 #
@@ -299,6 +302,8 @@ def show(opts, args):
    user_cred = get_user_cred() 
    result = reg_chan.resolve(user_cred, args[0])
    display_record(opts.type, results)
+   if (opts.file is not None):
+      save_record_to_file(opts.file, result)
    return
 
 # removed named registry record
@@ -342,6 +347,8 @@ def nodes(opts, args):
       context = args[0]
    result = slicemgr.list_nodes(user_cred, context)
    display_rspec(opts.format, result)
+   if (opts.file is not None):
+      save_rspec_to_file(opts.file, result)
    return
 
 # list instantiated slices
@@ -358,6 +365,8 @@ def resources(opts, args):
    slice_cred = get_slice_cred(args[0]) 
    result = slicemgr.get_slice_resources(slice_cred, args[0])
    display_rspec(opts.format, result)
+   if (opts.file is not None):
+      save_rspec_to_file(opts.file, result)
    return
 
 # created named slice with given rspec
@@ -395,13 +404,17 @@ def reset(opts, args):
 
 #
 #
-# Display and Filter RSpecs and Records
+# Display, Save, and Filter RSpecs and Records
 #   - to be replace by EMF-generated routines
 #
 #
 
 def display_rspec(format, rspec):
    print "display rspec"
+   return
+
+def save_rspec_to_file(file, rspec):
+   print "save rspec"
    return
 
 def display_record(type, record):
@@ -411,6 +424,10 @@ def display_record(type, record):
 
 def filter_record(type, record):
    print "filter record"
+   return
+
+def save_record_to_file(file, record):
+   print "save record"
    return
 
 
