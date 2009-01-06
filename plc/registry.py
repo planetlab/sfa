@@ -6,16 +6,20 @@ import os
 import time
 import sys
 
+from util.credential import Credential
 from util.hierarchy import Hierarchy
 from util.trustedroot import TrustedRootList
 from util.cert import Keypair, Certificate
 from util.gid import GID
 from util.geniserver import GeniServer
 from util.record import GeniRecord
+from util.rights import RightList
 from util.genitable import GeniTable
 from util.geniticket import Ticket
 from util.excep import *
 from util.misc import *
+
+from util.config import *
 
 ##
 # Convert geni fields to PLC fields for use when registering up updating
@@ -132,7 +136,7 @@ class Registry(GeniServer):
     # @param auth_hrn human readable name of authority
 
     def get_auth_info(self, auth_hrn):
-        return AuthHierarchy.get_auth_info(auth_hrn)
+        return self.hierarchy.get_auth_info(auth_hrn)
 
     ##
     # Given an authority name, return the database table for that authority. If
@@ -347,8 +351,8 @@ class Registry(GeniServer):
 
         if (type == "sa") or (type=="ma"):
             # update the tree
-            if not AuthHierarchy.auth_exists(name):
-                AuthHierarchy.create_auth(name)
+            if not self.hierarchy.auth_exists(name):
+                self.hierarchy.create_auth(name)
 
             # authorities are special since they are managed by the registry
             # rather than by the caller. We create our own GID for the
@@ -729,7 +733,7 @@ class Registry(GeniServer):
         rl = self.determine_rights(type, name)
         cred.set_privileges(rl)
 
-        cred.set_parent(AuthHierarchy.get_auth_cred(auth_hrn))
+        cred.set_parent(self.hierarchy.get_auth_cred(auth_hrn))
 
         cred.encode()
         cred.sign()
@@ -775,7 +779,7 @@ class Registry(GeniServer):
         rl = self.determine_rights(type, name)
         new_cred.set_privileges(rl)
 
-        new_cred.set_parent(AuthHierarchy.get_auth_cred(auth_hrn))
+        new_cred.set_parent(self.hierarchy.get_auth_cred(auth_hrn))
 
         new_cred.encode()
         new_cred.sign()
@@ -808,7 +812,7 @@ class Registry(GeniServer):
 
         pkey = Keypair()
         pkey.load_pubkey_from_string(pubkey_str)
-        gid = AuthHierarchy.create_gid(name, uuid, pkey)
+        gid = self.hierarchy.create_gid(name, uuid, pkey)
 
         return gid.save_to_string(save_parents=True)
 

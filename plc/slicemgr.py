@@ -17,6 +17,8 @@ from util.geniticket import Ticket
 from util.excep import *
 from util.misc import *
 
+from util.config import *
+
 ##
 # SliceMgr class extends GeniServer class
 

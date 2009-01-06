@@ -14,7 +14,7 @@
 #    appropriate geni records. This is done by running the "import.py" tool.
 #
 # 3) Create a "trusted_roots" directory and place the certificate of the root
-#    authority in that directory. Given the defaults in import.py, this 
+#    authority in that directory. Given the defaults in import.py, this
 #    certificate would be named "planetlab.gid". For example,
 #
 #    mkdir trusted_roots; cp authorities/planetlab.gid trusted_roots/
@@ -34,7 +34,7 @@ from util.hierarchy import Hierarchy
 from util.trustedroot import TrustedRootList
 from util.cert import Keypair, Certificate
 from registry import Registry
-from aggregate import Aggregate
+#from aggregate import Aggregate
 from slicemgr import SliceMgr
 
 def main():
@@ -78,6 +78,7 @@ def main():
     if (options.registry):
         r = Registry("", registry_port, key_file, cert_file)
         r.trusted_cert_list = TrustedRoots.get_list()
+        r.hierarchy = AuthHierarchy
         r.start()
 
     # start aggregate manager
