@@ -175,16 +175,12 @@ class Aggregate:
 	elif type in ['aggregate']:
 	    pass
 
-    get_slice_rspec = get_rspec(hrn, 'slice')
-    get_node_rspec = get_rspec(hrn, 'node')
-    get_aggregate_rspec = get_rpsec(hrn, 'aggregate')		
-
     def get_resources(self, slice_hrn):
 	"""
 	Return the current rspec for the specified slice.
 	"""
 	slicename = hrn_to_plcslicename(slice_hrn)
-	rspec = self.get_slice_rspec(slicename)
+	rspec = self.get_rspec(slicenamem, 'slice' )
         
 	return rspec
  
@@ -192,7 +188,7 @@ class Aggregate:
 	"""
 	Instantiate the specified slice according to whats defined in the rspec.
 	"""
-	slicename = hrn_to_plcslicename(slice_hrn)
+	slicename = self.hrn_to_plcslicename(slice_hrn)
 	#spec = Rspec(rspec)
 	#components = spec.components()
 	#shell.AddSliceToNodes(self.auth, slicename, components)
@@ -203,7 +199,7 @@ class Aggregate:
 	Remove this slice from all components it was previouly associated with and 
 	free up the resources it was using.
 	"""
-	slicename = hrn_to_plcslicename(slice_hrn)
+	slicename = self.hrn_to_plcslicename(slice_hrn)
 	rspec = self.get_resources(slice_hrn)
 	components = rspec.components()
 	shell.DeleteSliceFromNodes(self.auth, slicename, components)
@@ -220,7 +216,7 @@ class Aggregate:
 	slice_id = slices[0]
 	atrribtes = self.shell.GetSliceAttributes({'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
 	attribute_id = attreibutes[0] 
-	self.shell.UpdateSliceAttribute(self.auth, attribute_id, "1" })
+	self.shell.UpdateSliceAttribute(self.auth, attribute_id, "1" )
 	return 1
 
     def stop_slice(self, slice_hrn):
@@ -234,21 +230,21 @@ class Aggregate:
         slice_id = slices[0]
         atrribtes = self.shell.GetSliceAttributes({'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
         attribute_id = attreibutes[0]
-	self.shell.UpdateSliceAttribute(self.auth, attribute_id, "0"})
+	self.shell.UpdateSliceAttribute(self.auth, attribute_id, "0")
 	return 1
 
     def reset_slice(self, slice_hrn):
 	"""
 	Reset the slice
 	"""
-	slicename = hrn_to_plcslicename(slice_hrn)
+	slicename = self.hrn_to_plcslicename(slice_hrn)
 	return 1
 
     def get_policy(self):
 	"""
 	Return this aggregates policy as an rspec
 	"""
-	rspec = get_aggregate_rspec(self.hrn):
+	rspec = self.get_rspec(self.hrn, 'aggregate')
 	return rspec
     	
 	 		
