@@ -9,7 +9,7 @@ from geniticket import *
 
 long_opts = ["keyfile=", "help", "outfile=", "credfile=", "ticketfile=",
              "username=", "email=", "ip=", "dns=", "dump_parents", "server=",
-             "filter="]
+             "filter=", "short"]
 
 # default command line options
 username = "client"
@@ -23,6 +23,7 @@ cert_file = None
 out_file = None
 ticket_file = None
 
+short = False
 ip = None
 dns = None
 email = None
@@ -54,10 +55,12 @@ def showhelp():
    print "    --dump_parents   ... dump parents"
    print "    --server         ... geni server (registry/component) to connect to"
    print "    --filter <type>  ... filter the results of a list operation (user | slice | node ...)"
+   print "    --short          ... list records in short format (name only)"
    print "commands:"
    print "    resolve <hrn>"
    print "    dumpCredential"
    print "    getCredential <type> <hrn>"
+   print "    list <hrn>"
    print "    start <hrn>"
    print "    createKey <filename>"
    print "    createGid <hrn> <uuid|None> <pubkey_fn>"
@@ -78,6 +81,7 @@ def process_options():
    global dump_parents
    global server_url
    global filter
+   global short
 
    (options, args) = getopt.getopt(sys.argv[1:], '', long_opts)
    for opt in options:
@@ -111,6 +115,8 @@ def process_options():
            server_url = val
        elif name == "--filter":
            filter = val
+       elif name == "--short":
+           short = True
 
    if not args:
        print "no operation specified"
@@ -130,6 +136,13 @@ def process_options():
            sys.exit(-1)
        type = args[1]
        hrn = args[2]
+
+   elif opname == "list":
+       if len(args) < 2:
+           print "syntax: list <hrn>"
+           sys.exit(-1)
+       hrn = args[1]
+
 
    elif opname == "createGid":
        if len(args) < 4:
@@ -290,13 +303,16 @@ def main():
           print "NO RESULT"
 
    elif (opname == "list"):
-      result = client.list(cred)
+      result = client.list(cred, hrn)
       if result:
           if filter:
               result = [r for r in result if r.type==filter]
+          print "RESULT:"
           for record in result:
-              print "RESULT:"
-              record.dump(dump_parents=dump_parents)
+              if short:
+                  print "  ", record.get_name()
+              else:
+                  record.dump(dump_parents=dump_parents)
       else:
           print "NO RESULT"
 
@@ -336,20 +352,6 @@ def main():
 
    elif (opname == "remove"):
        client.remove(cred, type, hrn)
-#       record_list = client.resolve(cred, hrn)
-#       if not record_list:
-#           print "no records match hrn"
-#
-#       matching_records = []
-#       for record in record_list:
-#           if record.get_type() == type:
-#               matching_records.append(record)
-#
-#       if not matching_records:
-#           print "records match hrn, but no records match type"
-#
-#       for record in matching_records:
-#           client.remove(cred, record)
 
    elif (opname == "update"):
        record_list = client.resolve(cred, hrn)
