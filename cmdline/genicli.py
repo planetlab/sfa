@@ -335,20 +335,21 @@ def main():
        result = client.register(cred, record)
 
    elif (opname == "remove"):
-       record_list = client.resolve(cred, hrn)
-       if not record_list:
-           print "no records match hrn"
-
-       matching_records = []
-       for record in record_list:
-           if record.get_type() == type:
-               matching_records.append(record)
-
-       if not matching_records:
-           print "records match hrn, but no records match type"
-
-       for record in matching_records:
-           client.remove(cred,record)
+       client.remove(cred, type, hrn)
+#       record_list = client.resolve(cred, hrn)
+#       if not record_list:
+#           print "no records match hrn"
+#
+#       matching_records = []
+#       for record in record_list:
+#           if record.get_type() == type:
+#               matching_records.append(record)
+#
+#       if not matching_records:
+#           print "records match hrn, but no records match type"
+#
+#       for record in matching_records:
+#           client.remove(cred, record)
 
    elif (opname == "update"):
        record_list = client.resolve(cred, hrn)
