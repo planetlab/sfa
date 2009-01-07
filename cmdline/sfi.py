@@ -292,16 +292,21 @@ def main():
 def list(opts, args):
    global registry
    user_cred = get_user_cred()
-   result = registry.list(user_cred, args[0])
-   display_record(opts.type, results)
+   list = registry.list(user_cred, args[0])
+   for record in list :
+      if (filter_record(opts.type, record) is not None):
+         display_record(record)
    return
 
 # show named registry record
 def show(opts, args):
    global registry
    user_cred = get_user_cred() 
-   result = reg_chan.resolve(user_cred, args[0])
-   display_record(opts.type, results)
+   record = reg_chan.resolve(user_cred, args[0])
+   if (opts.type == record.get_type()):
+      display_record(record)
+   else :
+      print "No record of type", opts.type
    if (opts.file is not None):
       save_record_to_file(opts.file, result)
    return
@@ -311,9 +316,11 @@ def show(opts, args):
 def remove(opts, args):
    global registry
    auth_cred = get_auth_cred() 
-   results = registry.resolve(auth_cred, args[0])
-   record = filter_record(opts.type, results)
-   return registry.remove(auth_cred, record)
+   list = registry.resolve(auth_cred, args[0])
+   for record in list :
+      if (filter_record(opts.type, record) is not None):
+         return registry.remove(auth_cred, record)
+   return 
 
 # add named registry record
 def add(opts, args):
@@ -417,14 +424,15 @@ def save_rspec_to_file(file, rspec):
    print "save rspec"
    return
 
-def display_record(type, record):
-   rec = filter_record(type, record)
-   print "display record"
+def display_record(record):
+   record.dump(False)
    return
 
 def filter_record(type, record):
-   print "filter record"
-   return
+   if (record.get_type() == type):
+      return record
+   else:
+      return None
 
 def save_record_to_file(file, record):
    print "save record"
