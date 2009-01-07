@@ -4,17 +4,14 @@ import datetime
 import time
 import xmlrpclib
 
-from geniserver import *
-from excep import *
-from misc import *
-from config import Config
+from util.geniserver import *
+from util.cert import *
+from util.trustedroot import *
+from util.excep import *
+from util.misc import *
+from util.config import Config
 
-conf = Config()
-basedir = conf.GENI_BASE_DIR + os.sep 
-server_basedir = basedir + os.sep + "plc" + os.sep 
-agg_hrn = conf.GENI_INTERFACE_HRN
-
-class Aggregate:
+class Aggregate(GeniServer):
 
     hrn = None
     aggregate_file = None
@@ -26,15 +23,21 @@ class Aggregate:
     policies = {}
     timestamp = None
     threshold = None	
-    server = None
+    shell = None
      
 
-    def __init__(self, hrn = agg_hrn, components_ttl = 1):
-        self.hrn = hrn
+    def __init__(self, ip, port, key_file, cert_file, config = "/usr/share/geniwrapper/util/geni_config"):
+        GeniServer.__init__(ip, port, keyfile, cert_file)
+	
+	conf = Config(config)
+        basedir = conf.GENI_BASE_DIR + os.sep
+        server_basedir = basedir + os.sep + "plc" + os.sep
+	self.hrn = conf.GENI_INTERFACE_HRN
 	self.components_file = os.sep.join([server_basedir, 'components', hrn + '.comp'])
 	self.slices_file = os.sep.join([server_basedir, 'components', hrn + '.slices'])
 	self.timestamp_file = os.sep.join([server_basedir, 'components', hrn + '.timestamp']) 
 	self.components_ttl = components_ttl
+	self.connect()
 
     def connect(self):
 	"""
@@ -247,4 +250,61 @@ class Aggregate:
 	rspec = self.get_rspec(self.hrn, 'aggregate')
 	return rspec
     	
-	 		
+	
+
+##############################
+## Server methods here for now
+##############################
+
+    def nodes(self):
+        return self..get_components()
+
+    def slices(self):
+        return self.get_slices()
+
+    def resources(self, cred, hrn):
+        self.decode_authentication(cred, 'info')
+        self.verify_object_belongs_to_me(hrn)
+
+        return self.get_resources(hrn)
+
+    def create(self, cred, hrn, rspec):
+        self.decode_authentication(cred, 'embed')
+        self.verify_object_belongs_to_me(hrn, rspec)
+        return self.create(hrn)
+
+    def delete(self, cred, hrn):
+        self.decode_authentication(cred, 'embed')
+        self.verify_object_belongs_to_me(hrn)
+        return self.delete_slice(hrn)
+
+    def start(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.start(hrn)
+
+    def stop(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.stop(hrn)
+
+    def reset(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.reset(hrn)
+
+    def policy(self, cred):
+        self.decode_authentication(cred, 'info')
+        return self.get_policy()
+
+    def register_functions(self):
+        GeniServer.register_functions(self)
+
+        # Aggregate interface methods
+        self.server.register_function(self.components)
+        self.server.register_function(self.slices)
+        self.server.register_function(self.resources)
+        self.server.register_function(self.create)
+        self.server.register_function(self.delete)
+        self.server.register_function(self.start)
+        self.server.register_function(self.stop)
+        self.server.register_function(self.reset)
+        self.server.register_function(self.policy)
+      		
