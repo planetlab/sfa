@@ -546,11 +546,13 @@ class Registry(GeniServer):
     # @param cred credential string specifying rights of the caller
     #
     # @return list of record dictionaries
-    def list(self, cred):
+    def list(self, cred, auth_hrn):
         self.decode_authentication(cred, "list")
 
-        auth_name = self.object_gid.get_hrn()
-        table = self.get_auth_table(auth_name)
+        if not self.hierarchy.auth_exists(auth_hrn):
+            raise MissingAuthority(auth_hrn)
+
+        table = self.get_auth_table(auth_hrn)
 
         records = table.list()
 

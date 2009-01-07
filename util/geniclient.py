@@ -165,8 +165,8 @@ class GeniClient():
     #
     # @return list of record objects
 
-    def list(self, cred):
-        result_dict_list = self.server.list(cred.save_to_string(save_parents=True))
+    def list(self, cred, auth_hrn):
+        result_dict_list = self.server.list(cred.save_to_string(save_parents=True), auth_hrn)
         result_rec_list = []
         for dict in result_dict_list:
              result_rec_list.append(GeniRecord(dict=dict))
