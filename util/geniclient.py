@@ -197,13 +197,11 @@ class GeniClient():
     # then the PLC records will also be removed.
     #
     # @param cred credential object specifying rights of the caller
-    # @param record record to register. The only relevant
-    #     fields of the record are 'name' and 'type', which are used to lookup
-    #     the current copy of the record in the Geni database, to make sure
-    #     that the appopriate record is removed.
+    # @param type
+    # @param hrn
 
-    def remove(self, cred, record):
-        result = self.server.remove(cred.save_to_string(save_parents=True), record.as_dict())
+    def remove(self, cred, type, hrn):
+        result = self.server.remove(cred.save_to_string(save_parents=True), type, hrn)
         return result
 
     ##
