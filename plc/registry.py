@@ -10,7 +10,7 @@ from util.credential import Credential
 from util.hierarchy import Hierarchy
 from util.trustedroot import TrustedRootList
 from util.cert import Keypair, Certificate
-from util.gid import GID
+from util.gid import GID, create_uuid
 from util.geniserver import GeniServer
 from util.record import GeniRecord
 from util.rights import RightList
@@ -155,7 +155,7 @@ class Registry(GeniServer):
         # into this authority yet.
 
         if not table.exists():
-            report.trace("Registry: creating table for authority " + auth_name)
+            print "Registry: creating table for authority", auth_name
             table.create()
 
         return table
@@ -432,20 +432,15 @@ class Registry(GeniServer):
     #     the current copy of the record in the Geni database, to make sure
     #     that the appopriate record is removed.
 
-    def remove(self, cred, record_dict):
+    def remove(self, cred, type, hrn):
         self.decode_authentication(cred, "remove")
 
-        record = GeniRecord(dict = record_dict)
-        type = record.get_type()
+        self.verify_object_permission(hrn)
 
-        self.verify_object_permission(record.get_name())
-
-        auth_name = get_authority(record.get_name())
+        auth_name = get_authority(hrn)
         table = self.get_auth_table(auth_name)
 
-        # let's not trust that the caller has a well-formed record (a forged
-        # pointer field could be a disaster), so look it up ourselves
-        record_list = table.resolve(type, record.get_name())
+        record_list = table.resolve(type, hrn)
         if not record_list:
             raise RecordNotFound(name)
         record = record_list[0]
@@ -567,7 +562,7 @@ class Registry(GeniServer):
             except PlanetLabRecordDoesNotExist:
                 # silently drop the ones that are missing in PL.
                 # is this the right thing to do?
-                report.error("ignoring geni record " + record.get_name() + " because pl record does not exist")
+                print "ignoring geni record ", record.get_name(), " because pl record does not exist"
                 table.remove(record)
 
         dicts = []
@@ -607,7 +602,7 @@ class Registry(GeniServer):
             except PlanetLabRecordDoesNotExist:
                 # silently drop the ones that are missing in PL.
                 # is this the right thing to do?
-                report.error("ignoring geni record " + record.get_name() + " because pl record does not exist")
+                print "ignoring geni record ", record.get_name(), "because pl record does not exist"
                 table.remove(record)
 
         return good_records
