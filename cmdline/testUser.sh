@@ -6,7 +6,7 @@
 
 # The following lines use a test account. The account has a first name of "test"
 # and a last name of "account". The private key should be in the file test.pkey
-USERNAME=test
+USERNAME=${USERNAME-`whoami`}
 PARENT_HRN=planetlab.us.pl
 USER_HRN=$PARENT_HRN.account_test
 
@@ -18,9 +18,9 @@ USER_HRN=$PARENT_HRN.account_test
 
 # The following lines use Tony Mack's planetlab account on a live PLC
 # database (tony: copy your private key to tmack.pkey in the current directory)
-USERNAME=tmack
-PARENT_HRN=planetlab.us.princeton
-USER_HRN=$PARENT_HRN.Mack_Tony
+#USERNAME=tmack
+#PARENT_HRN=planetlab.us.princeton
+#USER_HRN=$PARENT_HRN.Mack_Tony
 
 PRIVKEY_FN=$USERNAME.pkey
 CRED_FN=$USERNAME.cred
