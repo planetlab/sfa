@@ -52,14 +52,7 @@ class GeniRecord():
         if pointer:
             self.set_pointer(pointer)
         if dict:
-            self.set_name(dict['name'])
-            self.set_gid(dict['gid'])
-            self.set_type(dict['type'])
-            self.set_pointer(dict['pointer'])
-            if "pl_info" in dict:
-               self.set_pl_info(dict["pl_info"])
-            if "geni_info" in dict:
-               self.set_geni_info(dict["geni_info"])
+            self.load_from_dict(dict)
 
     ##
     # Set the name of the record
@@ -222,6 +215,38 @@ class GeniRecord():
             dict['geni_info'] = self.geni_info
 
         return dict
+
+    ##
+    # Load the record from a dictionary
+    #
+    # @param dict dictionary to load record fields from
+
+    def load_from_dict(self, dict):
+        self.set_name(dict['name'])
+        self.set_gid(dict['gid'])
+        self.set_type(dict['type'])
+        self.set_pointer(dict['pointer'])
+        if "pl_info" in dict:
+           self.set_pl_info(dict["pl_info"])
+        if "geni_info" in dict:
+           self.set_geni_info(dict["geni_info"])
+
+    ##
+    # Save the record to a string. The string contains an XML representation of
+    # the record.
+
+    def save_to_string(self):
+        dict = self.as_dict()
+        str = xmlrpclib.dumps((dict,), allow_none=True)
+        return str
+
+    ##
+    # Load the record from a string. The string is assumed to contain an XML
+    # representation of the record.
+
+    def load_from_string(self, str):
+        dict = xmlrpclib.loads(str)[0][0]
+        self.load_from_dict(dict)
 
     ##
     # Dump the record to stdout
