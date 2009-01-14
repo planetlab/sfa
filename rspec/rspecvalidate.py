@@ -30,6 +30,18 @@ def traverseComplexType(cmpTypeNode):
 		for n in cmpTypeNode.getElementsByTagName("xsd:attribute"):
 			_elements[n.getAttribute("name")] = {'type': n.getAttribute("type")}
 
+
+# Element.  {name, value, default}
+def Element(elementDom):
+	node = {} #parsed dict
+	for attr in elementDom.attributes.keys():
+		node[attr] = elementDom.attributes.get(attr).value
+	return node
+
+# Sequence is a list of dicts.  Each dict is an element type with Type fields
+def Sequence(sequenceNode):
+	pass
+
 def buildDict(document):
 	if document.hasChildNodes():
 		for i in document.childNodes: buildDict(i)
