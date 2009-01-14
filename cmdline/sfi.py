@@ -46,7 +46,7 @@ def set_servers(options):
 
    if options.verbose :
       print "Contacting Slice Manager at:", sm_url
-      print "Contacting Registry at:", registry_url
+      print "Contacting Registry at:", reg_url
 
    # Set user HRN
    if (options.user is not None):
@@ -65,13 +65,13 @@ def set_servers(options):
    else:
       authority = None
 
-   # Get key and certificate   
+   # Get key and certificate
    key_file = get_key_file()
    cert_file = get_cert_file(key_file)
 
    # Establish connection to server(s)
    slicemgr = GeniClient(sm_url, key_file, cert_file)
-   registry = GeniClient(registry_url, key_file, cert_file)
+   registry = GeniClient(reg_url, key_file, cert_file)
    return
 
 #
@@ -126,7 +126,7 @@ def get_user_cred():
       return user_cred
    else:
       # bootstrap user credential
-      user_cred = get_credential(None, "user", user)
+      user_cred = registry.get_credential(None, "user", user)
       if user_cred:
          user_cred.save_to_file(file, save_parents=True)
          if verbose:
@@ -146,7 +146,7 @@ def get_auth_cred():
    else:
       # bootstrap authority credential from user credential
       user_cred = get_user_cred()
-      auth_cred = get_credential(user_cred, "sa", authority)
+      auth_cred = registry.get_credential(user_cred, "sa", authority)
       if auth_cred:
          auth_cred.save_to_file(file, save_parents=True)
          if verbose:
@@ -164,7 +164,7 @@ def get_slice_cred(name):
    else:
       # bootstrap slice credential from user credential
       user_cred = get_user_cred()
-      slice_cred = get_credential(user_cred, "slice", name)
+      slice_cred = registry.get_credential(user_cred, "slice", name)
       if slice_cred:
          slice_cred.save_to_file(file, save_parents=True)
          if verbose:
@@ -196,10 +196,11 @@ def get_record_file(record):
       print "No such registry record file"
       sys.exit(1)
 
+
 #
 # Generate sub-command parser
 #
-def create_cmd_parser(command):
+def create_cmd_parser(command, additional_cmdargs = None):
    cmdargs = {"list": "name",
               "show": "name",
               "remove": "name",
@@ -214,9 +215,16 @@ def create_cmd_parser(command):
               "start": "name",
               "stop": "name"
              }
+
+   if additional_cmdargs:
+      cmdargs.update(additional_cmdargs)
+
    if command not in cmdargs:
       print "Invalid command\n"
-      print "Commands:list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset"
+      print "Commands: ",
+      for key in cmdargs.keys():
+          print key+",",
+      print ""
       sys.exit(2)
 
    parser = OptionParser(usage="sfi [sfi_options] %s [options] %s" \
@@ -227,20 +235,15 @@ def create_cmd_parser(command):
            choices=("dns","ip","hrn","rspec"))
    if command in ("list", "show", "remove"):
       parser.add_option("-t", "--type", dest="type",type="choice",
-           help="type filter (user|slice|sa|ma|node|aggregate)", 
+           help="type filter (user|slice|sa|ma|node|aggregate)",
            choices=("user","slice","sa","ma","node","aggregate", "all"),
            default="all")
-   if command in ("show", "nodes", "resources"):
+   if command in ("show", "list", "nodes", "resources"):
       parser.add_option("-o", "--output", dest="file",
            help="output XML to file", metavar="FILE", default=None)
    return parser
 
-#
-# Main: parse arguments and dispatch to command
-#
-def main():
-   global verbose
-
+def create_parser():
    # Generate command line parser
    parser = OptionParser(usage="sfi [options] command [command_options] [command_args]",
         description="Commands: list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset")
@@ -258,7 +261,25 @@ def main():
         action="store_true", dest="verbose", default=False,
         help="verbose mode")
    parser.disable_interspersed_args()
+
+   return parser
+
+def dispatch(command, cmd_opts, cmd_args):
+   globals()[command](cmd_opts, cmd_args)
+
+#
+# Main: parse arguments and dispatch to command
+#
+def main():
+   global verbose
+
+   parser = create_parser()
    (options, args) = parser.parse_args()
+
+   if len(args) <= 0:
+        print "No command given. Use -h for help."
+        return -1
+
    command = args[0]
    (cmd_opts, cmd_args) = create_cmd_parser(command).parse_args(args[1:])
    verbose = options.verbose
@@ -270,16 +291,16 @@ def main():
          print cmd_opts.format
       elif command in ("list","show","remove"):
          print cmd_opts.type
-      print cmd_args 
+      print cmd_args
 
    set_servers(options)
 
-   # Dispatch to selected command
    try:
-      globals()[command](cmd_opts, cmd_args)
+      dispatch(command, cmd_opts, cmd_args)
    except KeyError:
       print "Command not found:", command
       sys.exit(1)
+
    return
 
 #
@@ -293,39 +314,36 @@ def list(opts, args):
    global registry
    user_cred = get_user_cred()
    list = registry.list(user_cred, args[0])
-   for record in list :
-      if (filter_record(opts.type, record) is not None):
-         display_record(record)
+   list = filter_records(opts.type, list)
+   display_records(list)
+   if opts.file:
+       save_records_to_file(opts.file, list)
    return
 
 # show named registry record
 def show(opts, args):
    global registry
-   user_cred = get_user_cred() 
-   record = reg_chan.resolve(user_cred, args[0])
-   if (opts.type == record.get_type()):
-      display_record(record)
-   else :
+   user_cred = get_user_cred()
+   records = registry.resolve(user_cred, args[0])
+   records = filter_records(opts.type, records)
+   if not records:
       print "No record of type", opts.type
-   if (opts.file is not None):
-      save_record_to_file(opts.file, result)
+   display_records(records)
+   if opts.file:
+       save_records_to_file(opts.file, records)
    return
 
 # removed named registry record
 #   - have to first retrieve the record to be removed
 def remove(opts, args):
    global registry
-   auth_cred = get_auth_cred() 
-   list = registry.resolve(auth_cred, args[0])
-   for record in list :
-      if (filter_record(opts.type, record) is not None):
-         return registry.remove(auth_cred, record)
-   return 
+   auth_cred = get_auth_cred()
+   return registry.remove(auth_cred, opts.type, args[0])
 
 # add named registry record
 def add(opts, args):
    global registry
-   auth_cred = get_auth_cred() 
+   auth_cred = get_auth_cred()
    rec_file = get_record_file(args[1])
    with open(rec_file) as f:
       record = f.read()
@@ -334,7 +352,7 @@ def add(opts, args):
 # update named registry entry
 def update(opts, args):
    global registry
-   user_cred = get_user_cred() 
+   user_cred = get_user_cred()
    rec_file = get_record_file(args[1])
    with open(rec_file) as f:
       record = f.read()
@@ -424,20 +442,35 @@ def save_rspec_to_file(file, rspec):
    print "save rspec"
    return
 
+def display_records(recordList):
+   for record in recordList:
+      display_record(record)
+
 def display_record(record):
    record.dump(False)
    return
 
-def filter_record(type, record):
-   if (record.get_type() == type):
-      return record
-   else:
-      return None
+def filter_records(type, records):
+   filtered_records = []
+   for record in records:
+       if (record.get_type() == type) or (type == "all"):
+           filtered_records.append(record)
+   return filtered_records
 
-def save_record_to_file(file, record):
-   print "save record"
+def save_records_to_file(filename, recordList):
+   index = 0
+   for record in recordList:
+       if index>0:
+           save_record_to_file(filename + "." + str(index), record)
+       else:
+           save_record_to_file(filename, record)
+       index = index + 1
+
+def save_record_to_file(filename, record):
+   print "saving record", record.name, "to file", filename
+   str = record.save_to_string()
+   file(filename, "w").write(str)
    return
-
 
 if __name__=="__main__":
    main()
