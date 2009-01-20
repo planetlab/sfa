@@ -57,7 +57,7 @@ class SliceMgr(GeniServer):
     def load_aggregates(self, aggregates_file):
 	"""
 	Get info about the aggregates available to us from file and create 
-         an xmlrpc connection to each. If any info is invalid, skip it. 
+        an xmlrpc connection to each. If any info is invalid, skip it. 
 	"""
 	lines = []
         try:
@@ -80,6 +80,7 @@ class SliceMgr(GeniServer):
 	    hrn, address, port = agg_info[0], agg_info[1], agg_info[2]
 	    url = 'https://%(address)s:%(port)s' % locals()
 	    self.aggregates[hrn] = GeniClient(url, self.key_file, self.cert_file)
+
 
     def item_hrns(self, items):
 	"""
@@ -115,7 +116,7 @@ class SliceMgr(GeniServer):
 
     def refresh_components(self):
 	"""
-	Update the cached list of nodes and slices.
+	Update the cached list of nodes.
 	"""
 	print "refreshing"
 	
@@ -127,9 +128,6 @@ class SliceMgr(GeniServer):
 		# resolve components hostnames
 	        nodes = self.aggregates[aggregate].get_components()
 		all_nodes.extend(nodes)	
-	 	# resolve slices
-	        slices = self.aggregates[aggregate].get_slices()
-		all_slices.extend(slice)
 		# update timestamp and threshold
 		self.timestamp = datetime.datetime.now()
 		delta = datetime.timedelta(hours=self.components_ttl)
@@ -139,12 +137,8 @@ class SliceMgr(GeniServer):
 		pass	
    
 	self.components = all_nodes
-	self.slices = all_slices	
 	f = open(self.components_file, 'w')
 	f.write(str(self.components))
-	f.close()
-	f = open(self.slices_file, 'w')
-	f.write(str(self.slices))
 	f.close()
 	f = open(self.timestamp_file, 'w')
 	f.write(str(self.threshold))
@@ -154,18 +148,13 @@ class SliceMgr(GeniServer):
 	"""
 	Read cached list of nodes and slices.
 	"""
-	print "loading"
+	print "loading nodes"
 	# Read component list from cached file 
 	if os.path.exists(self.components_file):
 	    f = open(self.components_file, 'r')
 	    self.components = eval(f.read())
 	    f.close()
 	
-	if os.path.exists(self.slices_file):
-            f = open(self.components_file, 'r')
-            self.slices = eval(f.read())
-            f.close()
-
 	time_format = "%Y-%m-%d %H:%M:%S"
 	if os.path.exists(self.timestamp_file):
 	    f = open(self.timestamp_file, 'r')
@@ -173,7 +162,27 @@ class SliceMgr(GeniServer):
 	    self.timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, time_format)))
 	    delta = datetime.timedelta(hours=self.components_ttl)
             self.threshold = self.timestamp + delta
-	    f.close()	
+	    f.close()
+ 
+    def load_slices(self):
+	"""
+ 	Read current slice instantiation states.
+	"""
+	print "loading slices"
+	if os.path.exists(self.slices_file):
+            f = open(self.components_file, 'r')
+            self.slices = eval(f.read())
+            f.close()	
+
+    def write_slices(self):
+        """
+        Write current slice instantiations to file.
+        """
+        print "writing slices"
+        f = open(self.slices_file, 'w')
+        f.write(str(self.slices))
+        f.close()
+
 
     def get_components(self):
 	"""
@@ -200,6 +209,17 @@ class SliceMgr(GeniServer):
 	elif now < self.threshold and not self.slices:
 	    self.load_components()
 	return self.slices
+
+    def get_slivers(self, hrn):
+	"""
+	Return the list of slices instantiated at the specified component.
+	"""
+
+	# hrn is assumed to be a component hrn
+	if hrn not in self.slices:
+	    raise Exception, hrn + " not found"
+	
+	return self.slices[hrn]
 
     def get_rspec(self, hrn, type):
 	#rspec = Rspec()
