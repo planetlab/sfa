@@ -14,17 +14,23 @@ from util.config import Config
 class Aggregate(GeniServer):
 
     hrn = None
-    aggregate_file = None
     components_file = None
-    slices_file = None	
     components_ttl = None
     components = []
-    slices = []	
-    policies = {}
+    whitelist_file = None
+    blacklist_file = None	
+    policy = {}
     timestamp = None
     threshold = None	
     shell = None
-     
+  
+    ##
+    # Create a new aggregate object.
+    #
+    # @param ip the ip address to listen on
+    # @param port the port to listen on
+    # @param key_file private key filename of registry
+    # @param cert_file certificate filename containing public key (could be a GID file)     
 
     def __init__(self, ip, port, key_file, cert_file, config = "/usr/share/geniwrapper/util/geni_config"):
         GeniServer.__init__(ip, port, keyfile, cert_file)
@@ -34,9 +40,12 @@ class Aggregate(GeniServer):
         server_basedir = basedir + os.sep + "plc" + os.sep
 	self.hrn = conf.GENI_INTERFACE_HRN
 	self.components_file = os.sep.join([server_basedir, 'components', hrn + '.comp'])
-	self.slices_file = os.sep.join([server_basedir, 'components', hrn + '.slices'])
+	self.whitelist_file = os.sep.join([server_basedir, 'policy', 'whitelist'])
+	self.blacklist_file = os.sep.join([server_basedir, 'policy', 'blacklist'])
 	self.timestamp_file = os.sep.join([server_basedir, 'components', hrn + '.timestamp']) 
 	self.components_ttl = components_ttl
+	self.policy['whitelist'] = []
+	self.policy['blacklist'] = []
 	self.connect()
 
     def connect(self):
@@ -83,15 +92,12 @@ class Aggregate(GeniServer):
 
     def refresh_components(self):
 	"""
-	Update the cached list of nodes and slices.
+	Update the cached list of nodes.
 	"""
 	print "refreshing"	
 	# resolve component hostnames 
 	nodes = self.shell.GetNodes(self.auth, {}, ['hostname', 'site_id'])
 	
-	# resolve slices
-	slices = self.shell.GetSlices(self.auth, {}, ['name', 'site_id'])
-   
 	# resolve site login_bases
 	site_ids = [node['site_id'] for node in nodes]
 	sites = self.shell.GetSites(self.auth, site_ids, ['site_id', 'login_base'])
@@ -101,8 +107,16 @@ class Aggregate(GeniServer):
 
 	# convert plc names to geni hrn
 	self.components = [self.hostname_to_hrn(site_dict[node['site_id']], node['hostname']) for node in nodes]
-	self.slices = [self.slicename_to_hrn(slice['name']) for slice in slices]
-		
+
+	# apply policy. Do not allow nodes found in blacklist, only allow nodes found in whitelist
+	whitelist_policy = lambda node: node in self.policy['whitelist']
+	blacklist_policy = lambda node: node not in self.policy['blacklist']
+
+	if self.policy['blacklist']:
+	    self.components = blacklist_policy(self.components)
+	if self.policy['whitelist']:
+	    self.components = whitelist_policy(self.components)
+	    	
 	# update timestamp and threshold
 	self.timestamp = datetime.datetime.now()
 	delta = datetime.timedelta(hours=self.components_ttl)
@@ -111,29 +125,21 @@ class Aggregate(GeniServer):
 	f = open(self.components_file, 'w')
 	f.write(str(self.components))
 	f.close()
-	f = open(self.slices_file, 'w')
-	f.write(str(self.slices))
-	f.close()
 	f = open(self.timestamp_file, 'w')
 	f.write(str(self.threshold))
 	f.close()
  
     def load_components(self):
 	"""
-	Read cached list of nodes and slices.
+	Read cached list of nodes.
 	"""
-	print "loading"
+	print "loading components"
 	# Read component list from cached file 
 	if os.path.exists(self.components_file):
 	    f = open(self.components_file, 'r')
 	    self.components = eval(f.read())
 	    f.close()
 	
-	if os.path.exists(self.slices_file):
-            f = open(self.components_file, 'r')
-            self.slices = eval(f.read())
-            f.close()
-
 	time_format = "%Y-%m-%d %H:%M:%S"
 	if os.path.exists(self.timestamp_file):
 	    f = open(self.timestamp_file, 'r')
@@ -142,6 +148,32 @@ class Aggregate(GeniServer):
 	    delta = datetime.timedelta(hours=self.components_ttl)
             self.threshold = self.timestamp + delta
 	    f.close()	
+
+    def load_policy(self):
+	"""
+	Read the list of blacklisted and whitelisted nodes.
+	"""
+	whitelist = []
+	blacklist = []
+	if os.path.exists(self.whitelist_file):
+            f = open(self.whitelist_file, 'r')
+	    lines = f.readlines()
+            f.close()
+	    for line in lines:
+		line = line.strip().replace(" ", "").replace("\n", "")
+		whitelist.extend(line.split(","))
+			
+	
+	if os.path.exists(self.blacklist_file):
+            f = open(self.blacklist_file, 'r')
+            lines = f.readlines()
+            f.close()
+	    for line in lines:
+                line = line.strip().replace(" ", "").replace("\n", "")
+                blacklist.extend(line.split(","))
+
+	self.policy['whitelist'] = whitelist
+	self.policy['blacklist'] = blacklist
 
     def get_components(self):
 	"""
@@ -157,18 +189,6 @@ class Aggregate(GeniServer):
 	return self.components
    
      
-    def get_slices(self):
-	"""
-	Return a list of instnatiated slices at this aggregate.
-	"""
-	now = datetime.datetime.now()
-	#self.load_components()
-	if not self.threshold or not self.timestamp or now > self.threshold:
-	    self.refresh_components()
-	elif now < self.threshold and not self.slices:
-	    self.load_components()
-	return self.slices
-
     def get_rspec(self, hrn, type):
 	#rspec = Rspec()
 	if type in ['node']:
@@ -245,10 +265,10 @@ class Aggregate(GeniServer):
 
     def get_policy(self):
 	"""
-	Return this aggregates policy as an rspec
+	Return this aggregates policy.
 	"""
-	rspec = self.get_rspec(self.hrn, 'aggregate')
-	return rspec
+	
+	return self.policy
     	
 	
 
@@ -259,8 +279,8 @@ class Aggregate(GeniServer):
     def nodes(self):
         return self..get_components()
 
-    def slices(self):
-        return self.get_slices()
+    #def slices(self):
+    #    return self.get_slices()
 
     def resources(self, cred, hrn):
         self.decode_authentication(cred, 'info')
@@ -299,7 +319,7 @@ class Aggregate(GeniServer):
 
         # Aggregate interface methods
         self.server.register_function(self.components)
-        self.server.register_function(self.slices)
+        #self.server.register_function(self.slices)
         self.server.register_function(self.resources)
         self.server.register_function(self.create)
         self.server.register_function(self.delete)
