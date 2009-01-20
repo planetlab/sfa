@@ -3,7 +3,7 @@
 	<networks>
 		<NetSpec name="planetlab.us" start_time="1235696400" duration="2419200">
 			<nodes>
-				<NodeSpec name="planetlab-1" type="" init_params="" cpu_min="" cpu_share="" cpu_pct="" disk_max="" start_time="" duration="">
+				<NodeSpec name="planetlab-1.cs.princeton.edu" type="" init_params="" cpu_min="" cpu_share="" cpu_pct="" disk_max="" start_time="" duration="">
 					<net_if>
 						<IfSpec name="128.112.139.71" addr="128.112.139.71" type="ipv4" init_params="" min_rate="0" max_rate="10000000" max_kbyte="" ip_spoof="" />
 					</net_if>
@@ -19,7 +19,7 @@
 		</NetSpec>
 		<NetSpec name="planetlab.eu" start_time="" duration="">
 			<nodes>
-				<NodeSpec name="onelab03" type="" init_params="" cpu_min="" cpu_share="" cpu_pct="" disk_max="" start_time="" duration="">
+				<NodeSpec name="onelab03.onelab.eu" type="" init_params="" cpu_min="" cpu_share="" cpu_pct="" disk_max="" start_time="" duration="">
 					<net_if>
 						<IfSpec name="128.112.139.321" addr="128.112.139.321" type="ipv4" init_params="" min_rate="0" max_rate="10000000" max_kbyte="" ip_spoof="" />
 					</net_if>
