@@ -187,35 +187,82 @@ class Aggregate(GeniServer):
 	elif now < self.threshold and not self.components: 
 	    self.load_components()
 	return self.components
-   
      
     def get_rspec(self, hrn, type):
 	#rspec = Rspec()
+	#rspec['nodespec'] = {'name': self.conf.GENI_INTERFACE_HRN}
+	#rsepc['nodespec']['nodes'] = []
 	if type in ['node']:
 	    nodes = self.shell.GetNodes(self.auth)
 	elif type in ['slice']:
-	    slices = self.shell.GetSlices(self.auth)
+	    slicename = hrn_to_pl_slicename(hrn)
+	    slices = self.shell.GetSlices(self.auth, [slicename])
+	    node_ids = slices[0]['node_ids']
+	    nodes = self.shell.GetNodes(self.auth, node_ids) 
+	    for node in nodes:
+	        nodespec = {'name': node['hostname'], 'type': 'std'}
+	    #	rspec['nodespec']['nodes'].append(nodespec)
+		
 	elif type in ['aggregate']:
 	    pass
+
+	#return rspec
 
     def get_resources(self, slice_hrn):
 	"""
 	Return the current rspec for the specified slice.
 	"""
 	slicename = hrn_to_plcslicename(slice_hrn)
-	rspec = self.get_rspec(slicenamem, 'slice' )
+	rspec = self.get_rspec(slicenamem, 'slice')
         
 	return rspec
  
-    def create_slice(self, slice_hrn, rspec):
+    def create_slice(self, slice_hrn, rspec, attributes):
 	"""
 	Instantiate the specified slice according to whats defined in the rspec.
 	"""
 	slicename = self.hrn_to_plcslicename(slice_hrn)
 	#spec = Rspec(rspec)
-	#components = spec.components()
-	#shell.AddSliceToNodes(self.auth, slicename, components)
+	#nodespec = spec['networks']['nodes']
+	#nodes = [nspec['name'] for nspec in nodespec]
+	#self.shell.AddSliceToNodes(self.auth, slicename, nodes)
+	#for attribute in attributes:
+	    #type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
+	    #shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
+
 	return 1
+
+    def update_slice(self, slice_hrn, rspec, attributes):
+	"""
+	Update the specified slice.
+	"""
+	# Get slice info
+	slicename = self.hrn_to_plcslicename(slice_hrn)
+        slices = self.shell.GetSlices(self.auth, [slicename], ['node_ids'])
+        if not slice:
+            raise RecordNotFound(slice_hrn)
+        slice = slices[0]
+
+	# find out where this slice is currently running
+        nodes = self.shell.GetNodes(self.auth, slice['node_ids'], ['hostname'])
+        hostnames = [node['hostname'] for node in nodes]
+
+	# get netspec details
+	#spec = Rspec(rspec)
+        #nodespec = spec['networks']['nodes']
+        #nodes = [nspec['name'] for nspec in nodespec]
+
+	# remove nodes not in rspec
+	#delete_nodes = set(hostnames).difference(nodes)
+	# add nodes from rspec
+	#added_nodes = set(nodes).difference(hostnames)
+	
+        #shell.AddSliceToNodes(self.auth, slicename, added_nodes)
+	#shell.DeleteSliceFromNodes(self.auth, slicename, deleted_nodes)
+
+        #for attribute in attributes:
+            #type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
+            #shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
 	
     def delete_slice_(self, slice_hrn):
 	"""
@@ -223,9 +270,12 @@ class Aggregate(GeniServer):
 	free up the resources it was using.
 	"""
 	slicename = self.hrn_to_plcslicename(slice_hrn)
-	rspec = self.get_resources(slice_hrn)
-	components = rspec.components()
-	shell.DeleteSliceFromNodes(self.auth, slicename, components)
+	slices = shell.GetSlices(self.auth, [slicename])
+	if not slice:
+	    raise RecordNotFound(slice_hrn)
+	slice = slices[0]
+	  
+	shell.DeleteSliceFromNodes(self.auth, slicename, slice['node_ids'])
 	return 1
 
     def start_slice(self, slice_hrn):
@@ -255,6 +305,7 @@ class Aggregate(GeniServer):
         attribute_id = attreibutes[0]
 	self.shell.UpdateSliceAttribute(self.auth, attribute_id, "0")
 	return 1
+
 
     def reset_slice(self, slice_hrn):
 	"""
@@ -290,8 +341,13 @@ class Aggregate(GeniServer):
 
     def create(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'embed')
-        self.verify_object_belongs_to_me(hrn, rspec)
+        self.verify_object_belongs_to_me(hrn)
         return self.create(hrn)
+
+    def update(self, cred, hrn, rspec):
+        self.decode_authentication(cred, 'embed')
+        self.verify_object_belongs_to_me(hrn)
+        return self.update(hrn)	
 
     def delete(self, cred, hrn):
         self.decode_authentication(cred, 'embed')
