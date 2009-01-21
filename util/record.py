@@ -39,10 +39,14 @@ class GeniRecord():
     # @param pointer is a pointer to a PLC record
     # @param dict if !=None, then fill in this record from the dictionary
 
-    def __init__(self, name=None, gid=None, type=None, pointer=None, dict=None):
+    def __init__(self, name=None, gid=None, type=None, pointer=None, dict=None, string=None):
         self.dirty = True
         self.pl_info = None
         self.geni_info = None
+        self.name = None
+        self.gid = None
+        self.type = None
+        self.pointer = None
         if name:
             self.set_name(name)
         if gid:
@@ -53,6 +57,8 @@ class GeniRecord():
             self.set_pointer(pointer)
         if dict:
             self.load_from_dict(dict)
+        if string:
+            self.load_from_string(string)
 
     ##
     # Set the name of the record
@@ -258,7 +264,10 @@ class GeniRecord():
         print "        hrn:", self.name
         print "       type:", self.type
         print "        gid:"
-        self.get_gid_object().dump(8, dump_parents)
+        if (not self.gid):
+            print "        None"
+        else:
+            self.get_gid_object().dump(8, dump_parents)
         print "    pointer:", self.pointer
 
         print "  geni_info:"
