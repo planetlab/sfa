@@ -34,7 +34,7 @@ def handleIfs(interf):
     # loop through attribs and put key value pair into array
     for i in interf.attributes:
         a = node.attributes[i]
-        ifdict.append({a.name:a.value})
+        ifdict[a.name] = a.value
         
     return ifdict
 
