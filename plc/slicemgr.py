@@ -21,7 +21,7 @@ class SliceMgr(GeniServer):
     components_ttl = None
     components = []
     slices = []	
-    policies = {}
+    policy = {}
     timestamp = None
     threshold = None	
     shell = None
@@ -52,6 +52,8 @@ class SliceMgr(GeniServer):
 	self.slices_file = os.sep.join([server_basedir, 'components', 'slicemgr' + hrn + '.slices'])
 	self.timestamp_file = os.sep.join([server_basedir, 'components', 'slicemgr' + hrn + '.timestamp']) 
 	self.components_ttl = components_ttl
+	self.policy['whitelist'] = []
+        self.policy['blacklist'] = []
 	self.connect()
 
     def load_aggregates(self, aggregates_file):
@@ -163,6 +165,32 @@ class SliceMgr(GeniServer):
 	    delta = datetime.timedelta(hours=self.components_ttl)
             self.threshold = self.timestamp + delta
 	    f.close()
+
+    def load_policy(self):
+        """
+        Read the list of blacklisted and whitelisted nodes.
+        """
+        whitelist = []
+        blacklist = []
+        if os.path.exists(self.whitelist_file):
+            f = open(self.whitelist_file, 'r')
+            lines = f.readlines()
+            f.close()
+            for line in lines:
+                line = line.strip().replace(" ", "").replace("\n", "")
+                whitelist.extend(line.split(","))
+
+
+        if os.path.exists(self.blacklist_file):
+            f = open(self.blacklist_file, 'r')
+            lines = f.readlines()
+            f.close()
+            for line in lines:
+                line = line.strip().replace(" ", "").replace("\n", "")
+                blacklist.extend(line.split(","))
+
+        self.policy['whitelist'] = whitelist
+        self.policy['blacklist'] = blacklist
  
     def load_slices(self):
 	"""
@@ -217,7 +245,7 @@ class SliceMgr(GeniServer):
 
 	# hrn is assumed to be a component hrn
 	if hrn not in self.slices:
-	    raise Exception, hrn + " not found"
+	    raise RecordNotFound(hrn)
 	
 	return self.slices[hrn]
 
@@ -239,14 +267,20 @@ class SliceMgr(GeniServer):
         
 	return rspec
  
-    def create_slice(self, slice_hrn, rspec):
+    def create_slice(self, slice_hrn, rspec, attributes):
 	"""
 	Instantiate the specified slice according to whats defined in the rspec.
 	"""
 	slicename = self.hrn_to_plcslicename(slice_hrn)
 	#spec = Rspec(rspec)
-	#components = spec.components()
-	#shell.AddSliceToNodes(self.auth, slicename, components)
+	node_hrns = []
+	#for netspec in spec['networks]:
+	#    networkname = netspec['name']
+	#    nodespec = spec['networks']['nodes']
+	#    nodes = [nspec['name'] for nspec in nodespec]
+	#    node_hrns = [networkname + node for node in nodes]
+	#    
+	self.db.AddSliceToNodes(slice_hrn, node_hrns)
 	return 1
 	
     def delete_slice_(self, slice_hrn):
@@ -254,10 +288,7 @@ class SliceMgr(GeniServer):
 	Remove this slice from all components it was previouly associated with and 
 	free up the resources it was using.
 	"""
-	slicename = self.hrn_to_plcslicename(slice_hrn)
-	rspec = self.get_resources(slice_hrn)
-	components = rspec.components()
-	shell.DeleteSliceFromNodes(self.auth, slicename, components)
+	self.db.DeleteSliceFromNodes(self.auth, slicename, self.components)
 	return 1
 
     def start_slice(self, slice_hrn):
@@ -297,10 +328,10 @@ class SliceMgr(GeniServer):
 
     def get_policy(self):
 	"""
-	Return this aggregates policy as an rspec
+	Return the policy of this slice manager.
 	"""
-	rspec = self.get_rspec(self.hrn, 'aggregate')
-	return rspec
+	
+	return self.policy
     	
 	
 
