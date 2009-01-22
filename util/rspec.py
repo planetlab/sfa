@@ -56,16 +56,21 @@ class Rspec():
 	elementName = nodeDom.nodeName
         if elementName and not elementName.startswith("#"):
             # attributes have tags and values.  get {tag: value}, else {type: value} 
-	    node.update(self._attributeDict(nodeDom))
+	    node[elementName] = self._attributeDict(nodeDom)
+	    #node.update(self._attributeDict(nodeDom))
             # resolve the child nodes.
             if nodeDom.hasChildNodes():
                 for child in nodeDom.childNodes:
-			childName = self._getName(child)
-			if not childName:
-			    continue
-			if not node.has_key(childName):
-			    node[childName] = []
-			node[childName].append(self.toDict2(child))
+		    childName = self._getName(child)
+		    if not childName:
+		        continue
+		    if not node[elementName].has_key(childName):
+		        node[elementName][childName] = []	
+		        #node[childName] = []
+		    childdict = self.toDict(child)
+		    for value in childdict.values():
+		        node[elementName][childName].append(value)
+		    #node[childName].append(self.toDict(child))
         return node
 
     def toxml(self):
@@ -96,10 +101,21 @@ class Rspec():
 	dom = minidom.parseString(xml)
 	self.rootNode = dom.childNodes[0]
 
-    def parseDict(self, d):
+    def parseDict(self, rdict):
 	"""
 	convert a dict object into a dom object.
 	"""
-	pass
+	doc = minidom.Document()
+
+	
+	def elementDict(rd):
+	    for key in rd.keys():
+		if isinstance(rd[key], dict):
+		    elementFromDict(rd[key])
+	 		    	
+	for key in dict.keys():    
+	    doc.appendChild(dictElement(rdict))
+        self.rootNode = doc
+
 
 	
