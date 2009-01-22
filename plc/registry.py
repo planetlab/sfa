@@ -677,6 +677,7 @@ class Registry(GeniServer):
         elif type == "ma":
             rl.add("authority")
         elif type == "slice":
+            rl.add("refresh")
             rl.add("embed")
             rl.add("bind")
             rl.add("control")
