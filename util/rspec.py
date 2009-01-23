@@ -102,11 +102,10 @@ class Rspec():
 	dom = minidom.parseString(xml)
 	self.rootNode = dom.childNodes[0]
 
-    def parseDict(self, rdict):
+    def dict2dom(self, rdict, include_doc = False):
 	"""
 	convert a dict object into a dom object.
 	"""
-	doc = minidom.Document()
 	
 	def elementNode(tagname, rd):
             element = minidom.Element(tagname)   
@@ -125,7 +124,15 @@ class Rspec():
 
 	    return element
 		    	
-	node = elementNode(rdict.keys()[0], rdict.values()[0]) 
-	doc.appendChild(node)
-        self.rootNode = doc
+	node = elementNode(rdict.keys()[0], rdict.values()[0])
+	if include_doc:
+	    rootNode = minidom.Document()
+	    rootNode.appendChild(node)
+	else:
+	    rootNode = node
+ 
+	return rootNode
+
+    def parseDict(self, rdict, include_doc = True):
+	self.rootNode = self.dict2dom(rdict, include_doc)
 
