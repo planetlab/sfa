@@ -51,3 +51,6 @@ echo XXXXX -------------------------------------------------------------------
 echo XXXXX Update Self
 python ./genicli.py --server $PLC_URL --username $USERNAME update user $USER_HRN
 
+echo XXXXX -------------------------------------------------------------------
+echo XXXXX List Records in parent authority
+python ./genicli.py --server $PLC_URL --username $USERNAME --short list $PARENT_HRN

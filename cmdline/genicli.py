@@ -32,6 +32,8 @@ gid_pkey_fn = None
 gid_fn = None
 filter = None
 
+dump_fn = None
+
 dump_parents = False
 
 leaf_name = None
@@ -58,7 +60,8 @@ def showhelp():
    print "    --short          ... list records in short format (name only)"
    print "commands:"
    print "    resolve <hrn>"
-   print "    dumpCredential"
+   print "    dumpCredential <filename>"
+   print "    dumpGid <filename>"
    print "    getCredential <type> <hrn>"
    print "    list <hrn>"
    print "    start <hrn>"
@@ -82,6 +85,7 @@ def process_options():
    global server_url
    global filter
    global short
+   global dump_fn
 
    (options, args) = getopt.getopt(sys.argv[1:], '', long_opts)
    for opt in options:
@@ -179,6 +183,12 @@ def process_options():
            sys.exit(-1)
        hrn = args[1]
 
+   elif opname == "dumpGid":
+       if len(args) < 2:
+           print "syntax: dumpGid <filename>"
+           sys.exit(-1)
+       dump_fn = args[1]
+
    leaf_name = get_leaf(username)
 
    if cert_file == None:
@@ -207,6 +217,10 @@ def get_authority(x):
 
 def dumpCredential():
    pass
+
+def dumpGid():
+   gid = GID(filename = dump_fn)
+   gid.dump()
 
 # creates a self-signed certificate and private key
 def createKey():
@@ -253,7 +267,7 @@ def main():
 
    # if the operation is not a local operation, then create a geniclient to
    # talk to the server
-   if (opname != "dumpCredential") and (opname != "help") and (opname != "createKey"):
+   if (opname != "dumpCredential") and (opname != "help") and (opname != "createKey") and (opname != "dumpGid"):
        if not os.path.exists(key_file):
            print "key file", key_file, "does not exist"
            sys.exit(-1)
@@ -269,13 +283,16 @@ def main():
 
    # if a cred_file was specified, then load the credential
    if (cred_file=="None") or (opname == "help") or (opname == "createKey") or \
-      (opname == "redeemTicket"):
+      (opname == "redeemTicket") or (opname == "dumpCredential") or (opname == "dumpGid"):
       cred = None
    else:
       cred = Credential(filename = cred_file)
 
    if opname == "dumpCredential":
       dumpCredential()
+
+   elif opname == "dumpGid":
+      dumpGid()
 
    elif opname == "help":
       showhelp()

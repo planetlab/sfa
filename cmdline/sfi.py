@@ -5,10 +5,13 @@ from __future__ import with_statement
 
 import sys
 import os, os.path
+import tempfile
 from optparse import OptionParser
 from util.cert import Keypair, Certificate
 from util.credential import Credential
 from util.geniclient import GeniClient
+from util.gid import create_uuid
+from util.record import GeniRecord
 
 sfi_dir = os.path.expanduser("~/.sfi/")
 slicemgr = None
@@ -139,7 +142,11 @@ def get_user_cred():
 def get_auth_cred():
    global authority
 
-   file = os.path.join(sfi_dir, "authority.cred")
+   if not authority:
+      print "no authority specified. Use -a or set SF_AUTH"
+      sys.exit(-1)
+
+   file = os.path.join(sfi_dir, get_leaf("authority") +".cred")
    if (os.path.isfile(file)):
       auth_cred = Credential(filename=file)
       return auth_cred
@@ -182,7 +189,7 @@ def get_rspec_file(rspec):
    if (os.path.isfile(file)):
       return file
    else:
-      print "No such rspec file"
+      print "No such rspec file", rspec
       sys.exit(1)
 
 def get_record_file(record):
@@ -193,8 +200,23 @@ def get_record_file(record):
    if (os.path.isfile(file)):
       return file
    else:
-      print "No such registry record file"
+      print "No such registry record file", record
       sys.exit(1)
+
+def load_publickey_string(fn):
+   f = file(fn,"r")
+   key_string = f.read()
+
+   # if the filename is a private key file, then extract the public key
+   if "PRIVATE KEY" in key_string:
+       outfn = tempfile.mktemp()
+       cmd = "openssl rsa -in " + fn + " -pubout -outform PEM -out " + outfn
+       os.system(cmd)
+       f = file(outfn, "r")
+       key_string = f.read()
+       os.remove(outfn)
+
+   return key_string
 
 
 #
@@ -204,6 +226,7 @@ def create_cmd_parser(command, additional_cmdargs = None):
    cmdargs = {"list": "name",
               "show": "name",
               "remove": "name",
+              "creategid": "hrn publickey_fn",
               "add": "name record",
               "update": "name record",
               "nodes": "[name]",
@@ -238,7 +261,7 @@ def create_cmd_parser(command, additional_cmdargs = None):
            help="type filter (user|slice|sa|ma|node|aggregate)",
            choices=("user","slice","sa","ma","node","aggregate", "all"),
            default="all")
-   if command in ("show", "list", "nodes", "resources"):
+   if command in ("show", "list", "nodes", "resources", "creategid"):
       parser.add_option("-o", "--output", dest="file",
            help="output XML to file", metavar="FILE", default=None)
    return parser
@@ -340,23 +363,40 @@ def remove(opts, args):
    auth_cred = get_auth_cred()
    return registry.remove(auth_cred, opts.type, args[0])
 
+def creategid(opts, args):
+   global registry
+   auth_cred = get_auth_cred()
+   hrn = args[0]
+   pkey_string = load_publickey_string(args[1])
+   gid = registry.create_gid(auth_cred, hrn, create_uuid(), pkey_string)
+   if (opts.file is not None):
+      gid.save_to_file(opts.file, save_parents=True)
+   else:
+      print "I created your gid, but you did not ask me to save it"
+
 # add named registry record
 def add(opts, args):
    global registry
    auth_cred = get_auth_cred()
-   rec_file = get_record_file(args[1])
-   with open(rec_file) as f:
-      record = f.read()
+   rec_file = get_record_file(args[0])
+   record = load_record_from_file(rec_file)
    return registry.register(auth_cred, record)
 
 # update named registry entry
 def update(opts, args):
    global registry
    user_cred = get_user_cred()
-   rec_file = get_record_file(args[1])
-   with open(rec_file) as f:
-      record = f.read()
-   return registry.update(user_cred, record)
+   rec_file = get_record_file(args[0])
+   record = load_record_from_file(rec_file)
+
+   if record.get_type() == "user":
+       cred = user_cred
+   elif record.get_type() in ["sa", "ma", "slice", "node"]:
+       cred = get_auth_cred()
+   else:
+       raise "unknown record type" + record.get_type()
+
+   return registry.update(cred, record)
 
 #
 # Slice-related commands
@@ -387,7 +427,7 @@ def slices(opts, args):
 # show rspec for named slice
 def resources(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0]) 
+   slice_cred = get_slice_cred(args[0])
    result = slicemgr.get_slice_resources(slice_cred, args[0])
    display_rspec(opts.format, result)
    if (opts.file is not None):
@@ -397,7 +437,7 @@ def resources(opts, args):
 # created named slice with given rspec
 def create(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0]) 
+   slice_cred = get_slice_cred(args[0])
    rspec_file = get_rspec_file(args[1])
    with open(rspec_file) as f:
       rspec = f.read()
@@ -406,25 +446,25 @@ def create(opts, args):
 # delete named slice
 def delete(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0]) 
+   slice_cred = get_slice_cred(args[0])
    return slicemgr.delete_slice(slice_cred)
 
 # start named slice
 def start(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0]) 
+   slice_cred = get_slice_cred(args[0])
    return slicemgr.start_slice(slice_cred)
 
 # stop named slice
 def stop(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0]) 
+   slice_cred = get_slice_cred(args[0])
    return slicemgr.stop_slice(slice_cred)
 
 # reset named slice
 def reset(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0]) 
+   slice_cred = get_slice_cred(args[0])
    return slicemgr.reset_slice(slice_cred)
 
 #
@@ -471,6 +511,11 @@ def save_record_to_file(filename, record):
    str = record.save_to_string()
    file(filename, "w").write(str)
    return
+
+def load_record_from_file(filename):
+   str = file(filename, "r").read()
+   record = GeniRecord(string=str)
+   return record
 
 if __name__=="__main__":
    main()
