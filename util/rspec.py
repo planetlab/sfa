@@ -2,6 +2,7 @@ import sys
 import pprint
 import os
 from xml.dom import minidom
+from types import StringTypes
 
 class Rspec():
 
@@ -106,16 +107,25 @@ class Rspec():
 	convert a dict object into a dom object.
 	"""
 	doc = minidom.Document()
-
 	
-	def elementDict(rd):
+	def elementNode(tagname, rd):
+            element = minidom.Element(tagname)   
 	    for key in rd.keys():
-		if isinstance(rd[key], dict):
-		    elementFromDict(rd[key])
-	 		    	
-	for key in dict.keys():    
-	    doc.appendChild(dictElement(rdict))
+		if isinstance(rd[key], StringTypes):
+		    element.setAttribute(key, rd[key])
+ 
+		elif isinstance(rd[key], dict):	
+		    child = elementNode(key, rd[key])
+		    element.appendChild(child)
+		
+		elif isinstance(rd[key], list):
+		    for item in rd[key]:
+			child = elementNode(key, item)
+                        element.appendChild(child)
+
+	    return element
+		    	
+	node = elementNode(rdict.keys()[0], rdict.values()[0]) 
+	doc.appendChild(node)
         self.rootNode = doc
 
-
-	
