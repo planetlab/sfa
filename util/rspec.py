@@ -35,7 +35,8 @@ class Rspec():
             elif node.attributes.has_key("name"):
                 name = node.attributes.get("name").value
         return name     
-  
+ 
+ 
     # Attribute.  {name : nameofattribute, {items: values})
     def _attributeDict(self, attributeDom):
         '''Traverse single attribute node.  Create a dict {attributename : {name: value,}]}'''
@@ -72,18 +73,21 @@ class Rspec():
                         node[elementName][childName].append(value)
                     #node[childName].append(self.toDict(child))
         return node
+
   
     def toxml(self):
         """
         convert this rspec to an xml string and return it.
         """
         return self.rootNode.toxml()
+
   
     def toprettyxml(self):
         """
         print this rspec in xml in a pretty format.
         """
         return self.rootNode.toprettyxml()
+
   
     def parseFile(self, filename):
         """
@@ -100,6 +104,7 @@ class Rspec():
         xml = xml.replace('\n', '').replace('\t', '').strip()
         dom = minidom.parseString(xml)
         self.rootNode = dom.childNodes[0]
+
  
     def dict2dom(self, rdict, include_doc = False):
         """
@@ -127,6 +132,7 @@ class Rspec():
         else:
             rootNode = node
         return rootNode
+
  
     def parseDict(self, rdict, include_doc = True):
         """
@@ -150,4 +156,4 @@ class Rspec():
                 dicts.append(value)
         return dicts
 
-#  vim:ts=4:expandtab
+# vim:ts=4:expandtab
