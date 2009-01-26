@@ -45,7 +45,7 @@ class Rspec():
             node[attr] = attributeDom.attributes.get(attr).value
         return node
 
-
+    
     def toDict(self, nodeDom = None):
         """
 	convert this rspec to a dict and return it.
@@ -134,5 +134,24 @@ class Rspec():
 	return rootNode
 
     def parseDict(self, rdict, include_doc = True):
+	"""
+	Convert a dictionary into a dom object and store it.
+	"""
 	self.rootNode = self.dict2dom(rdict, include_doc)
+
+
+    def getDictsByTagName(self, tagname, dom = None):
+	"""
+	Search the dom for all elements with the specified tagname
+	and return them as a list of dicts
+	"""
+	if not dom:
+	    dom = self.rootNode
+	dicts = []
+	doms = dom.getElementsByTagName(tagname)
+	dictlist = [self.toDict(d) for d in doms]
+	for item in dictlist:
+	    for value in item.values():
+		dicts.append(value)
+	return dicts
 
