@@ -147,24 +147,24 @@ class SliceMgr(GeniServer):
 	    f.close()
  
     def load_components(self):
-	"""
-	Read cached list of nodes and slices.
-	"""
-	print "loading nodes"
-	# Read component list from cached file 
-	if os.path.exists(self.components_file):
-	    f = open(self.components_file, 'r')
-	    self.components = eval(f.read())
-	    f.close()
+	    """
+	    Read cached list of nodes and slices.
+	    """
+	    print "loading nodes"
+	    # Read component list from cached file 
+	    if os.path.exists(self.components_file):
+	        f = open(self.components_file, 'r')
+	        self.components = eval(f.read())
+	        f.close()
 	
-	time_format = "%Y-%m-%d %H:%M:%S"
-	if os.path.exists(self.timestamp_file):
-	    f = open(self.timestamp_file, 'r')
-	    timestamp = str(f.read()).split(".")[0]
-	    self.timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, time_format)))
-	    delta = datetime.timedelta(hours=self.components_ttl)
+	    time_format = "%Y-%m-%d %H:%M:%S"
+	    if os.path.exists(self.timestamp_file):
+	        f = open(self.timestamp_file, 'r')
+	        timestamp = str(f.read()).split(".")[0]
+	        self.timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, time_format)))
+	        delta = datetime.timedelta(hours=self.components_ttl)
             self.threshold = self.timestamp + delta
-	    f.close()
+	        f.close()
 
     def load_policy(self):
         """
