@@ -10,6 +10,7 @@ from util.trustedroot import *
 from util.excep import *
 from util.misc import *
 from util.config import Config
+from util.rspec import Rspec
 
 class Aggregate(GeniServer):
 
@@ -46,9 +47,15 @@ class Aggregate(GeniServer):
 	self.components_ttl = components_ttl
 	self.policy['whitelist'] = []
 	self.policy['blacklist'] = []
-	self.connect()
+	self.connectPLC()
+	self.connectRegistry()
 
-    def connect(self):
+    def connectRegistry(self):
+	"""
+	Connect to the registry
+	"""
+
+    def connectPLC(self):
 	"""
 	Connect to the plc api interface. First attempt to impor thte shell, if that fails
 	try to connect to the xmlrpc server.
@@ -217,22 +224,31 @@ class Aggregate(GeniServer):
         
 	return rspec
  
-    def create_slice(self, slice_hrn, rspec, attributes):
+    def create_slice(self, slice_hrn, rspec, attributes = []):
 	"""
 	Instantiate the specified slice according to whats defined in the rspec.
 	"""
 	slicename = self.hrn_to_plcslicename(slice_hrn)
-	#spec = Rspec(rspec)
-	#nodespec = spec['networks']['nodes']
-	#nodes = [nspec['name'] for nspec in nodespec]
-	#self.shell.AddSliceToNodes(self.auth, slicename, nodes)
-	#for attribute in attributes:
-	    #type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
-	    #shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
+	spec = Rspec(rspec)
+	nodespecs = spec.getDictsByTagName('NodeSpec')
+	nodes = [nodespec['name'] for nodespec in nodespecs]	
+	self.shell.AddSliceToNodes(self.auth, slicename, nodes)
+	for attribute in attributes:
+	    type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
+	    shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
+
+	# XX contact the registry to get the list of users on this slice and
+	# their keys.
+	#slice_record = self.registry.resolve(slice_hrn)
+	#person_records = slice_record['users']
+	# for person in person_record:
+	#    email = person['email']
+	#    self.shell.AddPersonToSlice(self.auth, email, slicename) 
+	 
 
 	return 1
 
-    def update_slice(self, slice_hrn, rspec, attributes):
+    def update_slice(self, slice_hrn, rspec, attributes = []):
 	"""
 	Update the specified slice.
 	"""
@@ -248,22 +264,27 @@ class Aggregate(GeniServer):
         hostnames = [node['hostname'] for node in nodes]
 
 	# get netspec details
-	#spec = Rspec(rspec)
-        #nodespec = spec['networks']['nodes']
-        #nodes = [nspec['name'] for nspec in nodespec]
-
+	spec = Rspec(rspec)
+	nodespecs = spec.getDictsByTagName('NodeSpec')
+        nodes = [nodespec['name'] for nodespec in nodespecs]	
 	# remove nodes not in rspec
-	#delete_nodes = set(hostnames).difference(nodes)
+	delete_nodes = set(hostnames).difference(nodes)
 	# add nodes from rspec
-	#added_nodes = set(nodes).difference(hostnames)
+	added_nodes = set(nodes).difference(hostnames)
 	
-        #shell.AddSliceToNodes(self.auth, slicename, added_nodes)
-	#shell.DeleteSliceFromNodes(self.auth, slicename, deleted_nodes)
+        shell.AddSliceToNodes(self.auth, slicename, added_nodes)
+	shell.DeleteSliceFromNodes(self.auth, slicename, deleted_nodes)
 
-        #for attribute in attributes:
-            #type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
-            #shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
+        for attribute in attributes:
+            type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
+            shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
 	
+	# contact registry to get slice users and add them to the slice
+	# slice_record = self.registry.resolve(slice_hrn)
+	# persons = slice_record['users']
+		
+	#for person in persons:
+	#    shell.AddPersonToSlice(person['email'], slice_name) 
     def delete_slice_(self, slice_hrn):
 	"""
 	Remove this slice from all components it was previouly associated with and 
