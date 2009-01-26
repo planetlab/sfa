@@ -7,11 +7,15 @@ from types import StringTypes
 class Rspec():
 
     def __init__(self, xml = None, xsd = None):
-        self.xsd = xsd
-        self.rootNode = None
-        if xml:
-            self.parseString(xml)
-      
+        self.xsd = xsd # schema
+        self.rootNode = None # root of the dom
+        self.dict = {} # dict of the rspec.
+        if xml: 
+            if type(xml) == file:
+                self.parseFile(xml)
+            if type(xml) == str:
+                self.parseString(xml)
+            self.dict = self.toDict() 
   
     def _getText(self, nodelist):
         rc = ""
