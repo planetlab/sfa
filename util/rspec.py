@@ -10,7 +10,7 @@ class Rspec():
         self.xsd = xsd
         self.rootNode = None
         if xml:
-            self.parse_string(xml)
+            self.parseString(xml)
       
   
     def _getText(self, nodelist):
@@ -36,8 +36,8 @@ class Rspec():
                 name = node.attributes.get("name").value
         return name     
   
-  # Attribute.  {name : nameofattribute, {items: values})
-  def _attributeDict(self, attributeDom):
+    # Attribute.  {name : nameofattribute, {items: values})
+    def _attributeDict(self, attributeDom):
         '''Traverse single attribute node.  Create a dict {attributename : {name: value,}]}'''
         node = {} # parsed dict
         for attr in attributeDom.attributes.keys():
@@ -128,26 +128,26 @@ class Rspec():
             rootNode = node
         return rootNode
  
-def parseDict(self, rdict, include_doc = True):
-      """
-      Convert a dictionary into a dom object and store it.
-      """
-      self.rootNode = self.dict2dom(rdict, include_doc)
+    def parseDict(self, rdict, include_doc = True):
+        """
+        Convert a dictionary into a dom object and store it.
+        """
+        self.rootNode = self.dict2dom(rdict, include_doc)
  
  
-def getDictsByTagName(self, tagname, dom = None):
-      """
-      Search the dom for all elements with the specified tagname
-      and return them as a list of dicts
-      """
-      if not dom:
-          dom = self.rootNode
-      dicts = []
-      doms = dom.getElementsByTagName(tagname)
-      dictlist = [self.toDict(d) for d in doms]
-      for item in dictlist:
-          for value in item.values():
-              dicts.append(value)
-      return dicts
+    def getDictsByTagName(self, tagname, dom = None):
+        """
+        Search the dom for all elements with the specified tagname
+        and return them as a list of dicts
+        """
+        if not dom:
+            dom = self.rootNode
+        dicts = []
+        doms = dom.getElementsByTagName(tagname)
+        dictlist = [self.toDict(d) for d in doms]
+        for item in dictlist:
+            for value in item.values():
+                dicts.append(value)
+        return dicts
 
 #  vim:ts=4:expandtab
