@@ -25,7 +25,7 @@ GENI_AGGREGATE_IP="127.0.0.1"
 GENI_AGGREGATE_PORT=12346
 
 
-# Registry Confguration
+# Registry Configuration
 #
 # Enabled
 # Enable the registry interface 
