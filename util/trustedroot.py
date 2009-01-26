@@ -3,8 +3,8 @@ import os
 from gid import *
 
 class TrustedRootList():
-    def __init__(self, basedir="."):
-        self.basedir = os.path.join(basedir, "trusted_roots")
+    def __init__(self, dir="./trusted_roots"):
+        self.basedir = dir
 
         # create the directory to hold the files
         try:
