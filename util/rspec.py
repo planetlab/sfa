@@ -47,8 +47,8 @@ class Rspec():
   
  
     def toDict(self, nodeDom = None):
-         """
-         convert this rspec to a dict and return it.
+        """
+        convert this rspec to a dict and return it.
         """
         node = {}
         if not nodeDom:
@@ -123,7 +123,7 @@ class Rspec():
                  for item in rd[key]:
                      child = elementNode(key, item)
                      element.appendChild(child)
-          return element
+        return element
                      
         node = elementNode(rdict.keys()[0], rdict.values()[0])
         if include_doc:
