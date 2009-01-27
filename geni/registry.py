@@ -6,18 +6,18 @@ import os
 import time
 import sys
 
-from util.credential import Credential
-from util.hierarchy import Hierarchy
-from util.trustedroot import TrustedRootList
-from util.cert import Keypair, Certificate
-from util.gid import GID, create_uuid
-from util.geniserver import GeniServer
-from util.record import GeniRecord
-from util.rights import RightList
-from util.genitable import GeniTable
-from util.geniticket import Ticket
-from util.excep import *
-from util.misc import *
+from geni.util.credential import Credential
+from geni.util.hierarchy import Hierarchy
+from geni.util.trustedroot import TrustedRootList
+from geni.util.cert import Keypair, Certificate
+from geni.util.gid import GID, create_uuid
+from geni.util.geniserver import GeniServer
+from geni.util.record import GeniRecord
+from geni.util.rights import RightList
+from geni.util.genitable import GeniTable
+from geni.util.geniticket import Ticket
+from geni.util.excep import *
+from geni.util.misc import *
 
 from util.config import *
 
