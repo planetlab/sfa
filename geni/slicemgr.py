@@ -340,7 +340,7 @@ class SliceMgr(GeniServer):
 ##############################
 
     def nodes(self):
-        return self..get_components()
+        return self.get_components()
 
     def slices(self):
         return self.get_slices()
