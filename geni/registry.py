@@ -103,7 +103,7 @@ class Registry(GeniServer):
     # Connect to a remote shell via XMLRPC
 
     def connect_remote_shell(self):
-        import remoteshell
+        from geni.util import remoteshell
         self.shell = remoteshell.RemoteShell()
 
     ##
