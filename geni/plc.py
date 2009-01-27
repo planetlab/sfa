@@ -33,12 +33,12 @@ slicemgr_port=12347
 import os, os.path
 from optparse import OptionParser
 
-from util.hierarchy import Hierarchy
-from util.trustedroot import TrustedRootList
-from util.cert import Keypair, Certificate
-from registry import Registry
-#from aggregate import Aggregate
-from slicemgr import SliceMgr
+from geni.util.hierarchy import Hierarchy
+from geni.util.trustedroot import TrustedRootList
+from geni.util.cert import Keypair, Certificate
+from geni.registry import Registry
+from geni.aggregate import Aggregate
+from geni.slicemgr import SliceMgr
 
 def main():
     global AuthHierarchy
