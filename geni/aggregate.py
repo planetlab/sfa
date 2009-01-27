@@ -4,10 +4,10 @@ import datetime
 import time
 import xmlrpclib
 
-from geni.util.geniserver import *
+from geni.util.geniserver import GeniServer
 from geni.util.geniclient import *
-from geni.util.cert import *
-from geni.util.trustedroot import *
+from geni.util.cert import Keypair, Certificate
+from geni.util.trustedroot import TrustedRootList
 from geni.util.excep import *
 from geni.util.misc import *
 from geni.util.config import Config
@@ -358,30 +358,30 @@ class Aggregate(GeniServer):
 
         return self.get_resources(hrn)
 
-    def create(self, cred, hrn, rspec):
+    def createSlice(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'embed')
         self.verify_object_belongs_to_me(hrn)
-        return self.create(hrn)
+        return self.create_slice(hrn)
 
-    def update(self, cred, hrn, rspec):
+    def updateSlice(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'embed')
         self.verify_object_belongs_to_me(hrn)
-        return self.update(hrn)    
+        return self.update_slice(hrn)    
 
-    def delete(self, cred, hrn):
+    def deleteSlice(self, cred, hrn):
         self.decode_authentication(cred, 'embed')
         self.verify_object_belongs_to_me(hrn)
         return self.delete_slice(hrn)
 
-    def start(self, cred, hrn):
+    def startSlice(self, cred, hrn):
         self.decode_authentication(cred, 'control')
-        return self.start(hrn)
+        return self.start_slice(hrn)
 
-    def stop(self, cred, hrn):
+    def stopSlice(self, cred, hrn):
         self.decode_authentication(cred, 'control')
         return self.stop(hrn)
 
-    def reset(self, cred, hrn):
+    def resetSlice(self, cred, hrn):
         self.decode_authentication(cred, 'control')
         return self.reset(hrn)
 
@@ -396,10 +396,10 @@ class Aggregate(GeniServer):
         self.server.register_function(self.components)
         #self.server.register_function(self.slices)
         self.server.register_function(self.resources)
-        self.server.register_function(self.create)
-        self.server.register_function(self.delete)
-        self.server.register_function(self.start)
-        self.server.register_function(self.stop)
-        self.server.register_function(self.reset)
+        self.server.register_function(self.createSlice)
+        self.server.register_function(self.deleteSlice)
+        self.server.register_function(self.startSlice)
+        self.server.register_function(self.stopSlice)
+        self.server.register_function(self.resetSlice)
         self.server.register_function(self.policy)
               
