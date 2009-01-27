@@ -33,29 +33,29 @@ class Config:
     def __init__(self, file = "/usr/share/geniwrapper/util/geni_config"):
         # Load plc_config
 
-	loaded = False
-	path = os.path.dirname(os.path.abspath(__file__))
-	filename = file.split(os.sep)[-1]
-	alt_file = path + os.sep + filename
-	myplc_file = myplc + os.sep + filename
-	files = [file, alt_file, myplc_file]
+	    loaded = False
+	    path = os.path.dirname(os.path.abspath(__file__))
+	    filename = file.split(os.sep)[-1]
+	    alt_file = path + os.sep + filename
+	    myplc_file = myplc + os.sep + filename
+	    files = [file, alt_file, myplc_file]
 
-	for file in files:
-	    try: 
-		execfile(file, self.__dict__)
-		loaded = True
-	    except:
-	        pass
+	    for file in files:
+	        try: 
+		        execfile(file, self.__dict__)
+		        loaded = True
+	        except:
+	            pass
 
-	if not loaded:
-	    raise Exception, "Could not find config in " + ", ".join(files)
+	    if not loaded:
+	        raise Exception, "Could not find config in " + ", ".join(files)
 
 
     def load(self, file):
-	try:
-	    execfile(file, self.__dict__)
-	except:
-	    raise Exception, "Could not find config in " + file
+	    try:
+	        execfile(file, self.__dict__)
+	    except:
+	        raise Exception, "Could not find config in " + file
 
 plcConfig = Config("/etc/planetlab/plc_config")
 
