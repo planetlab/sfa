@@ -39,7 +39,7 @@ class Aggregate(GeniServer):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
         self.conf = Config(config)
         basedir = self.conf.GENI_BASE_DIR + os.sep
-        server_basedir = basedir + os.sep + "plc" + os.sep
+        server_basedir = basedir + os.sep + "geni" + os.sep
         self.hrn = self.conf.GENI_INTERFACE_HRN
         self.nodes_file = os.sep.join([server_basedir, 'components', self.hrn + '.comp'])
         self.whitelist_file = os.sep.join([server_basedir, 'policy', 'whitelist'])
