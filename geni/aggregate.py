@@ -36,7 +36,7 @@ class Aggregate(GeniServer):
     # @param cert_file certificate filename containing public key (could be a GID file)     
 
     def __init__(self, ip, port, key_file, cert_file, config = "/usr/share/geniwrapper/util/geni_config"):
-        GeniServer.__init__(ip, port, keyfile, cert_file)
+        GeniServer.__init__(ip, port, key_file, cert_file)
         conf = Config(config)
         basedir = conf.GENI_BASE_DIR + os.sep
         server_basedir = basedir + os.sep + "plc" + os.sep
