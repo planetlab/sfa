@@ -16,9 +16,9 @@ from geni.util.rspec import Rspec
 class Aggregate(GeniServer):
 
     hrn = None
-    components_file = None
-    components_ttl = None
-    components = []
+    nodes_file = None
+    nodes_ttl = None
+    nodes = []
     whitelist_file = None
     blacklist_file = None    
     policy = {}
@@ -41,11 +41,11 @@ class Aggregate(GeniServer):
         basedir = conf.GENI_BASE_DIR + os.sep
         server_basedir = basedir + os.sep + "plc" + os.sep
         self.hrn = conf.GENI_INTERFACE_HRN
-        self.components_file = os.sep.join([server_basedir, 'components', hrn + '.comp'])
+        self.nodes_file = os.sep.join([server_basedir, 'components', self.hrn + '.comp'])
         self.whitelist_file = os.sep.join([server_basedir, 'policy', 'whitelist'])
         self.blacklist_file = os.sep.join([server_basedir, 'policy', 'blacklist'])
-        self.timestamp_file = os.sep.join([server_basedir, 'components', hrn + '.timestamp']) 
-        self.components_ttl = components_ttl
+        self.timestamp_file = os.sep.join([server_basedir, 'components', self.hrn + '.timestamp']) 
+        self.nodes_ttl = 1
         self.policy['whitelist'] = []
         self.policy['blacklist'] = []
         self.connectPLC()
@@ -114,24 +114,24 @@ class Aggregate(GeniServer):
             site_dict[site['site_id']] = site['login_base']
 
         # convert plc names to geni hrn
-        self.components = [self.hostname_to_hrn(site_dict[node['site_id']], node['hostname']) for node in nodes]
+        self.nodes = [self.hostname_to_hrn(site_dict[node['site_id']], node['hostname']) for node in nodes]
 
         # apply policy. Do not allow nodes found in blacklist, only allow nodes found in whitelist
         whitelist_policy = lambda node: node in self.policy['whitelist']
         blacklist_policy = lambda node: node not in self.policy['blacklist']
 
         if self.policy['blacklist']:
-            self.components = blacklist_policy(self.components)
+            self.nodes = blacklist_policy(self.nodes)
         if self.policy['whitelist']:
-            self.components = whitelist_policy(self.components)
+            self.nodes = whitelist_policy(self.nodes)
             
         # update timestamp and threshold
         self.timestamp = datetime.datetime.now()
-        delta = datetime.timedelta(hours=self.components_ttl)
+        delta = datetime.timedelta(hours=self.nodes_ttl)
         self.threshold = self.timestamp + delta 
     
-        f = open(self.components_file, 'w')
-        f.write(str(self.components))
+        f = open(self.nodes_file, 'w')
+        f.write(str(self.nodes))
         f.close()
         f = open(self.timestamp_file, 'w')
         f.write(str(self.threshold))
@@ -142,9 +142,9 @@ class Aggregate(GeniServer):
         Read cached list of nodes.
         """
         # Read component list from cached file 
-        if os.path.exists(self.components_file):
-            f = open(self.components_file, 'r')
-            self.components = eval(f.read())
+        if os.path.exists(self.nodes_file):
+            f = open(self.nodes_file, 'r')
+            self.nodes = eval(f.read())
             f.close()
     
         time_format = "%Y-%m-%d %H:%M:%S"
@@ -152,7 +152,7 @@ class Aggregate(GeniServer):
             f = open(self.timestamp_file, 'r')
             timestamp = str(f.read()).split(".")[0]
             self.timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, time_format)))
-            delta = datetime.timedelta(hours=self.components_ttl)
+            delta = datetime.timedelta(hours=self.nodes_ttl)
             self.threshold = self.timestamp + delta
             f.close()    
 
@@ -191,9 +191,9 @@ class Aggregate(GeniServer):
         #self.load_components()
         if not self.threshold or not self.timestamp or now > self.threshold:
             self.refresh_components()
-        elif now < self.threshold and not self.components: 
+        elif now < self.threshold and not self.nodes: 
             self.load_components()
-        return self.components
+        return self.nodes
      
     def get_rspec(self, hrn, type):
         rspec = Rspec()
@@ -346,7 +346,7 @@ class Aggregate(GeniServer):
 ## Server methods here for now
 ##############################
 
-    def nodes(self):
+    def components(self):
         return self.get_components()
 
     #def slices(self):
