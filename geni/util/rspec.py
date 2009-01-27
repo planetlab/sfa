@@ -4,6 +4,32 @@ import os
 from xml.dom import minidom
 from types import StringTypes
 
+class Spec(dict):
+
+    fields = {}
+    plcFields = {}
+    type = None
+        
+    def __init__(self, spec_dict):
+        sdict = self.plcToSpec(spec_dict)
+        dict.__init__(self, sdict)
+
+    def plcToSpec(self, spec_dict):
+        spec = {}
+        for field in self.fields:
+            plc_field = plc_fields[field]
+            
+            if spec_dict.has_key(field):
+                spec[field] = spec_dict(field)
+        
+        return {self.type: spec}
+    
+
+class IfSpec(Spec):
+    pass
+
+
+
 class Rspec():
 
     def __init__(self, xml = None, xsd = None):
@@ -115,19 +141,19 @@ class Rspec():
         convert a dict object into a dom object.
         """
      
-    def elementNode(tagname, rd):
-        element = minidom.Element(tagname)   
-        for key in rd.keys():
-            if isinstance(rd[key], StringTypes):
-                element.setAttribute(key, rd[key])
-            elif isinstance(rd[key], dict):
-                 child = elementNode(key, rd[key])
-                 element.appendChild(child)
-            elif isinstance(rd[key], list):
-                 for item in rd[key]:
-                     child = elementNode(key, item)
-                     element.appendChild(child)
-        return element
+        def elementNode(tagname, rd):
+            element = minidom.Element(tagname)   
+            for key in rd.keys():
+                if isinstance(rd[key], StringTypes):
+                    element.setAttribute(key, rd[key])
+                elif isinstance(rd[key], dict):
+                    child = elementNode(key, rd[key])
+                    element.appendChild(child)
+                elif isinstance(rd[key], list):
+                    for item in rd[key]:
+                        child = elementNode(key, item)
+                        element.appendChild(child)
+            return element
                      
         node = elementNode(rdict.keys()[0], rdict.values()[0])
         if include_doc:
