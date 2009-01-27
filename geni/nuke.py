@@ -9,10 +9,10 @@
 import getopt
 import sys
 
-from hierarchy import *
-from record import *
-from genitable import *
-from config import *
+from geni.util.hierarchy import *
+from geni.util.record import *
+from geni.util.genitable import *
+from geni.util.config import *
 
 def process_options():
    global hrn

@@ -16,12 +16,12 @@ import getopt
 import sys
 import tempfile
 
-from cert import *
-from trustedroot import *
-from hierarchy import *
-from record import *
-from genitable import *
-from misc import *
+from geni.util.cert import *
+from geni.util.trustedroot import *
+from geni.util.hierarchy import *
+from geni.util.record import *
+from geni.util.genitable import *
+from geni.util.misc import *
 
 shell = None
 
