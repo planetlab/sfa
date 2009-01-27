@@ -37,17 +37,17 @@ class Aggregate(GeniServer):
 
     def __init__(self, ip, port, key_file, cert_file, config = "/usr/share/geniwrapper/util/geni_config"):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
-        conf = Config(config)
-        basedir = conf.GENI_BASE_DIR + os.sep
+        self.conf = Config(config)
+        basedir = self.conf.GENI_BASE_DIR + os.sep
         server_basedir = basedir + os.sep + "plc" + os.sep
-        self.hrn = conf.GENI_INTERFACE_HRN
+        self.hrn = self.conf.GENI_INTERFACE_HRN
         self.nodes_file = os.sep.join([server_basedir, 'components', self.hrn + '.comp'])
         self.whitelist_file = os.sep.join([server_basedir, 'policy', 'whitelist'])
         self.blacklist_file = os.sep.join([server_basedir, 'policy', 'blacklist'])
         self.timestamp_file = os.sep.join([server_basedir, 'components', self.hrn + '.timestamp']) 
         self.nodes_ttl = 1
-        self.policy['whitelist'] = []
-        self.policy['blacklist'] = []
+        self.nodes = []
+        self.policy = {'whitelist': [], 'blacklist': []} 
         self.connectPLC()
         self.connectRegistry()
 
@@ -62,25 +62,25 @@ class Aggregate(GeniServer):
         Connect to the plc api interface. First attempt to impor thte shell, if that fails
         try to connect to the xmlrpc server.
         """
-        self.auth = {'Username': conf.GENI_PLC_USER,
+        self.auth = {'Username': self.conf.GENI_PLC_USER,
                      'AuthMethod': 'password',
-                     'AuthString': conf.GENI_PLC_PASSWORD}
+                     'AuthString': self.conf.GENI_PLC_PASSWORD}
 
         try:
            # try to import PLC.Shell directly
-            sys.path.append(conf.GENI_PLC_SHELL_PATH) 
+            sys.path.append(self.conf.GENI_PLC_SHELL_PATH) 
             import PLC.Shell
             self.shell = PLC.Shell.Shell(globals())
             self.shell.AuthCheck()
         except ImportError:
             # connect to plc api via xmlrpc
-            plc_host = conf.GENI_PLC_HOST
-            plc_port = conf.GENI_PLC_PORT
-            plc_api_path = conf.GENI_PLC_API_PATH                 
+            plc_host = self.conf.GENI_PLC_HOST
+            plc_port = self.conf.GENI_PLC_PORT
+            plc_api_path = self.conf.GENI_PLC_API_PATH                 
             url = "https://%(plc_host)s:%(plc_port)s/%(plc_api_path)s/" % locals()
-            self.auth = {'Username': conf.GENI_PLC_USER,
+            self.auth = {'Username': self.conf.GENI_PLC_USER,
                  'AuthMethod': 'password',
-                 'AuthString': conf.GENI_PLC_PASSWORD} 
+                 'AuthString': self.conf.GENI_PLC_PASSWORD} 
 
             self.shell = xmlrpclib.Server(url, verbose = 0, allow_none = True) 
             self.shell.AuthCheck(self.auth) 
