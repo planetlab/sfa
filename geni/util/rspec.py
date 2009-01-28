@@ -2,33 +2,6 @@ import sys
 import pprint
 import os
 from xml.dom import minidom
-from types import StringTypes
-
-class Spec(dict):
-
-    fields = {}
-    plcFields = {}
-    type = None
-        
-    def __init__(self, spec_dict):
-        sdict = self.plcToSpec(spec_dict)
-        dict.__init__(self, sdict)
-
-    def plcToSpec(self, spec_dict):
-        spec = {}
-        for field in self.fields:
-            plc_field = plc_fields[field]
-            
-            if spec_dict.has_key(field):
-                spec[field] = spec_dict(field)
-        
-        return {self.type: spec}
-    
-
-class IfSpec(Spec):
-    pass
-
-
 
 class Rspec():
 
