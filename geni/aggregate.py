@@ -12,15 +12,17 @@ from geni.util.excep import *
 from geni.util.misc import *
 from geni.util.config import Config
 from geni.util.rspec import Rspec
+from geni.util.storage improt SimpleStorage
 
 class Aggregate(GeniServer):
 
     hrn = None
-    nodes_file = None
+    #nodes_file = None
     nodes_ttl = None
-    nodes = []
-    whitelist_file = None
-    blacklist_file = None    
+    nodes = {}
+    
+    #whitelist_file = None
+    #blacklist_file = None    
     policy = {}
     timestamp = None
     threshold = None    
@@ -41,13 +43,18 @@ class Aggregate(GeniServer):
         basedir = self.conf.GENI_BASE_DIR + os.sep
         server_basedir = basedir + os.sep + "geni" + os.sep
         self.hrn = self.conf.GENI_INTERFACE_HRN
-        self.nodes_file = os.sep.join([server_basedir, 'components', self.hrn + '.comp'])
-        self.whitelist_file = os.sep.join([server_basedir, 'policy', 'whitelist'])
-        self.blacklist_file = os.sep.join([server_basedir, 'policy', 'blacklist'])
-        self.timestamp_file = os.sep.join([server_basedir, 'components', self.hrn + '.timestamp']) 
+        
+        nodes_file = os.sep.join([server_basedir, 'components', self.hrn + '.comp'])
+        self.nodes = SimpleStorage(nodes_file)
+        
+        policy_file = os.sep.join([server_basedir, 'policy'])
+        self.policy = SimpleStorage(policy_file, {'whitelist': [], 'blacklist': []})
+        
+        timestamp_file = os.sep.join([server_basedir, 'components', self.hrn + '.timestamp']) 
+        self.timestamp = SimpleStorage(timestamp_file)
+
         self.nodes_ttl = 1
         self.nodes = []
-        self.policy = {'whitelist': [], 'blacklist': []} 
         self.connectPLC()
         self.connectRegistry()
 
@@ -114,73 +121,45 @@ class Aggregate(GeniServer):
             site_dict[site['site_id']] = site['login_base']
 
         # convert plc names to geni hrn
-        self.nodes = [self.hostname_to_hrn(site_dict[node['site_id']], node['hostname']) for node in nodes]
+        nodedict = {}
+        for node in nodes:
+            node_hrn = self.hostname_to_hrn(site_dict[node['site_id']], node['hostname'])
+            # apply policy. 
+            # Do not allow nodes found in blacklist, only allow nodes found in whitelist
+            if self.polciy['whitelist'] and node_hrn not in self.polciy['whitelist']:
+                continue
+            if self.polciy['blacklist'] and node_hrn in self.policy['blacklist']:
+                continue
+            nodedict[node_hrn] = node['hostname']
+        
+        self.nodes = SimpleStorage(self.nodes.db_filename, nodedict)
+        self.nodes.write()
 
-        # apply policy. Do not allow nodes found in blacklist, only allow nodes found in whitelist
-        whitelist_policy = lambda node: node in self.policy['whitelist']
-        blacklist_policy = lambda node: node not in self.policy['blacklist']
-
-        if self.policy['blacklist']:
-            self.nodes = blacklist_policy(self.nodes)
-        if self.policy['whitelist']:
-            self.nodes = whitelist_policy(self.nodes)
-            
         # update timestamp and threshold
-        self.timestamp = datetime.datetime.now()
+        self.timestamp['timestamp'] =  datetime.datetime.now()}
         delta = datetime.timedelta(hours=self.nodes_ttl)
-        self.threshold = self.timestamp + delta 
-    
-        f = open(self.nodes_file, 'w')
-        f.write(str(self.nodes))
-        f.close()
-        f = open(self.timestamp_file, 'w')
-        f.write(str(self.threshold))
-        f.close()
+        self.threshold = self.timestamp['timestamp'] + delta 
+        self.timestamp.write()        
  
     def load_components(self):
         """
         Read cached list of nodes.
         """
         # Read component list from cached file 
-        if os.path.exists(self.nodes_file):
-            f = open(self.nodes_file, 'r')
-            self.nodes = eval(f.read())
-            f.close()
-    
+        self.nodes.load()
+        self.timestamp.load() 
         time_format = "%Y-%m-%d %H:%M:%S"
-        if os.path.exists(self.timestamp_file):
-            f = open(self.timestamp_file, 'r')
-            timestamp = str(f.read()).split(".")[0]
-            self.timestamp = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, time_format)))
-            delta = datetime.timedelta(hours=self.nodes_ttl)
-            self.threshold = self.timestamp + delta
-            f.close()    
+        timestamp = self.timestamp['timestamp']
+        self.timestamp['timestamp'] = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, time_format)))
+        delta = datetime.timedelta(hours=self.nodes_ttl)
+        self.threshold = self.timestamp['timestamp'] + delta
 
     def load_policy(self):
         """
         Read the list of blacklisted and whitelisted nodes.
         """
-        whitelist = []
-        blacklist = []
-        if os.path.exists(self.whitelist_file):
-            f = open(self.whitelist_file, 'r')
-            lines = f.readlines()
-            f.close()
-        for line in lines:
-            line = line.strip().replace(" ", "").replace("\n", "")
-            whitelist.extend(line.split(","))
-            
-    
-        if os.path.exists(self.blacklist_file):
-            f = open(self.blacklist_file, 'r')
-            lines = f.readlines()
-            f.close()
-        for line in lines:
-            line = line.strip().replace(" ", "").replace("\n", "")
-            blacklist.extend(line.split(","))
+        self.policy.load()
 
-        self.policy['whitelist'] = whitelist
-        self.policy['blacklist'] = blacklist
 
     def get_components(self):
         """
@@ -191,15 +170,13 @@ class Aggregate(GeniServer):
         #self.load_components()
         if not self.threshold or not self.timestamp or now > self.threshold:
             self.refresh_components()
-        elif now < self.threshold and not self.nodes: 
+        elif now < self.threshold and not self.nodes.keys(): 
             self.load_components()
-        return self.nodes
+        return self.nodes.keys()
      
     def get_rspec(self, hrn, type):
-        rspec = Rspec()
-        rspec['nodespec'] = {'name': self.conf.GENI_INTERFACE_HRN}
-        rsepc['nodespec']['nodes'] = []
-        if type in ['node']:
+        
+        if type in ['aggregate']:
             nodes = self.shell.GetNodes(self.auth)
         elif type in ['slice']:
             slicename = hrn_to_pl_slicename(hrn)
@@ -207,11 +184,21 @@ class Aggregate(GeniServer):
             node_ids = slices[0]['node_ids']
             nodes = self.shell.GetNodes(self.auth, node_ids) 
             for node in nodes:
-                nodespec = {'name': node['hostname'], 'type': 'std'}
-        elif type in ['aggregate']:
-            pass
-
-        return rspec
+        
+       
+        nodespecs = []
+        for node in nodes
+            nodespec = {}
+            nodespec['name'] = node['hostname']
+            nodespec['type'] = ""
+            nodespec['init_params'] = ""
+            nodespec['cpu_min'] = ""
+            nodespec
+         
+        
+        rspec = Rspec()
+        rspec.parseDict(spec)
+        return rspec.toxml()
 
     def get_resources(self, slice_hrn):
         """
