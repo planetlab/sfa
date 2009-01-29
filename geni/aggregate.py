@@ -12,17 +12,15 @@ from geni.util.excep import *
 from geni.util.misc import *
 from geni.util.config import Config
 from geni.util.rspec import Rspec
-from geni.util.storage improt SimpleStorage
+from geni.util.specdict import *
+from geni.util.storage import SimpleStorage
 
 class Aggregate(GeniServer):
 
     hrn = None
-    #nodes_file = None
     nodes_ttl = None
     nodes = {}
-    
-    #whitelist_file = None
-    #blacklist_file = None    
+    slices = {} 
     policy = {}
     timestamp = None
     threshold = None    
@@ -44,9 +42,13 @@ class Aggregate(GeniServer):
         server_basedir = basedir + os.sep + "geni" + os.sep
         self.hrn = self.conf.GENI_INTERFACE_HRN
         
-        nodes_file = os.sep.join([server_basedir, 'components', self.hrn + '.comp'])
+        nodes_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.components'])
         self.nodes = SimpleStorage(nodes_file)
-        
+       
+        node_slices_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.slices'])
+        self.slices = SimpleStorage(node_slices_file)
+        self.slices.load()
+ 
         policy_file = os.sep.join([server_basedir, 'policy'])
         self.policy = SimpleStorage(policy_file, {'whitelist': [], 'blacklist': []})
         
@@ -54,7 +56,6 @@ class Aggregate(GeniServer):
         self.timestamp = SimpleStorage(timestamp_file)
 
         self.nodes_ttl = 1
-        self.nodes = []
         self.connectPLC()
         self.connectRegistry()
 
@@ -136,7 +137,7 @@ class Aggregate(GeniServer):
         self.nodes.write()
 
         # update timestamp and threshold
-        self.timestamp['timestamp'] =  datetime.datetime.now()}
+        self.timestamp['timestamp'] =  datetime.datetime.now()
         delta = datetime.timedelta(hours=self.nodes_ttl)
         self.threshold = self.timestamp['timestamp'] + delta 
         self.timestamp.write()        
@@ -168,7 +169,7 @@ class Aggregate(GeniServer):
         # Reload components list
         now = datetime.datetime.now()
         #self.load_components()
-        if not self.threshold or not self.timestamp or now > self.threshold:
+        if not self.threshold or not self.timestamp['timestamp'] or now > self.threshold:
             self.refresh_components()
         elif now < self.threshold and not self.nodes.keys(): 
             self.load_components()
@@ -176,6 +177,7 @@ class Aggregate(GeniServer):
      
     def get_rspec(self, hrn, type):
         
+        # Get the required nodes
         if type in ['aggregate']:
             nodes = self.shell.GetNodes(self.auth)
         elif type in ['slice']:
@@ -183,21 +185,38 @@ class Aggregate(GeniServer):
             slices = self.shell.GetSlices(self.auth, [slicename])
             node_ids = slices[0]['node_ids']
             nodes = self.shell.GetNodes(self.auth, node_ids) 
-            for node in nodes:
         
-       
-        nodespecs = []
-        for node in nodes
-            nodespec = {}
-            nodespec['name'] = node['hostname']
-            nodespec['type'] = ""
-            nodespec['init_params'] = ""
-            nodespec['cpu_min'] = ""
-            nodespec
-         
+        # Get all network interfaces
+        interface_ids = []
+        for node in nodes:
+            interface_ids.extend(node['nodenetwork_ids'])
+        interfaces = self.shell.GetNodeNetworks(self.auth, interface_ids)
+        interface_dict = {}
+        for interface in interfaces:
+            interface_dict[interface['nodenetwork_id']] = interface
         
+        # join nodes with thier interfaces
+        for node in nodes:
+            node['interfaces'] = []
+            for nodenetwork_id in node['nodenetwork_ids']:
+                node['interfaces'].append(interface_dict[nodenetwork_id])
+
+        # convert and threshold to ints
+        timestamp = self.timestamp['timestamp']
+        start_time = int(self.timestamp['timestamp'].strftime("%s"))
+        end_time = int(self.duration.strftime("%s"))
+        duration = end_time - start_time
+
+        # create the plc dict
+        networks = {'nodes': nodes, 'name': self.hrn, 'start_time': start_time, 'duration': duration} 
+        resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
+
+        # convert the plc dict to an rspec dict
+        resouceDict = RspecDict(resources)
+
+        # convert the rspec dict to xml
         rspec = Rspec()
-        rspec.parseDict(spec)
+        rspec.parseDict(resourceDict)
         return rspec.toxml()
 
     def get_resources(self, slice_hrn):
@@ -214,9 +233,19 @@ class Aggregate(GeniServer):
         Instantiate the specified slice according to whats defined in the rspec.
         """
         slicename = self.hrn_to_plcslicename(slice_hrn)
+        
+        # extract node list from rspec
         spec = Rspec(rspec)
         nodespecs = spec.getDictsByTagName('NodeSpec')
-        nodes = [nodespec['name'] for nodespec in nodespecs]    
+        nodes = [nodespec['name'] for nodespec in nodespecs]
+
+        # save slice state locally
+        # we can assume that spec object has been validated so its safer to 
+        # save this instead of the unvalidated rspec the user gave us
+        self.slices[slice_hrn] = spec.toxml()
+        self.slices.write()
+
+        # add slice to nodes at plc    
         self.shell.AddSliceToNodes(self.auth, slicename, nodes)
         for attribute in attributes:
             type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
@@ -252,6 +281,13 @@ class Aggregate(GeniServer):
         spec = Rspec(rspec)
         nodespecs = spec.getDictsByTagName('NodeSpec')
         nodes = [nodespec['name'] for nodespec in nodespecs]    
+       
+        # save slice state locally
+        # we can assume that spec object has been validated so its safer to 
+        # save this instead of the unvalidated rspec the user gave us
+        self.slices[slice_hrn] = spec.toxml()
+        self.slices.write()
+
         # remove nodes not in rspec
         delete_nodes = set(hostnames).difference(nodes)
         # add nodes from rspec
@@ -269,12 +305,18 @@ class Aggregate(GeniServer):
         # persons = slice_record['users']
         
         #for person in persons:
-        #    shell.AddPersonToSlice(person['email'], slice_name) 
+        #    shell.AddPersonToSlice(person['email'], slice_name)
+
+         
     def delete_slice_(self, slice_hrn):
         """
         Remove this slice from all components it was previouly associated with and 
         free up the resources it was using.
         """
+        if self.slices.has_key(slice_hrn):
+            self.slices.pop(slice_hrn)
+            self.slices.write()
+
         slicename = self.hrn_to_plcslicename(slice_hrn)
         slices = shell.GetSlices(self.auth, [slicename])
         if not slice:
