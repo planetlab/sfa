@@ -89,6 +89,8 @@ class NetSpecDict(SpecDict):
               'nodes': [NodeSpecDict],
              }
     plc_fields = {'name': 'name',
+                  'start_time': 'start_time',
+                  'duration': 'duration',
                   'nodes': 'nodes'}
 
 class RspecDict(SpecDict):
