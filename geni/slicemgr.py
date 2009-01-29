@@ -10,22 +10,23 @@ from geni.util.trustedroot import *
 from geni.util.excep import *
 from geni.util.misc import *
 from geni.util.config import Config
+from geni.util.rspec import Rspec
+from geni.util.specdict import *
+from geni.util.storage import SimpleStorage
 
 class SliceMgr(GeniServer):
 
     hrn = None
     key_file = None
     cert_file = None
-    components_file = None
-    slices_file = None    
-    components_ttl = None
-    components = []
-    slices = []    
+    nodes = {}
+    slices = {}
     policy = {}
+    aggregates = {}
     timestamp = None
     threshold = None    
     shell = None
-    aggregates = {}
+    registry = None
     
   
     ##
@@ -42,13 +43,16 @@ class SliceMgr(GeniServer):
         self.cert_file = cert_file
         self.conf = Config(config)
         basedir = self.conf.GENI_BASE_DIR + os.sep
-        server_basedir = basedir + os.sep + "plc" + os.sep
+        server_basedir = basedir + os.sep + "geni" + os.sep
         self.hrn = conf.GENI_INTERFACE_HRN
     
         # Get list of aggregates this sm talks to
         aggregates_file = server_basedir + os.sep + 'aggregates'
+        self.aggregates = SimpleStorage(aggregates_file)
         self.load_aggregates(aggregates_file) 
-        self.components_file = os.sep.join([server_basedir, 'components', 'slicemgr.' + hrn + '.comp'])
+        
+        components_file = os.sep.join([server_basedir, 'components', 'slicemgr.' + hrn + '.comp'])
+        
         self.slices_file = os.sep.join([server_basedir, 'components', 'slicemgr' + hrn + '.slices'])
         self.timestamp_file = os.sep.join([server_basedir, 'components', 'slicemgr' + hrn + '.timestamp']) 
         self.components_ttl = components_ttl
