@@ -159,4 +159,19 @@ class Rspec():
                 dicts.append(value)
         return dicts
 
+    def getDictByTagNameValue(self, tagname, value, dom = None)
+        """
+        Search the dom for the first element with the specified tagname
+        and value and return it as a dict.
+        """
+        tempdict = {}
+        if not dom:
+            dom = self.rootNode
+        dicts = self.getDictsByTagName(tagname, dom)
+        
+        for rdict in dicts:
+            if rdict.has_key('name') and rdict['name'] in [value]:
+                return rdict
+              
+        return tempdict
 # vim:ts=4:expandtab

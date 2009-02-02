@@ -19,9 +19,9 @@ class Aggregate(GeniServer):
 
     hrn = None
     nodes_ttl = None
-    nodes = {}
-    slices = {} 
-    policy = {}
+    nodes = None
+    slices = None 
+    policy = None
     timestamp = None
     threshold = None    
     shell = None
@@ -35,8 +35,10 @@ class Aggregate(GeniServer):
     # @param key_file private key filename of registry
     # @param cert_file certificate filename containing public key (could be a GID file)     
 
-    def __init__(self, ip, port, key_file, cert_file, config = "/usr/share/geniwrapper/util/geni_config"):
+    def __init__(self, ip, port, key_file, cert_file, config = "/usr/share/geniwrapper/geni/util/geni_config"):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
+        self.key_file = key_file
+        self.cert_file = cert_file
         self.conf = Config(config)
         basedir = self.conf.GENI_BASE_DIR + os.sep
         server_basedir = basedir + os.sep + "geni" + os.sep
@@ -44,15 +46,17 @@ class Aggregate(GeniServer):
         
         nodes_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.components'])
         self.nodes = SimpleStorage(nodes_file)
+        self.nodes.load()
        
-        node_slices_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.slices'])
-        self.slices = SimpleStorage(node_slices_file)
+        slices_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.slices'])
+        self.slices = SimpleStorage(slices_file)
         self.slices.load()
  
-        policy_file = os.sep.join([server_basedir, 'policy'])
-        self.policy = SimpleStorage(policy_file, {'whitelist': [], 'blacklist': []})
+        policy_file = os.sep.join([server_basedir, 'agg.policy'])
+        self.policy = SimpleStorage(policy_file)
+        self.policy.load()
         
-        timestamp_file = os.sep.join([server_basedir, 'components', self.hrn + '.timestamp']) 
+        timestamp_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.timestamp']) 
         self.timestamp = SimpleStorage(timestamp_file)
 
         self.nodes_ttl = 1
@@ -63,7 +67,11 @@ class Aggregate(GeniServer):
         """
         Connect to the registry
         """
-        pass
+        # connect to registry using GeniClient
+        address = self.config.GENI_REGISTRY_HOSTNAME
+        port = self.config.GENI_REGISTRY_PORT
+        url = 'https://%(address)s:%(port)s' % locals()
+        self.registry = GeniClient(url, self.key_file, self.cert_file) 
     
     def connectPLC(self):
         """
@@ -176,6 +184,9 @@ class Aggregate(GeniServer):
         return self.nodes.keys()
      
     def get_rspec(self, hrn, type):
+        """
+        Get resource information from PLC
+        """
         
         # Get the required nodes
         if type in ['aggregate']:
@@ -204,7 +215,7 @@ class Aggregate(GeniServer):
         # convert and threshold to ints
         timestamp = self.timestamp['timestamp']
         start_time = int(self.timestamp['timestamp'].strftime("%s"))
-        end_time = int(self.duration.strftime("%s"))
+        end_time = int(self.threshold.strftime("%s"))
         duration = end_time - start_time
 
         # create the plc dict
@@ -232,18 +243,18 @@ class Aggregate(GeniServer):
         """
         Instantiate the specified slice according to whats defined in the rspec.
         """
-        slicename = self.hrn_to_plcslicename(slice_hrn)
-        
-        # extract node list from rspec
-        spec = Rspec(rspec)
-        nodespecs = spec.getDictsByTagName('NodeSpec')
-        nodes = [nodespec['name'] for nodespec in nodespecs]
 
         # save slice state locally
-        # we can assume that spec object has been validated so its safer to 
+        # we can assume that spec object has been validated so its safer to
         # save this instead of the unvalidated rspec the user gave us
         self.slices[slice_hrn] = spec.toxml()
         self.slices.write()
+
+        # extract node list from rspec
+        slicename = self.hrn_to_plcslicename(slice_hrn)
+        spec = Rspec(rspec)
+        nodespecs = spec.getDictsByTagName('NodeSpec')
+        nodes = [nodespec['name'] for nodespec in nodespecs]
 
         # add slice to nodes at plc    
         self.shell.AddSliceToNodes(self.auth, slicename, nodes)
@@ -320,7 +331,7 @@ class Aggregate(GeniServer):
         slicename = self.hrn_to_plcslicename(slice_hrn)
         slices = shell.GetSlices(self.auth, [slicename])
         if not slice:
-            raise RecordNotFound(slice_hrn)
+            return 1  
         slice = slices[0]
       
         shell.DeleteSliceFromNodes(self.auth, slicename, slice['node_ids'])
@@ -333,7 +344,8 @@ class Aggregate(GeniServer):
         slicename = hrn_to_plcslicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, {'name': slicename}, ['slice_id'])
         if not slices:
-            raise RecordNotFound(slice_hrn)
+            #raise RecordNotFound(slice_hrn)
+            return 1 
         slice_id = slices[0]
         atrribtes = self.shell.GetSliceAttributes({'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
         attribute_id = attreibutes[0] 
@@ -347,7 +359,8 @@ class Aggregate(GeniServer):
         slicename = hrn_to_plcslicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, {'name': slicename}, ['slice_id'])
         if not slices:
-            raise RecordNotFound(slice_hrn)
+            #raise RecordNotFound(slice_hrn)
+            return 1
         slice_id = slices[0]
         atrribtes = self.shell.GetSliceAttributes({'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
         attribute_id = attreibutes[0]
@@ -359,7 +372,7 @@ class Aggregate(GeniServer):
         """
         Reset the slice
         """
-        slicename = self.hrn_to_plcslicename(slice_hrn)
+        # XX not yet implemented
         return 1
 
     def get_policy(self):
