@@ -18,8 +18,7 @@ from geni.util.genitable import GeniTable
 from geni.util.geniticket import Ticket
 from geni.util.excep import *
 from geni.util.misc import *
-
-from util.config import *
+from geni.util.config import *
 
 ##
 # Convert geni fields to PLC fields for use when registering up updating
