@@ -21,9 +21,7 @@ class SimpleStorage(dict):
             raise IOError, '%s exists but is not a file. please remove it and try again' \
                            % self.db_filename
         else:
-            db_file = open(self.db_filename, 'w')
-            db_file.write('{}')
-            db_file.close()
+            self.write()
  
     def write(self):
         db_file = open(self.db_filename, 'w')  
