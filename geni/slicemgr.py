@@ -6,6 +6,7 @@ import time
 from geni.util.geniserver import *
 from geni.util.geniclient import *
 from geni.util.cert import *
+from geni.util.credential import Credential
 from geni.util.trustedroot import *
 from geni.util.excep import *
 from geni.util.misc import *
@@ -17,8 +18,6 @@ from geni.util.storage import SimpleStorage
 class SliceMgr(GeniServer):
 
     hrn = None
-    key_file = None
-    cert_file = None
     nodes_ttl = None
     nodes = None
     slices = None
@@ -28,7 +27,9 @@ class SliceMgr(GeniServer):
     threshold = None    
     shell = None
     registry = None
-    
+    key_file = None
+    cert_file = None
+    credential = None 
   
     ##
     # Create a new slice manager object.
@@ -71,6 +72,33 @@ class SliceMgr(GeniServer):
         self.nodes_ttl = 1
         self.connectAggregates()
         self.connectRegistry()
+        self.loadCredential()
+
+
+    def loadCredential(self):
+        """
+        Attempt to load credential from file if it exists. If it doesnt get
+        credential from registry.
+        """
+
+        self_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".cred"
+        ma_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".sa.cred"
+
+        # see if this file exists
+        try:
+            cred = Credential(filename = ma_cred_filename)
+            self.credential = cred.save_to_string()
+        except IOError:
+            # get self credential
+            self_cred = self.registry.get_credential(None, 'ma', self.hrn)
+            self_credential = Credential(string = self_cred)
+            self_credential.save_to_file(self_cred_filename)
+
+            # get ma credential
+            ma_cred = self.registry.get_gredential(self_cred)
+            ma_credential = Credential(string = ma_cred)
+            ma_credential.save_to_file(ma_cred_filename)
+            self.credential = ma_cred        
 
     def connect_aggregates(self, aggregates_file):
         """
@@ -190,7 +218,7 @@ class SliceMgr(GeniServer):
  
     def load_slices(self):
         """
-         Read current slice instantiation states.
+        Read current slice instantiation states.
         """
         print "loading slices"
         self.slices.load()
@@ -220,8 +248,8 @@ class SliceMgr(GeniServer):
         """
         Return the current rspec for the specified slice.
         """
+        cred = self.credential
 
-        cred = None
         if slice_hrn in self.slices.keys():
             # check if we alreay have this slices state saved
             rspec = self.slices[slice_hrn]
@@ -262,7 +290,7 @@ class SliceMgr(GeniServer):
         Instantiate the specified slice according to whats defined in the rspec.
         """
         # XX need to gget the correct credentials
-        cred = None
+        cred = self.credential
 
         # save slice state locally
         # we can assume that spec object has been validated so its safer to
@@ -311,7 +339,7 @@ class SliceMgr(GeniServer):
         free up the resources it was using.
         """
         # XX need to get the correct credential
-        cred = None
+        cred = self.credential
         
         if self.slices.has_key(slice_hrn):
             self.slices.pop(slice_hrn)
@@ -326,8 +354,7 @@ class SliceMgr(GeniServer):
         """
         Stop the slice at plc.
         """
-        # XX need to get the correct credential
-        cred = None
+        cred = self.credential
 
         for hrn in self.aggregates.keys():
             self.aggregates[hrn].startSlice(cred, slice_hrn)
@@ -337,6 +364,7 @@ class SliceMgr(GeniServer):
         """
         Stop the slice at plc
         """
+        cred = self.credential
         for hrn in self.aggregates.keys():
             self.aggregates[hrn].startSlice(cred, slice_hrn)
         return 1
@@ -375,7 +403,7 @@ class SliceMgr(GeniServer):
 
     def create(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'embed')
-        self.verify_object_belongs_to_me(hrn, rspec)
+        self.verify_object_belongs_to_me(hrn)
         return self.create(hrn)
 
     def delete(self, cred, hrn):

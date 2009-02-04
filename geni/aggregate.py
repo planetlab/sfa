@@ -7,6 +7,7 @@ import xmlrpclib
 from geni.util.geniserver import GeniServer
 from geni.util.geniclient import *
 from geni.util.cert import Keypair, Certificate
+from geni.util.credential import Credential
 from geni.util.trustedroot import TrustedRootList
 from geni.util.excep import *
 from geni.util.misc import *
@@ -26,6 +27,9 @@ class Aggregate(GeniServer):
     threshold = None    
     shell = None
     registry = None
+    key_file = None
+    cert_file = None
+    credential = None
   
     ##
     # Create a new aggregate object.
@@ -40,28 +44,30 @@ class Aggregate(GeniServer):
         self.key_file = key_file
         self.cert_file = cert_file
         self.conf = Config(config)
-        basedir = self.conf.GENI_BASE_DIR + os.sep
-        server_basedir = basedir + os.sep + "geni" + os.sep
+        self.basedir = self.conf.GENI_BASE_DIR + os.sep
+        self.server_basedir = self.basedir + os.sep + "geni" + os.sep
         self.hrn = self.conf.GENI_INTERFACE_HRN
         
-        nodes_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.components'])
+        nodes_file = os.sep.join([self.server_basedir, 'agg.' + self.hrn + '.components'])
         self.nodes = SimpleStorage(nodes_file)
         self.nodes.load()
        
-        slices_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.slices'])
+        slices_file = os.sep.join([self.server_basedir, 'agg.' + self.hrn + '.slices'])
         self.slices = SimpleStorage(slices_file)
         self.slices.load()
  
-        policy_file = os.sep.join([server_basedir, 'agg.policy'])
+        policy_file = os.sep.join([self.server_basedir, 'agg.policy'])
         self.policy = SimpleStorage(policy_file)
         self.policy.load()
         
-        timestamp_file = os.sep.join([server_basedir, 'agg.' + self.hrn + '.timestamp']) 
+        timestamp_file = os.sep.join([self.server_basedir, 'agg.' + self.hrn + '.timestamp']) 
         self.timestamp = SimpleStorage(timestamp_file)
 
         self.nodes_ttl = 1
+
         self.connectPLC()
         self.connectRegistry()
+        self.loadCredential()
 
     def connectRegistry(self):
         """
@@ -71,7 +77,8 @@ class Aggregate(GeniServer):
         address = self.config.GENI_REGISTRY_HOSTNAME
         port = self.config.GENI_REGISTRY_PORT
         url = 'https://%(address)s:%(port)s' % locals()
-        self.registry = GeniClient(url, self.key_file, self.cert_file) 
+        self.registry = GeniClient(url, self.key_file, self.cert_file)
+
     
     def connectPLC(self):
         """
@@ -99,7 +106,32 @@ class Aggregate(GeniServer):
                  'AuthString': self.conf.GENI_PLC_PASSWORD} 
 
             self.shell = xmlrpclib.Server(url, verbose = 0, allow_none = True) 
-            self.shell.AuthCheck(self.auth) 
+            self.shell.AuthCheck(self.auth)
+
+    def loadCredential(self):
+        """
+        Attempt to load credential from file if it exists. If it doesnt get 
+        credential from registry.
+        """ 
+
+        self_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".cred"
+        ma_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".ma.cred"
+        
+        # see if this file exists
+        try:
+            cred = Credential(filename = ma_cred_filename)
+            self.credential = cred.save_to_string()
+        except IOError:
+            # get self credential
+            self_cred = self.registry.get_credential(None, 'ma', self.hrn)
+            self_credential = Credential(string = self_cred)
+            self_credential.save_to_file(self_cred_filename)
+
+            # get ma credential
+            ma_cred = self.registry.get_gredential(self_cred)
+            ma_credential = Credential(string = ma_cred)
+            ma_credential.save_to_file(ma_cred_filename)
+            self.credential = ma_cred
 
     def hostname_to_hrn(self, login_base, hostname):
         """
@@ -264,7 +296,7 @@ class Aggregate(GeniServer):
 
         # XX contact the registry to get the list of users on this slice and
         # their keys.
-        #slice_record = self.registry.resolve(slice_hrn)
+        slice_record = self.registry.resolve(self.credential, slice_hrn)
         #person_records = slice_record['users']
         # for person in person_record:
         #    email = person['email']
@@ -312,7 +344,7 @@ class Aggregate(GeniServer):
             shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
     
         # contact registry to get slice users and add them to the slice
-        # slice_record = self.registry.resolve(slice_hrn)
+        slice_record = self.registry.resolve(self.credential, slice_hrn)
         # persons = slice_record['users']
         
         #for person in persons:

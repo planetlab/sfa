@@ -159,7 +159,7 @@ class Rspec():
                 dicts.append(value)
         return dicts
 
-    def getDictByTagNameValue(self, tagname, value, dom = None)
+    def getDictByTagNameValue(self, tagname, value, dom = None):
         """
         Search the dom for the first element with the specified tagname
         and value and return it as a dict.

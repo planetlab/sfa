@@ -18,7 +18,7 @@ class SimpleStorage(dict):
  
     def write(self):
         db_file = open(self.db_filename, 'w')  
-        db_file.write(str(self)
+        db_file.write(str(self))
         db_file.close()
     
     def sync(self):
