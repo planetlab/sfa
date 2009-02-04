@@ -176,7 +176,7 @@ class Rspec():
         return tempdict
 
 
-    def filter(self, tagname, attribute, valuelist, dom = None):
+    def filter(self, tagname, attribute, blacklist = [], whitelist = [], dom = None):
         """
         Removes all elements where:
         1. tagname matches the element tag
@@ -188,12 +188,14 @@ class Rspec():
         if not dom:
             dom = self.rootNode
        
-        if dom.localName in [tagname] and dom.attributes.has_key(attribute) and \
-           dom.attributes.get(attribute).value in valuelist:
-            dom.parentNode.removeChild(dom)
+        if dom.localName in [tagname] and dom.attributes.has_key(attribute):
+            if whitelist and dom.attributes.get(attribute).value not in whitelist:
+                dom.parentNode.removeChild(dom)
+            if blacklist and dom.attributes.get(attribute).value in blacklist:
+                dom.parentNode.removeChild(dom)
            
         if dom.hasChildNodes():
             for child in dom.childNodes:
-                self.filter(tagname, attribute, valuelist, child) 
+                self.filter(tagname, attribute, blacklist, whitelist, child) 
 
 # vim:ts=4:expandtab
