@@ -1,3 +1,4 @@
+import os
 
 class SimpleStorage(dict):
 
@@ -13,8 +14,16 @@ class SimpleStorage(dict):
         self.db_filename = db_filename
     
     def load(self):
-        db_file = open(self.db_filename, 'r')
-        dict.__init__(self, eval(db_file.read()))    
+        if os.path.exists(self.db_filename) and os.path.isfile(self.db_filename):
+            db_file = open(self.db_filename, 'r')
+            dict.__init__(self, eval(db_file.read()))
+        elif os.path.exists(self.db_filename) and not os.path.isfile(self.db_filename):
+            raise IOError, '%s exists but is not a file. please remove it and try again' \
+                           % self.db_filename
+        else:
+            db_file = open(self.db_filename, 'w')
+            db_file.write('{}')
+            db_file.close()
  
     def write(self):
         db_file = open(self.db_filename, 'w')  
