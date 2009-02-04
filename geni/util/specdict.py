@@ -38,6 +38,7 @@ class SpecDict(dict):
             if isinstance(expected, StringTypes):
                 if self.plc_fields.has_key(field):
                     plc_field = self.plc_fields[field]
+                    print self.type, spec_dict
                     if spec_dict.has_key(plc_field):
                         value = spec_dict[plc_field]
             elif isinstance(expected, ListType):

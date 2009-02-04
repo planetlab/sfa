@@ -43,10 +43,10 @@ class Aggregate(GeniServer):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
         self.key_file = key_file
         self.cert_file = cert_file
-        self.conf = Config(config)
-        self.basedir = self.conf.GENI_BASE_DIR + os.sep
+        self.config = Config(config)
+        self.basedir = self.config.GENI_BASE_DIR + os.sep
         self.server_basedir = self.basedir + os.sep + "geni" + os.sep
-        self.hrn = self.conf.GENI_INTERFACE_HRN
+        self.hrn = self.config.GENI_INTERFACE_HRN
         
         nodes_file = os.sep.join([self.server_basedir, 'agg.' + self.hrn + '.components'])
         self.nodes = SimpleStorage(nodes_file)
@@ -56,8 +56,8 @@ class Aggregate(GeniServer):
         self.slices = SimpleStorage(slices_file)
         self.slices.load()
  
-        policy_file = os.sep.join([self.server_basedir, 'agg.policy'])
-        self.policy = SimpleStorage(policy_file)
+        policy_file = os.sep.join([self.server_basedir, 'agg.' + self.hrn + '.policy'])
+        self.policy = SimpleStorage(policy_file, {'whitelist': [], 'blacklist': []})
         self.policy.load()
         
         timestamp_file = os.sep.join([self.server_basedir, 'agg.' + self.hrn + '.timestamp']) 
@@ -85,25 +85,25 @@ class Aggregate(GeniServer):
         Connect to the plc api interface. First attempt to impor thte shell, if that fails
         try to connect to the xmlrpc server.
         """
-        self.auth = {'Username': self.conf.GENI_PLC_USER,
+        self.auth = {'Username': self.config.GENI_PLC_USER,
                      'AuthMethod': 'password',
-                     'AuthString': self.conf.GENI_PLC_PASSWORD}
+                     'AuthString': self.config.GENI_PLC_PASSWORD}
 
         try:
            # try to import PLC.Shell directly
-            sys.path.append(self.conf.GENI_PLC_SHELL_PATH) 
+            sys.path.append(self.config.GENI_PLC_SHELL_PATH) 
             import PLC.Shell
             self.shell = PLC.Shell.Shell(globals())
             self.shell.AuthCheck()
         except ImportError:
             # connect to plc api via xmlrpc
-            plc_host = self.conf.GENI_PLC_HOST
-            plc_port = self.conf.GENI_PLC_PORT
-            plc_api_path = self.conf.GENI_PLC_API_PATH                 
+            plc_host = self.config.GENI_PLC_HOST
+            plc_port = self.config.GENI_PLC_PORT
+            plc_api_path = self.config.GENI_PLC_API_PATH                 
             url = "https://%(plc_host)s:%(plc_port)s/%(plc_api_path)s/" % locals()
-            self.auth = {'Username': self.conf.GENI_PLC_USER,
+            self.auth = {'Username': self.config.GENI_PLC_USER,
                  'AuthMethod': 'password',
-                 'AuthString': self.conf.GENI_PLC_PASSWORD} 
+                 'AuthString': self.config.GENI_PLC_PASSWORD} 
 
             self.shell = xmlrpclib.Server(url, verbose = 0, allow_none = True) 
             self.shell.AuthCheck(self.auth)
@@ -123,15 +123,18 @@ class Aggregate(GeniServer):
             self.credential = cred.save_to_string()
         except IOError:
             # get self credential
-            self_cred = self.registry.get_credential(None, 'ma', self.hrn)
-            self_credential = Credential(string = self_cred)
-            self_credential.save_to_file(self_cred_filename)
+            #self_cred = self.registry.get_credential(None, 'ma', self.hrn)
+            #self_credential = Credential(string = self_cred)
+            #self_credential.save_to_file(self_cred_filename)
 
             # get ma credential
-            ma_cred = self.registry.get_gredential(self_cred)
-            ma_credential = Credential(string = ma_cred)
-            ma_credential.save_to_file(ma_cred_filename)
-            self.credential = ma_cred
+            #ma_cred = self.registry.get_gredential(self_cred)
+            #ma_credential = Credential(string = ma_cred)
+            #ma_credential.save_to_file(ma_cred_filename)
+
+            ma_cred = Certificate(filename = self.cert_file)
+            
+            self.credential = ma_cred.save_to_string()
 
     def hostname_to_hrn(self, login_base, hostname):
         """
@@ -149,8 +152,23 @@ class Aggregate(GeniServer):
 
     def refresh_components(self):
         """
-        Update the cached list of nodes.
+        Update the cached list of nodes and save in 4 differnt formats
+        (rspec, dns, ip, hrn)
         """
+
+        node_details = {}
+        # get node list in rspec format
+        rspec = Rspec()
+        rspec.parseString(self.get_rspec(self.hrn, 'aggregate'))
+        # filter nodes according to policy
+        rspec.filter('NodeSpec', 'name', blacklist=self.policy['blacklist'], whitelist=self.policy['whitelist'])
+        # extract ifspec info to get ip's
+        ips = []
+        ifspecs = rspec.getDictsByTagName('IfSpec')
+        for ifspec in ifspecs:
+            if ifspec.has_key('addr') and ifspec['addr']:
+                ips.append(ifspec['addr']) 
+
         # resolve component hostnames 
         nodes = self.shell.GetNodes(self.auth, {}, ['hostname', 'site_id'])
     
@@ -161,21 +179,29 @@ class Aggregate(GeniServer):
         for site in sites:
             site_dict[site['site_id']] = site['login_base']
 
+        # filter nodes according to policy
         # convert plc names to geni hrn
         nodedict = {}
         for node in nodes:
             node_hrn = self.hostname_to_hrn(site_dict[node['site_id']], node['hostname'])
             # apply policy. 
             # Do not allow nodes found in blacklist, only allow nodes found in whitelist
-            if self.polciy['whitelist'] and node_hrn not in self.polciy['whitelist']:
+            if self.policy['whitelist'] and node_hrn not in self.polciy['whitelist']:
                 continue
-            if self.polciy['blacklist'] and node_hrn in self.policy['blacklist']:
+            if self.policy['blacklist'] and node_hrn in self.policy['blacklist']:
                 continue
             nodedict[node_hrn] = node['hostname']
+
         
-        self.nodes = SimpleStorage(self.nodes.db_filename, nodedict)
+        node_details['rspec'] = rspec.toxml()
+        node_details['hrn'] = nodedict.keys()
+        node_details['dns'] = nodedict.values()
+        node_details['ip'] = ips
+        # save state 
+        self.nodes = SimpleStorage(self.nodes.db_filename, node_details)
         self.nodes.write()
 
+        
         # update timestamp and threshold
         self.timestamp['timestamp'] =  datetime.datetime.now()
         delta = datetime.timedelta(hours=self.nodes_ttl)
@@ -202,10 +228,15 @@ class Aggregate(GeniServer):
         self.policy.load()
 
 
-    def get_components(self):
+    def getComponents(self, type = 'rspec'):
         """
         Return a list of components at this aggregate.
         """
+        valid_types = ['rspec', 'hrn', 'dns', 'ip']
+        if type not in valid_types:
+            raise Exception, "Invalid type specified, must be one of the following: %s" \
+                             % ", ".join(valid_types)
+        
         # Reload components list
         now = datetime.datetime.now()
         #self.load_components()
@@ -214,7 +245,15 @@ class Aggregate(GeniServer):
         elif now < self.threshold and not self.nodes.keys(): 
             self.load_components()
         return self.nodes.keys()
-     
+    
+    def getSlices(self, hrn):
+        """
+        Return a list of instnatiated managed by this slice manager.
+        """
+
+        # XX list only the slices at the specfied hrn
+        return dict(self.slices)
+ 
     def get_rspec(self, hrn, type):
         """
         Get resource information from PLC
@@ -245,9 +284,17 @@ class Aggregate(GeniServer):
                 node['interfaces'].append(interface_dict[nodenetwork_id])
 
         # convert and threshold to ints
-        timestamp = self.timestamp['timestamp']
-        start_time = int(self.timestamp['timestamp'].strftime("%s"))
-        end_time = int(self.threshold.strftime("%s"))
+        if self.timestamp.has_key('timestamp') and self.timestamp['timestamp']:
+            timestamp = self.timestamp['timestamp']
+            threshold = self.threshold
+        else:
+            timestamp = datetime.datetime.now()
+            delta = datetime.timedelta(hours=self.nodes_ttl)
+            threshold = timestamp + delta        
+
+    
+        start_time = int(timestamp.strftime("%s"))
+        end_time = int(threshold.strftime("%s"))
         duration = end_time - start_time
 
         # create the plc dict
@@ -262,53 +309,27 @@ class Aggregate(GeniServer):
         rspec.parseDict(resourceDict)
         return rspec.toxml()
 
-    def get_resources(self, slice_hrn):
+    def getResources(self, slice_hrn):
         """
         Return the current rspec for the specified slice.
         """
-        slicename = hrn_to_plcslicename(slice_hrn)
+        slicename = self.hrn_to_plcslicename(slice_hrn)
         rspec = self.get_rspec(slicenamem, 'slice')
         
         return rspec
  
-    def create_slice(self, slice_hrn, rspec, attributes = []):
+
+    def createSlice(self, slice_hrn, rspec, attributes = []):
         """
         Instantiate the specified slice according to whats defined in the rspec.
         """
-
+        
         # save slice state locally
         # we can assume that spec object has been validated so its safer to
         # save this instead of the unvalidated rspec the user gave us
         self.slices[slice_hrn] = spec.toxml()
         self.slices.write()
-
-        # extract node list from rspec
-        slicename = self.hrn_to_plcslicename(slice_hrn)
-        spec = Rspec(rspec)
-        nodespecs = spec.getDictsByTagName('NodeSpec')
-        nodes = [nodespec['name'] for nodespec in nodespecs]
-
-        # add slice to nodes at plc    
-        self.shell.AddSliceToNodes(self.auth, slicename, nodes)
-        for attribute in attributes:
-            type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
-            shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
-
-        # XX contact the registry to get the list of users on this slice and
-        # their keys.
-        slice_record = self.registry.resolve(self.credential, slice_hrn)
-        #person_records = slice_record['users']
-        # for person in person_record:
-        #    email = person['email']
-        #    self.shell.AddPersonToSlice(self.auth, email, slicename) 
-     
-
-        return 1
-
-    def update_slice(self, slice_hrn, rspec, attributes = []):
-        """
-        Update the specified slice.
-        """
+        
         # Get slice info
         slicename = self.hrn_to_plcslicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, [slicename], ['node_ids'])
@@ -349,9 +370,12 @@ class Aggregate(GeniServer):
         
         #for person in persons:
         #    shell.AddPersonToSlice(person['email'], slice_name)
+        return 1
 
+    def update_slice(self, slice_hrn, rspec, attributes = []):
+        return self.create_slice(slice_hrn, rspec, attributes)
          
-    def delete_slice_(self, slice_hrn):
+    def deleteSlice_(self, slice_hrn):
         """
         Remove this slice from all components it was previouly associated with and 
         free up the resources it was using.
@@ -369,7 +393,7 @@ class Aggregate(GeniServer):
         shell.DeleteSliceFromNodes(self.auth, slicename, slice['node_ids'])
         return 1
 
-    def start_slice(self, slice_hrn):
+    def startSlice(self, slice_hrn):
         """
         Stop the slice at plc.
         """
@@ -384,7 +408,7 @@ class Aggregate(GeniServer):
         self.shell.UpdateSliceAttribute(self.auth, attribute_id, "1" )
         return 1
 
-    def stop_slice(self, slice_hrn):
+    def stopSlice(self, slice_hrn):
         """
         Stop the slice at plc
         """
@@ -400,14 +424,14 @@ class Aggregate(GeniServer):
         return 1
 
 
-    def reset_slice(self, slice_hrn):
+    def resetSlice(self, slice_hrn):
         """
         Reset the slice
         """
         # XX not yet implemented
         return 1
 
-    def get_policy(self):
+    def getPolicy(self):
         """
         Return this aggregates policy.
         """
@@ -420,60 +444,57 @@ class Aggregate(GeniServer):
 ## Server methods here for now
 ##############################
 
-    def components(self):
-        return self.get_components()
+    def list_components(self):
+        return self.getComponents()
 
-    #def slices(self):
-    #    return self.get_slices()
+    def list_slices(self, cred, hrn):
+        self.decode_authentication(cred, 'list')
+        return self.getSlices(hrn)
 
-    def resources(self, cred, hrn):
+    def get_resources(self, cred, hrn):
         self.decode_authentication(cred, 'info')
-        self.verify_object_belongs_to_me(hrn)
+        return self.getResources(hrn)
 
-        return self.get_resources(hrn)
-
-    def createSlice(self, cred, hrn, rspec):
-        self.decode_authentication(cred, 'embed')
-        self.verify_object_belongs_to_me(hrn)
-        return self.create_slice(hrn)
-
-    def updateSlice(self, cred, hrn, rspec):
-        self.decode_authentication(cred, 'embed')
-        self.verify_object_belongs_to_me(hrn)
-        return self.update_slice(hrn)    
-
-    def deleteSlice(self, cred, hrn):
-        self.decode_authentication(cred, 'embed')
-        self.verify_object_belongs_to_me(hrn)
-        return self.delete_slice(hrn)
-
-    def startSlice(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
-        return self.start_slice(hrn)
-
-    def stopSlice(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
-        return self.stop(hrn)
-
-    def resetSlice(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
-        return self.reset(hrn)
-
-    def policy(self, cred):
+    def get_policy(self, cred):
         self.decode_authentication(cred, 'info')
-        return self.get_policy()
+        return self.getPolicy()
+
+    def create_slice(self, cred, hrn, rspec):
+        self.decode_authentication(cred, 'embed')
+        return self.createSlice(hrn)
+
+    def update_slice(self, cred, hrn, rspec):
+        self.decode_authentication(cred, 'embed')
+        return self.updateSlice(hrn)    
+
+    def delete_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'embed')
+        return self.deleteSlice(hrn)
+
+    def start_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.startSlice(hrn)
+
+    def stop_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.stopSlice(hrn)
+
+    def reset_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.resetSlice(hrn)
 
     def register_functions(self):
         GeniServer.register_functions(self)
 
         # Aggregate interface methods
-        self.server.register_function(self.components)
-        #self.server.register_function(self.slices)
-        self.server.register_function(self.resources)
-        self.server.register_function(self.createSlice)
-        self.server.register_function(self.deleteSlice)
-        self.server.register_function(self.startSlice)
-        self.server.register_function(self.stopSlice)
-        self.server.register_function(self.resetSlice)
-        self.server.register_function(self.policy)
+        self.server.register_function(self.list_components)
+        self.server.register_function(self.list_slices)
+        self.server.register_function(self.get_resources)
+        self.server.register_function(self.get_policy)
+        self.server.register_function(self.create_slice)
+        self.server.register_function(self.update_slice)
+        self.server.register_function(self.delete_slice)
+        self.server.register_function(self.start_slice)
+        self.server.register_function(self.stop_slice)
+        self.server.register_function(self.reset_slice)
               

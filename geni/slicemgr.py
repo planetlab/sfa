@@ -58,11 +58,11 @@ class SliceMgr(GeniServer):
         self.nodes = SimpleStorage(nodes_file)
         self.nodes.load()
         
-        slices_file = os.sep.join([server_basedir, 'slicemgr' + self.hrn + '.slices'])
+        slices_file = os.sep.join([server_basedir, 'smgr' + self.hrn + '.slices'])
         self.slices = SimpleStorage(slices_file)
         self.slices.load()
 
-        policy_file = os.sep.join([server_basedir, 'smgr.policy'])
+        policy_file = os.sep.join([server_basedir, 'smgr.' + self.hrn + '.policy'])
         self.policy = SimpleStorage(policy_file)
         self.policy.load()
 
@@ -224,7 +224,7 @@ class SliceMgr(GeniServer):
         self.slices.load()
 
 
-    def get_components(self):
+    def getComponents(self):
         """
         Return a list of components managed by this slice manager.
         """
@@ -238,13 +238,14 @@ class SliceMgr(GeniServer):
         return self.nodes.keys()
    
      
-    def get_slices(self):
+    def getSlices(self):
         """
         Return a list of instnatiated managed by this slice manager.
         """
+        # XX return only the slices at the specified hrn
         return dict(self.slices)
 
-    def get_resources(self, slice_hrn):
+    def getResources(self, slice_hrn):
         """
         Return the current rspec for the specified slice.
         """
@@ -285,7 +286,7 @@ class SliceMgr(GeniServer):
          
         return rspec
  
-    def create_slice(self, slice_hrn, rspec, attributes):
+    def createSlice(self, slice_hrn, rspec, attributes):
         """
         Instantiate the specified slice according to whats defined in the rspec.
         """
@@ -327,13 +328,13 @@ class SliceMgr(GeniServer):
             
         return 1
 
-    def update_slice(self, slice_hrn, rspec, attributes = []):
+    def updateSlice(self, slice_hrn, rspec, attributes = []):
         """
         Update the specifed slice
         """
         self.create_slice(slice_hrn, rspec, attributes)
     
-    def delete_slice_(self, slice_hrn):
+    def deleteSlice_(self, slice_hrn):
         """
         Remove this slice from all components it was previouly associated with and 
         free up the resources it was using.
@@ -350,7 +351,7 @@ class SliceMgr(GeniServer):
 
         return 1
 
-    def start_slice(self, slice_hrn):
+    def startSlice(self, slice_hrn):
         """
         Stop the slice at plc.
         """
@@ -360,7 +361,7 @@ class SliceMgr(GeniServer):
             self.aggregates[hrn].startSlice(cred, slice_hrn)
         return 1
 
-    def stop_slice(self, slice_hrn):
+    def stopSlice(self, slice_hrn):
         """
         Stop the slice at plc
         """
@@ -369,14 +370,14 @@ class SliceMgr(GeniServer):
             self.aggregates[hrn].startSlice(cred, slice_hrn)
         return 1
 
-    def reset_slice(self, slice_hrn):
+    def resetSlice(self, slice_hrn):
         """
         Reset the slice
         """
         # XX not yet implemented
         return 1
 
-    def get_policy(self):
+    def getPolicy(self):
         """
         Return the policy of this slice manager.
         """
@@ -389,55 +390,52 @@ class SliceMgr(GeniServer):
 ## Server methods here for now
 ##############################
 
-    def nodes(self):
-        return self.get_components()
+    def list_components(self):
+        return self.getComponents()
 
-    def slices(self):
-        return self.get_slices()
+    def list_slices(self, cred, hrn):
+        self.decode_authentication(cred, 'list')
+        return self.getSlices(hrn)
 
-    def resources(self, cred, hrn):
+    def get_resources(self, cred, hrn):
         self.decode_authentication(cred, 'info')
-        self.verify_object_belongs_to_me(hrn)
+        return self.getResources(hrn)
 
-        return self.get_resources(hrn)
-
-    def create(self, cred, hrn, rspec):
-        self.decode_authentication(cred, 'embed')
-        self.verify_object_belongs_to_me(hrn)
-        return self.create(hrn)
-
-    def delete(self, cred, hrn):
-        self.decode_authentication(cred, 'embed')
-        self.verify_object_belongs_to_me(hrn)
-        return self.delete_slice(hrn)
-
-    def start(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
-        return self.start(hrn)
-
-    def stop(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
-        return self.stop(hrn)
-
-    def reset(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
-        return self.reset(hrn)
-
-    def policy(self, cred):
+    def get_policy(self, cred):
         self.decode_authentication(cred, 'info')
-        return self.get_policy()
+        return self.getPolicy()
+
+    def create_slice(self, cred, hrn, rspec):
+        self.decode_authentication(cred, 'embed')
+        return self.createSlice(hrn)
+
+    def delete_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'embed')
+        return self.deleteSlice(hrn)
+
+    def start_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.startSlice(hrn)
+
+    def stop_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.stopSlice(hrn)
+
+    def reset_slice(self, cred, hrn):
+        self.decode_authentication(cred, 'control')
+        return self.resetSlice(hrn)
 
     def register_functions(self):
         GeniServer.register_functions(self)
 
         # Aggregate interface methods
-        self.server.register_function(self.components)
-        self.server.register_function(self.slices)
-        self.server.register_function(self.resources)
-        self.server.register_function(self.create)
-        self.server.register_function(self.delete)
-        self.server.register_function(self.start)
-        self.server.register_function(self.stop)
-        self.server.register_function(self.reset)
-        self.server.register_function(self.policy)
+        self.server.register_function(self.list_components)
+        self.server.register_function(self.list_slices)
+        self.server.register_function(self.get_resources)
+        self.server.register_function(self.get_policy)
+        self.server.register_function(self.create_slice)
+        self.server.register_function(self.delete_slice)
+        self.server.register_function(self.start_slice)
+        self.server.register_function(self.stop_slice)
+        self.server.register_function(self.reset_slice)
               
