@@ -3,9 +3,9 @@
 import getopt
 import sys
 import os
-from cert import *
-from geniclient import *
-from geniticket import *
+from geni.util.cert import *
+from geni.util.geniclient import *
+from geni.util.geniticket import *
 
 long_opts = ["keyfile=", "help", "outfile=", "credfile=", "ticketfile=",
              "username=", "email=", "ip=", "dns=", "dump_parents", "server=",
