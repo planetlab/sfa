@@ -238,6 +238,27 @@ class GeniClient():
         result = self.server.update(cred.save_to_string(save_parents=True), record.as_dict())
         return result
 
+
+    #-------------------------------------------------------------------------
+    # Aggregate Interface
+    #-------------------------------------------------------------------------
+    
+    ## Get components
+    #
+    # 
+    def list_components(self):
+        result = self.server.list_components()
+        return result
+
+    def list_resources(self, cred, hrn):
+        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
+        return result
+
+    def get_policy(self, cred):
+        result = self.server.get_policy(cred.save_to_string(save_parents=True))
+        return result
+
+
     # ------------------------------------------------------------------------
     # Slice Interface
     # ------------------------------------------------------------------------
