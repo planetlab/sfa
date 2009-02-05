@@ -38,7 +38,6 @@ class SpecDict(dict):
             if isinstance(expected, StringTypes):
                 if self.plc_fields.has_key(field):
                     plc_field = self.plc_fields[field]
-                    print self.type, spec_dict
                     if spec_dict.has_key(plc_field):
                         value = spec_dict[plc_field]
             elif isinstance(expected, ListType):
@@ -47,8 +46,6 @@ class SpecDict(dict):
                     plc_field = self.plc_fields[field]
                     if spec_dict.has_key(plc_field):
                         value = [expected(value) for value in spec_dict[plc_field]]
-                    
-             
             spec[field] = value
         return {self.type: spec}
     
@@ -100,6 +97,9 @@ class RspecDict(SpecDict):
               'duration': '',
               'networks': [NetSpecDict]
              }
-    plc_fields = {'networks': 'networks'}
+    plc_fields = {'networks': 'networks',
+                  'start_time': 'start_tim',
+                  'duration': 'duration'
+                 }
 
 # vim:ts=4:expandtab
