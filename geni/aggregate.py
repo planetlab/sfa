@@ -299,11 +299,11 @@ class Aggregate(GeniServer):
 
         # create the plc dict
         networks = {'nodes': nodes, 'name': self.hrn, 'start_time': start_time, 'duration': duration} 
+        #networks = [{'name': self.hrn, 'start_time': start_time, 'duration': duration}] 
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
 
         # convert the plc dict to an rspec dict
-        resouceDict = RspecDict(resources)
-
+        resourceDict = RspecDict(resources)
         # convert the rspec dict to xml
         rspec = Rspec()
         rspec.parseDict(resourceDict)
@@ -397,7 +397,7 @@ class Aggregate(GeniServer):
         """
         Stop the slice at plc.
         """
-        slicename = hrn_to_plcslicename(slice_hrn)
+        slicename = self.hrn_to_plcslicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, {'name': slicename}, ['slice_id'])
         if not slices:
             #raise RecordNotFound(slice_hrn)
@@ -412,7 +412,7 @@ class Aggregate(GeniServer):
         """
         Stop the slice at plc
         """
-        slicename = hrn_to_plcslicename(slice_hrn)
+        slicename = self.hrn_to_plcslicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, {'name': slicename}, ['slice_id'])
         if not slices:
             #raise RecordNotFound(slice_hrn)
