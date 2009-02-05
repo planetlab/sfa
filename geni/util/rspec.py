@@ -2,6 +2,7 @@ import sys
 import pprint
 import os
 from xml.dom import minidom
+from types import StringTypes, ListType
 
 class Rspec():
 
