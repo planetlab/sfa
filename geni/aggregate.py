@@ -263,6 +263,7 @@ class Aggregate(GeniServer):
         if type in ['aggregate']:
             nodes = self.shell.GetNodes(self.auth)
         elif type in ['slice']:
+            print hrn
             slicename = hrn_to_pl_slicename(hrn)
             slices = self.shell.GetSlices(self.auth, [slicename])
             node_ids = slices[0]['node_ids']
@@ -298,8 +299,7 @@ class Aggregate(GeniServer):
         duration = end_time - start_time
 
         # create the plc dict
-        networks = {'nodes': nodes, 'name': self.hrn, 'start_time': start_time, 'duration': duration} 
-        #networks = [{'name': self.hrn, 'start_time': start_time, 'duration': duration}] 
+        networks = [{'nodes': nodes, 'name': self.hrn, 'start_time': start_time, 'duration': duration}] 
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
 
         # convert the plc dict to an rspec dict
@@ -313,8 +313,7 @@ class Aggregate(GeniServer):
         """
         Return the current rspec for the specified slice.
         """
-        slicename = self.hrn_to_plcslicename(slice_hrn)
-        rspec = self.get_rspec(slicenamem, 'slice')
+        rspec = self.get_rspec(slice_hrn, 'slice')
         
         return rspec
  
@@ -331,7 +330,7 @@ class Aggregate(GeniServer):
         self.slices.write()
         
         # Get slice info
-        slicename = self.hrn_to_plcslicename(slice_hrn)
+        slicename = hrn_to_pl_slicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, [slicename], ['node_ids'])
         if not slice:
             raise RecordNotFound(slice_hrn)
@@ -384,7 +383,7 @@ class Aggregate(GeniServer):
             self.slices.pop(slice_hrn)
             self.slices.write()
 
-        slicename = self.hrn_to_plcslicename(slice_hrn)
+        slicename = hrn_to_pl_slicename(slice_hrn)
         slices = shell.GetSlices(self.auth, [slicename])
         if not slice:
             return 1  
@@ -397,7 +396,7 @@ class Aggregate(GeniServer):
         """
         Stop the slice at plc.
         """
-        slicename = self.hrn_to_plcslicename(slice_hrn)
+        slicename = hrn_to_pl_slicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, {'name': slicename}, ['slice_id'])
         if not slices:
             #raise RecordNotFound(slice_hrn)
@@ -412,7 +411,7 @@ class Aggregate(GeniServer):
         """
         Stop the slice at plc
         """
-        slicename = self.hrn_to_plcslicename(slice_hrn)
+        slicename = hrn_to_pl_slicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, {'name': slicename}, ['slice_id'])
         if not slices:
             #raise RecordNotFound(slice_hrn)
