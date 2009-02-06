@@ -119,22 +119,19 @@ class Aggregate(GeniServer):
         
         # see if this file exists
         try:
-            cred = Credential(filename = ma_cred_filename)
+            cred = Credential(filename = ma_cred_filename, subject=self.hrn)
             self.credential = cred.save_to_string()
         except IOError:
             # get self credential
-            #self_cred = self.registry.get_credential(None, 'ma', self.hrn)
-            #self_credential = Credential(string = self_cred)
-            #self_credential.save_to_file(self_cred_filename)
+            self_cred = self.registry.get_credential(None, 'ma', self.hrn)
+            self_credential = Credential(string = self_cred)
+            self_credential.save_to_file(self_cred_filename)
 
             # get ma credential
-            #ma_cred = self.registry.get_gredential(self_cred)
-            #ma_credential = Credential(string = ma_cred)
-            #ma_credential.save_to_file(ma_cred_filename)
-
-            ma_cred = Certificate(filename = self.cert_file)
-            
-            self.credential = ma_cred.save_to_string()
+            ma_cred = self.registry.get_credential(self_cred)
+            ma_credential = Credential(string = ma_cred)
+            ma_credential.save_to_file(ma_cred_filename)
+            self.credential = ma_cred
 
     def hostname_to_hrn(self, login_base, hostname):
         """
@@ -322,6 +319,7 @@ class Aggregate(GeniServer):
         Instantiate the specified slice according to whats defined in the rspec.
         """
         
+        spec = Rspec(rspec)
         # save slice state locally
         # we can assume that spec object has been validated so its safer to
         # save this instead of the unvalidated rspec the user gave us
@@ -331,7 +329,7 @@ class Aggregate(GeniServer):
         # Get slice info
         slicename = hrn_to_pl_slicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, [slicename], ['node_ids'])
-        if not slice:
+        if not slices:
             raise RecordNotFound(slice_hrn)
         slice = slices[0]
 
@@ -340,7 +338,6 @@ class Aggregate(GeniServer):
         hostnames = [node['hostname'] for node in nodes]
 
         # get netspec details
-        spec = Rspec(rspec)
         nodespecs = spec.getDictsByTagName('NodeSpec')
         nodes = [nodespec['name'] for nodespec in nodespecs]    
        
@@ -351,16 +348,16 @@ class Aggregate(GeniServer):
         self.slices.write()
 
         # remove nodes not in rspec
-        delete_nodes = set(hostnames).difference(nodes)
+        deleted_nodes = list(set(hostnames).difference(nodes))
         # add nodes from rspec
-        added_nodes = set(nodes).difference(hostnames)
+        added_nodes = list(set(nodes).difference(hostnames))
     
-        shell.AddSliceToNodes(self.auth, slicename, added_nodes)
-        shell.DeleteSliceFromNodes(self.auth, slicename, deleted_nodes)
+        self.shell.AddSliceToNodes(self.auth, slicename, added_nodes)
+        self.shell.DeleteSliceFromNodes(self.auth, slicename, deleted_nodes)
 
         for attribute in attributes:
             type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
-            shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
+            self.shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
     
         # contact registry to get slice users and add them to the slice
         slice_record = self.registry.resolve(self.credential, slice_hrn)
@@ -370,10 +367,10 @@ class Aggregate(GeniServer):
         #    shell.AddPersonToSlice(person['email'], slice_name)
         return 1
 
-    def update_slice(self, slice_hrn, rspec, attributes = []):
+    def updateSlice(self, slice_hrn, rspec, attributes = []):
         return self.create_slice(slice_hrn, rspec, attributes)
          
-    def deleteSlice_(self, slice_hrn):
+    def deleteSlice(self, slice_hrn):
         """
         Remove this slice from all components it was previouly associated with and 
         free up the resources it was using.
@@ -383,12 +380,12 @@ class Aggregate(GeniServer):
             self.slices.write()
 
         slicename = hrn_to_pl_slicename(slice_hrn)
-        slices = shell.GetSlices(self.auth, [slicename])
-        if not slice:
+        slices = self.shell.GetSlices(self.auth, [slicename])
+        if not slices:
             return 1  
         slice = slices[0]
       
-        shell.DeleteSliceFromNodes(self.auth, slicename, slice['node_ids'])
+        self.shell.DeleteSliceFromNodes(self.auth, slicename, slice['node_ids'])
         return 1
 
     def startSlice(self, slice_hrn):
@@ -459,7 +456,7 @@ class Aggregate(GeniServer):
 
     def create_slice(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'embed')
-        return self.createSlice(hrn)
+        return self.createSlice(hrn, rspec)
 
     def update_slice(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'embed')
