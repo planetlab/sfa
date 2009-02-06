@@ -243,21 +243,47 @@ class GeniClient():
     # Aggregate Interface
     #-------------------------------------------------------------------------
     
-    ## Get components
+    ## list components
     #
     # 
     def list_components(self):
         result = self.server.list_components()
         return result
 
+    ## list resources
+    #
+    # @param cred a credential
+    # @param hrn slice hrn
+
     def list_resources(self, cred, hrn):
         result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
         return result
+
+    ## get policy
+    #
+    # @param cred a credential
 
     def get_policy(self, cred):
         result = self.server.get_policy(cred.save_to_string(save_parents=True))
         return result
 
+    ## create slice
+    #
+    # @param cred a credential
+    # @param rspec resource specification defining how to instantiate the slice
+    
+    def create_slice(self, cred, hrn, rspec):
+        result = self.server.create_slice(cred.save_to_string(save_parents=True), hrn, rspec)
+        return result
+
+
+    ## delete slice
+    #
+    # @param cred a credential
+    # @param hrn slice to delete
+    def delete_slice(self, cred, hrn):
+        result = self.server.delete_slice(cred.save_to_string(save_parents=True), hrn)
+        return result    
 
     # ------------------------------------------------------------------------
     # Slice Interface
@@ -299,8 +325,8 @@ class GeniClient():
     # @param cred a credential identifying the caller (callerGID) and the slice
     #     (objectGID)
 
-    def delete_slice(self, cred):
-        result = self.server.delete_slice(cred.save_to_string(save_parents=True))
+    def delete_slice(self, cred, hrn):
+        result = self.server.delete_slice(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ##
@@ -310,7 +336,7 @@ class GeniClient():
     #
     # @return a list of slice names
 
-    def list_slices(self, cred):
+    def list_slices(self, cred, hrn):
         result = self.server.list_slices(cred.save_to_string(save_parents=True))
         return result
 
