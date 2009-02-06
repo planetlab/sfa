@@ -67,7 +67,7 @@ class Aggregate(GeniServer):
 
         self.connectPLC()
         self.connectRegistry()
-        self.loadCredential()
+        #self.loadCredential()
 
     def connectRegistry(self):
         """
@@ -360,7 +360,7 @@ class Aggregate(GeniServer):
             self.shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
     
         # contact registry to get slice users and add them to the slice
-        slice_record = self.registry.resolve(self.credential, slice_hrn)
+        #slice_record = self.registry.resolve(self.credential, slice_hrn)
         # persons = slice_record['users']
         
         #for person in persons:
