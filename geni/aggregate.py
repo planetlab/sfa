@@ -244,7 +244,7 @@ class Aggregate(GeniServer):
             self.refresh_components()
         elif now < self.threshold and not self.nodes.keys(): 
             self.load_components()
-        return self.nodes.keys()
+        return self.nodes[type]
     
     def getSlices(self, hrn):
         """
@@ -263,7 +263,6 @@ class Aggregate(GeniServer):
         if type in ['aggregate']:
             nodes = self.shell.GetNodes(self.auth)
         elif type in ['slice']:
-            print hrn
             slicename = hrn_to_pl_slicename(hrn)
             slices = self.shell.GetSlices(self.auth, [slicename])
             node_ids = slices[0]['node_ids']
