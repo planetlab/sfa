@@ -439,43 +439,47 @@ class Aggregate(GeniServer):
 ## Server methods here for now
 ##############################
 
-    def list_components(self):
+
+    # XX fix rights, should be function name defined in 
+    # privilege_table (from util/rights.py)
+    def list_components(self, cred):
+        self.decode_authentication(cred, 'listnodes')
         return self.getComponents()
 
     def list_slices(self, cred, hrn):
-        self.decode_authentication(cred, 'list')
+        self.decode_authentication(cred, 'listslices')
         return self.getSlices(hrn)
 
     def get_resources(self, cred, hrn):
-        self.decode_authentication(cred, 'info')
+        self.decode_authentication(cred, 'listnodes')
         return self.getResources(hrn)
 
     def get_policy(self, cred):
-        self.decode_authentication(cred, 'info')
+        self.decode_authentication(cred, 'getpolicy')
         return self.getPolicy()
 
     def create_slice(self, cred, hrn, rspec):
-        self.decode_authentication(cred, 'embed')
+        self.decode_authentication(cred, 'createslice')
         return self.createSlice(hrn, rspec)
 
     def update_slice(self, cred, hrn, rspec):
-        self.decode_authentication(cred, 'embed')
+        self.decode_authentication(cred, 'updateslice')
         return self.updateSlice(hrn)    
 
     def delete_slice(self, cred, hrn):
-        self.decode_authentication(cred, 'embed')
+        self.decode_authentication(cred, 'deleteslice')
         return self.deleteSlice(hrn)
 
     def start_slice(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
+        self.decode_authentication(cred, 'startslice')
         return self.startSlice(hrn)
 
     def stop_slice(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
+        self.decode_authentication(cred, 'stopslice')
         return self.stopSlice(hrn)
 
     def reset_slice(self, cred, hrn):
-        self.decode_authentication(cred, 'control')
+        self.decode_authentication(cred, 'resetslice')
         return self.resetSlice(hrn)
 
     def register_functions(self):
