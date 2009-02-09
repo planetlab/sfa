@@ -21,7 +21,7 @@ privilege_table = {"authority": ["*"],
                    "embed": ["getticket", "redeemslice", "createslice", "deleteslice", "updateslice", "getsliceresources"],
                    "bind": ["getticket", "loanresources"],
                    "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources"],
-                   "info": ["listslices", "listnodes"],
+                   "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["*"]}
 
 ##
