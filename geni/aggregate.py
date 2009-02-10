@@ -183,7 +183,7 @@ class Aggregate(GeniServer):
         for node in nodes:
             node_hrn = self.hostname_to_hrn(site_dict[node['site_id']], node['hostname'])
             # filter nodes with a whitelist
-            if node.has_key('slice_ids_whitelist') and node['slice_ids_whitelist'):
+            if node.has_key('slice_ids_whitelist') and node['slice_ids_whitelist']:
                 continue
             # Do not allow nodes not found in whitelist policy
             if self.policy['whitelist'] and node_hrn not in self.polciy['whitelist']:
