@@ -167,7 +167,7 @@ class Aggregate(GeniServer):
                 ips.append(ifspec['addr']) 
 
         # resolve component hostnames 
-        nodes = self.shell.GetNodes(self.auth, {}, ['hostname', 'site_id'])
+        nodes = self.shell.GetNodes(self.auth, {}, ['hostname', 'site_id', 'slice_ids_whitelist'])
     
         # resolve site login_bases
         site_ids = [node['site_id'] for node in nodes]
@@ -176,15 +176,19 @@ class Aggregate(GeniServer):
         for site in sites:
             site_dict[site['site_id']] = site['login_base']
 
-        # filter nodes according to policy
+        # filter nodes according to policy policy
+        # filter nodes with whitelist
         # convert plc names to geni hrn
         nodedict = {}
         for node in nodes:
             node_hrn = self.hostname_to_hrn(site_dict[node['site_id']], node['hostname'])
-            # apply policy. 
-            # Do not allow nodes found in blacklist, only allow nodes found in whitelist
+            # filter nodes with a whitelist
+            if node.has_key('slice_ids_whitelist') and node['slice_ids_whitelist'):
+                continue
+            # Do not allow nodes not found in whitelist policy
             if self.policy['whitelist'] and node_hrn not in self.polciy['whitelist']:
                 continue
+            # Do not allow nodes found in blacklist policy
             if self.policy['blacklist'] and node_hrn in self.policy['blacklist']:
                 continue
             nodedict[node_hrn] = node['hostname']
@@ -265,6 +269,10 @@ class Aggregate(GeniServer):
             node_ids = slices[0]['node_ids']
             nodes = self.shell.GetNodes(self.auth, node_ids) 
         
+        # Filter out whitelisted nodes
+        public_nodes = lambda n: n.has_key('slice_ids_whitelist') and not n['slice_ids_whitelist']
+        nodes = filter(public_nodes, nodes)
+ 
         # Get all network interfaces
         interface_ids = []
         for node in nodes:
