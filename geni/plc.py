@@ -62,11 +62,19 @@ def main():
     key_file = "server.key"
     cert_file = "server.cert"
 
-    # if no key is specified, then make one up
-    if (not os.path.exists(key_file)) or (not os.path.exists(cert_file)):
+    if (os.path.exists(key_file)) and (not os.path.exists(cert_file)):
+        # If private key exists and cert doesnt, recreate cert
+        key = Keypair(filename=key_file)
+        cert = Certificate(subject="registry")
+        cert.set_issuer(key=key, subject="registry")
+        cert.set_pubkey(key)
+        cert.sign()
+        cert.save_to_file(cert_file)
+
+    elif (not os.path.exists(key_file)) or (not os.path.exists(cert_file)):
+        # if no key is specified, then make one up
         key = Keypair(create=True)
         key.save_to_file(key_file)
-
         cert = Certificate(subject="registry")
         cert.set_issuer(key=key, subject="registry")
         cert.set_pubkey(key)
