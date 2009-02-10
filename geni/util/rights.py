@@ -14,15 +14,15 @@
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
 
-privilege_table = {"authority": ["*"],
+privilege_table = {"authority": ["remove", "update", "resolve", "list", "getcredential"],
                    "refresh": ["remove", "update"],
                    "resolve": ["resolve", "list", "getcredential"],
-                   "sa": ["*"],
+                   "sa": ["getticket", "redeemslice", "createslice", "deleteslice", "updateslice", "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy"],
                    "embed": ["getticket", "redeemslice", "createslice", "deleteslice", "updateslice", "getsliceresources"],
                    "bind": ["getticket", "loanresources"],
                    "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources"],
                    "info": ["listslices", "listnodes", "getpolicy"],
-                   "ma": ["*"]}
+                   "ma": ["setbootstate", "getbootstate", "reboot"]}
 
 ##
 # The Right class represents a single privilege.
