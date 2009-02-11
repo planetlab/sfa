@@ -410,7 +410,6 @@ def nodes(opts, args):
       context = None
    else:
       context = args[0]
-   print context
    result = slicemgr.list_nodes(user_cred, context)
    display_rspec(opts.format, result)
    if (opts.file is not None):
