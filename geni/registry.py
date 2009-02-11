@@ -122,6 +122,7 @@ class Registry(GeniServer):
         self.server.register_function(self.get_self_credential)
         self.server.register_function(self.get_credential)
         self.server.register_function(self.get_gid)
+        self.server.register_function(self.get_ticket)
         self.server.register_function(self.register)
         self.server.register_function(self.remove)
         self.server.register_function(self.update)
@@ -798,6 +799,60 @@ class Registry(GeniServer):
         new_cred.sign()
 
         return new_cred.save_to_string(save_parents=True)
+
+    ##
+    # GENI API: get_ticket
+    #
+    # Retrieve a ticket. This operation is currently implemented on PLC
+    # only (see SFA, engineering decisions); it is not implemented on
+    # components.
+    #
+    # The ticket is filled in with information from the PLC database. This
+    # information includes resources, and attributes such as user keys and
+    # initscripts.
+    #
+    # @param cred credential string
+    # @param name name of the slice to retrieve a ticket for
+    # @param rspec resource specification dictionary
+    #
+    # @return the string representation of a ticket object
+
+    def get_ticket(self, cred, name, rspec):
+        self.decode_authentication(cred, "getticket")
+
+        self.verify_object_belongs_to_me(name)
+
+        self.verify_object_permission(name)
+
+        # XXX much of this code looks like get_credential... are they so similar
+        # that they should be combined?
+
+        auth_hrn = get_authority(name)
+        auth_info = self.get_auth_info(auth_hrn)
+
+        records = self.resolve_raw("slice", name, must_exist=True)
+        record = records[0]
+
+        object_gid = record.get_gid_object()
+        new_ticket = Ticket(subject = object_gid.get_subject())
+        new_ticket.set_gid_caller(self.client_gid)
+        new_ticket.set_gid_object(object_gid)
+        new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
+        new_ticket.set_pubkey(object_gid.get_pubkey())
+
+        self.fill_record_info(record)
+
+        (attributes, rspec) = self.record_to_slice_info(record)
+
+        new_ticket.set_attributes(attributes)
+        new_ticket.set_rspec(rspec)
+
+        new_ticket.set_parent(AuthHierarchy.get_auth_ticket(auth_hrn))
+
+        new_ticket.encode()
+        new_ticket.sign()
+
+        return new_ticket.save_to_string(save_parents=True)
 
     ##
     # GENI_API: Create_gid
