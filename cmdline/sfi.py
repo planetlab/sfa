@@ -421,7 +421,8 @@ def slices(opts, args):
    global slicemgr
    user_cred = get_user_cred() 
    result = slicemgr.list_slices(user_cred)
-   display_rspec(opts.format, results)
+   #display_rspec(opts.format, results)
+   print result
    return
 
 # show rspec for named slice
