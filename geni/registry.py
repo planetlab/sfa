@@ -441,7 +441,7 @@ class Registry(GeniServer):
 
         record_list = table.resolve(type, hrn)
         if not record_list:
-            raise RecordNotFound(name)
+            raise RecordNotFound(hrn)
         record = record_list[0]
 
         # TODO: sa, ma
@@ -672,9 +672,9 @@ class Registry(GeniServer):
             rl.add("resolve")
             rl.add("info")
         elif type == "sa":
-            rl.add("authority")
+            rl.add("authority,sa")
         elif type == "ma":
-            rl.add("authority")
+            rl.add("authority,ma")
         elif type == "slice":
             rl.add("refresh")
             rl.add("embed")
@@ -730,7 +730,15 @@ class Registry(GeniServer):
         rl = self.determine_rights(type, name)
         cred.set_privileges(rl)
 
-        cred.set_parent(self.hierarchy.get_auth_cred(auth_hrn))
+        # determine the type of credential that we want to use as a parent for
+        # this credential.
+
+        if (type == "ma") or (type == "node"):
+            auth_kind = "authority,ma"
+        else: # user, slice, sa
+            auth_kind = "authority,sa"
+
+        cred.set_parent(self.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
 
         cred.encode()
         cred.sign()
@@ -776,7 +784,15 @@ class Registry(GeniServer):
         rl = self.determine_rights(type, name)
         new_cred.set_privileges(rl)
 
-        new_cred.set_parent(self.hierarchy.get_auth_cred(auth_hrn))
+        # determine the type of credential that we want to use as a parent for
+        # this credential.
+
+        if (type == "ma") or (type == "node"):
+            auth_kind = "authority,ma"
+        else: # user, slice, sa
+            auth_kind = "authority,sa"
+
+        new_cred.set_parent(self.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
 
         new_cred.encode()
         new_cred.sign()

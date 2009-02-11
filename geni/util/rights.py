@@ -14,7 +14,7 @@
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
 
-privilege_table = {"authority": ["remove", "update", "resolve", "list", "getcredential"],
+privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "getcredential"],
                    "refresh": ["remove", "update"],
                    "resolve": ["resolve", "list", "getcredential"],
                    "sa": ["getticket", "redeemslice", "createslice", "deleteslice", "updateslice", "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy"],

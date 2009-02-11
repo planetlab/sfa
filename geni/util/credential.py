@@ -204,7 +204,7 @@ class Credential(Certificate):
             # make sure the rights given to the child are a subset of the
             # parents rights
             if not self.parent.get_privileges().is_superset(self.get_privileges()):
-                raise ChildRightsNotSubsetOfParent(self.get_subject())
+                raise ChildRightsNotSubsetOfParent(self.get_subject() + " " + self.parent.get_privileges().save_to_string() + " " + self.get_privileges().save_to_string())
 
         return
 

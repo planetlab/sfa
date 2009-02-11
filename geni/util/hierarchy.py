@@ -264,15 +264,16 @@ class Hierarchy():
     # the authority's parent.
     #
     # @param hrn the human readable name of the authority
+    # @param authority type of credential to return (authority | sa | ma)
 
-    def get_auth_cred(self, hrn):
+    def get_auth_cred(self, hrn, kind="authority"):
         auth_info = self.get_auth_info(hrn)
         gid = auth_info.get_gid_object()
 
         cred = Credential(subject=hrn)
         cred.set_gid_caller(gid)
         cred.set_gid_object(gid)
-        cred.set_privileges("authority")
+        cred.set_privileges(kind)
         cred.set_delegate(True)
         cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
 
@@ -285,7 +286,7 @@ class Hierarchy():
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
             cred.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
-            cred.set_parent(self.get_auth_cred(parent_hrn))
+            cred.set_parent(self.get_auth_cred(parent_hrn, kind))
 
         cred.encode()
         cred.sign()
