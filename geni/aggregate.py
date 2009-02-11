@@ -249,13 +249,15 @@ class Aggregate(GeniServer):
             self.load_components()
         return self.nodes[format]
     
-    def getSlices(self, hrn):
+    def getSlices(self):
         """
         Return a list of instnatiated managed by this slice manager.
         """
 
-        # XX list only the slices at the specfied hrn
-        return dict(self.slices)
+        slices = self.shell.GetSlices(self.auth, {}, ['name'])
+        slice_hrns = [self.slicename_to_hrn(slice['name']) for slice in slices]  
+
+        return slice_hrns
  
     def get_rspec(self, hrn, type):
         """
@@ -323,6 +325,21 @@ class Aggregate(GeniServer):
         
         return rspec
  
+    
+    def getTicket(self, hrn, rspec):
+        """
+        Retrieve a ticket. This operation is currently implemented on PLC
+        only (see SFA, engineering decisions); it is not implemented on
+        components.
+
+        @param name name of the slice to retrieve a ticket for
+        @param rspec resource specification dictionary
+        @return the string representation of a ticket object
+        """
+        #self.registry.get_ticket(name, rspec)
+
+        return         
+
 
     def createSlice(self, slice_hrn, rspec, attributes = []):
         """
@@ -456,14 +473,18 @@ class Aggregate(GeniServer):
         self.decode_authentication(cred, 'listnodes')
         return self.getNodes(format)
 
-    def list_slices(self, cred, hrn):
+    def list_slices(self, cred):
         self.decode_authentication(cred, 'listslices')
-        return self.getSlices(hrn)
+        return self.getSlices()
 
     def get_resources(self, cred, hrn):
         self.decode_authentication(cred, 'listnodes')
         return self.getResources(hrn)
 
+    def get_ticket(self, cred, hrn, rspec):
+        self.decode_authentication(cred, 'getticket')
+        return self.getTicket(hrn, rspec)
+ 
     def get_policy(self, cred):
         self.decode_authentication(cred, 'getpolicy')
         return self.getPolicy()
