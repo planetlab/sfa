@@ -279,7 +279,13 @@ class GeniRecord():
         print "    pl_info:"
         pl_info = getattr(self, "pl_info", {})
         if pl_info:
+
             for key in pl_info.keys():
                 print "       ", key, ":", pl_info[key]
 
 
+    def get(self):
+        info = {}
+        info.update(getattr(self, "geni_info", {}))
+        info.update(getattr(self, "pl_info", {}))
+        return info
