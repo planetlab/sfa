@@ -246,9 +246,9 @@ class GeniClient():
     ## list components
     #
     # 
-    def list_components(self, cred):
+    def list_nodes(self, cred, format):
         
-        result = self.server.list_components(cred.save_to_string(save_parents=True))
+        result = self.server.list_nodes(cred.save_to_string(save_parents=True), format)
         return result
 
     ## list resources
