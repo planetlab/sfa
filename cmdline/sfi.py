@@ -7,11 +7,11 @@ import sys
 import os, os.path
 import tempfile
 from optparse import OptionParser
-from util.cert import Keypair, Certificate
-from util.credential import Credential
-from util.geniclient import GeniClient
-from util.gid import create_uuid
-from util.record import GeniRecord
+from geni.util.cert import Keypair, Certificate
+from geni.util.credential import Credential
+from geni.util.geniclient import GeniClient
+from geni.util.gid import create_uuid
+from geni.util.record import GeniRecord
 
 sfi_dir = os.path.expanduser("~/.sfi/")
 slicemgr = None
@@ -410,6 +410,7 @@ def nodes(opts, args):
       context = None
    else:
       context = args[0]
+   print context
    result = slicemgr.list_nodes(user_cred, context)
    display_rspec(opts.format, result)
    if (opts.file is not None):
@@ -476,6 +477,7 @@ def reset(opts, args):
 
 def display_rspec(format, rspec):
    print "display rspec"
+   print rspec
    return
 
 def save_rspec_to_file(file, rspec):
