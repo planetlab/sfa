@@ -229,14 +229,16 @@ class Aggregate(GeniServer):
         self.policy.load()
 
 
-    def getComponents(self, type = 'rspec'):
+    def getNodes(self, format = 'rspec'):
         """
         Return a list of components at this aggregate.
         """
-        valid_types = ['rspec', 'hrn', 'dns', 'ip']
-        if type not in valid_types:
-            raise Exception, "Invalid type specified, must be one of the following: %s" \
-                             % ", ".join(valid_types)
+        valid_formats = ['rspec', 'hrn', 'dns', 'ip']
+        if not format:
+            format = 'rspec'
+        if format not in valid_formats:
+            raise Exception, "Invalid format specified, must be one of the following: %s" \
+                             % ", ".join(valid_formats)
         
         # Reload components list
         now = datetime.datetime.now()
@@ -245,7 +247,7 @@ class Aggregate(GeniServer):
             self.refresh_components()
         elif now < self.threshold and not self.nodes.keys(): 
             self.load_components()
-        return self.nodes[type]
+        return self.nodes[format]
     
     def getSlices(self, hrn):
         """
@@ -450,9 +452,9 @@ class Aggregate(GeniServer):
 
     # XX fix rights, should be function name defined in 
     # privilege_table (from util/rights.py)
-    def list_components(self, cred):
+    def list_nodes(self, cred, format):
         self.decode_authentication(cred, 'listnodes')
-        return self.getComponents()
+        return self.getNodes(format)
 
     def list_slices(self, cred, hrn):
         self.decode_authentication(cred, 'listslices')
@@ -494,7 +496,7 @@ class Aggregate(GeniServer):
         GeniServer.register_functions(self)
 
         # Aggregate interface methods
-        self.server.register_function(self.list_components)
+        self.server.register_function(self.list_nodes)
         self.server.register_function(self.list_slices)
         self.server.register_function(self.get_resources)
         self.server.register_function(self.get_policy)
