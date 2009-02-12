@@ -424,9 +424,8 @@ def nodes(opts, args):
 def slices(opts, args):
    global slicemgr
    user_cred = get_user_cred() 
-   result = slicemgr.list_slices(user_cred)
-   #display_rspec(opts.format, results)
-   print result
+   results = slicemgr.list_slices(user_cred)
+   display_list(results)
    return
 
 # show rspec for named slice
@@ -525,6 +524,8 @@ def save_records_to_file(filename, recordList):
        index = index + 1
 
 def save_record_to_file(filename, record):
+   if not filename.startswith(os.sep):
+       filename = sfi_dir + filename
    print "saving record", record.name, "to file", filename
    str = record.save_to_string()
    file(filename, "w").write(str)
