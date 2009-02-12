@@ -284,8 +284,8 @@ class GeniRecord():
                 print "       ", key, ":", pl_info[key]
 
 
-    def get(self):
-        info = {}
+    def getdict(self):
+        info = {'hrn': self.name, 'type': self.type, 'gid': self.gid}
         info.update(getattr(self, "geni_info", {}))
         info.update(getattr(self, "pl_info", {}))
         return info
