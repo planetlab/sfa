@@ -20,12 +20,12 @@ print "resources being used by %(slicehrn)s" % locals()
 tmack_components = a.list_resources(cred, slicehrn)
 pprint(tmack_components)
 
-print "removing %(slicehrn)s from all nodes" % locals()
-a.delete_slice(cred, slicehrn)
+#print "removing %(slicehrn)s from all nodes" % locals()
+#a.delete_slice(cred, slicehrn)
 
-print "adding %(slicehrn)s back to its original nodes"
+print "adding %(slicehrn)s back to its original nodes" % locals()
 a.list_resources(cred, slicehrn)
-a.create_slice(cred, slicehrn, tmack_components)
+a.create_slice(cred, slicehrn, components)
 a.list_resources(cred, slicehrn)
 
  

@@ -406,14 +406,18 @@ def update(opts, args):
 def nodes(opts, args):
    global slicemgr
    user_cred = get_user_cred() 
-   if (len(args) == 0):
+   if not opts.format:
       context = None
    else:
-      context = args[0]
-   result = slicemgr.list_nodes(user_cred, context)
-   display_rspec(opts.format, result)
+      context = opts.format
+   results = slicemgr.list_nodes(user_cred, context)
+   if opts.format in ['rspec']:     
+      display_rspec(results)
+   else:
+      display_list(results)
    if (opts.file is not None):
-      save_rspec_to_file(opts.file, result)
+      rspec = slicemgr.list_nodes(user_cred, 'rspec')
+      save_rspec_to_file(rspec, opts.file)
    return
 
 # list instantiated slices
@@ -475,13 +479,23 @@ def reset(opts, args):
 #
 #
 
-def display_rspec(format, rspec):
-   print "display rspec"
+def display_rspec(rspec):
    print rspec
    return
 
-def save_rspec_to_file(file, rspec):
-   print "save rspec"
+def display_list(results):
+    for result in results:
+        print result
+
+def save_rspec_to_file(rspec, filename):
+   if not filename.startswith(os.sep):
+       filename = sfi_dir + filename
+   if not filename.endswith(".rspec"):
+       filename = filename + ".rspec"
+
+   f = open(filename, 'w')
+   f.write(rspec)
+   f.close()
    return
 
 def display_records(recordList):
@@ -489,7 +503,9 @@ def display_records(recordList):
       display_record(record)
 
 def display_record(record):
-   record.dump(False)
+   #record.dump(False)
+   info = record.getdict()
+   print "%s (%s)" % (info['hrn'], info['type'])
    return
 
 def filter_records(type, records):

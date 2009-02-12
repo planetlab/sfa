@@ -3,7 +3,7 @@
 
 #export TEST_USER_2=$SFI_AUTH.Hartman_John
 
-export SFI_AUTH=planetlab.us.pl
+export SFI_AUTH=planetlab.us.princeton
 export SFI_USER=$SFI_AUTH.Mack_Tony
 
 #export SFI_REGISTRY=http://198.0.0.132:12345/
