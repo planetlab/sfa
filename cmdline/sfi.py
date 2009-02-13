@@ -351,7 +351,7 @@ def show(opts, args):
    records = filter_records(opts.type, records)
    if not records:
       print "No record of type", opts.type
-   display_records(records)
+   display_records(records, True)
    if opts.file:
        save_records_to_file(opts.file, records)
    return
@@ -433,7 +433,7 @@ def resources(opts, args):
    global slicemgr
    slice_cred = get_slice_cred(args[0])
    result = slicemgr.list_resources(slice_cred, args[0])
-   display_rspec(opts.format, result)
+   display_rspec(result)
    if (opts.file is not None):
       save_rspec_to_file(opts.file, result)
    return
@@ -497,14 +497,16 @@ def save_rspec_to_file(rspec, filename):
    f.close()
    return
 
-def display_records(recordList):
+def display_records(recordList, dump = False):
    for record in recordList:
-      display_record(record)
+      display_record(record, dump)
 
-def display_record(record):
-   #record.dump(False)
-   info = record.getdict()
-   print "%s (%s)" % (info['hrn'], info['type'])
+def display_record(record, dump = False):
+   if dump:
+       record.dump(False)
+   else:
+       info = record.getdict()
+       print "%s (%s)" % (info['hrn'], info['type'])
    return
 
 def filter_records(type, records):
