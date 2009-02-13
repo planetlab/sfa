@@ -441,17 +441,20 @@ def resources(opts, args):
 # created named slice with given rspec
 def create(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0])
+   slice_hrn = args[0]
+   slice_cred = get_slice_cred(slice_hrn)
    rspec_file = get_rspec_file(args[1])
    with open(rspec_file) as f:
       rspec = f.read()
-   return slicemgr.create_slice(slice_cred, rspec)
+   return slicemgr.create_slice(slice_cred, slice_hrn, rspec)
 
 # delete named slice
 def delete(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0])
-   return slicemgr.delete_slice(slice_cred)
+   slice_hrn = args[0]
+   slice_cred = get_slice_cred(slice_hrn)
+   
+   return slicemgr.delete_slice(slice_cred, slice_hrn)
 
 # start named slice
 def start(opts, args):
