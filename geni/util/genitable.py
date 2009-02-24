@@ -6,7 +6,7 @@
 
 import report
 
-from pg import DB
+from pg import DB, ProgrammingError
 from gid import *
 from record import *
 
@@ -44,7 +44,15 @@ class GeniTable():
                 type text, \
                 pointer integer);"
 
-        self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
+        # IF EXISTS doenst exist in postgres < 8.2
+        try:
+            self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
+        except ProgrammingError:
+            try:
+                self.cnx.query('DROP TABLE ' + self.tablename)
+            except ProgrammingError:
+                pass
+        
         self.cnx.query(querystr)
 
     def remove(self, record):
