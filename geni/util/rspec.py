@@ -1,22 +1,39 @@
 import sys
 import pprint
 import os
+import httplib
 from xml.dom import minidom
 from types import StringTypes, ListType
 
 class Rspec():
 
-    def __init__(self, xml = None, xsd = None):
-        self.xsd = xsd # schema
-        self.rootNode = None # root of the dom
-        self.dict = {} # dict of the rspec.
+    def __init__(self, xml = None, xsd = None, NSURL = None):
+        '''
+        Class to manipulate RSpecs.  Reads and parses rspec xml into python dicts
+        and reads python dicts and writes rspec xml
+
+        self.xsd = # Schema.  Can be local or remote file.
+        self.NSURL = # If schema is remote, Name Space URL to query (full path minus filename)
+        self.rootNode = # root of the DOM
+        self.dict = # dict of the RSpec.
+        self.schemaDict = {} # dict of the Schema
+        '''
+ 
+        self.xsd = xsd
+        self.rootNode = None
+        self.dict = {}
+        self.schemaDict = {}
+        self.NSURL = NSURL 
         if xml: 
             if type(xml) == file:
                 self.parseFile(xml)
             if type(xml) == str:
                 self.parseString(xml)
             self.dict = self.toDict() 
-  
+        if xsd:
+            self._parseXSD(self.NSURL + self.xsd)
+
+
     def _getText(self, nodelist):
         rc = ""
         for node in nodelist:
@@ -99,8 +116,8 @@ class Rspec():
         """
         dom = minidom.parse(filename)
         self.rootNode = dom.childNodes[0]
-  
-  
+
+
     def parseString(self, xml):
         """
         read an xml string and store it as a dom object.
@@ -110,6 +127,49 @@ class Rspec():
         self.rootNode = dom.childNodes[0]
 
  
+    def _httpGetXSD(self, xsdURI):
+        # split the URI into relevant parts
+        host = xsdURI.split("/")[2]
+        if xsdURI.startswith("https"):
+            conn = httplib.HTTPSConnection(host,
+                httplib.HTTPSConnection.default_port)
+        elif xsdURI.startswith("http"):
+            conn = httplib.HTTPConnection(host,
+                httplib.HTTPConnection.default_port)
+        conn.request("GET", xsdURI)
+        # If we can't download the schema, raise an exception
+        r1 = conn.getresponse()
+        if r1.status != 200: 
+            raise Exception
+        return r1.read().replace('\n', '').replace('\t', '').strip() 
+
+
+    def _parseXSD(self, xsdURI):
+        """
+        Download XSD from URL, or if file, read local xsd file and set schemaDict
+        """
+        # Since the schema definiton is a global namespace shared by and agreed upon by
+        # others, this should probably be a URL.  Check for URL, download xsd, parse, or 
+        # if local file, use local file.
+        schemaDom = None
+        if xsdURI.startswith("http"):
+            try: 
+                schemaDom = minidom.parseString(self._httpGetXSD(xsdURI))
+            except Exception, e:
+                # logging.debug("%s: web file not found" % xsdURI)
+                # logging.debug("Using local file %s" % self.xsd")
+                print e
+                print "Can't find %s on the web. Continuing." % xsdURI
+        if not schemaDom:
+            if os.path.exists(xsdURI):
+                # logging.debug("using local copy.")
+                print "Using local %s" % xsdURI
+                schemaDom = minidom.parse(xsdURI)
+            else:
+                raise Exception("Can't find xsd locally")
+        self.schemaDict = self.toDict(schemaDom.childNodes[0])
+
+
     def dict2dom(self, rdict, include_doc = False):
         """
         convert a dict object into a dom object.
