@@ -44,6 +44,9 @@ class RemoteShell:
     def AddPerson(self, pl_auth, *args):
         return self.call("AddPerson", pl_auth, *args)
 
+    def AddPersonToSlice(self, pl_auth, *args):
+        return self.call("AddPersonToSlice", pl_auth, *args)
+
     def AddSite(self, pl_auth, *args):
         return self.call("AddSite", pl_auth, *args)
 
@@ -55,6 +58,9 @@ class RemoteShell:
 
     def DeletePerson(self, pl_auth, *args):
         return self.call("DeletePerson", pl_auth, *args)
+
+    def DeletePersonFromSlice(self, pl_auth, *args):
+        return self.call("DeletePersonFromSlice", pl_auth, *args)
 
     def DeleteSite(self, pl_auth, *args):
         return self.call("DeleteSite", pl_auth, *args)

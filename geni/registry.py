@@ -320,6 +320,62 @@ class Registry(GeniServer):
         self.fill_record_pl_info(record)
         self.fill_record_geni_info(record)
 
+    def update_membership_list(self, oldRecord, record, listName, addFunc, delFunc):
+        # get a list of the HRNs tht are members of the old and new records
+        if oldRecord:
+            if oldRecord.pl_info == None:
+                oldRecord.pl_info = {}
+            oldList = oldRecord.get_geni_info().get(listName, [])
+        else:
+            oldList = []
+        newList = record.get_geni_info().get(listName, [])
+
+        # if the lists are the same, then we don't have to update anything
+        if (oldList == newList):
+            return
+
+        # build a list of the new person ids, by looking up each person to get
+        # their pointer
+        newIdList = []
+        for hrn in newList:
+            userRecord = self.resolve_raw("user", hrn)[0]
+            newIdList.append(userRecord.get_pointer())
+
+        # build a list of the old person ids from the person_ids field of the
+        # pl_info
+        if oldRecord:
+            oldIdList = oldRecord.pl_info.get("person_ids", [])
+            containerId = oldRecord.get_pointer()
+        else:
+            # if oldRecord==None, then we are doing a Register, instead of an
+            # update.
+            oldIdList = []
+            containerId = record.get_pointer()
+
+        # add people who are in the new list, but not the oldList
+        for personId in newIdList:
+            if not (personId in oldIdList):
+                print "adding id", personId, "to", record.get_name()
+                addFunc(self.pl_auth, personId, containerId)
+
+        # remove people who are in the old list, but not the new list
+        for personId in oldIdList:
+            if not (personId in newIdList):
+                print "removing id", personId, "from", record.get_name()
+                delFunc(self.pl_auth, personId, containerId)
+
+    def update_membership(self, oldRecord, record):
+        if record.type == "slice":
+            self.update_membership_list(oldRecord, record, 'researcher',
+                                        self.shell.AddPersonToSlice,
+                                        self.shell.DeletePersonFromSlice)
+        elif record.type == "sa":
+            # TODO
+            pass
+        elif record.type == "ma":
+            # TODO
+            pass
+
     ##
     # GENI API: register
     #
@@ -418,6 +474,9 @@ class Registry(GeniServer):
 
         table.insert(record)
 
+        # update membership for researchers, pis, owners, operators
+        self.update_membership(None, record)
+
         return record.get_gid_object().save_to_string(save_parents=True)
 
     ##
@@ -474,7 +533,7 @@ class Registry(GeniServer):
         return True
 
     ##
-    # GENI API: Register
+    # GENI API: Update
     #
     # Update an object in the registry. Currently, this only updates the
     # PLC information associated with the record. The Geni fields (name, type,
@@ -534,6 +593,9 @@ class Registry(GeniServer):
 
         else:
             raise UnknownGeniType(type)
+
+        # update membership for researchers, pis, owners, operators
+        self.update_membership(existing_record, record)
 
     ##
     # List the records in an authority. The objectGID in the supplied credential
