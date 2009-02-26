@@ -6,12 +6,16 @@ from __future__ import with_statement
 import sys
 import os, os.path
 import getopt
-from util.cert import Keypair, Certificate
-from util.credential import Credential
-from util.geniclient import GeniClient
-from util.record import GeniRecord
-from util.gid import GID
+import tempfile
+from geni.util.cert import Keypair, Certificate
+from geni.util.credential import Credential
+from geni.util.geniclient import GeniClient
+from geni.util.record import GeniRecord
+from geni.util.gid import GID
+from geni.util.gid import create_uuid
 
+gidhrn = None
+gidkeyfile = None
 infile = None
 outfile = None
 gidfile = None
@@ -23,7 +27,7 @@ type = None
 dump = False
 researcher = []
 
-long_opts = ["infile=", "outfile=", "email=", "ip=", "dns=", "gidfile=", "hrn=", "type=", "addresearcher=", "delresearcher=", "dump"]
+long_opts = ["infile=", "outfile=", "email=", "ip=", "dns=", "gidfile=", "gidhrn=", "gidkeyfile=", "hrn=", "type=", "addresearcher=", "delresearcher=", "dump"]
 
 def showhelp():
    print "syntax: editRecord.py <options>"
@@ -32,6 +36,8 @@ def showhelp():
    print "    --outfile <name>      ... write record to file"
    print "    --dump                ... dump record to stdout"
    print "    --gidfile <fn>        ... load gid from file"
+   print "    --gidhrn <name>       ... name to use when creating gid"
+   print "    --gidkeyfile <name>   ... key to use when creating gid"
    print "    --hrn <name>          ... set hrn"
    print "    --type <type>         ... set type (user|slice|sa|ma|...)"
    print "    --email <addr>        ... user: set email address"
@@ -40,11 +46,27 @@ def showhelp():
    print "    --addresearcher <hrn> ... slice: add researcher"
    print "    --delresearcher <hrn> ... slice: delete researcher"
 
+def load_publickey_string(fn):
+   f = file(fn,"r")
+   key_string = f.read()
+
+   # if the filename is a private key file, then extract the public key
+   if "PRIVATE KEY" in key_string:
+       outfn = tempfile.mktemp()
+       cmd = "openssl rsa -in " + fn + " -pubout -outform PEM -out " + outfn
+       os.system(cmd)
+       f = file(outfn, "r")
+       key_string = f.read()
+       os.remove(outfn)
+
+   return key_string
+
 def process_options():
    global infile, outfile
    global email, ip, dns, gidfile, hrn, type
    global researcher
    global dump
+   global gidkeyfile, gidhrn
 
    (options, args) = getopt.getopt(sys.argv[1:], '', long_opts)
    for opt in options:
@@ -66,6 +88,10 @@ def process_options():
            dns = val
        elif name == "--gidfile":
            gidfile = val
+       elif name == "--gidhrn":
+           gidhrn = val
+       elif name == "--gidkeyfile":
+           gidkeyfile = val
        elif name == "--hrn":
            hrn = val
        elif name == "--type":
@@ -86,7 +112,7 @@ def errorcheck(record):
        print "Warning: unknown record type"
    if not record.name:
        print "Warning: unknown record name"
-   if not record.gid:
+   if (not record.gid) and (not ("create_gid" in geni_info)):
        print "Warning: unknown record gid"
 
    if record.type == "user":
@@ -151,6 +177,19 @@ def main():
        gid_str = file(gidfile, "r").read()
        gid = GID(string=gid_str)
        record.set_gid(gid)
+
+   if gidhrn or gidkeyfile:
+       if not gidhrn:
+           print "must use --gidkeyfile with --gidhrn"
+           sys.exit(-1)
+       if not gidkeyfile:
+           print "must use --gidhrn with --gidkeyfile"
+           sys.exit(-1)
+
+       geni_info = record.get_geni_info()
+       geni_info["create_gid"] = True
+       geni_info["create_gid_hrn"] = gidhrn
+       geni_info["create_gid_key"] = load_publickey_string(gidkeyfile)
 
    if researcher:
        update_list(geni_info, "researcher", researcher)

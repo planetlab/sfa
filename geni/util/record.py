@@ -28,7 +28,7 @@ from gid import *
 # of different types. For example, planetlab.us.arizona may have both an SA
 # and a MA record, but cannot have two SA records.
 
-class GeniRecord():
+class GeniRecord:
 
     ##
     # Create a Geni Record
@@ -229,7 +229,11 @@ class GeniRecord():
 
     def load_from_dict(self, dict):
         self.set_name(dict['name'])
-        self.set_gid(dict['gid'])
+
+        gidstr = dict.get("gid", None)
+        if gidstr:
+            self.set_gid(dict['gid'])
+
         self.set_type(dict['type'])
         self.set_pointer(dict['pointer'])
         if "pl_info" in dict:

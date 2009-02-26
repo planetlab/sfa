@@ -218,7 +218,6 @@ def load_publickey_string(fn):
 
    return key_string
 
-
 #
 # Generate sub-command parser
 #
@@ -226,7 +225,6 @@ def create_cmd_parser(command, additional_cmdargs = None):
    cmdargs = {"list": "name",
               "show": "name",
               "remove": "name",
-              "creategid": "hrn publickey_fn",
               "add": "name record",
               "update": "name record",
               "nodes": "[name]",
@@ -261,7 +259,7 @@ def create_cmd_parser(command, additional_cmdargs = None):
            help="type filter (user|slice|sa|ma|node|aggregate)",
            choices=("user","slice","sa","ma","node","aggregate", "all"),
            default="all")
-   if command in ("show", "list", "nodes", "resources", "creategid"):
+   if command in ("show", "list", "nodes", "resources"):
       parser.add_option("-o", "--output", dest="file",
            help="output XML to file", metavar="FILE", default=None)
    return parser
@@ -363,23 +361,27 @@ def remove(opts, args):
    auth_cred = get_auth_cred()
    return registry.remove(auth_cred, opts.type, args[0])
 
-def creategid(opts, args):
-   global registry
-   auth_cred = get_auth_cred()
-   hrn = args[0]
-   pkey_string = load_publickey_string(args[1])
-   gid = registry.create_gid(auth_cred, hrn, create_uuid(), pkey_string)
-   if (opts.file is not None):
-      gid.save_to_file(opts.file, save_parents=True)
-   else:
-      print "I created your gid, but you did not ask me to save it"
-
 # add named registry record
 def add(opts, args):
    global registry
    auth_cred = get_auth_cred()
    rec_file = get_record_file(args[0])
    record = load_record_from_file(rec_file)
+
+   # check and see if we need to create a gid for this record. The creator
+   # of the record signals this by filling in the create_gid, create_gid_hrn,
+   # and create_gid_key members.
+   # (note: we'd use an unsigned GID in the record instead, but pyOpenSSL is
+   #   broken and has no way for us to get the key back out of the gid)
+   geni_info = record.get_geni_info()
+   if "create_gid" in geni_info:
+       gid = registry.create_gid(auth_cred, geni_info["create_gid_hrn"], create_uuid(), geni_info["create_gid_key"])
+       record.set_gid(gid)
+
+       del geni_info["create_gid"]
+       del geni_info["create_gid_hrn"]
+       del geni_info["create_gid_key"]
+
    return registry.register(auth_cred, record)
 
 # update named registry entry
