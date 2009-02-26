@@ -28,8 +28,13 @@ shell = None
 ##
 # Two authorities are specified: the root authority and the level1 authority.
 
-root_auth = "planetlab"
-level1_auth = "planetlab.us"
+root_auth = "plc"
+level1_auth = None
+
+#root_auth = "planetlab"
+#level1_auth = "planetlab.us"
+
+keyconvert_fn = "../keyconvert/keyconvert"
 
 
 def un_unicode(str):
@@ -110,7 +115,11 @@ def get_pl_pubkey(key_id):
         os.write(ssh_f, key_str)
         os.close(ssh_f)
 
-        cmd = "../keyconvert/keyconvert " + ssh_fn + " " + ssl_fn
+        if not os.path.exists(keyconvert_fn):
+            report.trace("  keyconvert utility " + str(keyconvert_fn) + " does not exist");
+            sys.exit(-1)
+
+        cmd = keyconvert_fn + " " + ssh_fn + " " + ssl_fn
         print cmd
         os.system(cmd)
 
@@ -137,7 +146,11 @@ def get_pl_pubkey(key_id):
         return None
 
 def person_to_hrn(parent_hrn, person):
-    personname = person['last_name'] + "_" + person['first_name']
+    # the old way - Lastname_Firstname
+    #personname = person['last_name'] + "_" + person['first_name']
+
+    # the new way - use email address up to the "@" 
+    personname = person['email'].split("@")[0]
 
     personname = cleanup_string(personname)
 
@@ -318,10 +331,16 @@ def main():
 
     if not AuthHierarchy.auth_exists(root_auth):
         AuthHierarchy.create_auth(root_auth)
+
     #create_top_level_auth_records(root_auth)
-    if not AuthHierarchy.auth_exists(level1_auth):
-        AuthHierarchy.create_auth(level1_auth)
-    create_top_level_auth_records(level1_auth)
+
+    if level1_auth:
+        if not AuthHierarchy.auth_exists(level1_auth):
+            AuthHierarchy.create_auth(level1_auth)
+        create_top_level_auth_records(level1_auth)
+        import_auth = level1_auth
+    else:
+        import_auth = root_auth
 
     print "Import: adding", root_auth, "to trusted list"
     root = AuthHierarchy.get_auth_info(root_auth)
@@ -331,7 +350,7 @@ def main():
 
     sites = shell.GetSites(pl_auth)
     for site in sites:
-        import_site(level1_auth, site)
+        import_site(import_auth, site)
 
 if __name__ == "__main__":
     main()
