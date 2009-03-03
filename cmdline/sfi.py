@@ -225,8 +225,8 @@ def create_cmd_parser(command, additional_cmdargs = None):
    cmdargs = {"list": "name",
               "show": "name",
               "remove": "name",
-              "add": "name record",
-              "update": "name record",
+              "add": "record",
+              "update": "record",
               "nodes": "[name]",
               "slices": "",
               "resources": "name",
@@ -252,8 +252,8 @@ def create_cmd_parser(command, additional_cmdargs = None):
       % (command, cmdargs[command]))
    if command in ("nodes", "resources"):
       parser.add_option("-f", "--format", dest="format",type="choice",
-           help="display format (dns|ip|hrn|rspec)",default="rspec",
-           choices=("dns","ip","hrn","rspec"))
+           help="display format (dns|ip|rspec)",default="rspec",
+           choices=("dns","ip","rspec"))
    if command in ("list", "show", "remove"):
       parser.add_option("-t", "--type", dest="type",type="choice",
            help="type filter (user|slice|sa|ma|node|aggregate)",
