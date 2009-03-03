@@ -62,6 +62,18 @@ class IfSpecDict(SpecDict):
     plc_fields = {'name': 'is_primary',
                  'addr': 'ip',
                  'type': 'type'}
+ 
+class LinkSpecDict(SpecDict):
+    type = 'IfSpec'
+    fields = {'name': '',
+              'addr': '',
+              'type': '',
+              'init_params': '',
+              'min_rate': '',
+              'max_rate': '',
+              'max_kbyte': ''}
+    plc_fields = {}
+                 
             
 class NodeSpecDict(SpecDict):
     type = 'NodeSpec'

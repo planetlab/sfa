@@ -262,10 +262,10 @@ class Rspec():
 
 	def validateDicts(self):
 		types = {
-			'EInt' = int,
-			'EString' = str,
-			'EByteArray' = list,
-			'EBoolean' = bool,
-			'EFloat' = float,
-			'EDate' = date}
+			'EInt' : int,
+			'EString' : str,
+			'EByteArray' : list,
+			'EBoolean' : bool,
+			'EFloat' : float,
+			'EDate' : date}
 # vim:ts=4:expandtab
