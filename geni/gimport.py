@@ -22,8 +22,18 @@ from geni.util.hierarchy import *
 from geni.util.record import *
 from geni.util.genitable import *
 from geni.util.misc import *
+from geni.util.config import *
 
-shell = None
+# get PL account settings from config module
+pl_auth = get_pl_auth()
+
+# connect to planetlab
+if "Url" in pl_auth:
+    from geni.util import remoteshell
+    shell = remoteshell.RemoteShell()
+else:
+    import PLC.Shell
+    shell = PLC.Shell.Shell(globals = globals())
 
 ##
 # Two authorities are specified: the root authority and the level1 authority.
@@ -33,8 +43,8 @@ level1_auth = None
 
 #root_auth = "planetlab"
 #level1_auth = "planetlab.us"
-
-keyconvert_fn = "../keyconvert/keyconvert"
+config = Config()
+keyconvert_fn = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
 
 
 def un_unicode(str):
@@ -82,6 +92,8 @@ def connect_shell():
     else:
         import PLC.Shell
         shell = PLC.Shell.Shell(globals = globals())
+
+    return shell
 
 def get_auth_table(auth_name):
     AuthHierarchy = Hierarchy()
