@@ -48,7 +48,12 @@ class SpecDict(dict):
                         value = [expected(value) for value in spec_dict[plc_field]]
             spec[field] = value
         return {self.type: spec}
-    
+
+#
+# fields = { geni_field:  type.  Could be class for nested classes, otherwise prob str}
+# plc_fields = {geni_field : plc_field}
+#
+ 
 class IfSpecDict(SpecDict):
     type = 'IfSpec'
     fields = {'name': '',
@@ -59,7 +64,7 @@ class IfSpecDict(SpecDict):
               'max_rate': '',
               'max_kbyte': '',
               'ip_spoof': ''}
-    plc_fields = {'name': 'is_primary',
+    plc_fields = {'name': 'is_primary', # XXX needs munging to return name instead of True or False
                  'addr': 'ip',
                  'type': 'type'}
  
