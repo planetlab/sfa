@@ -63,6 +63,7 @@ class Aggregate(GeniServer):
         timestamp_file = os.sep.join([self.server_basedir, 'agg.' + self.hrn + '.timestamp']) 
         self.timestamp = SimpleStorage(timestamp_file)
 
+        # How long before we refresh nodes cache
         self.nodes_ttl = 1
 
         self.connectPLC()
@@ -469,9 +470,9 @@ class Aggregate(GeniServer):
 
     # XX fix rights, should be function name defined in 
     # privilege_table (from util/rights.py)
-    def list_nodes(self, cred, format):
+    def list_nodes(self, cred):
         self.decode_authentication(cred, 'listnodes')
-        return self.getNodes(format)
+        return self.getNodes()
 
     def list_slices(self, cred):
         self.decode_authentication(cred, 'listslices')
