@@ -412,7 +412,7 @@ def nodes(opts, args):
       context = None
    else:
       context = opts.format
-   results = slicemgr.list_nodes(user_cred, context)
+   results = slicemgr.list_nodes(user_cred)
    if opts.format in ['rspec']:     
       display_rspec(results)
    else:
