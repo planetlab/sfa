@@ -103,7 +103,10 @@ class Hierarchy():
     #
     # @param basedir the base directory to store the hierarchy in
 
-    def __init__(self, basedir="."):
+    def __init__(self, basedir = None):
+        config = Config()
+        if not basedir:
+            basedir = config.GENI_BASE_DIR + os.sep + 'geni' + os.sep
         self.basedir = os.path.join(basedir, "authorities")
 
     ##
@@ -132,7 +135,7 @@ class Hierarchy():
     def auth_exists(self, hrn):
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \
             self.get_auth_filenames(hrn)
-
+    
         return os.path.exists(gid_filename) and \
                os.path.exists(privkey_filename) and \
                os.path.exists(dbinfo_filename)
@@ -185,7 +188,7 @@ class Hierarchy():
 
     def get_auth_info(self, hrn):
         #report.trace("Hierarchy: getting authority: " + hrn)
-
+    
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
 
