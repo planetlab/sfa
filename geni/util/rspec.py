@@ -176,7 +176,7 @@ class Rspec():
         """
      
         def elementNode(tagname, rd):
-            element = minidom.Element(tagname)   
+            element = minidom.Element(tagname)
             for key in rd.keys():
                 if isinstance(rd[key], StringTypes):
                     element.setAttribute(key, rd[key])
@@ -188,7 +188,11 @@ class Rspec():
                         child = elementNode(key, item)
                         element.appendChild(child)
             return element
-                     
+        
+        # Minidom does not allow documents to have more then one
+        # child, but elements may have many children. Because of
+        # this, the document's root node will be the first key/value
+        # pair in the dictionary.  
         node = elementNode(rdict.keys()[0], rdict.values()[0])
         if include_doc:
             rootNode = minidom.Document()
