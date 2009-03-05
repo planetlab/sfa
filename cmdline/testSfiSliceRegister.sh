@@ -12,12 +12,6 @@ export TEST_SLICE_RECORD=$CWD/testslice.record
 export TEST_SLICE_HRN=$SFI_AUTH.testslice
 
 echo XXXXX -------------------------------------------------------------------
-echo XXXXX Creating a GID for test slice $TEST_SLICE_HRN
-echo XXXXX -------------------------------------------------------------------
-
-python ./sfi.py creategid -o $TEST_SLICE_GID $TEST_SLICE_HRN $TEST_KEY
-
-echo XXXXX -------------------------------------------------------------------
 echo XXXXX Removing the test slice. this will cause an error if the slice does
 echo XXXXX not exist -- this error can be ignored
 echo XXXXX -------------------------------------------------------------------
@@ -28,7 +22,7 @@ echo XXXXX -------------------------------------------------------------------
 echo XXXXX Creating a record for the test slice
 echo XXXXX -------------------------------------------------------------------
 
-python ./editRecord.py --hrn $TEST_SLICE_HRN --gidfile $TEST_SLICE_GID --type slice --addresearcher $SFI_USER --outfile $TEST_SLICE_RECORD
+python ./editRecord.py --hrn $TEST_SLICE_HRN --gidhrn $TEST_SLICE_HRN --gidkeyfile $TEST_KEY --type slice --addresearcher $SFI_USER --outfile $TEST_SLICE_RECORD
 
 echo XXXXX -------------------------------------------------------------------
 echo XXXXX Adding the test slice, $TEST_SLICE_HRN
