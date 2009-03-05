@@ -236,7 +236,7 @@ def import_slice(parent_hrn, slice):
 
 def import_node(parent_hrn, node):
     AuthHierarchy = Hierarchy()
-    nodename = node['hostname']
+    nodename = node['hostname'].split(".")[0]
     nodename = cleanup_string(nodename)
 
     if not nodename:
@@ -335,6 +335,8 @@ def main():
     global TrustedRoots
 
     process_options()
+
+    print "Base Directory: ", config.GENI_BASE_DIR
 
     AuthHierarchy = Hierarchy()
     TrustedRoots = TrustedRootList()
