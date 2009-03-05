@@ -166,8 +166,12 @@ class Hierarchy():
             if errno == 17:
                 pass
 
-        pkey = Keypair(create = True)
-        pkey.save_to_file(privkey_filename)
+        if os.path.exists(privkey_filename):
+            print "using existing key", privkey_filename, "for authority", hrn
+            pkey = Keypair(filename = privkey_filename)
+        else:
+            pkey = Keypair(create = True)
+            pkey.save_to_file(privkey_filename)
 
         gid = self.create_gid(hrn, create_uuid(), pkey)
         gid.save_to_file(gid_filename, save_parents=True)
