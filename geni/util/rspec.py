@@ -264,12 +264,12 @@ class Rspec():
                 self.filter(tagname, attribute, blacklist, whitelist, child) 
 
 
-	def validateDicts(self):
-		types = {
-			'EInt' : int,
-			'EString' : str,
-			'EByteArray' : list,
-			'EBoolean' : bool,
-			'EFloat' : float,
-			'EDate' : date}
+    def validateDicts(self):
+        types = {
+            'EInt' : int,
+            'EString' : str,
+            'EByteArray' : list,
+            'EBoolean' : bool,
+            'EFloat' : float,
+            'EDate' : date}
 # vim:ts=4:expandtab
