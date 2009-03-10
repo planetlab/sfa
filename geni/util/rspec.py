@@ -178,14 +178,14 @@ class Rspec():
         def elementNode(tagname, rd):
             element = minidom.Element(tagname)
             for key in rd.keys():
-                if isinstance(rd[key], StringTypes):
-                    element.setAttribute(key, rd[key])
+                if isinstance(rd[key], StringTypes) or isinstance(rd[key], int):
+                    element.setAttribute(key, str(rd[key]))
                 elif isinstance(rd[key], dict):
                     child = elementNode(key, rd[key])
                     element.appendChild(child)
                 elif isinstance(rd[key], list):
                     for item in rd[key]:
-                        child = elementNode(key, item)
+                        child = elementNode(key, {key:item})
                         element.appendChild(child)
             return element
         
@@ -272,4 +272,19 @@ class Rspec():
             'EBoolean' : bool,
             'EFloat' : float,
             'EDate' : date}
+
+
+
+class RecordSpec(Rspec):
+
+    def parseDict(self, rdict, include_doc = False):
+        """
+        Convert a dictionary into a dom object and store it.
+        """
+        self.rootNode = self.dict2dom(rdict, include_doc)
+
+    def dict2dom(self, rdict, include_doc = False):
+        record_dict = {'record': rdict}
+        return Rspec.dict2dom(self, record_dict, include_doc)
+        
 # vim:ts=4:expandtab
