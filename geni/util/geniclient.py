@@ -256,7 +256,7 @@ class GeniClient():
     # @param cred a credential
     # @param hrn slice hrn
 
-    def list_resources(self, cred, hrn):
+    def get_resources(self, cred, hrn):
         result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
         return result
 
