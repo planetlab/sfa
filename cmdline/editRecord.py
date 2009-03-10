@@ -130,7 +130,9 @@ def update_list(dict, listname, updates):
        if hrn.startswith("-"):
            real_hrn = hrn[1:]
            if real_hrn in list:
-               list.delete(real_hrn)
+               list.remove(real_hrn)
+           else:
+               print "Error:", real_hrn, "is not in researcher list:", list 
        else:
            if not hrn in list:
                list.append(hrn)
