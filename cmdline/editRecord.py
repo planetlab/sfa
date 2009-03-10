@@ -14,8 +14,7 @@ from geni.util.record import GeniRecord
 from geni.util.gid import GID
 from geni.util.gid import create_uuid
 
-gidhrn = None
-gidkeyfile = None
+pubkeyfile = None
 infile = None
 outfile = None
 gidfile = None
@@ -27,7 +26,7 @@ type = None
 dump = False
 researcher = []
 
-long_opts = ["infile=", "outfile=", "email=", "ip=", "dns=", "gidfile=", "gidhrn=", "gidkeyfile=", "hrn=", "type=", "addresearcher=", "delresearcher=", "dump"]
+long_opts = ["infile=", "outfile=", "email=", "ip=", "dns=", "gidfile=", "hrn=", "pubkeyfile=", "type=", "addresearcher=", "delresearcher=", "dump"]
 
 def showhelp():
    print "syntax: editRecord.py <options>"
@@ -36,8 +35,7 @@ def showhelp():
    print "    --outfile <name>      ... write record to file"
    print "    --dump                ... dump record to stdout"
    print "    --gidfile <fn>        ... load gid from file"
-   print "    --gidhrn <name>       ... name to use when creating gid"
-   print "    --gidkeyfile <name>   ... key to use when creating gid"
+   print "    --pubkeyfile <name>   ... key to use when creating gid"
    print "    --hrn <name>          ... set hrn"
    print "    --type <type>         ... set type (user|slice|sa|ma|...)"
    print "    --email <addr>        ... user: set email address"
@@ -66,7 +64,7 @@ def process_options():
    global email, ip, dns, gidfile, hrn, type
    global researcher
    global dump
-   global gidkeyfile, gidhrn
+   global pubkeyfile
 
    (options, args) = getopt.getopt(sys.argv[1:], '', long_opts)
    for opt in options:
@@ -88,10 +86,8 @@ def process_options():
            dns = val
        elif name == "--gidfile":
            gidfile = val
-       elif name == "--gidhrn":
-           gidhrn = val
-       elif name == "--gidkeyfile":
-           gidkeyfile = val
+       elif name == "--pubkeyfile":
+           pubkeyfile = val
        elif name == "--hrn":
            hrn = val
        elif name == "--type":
@@ -114,6 +110,7 @@ def errorcheck(record):
        print "Warning: unknown record name"
    if (not record.gid) and (not ("create_gid" in geni_info)):
        print "Warning: unknown record gid"
+       print "   use --hrn and --pubkeyfile to cause a gid to be created"
 
    if record.type == "user":
        if not geni_info.get("email",None):
@@ -178,18 +175,19 @@ def main():
        gid = GID(string=gid_str)
        record.set_gid(gid)
 
-   if gidhrn or gidkeyfile:
-       if not gidhrn:
-           print "must use --gidkeyfile with --gidhrn"
+   if pubkeyfile:
+       if gidfile:
+           print "You should not use --gidfile and --pubkeyfile together"
            sys.exit(-1)
-       if not gidkeyfile:
-           print "must use --gidhrn with --gidkeyfile"
+
+       if not record.name:
+           print "You must specify --hrn when you specify --pubkeyfile"
            sys.exit(-1)
 
        geni_info = record.get_geni_info()
        geni_info["create_gid"] = True
-       geni_info["create_gid_hrn"] = gidhrn
-       geni_info["create_gid_key"] = load_publickey_string(gidkeyfile)
+       geni_info["create_gid_hrn"] = record.name
+       geni_info["create_gid_key"] = load_publickey_string(pubkeyfile)
 
    if researcher:
        update_list(geni_info, "researcher", researcher)
