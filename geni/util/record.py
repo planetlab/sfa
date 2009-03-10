@@ -6,7 +6,7 @@
 
 import report
 from gid import *
-
+from geni.util.rspec import *
 ##
 # The GeniRecord class implements a Geni Record. A GeniRecord is a tuple
 # (Name, GID, Type, Info).
@@ -246,8 +246,13 @@ class GeniRecord:
     # the record.
 
     def save_to_string(self):
+
         dict = self.as_dict()
-        str = xmlrpclib.dumps((dict,), allow_none=True)
+        print dict
+        record = RecordSpec()
+        record.parseDict(dict)
+        str = record.toxml()
+        #str = xmlrpclib.dumps((dict,), allow_none=True)
         return str
 
     ##
