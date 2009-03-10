@@ -563,8 +563,14 @@ class Registry(GeniServer):
         existing_record_list = table.resolve(type, record.get_name())
         if not existing_record_list:
             raise RecordNotFound(record.get_name())
-
         existing_record = existing_record_list[0]
+
+        # Update_membership needs the membership lists in the existing record
+        # filled in, so it can see if members were added or removed
+        self.fill_record_info(existing_record)
+
+        # Use the pointer from the existing record, not the one that the user
+        # gave us. This prevents the user from inserting a forged pointer
         pointer = existing_record.get_pointer()
 
         # update the PLC information that was specified with the record
@@ -809,6 +815,29 @@ class Registry(GeniServer):
         return cred.save_to_string(save_parents=True)
 
     ##
+    # verify_cancreate_credential
+    #
+    # Verify that a user can retrieve a particular type of credential. For
+    # slices, the user must be on the researcher list. For SA and MA the user
+    # must be on the pi and operator lists respectively.
+
+    def verify_cancreate_credential(self, src_cred, record):
+        type = record.get_type()
+        cred_object_hrn = src_cred.get_gid_object().get_hrn()
+        if type=="slice":
+            researchers = record.get_geni_info().get("researcher", [])
+            if not (cred_object_hrn in researchers):
+                raise PermissionError(cred_object_hrn + " is not in researcher list for " + record.get_name())
+        elif type == "sa":
+            pis = record.get_geni_info().get("pi", [])
+            if not (cred_object_hrn in pis):
+                raise PermissionError(cred_object_hrn + " is not in pi list for " + record.get_name())
+        elif type == "ma":
+            operators = record.get_geni_info().get("operator", [])
+            if not (cred_object_hrn in operators):
+                raise PermissionError(cred_object_hrn + " is not in operator list for " + record.get_name())
+
+    ##
     # GENI API: Get_credential
     #
     # Retrieve a credential for an object.
@@ -834,6 +863,12 @@ class Registry(GeniServer):
 
         records = self.resolve_raw(type, name, must_exist=True)
         record = records[0]
+
+        # verify_cancreate_credential requires that the member lists
+        # (researchers, pis, etc) be filled in
+        self.fill_record_info(record)
+
+        self.verify_cancreate_credential(self.client_cred, record)
 
         # TODO: Check permission that self.client_cred can access the object
 
