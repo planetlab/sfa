@@ -151,54 +151,35 @@ class Aggregate(GeniServer):
     def refresh_components(self):
         """
         Update the cached list of nodes and save in 4 differnt formats
-        (rspec, dns, ip, hrn)
+        (rspec, dns, ip)
         """
 
-        node_details = {}
         # get node list in rspec format
         rspec = Rspec()
         rspec.parseString(self.get_rspec(self.hrn, 'aggregate'))
+        
         # filter nodes according to policy
         rspec.filter('NodeSpec', 'name', blacklist=self.policy['blacklist'], whitelist=self.policy['whitelist'])
-        # extract ifspec info to get ip's
+        
+        # extract ifspecs from rspec to get ip's
         ips = []
         ifspecs = rspec.getDictsByTagName('IfSpec')
         for ifspec in ifspecs:
             if ifspec.has_key('addr') and ifspec['addr']:
                 ips.append(ifspec['addr']) 
 
-        # resolve component hostnames 
-        nodes = self.shell.GetNodes(self.auth, {}, ['hostname', 'site_id', 'slice_ids_whitelist'])
-    
-        # resolve site login_bases
-        site_ids = [node['site_id'] for node in nodes]
-        sites = self.shell.GetSites(self.auth, site_ids, ['site_id', 'login_base'])
-        site_dict = {}
-        for site in sites:
-            site_dict[site['site_id']] = site['login_base']
-
-        # filter nodes according to policy policy
-        # filter nodes with whitelist
-        # convert plc names to geni hrn
-        nodedict = {}
-        for node in nodes:
-            node_hrn = self.hostname_to_hrn(site_dict[node['site_id']], node['hostname'])
-            # filter nodes with a whitelist
-            if node.has_key('slice_ids_whitelist') and node['slice_ids_whitelist']:
-                continue
-            # Do not allow nodes not found in whitelist policy
-            if self.policy['whitelist'] and node_hrn not in self.polciy['whitelist']:
-                continue
-            # Do not allow nodes found in blacklist policy
-            if self.policy['blacklist'] and node_hrn in self.policy['blacklist']:
-                continue
-            nodedict[node_hrn] = node['hostname']
+        # extract nodespecs from rspec to get dns names
+        hostnames = []
+        nodespecs = rspec.getDictsByTagName('NodeSpec')
+        for nodespec in nodespecs:
+            if nodespec.has_key('name') and nodespec['name']:
+                hostnames.append(nodespec['name'])
 
         
+        node_details = {}
         node_details['rspec'] = rspec.toxml()
-        node_details['hrn'] = nodedict.keys()
-        node_details['dns'] = nodedict.values()
         node_details['ip'] = ips
+        node_details['dns'] = hostnames
         # save state 
         self.nodes = SimpleStorage(self.nodes.db_filename, node_details)
         self.nodes.write()
