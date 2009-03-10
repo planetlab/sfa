@@ -9,7 +9,7 @@ import tempfile
 from optparse import OptionParser
 from geni.util.cert import Keypair, Certificate
 from geni.util.credential import Credential
-from geni.util.geniclient import GeniClient
+from geni.util.geniclient import GeniClient, ServerException
 from geni.util.gid import create_uuid
 from geni.util.record import GeniRecord
 
@@ -392,8 +392,19 @@ def update(opts, args):
    record = load_record_from_file(rec_file)
 
    if record.get_type() == "user":
-       cred = user_cred
-   elif record.get_type() in ["sa", "ma", "slice", "node"]:
+       if record.get_name() == user_cred.get_object_gid().get_hrn():
+          cred = user_cred
+       else:
+          create = get_auth_cred()
+   elif record.get_type() in ["slice"]:
+       try:
+           cred = get_slice_cred(record.get_name())
+       except ServerException, e:
+           if "PermissionError" in e.args[0]:
+               cred = get_auth_cred()
+           else:
+               raise
+   elif record.get_type() in ["sa", "ma", "node"]:
        cred = get_auth_cred()
    else:
        raise "unknown record type" + record.get_type()
