@@ -303,7 +303,7 @@ class SliceMgr(GeniServer):
          
             return rspec.toxml()
  
-    def createSlice(self, slice_hrn, rspec, attributes):
+    def createSlice(self, cred, slice_hrn, rspec):
         """
         Instantiate the specified slice according to whats defined in the rspec.
         """
@@ -426,7 +426,7 @@ class SliceMgr(GeniServer):
 
     def create_slice(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'creatslice')
-        return self.createSlice(hrn)
+        return self.createSlice(cred, hrn, rspec)
 
     def delete_slice(self, cred, hrn):
         self.decode_authentication(cred, 'deleteslice')
