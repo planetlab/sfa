@@ -79,19 +79,26 @@ class Rspec():
         if elementName and not elementName.startswith("#"):
             # attributes have tags and values.  get {tag: value}, else {type: value}
             node[elementName] = self._attributeDict(nodeDom)
-            #node.update(self._attributeDict(nodeDom))
             # resolve the child nodes.
             if nodeDom.hasChildNodes():
                 for child in nodeDom.childNodes:
                     childName = self._getName(child)
+                    # skip null children 
                     if not childName:
                         continue
+                    # initialize the possible array of children        
                     if not node[elementName].has_key(childName):
-                        node[elementName][childName] = []       
-                        #node[childName] = []
-                    childdict = self.toDict(child)
-                    for value in childdict.values():
-                        node[elementName][childName].append(value)
+                        node[elementName][childName] = []
+                    # if child node has text child nodes
+                    # append the children to the array as strings
+                    if child.hasChildNodes() and isinstance(child.childNodes[0], minidom.Text):
+                        for nextchild in child.childNodes:
+                            node[elementName][childName].append(nextchild.data)
+                    # convert element child node to dict
+                    else:       
+                        childdict = self.toDict(child)
+                        for value in childdict.values():
+                            node[elementName][childName].append(value)
                     #node[childName].append(self.toDict(child))
         return node
 
@@ -185,8 +192,15 @@ class Rspec():
                     element.appendChild(child)
                 elif isinstance(rd[key], list):
                     for item in rd[key]:
-                        child = elementNode(key, {key:item})
-                        element.appendChild(child)
+                        if isinstance(item, dict):
+                            child = elementNode(key, item)
+                            element.appendChild(child)
+                        elif isinstance(item, StringTypes) or isinstance(item, int):
+                            child = minidom.Element(key)
+                            text = minidom.Text()
+                            text.data = item
+                            child.appendChild(text)
+                            element.appendChild(child) 
             return element
         
         # Minidom does not allow documents to have more then one
