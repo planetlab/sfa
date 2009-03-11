@@ -4,6 +4,7 @@ import datetime
 import time
 import xmlrpclib
 
+from types import StringTypes, ListType
 from geni.util.geniserver import GeniServer
 from geni.util.geniclient import *
 from geni.util.cert import Keypair, Certificate
@@ -343,13 +344,18 @@ class Aggregate(GeniServer):
         slice = slices[0]
 
         # find out where this slice is currently running
-        nodes = self.shell.GetNodes(self.auth, slice['node_ids'], ['hostname'])
-        hostnames = [node['hostname'] for node in nodes]
+        nodelist = self.shell.GetNodes(self.auth, slice['node_ids'], ['hostname'])
+        hostnames = [node['hostname'] for node in nodelist]
 
         # get netspec details
         nodespecs = spec.getDictsByTagName('NodeSpec')
-        nodes = [nodespec['name'] for nodespec in nodespecs]    
-       
+        nodes = []
+        for nodespec in nodespecs:
+            if isinstance(nodespec['name'], list):
+                nodes.extend(nodespec['name'])
+            elif isinstance(nodespec['name'], StringTypes:
+                nodes.append(nodespec['name'])
+                
         # save slice state locally
         # we can assume that spec object has been validated so its safer to 
         # save this instead of the unvalidated rspec the user gave us
