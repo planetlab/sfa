@@ -248,7 +248,6 @@ class GeniRecord:
     def save_to_string(self):
 
         dict = self.as_dict()
-        print dict
         record = RecordSpec()
         record.parseDict(dict)
         str = record.toxml()
@@ -260,7 +259,10 @@ class GeniRecord:
     # representation of the record.
 
     def load_from_string(self, str):
-        dict = xmlrpclib.loads(str)[0][0]
+        #dict = xmlrpclib.loads(str)[0][0]
+        record = RecordSpec()
+        record.parseString(str)
+        dict = record.toDict()
         self.load_from_dict(dict)
 
     ##
