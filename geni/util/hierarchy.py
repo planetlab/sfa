@@ -192,7 +192,7 @@ class Hierarchy():
 
     def get_auth_info(self, hrn):
         #report.trace("Hierarchy: getting authority: " + hrn)
-    
+   
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
 
