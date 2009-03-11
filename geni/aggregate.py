@@ -353,7 +353,7 @@ class Aggregate(GeniServer):
         for nodespec in nodespecs:
             if isinstance(nodespec['name'], list):
                 nodes.extend(nodespec['name'])
-            elif isinstance(nodespec['name'], StringTypes:
+            elif isinstance(nodespec['name'], StringTypes):
                 nodes.append(nodespec['name'])
                 
         # save slice state locally
