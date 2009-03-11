@@ -38,12 +38,17 @@ else:
 ##
 # Two authorities are specified: the root authority and the level1 authority.
 
-root_auth = "plc"
-level1_auth = None
+#root_auth = "plc"
+#level1_auth = None
 
 #root_auth = "planetlab"
 #level1_auth = "planetlab.us"
 config = Config()
+
+root_auth = config.GENI_REGISTRY_ROOT_AUTH
+level1_auth = config.GENI_REGISTRY_LEVEL1_AUTH
+if not level1_auth or level1_auth in ['']:
+    level1_auth = None
 keyconvert_fn = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
 
 
