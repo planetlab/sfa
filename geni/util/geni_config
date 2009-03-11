@@ -3,26 +3,7 @@ GENI_BASE_DIR="/usr/share/geniwrapper/"
 
 # HRN
 # Human readable name for the interfaces
-GENI_INTERFACE_HRN="planetlab.us"   
-
-
-## Aggregate Configuration
-#
-# Enable aggregate inteface
-# Enable the aggregate inteface.   
-GENI_AGGREGATE_ENABLED=1
-
-# Hostname
-# The fully qualified hostname of the aggregate server  
-GENI_AGGREGATE_HOSTNAME="localhost"
-
-# IP
-# Geni aggregate ip address   
-GENI_AGGREGATE_IP="127.0.0.1"
-
-# Port
-# Geni aggregate server port
-GENI_AGGREGATE_PORT=12346
+GENI_INTERFACE_HRN="plc"   
 
 
 # Registry Configuration
@@ -30,6 +11,14 @@ GENI_AGGREGATE_PORT=12346
 # Enabled
 # Enable the registry interface 
 GENI_REGISTRY_ENABLE=1
+
+# Root Auth
+# The hrn of the registry's root auth
+GENI_REGISTRY_ROOT_AUTH="plc"
+
+# Level1 Auth
+# The hrn of the registry's level1 auth
+GENI_REGISTRY_LEVEL1_AUTH=""
 
 # Hostname
 # The fully qualified hostname of the registry server
@@ -42,6 +31,25 @@ GENI_REGISTRY_IP="127.0.0.1"
 # Port
 # Geni registry port
 GENI_REGISTRY_PORT=12345
+
+
+## Aggregate Configuration
+##
+## Enable aggregate inteface
+## Enable the aggregate inteface.
+GENI_AGGREGATE_ENABLED=1
+#
+## Hostname
+## The fully qualified hostname of the aggregate server
+GENI_AGGREGATE_HOSTNAME="localhost"
+#
+## IP
+## Geni aggregate ip address
+GENI_AGGREGATE_IP="127.0.0.1"
+#
+## Port
+## Geni aggregate server port
+GENI_AGGREGATE_PORT=12346
 
 # Slice Manager Configuration
 #
