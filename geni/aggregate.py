@@ -67,7 +67,7 @@ class Aggregate(GeniServer):
         self.nodes_ttl = 1
 
         self.connectPLC()
-        self.connectRegistry()
+        #self.connectRegistry()
         #self.loadCredential()
 
     def connectRegistry(self):
