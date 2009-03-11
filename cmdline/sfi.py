@@ -445,7 +445,7 @@ def slices(opts, args):
 def resources(opts, args):
    global slicemgr
    slice_cred = get_slice_cred(args[0])
-   result = slicemgr.list_resources(slice_cred, args[0])
+   result = slicemgr.get_resources(slice_cred, args[0])
    display_rspec(result)
    if (opts.file is not None):
       save_rspec_to_file(opts.file, result)
