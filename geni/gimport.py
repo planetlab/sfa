@@ -319,7 +319,9 @@ def import_site(parent_hrn, site):
 
 def create_top_level_auth_records(hrn):
     parent_hrn = get_authority(hrn)
-    print hrn, ":", parent_hrn	
+    print hrn, ":", parent_hrn
+    if not parent_hrn:
+        parent_hrn = hrn	
     auth_info = AuthHierarchy.get_auth_info(parent_hrn)
     table = get_auth_table(parent_hrn)
 
@@ -351,8 +353,7 @@ def main():
     if not AuthHierarchy.auth_exists(root_auth):
         AuthHierarchy.create_auth(root_auth)
 
-    #create_top_level_auth_records(root_auth)
-
+    create_top_level_auth_records(root_auth)
     if level1_auth:
         if not AuthHierarchy.auth_exists(level1_auth):
             AuthHierarchy.create_auth(level1_auth)

@@ -557,6 +557,8 @@ class Registry(GeniServer):
         self.verify_object_permission(record.get_name())
 
         auth_name = get_authority(record.get_name())
+        if not auth_name:
+            auth_name = record.get_name()
         table = self.get_auth_table(auth_name)
 
         # make sure the record exists
@@ -656,11 +658,10 @@ class Registry(GeniServer):
 
     def resolve_raw(self, type, name, must_exist=True):
         auth_name = get_authority(name)
-
+        if not auth_name:
+            auth_name = name
         table = self.get_auth_table(auth_name)
-
         records = table.resolve(type, name)
-
         if (not records) and must_exist:
             raise RecordNotFound(name)
 
@@ -777,8 +778,9 @@ class Registry(GeniServer):
         self.verify_object_belongs_to_me(name)
 
         auth_hrn = get_authority(name)
+        if not auth_hrn:
+            auth_hrn = name
         auth_info = self.get_auth_info(auth_hrn)
-
         # find a record that matches
         records = self.resolve_raw(type, name, must_exist=True)
         record = records[0]
@@ -824,6 +826,9 @@ class Registry(GeniServer):
     def verify_cancreate_credential(self, src_cred, record):
         type = record.get_type()
         cred_object_hrn = src_cred.get_gid_object().get_hrn()
+        config = Config()
+        if cred_object_hrn in [config.GENI_REGISTRY_ROOT_AUTH]:
+            return
         if type=="slice":
             researchers = record.get_geni_info().get("researcher", [])
             if not (cred_object_hrn in researchers):
@@ -859,6 +864,8 @@ class Registry(GeniServer):
         self.verify_object_belongs_to_me(name)
 
         auth_hrn = get_authority(name)
+        if not auth_hrn:
+            auth_hrn = name
         auth_info = self.get_auth_info(auth_hrn)
 
         records = self.resolve_raw(type, name, must_exist=True)
@@ -925,6 +932,8 @@ class Registry(GeniServer):
         # that they should be combined?
 
         auth_hrn = get_authority(name)
+        if not auth_hrn:
+            auth_hrn = name
         auth_info = self.get_auth_info(auth_hrn)
 
         records = self.resolve_raw("slice", name, must_exist=True)
