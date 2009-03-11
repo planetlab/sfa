@@ -247,9 +247,13 @@ class SliceMgr(GeniServer):
         Return a list of components managed by this slice manager.
         """
         # Reload components list
-        now = datetime.datetime.now()
-        if not self.nodes.has_key('threshold') or not self.nodes['threshold'] or not self.nodes.has_key('timestamp') or not self.nodes['timestamp'] or now > self.nodes['threshold']:
+        if not self.nodes.has_key('threshold') or not self.nodes['threshold'] or not self.nodes.has_key('timestamp') or not self.nodes['timestamp']:
             self.refresh_components()
+        else:
+            now = datetime.datetime.now()
+            threshold = datetime.datetime.fromtimestamp(time.mktime(time.strptime(self.nodes['threshold'], self.time_format)))
+            if  now > threshold:
+                self.refresh_components()
         return self.nodes[format]
    
      
