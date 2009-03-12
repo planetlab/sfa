@@ -58,7 +58,7 @@ class SliceMgr(GeniServer):
         self.nodes = SimpleStorage(nodes_file)
         self.nodes.load()
         
-        slices_file = os.sep.join([self.server_basedir, 'smgr' + self.hrn + '.slices'])
+        slices_file = os.sep.join([self.server_basedir, 'smgr.' + self.hrn + '.slices'])
         self.slices = SimpleStorage(slices_file)
         self.slices.load()
 
@@ -195,17 +195,15 @@ class SliceMgr(GeniServer):
         for aggregate in aggregates:
             try:
                 # get the rspec from the aggregate
-                agg_server = self.aggregates[aggregate]
                 agg_rspec = self.aggregates[aggregate].list_nodes(self.credential)
-                
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
-                networks.extend({'NetSpec': rspec.getDictsByTagName('NetSpec')})
+                networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
             except:
                 # XX print out to some error log
                 print "Error calling list nodes at aggregate %s" % aggregate
                 raise    
-   
+  
         # create the rspec dict
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
         resourceDict = {'Rspec': resources} 
