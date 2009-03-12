@@ -377,8 +377,7 @@ class Aggregate(GeniServer):
         # contact registry to get slice users and add them to the slice
         #slice_record = self.registry.resolve(self.credential, slice_hrn)
         # persons = slice_record['users']
-        
-        #for person in persons:
+        # for perosn in persons:
         #    shell.AddPersonToSlice(person['email'], slice_name)
         return 1
 
