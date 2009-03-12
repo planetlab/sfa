@@ -200,7 +200,7 @@ class SliceMgr(GeniServer):
                 
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
-                networks.extend(rspec.getDictsByTagName('NetSpec'))
+                networks.extend({'NetSpec': rspec.getDictsByTagName('NetSpec')})
             except:
                 # XX print out to some error log
                 print "Error calling list nodes at aggregate %s" % aggregate
@@ -278,34 +278,30 @@ class SliceMgr(GeniServer):
         Return the current rspec for the specified slice.
         """
 
-        if slice_hrn in self.slices.keys():
-            # check if we alreay have this slices state saved
-            return  self.slices[slice_hrn]
-        else:
-            # request this slices state from all known aggregates
-            rspec = Rspec()
-            rspecdicts = []
-            networks = []
-            for hrn in self.aggregates.keys():
-                # check if the slice has resources at this hrn
-                slice_resources = self.aggregates[hrn].get_resources(self.credential, slice_hrn)
-                rspec.parseString(slice_resources)
-                networks.extend(rspec.getDictsByTagName('NetSpec'))
+        # request this slices state from all known aggregates
+        rspec = Rspec()
+        rspecdicts = []
+        networks = []
+        for hrn in self.aggregates.keys():
+            # check if the slice has resources at this hrn
+            slice_resources = self.aggregates[hrn].get_resources(self.credential, slice_hrn)
+            rspec.parseString(slice_resources)
+            networks.extend({'NetSpec': rspec.getDictsByTagName('NetSpec')})
             
-            # merge all these rspecs into one
-            start_time = int(datetime.datetime.now().strftime("%s"))
-            end_time = start_time
-            duration = end_time - start_time
+        # merge all these rspecs into one
+        start_time = int(datetime.datetime.now().strftime("%s"))
+        end_time = start_time
+        duration = end_time - start_time
     
-            resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
-            resourceDict = {'Rspec': resources}
-            # convert rspec dict to xml
-            rspec.parseDict(resourceDict)
-            # save this slices resources
-            self.slices[slice_hrn] = rspec.toxml()
-            self.slices.write()
+        resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
+        resourceDict = {'Rspec': resources}
+        # convert rspec dict to xml
+        rspec.parseDict(resourceDict)
+        # save this slices resources
+        #self.slices[slice_hrn] = rspec.toxml()
+        #self.slices.write()
          
-            return rspec.toxml()
+        return rspec.toxml()
  
     def createSlice(self, cred, slice_hrn, rspec):
         """
