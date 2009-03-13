@@ -79,22 +79,29 @@ class SliceMgr(GeniServer):
         Attempt to load credential from file if it exists. If it doesnt get
         credential from registry.
         """
-
-        self_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".cred"
-        ma_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".sa.cred"
         
         # see if this file exists
+        ma_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".sa.cred"
         try:
             self.credential = Credential(filename = ma_cred_filename)
         except IOError:
-            # get self credential
-            self_cred = self.registry.get_credential(None, 'ma', self.hrn)
-            self_cred.save_to_file(self_cred_filename, save_parents=True)
+            self.credential = self.getCrednetialFromRegistry()
+            
+        
+    def getCredentialFromRegistry(self):
+        """
+        Get our current credential from the registry.
+        """
+        # get self credential
+        self_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".cred"
+        self_cred = self.registry.get_credential(None, 'ma', self.hrn)
+        self_cred.save_to_file(self_cred_filename, save_parents=True)
 
-            # get ma credential
-            ma_cred = self.registry.get_credential(self_cred, 'sa', self.hrn)
-            ma_cred.save_to_file(ma_cred_filename, save_parents=True)
-            self.credential = ma_cred
+        # get ma credential
+        ma_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".sa.cred"
+        ma_cred = self.registry.get_credential(self_cred, 'sa', self.hrn)
+        ma_cred.save_to_file(ma_cred_filename, save_parents=True)
+        return ma_cred        
 
     def connectRegistry(self):
         """
