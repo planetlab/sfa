@@ -24,9 +24,10 @@ dns = None
 hrn = None
 type = None
 dump = False
+extractgid = None
 researcher = []
 
-long_opts = ["infile=", "outfile=", "email=", "ip=", "dns=", "gidfile=", "hrn=", "pubkeyfile=", "type=", "addresearcher=", "delresearcher=", "dump"]
+long_opts = ["infile=", "outfile=", "email=", "ip=", "dns=", "gidfile=", "hrn=", "pubkeyfile=", "type=", "addresearcher=", "delresearcher=", "dump", "extractgid="]
 
 def showhelp():
    print "syntax: editRecord.py <options>"
@@ -34,6 +35,7 @@ def showhelp():
    print "    --infile <name>       ... read record from file"
    print "    --outfile <name>      ... write record to file"
    print "    --dump                ... dump record to stdout"
+   print "    --extractgid <fn>     ... extract GID to filename"
    print "    --gidfile <fn>        ... load gid from file"
    print "    --pubkeyfile <name>   ... key to use when creating gid"
    print "    --hrn <name>          ... set hrn"
@@ -63,7 +65,7 @@ def process_options():
    global infile, outfile
    global email, ip, dns, gidfile, hrn, type
    global researcher
-   global dump
+   global dump, extractgid
    global pubkeyfile
 
    (options, args) = getopt.getopt(sys.argv[1:], '', long_opts)
@@ -94,6 +96,8 @@ def process_options():
            type = val
        elif name == "--dump":
            dump = True
+       elif name == "--extractgid":
+           extractgid = val
        elif name == "--addresearcher":
            researcher.append(val)
        elif name == "--delresearcher":
@@ -113,13 +117,13 @@ def errorcheck(record):
        print "   use --hrn and --pubkeyfile to cause a gid to be created"
 
    if record.type == "user":
-       if not geni_info.get("email",None):
+       if geni_info.get("email", None) == None:
            print "Warning: unknown email in user record"
 
    if record.type == "node":
-       if not geni_info.get("ip",None):
+       if geni_info.get("ip",None) == None:
            print "Warning: unknown ip in node record"
-       if not geni_info.get("dns",None):
+       if geni_info.get("dns",None) == None:
            print "Warning: unknown dns in node record"
 
 # updates is a list of items to add or remove. If an item starts with "-", then
@@ -144,7 +148,7 @@ def main():
 
    # if the user didn't tell us to do much of anything, then maybe he needs
    # some help
-   if (not infile) and (not outfile) and (not dump):
+   if (not infile) and (not outfile) and (not dump) and (extractgid==None):
        showhelp()
        return
 
@@ -186,7 +190,6 @@ def main():
            print "You must specify --hrn when you specify --pubkeyfile"
            sys.exit(-1)
 
-       geni_info = record.get_geni_info()
        geni_info["create_gid"] = True
        geni_info["create_gid_hrn"] = record.name
        geni_info["create_gid_key"] = load_publickey_string(pubkeyfile)
@@ -201,6 +204,10 @@ def main():
 
    if dump:
        record.dump(False)
+
+   if extractgid:
+       record.get_gid_object().save_to_file(extractgid, save_parents=True)
+       print "write GID to", extractgid
 
    if outfile:
        str = record.save_to_string()
