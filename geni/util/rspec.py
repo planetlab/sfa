@@ -291,6 +291,7 @@ class Rspec():
 
 class RecordSpec(Rspec):
 
+    root_tag = 'record'
     def parseDict(self, rdict, include_doc = False):
         """
         Convert a dictionary into a dom object and store it.
@@ -298,7 +299,7 @@ class RecordSpec(Rspec):
         self.rootNode = self.dict2dom(rdict, include_doc)
 
     def dict2dom(self, rdict, include_doc = False):
-        record_dict = {'': rdict}
+        record_dict = {self.root_tag : rdict}
         return Rspec.dict2dom(self, record_dict, include_doc)
         
 # vim:ts=4:expandtab
