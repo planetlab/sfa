@@ -299,7 +299,10 @@ class RecordSpec(Rspec):
         self.rootNode = self.dict2dom(rdict, include_doc)
 
     def dict2dom(self, rdict, include_doc = False):
-        record_dict = {self.root_tag : rdict}
+        record_dict = rdict
+        if not len(rdict.keys()) == 1:
+            record_dict = {self.root_tag : rdict}
         return Rspec.dict2dom(self, record_dict, include_doc)
         
 # vim:ts=4:expandtab
+    
