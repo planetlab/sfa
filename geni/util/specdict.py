@@ -69,16 +69,24 @@ class IfSpecDict(SpecDict):
                  'type': 'type'}
  
 class LinkSpecDict(SpecDict):
-    type = 'IfSpec'
-    fields = {'name': '',
-              'addr': '',
-              'type': '',
+    type = 'LinkSpec'
+    fields = {'min_alloc': '', 
+              'max_alloc': '', 
+              'type': '', 
+              'start_time': '', 
+              'bw': '', 
+              'duration': '', 
               'init_params': '',
-              'min_rate': '',
-              'max_rate': '',
-              'max_kbyte': ''}
-    plc_fields = {}
-                 
+              'endpoints': [IfSpecDict]}
+    plc_fields = {'min_alloc': 'min_alloc',
+              'max_alloc': 'max_alloc', 
+              'type': 'type', 
+              'start_time': 'start_time', 
+              'bw': 'bw', 
+              'duration': 'duration', 
+              'init_params': 'init_params',
+              'endpoints': 'endpoints'}
+  
             
 class NodeSpecDict(SpecDict):
     type = 'NodeSpec'
