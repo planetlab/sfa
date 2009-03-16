@@ -13,7 +13,7 @@ from geni.util.misc import *
 from geni.util.config import Config
 from geni.util.rspec import Rspec
 from geni.util.specdict import *
-from geni.util.storage import SimpleStorage
+from geni.util.storage import SimpleStorage, XmlStorage
 
 class SliceMgr(GeniServer):
 
@@ -50,18 +50,21 @@ class SliceMgr(GeniServer):
         self.time_format = "%Y-%m-%d %H:%M:%S"
         
         # Get list of aggregates this sm talks to
-        # XX do we use simplestorage to maintain this file manually?
-        aggregates_file = self.server_basedir + os.sep + 'aggregates'
-        self.aggregates = SimpleStorage(aggregates_file)
+        aggregates_file = self.server_basedir + os.sep + 'aggregates.xml'
+        self.aggregate_info = XmlStorage(aggregates_file, {'aggregates': {'aggregate': []}} )
+        self.aggregate_info.load()
         
+        # Get cached list of nodes (rspec) 
         nodes_file = os.sep.join([self.server_basedir, 'smgr.' + self.hrn + '.components'])
         self.nodes = SimpleStorage(nodes_file)
         self.nodes.load()
         
+        # Get cacheds slice states
         slices_file = os.sep.join([self.server_basedir, 'smgr.' + self.hrn + '.slices'])
         self.slices = SimpleStorage(slices_file)
         self.slices.load()
 
+        # Get the policy
         policy_file = os.sep.join([self.server_basedir, 'smgr.' + self.hrn + '.policy'])
         self.policy = SimpleStorage(policy_file, {'whitelist': [], 'blacklist': []})
         self.policy.load()
@@ -71,7 +74,7 @@ class SliceMgr(GeniServer):
 
         self.connectRegistry()
         self.loadCredential()
-        self.connectAggregates(aggregates_file)
+        self.connectAggregates()
 
 
     def loadCredential(self):
@@ -113,33 +116,21 @@ class SliceMgr(GeniServer):
         url = 'http://%(address)s:%(port)s' % locals()
         self.registry = GeniClient(url, self.key_file, self.cert_file)
 
-    def connectAggregates(self, aggregates_file):
+    def connectAggregates(self):
         """
         Get info about the aggregates available to us from file and create 
         an xmlrpc connection to each. If any info is invalid, skip it. 
         """
-        lines = []
-        try:
-            f = open(aggregates_file, 'r')
-            lines = f.readlines()
-            f.close()
-        except: raise 
-        
-        for line in lines:
-            # Skip comments
-            if line.strip().startswith("#"):
-                continue
-            line = line.replace("\t", " ").replace("\n", "").replace("\r", "").strip()
-            agg_info = line.split(" ")
-        
-            # skip invalid info
-            if len(agg_info) != 3:
-                continue
-
-            # create xmlrpc connection using GeniClient
-            hrn, address, port = agg_info[0], agg_info[1], agg_info[2]
-            url = 'http://%(address)s:%(port)s' % locals()
-            self.aggregates[hrn] = GeniClient(url, self.key_file, self.cert_file)
+        self.aggregates = {} 
+        aggregates = self.aggregate_info['aggregates']['aggregate']
+        if isinstance(aggregates, dict):
+            aggregates = [aggregates]
+        if isinstance(aggregates, list):
+            for aggregate in aggregates:         
+                # create xmlrpc connection using GeniClient
+                hrn, address, port = aggregate['hrn'], aggregate['addr'], aggregate['port']
+                url = 'http://%(address)s:%(port)s' % locals()
+                self.aggregates[hrn] = GeniClient(url, self.key_file, self.cert_file)
 
     def item_hrns(self, items):
         """
