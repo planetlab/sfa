@@ -14,10 +14,10 @@
 # is up to date and accurate.
 #
 # 1) Import the existing planetlab database, creating the
-#    appropriate geni records. This is done by running the "import.py" tool.
+#    appropriate geni records. This is done by running the "gimport.py" tool.
 #
 # 2) Create a "trusted_roots" directory and place the certificate of the root
-#    authority in that directory. Given the defaults in import.py, this
+#    authority in that directory. Given the defaults in gimport.py, this
 #    certificate would be named "planetlab.gid". For example,
 #
 #    mkdir trusted_roots; cp authorities/planetlab.gid trusted_roots/
