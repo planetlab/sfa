@@ -250,6 +250,8 @@ class Aggregate(GeniServer):
         # Get the required nodes
         if type in ['aggregate']:
             nodes = self.shell.GetNodes(self.auth)
+            try:  linkspecs = self.shell.GetLinkSpecs() # if call is supported
+            except:  linkspecs = []
         elif type in ['slice']:
             slicename = hrn_to_pl_slicename(hrn)
             slices = self.shell.GetSlices(self.auth, [slicename])
@@ -290,7 +292,11 @@ class Aggregate(GeniServer):
         duration = end_time - start_time
 
         # create the plc dict
-        networks = [{'nodes': nodes, 'name': self.hrn, 'start_time': start_time, 'duration': duration}] 
+        networks = [{'nodes': nodes,
+                     'links': linkspecs, 
+                     'name': self.hrn, 
+                     'start_time': start_time, 
+                     'duration': duration}] 
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
 
         # convert the plc dict to an rspec dict
