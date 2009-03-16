@@ -110,11 +110,13 @@ class NetSpecDict(SpecDict):
               'start_time': '',
               'duration': '',
               'nodes': [NodeSpecDict],
+              'links': [LinkSpecDict],
              }
     plc_fields = {'name': 'name',
                   'start_time': 'start_time',
                   'duration': 'duration',
-                  'nodes': 'nodes'}
+                  'nodes': 'nodes',
+                  'links': 'links'}
 
 class RspecDict(SpecDict):
     type = 'RSpec'
