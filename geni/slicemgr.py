@@ -10,7 +10,7 @@ from geni.util.credential import Credential
 from geni.util.trustedroot import *
 from geni.util.excep import *
 from geni.util.misc import *
-from geni.util.config import Config
+from geni.util.config import *
 from geni.util.rspec import Rspec
 from geni.util.specdict import *
 from geni.util.storage import SimpleStorage, XmlStorage
