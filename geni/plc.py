@@ -1,3 +1,4 @@
+#!/usr/bin/python
 ##
 # GENI PLC Wrapper
 #
