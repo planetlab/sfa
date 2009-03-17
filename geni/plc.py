@@ -41,6 +41,21 @@ from geni.registry import Registry
 from geni.aggregate import Aggregate
 from geni.slicemgr import SliceMgr
 
+
+# after http://www.erlenstar.demon.co.uk/unix/faq_2.html
+def daemon():
+    """Daemonize the current process."""
+    if os.fork() != 0: os._exit(0)
+    os.setsid()
+    if os.fork() != 0: os._exit(0)
+    os.umask(0)
+    devnull = os.open(os.devnull, os.O_RDWR)
+    os.dup2(devnull, 0)
+    # xxx fixme - this is just to make sure that nothing gets stupidly lost - should use devnull
+    crashlog = os.open('/var/log/geni.daemon', os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
+    os.dup2(crashlog, 1)
+    os.dup2(crashlog, 2)
+
 def main():
     global AuthHierarchy
     global TrustedRoots
@@ -58,10 +73,14 @@ def main():
          help="run aggregate manager", default=False)
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", 
          help="verbose mode", default=False)
+    parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
+         help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
  
     key_file = "server.key"
     cert_file = "server.cert"
+    
+    if (options.daemon):  daemon()
 
     if (os.path.exists(key_file)) and (not os.path.exists(cert_file)):
         # If private key exists and cert doesnt, recreate cert

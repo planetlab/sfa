@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# geniwrapper   Wraps PLCAPI into the GENI compliant API
+#
+# chkconfig: 2345 5 99
+#
+# description:   Wraps PLCAPI into the GENI compliant API
+#
+# $Id$
+#
+
+# Source config
+. /usr/share/geniwrapper/geni/util/geni_config
+
+# source function library
+. /etc/init.d/functions
+
+
+start() {
+        echo -n $"Starting GENIWrapper:  "
+
+        if [ "$GENI_REGISTRY_ENABLE" ]; then
+            echo "Registry"
+            daemon $GENI_BASE_DIR/geni/plc.py -r -d $OPTIONS
+        fi
+
+        if [ "$GENI_AGGREGATE_ENABLED" ]; then
+            echo "Aggregate"
+            daemon $GENI_BASE_DIR/geni/plc.py -a -d $OPTIONS
+        fi
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/geniwrapper
+
+}
+
+stop() {
+    echo -n $"Shutting down GENIWrapper: "
+    killproc plc.py
+    RETVAL=$?
+
+    echo
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/geniwrapper
+}
+
+
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart|reload)
+    stop
+    start
+    ;;
+  condrestart)
+    if [ -f /var/lock/subsys/geniwrapper ]; then
+        stop
+        start
+    fi
+    ;;
+  status)
+    status geniwrapper
+    RETVAL=$?
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+    exit 1
+esac
+
+exit $RETVAL
+
