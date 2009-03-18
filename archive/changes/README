@@ -1,5 +1,0 @@
-The PLCAPI changes are in the directories "PLCAPI/trunk/PLC" and "PLCAPI/trunk/PLC/Methods".
-The SSL change is in the M2Crypto directory, at "/var/lib/python-support/python2.5/M2Crypto/SSL".
-
-Soner Sevinc
-04/30/08
