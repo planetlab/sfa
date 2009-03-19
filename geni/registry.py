@@ -715,7 +715,7 @@ class Registry(GeniServer):
         records = self.resolve_raw("*", name)
         gid_string_list = []
         for record in records:
-            gid = record.get_gid()
+            gid = record.get_gid_object()
             gid_string_list.append(gid.save_to_string(save_parents=True))
         return gid_string_list
 
