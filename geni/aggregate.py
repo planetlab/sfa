@@ -68,8 +68,8 @@ class Aggregate(GeniServer):
         self.nodes_ttl = 1
 
         self.connectPLC()
-        #self.connectRegistry()
-        #self.loadCredential()
+        self.connectRegistry()
+        self.loadCredential()
 
     def connectRegistry(self):
         """
@@ -78,7 +78,7 @@ class Aggregate(GeniServer):
         # connect to registry using GeniClient
         address = self.config.GENI_REGISTRY_HOSTNAME
         port = self.config.GENI_REGISTRY_PORT
-        url = 'https://%(address)s:%(port)s' % locals()
+        url = 'http://%(address)s:%(port)s' % locals()
         self.registry = GeniClient(url, self.key_file, self.cert_file)
 
     
@@ -116,24 +116,30 @@ class Aggregate(GeniServer):
         credential from registry.
         """ 
 
-        self_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".cred"
         ma_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".ma.cred"
         
         # see if this file exists
         try:
-            cred = Credential(filename = ma_cred_filename, subject=self.hrn)
-            self.credential = cred.save_to_string()
+            self.credential = Credential(filename = ma_cred_filename)
         except IOError:
-            # get self credential
-            self_cred = self.registry.get_credential(None, 'ma', self.hrn)
-            self_credential = Credential(string = self_cred)
-            self_credential.save_to_file(self_cred_filename)
+            self.credential = self.getCredentialFromRegistry()
 
-            # get ma credential
-            ma_cred = self.registry.get_credential(self_cred)
-            ma_credential = Credential(string = ma_cred)
-            ma_credential.save_to_file(ma_cred_filename)
-            self.credential = ma_cred
+    def getCredentialFromRegistry(self):
+        """
+        Get our current credential from the registry
+        """
+        # get self credential
+        self_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".cred"
+        self_cred = self.registry.get_credential(None, 'ma', self.hrn)
+        self_cred.save_to_file(self_cred_filename, save_parents = True)
+
+        
+        # get ma credential
+        ma_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".ma.cred"
+        ma_cred = self.registry.get_credential(self_cred, 'ma', self.hrn)
+        ma_cred.save_to_file(ma_cred_filename, save_parents=True)
+        return ma_cred        
+
 
     def hostname_to_hrn(self, login_base, hostname):
         """
@@ -146,8 +152,9 @@ class Aggregate(GeniServer):
         """
         Convert hrn to planetlab name.
         """
-        slicename = slicename.replace("_", ".")
-        return ".".join([self.hrn, slicename])
+        parts = slicename.split("_")
+        slice_hrn = parts[0] + "." + "_".join(parts[1:])  
+        return slice_hrn
 
     def refresh_components(self):
         """
@@ -346,9 +353,54 @@ class Aggregate(GeniServer):
         slicename = hrn_to_pl_slicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, [slicename], ['node_ids'])
         if not slices:
-            raise RecordNotFound(slice_hrn)
-        slice = slices[0]
+            parts = slicename.split("_")
+            login_base = parts[0]
+            slice_record = self.registry.resolve(self.cred, slice_hrn)
+            slice_info = slice_record.as_dict()
+            slice = slice_info['pl_info']
 
+            # if site doesnt exist add it
+            sites = self.shell.GetSites(self.auth, [login_base]) 
+            if not sites:
+                authority = get_authority(slice_hrn)
+                site_record = self.registry.reolve(self.cred, authority)
+                site_info = site_record.as_dict()
+                site = site_info['pl_info'] 
+                
+                # add the site
+                site.pop('site_id') 
+                site_id = self.shell.AddSite(self.auth, site)
+            else:
+                site = sites[0]
+                
+            self.shell.AddSlice(self.auth, slice_info)
+        else:
+            slice = slices[0]
+
+        
+        # get the list of valid slice users from the registry and make 
+        # they are added to the slice 
+        slice_records = self.registry.resolve(self.credential, slice_hrn)
+        if not slice_records:
+            raise Error, "record for %s not found" % slice_hrn
+        slice_record = slice_records[0]
+        slice_record_dict = slice_record.as_dict()
+        geni_info = slice_record_dict['geni_info']
+        researchers = geni_info['researcher']
+        for researcher in researchers:
+            person_records = self.registry.resolve(self.credential, researcher)
+            if not person_records:
+                pass
+            person_record = person_records[0]
+            person_dict = person_record.as_dict()['plc_info']
+            persons = self.shell.GetPersons(self.auth, [person_dict['email']], ['person_id', 'key_ids'])
+            if not persons:
+                self.shell.AddPerson(self.auth, person_dict)
+            else:
+                person = persons[0]
+            self.shell.AddPersonToSlice(self.auth, person_dict['email'], login_base)
+            # XX Dont forget to add this person's public keys     
+        
         # find out where this slice is currently running
         nodelist = self.shell.GetNodes(self.auth, slice['node_ids'], ['hostname'])
         hostnames = [node['hostname'] for node in nodelist]
@@ -376,15 +428,6 @@ class Aggregate(GeniServer):
         self.shell.AddSliceToNodes(self.auth, slicename, added_nodes)
         self.shell.DeleteSliceFromNodes(self.auth, slicename, deleted_nodes)
 
-        for attribute in attributes:
-            type, value, node, nodegroup = attribute['type'], attribute['value'], attribute['node'], attribute['nodegroup']
-            self.shell.AddSliceAttribute(self.auth, slicename, type, value, node, nodegroup)
-    
-        # contact registry to get slice users and add them to the slice
-        #slice_record = self.registry.resolve(self.credential, slice_hrn)
-        # persons = slice_record['users']
-        # for perosn in persons:
-        #    shell.AddPersonToSlice(person['email'], slice_name)
         return 1
 
     def updateSlice(self, slice_hrn, rspec, attributes = []):
