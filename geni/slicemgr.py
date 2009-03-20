@@ -51,7 +51,8 @@ class SliceMgr(GeniServer):
         
         # Get list of aggregates this sm talks to
         aggregates_file = self.server_basedir + os.sep + 'aggregates.xml'
-        self.aggregate_info = XmlStorage(aggregates_file, {'aggregates': {'aggregate': []}} )
+        connection_dict = {'hrn': '', 'addr': '', 'port': ''}
+        self.aggregate_info = XmlStorage(aggregates_file, {'aggregates': {'aggregate': [connection_dict]}} )
         self.aggregate_info.load()
         
         # Get cached list of nodes (rspec) 
