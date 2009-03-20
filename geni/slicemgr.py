@@ -88,7 +88,7 @@ class SliceMgr(GeniServer):
         try:
             self.credential = Credential(filename = ma_cred_filename)
         except IOError:
-            self.credential = self.getCrednetialFromRegistry()
+            self.credential = self.getCredentialFromRegistry()
             
         
     def getCredentialFromRegistry(self):
@@ -118,8 +118,8 @@ class SliceMgr(GeniServer):
 
     def connectAggregates(self):
         """
-        Get info about the aggregates available to us from file and create 
-        an xmlrpc connection to each. If any info is invalid, skip it. 
+        Get connection details for the trusted peer aggregates from file and 
+        create a GeniClient connection to each.      
         """
         self.aggregates = {} 
         aggregates = self.aggregate_info['aggregates']['aggregate']
