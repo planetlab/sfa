@@ -12,6 +12,7 @@ from geni.util.trustedroot import TrustedRootList
 from geni.util.cert import Keypair, Certificate
 from geni.util.gid import GID, create_uuid
 from geni.util.geniserver import GeniServer
+from geni.util.geniclient import GeniClient
 from geni.util.record import GeniRecord
 from geni.util.rights import RightList
 from geni.util.genitable import GeniTable
@@ -19,6 +20,7 @@ from geni.util.geniticket import Ticket
 from geni.util.excep import *
 from geni.util.misc import *
 from geni.util.config import *
+from geni.util.storage import *
 
 ##
 # Convert geni fields to PLC fields for use when registering up updating
@@ -86,7 +88,7 @@ class Registry(GeniServer):
     # @param key_file private key filename of registry
     # @param cert_file certificate filename containing public key (could be a GID file)
 
-    def __init__(self, ip, port, key_file, cert_file):
+    def __init__(self, ip, port, key_file, cert_file, config = '/usr/share/geniwrapper/geni/util/geni_config'):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
 
         # get PL account settings from config module
@@ -98,6 +100,23 @@ class Registry(GeniServer):
         else:
             self.connect_local_shell()
 
+        self.key_file = key_file
+        self.cert_file = cert_file
+        self.config = Config(config)
+        self.basedir = self.config.GENI_BASE_DIR + os.sep
+        self.server_basedir = self.basedir + os.sep + "geni" + os.sep
+        self.hrn = self.config.GENI_INTERFACE_HRN
+
+        # get peer registry information
+        registries_file = self.server_basedir + os.sep + 'registries.xml'
+        connection_dict = {'hrn': '', 'addr': '', 'port': ''} 
+        self.registry_info = XmlStorage(registries_file, {'registries': {'registry': [connection_dict]}})
+        self.registry_info.load()
+        self.connectRegistry()
+        self.loadCredential()
+        self.connectRegistries()
+        
+ 
     ##
     # Connect to a remote shell via XMLRPC
 
@@ -128,6 +147,61 @@ class Registry(GeniServer):
         self.server.register_function(self.update)
         self.server.register_function(self.list)
         self.server.register_function(self.resolve)
+
+
+    def loadCredential(self):
+        """
+        Attempt to load credential from file if it exists. If it doesnt get
+        credential from registry.
+        """
+
+        # see if this file exists
+        ma_cred_filename = self.server_basedir + os.sep + "reg." + self.hrn + ".sa.cred"
+        try:
+            self.credential = Credential(filename = ma_cred_filename)
+        except IOError:
+            self.credential = self.getCredentialFromRegistry()
+
+    def getCredentialFromRegistry(self):
+        """
+        Get our current credential from the registry.
+        """
+        # get self credential
+        self_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".cred"
+        self_cred = self.registry.get_credential(None, 'ma', self.hrn)
+        self_cred.save_to_file(self_cred_filename, save_parents=True)
+
+        # get ma credential
+        ma_cred_filename = self.server_basedir + os.sep + "smgr." + self.hrn + ".sa.cred"
+        ma_cred = self.registry.get_credential(self_cred, 'sa', self.hrn)
+        ma_cred.save_to_file(ma_cred_filename, save_parents=True)
+        return ma_cred
+
+    def connectRegistry(self):
+        """
+        Connect to the registry
+        """
+        # connect to registry using GeniClient
+        address = self.config.GENI_REGISTRY_HOSTNAME
+        port = self.config.GENI_REGISTRY_PORT
+        url = 'http://%(address)s:%(port)s' % locals()
+        self.registry = GeniClient(url, self.key_file, self.cert_file)
+
+    def connectRegistries(self):
+        """
+        Get connection details for the trusted peer registries from file and 
+        create an GeniClient connection to each. 
+        """
+        self.registries= {}
+        registries = self.registry_info['registries']['registry']
+        if isinstance(registries, dict):
+            registries = [registries]
+        if isinstance(registries, list):
+            for registry in registries:
+                # create xmlrpc connection using GeniClient
+                hrn, address, port = registry['hrn'], registry['addr'], registry['port']
+                url = 'http://%(address)s:%(port)s' % locals()
+                self.registries[hrn] = GeniClient(url, self.key_file, self.cert_file)
 
     ##
     # Given an authority name, return the information for that authority. This
