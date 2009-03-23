@@ -113,7 +113,6 @@ class Registry(GeniServer):
         self.registry_info = XmlStorage(registries_file, {'registries': {'registry': [connection_dict]}})
         self.registry_info.load()
         self.connectRegistry()
-        #self.loadCredential()
         self.connectRegistries()
         
  
@@ -156,7 +155,7 @@ class Registry(GeniServer):
         """
 
         # see if this file exists
-        ma_cred_filename = self.server_basedir + os.sep + "reg." + self.hrn + ".sa.cred"
+        ma_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".ma.cred"
         try:
             self.credential = Credential(filename = ma_cred_filename)
         except IOError:
@@ -768,12 +767,13 @@ class Registry(GeniServer):
         
         try:
             records = self.resolve_raw("*", name)
-        except RecordNotFound:
+        except:
             records = []
             for registry in self.registries:
                 if name.startswith(registry):
-                    records = self.registries[registry].resolve(cred, name)
-  
+                    records = self.registries[registry].resolve(self.credential, name)
+                
+
         dicts = []
         for record in records:
             dicts.append(record.as_dict())
@@ -938,7 +938,7 @@ class Registry(GeniServer):
 
     def get_credential(self, cred, type, name):
         if not cred:
-            return get_self_credential(self, type, name)
+            return self.get_self_credential(type, name)
 
         self.decode_authentication(cred, "getcredential")
 
