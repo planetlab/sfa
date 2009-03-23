@@ -111,6 +111,7 @@ def main():
         r.trusted_cert_list = TrustedRoots.get_list()
         r.hierarchy = AuthHierarchy
         r.start()
+        r.loadCredential()
 
     # start aggregate manager
     if (options.am):
