@@ -394,13 +394,16 @@ class Aggregate(GeniServer):
             person_record = person_records[0]
             person_dict = person_record.as_dict()['plc_info']
             persons = self.shell.GetPersons(self.auth, [person_dict['email']], ['person_id', 'key_ids'])
+            
+            # Create the person record 
             if not persons:
                 self.shell.AddPerson(self.auth, person_dict)
-            else:
-                person = persons[0]
             self.shell.AddPersonToSlice(self.auth, person_dict['email'], login_base)
-            # XX Dont forget to add this person's public keys     
-        
+            # Add this person's public keys
+            for personkey in person_dict['keys']:
+                key = {'type': 'ssh', 'key': personkey}      
+                self.shellAddPersonKey(self.auth, person_dict['email'], key)
+ 
         # find out where this slice is currently running
         nodelist = self.shell.GetNodes(self.auth, slice['node_ids'], ['hostname'])
         hostnames = [node['hostname'] for node in nodelist]
