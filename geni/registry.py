@@ -305,6 +305,12 @@ class Registry(GeniServer):
             pl_res = self.shell.GetSlices(self.pl_auth, [pointer])
         elif (type == "user"):
             pl_res = self.shell.GetPersons(self.pl_auth, [pointer])
+            key_ids = pl_res[0]['key_ids']
+            keys = self.shell.GetKeys(self.pl_auth, key_ids)
+            pubkeys = []
+            if keys:
+                pubkeys = [key['key'] for key in keys]
+            pl_res[0]['keys'] = pubkeys
         elif (type == "node"):
             pl_res = self.shell.GetNodes(self.pl_auth, [pointer])
         else:
