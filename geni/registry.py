@@ -113,7 +113,7 @@ class Registry(GeniServer):
         self.registry_info = XmlStorage(registries_file, {'registries': {'registry': [connection_dict]}})
         self.registry_info.load()
         self.connectRegistry()
-        self.loadCredential()
+        #self.loadCredential()
         self.connectRegistries()
         
  
@@ -765,8 +765,15 @@ class Registry(GeniServer):
 
     def resolve(self, cred, name):
         self.decode_authentication(cred, "resolve")
-
-        records = self.resolve_raw("*", name)
+        
+        try:
+            records = self.resolve_raw("*", name)
+        except RecordNotFound:
+            records = []
+            for registry in self.registries:
+                if name.startswith(registry):
+                    records = self.registries[registry].resolve(cred, name)
+  
         dicts = []
         for record in records:
             dicts.append(record.as_dict())
