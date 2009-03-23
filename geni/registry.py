@@ -155,6 +155,8 @@ class Registry(GeniServer):
         """
 
         # see if this file exists
+        # XX This is really the aggregate's credential. Using this is easier than getting
+        # the registry's credential from iteslf (ssl errors).   
         ma_cred_filename = self.server_basedir + os.sep + "agg." + self.hrn + ".ma.cred"
         try:
             self.credential = Credential(filename = ma_cred_filename)
