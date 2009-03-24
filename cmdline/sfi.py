@@ -429,7 +429,7 @@ def nodes(opts, args):
    else:
       display_list(results)
    if (opts.file is not None):
-      rspec = slicemgr.list_nodes(user_cred, 'rspec')
+      rspec = slicemgr.list_nodes(user_cred)
       save_rspec_to_file(rspec, opts.file)
    return
 
