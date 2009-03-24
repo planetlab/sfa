@@ -130,6 +130,8 @@ class SliceMgr(GeniServer):
             for aggregate in aggregates:         
                 # create xmlrpc connection using GeniClient
                 hrn, address, port = aggregate['hrn'], aggregate['addr'], aggregate['port']
+                if not hrn or not address or not port:
+                    continue
                 url = 'http://%(address)s:%(port)s' % locals()
                 self.aggregates[hrn] = GeniClient(url, self.key_file, self.cert_file)
 
