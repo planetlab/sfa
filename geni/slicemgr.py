@@ -411,9 +411,12 @@ class SliceMgr(GeniServer):
         self.decode_authentication(cred, 'listslices')
         return self.getSlices()
 
-    def get_resources(self, cred, hrn):
+    def get_resources(self, cred, hrn=None):
         self.decode_authentication(cred, 'listnodes')
-        return self.getResources(hrn)
+        if not hrn: 
+            return self.getNodes()
+        else:
+            return self.getResources(hrn)
 
     def get_ticket(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'getticket')
