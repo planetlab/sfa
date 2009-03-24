@@ -153,7 +153,8 @@ class Aggregate(GeniServer):
         Convert hrn to planetlab name.
         """
         parts = slicename.split("_")
-        slice_hrn = parts[0] + "." + "_".join(parts[1:])  
+        slice_hrn = ".".join([self.hrn, parts[0]]) + "." + "_".join(parts[1:])
+          
         return slice_hrn
 
     def refresh_components(self):
@@ -246,7 +247,7 @@ class Aggregate(GeniServer):
 
         slices = self.shell.GetSlices(self.auth, {}, ['name'])
         slice_hrns = [self.slicename_to_hrn(slice['name']) for slice in slices]  
-
+        
         return slice_hrns
  
     def get_rspec(self, hrn, type):
@@ -516,9 +517,12 @@ class Aggregate(GeniServer):
         self.decode_authentication(cred, 'listslices')
         return self.getSlices()
 
-    def get_resources(self, cred, hrn):
+    def get_resources(self, cred, hrn = None):
         self.decode_authentication(cred, 'listnodes')
-        return self.getResources(hrn)
+        if not hrn: 
+            return self.getNodes()
+        else: 
+            return self.getResources(hrn)
 
     def get_ticket(self, cred, hrn, rspec):
         self.decode_authentication(cred, 'getticket')
