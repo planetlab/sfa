@@ -200,6 +200,8 @@ class Registry(GeniServer):
         if isinstance(registries, list):
             for registry in registries:
                 # create xmlrpc connection using GeniClient
+                if not hrn or not address or not port:
+                    continue
                 hrn, address, port = registry['hrn'], registry['addr'], registry['port']
                 url = 'http://%(address)s:%(port)s' % locals()
                 self.registries[hrn] = GeniClient(url, self.key_file, self.cert_file)
