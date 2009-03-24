@@ -444,8 +444,12 @@ def slices(opts, args):
 # show rspec for named slice
 def resources(opts, args):
    global slicemgr
-   slice_cred = get_slice_cred(args[0])
-   result = slicemgr.get_resources(slice_cred, args[0])
+   if args: 
+       slice_cred = get_slice_cred(args[0])
+       result = slicemgr.get_resources(slice_cred, args[0])
+   else:
+       user_cred = get_user_cred()
+       result = slicemgr.get_resources(user_cred)   
    display_rspec(result)
    if (opts.file is not None):
       save_rspec_to_file(opts.file, result)
