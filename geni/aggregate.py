@@ -353,13 +353,14 @@ class Aggregate(GeniServer):
         # Get the slice record from geni
         slice = {}
         records = self.registry.resolve(self.cred, slice_hrn)
-        if not records:
-            raise RecordNotFound(slice_hrn)
             
         for record in records:
             if record.get_type() in ['slice']:
                 slice_info = record.as_dict()
                 slice = slice_info['pl_info']
+        if not slice:
+            raise RecordNotFound(slice_hrn)
+                    
  
         # Make sure slice exists at plc, if it doesnt add it
         slicename = hrn_to_pl_slicename(slice_hrn)
