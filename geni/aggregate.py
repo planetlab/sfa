@@ -349,18 +349,25 @@ class Aggregate(GeniServer):
         # save this instead of the unvalidated rspec the user gave us
         self.slices[slice_hrn] = spec.toxml()
         self.slices.write()
-        
-        # Get slice info
+       
+        # Get the slice record from geni
+        slice = {}
+        records = self.registry.resolve(self.cred, slice_hrn)
+        if not records:
+            raise RecordNotFound(slice_hrn)
+            
+        for record in records:
+            if record.get_type() in ['slice']:
+                slice_info = record.as_dict()
+                slice = slice_info['pl_info']
+ 
+        # Make sure slice exists at plc, if it doesnt add it
         slicename = hrn_to_pl_slicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, [slicename], ['node_ids'])
         if not slices:
+            # if site doesnt exist add it
             parts = slicename.split("_")
             login_base = parts[0]
-            slice_record = self.registry.resolve(self.cred, slice_hrn)
-            slice_info = slice_record.as_dict()
-            slice = slice_info['pl_info']
-
-            # if site doesnt exist add it
             sites = self.shell.GetSites(self.auth, [login_base]) 
             if not sites:
                 authority = get_authority(slice_hrn)
@@ -375,24 +382,19 @@ class Aggregate(GeniServer):
                 site = sites[0]
                 
             self.shell.AddSlice(self.auth, slice_info)
-        else:
-            slice = slices[0]
-
         
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
-        slice_records = self.registry.resolve(self.credential, slice_hrn)
-        if not slice_records:
-            raise Error, "record for %s not found" % slice_hrn
-        slice_record = slice_records[0]
-        slice_record_dict = slice_record.as_dict()
-        geni_info = slice_record_dict['geni_info']
+        geni_info = slice_info['geni_info']
         researchers = geni_info['researcher']
         for researcher in researchers:
+            person_record = {}
             person_records = self.registry.resolve(self.credential, researcher)
-            if not person_records:
+            for record in person_records:
+                if record.get_type() in ['user']:
+                    person_record = person_records[0]
+            if not person_record:
                 pass
-            person_record = person_records[0]
             person_dict = person_record.as_dict()['plc_info']
             persons = self.shell.GetPersons(self.auth, [person_dict['email']], ['person_id', 'key_ids'])
             
