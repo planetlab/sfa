@@ -301,10 +301,11 @@ class Aggregate(GeniServer):
 
         # create the plc dict
         networks = [{'nodes': nodes,
-                     'links': linkspecs, 
                      'name': self.hrn, 
                      'start_time': start_time, 
-                     'duration': duration}] 
+                     'duration': duration}]
+        if type in ['aggregate']:
+            networks[0]['links'] = linkspecs 
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
 
         # convert the plc dict to an rspec dict
@@ -366,9 +367,9 @@ class Aggregate(GeniServer):
         slicename = hrn_to_pl_slicename(slice_hrn)
         slices = self.shell.GetSlices(self.auth, [slicename], ['node_ids'])
         if not slices:
-            # if site doesnt exist add it
             parts = slicename.split("_")
             login_base = parts[0]
+            # if site doesnt exist add it
             sites = self.shell.GetSites(self.auth, [login_base]) 
             if not sites:
                 authority = get_authority(slice_hrn)
@@ -393,20 +394,20 @@ class Aggregate(GeniServer):
             person_records = self.registry.resolve(self.credential, researcher)
             for record in person_records:
                 if record.get_type() in ['user']:
-                    person_record = person_records[0]
+                    person_record = record
             if not person_record:
                 pass
-            person_dict = person_record.as_dict()['plc_info']
+            person_dict = person_record.as_dict()['pl_info']
             persons = self.shell.GetPersons(self.auth, [person_dict['email']], ['person_id', 'key_ids'])
             
             # Create the person record 
             if not persons:
                 self.shell.AddPerson(self.auth, person_dict)
-            self.shell.AddPersonToSlice(self.auth, person_dict['email'], login_base)
+            self.shell.AddPersonToSlice(self.auth, person_dict['email'], slicename)
             # Add this person's public keys
             for personkey in person_dict['keys']:
-                key = {'type': 'ssh', 'key': personkey}      
-                self.shellAddPersonKey(self.auth, person_dict['email'], key)
+                key = {'key_type': 'ssh', 'key': personkey}      
+                self.shell.AddPersonKey(self.auth, person_dict['email'], key)
  
         # find out where this slice is currently running
         nodelist = self.shell.GetNodes(self.auth, slice['node_ids'], ['hostname'])
