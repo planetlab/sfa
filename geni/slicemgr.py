@@ -310,34 +310,37 @@ class SliceMgr(GeniServer):
         # save slice state locally
         # we can assume that spec object has been validated so its safer to
         # save this instead of the unvalidated rspec the user gave us
-        rspec = Rspec()
+        spec = Rspec()
         tempspec = Rspec()
-        rspec.parseString(rspec)
+        spec.parseString(rspec)
 
-        self.slices[slice_hrn] = rspec.toxml()
+        self.slices[slice_hrn] = spec.toxml()
         self.slices.write()
 
         # extract network list from the rspec and create a separate
         # rspec for each network
-        slicename = self.hrn_to_plcslicename(slice_hrn)
-        specDict = rspec.toDict()
-        start_time = specDict['start_time']
-        end_time = specDict['end_time']
-
+        slicename = hrn_to_pl_slicename(slice_hrn)
+        specDict = spec.toDict()
+        if specDict.has_key('Rspec'): specDict = specDict['Rspec']
+        if specDict.has_key('start_time'): start_time = specDict['start_time']
+        else: start_time = 0
+        if specDict.has_key('end_time'): end_time = specDict['end_time']
+        else: end_time = 0
+   
         rspecs = {}
         # only attempt to extract information about the aggregates we know about
         for hrn in self.aggregates.keys():
             netspec = spec.getDictByTagNameValue('NetSpec', hrn)
             if netspec:
                 # creat a plc dict 
-                resources = {'start_time': star_time, 'end_time': end_time, 'networks': netspec}
+                resources = {'start_time': start_time, 'end_time': end_time, 'networks': netspec}
                 resourceDict = {'Rspec': resources}
                 tempspec.parseDict(resourceDict)
                 rspecs[hrn] = tempspec.toxml()
 
         # notify the aggregates
-        for hrn in self.rspecs.keys():
-            self.aggregates[hrn].createSlice(self.credential, rspecs[hrn])
+        for hrn in rspecs.keys():
+            self.aggregates[hrn].create_slice(self.credential, slice_hrn, rspecs[hrn])
             
         return 1
 

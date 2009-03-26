@@ -373,7 +373,7 @@ class Aggregate(GeniServer):
             sites = self.shell.GetSites(self.auth, [login_base]) 
             if not sites:
                 authority = get_authority(slice_hrn)
-                site_record = self.registry.reolve(self.cred, authority)
+                site_record = self.registry.resolve(self.credential, authority)
                 site_info = site_record.as_dict()
                 site = site_info['pl_info'] 
                 
