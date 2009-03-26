@@ -352,7 +352,7 @@ class Aggregate(GeniServer):
        
         # Get the slice record from geni
         slice = {}
-        records = self.registry.resolve(self.cred, slice_hrn)
+        records = self.registry.resolve(self.credential, slice_hrn)
             
         for record in records:
             if record.get_type() in ['slice']:
