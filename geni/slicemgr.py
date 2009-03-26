@@ -427,7 +427,7 @@ class SliceMgr(GeniServer):
         return self.getPolicy()
 
     def create_slice(self, cred, hrn, rspec):
-        self.decode_authentication(cred, 'creatslice')
+        self.decode_authentication(cred, 'createslice')
         return self.createSlice(cred, hrn, rspec)
 
     def delete_slice(self, cred, hrn):
