@@ -373,7 +373,11 @@ class Aggregate(GeniServer):
             sites = self.shell.GetSites(self.auth, [login_base]) 
             if not sites:
                 authority = get_authority(slice_hrn)
-                site_record = self.registry.resolve(self.credential, authority)
+                site_records = self.registry.resolve(self.credential, authority)
+                site_record = {}
+                if not site_records:
+                    raise RecordNotFound(authority)
+                site_record = site_records[0]     
                 site_info = site_record.as_dict()
                 site = site_info['pl_info'] 
                 
@@ -383,7 +387,7 @@ class Aggregate(GeniServer):
             else:
                 site = sites[0]
                 
-            self.shell.AddSlice(self.auth, slice_info)
+            self.shell.AddSlice(self.auth, slice)
         
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
@@ -403,11 +407,21 @@ class Aggregate(GeniServer):
             # Create the person record 
             if not persons:
                 self.shell.AddPerson(self.auth, person_dict)
+                key_ids = []
+            else:
+                key_ids = persons[0]['key_ids']
+           
             self.shell.AddPersonToSlice(self.auth, person_dict['email'], slicename)
-            # Add this person's public keys
+            
+            # Get this users local keys
+            keylist = self.shell.GetKeys(self.auth, key_ids, ['key'])
+            keys = [key['key'] for key in keylist]
+            
+            # add keys that arent already there 
             for personkey in person_dict['keys']:
-                key = {'key_type': 'ssh', 'key': personkey}      
-                self.shell.AddPersonKey(self.auth, person_dict['email'], key)
+                if personkey not in keys:
+                    key = {'key_type': 'ssh', 'key': personkey}      
+                    self.shell.AddPersonKey(self.auth, person_dict['email'], key)
  
         # find out where this slice is currently running
         nodelist = self.shell.GetNodes(self.auth, slice['node_ids'], ['hostname'])
