@@ -263,8 +263,12 @@ class Aggregate(GeniServer):
         elif type in ['slice']:
             slicename = hrn_to_pl_slicename(hrn)
             slices = self.shell.GetSlices(self.auth, [slicename])
-            node_ids = slices[0]['node_ids']
-            nodes = self.shell.GetNodes(self.auth, node_ids) 
+            if not slices:
+                nodes = []
+            else:
+                slice = slices[0]     
+                node_ids = slice['node_ids']
+                nodes = self.shell.GetNodes(self.auth, node_ids) 
         
         # Filter out whitelisted nodes
         public_nodes = lambda n: n.has_key('slice_ids_whitelist') and not n['slice_ids_whitelist']
