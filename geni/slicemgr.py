@@ -285,7 +285,7 @@ class SliceMgr(GeniServer):
             # check if the slice has resources at this hrn
             slice_resources = self.aggregates[hrn].get_resources(self.credential, slice_hrn)
             rspec.parseString(slice_resources)
-            networks.extend({'NetSpec': rspec.getDictsByTagName('NetSpec')})
+            networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
             
         # merge all these rspecs into one
         start_time = int(datetime.datetime.now().strftime("%s"))
