@@ -5,6 +5,7 @@
 ##
 
 import report
+from types import StringTypes
 from gid import *
 from geni.util.rspec import *
 ##
@@ -75,7 +76,7 @@ class GeniRecord:
     # @param gid is a GID object or the string representation of a GID object
 
     def set_gid(self, gid):
-        if isinstance(gid, str):
+        if isinstance(gid, StringTypes):
             self.gid = gid
         else:
             self.gid = gid.save_to_string(save_parents=True)
@@ -229,7 +230,6 @@ class GeniRecord:
 
     def load_from_dict(self, dict):
         self.set_name(dict['name'])
-
         gidstr = dict.get("gid", None)
         if gidstr:
             self.set_gid(dict['gid'])
@@ -260,10 +260,12 @@ class GeniRecord:
 
     def load_from_string(self, str):
         #dict = xmlrpclib.loads(str)[0][0]
+        
         record = RecordSpec()
         record.parseString(str)
-        dict = record.toDict()
-        self.load_from_dict(dict)
+        record_dict = record.toDict()
+        geni_dict = record_dict['record']
+        self.load_from_dict(geni_dict)
 
     ##
     # Dump the record to stdout

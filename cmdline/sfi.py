@@ -390,7 +390,6 @@ def update(opts, args):
    user_cred = get_user_cred()
    rec_file = get_record_file(args[0])
    record = load_record_from_file(rec_file)
-
    if record.get_type() == "user":
        if record.get_name() == user_cred.get_object_gid().get_hrn():
           cred = user_cred
@@ -408,7 +407,6 @@ def update(opts, args):
        cred = get_auth_cred()
    else:
        raise "unknown record type" + record.get_type()
-
    return registry.update(cred, record)
 
 #
@@ -548,7 +546,6 @@ def save_records_to_file(filename, recordList):
 def save_record_to_file(filename, record):
    if not filename.startswith(os.sep):
        filename = sfi_dir + filename
-   print "saving record", record.name, "to file", filename
    str = record.save_to_string()
    file(filename, "w").write(str)
    return
