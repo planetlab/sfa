@@ -108,6 +108,14 @@ class GeniRecord:
     def set_pl_info(self, pl_info):
         if isinstance(pl_info, list):
             pl_info = pl_info[0]
+        
+        # Convert any boolean strings to real bools
+        for key in pl_info:
+            if isinstance(pl_info[key], StringTypes):
+                if pl_info[key].lower() in ["true"]:
+                    pl_info[key] = True
+                elif pl_info[key].lower() in ["false"]:
+                    pl_info[key] = False   
         self.pl_info = pl_info
         self.dirty = True
 
