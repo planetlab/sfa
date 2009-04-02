@@ -106,6 +106,8 @@ class GeniRecord:
     # @param pl_info is a dictionary containing planetlab info
 
     def set_pl_info(self, pl_info):
+        if isinstance(pl_info, list):
+            pl_info = pl_info[0]
         self.pl_info = pl_info
         self.dirty = True
 
@@ -115,6 +117,8 @@ class GeniRecord:
     # @param geni_info is a dictionary containing geni info
 
     def set_geni_info(self, geni_info):
+        if isinstance(geni_info, list):
+            geni_info = geni_info[0]
         self.geni_info = geni_info
         self.dirty = True
 
