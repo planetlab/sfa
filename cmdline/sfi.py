@@ -391,7 +391,6 @@ def update(opts, args):
    rec_file = get_record_file(args[0])
    record = load_record_from_file(rec_file)
    if record.get_type() == "user":
-       print dir(user_cred) 
        if record.get_name() == user_cred.get_gid_object().get_hrn():
           cred = user_cred
        else:
