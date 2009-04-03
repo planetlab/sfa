@@ -712,24 +712,7 @@ class Registry(GeniServer):
 
         records = table.list()
 
-        good_records = []
-        for record in records:
-            try:
-                self.fill_record_info(record)
-                good_records.append(record)
-            except PlanetLabRecordDoesNotExist:
-                # silently drop the ones that are missing in PL.
-                # is this the right thing to do?
-                print "ignoring geni record ", record.get_name(), " because pl record does not exist"
-                table.remove(record)
-
-        dicts = []
-        for record in good_records:
-            dicts.append(record.as_dict())
-
-        return dicts
-
-        return dict_list
+        return records
 
     ##
     # Resolve a record. This is an internal version of the Resolve API call
