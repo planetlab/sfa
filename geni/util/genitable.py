@@ -37,13 +37,16 @@ class GeniTable():
         return False
 
     def create(self):
+        
         querystr = "CREATE TABLE " + self.tablename + " ( \
                 key text, \
                 name text, \
                 gid text, \
                 type text, \
                 pointer integer);"
-
+        template = "CREATE INDEX %s_%s_idx ON %s (%s);"
+        indexes = [template % ( self.tablename, field, self.tablename, field) \
+                   for field in ['name', 'type' ]]
         # IF EXISTS doenst exist in postgres < 8.2
         try:
             self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
@@ -54,6 +57,8 @@ class GeniTable():
                 pass
         
         self.cnx.query(querystr)
+        for index in indexes:
+            self.cnx.query(index)
 
     def remove(self, record):
         query_str = "DELETE FROM " + self.tablename + " WHERE key = '" + record.get_key() + "'"
