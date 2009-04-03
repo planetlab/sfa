@@ -248,9 +248,9 @@ class GeniRecord:
 
         self.set_type(dict['type'])
         self.set_pointer(dict['pointer'])
-        if "pl_info" in dict:
+        if "pl_info" in dict and dict['pl_info']:
            self.set_pl_info(dict["pl_info"])
-        if "geni_info" in dict:
+        if "geni_info" in dict and dict['geni_info']:
            self.set_geni_info(dict["geni_info"])
 
     ##
@@ -311,6 +311,10 @@ class GeniRecord:
 
     def getdict(self):
         info = {'hrn': self.name, 'type': self.type, 'gid': self.gid}
-        info.update(getattr(self, "geni_info", {}))
-        info.update(getattr(self, "pl_info", {}))
+        geni_info = getattr(self, "geni_info", {})
+        pl_info = getattr(self, "pl_info", {}) 
+        if geni_info:
+            info.update(geni_info)
+        if pl_info:
+            info.update(pl_info)
         return info
