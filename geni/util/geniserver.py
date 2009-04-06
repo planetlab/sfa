@@ -17,77 +17,7 @@ import SimpleHTTPServer
 import SimpleXMLRPCServer
 import xmlrpclib
 import string
-# SOAP support is optional
-try:
-    import SOAPpy
-    from SOAPpy.Parser import parseSOAPRPC
-    from SOAPpy.Types import faultType
-    from SOAPpy.NS import NS
-    from SOAPpy.SOAPBuilder import buildSOAP
-except ImportError:
-    SOAPpy = None
-
-from cert import *
-from credential import *
-
-import socket, os
-from OpenSSL import SSL
-
-
-# See "2.2 Characters" in the XML specification:
-#
-# #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD]
-# avoiding
-# [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
-
-invalid_xml_ascii = map(chr, range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F))
-xml_escape_table = string.maketrans("".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
-
-def xmlrpclib_escape(s, replace = string.replace):
-    """
-    xmlrpclib does not handle invalid 7-bit control characters. This
-    function augments xmlrpclib.escape, which by default only replaces
-    '&', '<', and '>' with entities.
-    """
-
-    # This is the standard xmlrpclib.escape function
-    s = replace(s, "&", "&amp;")
-    s = replace(s, "<", "&lt;")
-    s = replace(s, ">", "&gt;",)
-
-    # Replace invalid 7-bit control characters with '?'
-    return s.translate(xml_escape_table)
-
-def xmlrpclib_dump(self, value, write):
-    """
-    xmlrpclib cannot marshal instances of subclasses of built-in
-    types. This function overrides xmlrpclib.Marshaller.__dump so that
-    any value that is an instance of one of its acceptable types is
-    marshalled as that type.
-
-    xmlrpclib also cannot handle invalid 7-bit control characters. See
-    above.
-    """
-
-    # Use our escape function
-    args = [self, value, write]
-    if isinstance(value, (str, unicode)):
-        args.append(xmlrpclib_escape)
-
-    try:
-        # Try for an exact match first
-        f = self.dispatch[type(value)]
-    except KeyError:
-        # Try for an isinstance() match
-        for Type, f in self.dispatch.iteritems():
-            if isinstance(value, Type):
-                f(*args)
-                return
-        raise TypeError, "cannot marshal %s objects" % type(value)
-    else:
-        f(*args)
-
-xmlrpclib.Marshaller._Marshaller__dump = xmlrpclib_dump
+from geni.util.api import GeniAPI 
 
 ##
 # Verification callback for pyOpenSSL. We do our own checking of keys because
@@ -191,53 +121,10 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
     It it very similar to SimpleXMLRPCRequestHandler but it uses HTTPS for transporting XML data.
     """
     def setup(self):
-        self.encoding = "utf-8"
+        #self.api = GeniAPI()
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
-
-    def handleXMLRPCSOAP(self, source, data):
-        """
-        Handle an XML-RPC or SOAP request from the specified source.
-        """
-        
-        # Parse request into method name and arguments
-        try:
-            interface = xmlrpclib
-            (args, method) = xmlrpclib.loads(data)
-            methodresponse = True
-        except Exception, e:
-            if SOAPpy is not None:
-                interface = SOAPpy
-                (r, header, body, attrs) = parseSOAPRPC(data, header = 1, body = 1, attrs = 1)
-                method = r._name
-                args = r._aslist()
-                # XXX Support named arguments
-            else:
-                raise e
-
-        try:
-            result = self.server._marshaled_dispatch(data, getattr(self, '_dispatch', None))
-        except Exception, fault:
-            # Handle expected faults
-            if interface == xmlrpclib:
-                result = fault
-                methodresponse = None
-            elif interface == SOAPpy:
-                result = faultParameter(NS.ENV_T + ":Server", "Method Failed", method)
-                result._setDetail("Fault: %s" % (fault))
-
-
-        # Return result
-        if interface == xmlrpclib:
-            # XX Shouldnt we be dumping xmlrpc here
-            #result = (result,)
-            #data = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
-            data = result 
-        elif interface == SOAPpy:
-            data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
-
-        return data
 
     def do_POST(self):
         """Handles the HTTPS POST request.
@@ -248,14 +135,15 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         try:
             # get arguments
             request = self.rfile.read(int(self.headers["content-length"]))
-            response = self.handleXMLRPCSOAP(None, request)
 
             # In previous versions of SimpleXMLRPCServer, _dispatch
             # could be overridden in this class, instead of in
             # SimpleXMLRPCDispatcher. To maintain backwards compatibility,
             # check to see if a subclass implements _dispatch and dispatch
             # using that method if present.
-            #response = self.server._marshaled_dispatch(request, getattr(self, '_dispatch', None))
+            response = self.server._marshaled_dispatch(request, getattr(self, '_dispatch', None))
+            #response = self.api.handle(None, request)
+
         except: # This should only happen if the module is buggy
             # internal error, report as HTTP server error
             self.send_response(500)
