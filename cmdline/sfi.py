@@ -227,9 +227,8 @@ def create_cmd_parser(command, additional_cmdargs = None):
               "remove": "name",
               "add": "record",
               "update": "record",
-              "nodes": "[name]",
               "slices": "",
-              "resources": "name",
+              "resources": "[name]",
               "create": "name rspec",
               "delete": "name",
               "reset": "name",
@@ -250,7 +249,7 @@ def create_cmd_parser(command, additional_cmdargs = None):
 
    parser = OptionParser(usage="sfi [sfi_options] %s [options] %s" \
       % (command, cmdargs[command]))
-   if command in ("nodes", "resources"):
+   if command in ("resources"):
       parser.add_option("-f", "--format", dest="format",type="choice",
            help="display format (dns|ip|rspec)",default="rspec",
            choices=("dns","ip","rspec"))
@@ -259,7 +258,7 @@ def create_cmd_parser(command, additional_cmdargs = None):
            help="type filter (user|slice|sa|ma|node|aggregate)",
            choices=("user","slice","sa","ma","node","aggregate", "all"),
            default="all")
-   if command in ("show", "list", "nodes", "resources"):
+   if command in ("show", "list", "resources"):
       parser.add_option("-o", "--output", dest="file",
            help="output XML to file", metavar="FILE", default=None)
    return parser
@@ -308,7 +307,7 @@ def main():
       print options.registry, options.sm, options.dir, options.verbose,\
          options.user, options.auth
       print command
-      if command in ("nodes", "resources"):
+      if command in ("resources"):
          print cmd_opts.format
       elif command in ("list","show","remove"):
          print cmd_opts.type
@@ -413,23 +412,23 @@ def update(opts, args):
 # Slice-related commands
 #
 
-# list available nodes
-def nodes(opts, args):
-   global slicemgr
-   user_cred = get_user_cred() 
-   if not opts.format:
-      context = None
-   else:
-      context = opts.format
-   results = slicemgr.list_nodes(user_cred)
-   if opts.format in ['rspec']:     
-      display_rspec(results)
-   else:
-      display_list(results)
-   if (opts.file is not None):
-      rspec = slicemgr.list_nodes(user_cred)
-      save_rspec_to_file(rspec, opts.file)
-   return
+# list available nodes -- now use 'resources' w/ no argument instead
+#def nodes(opts, args):
+#   global slicemgr
+#   user_cred = get_user_cred() 
+#   if not opts.format:
+#      context = None
+#   else:
+#      context = opts.format
+#   results = slicemgr.list_nodes(user_cred)
+#   if opts.format in ['rspec']:     
+#      display_rspec(results)
+#   else:
+#      display_list(results)
+#   if (opts.file is not None):
+#      rspec = slicemgr.list_nodes(user_cred)
+#      save_rspec_to_file(rspec, opts.file)
+#   return
 
 # list instantiated slices
 def slices(opts, args):
