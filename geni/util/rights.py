@@ -24,8 +24,47 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                    "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["setbootstate", "getbootstate", "reboot"]}
 
+
+##
+# Determine tje rights that an object should have. The rights are entirely
+# dependent on the type of the object. For example, users automatically
+# get "refresh", "resolve", and "info".
+#
+# @param type the type of the object (user | sa | ma | slice | node)
+# @param name human readable name of the object (not used at this time)
+#
+# @return RightList object containing rights
+
+def determine_rights(type, name):
+    rl = RightList()
+
+    # rights seem to be somewhat redundant with the type of the credential.
+    # For example, a "sa" credential implies the authority right, because
+    # a sa credential cannot be issued to a user who is not an owner of
+    # the authority
+    if type == "user":
+        rl.add("refresh")
+        rl.add("resolve")
+        rl.add("info")
+    elif type == "sa":
+        rl.add("authority,sa")
+    elif type == "ma":
+        rl.add("authority,ma")
+    elif type == "slice":
+        rl.add("refresh")
+        rl.add("embed")
+        rl.add("bind")
+        rl.add("control")
+        rl.add("info")
+    elif type == "component":
+        rl.add("operator")
+    return rl
+
+
 ##
 # The Right class represents a single privilege.
+
+
 
 class Right:
    ##
@@ -153,3 +192,40 @@ class RightList:
                 return False
         return True
 
+
+    ##
+    # Determine tje rights that an object should have. The rights are entirely
+    # dependent on the type of the object. For example, users automatically
+    # get "refresh", "resolve", and "info".
+    #
+    # @param type the type of the object (user | sa | ma | slice | node)
+    # @param name human readable name of the object (not used at this time)
+    #
+    # @return RightList object containing rights
+
+    def determine_rights(self, type, name):
+        rl = RightList()
+
+        # rights seem to be somewhat redundant with the type of the credential.
+        # For example, a "sa" credential implies the authority right, because
+        # a sa credential cannot be issued to a user who is not an owner of
+        # the authority
+
+        if type == "user":
+            rl.add("refresh")
+            rl.add("resolve")
+            rl.add("info")
+        elif type == "sa":
+            rl.add("authority,sa")
+        elif type == "ma":
+            rl.add("authority,ma")
+        elif type == "slice":
+            rl.add("refresh")
+            rl.add("embed")
+            rl.add("bind")
+            rl.add("control")
+            rl.add("info")
+        elif type == "component":
+            rl.add("operator")
+
+        return rl
