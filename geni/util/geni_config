@@ -5,6 +5,7 @@ GENI_BASE_DIR="/usr/share/geniwrapper/"
 # Human readable name for the interfaces
 GENI_INTERFACE_HRN="plc"   
 
+GENI_API_DEBUG=1
 
 # Registry Configuration
 #
