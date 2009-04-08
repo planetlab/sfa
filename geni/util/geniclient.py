@@ -152,9 +152,9 @@ class GeniClient():
     # @return a credental object
 
     def get_credential(self, cred, type, name):
-        if cred == None:
-            return self.get_self_credential(type, name)
-        cred_str = self.server.get_credential(cred.save_to_string(save_parents=True), type, name)
+        if cred:
+            cred = cred.save_to_string(save_parents=True) 
+        cred_str = self.server.get_credential(cred, type, name)
         return Credential(string = cred_str)
 
     ##
