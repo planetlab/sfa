@@ -35,7 +35,7 @@ class get_credential(Method):
             return self.get_self_credential(type, hrn)
         
         self.api.auth.check(cred, 'getcredential')
-        self.api.auth.verify_object_belongs_to_me(name)
+        self.api.auth.verify_object_belongs_to_me(hrn)
         auth_hrn = self.api.auth.get_authority(hrn)
         if not auth_hrn:
             auth_hrn = hrn
