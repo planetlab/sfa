@@ -40,10 +40,11 @@ class get_credential(Method):
         if not auth_hrn:
             auth_hrn = hrn
         auth_info = self.api.auth.get_auth_info(auth_hrn)
-        record = None
         table = self.api.auth.get_auth_table(auth_hrn)
         records = table.resolve('*', hrn)
-
+        if not records:
+            raise RecordNotFount(hrn)
+        record = records[0]
         # verify_cancreate_credential requires that the member lists
         # (researchers, pis, etc) be filled in
         self.api.fill_record_info(record)

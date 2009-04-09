@@ -40,6 +40,8 @@ class resolve(Method):
                 auth_hrn = hrn
             table = self.api.auth.get_auth_table(auth_hrn)
             records = table.resolve('*', hrn)
+            if not records:
+                raise RecordNotFound(hrn) 
             good_records = []
             for record in records:
                 try:
@@ -49,11 +51,9 @@ class resolve(Method):
                     # silently drop the ones that are missing in PL
                     print >> log, "ignoring geni record ", record.get_name(), \
                               " because pl record does not exist"
-                table.remove(record)
+                    table.remove(record)
 
         dicts = [record.as_dict() for record in good_records]
-        if not dicts:
-            raise RecordNotFound(hrn)
 
         return dicts    
             

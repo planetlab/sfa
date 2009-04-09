@@ -34,7 +34,7 @@ class update(Method):
     returns = Parameter(int, "1 if successful")
     
     def call(self, cred, record_dict):
-        self.api.auth.decode_authentication(cred, "update")
+        self.api.auth.check(cred, "update")
         record = GeniRecord(dict = record_dict)
         type = record.get_type()
         self.api.auth.verify_object_permission(record.get_name())
@@ -78,7 +78,7 @@ class update(Method):
                     update_fields[key] = all_fields[key]
             self.api.plshell.UpdatePerson(self.api.plauth, pointer, update_fields)
 
-         elif type == "node":
+        elif type == "node":
             self.api.plshell.UpdateNode(self.api.plauth, pointer, record.get_pl_info())
 
         else:
