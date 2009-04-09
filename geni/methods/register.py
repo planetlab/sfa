@@ -28,7 +28,7 @@ class register(Method):
     returns = Parameter(int, "String representation of gid object")
     
     def call(self, cred, record_dict):
-        self.decode_authentication(cred, "register")
+        self.api.auth.check(cred, "register")
         record = GeniRecord(dict = record_dict)
         type = record.get_type()
         name = record.get_name()

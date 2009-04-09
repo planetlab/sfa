@@ -49,18 +49,18 @@ class get_credential(Method):
         # (researchers, pis, etc) be filled in
         self.api.fill_record_info(record)
 
-        self.api.auth.verify_cancreate_credential(self.client_cred, record)
+        self.api.auth.verify_cancreate_credential(self.api.auth.client_cred, record)
 
         # TODO: Check permission that self.client_cred can access the object
 
         object_gid = record.get_gid_object()
         new_cred = Credential(subject = object_gid.get_subject())
-        new_cred.set_gid_caller(self.client_gid)
+        new_cred.set_gid_caller(self.api.auth.client_gid)
         new_cred.set_gid_object(object_gid)
         new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_cred.set_pubkey(object_gid.get_pubkey())
 
-        rl = determine_rights(type, name)
+        rl = determine_rights(type,hrn)
         new_cred.set_privileges(rl)
 
         # determine the type of credential that we want to use as a parent for

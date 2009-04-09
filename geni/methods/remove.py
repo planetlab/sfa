@@ -22,14 +22,14 @@ class remove(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Record type")
+        Parameter(str, "Record type"),
         Parameter(str, "Human readable name (hrn) of record to be removed")
         ]
 
     returns = Parameter(int, "1 if successful")
     
     def call(self, cred, type, hrn):
-        self.api.auth.decode_authentication(cred, "remove")
+        self.api.auth.check(cred, "remove")
         self.api.auth.verify_object_permission(hrn)
         auth_name = self.api.auth.get_authority(hrn)
         table = self.api.auth.get_auth_table(auth_name)
