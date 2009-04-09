@@ -40,6 +40,7 @@ class resolve(Method):
                 auth_hrn = hrn
             table = self.api.auth.get_auth_table(auth_hrn)
             records = table.resolve('*', hrn)
+            print >> log, records
             good_records = []
             for record in records:
                 try:
