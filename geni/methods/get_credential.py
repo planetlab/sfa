@@ -28,23 +28,21 @@ class get_credential(Method):
         Parameter(str, "Human readable name (hrn)")
         ]
 
-    returns = [GeniRecord]
+    returns = Parameter(str, "String representation of a credential object")
     
     def call(self, cred, type, hrn):
         if not cred:
             return self.get_self_credential(type, hrn)
         
         self.api.auth.check(cred, 'getcredential')
-
         self.api.auth.verify_object_belongs_to_me(name)
-
         auth_hrn = self.api.auth.get_authority(hrn)
         if not auth_hrn:
             auth_hrn = hrn
         auth_info = self.api.auth.get_auth_info(auth_hrn)
         record = None
         table = self.api.auth.get_auth_table(auth_hrn)
-        records = table.resolve('*', auth_hrn)
+        records = table.resolve('*', hrn)
 
         # verify_cancreate_credential requires that the member lists
         # (researchers, pis, etc) be filled in

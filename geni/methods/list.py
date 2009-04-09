@@ -17,7 +17,7 @@ class list(Method):
     interfaces = ['registry']
     
     accepts = [
-        Parameter(str, "credential"),
+        Parameter(str, "Credential string"),
         Parameter(str, "Human readable name (hrn)")
         ]
 

@@ -1,5 +1,10 @@
 methods="""
+create_gid
 get_credential
+get_ticket
 list
+register
+remove
 resolve
+update
 """.split()
