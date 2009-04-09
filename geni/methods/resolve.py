@@ -57,8 +57,3 @@ class resolve(Method):
 
         return dicts    
             
-
-
-                        
-                 
-        return records
