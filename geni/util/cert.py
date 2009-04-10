@@ -13,6 +13,7 @@
 
 import os
 import tempfile
+import base64
 from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
@@ -119,22 +120,34 @@ class Keypair:
    def as_pem(self):
       return crypto.dump_privatekey(crypto.FILETYPE_PEM, self.key)
 
-   ##
-   # Return an OpenSSL pkey object
-
    def get_m2_pkey(self):
       if not self.m2key:
          self.m2key = M2Crypto.EVP.load_key_string(self.as_pem())
       return self.m2key
 
    ##
-   # Given another Keypair object, return TRUE if the two keys are the same.
+   # Return an OpenSSL pkey object
 
    def get_openssl_pkey(self):
       return self.key
 
+   ##
+   # Given another Keypair object, return TRUE if the two keys are the same.
+
    def is_same(self, pkey):
       return self.as_pem() == pkey.as_pem()
+
+   def sign_string(self, data):
+      k = self.get_m2_pkey()
+      k.sign_init()
+      k.sign_update(data)
+      return base64.b64encode(k.sign_final())
+
+   def verify_string(self, data, sig):
+      k = self.get_m2_pkey()
+      k.verify_init()
+      k.verify_update(data)
+      return M2Crypto.m2.verify_final(k.ctx, base64.b64decode(sig), k.pkey)
 
 ##
 # The certificate class implements a general purpose X509 certificate, making
