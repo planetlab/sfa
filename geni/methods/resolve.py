@@ -1,9 +1,13 @@
+
+
+
 from geni.util.faults import *
 from geni.util.excep import *
 from geni.util.method import Method
 from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.record import GeniRecord
+from geni.registry import Registries
 from geni.util.debug import log
 
 class resolve(Method):
@@ -30,9 +34,11 @@ class resolve(Method):
         
         # is this a foreign record
         if not hrn.startswith(self.api.hrn):
-            for registry in self.api.registries:
+            registries = Registries(self.api)
+            credential = self.api.getCredential()
+            for registry in registries:
                 if hrn.startswith(registry):
-                    records = self.api.registries[registry].resolve(self.api.credential, name)
+                    records = registries[registry].resolve(credential, name)
                     good_records = records   
         else:
             auth_hrn = self.api.auth.get_authority(hrn)
