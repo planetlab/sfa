@@ -337,6 +337,8 @@ def list(opts, args):
    global registry
    user_cred = get_user_cred()
    list = registry.list(user_cred, args[0])
+   # filter on person, slice, site, node, etc.  
+   # THis really should be in the filter_records funct def comment...
    list = filter_records(opts.type, list)
    display_records(list)
    if opts.file:
@@ -518,12 +520,13 @@ def save_rspec_to_file(rspec, filename):
    return
 
 def display_records(recordList, dump = False):
+   ''' Print all fields in the record'''
    for record in recordList:
       display_record(record, dump)
 
 def display_record(record, dump = False):
    if dump:
-       record.dump(False)
+       record.dump()
    else:
        info = record.getdict()
        print "%s (%s)" % (info['hrn'], info['type'])
