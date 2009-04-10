@@ -15,9 +15,15 @@ import SocketServer
 import BaseHTTPServer
 import SimpleHTTPServer
 import SimpleXMLRPCServer
-import xmlrpclib
-import string
+import socket, os
+from OpenSSL import SSL
+
+from geni.util.cert import *
+from geni.util.credential import *
+from geni.util.excep import *
+from geni.util.faults import *
 from geni.util.api import GeniAPI 
+from geni.util.debug import log
 
 ##
 # Verification callback for pyOpenSSL. We do our own checking of keys because
@@ -85,7 +91,9 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         It it very similar to SimpleXMLRPCServer but it uses HTTPS for transporting XML data.
         """
         self.logRequests = logRequests
-
+        self.interface = None
+        self.key_file = key_file
+        self.cert_file = cert_file
         SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, True, None)
         SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
@@ -121,7 +129,6 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
     It it very similar to SimpleXMLRPCRequestHandler but it uses HTTPS for transporting XML data.
     """
     def setup(self):
-        #self.api = GeniAPI()
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
@@ -131,23 +138,25 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 
         It was copied out from SimpleXMLRPCServer.py and modified to shutdown the socket cleanly.
         """
-
+        self.api = GeniAPI(peer_cert = self.server.peer_cert, interface = self.server.interface, key_file = self.server.key_file, cert_file = self.server.cert_file)
         try:
             # get arguments
             request = self.rfile.read(int(self.headers["content-length"]))
-
             # In previous versions of SimpleXMLRPCServer, _dispatch
             # could be overridden in this class, instead of in
             # SimpleXMLRPCDispatcher. To maintain backwards compatibility,
             # check to see if a subclass implements _dispatch and dispatch
             # using that method if present.
-            response = self.server._marshaled_dispatch(request, getattr(self, '_dispatch', None))
-            #response = self.api.handle(None, request)
+            #response = self.server._marshaled_dispatch(request, getattr(self, '_dispatch', None))
+            # XX TODO: Need to get the real remote address 
+            source = None
+            response = self.api.handle(source, request)
 
-        except: # This should only happen if the module is buggy
+        
+        except Exception, fault:
+            # This should only happen if the module is buggy
             # internal error, report as HTTP server error
             self.send_response(500)
-
             self.end_headers()
         else:
             # got a valid XML RPC response
@@ -187,37 +196,6 @@ class GeniServer(threading.Thread):
         self.trusted_cert_list = None
         self.register_functions()
 
-    ##
-    # Decode the credential string that was submitted by the caller. Several
-    # checks are performed to ensure that the credential is valid, and that the
-    # callerGID included in the credential matches the caller that is
-    # connected to the HTTPS connection.
-
-    def decode_authentication(self, cred_string, operation):
-        self.client_cred = Credential(string = cred_string)
-        self.client_gid = self.client_cred.get_gid_caller()
-        self.object_gid = self.client_cred.get_gid_object()
-
-        # make sure the client_gid is not blank
-        if not self.client_gid:
-            raise MissingCallerGID(self.client_cred.get_subject())
-
-        # make sure the client_gid matches client's certificate
-        peer_cert = self.server.peer_cert
-        if not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
-            raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())
-
-        # make sure the client is allowed to perform the operation
-        if operation:
-            if not self.client_cred.can_perform(operation):
-                raise InsufficientRights(operation)
-
-        if self.trusted_cert_list:
-            self.client_cred.verify_chain(self.trusted_cert_list)
-            if self.client_gid:
-                self.client_gid.verify_chain(self.trusted_cert_list)
-            if self.object_gid:
-                self.object_gid.verify_chain(self.trusted_cert_list)
 
     ##
     # Register functions that will be served by the XMLRPC server. This
