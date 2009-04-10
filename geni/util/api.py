@@ -12,7 +12,8 @@ from geni.util.auth import Auth
 from geni.util.config import *
 from geni.util.faults import *
 from geni.util.debug import *
-
+from geni.util.rights import *
+from geni.util.credential import *
 # See "2.2 Characters" in the XML specification:
 #
 # #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD]
@@ -94,7 +95,7 @@ class GeniAPI:
     # flat list of method names
     methods = geni.methods.methods
     
-    def __init__(self, config = "/usr/share/geniwrapper/geni/util/geni_config", encoding = "utf-8", peer_cert = None, interface = None):
+    def __init__(self, config = "/usr/share/geniwrapper/geni/util/geni_config", encoding = "utf-8", peer_cert = None, interface = None, key_file = None, cert_file = None):
         self.encoding = encoding
 
         # Better just be documenting the API
@@ -105,10 +106,14 @@ class GeniAPI:
         self.config = Config(config)
         self.auth = Auth(peer_cert)
         self.interface = interface
+        self.key_file = key_file
+        self.cert_file = cert_file
+        self.credential = None
         self.plshell = self.getPLCShell()
         self.basedir = self.config.GENI_BASE_DIR + os.sep
         self.server_basedir = self.basedir + os.sep + "geni" + os.sep
         self.hrn = self.config.GENI_INTERFACE_HRN
+        self.time_format = "%Y-%m-%d %H:%M:%S"
 
 
     def getPLCShell(self):
@@ -130,8 +135,122 @@ class GeniAPI:
              
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
             shell.AuthCheck(self.plauth)
-            return shell         
+            return shell
+
+    def getCredential(self):
+        return self.getCredentialFromRegistry()
+
+    def getCredentialFromRegistry(self):
+        """
+        Get our current credential from the local registry.
+        """
+    
+        hrn = self.hrn
+        auth_hrn = self.auth.get_authority(hrn)
+        if not auth_hrn:
+            auth_hrn = hrn
+        auth_info = self.auth.get_auth_info(auth_hrn)
+        table = self.auth.get_auth_table(auth_hrn)
+        records = table.resolve('*', hrn)
+        if not records:
+            raise RecordnotFound
+        record = records[0]
+        type = record.get_type()
+        object_gid = record.get_gid_object()
+        new_cred = Credential(subject = object_gid.get_subject())
+        new_cred.set_gid_caller(object_gid)
+        new_cred.set_gid_object(object_gid)
+        new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
+        new_cred.set_pubkey(object_gid.get_pubkey())
+        r1 = determine_rights(type, hrn)
+        new_cred.set_privileges(r1)
+    
+        # determine the type of credential that we want to use as a parent for
+        # this credential.
+
+        if (type == "ma") or (type == "node"):
+            auth_kind = "authority,ma"
+        else: # user, slice, sa
+            auth_kind = "authority,sa"
+
+        new_cred.set_parent(self.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
+
+        new_cred.encode()
+        new_cred.sign()
+
+        return new_cred
    
+
+    def loadCredential(self):
+        """
+        Attempt to load credential from file if it exists. If it doesnt get
+        credential from registry.
+        """
+
+        # see if this file exists
+        # XX This is really the aggregate's credential. Using this is easier than getting
+        # the registry's credential from iteslf (ssl errors).   
+        ma_cred_filename = self.server_basedir + os.sep + self.interface + self.hrn + ".ma.cred"
+        try:
+            self.credential = Credential(filename = ma_cred_filename)
+        except IOError:
+            self.credential = self.getCredentialFromRegistry()
+      
+    ##
+    # Convert geni fields to PLC fields for use when registering up updating
+    # registry record in the PLC database
+    #
+    # @param type type of record (user, slice, ...)
+    # @param hrn human readable name
+    # @param geni_fields dictionary of geni fields
+    # @param pl_fields dictionary of PLC fields (output)
+
+    def geni_fields_to_pl_fields(self, type, hrn, geni_fields, pl_fields):
+        if type == "user":
+            if not "email" in pl_fields:
+                if not "email" in geni_fields:
+                    raise MissingGeniInfo("email")
+                pl_fields["email"] = geni_fields["email"]
+
+            if not "first_name" in pl_fields:
+                pl_fields["first_name"] = "geni"
+
+            if not "last_name" in pl_fields:
+                pl_fields["last_name"] = hrn
+
+        elif type == "slice":
+            if not "instantiation" in pl_fields:
+                pl_fields["instantiation"] = "delegated"  # "plc-instantiated"
+            if not "name" in pl_fields:
+                pl_fields["name"] = hrn_to_pl_slicename(hrn)
+            if not "max_nodes" in pl_fields:
+                pl_fields["max_nodes"] = 10
+
+        elif type == "node":
+            if not "hostname" in pl_fields:
+                if not "dns" in geni_fields:
+                    raise MissingGeniInfo("dns")
+                pl_fields["hostname"] = geni_fields["dns"]
+            if not "model" in pl_fields:
+                pl_fields["model"] = "geni"
+
+        elif type == "sa":
+            pl_fields["login_base"] = hrn_to_pl_login_base(hrn)
+
+            if not "name" in pl_fields:
+                pl_fields["name"] = hrn
+
+            if not "abbreviated_name" in pl_fields:
+                pl_fields["abbreviated_name"] = hrn
+
+            if not "enabled" in pl_fields:
+                pl_fields["enabled"] = True
+
+            if not "is_public" in pl_fields:
+                pl_fields["is_public"] = True
+
+
+ 
     def fill_record_pl_info(self, record):
         """
         Fill in the planetlab specific fields of a Geni record. This
