@@ -108,21 +108,20 @@ def main():
     # start registry server
     if (options.registry):
         r = Registry("", registry_port, key_file, cert_file)
-        r.trusted_cert_list = TrustedRoots.get_list()
-        r.hierarchy = AuthHierarchy
+        #r.trusted_cert_list = TrustedRoots.get_list()
+        #r.hierarchy = AuthHierarchy
         r.start()
-        r.loadCredential()
 
     # start aggregate manager
     if (options.am):
         a = Aggregate("", aggregate_port, key_file, cert_file)
-        a.trusted_cert_list = TrustedRoots.get_list()
+        #a.trusted_cert_list = TrustedRoots.get_list()
         a.start()
 
     # start slice manager
     if (options.sm):
         s = SliceMgr("", slicemgr_port, key_file, cert_file)
-        s.trusted_cert_list = TrustedRoots.get_list()
+        #s.trusted_cert_list = TrustedRoots.get_list()
         s.start()
 
 if __name__ == "__main__":
