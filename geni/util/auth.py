@@ -11,18 +11,19 @@ from geni.util.trustedroot import TrustedRootList
 from geni.util.hierarchy import Hierarchy
 from geni.util.rights import RightList
 from geni.util.genitable import *
-
+from geni.util.config import *
 
 class Auth:
     """
     Credential based authentication
     """
 
-    def __init__(self, peer_cert):
+    def __init__(self, peer_cert = None, config = None ):
         self.peer_cert = peer_cert
         self.hierarchy = Hierarchy()
         self.trusted_cert_list = TrustedRootList().get_list() 
-
+        if not config:
+            self.config = Config() 
     
 
     def check(self, cred, operation):
