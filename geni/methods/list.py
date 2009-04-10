@@ -4,6 +4,7 @@ from geni.util.method import Method
 from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.record import GeniRecord
+from geni.registry import Registries
 
 class list(Method):
     """
@@ -28,9 +29,11 @@ class list(Method):
         self.api.auth.check(cred, 'list')
         # is this a foreign authority
         if not hrn.startswith(self.api.hrn):
-            for registry in self.api.registries:
+            registries = Registries(self.api) 
+            credential = self.api.getCredential()
+            for registry in registries:
                 if hrn.startswith(registry):
-                    records = self.api.registries[registry].list(self.api.credential, hrn)
+                    records = registries[registry].list(credential, hrn)
                     return records    
 
         if not self.api.auth.hierarchy.auth_exists(hrn):

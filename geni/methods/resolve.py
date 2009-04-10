@@ -38,7 +38,7 @@ class resolve(Method):
             credential = self.api.getCredential()
             for registry in registries:
                 if hrn.startswith(registry):
-                    records = registries[registry].resolve(credential, name)
+                    records = registries[registry].resolve(credential, hrn)
                     good_records = records   
         else:
             auth_hrn = self.api.auth.get_authority(hrn)
@@ -59,6 +59,7 @@ class resolve(Method):
                               " because pl record does not exist"
                     table.remove(record)
 
+        print good_records
         dicts = [record.as_dict() for record in good_records]
 
         return dicts    
