@@ -304,14 +304,17 @@ def main():
    (cmd_opts, cmd_args) = create_cmd_parser(command).parse_args(args[1:])
    verbose = options.verbose
    if verbose :
-      print options.registry, options.sm, options.dir, options.verbose,\
-         options.user, options.auth
-      print command
+      print "Resgistry %s, sm %s, dir %s, user %s, auth %s" % (options.registry, 
+                                            options.sm, 
+                                            options.dir,
+                                            options.user, 
+                                            options.auth)
+      print "Command %s" %command
       if command in ("resources"):
-         print cmd_opts.format
+         print "resources cmd_opts %s" %cmd_opts.format
       elif command in ("list","show","remove"):
-         print cmd_opts.type
-      print cmd_args
+         print "cmd_opts.type %s" %cmd_opts.type
+      print "cmd_args %s" %cmd_args
 
    set_servers(options)
 
