@@ -1,5 +1,6 @@
 import unittest
 import xmlrpclib
+import base64
 from cert import *
 
 class TestKeypair(unittest.TestCase):
@@ -34,6 +35,15 @@ class TestKeypair(unittest.TestCase):
 
       pk = k.get_openssl_pkey()
       self.assert_(pk != None)
+
+   def test_sign_verify(self):
+      k = Keypair()
+      k.create()
+
+      data = "this is a test"
+      sig = k.sign_string(data)
+
+      print k.verify_string(data, sig)
 
 if __name__ == "__main__":
     unittest.main()
