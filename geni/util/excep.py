@@ -12,10 +12,10 @@ class GeniFault(xmlrpclib.Fault):
         xmlrpclib.Fault.__init__(self, faultCode, faultString)
 
 class GeniInvalidAPIMethod(GeniFault):
-    def __init__(self, method, role = None, extra = None):
+    def __init__(self, method, interface = None, extra = None):
         faultString = "Invalid method " + method
-        if role:
-            faultString += " for role " + role
+        if interface:
+            faultString += " for interface " + interface
         GeniFault.__init__(self, 100, faultString, extra)
 
 class GeniInvalidArgumentCount(GeniFault):
