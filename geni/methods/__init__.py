@@ -6,5 +6,6 @@ list
 register
 remove
 resolve
+resources
 update
 """.split()
