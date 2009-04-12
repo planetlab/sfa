@@ -243,21 +243,13 @@ class GeniClient():
     # Aggregate Interface
     #-------------------------------------------------------------------------
     
-    ## list components
-    #
-    # 
-    def list_nodes(self, cred):
-        
-        result = self.server.list_nodes(cred.save_to_string(save_parents=True))
-        return result
-
     ## list resources
     #
     # @param cred a credential
     # @param hrn slice hrn
 
-    def get_resources(self, cred, hrn=None):
-        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
+    def resources(self, cred, hrn=None):
+        result = self.server.resources(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ## get policy
