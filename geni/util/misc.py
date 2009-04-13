@@ -30,19 +30,19 @@ def hrn_to_pl_authname(hrn):
 def hrn_to_pl_login_base(hrn):
     return hrn_to_pl_authname(hrn)
 
-def hostname_to_hrn(self, login_base, hostname):
+def hostname_to_hrn(auth_hrn, login_base, hostname):
     """
     Convert hrn to plantelab name.
     """
     genihostname = "_".join(hostname.split("."))
-    return ".".join([self.hrn, login_base, genihostname])
+    return ".".join([auth_hrn, login_base, genihostname])
 
-def slicename_to_hrn(self, slicename):
+def slicename_to_hrn(auth_hrn, slicename):
     """
     Convert hrn to planetlab name.
     """
     parts = slicename.split("_")
-    slice_hrn = ".".join([self.hrn, parts[0]]) + "." + "_".join(parts[1:])
+    slice_hrn = ".".join([auth_hrn, parts[0]]) + "." + "_".join(parts[1:])
 
     return slice_hrn
 
