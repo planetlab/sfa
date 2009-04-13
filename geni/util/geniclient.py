@@ -329,8 +329,8 @@ class GeniClient():
     #
     # @return a list of slice names
 
-    def list_slices(self, cred):
-        result = self.server.list_slices(cred.save_to_string(save_parents=True))
+    def slices(self, cred):
+        result = self.server.slices(cred.save_to_string(save_parents=True))
         return result
 
     ##
