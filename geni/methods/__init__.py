@@ -7,5 +7,6 @@ register
 remove
 resolve
 resources
+slices
 update
 """.split()
