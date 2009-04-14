@@ -14,6 +14,7 @@ from geni.util.faults import *
 from geni.util.debug import *
 from geni.util.rights import *
 from geni.util.credential import *
+
 # See "2.2 Characters" in the XML specification:
 #
 # #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD]
@@ -138,11 +139,32 @@ class GeniAPI:
             return shell
 
     def getCredential(self):
-        return self.getCredentialFromRegistry()
+        if self.interface in ['registry']:
+            return self.getCredentialFromLocalRegistry()
+        else:
+            return self.getCredentialFromRegistry()
+    
 
     def getCredentialFromRegistry(self):
+        """ 
+        Get our credential from a remote registry using a geniclient connection
         """
-        Get our current credential from the local registry.
+        type = 'sa'
+        cred_filename = ".".join([self.server_basedir, self.interface, self.hrn, type, "cred"]) 
+        try:
+            credential = Credential(filename = cred_filename)
+            return credential
+        except IOError:
+            from geni.util.registry import Registries
+            registries = Registries()
+            registry = registries[self.hrn] 
+            self_cred = registry.get_credential(None, type, self.hrn)
+            cred = registry.get_credential(self_cred, type, self.hrn)
+            cred.save_to_file(cred_filename, save_parents=True)
+
+    def getCredentialFromLocalRegistry(self):
+        """
+        Get our current credential directly from the local registry. 
         """
     
         hrn = self.hrn
@@ -427,6 +449,7 @@ class GeniAPI:
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except ImportError, AttributeError:
+            raise
             raise GeniInvalidAPIMethod, method
 
     def call(self, source, method, *args):
