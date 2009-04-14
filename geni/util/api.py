@@ -155,8 +155,8 @@ class GeniAPI:
             credential = Credential(filename = cred_filename)
             return credential
         except IOError:
-            from geni.util.registry import Registries
-            registries = Registries()
+            from geni.registry import Registries
+            registries = Registries(self)
             registry = registries[self.hrn] 
             self_cred = registry.get_credential(None, type, self.hrn)
             cred = registry.get_credential(self_cred, type, self.hrn)
