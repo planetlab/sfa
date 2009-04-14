@@ -6,7 +6,7 @@ from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.slices import Slices
 
-class create_slices(Method):
+class create_slice(Method):
     """
     Instantiate the specified slice according to whats defined in the specified rspec      
 
@@ -30,6 +30,6 @@ class create_slices(Method):
        
         self.api.auth.check(cred, 'createslice')
         slices = Slices(self.api)
-        slices.create_slice(hrn, rspec):
+        slices.create_slice(hrn, rspec)
         
         return 1 
