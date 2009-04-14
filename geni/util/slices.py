@@ -5,6 +5,7 @@ from geni.util.rspec import *
 from geni.util.specdict import *
 from geni.util.excep import *
 from geni.util.storage import *
+from geni.util.policy import Policy
 from geni.util.debug import log
 from geni.aggregate import Aggregates
 from geni.registry import Registries
@@ -17,6 +18,7 @@ class Slices(SimpleStorage):
         self.threshold = None
         self.slices_file = os.sep.join([self.api.server_basedir, self.api.interface +'.'+ self.api.hrn + '.slices'])
         SimpleStorage.__init__(self, self.slices_file)
+        self.policy = Policy(self.api)    
         self.load()
 
 
@@ -100,6 +102,15 @@ class Slices(SimpleStorage):
             aggregates[aggregate].delete_slice(credential, hrn)
 
     def create_slice(self, hrn, rspec):
+        # check our slice policy before we procede
+        whitelist = self.policy['slice_whitelist']     
+        blacklist = self.policy['slice_blacklist']
+        
+        if whitelist and hrn not in whitelist or \
+           blacklist and hrn in blacklist:
+            policy_file = self.policy.policy_file
+            print >> log, "Slice %(hrn)s not allowed by policy %(policy_file)s" % locals()
+            return 1
         if self.api.interface in ['aggregate']:     
             self.create_slice_aggregate(hrn, rspec)
         elif self.api.interface in ['slicemgr']:
