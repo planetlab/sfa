@@ -12,6 +12,8 @@ from geni.util.credential import Credential
 from geni.util.geniclient import GeniClient, ServerException
 from geni.util.gid import create_uuid
 from geni.util.record import GeniRecord
+from geni.util.rspec import Rspec
+from types import StringTypes, ListType
 
 sfi_dir = os.path.expanduser("~/.sfi/")
 slicemgr = None
@@ -451,8 +453,9 @@ def resources(opts, args):
        result = slicemgr.resources(slice_cred, args[0])
    else:
        user_cred = get_user_cred()
-       result = slicemgr.resources(user_cred)   
-   display_rspec(result)
+       result = slicemgr.resources(user_cred)
+   format = opts.format      
+   display_rspec(result, format)
    if (opts.file is not None):
       save_rspec_to_file(opts.file, result)
    return
@@ -500,9 +503,33 @@ def reset(opts, args):
 #
 #
 
-def display_rspec(rspec):
-   print rspec
-   return
+def display_rspec(rspec, format = 'rspec'):
+    if format in ['dns']:
+        spec = Rspec()
+        spec.parseString(rspec)
+        hostnames = []
+        nodespecs = spec.getDictsByTagName('NodeSpec')
+        for nodespec in nodespecs:
+            if nodespec.has_key('name') and nodespec['name']:
+                if isinstance(nodespec['name'], ListType):
+                    hostnames.extend(nodespec['name'])
+                elif isinstance(nodespec['name'], StringTypes):
+                    hostnames.append(nodespec['name'])
+        result = hostnames
+    elif format in ['ip']:
+        spec = Rspec()
+        spec.parseString(rspec)
+        ips = []
+        ifspecs = spec.getDictsByTagName('IfSpec')
+        for ifspec in ifspecs:
+            if ifspec.has_key('addr') and ifspec['addr']:
+                ips.append(ifspec['addr'])
+        result = ips 
+    else:     
+        result = rspec
+
+    print result
+    return
 
 def display_list(results):
     for result in results:
