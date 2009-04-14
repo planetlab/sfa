@@ -6,25 +6,28 @@ from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.slices import Slices
 
-class slices(Method):
+class stop_slice(Method):
     """
-    Get a list of instantiated slices at this authority.      
+    Stop the specified slice      
 
     @param cred credential string specifying the rights of the caller
-    @return list of human readable slice names (hrn).  
+    @param hrn human readable name of slice to instantiate
+    @return 1 is successful, faults otherwise  
     """
 
     interfaces = ['aggregate', 'slicemgr']
     
     accepts = [
         Parameter(str, "Credential string"),
+        Parameter(str, "Human readable name of slice to instantiate"),
         ]
 
-    returns = [Parameter(str, "Human readable slice name (hrn)")]
+    returns = [Parameter(int, "1 if successful")]
     
-    def call(self, cred):
+    def call(self, cred, hrn):
        
-        self.api.auth.check(cred, 'listslices')
+        self.api.auth.check(cred, 'startslice')
         slices = Slices(self.api)
-        slices.refresh()    
-        return slices['hrn']
+        slices.stop_slice(hrn):
+        
+        return 1 
