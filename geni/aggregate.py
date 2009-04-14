@@ -7,6 +7,7 @@ import xmlrpclib
 from types import StringTypes, ListType
 from geni.util.geniserver import GeniServer
 from geni.util.geniclient import GeniClient
+from geni.util.storage import *
 from geni.util.excep import *
 
 class Aggregate(GeniServer):
