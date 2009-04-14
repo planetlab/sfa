@@ -439,7 +439,7 @@ def update(opts, args):
 def slices(opts, args):
    global slicemgr
    user_cred = get_user_cred() 
-   results = slicemgr.list_slices(user_cred)
+   results = slicemgr.slices(user_cred)
    display_list(results)
    return
 
@@ -448,10 +448,10 @@ def resources(opts, args):
    global slicemgr
    if args: 
        slice_cred = get_slice_cred(args[0])
-       result = slicemgr.get_resources(slice_cred, args[0])
+       result = slicemgr.resources(slice_cred, args[0])
    else:
        user_cred = get_user_cred()
-       result = slicemgr.get_resources(user_cred)   
+       result = slicemgr.resources(user_cred)   
    display_rspec(result)
    if (opts.file is not None):
       save_rspec_to_file(opts.file, result)
