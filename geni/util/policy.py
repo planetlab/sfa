@@ -9,7 +9,7 @@ class Policy(SimpleStorage):
         self.api = api    
         self.policy_file = os.sep.join([self.api.server_basedir, self.api.interface + '.' + self.api.hrn + '.policy'])
         default_policy = {'slice_whitelist': [],
-                          'slice_backlist': [],
+                          'slice_blacklist': [],
                           'node_whitelist': [],
                           'node_blacklist': []} 
         SimpleStorage.__init__(self, self.policy_file, default_policy)
