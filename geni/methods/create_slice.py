@@ -27,7 +27,6 @@ class create_slice(Method):
     returns = [Parameter(int, "1 if successful")]
     
     def call(self, cred, hrn, rspec):
-       
         self.api.auth.check(cred, 'createslice')
         slices = Slices(self.api)
         slices.create_slice(hrn, rspec)
