@@ -123,7 +123,7 @@ class ConnectionKeyGIDMismatch(GeniFault):
     def __init__(self, value, extra = None):
         self.value = value
         faultString = "Connection Key GID mismatch: %(value)s" % locals()
-        GeniFault.__init__(self, 102, faultstring, extra) 
+        GeniFault.__init__(self, 102, faultString, extra) 
     def __str__(self):
         return repr(self.value)
 
@@ -131,7 +131,7 @@ class MissingCallerGID(GeniFault):
     def __init__(self, value, extra = None):
         self.value = value
         faultString = "Missing Caller GID: %(value)s" % locals()
-        GeniFault.__init__(self, 102, faultstring, extra) 
+        GeniFault.__init__(self, 102, faultString, extra) 
     def __str__(self):
         return repr(self.value)
 
