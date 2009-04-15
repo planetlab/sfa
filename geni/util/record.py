@@ -378,7 +378,8 @@ class GeniRecord:
         pl_info = getattr(self, "pl_info", {})
         if pl_info:
 
-            for key in pl_info.keys():
+            for key in (s for s in pl_info.keys()\
+            if (s.endswith("_ids") or s.endswith("_id")) == False):
                 print "       ", key, ":", pl_info[key]
 
 
