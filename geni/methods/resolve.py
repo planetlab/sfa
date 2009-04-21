@@ -31,16 +31,8 @@ class resolve(Method):
     def call(self, cred, hrn):
         
         self.api.auth.check(cred, 'resolve')
-        
-        # is this a foreign record
-        if not hrn.startswith(self.api.hrn):
-            registries = Registries(self.api)
-            credential = self.api.getCredential()
-            for registry in registries:
-                if hrn.startswith(registry):
-                    records = registries[registry].resolve(credential, hrn)
-                    good_records = records   
-        else:
+        good_records = [] 
+        try:
             auth_hrn = self.api.auth.get_authority(hrn)
             if not auth_hrn:
                 auth_hrn = hrn
@@ -58,8 +50,14 @@ class resolve(Method):
                     print >> log, "ignoring geni record ", record.get_name(), \
                               " because pl record does not exist"
                     table.remove(record)
-
-        print good_records
+        except:
+            # is this a foreign record
+            registries = Registries(self.api)
+            credential = self.api.getCredential()
+            for registry in registries:
+                if hrn.startswith(registry) and not registry in [self.api.hrn]:
+                    records = registries[registry].resolve(credential, hrn)
+                    good_records = records
         dicts = [record.as_dict() for record in good_records]
 
         return dicts    
