@@ -60,7 +60,7 @@ class Slices(SimpleStorage):
         credential = self.api.getCredential()
         for aggregate in aggregates:
             try:
-                slices = aggregates[aggregate].slices(credential)
+                slices = aggregates[aggregate].get_slices(credential)
                 slice_hrns.extend(slices)
             except:
                 print >> log, "Error calling slices at aggregate %(aggregate)s" % locals()

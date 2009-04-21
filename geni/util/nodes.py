@@ -107,7 +107,7 @@ class Nodes(SimpleStorage):
         for aggregate in aggregates:
             try:
                 # get the rspec from the aggregate
-                agg_rspec = aggregates[aggregate].resources(credential)
+                agg_rspec = aggregates[aggregate].get_resources(credential)
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
                 networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
