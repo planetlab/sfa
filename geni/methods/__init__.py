@@ -9,8 +9,8 @@ register
 remove
 reset_slice
 resolve
-resources
-slices
+get_resources
+get_slices
 start_slice
 stop_slice
 update
