@@ -248,8 +248,8 @@ class GeniClient():
     # @param cred a credential
     # @param hrn slice hrn
 
-    def resources(self, cred, hrn=None):
-        result = self.server.resources(cred.save_to_string(save_parents=True), hrn)
+    def get_resources(self, cred, hrn=None):
+        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ## get policy
@@ -329,8 +329,8 @@ class GeniClient():
     #
     # @return a list of slice names
 
-    def slices(self, cred):
-        result = self.server.slices(cred.save_to_string(save_parents=True))
+    def get_slices(self, cred):
+        result = self.server.get_slices(cred.save_to_string(save_parents=True))
         return result
 
     ##
