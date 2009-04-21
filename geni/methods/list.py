@@ -27,18 +27,18 @@ class list(Method):
     def call(self, cred, hrn):
         
         self.api.auth.check(cred, 'list')
-        # is this a foreign authority
-        if not hrn.startswith(self.api.hrn):
-            registries = Registries(self.api) 
+        try:
+            if not self.api.auth.hierarchy.auth_exists(hrn):
+                raise MissingAuthority(hrn)
+            table = self.api.auth.get_auth_table(hrn)   
+            records = table.list()
+        except MissingAuthority:
+            # is this a foreign authority
+            registries = Registries(self.api)
             credential = self.api.getCredential()
             for registry in registries:
-                if hrn.startswith(registry):
+                if hrn.startswith(registry) and registry not in [self.api.hrn]:
                     records = registries[registry].list(credential, hrn)
-                    return records    
-
-        if not self.api.auth.hierarchy.auth_exists(hrn):
-            raise MissingAuthority(hrn)
-        table = self.api.auth.get_auth_table(hrn)   
-        records = table.list()
+                    return records
         
         return records
