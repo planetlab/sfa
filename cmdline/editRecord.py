@@ -192,7 +192,7 @@ def main():
 
        geni_info["create_gid"] = True
        geni_info["create_gid_hrn"] = record.name
-       geni_info["create_gid_key"] = load_publickey_string(pubkeyfile)
+       geni_info["create_gid_key"] = load_publickey_string(pubkeyfile).replace("\n", "|") # XXX smbaker: the rspec kills newlines
 
    if researcher:
        update_list(geni_info, "researcher", researcher)

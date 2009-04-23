@@ -371,23 +371,27 @@ def delegate(opts, args):
    global registry
    user_cred = get_user_cred()
    if opts.delegate_user:
-       cred = user_cred
+       object_cred = user_cred
    elif opts.delegate_slice:
-       cred = get_slice_cred(opt.delegate_slice)
+       object_cred = get_slice_cred(opts.delegate_slice)
    else:
        print "Must specify either --user or --slice <hrn>"
+       return
+
+   # the gid and hrn of the object we are delegating
+   object_gid = object_cred.get_gid_object()
+   object_hrn = object_gid.get_hrn()
+
+   if not object_cred.get_delegate():
+       print "Error: Object credential", object_hrn, "does not have delegate bit set"
        return
 
    records = registry.resolve(user_cred, args[0])
    records = filter_records("user", records)
 
    if not records:
-       print "Didn't find a user record for", delegee_name
+       print "Error: Didn't find a user record for", delegee_name
        return
-
-   # the gid and hrn of the object we are delegating
-   object_gid = cred.get_gid_object()
-   object_hrn = object_gid.get_hrn()
 
    # the gid of the user who will be delegated too
    delegee_gid = records[0].get_gid_object()
@@ -397,14 +401,14 @@ def delegate(opts, args):
    user_key = Keypair(filename = get_key_file())
    user_hrn = user_cred.get_gid_caller().get_hrn()
 
-   dcred = Credential(subject=cred.get_subject())
+   dcred = Credential(subject=object_hrn + " delegated to " + delegee_hrn)
    dcred.set_gid_caller(delegee_gid)
    dcred.set_gid_object(object_gid)
-   dcred.set_privileges(cred.get_privileges())
+   dcred.set_privileges(object_cred.get_privileges())
    dcred.set_delegate(True)
    dcred.set_pubkey(object_gid.get_pubkey())
    dcred.set_issuer(user_key, user_hrn)
-   dcred.set_parent(cred)
+   dcred.set_parent(object_cred)
    dcred.encode()
    dcred.sign()
 
@@ -438,7 +442,8 @@ def add(opts, args):
    #   broken and has no way for us to get the key back out of the gid)
    geni_info = record.get_geni_info()
    if "create_gid" in geni_info:
-       gid = registry.create_gid(auth_cred, geni_info["create_gid_hrn"], create_uuid(), geni_info["create_gid_key"])
+       key_string = geni_info["create_gid_key"].replace("|","\n") # XXX smbaker: the rspec kills newlines
+       gid = registry.create_gid(auth_cred, geni_info["create_gid_hrn"], create_uuid(), key_string)
        record.set_gid(gid)
 
        del geni_info["create_gid"]
