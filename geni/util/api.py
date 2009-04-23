@@ -14,6 +14,7 @@ from geni.util.faults import *
 from geni.util.debug import *
 from geni.util.rights import *
 from geni.util.credential import *
+from geni.util.misc import *
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -120,7 +121,7 @@ class GeniAPI:
     def getPLCShell(self):
         self.plauth = {'Username': self.config.GENI_PLC_USER,
                          'AuthMethod': 'password',
-                         'AuthString': self.config.GENI_PLC_PASSWORD} 
+                         'AuthString': self.config.GENI_PLC_PASSWORD}
         try:
             import PLC.Shell
             shell = PLC.Shell.Shell(globals = globals())
