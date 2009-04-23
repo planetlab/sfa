@@ -235,7 +235,8 @@ def create_cmd_parser(command, additional_cmdargs = None):
               "delete": "name",
               "reset": "name",
               "start": "name",
-              "stop": "name"
+              "stop": "name",
+              "delegate": "name"
              }
 
    if additional_cmdargs:
@@ -263,6 +264,12 @@ def create_cmd_parser(command, additional_cmdargs = None):
    if command in ("show", "list", "resources"):
       parser.add_option("-o", "--output", dest="file",
            help="output XML to file", metavar="FILE", default=None)
+   if command in ("delegate"):
+      parser.add_option("-u", "--user",
+        action="store_true", dest="delegate_user", default=False,
+        help="delegate user credential")
+      parser.add_option("-s", "--slice", dest="delegate_slice",
+        help="delegate slice credential", metavar="HRN", default=None)
    return parser
 
 def create_parser():
@@ -306,10 +313,10 @@ def main():
    (cmd_opts, cmd_args) = create_cmd_parser(command).parse_args(args[1:])
    verbose = options.verbose
    if verbose :
-      print "Resgistry %s, sm %s, dir %s, user %s, auth %s" % (options.registry, 
-                                            options.sm, 
+      print "Resgistry %s, sm %s, dir %s, user %s, auth %s" % (options.registry,
+                                            options.sm,
                                             options.dir,
-                                            options.user, 
+                                            options.user,
                                             options.auth)
       print "Command %s" %command
       if command in ("resources"):
@@ -359,6 +366,56 @@ def show(opts, args):
    if opts.file:
        save_records_to_file(opts.file, records)
    return
+
+def delegate(opts, args):
+   global registry
+   user_cred = get_user_cred()
+   if opts.delegate_user:
+       cred = user_cred
+   elif opts.delegate_slice:
+       cred = get_slice_cred(opt.delegate_slice)
+   else:
+       print "Must specify either --user or --slice <hrn>"
+       return
+
+   records = registry.resolve(user_cred, args[0])
+   records = filter_records("user", records)
+
+   if not records:
+       print "Didn't find a user record for", delegee_name
+       return
+
+   # the gid and hrn of the object we are delegating
+   object_gid = cred.get_gid_object()
+   object_hrn = object_gid.get_hrn()
+
+   # the gid of the user who will be delegated too
+   delegee_gid = records[0].get_gid_object()
+   delegee_hrn = delegee_gid.get_hrn()
+
+   # the key and hrn of the user who will be delegating
+   user_key = Keypair(filename = get_key_file())
+   user_hrn = user_cred.get_gid_caller().get_hrn()
+
+   dcred = Credential(subject=cred.get_subject())
+   dcred.set_gid_caller(delegee_gid)
+   dcred.set_gid_object(object_gid)
+   dcred.set_privileges(cred.get_privileges())
+   dcred.set_delegate(True)
+   dcred.set_pubkey(object_gid.get_pubkey())
+   dcred.set_issuer(user_key, user_hrn)
+   dcred.set_parent(cred)
+   dcred.encode()
+   dcred.sign()
+
+   if opts.delegate_user:
+       dest_fn = os.path.join(sfi_dir, get_leaf(delegee_hrn) + "_" + get_leaf(object_hrn) + ".cred")
+   elif opts.delegate_slice:
+       dest_fn = os.path_join(sfi_dir, get_leaf(delegee_hrn) + "_slice_" + get_leaf(object_hrn) + ".cred")
+
+   dcred.save_to_file(dest_fn, save_parents = True)
+
+   print "delegated credential for", object_hrn, "to", delegee_hrn, "and wrote to", dest_fn
 
 # removed named registry record
 #   - have to first retrieve the record to be removed
@@ -440,7 +497,7 @@ def update(opts, args):
 # list instantiated slices
 def slices(opts, args):
    global slicemgr
-   user_cred = get_user_cred() 
+   user_cred = get_user_cred()
    results = slicemgr.get_slices(user_cred)
    display_list(results)
    return
