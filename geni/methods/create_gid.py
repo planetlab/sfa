@@ -32,7 +32,7 @@ class create_gid(Method):
     returns = Parameter(str, "String represeneation of a GID object")
     
     def call(self, cred, hrn, uuid, pubkey_str):
-        self.api.auth.decode_authentication(cred, "getcredential")
+        self.api.auth.check(cred, "getcredential")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(hrn)
 
@@ -41,6 +41,6 @@ class create_gid(Method):
 
         pkey = Keypair()
         pkey.load_pubkey_from_string(pubkey_str)
-        gid = self.api.auth.hierarchy.create_gid(name, uuid, pkey)
+        gid = self.api.auth.hierarchy.create_gid(hrn, uuid, pkey)
 
         return gid.save_to_string(save_parents=True)
