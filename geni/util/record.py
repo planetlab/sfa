@@ -310,7 +310,8 @@ class GeniRecord:
             self.set_gid(dict['gid'])
 
         self.set_type(dict['type'])
-        self.set_pointer(dict['pointer'])
+        if "pointer" in dict:
+           self.set_pointer(dict['pointer'])
         if "pl_info" in dict and dict['pl_info']:
            self.set_pl_info(dict["pl_info"])
         if "geni_info" in dict and dict['geni_info']:
