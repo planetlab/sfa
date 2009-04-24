@@ -252,6 +252,10 @@ class GeniClient():
         result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
         return result
 
+    def get_aggregates(self, cred, hrn=None):
+        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
+        return result
+
     ## get policy
     #
     # @param cred a credential
