@@ -396,8 +396,15 @@ class GeniAPI:
         # their pointer
         newIdList = []
         for hrn in newList:
-            userRecord = self.resolve_raw("user", hrn)[0]
-            newIdList.append(userRecord.get_pointer())
+            auth_hrn = self.auth.get_authority(hrn)
+            if not auth_hrn:
+                auth_hrn = hrn
+            auth_info = self.auth.get_auth_info(auth_hrn)
+            table = self.auth.get_auth_table(auth_hrn)
+            records = table.resolve('user', hrn)
+            if records:
+                userRecord = records[0]    
+                newIdList.append(userRecord.get_pointer())
 
         # build a list of the old person ids from the person_ids field of the
         # pl_info
