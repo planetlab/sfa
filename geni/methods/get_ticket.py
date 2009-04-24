@@ -34,7 +34,7 @@ class get_ticket(Method):
     returns = Parameter(str, "String represeneation of a ticket object")
     
     def call(self, cred, hrn, rspec):
-        self.api.auth.decode_authentication(cred, "getticket")
+        self.api.auth.check(cred, "getticket")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(name)
 
