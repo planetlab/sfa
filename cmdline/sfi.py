@@ -467,11 +467,13 @@ def update(opts, args):
        try:
            cred = get_slice_cred(record.get_name())
        except ServerException, e:
-           if "PermissionError" in e.args[0]:
+           # XXX smbaker -- once we have better error return codes, update this
+           # to do something better than a string compare
+           if "Permission error" in e.args[0]:
                cred = get_auth_cred()
            else:
                raise
-   elif record.get_type() in ["sa", "ma", "node"]:
+   elif record.get_type() in ["authority"]:
        cred = get_auth_cred()
    else:
        raise "unknown record type" + record.get_type()
