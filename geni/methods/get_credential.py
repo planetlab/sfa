@@ -29,11 +29,11 @@ class get_credential(Method):
         ]
 
     returns = Parameter(str, "String representation of a credential object")
-    
+
     def call(self, cred, type, hrn):
         if not cred:
             return self.get_self_credential(type, hrn)
-        
+
         self.api.auth.check(cred, 'getcredential')
         self.api.auth.verify_object_belongs_to_me(hrn)
         auth_hrn = self.api.auth.get_authority(hrn)
@@ -49,7 +49,9 @@ class get_credential(Method):
         # (researchers, pis, etc) be filled in
         self.api.fill_record_info(record)
 
-        self.api.auth.verify_cancreate_credential(self.api.auth.client_cred, record)
+        rights = self.api.auth.determine_user_rights(self.api.auth.client_cred, record)
+        if rights.is_empty():
+            raise PermissionError(self.api.auth.client_cred.get_gid_object().get_hrn() + " has no rights to " + record.get_name())
 
         # TODO: Check permission that self.client_cred can access the object
 
@@ -59,18 +61,9 @@ class get_credential(Method):
         new_cred.set_gid_object(object_gid)
         new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_cred.set_pubkey(object_gid.get_pubkey())
+        new_cred.set_privileges(rights)
 
-        rl = determine_rights(type,hrn)
-        new_cred.set_privileges(rl)
-
-        # determine the type of credential that we want to use as a parent for
-        # this credential.
-
-        if (type == "ma") or (type == "node"):
-            auth_kind = "authority,ma"
-        else: # user, slice, sa
-            auth_kind = "authority,sa"
-
+        auth_kind = "authority,ma,sa"
         new_cred.set_parent(self.api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
 
         new_cred.encode()
@@ -81,18 +74,18 @@ class get_credential(Method):
     def get_self_credential(self, type, hrn):
         """
         get_self_credential a degenerate version of get_credential used by a client
-        to get his initial credential when de doesnt have one. This is the same as 
+        to get his initial credential when de doesnt have one. This is the same as
         get_credetial(..., cred = None, ...)
-    
-        The registry ensures that the client is the principal that is named by 
-        (type, name) by comparing the public key in the record's  GID to the 
+
+        The registry ensures that the client is the principal that is named by
+        (type, name) by comparing the public key in the record's  GID to the
         private key used to encrypt the client side of the HTTPS connection. Thus
-        it is impossible for one principal to retrive another principal's 
-        credential without having the appropriate private key.    
+        it is impossible for one principal to retrive another principal's
+        credential without having the appropriate private key.
 
         @param type type of object (user | slice | sa | ma | node)
         @param hrn human readable name of authority to list
-        @return string representation of a credential object 
+        @return string representation of a credential object
         """
         self.api.auth.verify_object_belongs_to_me(hrn)
 
@@ -120,18 +113,11 @@ class get_credential(Method):
         cred.set_gid_object(gid)
         cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         cred.set_pubkey(gid.get_pubkey())
-        
+
         rl = determine_rights(type, hrn)
         cred.set_privileges(rl)
 
-        # determine the type of credential that we want to use as a parent for
-        # this credential.
-
-        if (type == "ma") or (type == "node"):
-            auth_kind = "authority,ma"
-        else: # user, slice, sa
-            auth_kind = "authority,sa"
-
+        auth_kind = "authority,sa,ma"
         cred.set_parent(self.api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
 
         cred.encode()
