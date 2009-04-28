@@ -9,14 +9,6 @@ def get_authority(hrn):
     parts = hrn.split(".")
     return ".".join(parts[:-1])
 
-def get_auth_type(type):
-    if (type=="slice") or (type=="user") or (type=="sa"):
-        return "sa"
-    elif (type=="component") or (type=="ma"):
-        return "ma"
-    else:
-        raise UnknownGeniType(type)
-
 def hrn_to_pl_slicename(hrn):
     parts = hrn.split(".")
     return parts[-2] + "_" + parts[-1]

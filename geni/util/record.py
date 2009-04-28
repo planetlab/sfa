@@ -17,7 +17,7 @@ class GeniRecord:
  
     Name specifies the HRN of the object
     GID is the GID of the object
-    Type is user | sa | ma | slice | component
+    Type is user | authority | slice | component
  
     Info is comprised of the following sub-fields
            pointer = a pointer to the record in the PL database
@@ -29,8 +29,7 @@ class GeniRecord:
     into the persons table.
  
     A given HRN may have more than one record, provided that the records are
-    of different types. For example, planetlab.us.arizona may have both an SA
-    and a MA record, but cannot have two SA records.
+    of different types.
     """
 
     ##
@@ -38,7 +37,7 @@ class GeniRecord:
     #
     # @param name if !=None, assign the name of the record
     # @param gid if !=None, assign the gid of the record
-    # @param type one of user | sa | ma | slice | component
+    # @param type one of user | authority | slice | component
     # @param pointer is a pointer to a PLC record
     # @param dict if !=None, then fill in this record from the dictionary
 
@@ -94,7 +93,7 @@ class GeniRecord:
     ##
     # Set the type of the record
     #
-    # @param type is a string: user | sa | ma | slice | component
+    # @param type is a string: user | authority | slice | component
 
     def set_type(self, type):
         """

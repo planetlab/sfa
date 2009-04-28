@@ -126,6 +126,9 @@ class RightList:
         if string:
             self.load_from_string(string)
 
+    def is_empty(self):
+        return self.rights == []
+
     ##
     # Add a right to this list
     #

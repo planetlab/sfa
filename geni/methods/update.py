@@ -59,7 +59,7 @@ class update(Method):
 
         # update the PLC information that was specified with the record
 
-        if (type == "sa") or (type == "ma"):
+        if (type == "authority"):
             self.api.plshell.UpdateSite(self.api.plauth, pointer, record.get_pl_info())
 
         elif type == "slice":
@@ -84,7 +84,7 @@ class update(Method):
         else:
             raise UnknownGeniType(type)
 
-        # update membership for researchers, pis, owners, operators^M
+        # update membership for researchers, pis, owners, operators
         self.api.update_membership(existing_record, record)
 
-        return 1    
+        return 1

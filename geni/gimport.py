@@ -283,17 +283,11 @@ def import_site(parent_hrn, site):
 
     table = get_auth_table(parent_hrn)
 
-    sa_record = table.resolve("sa", hrn)
-    if not sa_record:
-        sa_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="sa", pointer=site['site_id'])
-        report.trace("  inserting sa record for " + hrn)
-        table.insert(sa_record)
-
-    ma_record = table.resolve("ma", hrn)
-    if not ma_record:
-        ma_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="ma", pointer=site['site_id'])
-        report.trace("  inserting ma record for " + hrn)
-        table.insert(ma_record)
+    auth_record = table.resolve("authority", hrn)
+    if not auth_record:
+        auth_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
+        report.trace("  inserting authority record for " + hrn)
+        table.insert(auth_record)
 
     for person_id in site['person_ids']:
         persons = shell.GetPersons(pl_auth, [person_id])
@@ -325,17 +319,11 @@ def create_top_level_auth_records(hrn):
     auth_info = AuthHierarchy.get_auth_info(parent_hrn)
     table = get_auth_table(parent_hrn)
 
-    sa_record = table.resolve("sa", hrn)
-    if not sa_record:
-        sa_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="sa", pointer=-1)
-        report.trace("  inserting sa record for " + hrn)
-        table.insert(sa_record)
-
-    ma_record = table.resolve("ma", hrn)
-    if not ma_record:
-        ma_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="ma", pointer=-1)
-        report.trace("  inserting ma record for " + hrn)
-        table.insert(ma_record)
+    auth_record = table.resolve("authority", hrn)
+    if not auth_record:
+        auth_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
+        report.trace("  inserting authority record for " + hrn)
+        table.insert(auth_record)
 
 def main():
     global AuthHierarchy

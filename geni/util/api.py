@@ -150,24 +150,24 @@ class GeniAPI:
         """ 
         Get our credential from a remote registry using a geniclient connection
         """
-        type = 'sa'
-        cred_filename = ".".join([self.server_basedir, self.interface, self.hrn, type, "cred"]) 
+        type = 'authority'
+        cred_filename = ".".join([self.server_basedir, self.interface, self.hrn, type, "cred"])
         try:
             credential = Credential(filename = cred_filename)
             return credential
         except IOError:
             from geni.registry import Registries
             registries = Registries(self)
-            registry = registries[self.hrn] 
+            registry = registries[self.hrn]
             self_cred = registry.get_credential(None, type, self.hrn)
             cred = registry.get_credential(self_cred, type, self.hrn)
             cred.save_to_file(cred_filename, save_parents=True)
 
     def getCredentialFromLocalRegistry(self):
         """
-        Get our current credential directly from the local registry. 
+        Get our current credential directly from the local registry.
         """
-    
+
         hrn = self.hrn
         auth_hrn = self.auth.get_authority(hrn)
         if not auth_hrn:
@@ -187,14 +187,8 @@ class GeniAPI:
         new_cred.set_pubkey(object_gid.get_pubkey())
         r1 = determine_rights(type, hrn)
         new_cred.set_privileges(r1)
-    
-        # determine the type of credential that we want to use as a parent for
-        # this credential.
 
-        if (type == "ma") or (type == "node"):
-            auth_kind = "authority,ma"
-        else: # user, slice, sa
-            auth_kind = "authority,sa"
+        auth_kind = "authority,ma,sa"
 
         new_cred.set_parent(self.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
 
@@ -218,7 +212,7 @@ class GeniAPI:
             self.credential = Credential(filename = ma_cred_filename)
         except IOError:
             self.credential = self.getCredentialFromRegistry()
-      
+
     ##
     # Convert geni fields to PLC fields for use when registering up updating
     # registry record in the PLC database
@@ -257,7 +251,7 @@ class GeniAPI:
             if not "model" in pl_fields:
                 pl_fields["model"] = "geni"
 
-        elif type == "sa":
+        elif type == "authority":
             pl_fields["login_base"] = hrn_to_pl_login_base(hrn)
 
             if not "name" in pl_fields:
@@ -273,7 +267,7 @@ class GeniAPI:
                 pl_fields["is_public"] = True
 
 
- 
+
     def fill_record_pl_info(self, record):
         """
         Fill in the planetlab specific fields of a Geni record. This
@@ -294,7 +288,7 @@ class GeniAPI:
             record.set_pl_info({})
             return
 
-        if (type == "sa") or (type == "ma"):
+        if (type == "authority"):
             pl_res = self.plshell.GetSites(self.plauth, [pointer])
         elif (type == "slice"):
             pl_res = self.plshell.GetSlices(self.plauth, [pointer])
@@ -341,24 +335,16 @@ class GeniAPI:
             researchers = self.lookup_users(auth_table, person_ids)
             geni_info['researcher'] = researchers
 
-        elif (type == "sa"):
+        elif (type == "authority"):
             auth_table = self.auth.get_auth_table(record.get_name())
             person_ids = record.pl_info.get("person_ids", [])
             pis = self.lookup_users(auth_table, person_ids, "pi")
-            geni_info['pi'] = pis
-            # TODO: OrganizationName
-
-        elif (type == "ma"):
-            auth_table = self.auth.get_auth_table(record.get_name())
-            person_ids = record.pl_info.get("person_ids", [])
             operators = self.lookup_users(auth_table, person_ids, "tech")
-            geni_info['operator'] = operators
-            # TODO: OrganizationName
-
-            auth_table = self.auth.get_auth_table(record.get_name())
-            person_ids = record.pl_info.get("person_ids", [])
             owners = self.lookup_users(auth_table, person_ids, "admin")
+            geni_info['pi'] = pis
+            geni_info['operator'] = operators
             geni_info['owner'] = owners
+            # TODO: OrganizationName
 
         elif (type == "node"):
             geni_info['dns'] = record.pl_info.get("hostname", "")
@@ -409,7 +395,7 @@ class GeniAPI:
         # build a list of the old person ids from the person_ids field of the
         # pl_info
         if oldRecord:
-            oldIdList = oldRecord.plinfo.get("person_ids", [])
+            oldIdList = oldRecord.pl_info.get("person_ids", [])
             containerId = oldRecord.get_pointer()
         else:
             # if oldRecord==None, then we are doing a Register, instead of an
@@ -434,13 +420,10 @@ class GeniAPI:
             self.update_membership_list(oldRecord, record, 'researcher',
                                         self.plshell.AddPersonToSlice,
                                         self.plshell.DeletePersonFromSlice)
-        elif record.type == "sa":
+        elif record.type == "authority":
             # TODO
             pass
-        elif record.type == "ma":
-            # TODO
-            pass
- 
+
 
     def callable(self, method):
         """

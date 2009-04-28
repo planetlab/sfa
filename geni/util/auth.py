@@ -141,12 +141,52 @@ class Auth:
         if name.startswith(object_hrn + "."):
             return
         raise PermissionError(name)
-  
+
+    def determine_user_rights(self, src_cred, record):
+        """
+        Given a user credential and a record, determine what set of rights the
+        user should have to that record.
+
+        This is intended to replace determine_rights() and
+        verify_cancreate_credential()
+        """
+
+        type = record.get_type()
+        cred_object_hrn = src_cred.get_gid_object().get_hrn()
+
+        rl = RightList()
+
+        if type=="slice":
+            researchers = record.get_geni_info().get("researcher", [])
+            if (cred_object_hrn in researchers):
+                rl.add("refresh")
+                rl.add("embed")
+                rl.add("bind")
+                rl.add("control")
+                rl.add("info")
+
+        elif type == "authority":
+            pis = record.get_geni_info().get("pi", [])
+            operators = record.get_geni_info().get("operator", [])
+            if (cred_object_hrn in pis):
+                rl.add("sa")
+            if (cred_object_hrn in operators):
+                rl.add("ma")
+            if (cred_object_hrn in pis) or (cred_object_hrn in operators):
+                rl.add("authority")
+
+        elif type == "user":
+            rl.add("refresh")
+            rl.add("resolve")
+            rl.add("info")
+
+        return rl
+
     def verify_cancreate_credential(self, src_cred, record):
         """
-        Verify that a user can retrive a particular type of credential. 
+        Verify that a user can retrive a particular type of credential.
         For slices, the user must be on the researcher list. For SA and
-        MA the user must be on the pi and operator lists respectively 
+        MA the user must be on the pi and operator lists respectively
         """
 
         type = record.get_type()
@@ -171,17 +211,8 @@ class Auth:
         return ".".join(parts[-1:])
 
     def get_authority(self, hrn):
-
         parts = hrn.split(".")
         return ".".join(parts[:-1])
-
-    def get_auth_type(self, type):
-        if (type=="slice") or (type=="user") or (type=="sa"):
-            return "sa"
-        elif (type=="component") or (type=="ma"):
-            return "ma"
-        else:
-            raise UnknownGeniType(type)
 
     def hrn_to_pl_slicename(self, hrn):
         parts = hrn.split(".")
