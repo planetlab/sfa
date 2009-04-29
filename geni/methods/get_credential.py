@@ -62,6 +62,7 @@ class get_credential(Method):
         new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_cred.set_pubkey(object_gid.get_pubkey())
         new_cred.set_privileges(rights)
+        new_cred.set_delegate(True)
 
         auth_kind = "authority,ma,sa"
         new_cred.set_parent(self.api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
@@ -106,6 +107,10 @@ class get_credential(Method):
         if not peer_cert.is_pubkey(gid.get_pubkey()):
            raise ConnectionKeyGIDMismatch(gid.get_subject())
 
+        rights = self.api.auth.determine_user_rights(None, record)
+        if rights.is_empty():
+            raise PermissionError(self.api.auth.client_cred.get_gid_object().get_hrn() + " has no rights to " + record.get_name())
+
         # create the credential
         gid = record.get_gid_object()
         cred = Credential(subject = gid.get_subject())
@@ -113,9 +118,8 @@ class get_credential(Method):
         cred.set_gid_object(gid)
         cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         cred.set_pubkey(gid.get_pubkey())
-
-        rl = determine_rights(type, hrn)
-        cred.set_privileges(rl)
+        cred.set_privileges(rights)
+        cred.set_delegate(True)
 
         auth_kind = "authority,sa,ma"
         cred.set_parent(self.api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
