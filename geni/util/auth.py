@@ -147,12 +147,22 @@ class Auth:
         Given a user credential and a record, determine what set of rights the
         user should have to that record.
 
+        Src_cred can be None when obtaining a user credential, but should be
+        set to a valid user credential when obtaining a slice or authority
+        credential.
+
         This is intended to replace determine_rights() and
         verify_cancreate_credential()
         """
 
         type = record.get_type()
-        cred_object_hrn = src_cred.get_gid_object().get_hrn()
+        if src_cred:
+            cred_object_hrn = src_cred.get_gid_object().get_hrn()
+        else:
+            # supplying src_cred==None is only valid when obtaining user
+            # credentials.
+            assert(type == "user")
+            cred_object_hrn = None
 
         rl = RightList()
 
