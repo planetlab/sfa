@@ -390,7 +390,7 @@ def delegate(opts, args):
    records = filter_records("user", records)
 
    if not records:
-       print "Error: Didn't find a user record for", delegee_name
+       print "Error: Didn't find a user record for", args[0]
        return
 
    # the gid of the user who will be delegated too
