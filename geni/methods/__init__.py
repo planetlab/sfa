@@ -11,6 +11,7 @@ reset_slice
 resolve
 get_resources
 get_slices
+get_aggregates
 start_slice
 stop_slice
 update

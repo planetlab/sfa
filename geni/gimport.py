@@ -1,3 +1,6 @@
+#!/bin/bash/python
+#
+#
 ##
 # Import PLC records into the Geni database. It is indended that this tool be
 # run once to create Geni records that reflect the current state of the
@@ -188,7 +191,9 @@ def import_person(parent_hrn, person):
 
     person_record = table.resolve("user", hrn)
     if not person_record:
-        key_ids = person["key_ids"]
+        key_ids = []
+        if 'key_ids' in person:    
+            key_ids = person["key_ids"]
 
         if key_ids:
             # get the user's private key from the SSH keys they have uploaded
@@ -209,14 +214,15 @@ def import_person(parent_hrn, person):
         report.trace("  inserting user record for " + hrn)
         table.insert(person_record)
     else:
-	key_ids = person["key_ids"]
-	if key_ids:
-	    pkey = get_pl_pubkey(key_ids[0])
-	    person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-            person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
-            report.trace("  updating user record for " + hrn)
-            table.update(person_record)
-	    
+        key_ids = person["key_ids"]
+
+    if key_ids:
+        pkey = get_pl_pubkey(key_ids[0])
+        person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
+        person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
+        report.trace("  updating user record for " + hrn)
+        table.update(person_record)
+        
 def import_slice(parent_hrn, slice):
     AuthHierarchy = Hierarchy()
     slicename = slice['name'].split("_",1)[-1]
@@ -289,33 +295,36 @@ def import_site(parent_hrn, site):
         report.trace("  inserting authority record for " + hrn)
         table.insert(auth_record)
 
-    for person_id in site['person_ids']:
-        persons = shell.GetPersons(pl_auth, [person_id])
-        if persons:
-            try: 
-                import_person(hrn, persons[0])
-            except:
-                report.trace("Failed to import: %s" % persons[0])
-    for slice_id in site['slice_ids']:
-        slices = shell.GetSlices(pl_auth, [slice_id])
-        if slices:
-            try:
-                import_slice(hrn, slices[0])
-            except:
-                report.trace("Failed to import: %s" % slices[0])
-    for node_id in site['node_ids']:
-        nodes = shell.GetNodes(pl_auth, [node_id])
-        if nodes:
-            try:
-                import_node(hrn, nodes[0])
-            except:
-                report.trace("Failed to import: %s" % nodes[0])
+    if 'person_ids' in site: 
+        for person_id in site['person_ids']:
+            persons = shell.GetPersons(pl_auth, [person_id])
+            if persons:
+                try: 
+                    import_person(hrn, persons[0])
+                except:
+                    report.trace("Failed to import: %s" % persons[0])
+    if 'slice_ids' in site:
+        for slice_id in site['slice_ids']:
+            slices = shell.GetSlices(pl_auth, [slice_id])
+            if slices:
+                try:
+                    import_slice(hrn, slices[0])
+                except:
+                    report.trace("Failed to import: %s" % slices[0])
+    if 'node_ids' in site:
+        for node_id in site['node_ids']:
+            nodes = shell.GetNodes(pl_auth, [node_id])
+            if nodes:
+                try:
+                    import_node(hrn, nodes[0])
+                except:
+                    report.trace("Failed to import: %s" % nodes[0])
 
 def create_top_level_auth_records(hrn):
     parent_hrn = get_authority(hrn)
     print hrn, ":", parent_hrn
     if not parent_hrn:
-        parent_hrn = hrn	
+        parent_hrn = hrn    
     auth_info = AuthHierarchy.get_auth_info(parent_hrn)
     table = get_auth_table(parent_hrn)
 
