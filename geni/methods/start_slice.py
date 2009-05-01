@@ -6,7 +6,7 @@ from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.slices import Slices
 
-class start_slices(Method):
+class start_slice(Method):
     """
     Start the specified slice      
 
@@ -28,6 +28,6 @@ class start_slices(Method):
        
         self.api.auth.check(cred, 'startslice')
         slices = Slices(self.api)
-        slices.stop_slice(hrn):
+        slices.start_slice(hrn)
         
         return 1 
