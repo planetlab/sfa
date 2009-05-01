@@ -10,7 +10,7 @@ import os, sys
 version = '0.2'
 scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py']
 package_dirs = ['geni', 'geni/util', 'geni/methods']
-data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'geni/util/geni_config'])]
+data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'geni/util/geni_config', 'cmdline/configSfi.sh'])]
 
 
 setup(name='geniwrapper', 
