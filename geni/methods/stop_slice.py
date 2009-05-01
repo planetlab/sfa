@@ -26,8 +26,8 @@ class stop_slice(Method):
     
     def call(self, cred, hrn):
        
-        self.api.auth.check(cred, 'startslice')
+        self.api.auth.check(cred, 'stopslice')
         slices = Slices(self.api)
-        slices.stop_slice(hrn):
+        slices.stop_slice(hrn)
         
         return 1 
