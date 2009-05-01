@@ -23,6 +23,7 @@ import sys
 # in site-packages.
 myplc = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + \
         os.sep + "myplc"
+geni =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))+ os.sep + "geni"
 
 class Config:
     """
@@ -30,14 +31,14 @@ class Config:
     fast but no type conversions.
     """
 
-    def __init__(self, file = "/usr/share/geniwrapper/util/geni_config"):
+    def __init__(self, file = "/etc/geni/geni_config"):
         # Load plc_config
 
         loaded = False
         path = os.path.dirname(os.path.abspath(__file__))
         filename = file.split(os.sep)[-1]
-        alt_file = path + os.sep + filename
-        myplc_file = myplc + os.sep + filename
+        alt_file = path + os.sep + 'util' + os.sep + filename
+        geni_file = geni + os.sep + 'util' + os.sep + filename
         files = [file, alt_file, myplc_file]
 
         for file in files:
