@@ -17,12 +17,6 @@
 import os
 import sys
 
-# If we have been checked out into a directory at the same
-# level as myplc, where plc_config.py lives. If we are in a
-# MyPLC environment, plc_config.py has already been installed
-# in site-packages.
-myplc = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + \
-        os.sep + "myplc"
 geni =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))+ os.sep + "geni"
 
 class Config:
@@ -39,7 +33,7 @@ class Config:
         filename = file.split(os.sep)[-1]
         alt_file = path + os.sep + 'util' + os.sep + filename
         geni_file = geni + os.sep + 'util' + os.sep + filename
-        files = [file, alt_file, myplc_file]
+        files = [file, alt_file, geni_file]
 
         for file in files:
             try: 
