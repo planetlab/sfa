@@ -83,7 +83,6 @@ try:
 except ImportError:
     SOAPpy = None
 
-import geni.methods
 
 def import_deep(name):
     mod = __import__(name)
@@ -95,7 +94,8 @@ def import_deep(name):
 class GeniAPI:
 
     # flat list of method names
-    methods = geni.methods.methods
+    import geni.methods
+    methods = geni.methods.all
     
     def __init__(self, config = "/etc/geni/geni_config", encoding = "utf-8", peer_cert = None, interface = None, key_file = None, cert_file = None):
         self.encoding = encoding
@@ -305,7 +305,6 @@ class GeniAPI:
 
         # convert ids to hrns
         pl_record = pl_res[0]
-        print pl_record
         if 'site_id' in pl_record:
             sites = self.plshell.GetSites(self.plauth, pl_record['site_id'], ['login_base'])
             site = sites[0]
