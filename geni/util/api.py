@@ -280,7 +280,8 @@ class GeniAPI:
         """
         type = record.get_type()
         pointer = record.get_pointer()
-
+        auth_hrn = self.hrn
+        login_base = ''
         # records with pointer==-1 do not have plc info associated with them.
         # for example, the top level authority records which are
         # authorities, but not PL "sites"
@@ -288,29 +289,57 @@ class GeniAPI:
             record.set_pl_info({})
             return
 
-        if (type == "authority"):
+        if (type in ["authority", "sa", "ma"]):
             pl_res = self.plshell.GetSites(self.plauth, [pointer])
         elif (type == "slice"):
             pl_res = self.plshell.GetSlices(self.plauth, [pointer])
         elif (type == "user"):
             pl_res = self.plshell.GetPersons(self.plauth, [pointer])
-            key_ids = pl_res[0]['key_ids']
-            keys = self.plshell.GetKeys(self.plauth, key_ids)
-            pubkeys = []
-            if keys:
-                pubkeys = [key['key'] for key in keys]
-            pl_res[0]['keys'] = pubkeys
         elif (type == "node"):
             pl_res = self.plshell.GetNodes(self.plauth, [pointer])
         else:
             raise UnknownGeniType(type)
-
+        
         if not pl_res:
-            # the planetlab record no longer exists
-            # TODO: delete the geni record ?
             raise PlanetLabRecordDoesNotExist(record.get_name())
 
-        record.set_pl_info(pl_res[0])
+        # convert ids to hrns
+        pl_record = pl_res[0]
+        print pl_record
+        if 'site_id' in pl_record:
+            sites = self.plshell.GetSites(self.plauth, pl_record['site_id'], ['login_base'])
+            site = sites[0]
+            login_base = site['login_base']
+            pl_record['site'] = ".".join([auth_hrn, login_base])
+        if 'person_ids' in pl_record:
+            persons =  self.plshell.GetPersons(self.plauth, pl_record['person_ids'], ['email'])
+            emails = [person['email'] for person in persons]
+            usernames = [email.split('@')[0] for email in emails]
+            person_hrns = [".".join([auth_hrn, login_base, username]) for username in usernames]
+            pl_record['persons'] = person_hrns 
+        if 'slice_ids' in pl_record:
+            slices = self.plshell.GetSlices(self.plauth, pl_record['slice_ids'], ['name'])
+            slicenames = [slice['name'] for slice in slices]
+            slice_hrns = [slicename_to_hrn(auth_hrn, slicename) for slicename in slicenames]
+            pl_record['slices'] = slice_hrns
+        if 'node_ids' in pl_record:
+            nodes = self.plshell.GetNodes(self.plauth, pl_record['node_ids'], ['hostname'])
+            hostnames = [node['hostname'] for node in nodes]
+            node_hrns = [hostname_to_hrn(auth_hrn, login_base, hostname) for hostname in hostnames]
+            pl_record['nodes'] = node_hrns
+        if 'site_ids' in pl_record:
+            sites = self.plshell.GetSites(self.plauth, pl_record['site_ids'], ['login_base'])
+            login_bases = [site['login_base'] for site in sites]
+            site_hrns = [".".join([auth_hrn, lbase]) for lbase in login_bases]
+            pl_record['sites'] = site_hrns
+        if 'key_ids' in pl_record:
+            keys = self.plshell.GetKeys(self.plauth, pl_record['key_ids'])
+            pubkeys = []
+            if keys:
+                pubkeys = [key['key'] for key in keys]
+            pl_record['keys'] = pubkeys     
+
+        record.set_pl_info(pl_record)
 
 
     def lookup_users(self, auth_table, user_id_list, role="*"):
