@@ -46,14 +46,33 @@ class Registries(dict):
 
     required_fields = ['hrn', 'addr', 'port']
 
-    def __init__(self, api):
+    def __init__(self, api, file = "/etc/geni/registries.xml"):
         dict.__init__(self, {})
         self.api = api
-        registries_file = self.api.server_basedir + os.sep + 'registries.xml'
+    
+        # create default connection dict
         connection_dict = {}
         for field in self.required_fields:
-            connection_dict[field] = ''  
-        self.registry_info = XmlStorage(registries_file, {'registries': {'registry': [connection_dict]}})
+            connection_dict[field] = ''
+        registries_dict = {'registries': {'registry': [connection_dict]}}
+
+        # get possible config file locations
+        loaded = False
+        path = os.path.dirname(os.path.abspath(__file__))
+        filename = file.split(os.sep)[-1]
+        alt_file = path + os.sep + filename
+        files = [file, alt_file]
+    
+        for f in files:
+            try:
+                if os.path.isfile(f):
+                    self.registry_info = XmlStorage(f, registries_dict)
+                    loaded = True
+            except: pass
+
+        # if file is missing, just recreate it in the right place
+        if not loaded:
+            self.registry_info = XmlStorage(file, registries_dict)
         self.registry_info.load()
         self.connectRegistries()
         
