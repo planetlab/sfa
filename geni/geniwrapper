@@ -10,7 +10,7 @@
 #
 
 # Source config
-. /usr/share/geniwrapper/geni/util/geni_config
+. /etc/geni/geni_config
 
 # source function library
 . /etc/init.d/functions
@@ -21,13 +21,19 @@ start() {
 
         if [ "$GENI_REGISTRY_ENABLE" ]; then
             echo "Registry"
-            daemon $GENI_BASE_DIR/geni/plc.py -r -d $OPTIONS
+            daemon /usr/bin/plc.py -r -d $OPTIONS
         fi
 
         if [ "$GENI_AGGREGATE_ENABLED" ]; then
             echo "Aggregate"
-            daemon $GENI_BASE_DIR/geni/plc.py -a -d $OPTIONS
+            daemon /usr/bin/plc.py -a -d $OPTIONS
         fi
+        
+        if [ "$GENI_SM_ENABLED" ]; then
+            echo "SliceMgr"
+            daemon /usr/bin/plc.py -s -d $OPTIONS
+        fi
+
         RETVAL=$?
         echo
         [ $RETVAL -eq 0 ] && touch /var/lock/subsys/geniwrapper
