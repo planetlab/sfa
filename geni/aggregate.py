@@ -44,7 +44,7 @@ class Aggregates(dict):
         connection_dict = {}
         for field in self.required_fields:
             connection_dict[field] = ''
-
+        aggregates_dict = {'aggregates': {'aggregate': [connection_dict]}}
         # get possible config file locations
         loaded = False
         path = os.path.dirname(os.path.abspath(__file__))
@@ -55,13 +55,13 @@ class Aggregates(dict):
         for f in files:
             try:
                 if os.path.isfile(f):
-                    self.aggregate_info = XmlStorage(f, {'aggregates': {'aggregate': [connection_dict]}})
+                    self.aggregate_info = XmlStorage(f, aggregates_dict)
                     loaded = True
             except: pass
 
         # if file is missing, just recreate it in the right place
         if not loaded:
-            self.aggregate_info = XmlStorage(file, {'aggregates': {'aggregate': [connection_dict]}})
+            self.aggregate_info = XmlStorage(file, aggregates_dict)
         self.aggregate_info.load()
         self.connectAggregates()
 
