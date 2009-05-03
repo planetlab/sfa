@@ -11,8 +11,11 @@ import shutil
 version = '0.2'
 scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py']
 package_dirs = ['geni', 'geni/util', 'geni/methods']
-data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'geni/util/geni_config', 'cmdline/configSfi.sh'])]
-
+data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'geni/util/geni_config', 'cmdline/configSfi.sh']),
+              ('/etc/init.d/', ['geni/geniwrapper'])
+                ]
+symlinks = ['/usr/share/geniwrapper']
+initscripts = ['/etc/init.d/geniwrapper']
         
 if sys.argv[1] in ['uninstall', 'remove', 'delete']:
     python_path = sys.path
@@ -21,7 +24,8 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete']:
     add_geni_path = lambda path: path + os.sep + 'geni'
     site_packages_path = map(add_geni_path, site_packages_path) 
     remove_dirs = ['/etc/geni/'] + site_packages_path
-    remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py']
+    remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py'] + \
+                    symlinks + initscripts
     
     # remove files   
     for filepath in remove_files:
@@ -54,3 +58,13 @@ as a layer between the existing PlanetLab interfaces
 and the Geni API.
                     """,
       license = 'GPL')
+
+    # create symlink to geniwrapper source in /usr/share
+    python_path = sys.path
+    site_packages_only = lambda path: path.endswith('site-packages')
+    site_packages_path = filter(site_packages_only, python_path)
+    add_geni_path = lambda path: path + os.sep + 'geni'
+    site_packages_path = map(add_geni_path, site_packages_path)
+    for src in site_packages_path:
+        for dst in symlinks:
+            os.symlink(src, dst)    
