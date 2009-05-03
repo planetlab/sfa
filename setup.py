@@ -67,4 +67,8 @@ and the Geni API.
     site_packages_path = map(add_geni_path, site_packages_path)
     for src in site_packages_path:
         for dst in symlinks:
-            os.symlink(src, dst)    
+            try: 
+                os.symlink(src, dst)
+            except: pass
+    for initscript in initscripts:
+        os.chmod(initscript, 00744)
