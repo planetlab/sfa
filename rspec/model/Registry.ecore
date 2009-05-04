@@ -4,9 +4,6 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Registry"
     nsURI="http://www.planet-lab.org/Registry" nsPrefix="Registry">
   <eClassifiers xsi:type="ecore:EClass" name="User" eSuperTypes="#//RegistryRecord">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="created" ordered="false"
-        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"
-        iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" ordered="false"
         lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         iD="true"/>
@@ -21,16 +18,10 @@
         iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="key" ordered="false" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" iD="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="last_updated" ordered="false"
-        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"
-        iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="slice" upperBound="-1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral=""/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Slice" eSuperTypes="#//RegistryRecord">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="created" ordered="false"
-        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"
-        iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="login_name" ordered="false"
         lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         iD="true"/>
@@ -57,9 +48,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="Authority" eSuperTypes="#//RegistryRecord">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" ordered="false" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" iD="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="created" ordered="false"
-        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"
-        iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="last_updated" ordered="false"
         lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"
         iD="true"/>
@@ -78,6 +66,12 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="gid" lowerBound="1" eType="#//gid"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral=""/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="created" ordered="false"
+        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"
+        iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="last_updated" ordered="false"
+        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"
+        iD="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="gid">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hrn" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
