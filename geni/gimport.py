@@ -58,7 +58,8 @@ loaded = False
 default_path = "/usr/shre/keyconvert/" + keyconvert
 cwd = os.path.dirname(os.path.abspath(__file__))
 alt_path = os.sep.join(cwd.split(os.sep)[:-1] + ['keyconvert', 'keyconvert'])
-files = [default_path, alt_path]
+geni_path = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
+files = [default_path, alt_path, geni_path]
 for path in files:
     if os.path.isfile(path):
         keyconvert_fn = path
