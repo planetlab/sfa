@@ -52,8 +52,23 @@ root_auth = config.GENI_REGISTRY_ROOT_AUTH
 level1_auth = config.GENI_REGISTRY_LEVEL1_AUTH
 if not level1_auth or level1_auth in ['']:
     level1_auth = None
-keyconvert_fn = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
 
+keyconvert = 'keyconvert'
+loaded = False
+default_path = "/usr/shre/keyconvert/" + keyconvert
+cwd = os.path.dirname(os.path.abspath(__file__))
+alt_path = os.sep.join(cwd.split(os.sep)[:-1] + ['keyconvert', 'keyconvert'])
+files = [default_path, alt_path]
+for path in files:
+    if os.path.isfile(path):
+        keyconvert_fn = path
+        loaded = True
+
+if not loaded:
+    raise Exception, "Could not find config in " + ", ".join(files)        
+
+keyconvert_fn = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
+alt_keyconvert_fn
 
 def un_unicode(str):
    if isinstance(str, unicode):
