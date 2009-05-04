@@ -5,9 +5,9 @@
 # Meta
 init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py 
 
-subdirs := keyconvert #pyOpenSSL-0.7
+subdirs := keyconvert #pyOpenSSL-0.9
  
-all: install $(init) $(subdirs)
+all: clean install $(init) $(subdirs)
 
 install: 
 	python setup.py install
@@ -19,8 +19,9 @@ $(subdirs): %:
 
 clean:
 	python setup.py uninstall
+	cd keyconvert && make clean
+	cd - 
 	# XX remove keyconvert   
-	
 
 index: $(init)
 
