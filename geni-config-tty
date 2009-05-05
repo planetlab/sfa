@@ -1,0 +1,168 @@
+#!/usr/bin/python
+
+# Interactively prompts for variable values
+# expected arguments are
+# command -d [default-xml [custom-xml [ consolidated-xml ]]]
+#
+# -d is for the myplc-devel package
+
+# we use 3 instances of PLCConfiguration throughout:
+# cdef : models the defaults, from plc_default.xml
+# cread : merged from plc_default & configs/site.xml
+# cwrite : site.xml + pending changes
+
+import sys
+import os
+import re
+import readline
+import traceback
+from optparse import OptionParser
+
+from geni.util.config import Config
+
+usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
+                   "GENI_REGISTRY_LEVEL1_AUTH",
+                   "GENI_REGISTRY_ENABLED",
+                   "GENI_REGISTRY_HOST" 
+                   "GENI_REGISTRY_PORT",
+                   "GENI_AGGREGATE_ENABLED",
+                   "GENI_AGGREGATE_HOST",
+                   "GENI_AGGREGATE_PORT",
+                   "GENI_SM_ENABLED",
+                   "GENI_SM_HOST",
+                   "GENI_SM_PORT",
+                   "GENI_PLC_USER",
+                   "GENI_PLC_PASSWORD",    
+                   "GENI_PLC_HOST",
+                   "GENI_PLC_PORT",
+                   "GENI_PLC_API_PATH"
+                   ]
+
+
+mainloop_usage= """Available commands:
+ Uppercase versions give variables comments, when available
+ u/U\t\t\tEdit usual variables
+ w/W\t\t\tWrite / Write & reload
+ q\t\t\tQuit (without saving)
+ h/?\t\t\tThis help
+---
+ l/L [<var>]\tShow Locally modified variables/values
+ s/S [<var>]\tShow variables/values (all, in category, single)
+ e/E [<var>]\tEdit variables (all, in category, single)
+---
+""" 
+
+command_usage="%prog [options]"
+command_usage += """
+  Unless you specify the -d option, meaning you want to configure
+  myplc-devel instead of regular myplc, in which case""" 
+
+variable_usage= """Edit Commands :
+#\tShow variable comments
+.\tStops prompting, return to mainloop
+/\tCleans any site-defined value, reverts to default
+=\tShows default value
+>\tSkips to next category
+?\tThis help
+"""
+
+def save():
+    print "save"
+
+def get_defaults():
+    geni_config = Config()
+    plc_vars = {'PLC_API_MAINTENANCE_PASSWORD': 'GENI_PLC_PASSWORD',
+                'PLC_API_MAINTENCE_USER': 'GENI_PLC_PASSWORD'
+               }
+    try:
+        from geni.util.config import plcConfig
+        plc_config = plcConfig
+    except:
+        plc_config = None
+    
+    defaults = {}
+    for var in dir(geni_config):
+        if var.startswith('GENI'):
+            value = eval("geni_config.%s" % var)
+            defaults[var] = value
+
+    # some defaults come from plc_config
+    for var in dir(plc_config):
+        if var in plc_vars:
+            value = eval("plc_config.%s" % var)
+            defaults[plc_vars[var]] = value
+
+    return defaults       
+
+def prompt_variable(variable, default_config):
+    if variable in default_config:
+        default_value = default_config[variable]
+    else:
+        default_value = ""  
+   #while True:
+    
+def mainloop (default_config):
+    changes = {}
+    while True:
+        try:
+            answer = raw_input("Enter command (u for usual changes, w to save, ? for help) ").strip()
+        except EOFError:
+            answer =""
+        except KeyboardInterrupt:
+            print "\nBye"
+            sys.exit()
+
+        if (answer == "") or (answer in "?hH"):
+            print mainloop_usage
+            continue
+        if answer in ['?']:
+            print "help"  
+
+        if (answer in ["q","Q"]):
+            # todo check confirmation
+            return
+        elif (answer == "w"):
+            save()
+        elif (answer == "u"):
+            try: 
+                for varname in usual_variables:
+                    print varname
+                    changes[varname] = prompt_variable(varname, default_config)
+            except Exception, inst:
+                if (str(inst) != 'BailOut'):
+                    raise
+        elif (answer in ["e","E"]):
+            try:
+                prompt_variable (cdef,cread,cwrite,category,variable,
+                                 show_comments,False)
+            except Exception, inst:
+                if (str(inst) != 'BailOut'):
+                    raise
+        elif (command in "vVsSlL"):
+            pass
+            #show_variable (c1,c2,c3,category,variable,show_value,show_comments)
+        else:
+            print ("Unknown command >%s< -- use h for help" % answer)
+
+####################
+def main ():
+
+    command=sys.argv[0]
+    argv = sys.argv[1:]
+    save = True
+    parser = OptionParser(usage=command_usage, version="%prog 1.0")
+    parser.set_defaults(config_dir="/etc/geni",
+                        usual_variables=[])
+    parser.add_option("","--configdir",dest="config_dir",help="specify configuration directory")
+    parser.add_option("","--usual_variable",dest="usual_variables",action="append", help="add a usual variable")
+
+    (config,args) = parser.parse_args()
+    if len(args)>3:
+        parser.error("too many arguments")
+
+    defaults = get_defaults()
+    mainloop (defaults)
+    return 0
+
+if __name__ == '__main__':
+    main()
