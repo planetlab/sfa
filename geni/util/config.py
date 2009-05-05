@@ -19,7 +19,7 @@ import sys
 
 geni =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))+ os.sep + "geni"
 
-class Config(dict):
+class Config:
     """
     Parse the bash/Python/PHP version of the configuration file. Very
     fast but no type conversions.
