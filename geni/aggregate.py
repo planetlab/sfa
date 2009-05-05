@@ -100,7 +100,7 @@ class Aggregates(dict):
 
         # set up a connection to the local registry
         # connect to registry using GeniClient
-        address = self.api.config.GENI_AGGREGATE_HOSTNAME
+        address = self.api.config.GENI_AGGREGATE_HOST
         port = self.api.config.GENI_AGGREGATE_PORT
         url = 'http://%(address)s:%(port)s' % locals()
         self[self.api.hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)
