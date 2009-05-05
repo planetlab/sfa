@@ -23,7 +23,7 @@ from geni.util.config import Config
 usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_REGISTRY_LEVEL1_AUTH",
                    "GENI_REGISTRY_ENABLED",
-                   "GENI_REGISTRY_HOST" 
+                   "GENI_REGISTRY_HOST", 
                    "GENI_REGISTRY_PORT",
                    "GENI_AGGREGATE_ENABLED",
                    "GENI_AGGREGATE_HOST",
@@ -58,15 +58,13 @@ command_usage += """
   myplc-devel instead of regular myplc, in which case""" 
 
 variable_usage= """Edit Commands :
-#\tShow variable comments
 .\tStops prompting, return to mainloop
-/\tCleans any site-defined value, reverts to default
 =\tShows default value
->\tSkips to next category
 ?\tThis help
 """
 
-def save():
+def save(changes, config_file):
+
     print "save"
 
 def get_defaults():
@@ -99,9 +97,29 @@ def prompt_variable(variable, default_config):
         default_value = default_config[variable]
     else:
         default_value = ""  
-   #while True:
+   
+    while True:
+        prompt = "%(variable)s : [%(default_value)s] " % locals()
+        try: 
+            answer = raw_input(prompt).strip()
+        except EOFError:
+            raise Exception ('BailOut')
+        except KeyboardInterrupt:
+            print "\n"
+            raise Excception ('BailOut')
+
+        if (answer == "") or (answer == default_value):
+            return answer
+        elif (answer == "."):
+            raise Exception ('BailOut')
+        elif (answer == "?"):
+            print variable_usage.strip()
+        elif (answer == "="):
+            print ("%s defaults to %s" %(variable,default_value))
+        else:
+            return answer        
     
-def mainloop (default_config):
+def mainloop (default_config, config_file):
     changes = {}
     while True:
         try:
@@ -122,11 +140,10 @@ def mainloop (default_config):
             # todo check confirmation
             return
         elif (answer == "w"):
-            save()
+            save(changes, config_file)
         elif (answer == "u"):
             try: 
                 for varname in usual_variables:
-                    print varname
                     changes[varname] = prompt_variable(varname, default_config)
             except Exception, inst:
                 if (str(inst) != 'BailOut'):
@@ -138,7 +155,7 @@ def mainloop (default_config):
             except Exception, inst:
                 if (str(inst) != 'BailOut'):
                     raise
-        elif (command in "vVsSlL"):
+        elif (answer in "vVsSlL"):
             pass
             #show_variable (c1,c2,c3,category,variable,show_value,show_comments)
         else:
@@ -160,8 +177,10 @@ def main ():
     if len(args)>3:
         parser.error("too many arguments")
 
+    config_dir = parser.values.config_dir
+    config_file = os.sep.join([config_dir, 'geni_config'])
     defaults = get_defaults()
-    mainloop (defaults)
+    mainloop (defaults, config_file)
     return 0
 
 if __name__ == '__main__':
