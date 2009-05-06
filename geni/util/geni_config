@@ -14,7 +14,7 @@ GENI_API_DEBUG=1
 #
 # Enabled
 # Enable the registry interface 
-GENI_REGISTRY_ENABLE=1
+GENI_REGISTRY_ENABLED=1
 
 # Root Auth
 # The hrn of the registry's root auth
