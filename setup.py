@@ -9,7 +9,7 @@ import os, sys
 import shutil
 
 version = '0.2'
-scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py']
+scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py', 'geni-config-tty']
 package_dirs = ['geni', 'geni/util', 'geni/methods']
 data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'geni/util/geni_config', 'cmdline/configSfi.sh']),
               ('/etc/init.d/', ['geni/geniwrapper'])
@@ -65,6 +65,8 @@ and the Geni API.
     site_packages_path = filter(site_packages_only, python_path)
     add_geni_path = lambda path: path + os.sep + 'geni'
     site_packages_path = map(add_geni_path, site_packages_path)
+    # python path usualy has /urs/local/lib/ path , filter this out
+    site_packages_path = filter(lambda x: 'local' not in x, site_packages_path) 
     for src in site_packages_path:
         for dst in symlinks:
             try: 
