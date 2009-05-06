@@ -1,0 +1,70 @@
+Dependencies:
+=============
+make
+gcc
+openssl-devel/libssl-dev
+pyOpenSSL >= 0.7
+m2crypto
+
+
+Install:
+========
+cd geniwrapper/trunk
+make 
+
+
+Configure:
+==========
+geni-config-tty
+
+or
+ 
+edit /etc/geni/geni_config
+* set GENI_PLC_USER to PLC_MAINTENANCE_USER in /etc/planetlab/plc_config
+* set GENI_PLC_PASSWORD to PLC_MAINTENANCE_PASSWORD in /etc/planetlab/plc_config
+
+copy authorities/ple/ple.pkey to geni/server.key
+
+
+Federation:
+===========
+edit /etc/geni/aggregates.xml and /etc/geni/registries.xml  
+* set addr to ip or hostname of federated peer
+* set port to geni service port on federated peer
+* set hrn to humarn readable name of federated peer interface
+
+trade trusted root gid's (found in /usr/share/geniwrapper/geni/trusted_roots/) 
+
+Run:
+====
+
+First run:
+# initialize the registry by running the registry import tool 
+python gimport.py
+
+# start the services
+/etc/init.d/geniwrapper start 
+
+or 
+
+plc.py -r -d
+plc.py -a -d
+plc.py -s -d
+
+
+Use:
+==== 
+
+Copy my private PL ssh key to ~/.sfi/quetier.pkey
+
+in cmdline
+edit  configSfi.sh
+export SFI_AUTH=ple.upmc
+export SFI_USER=$SFI_AUTH.quetier
+export SFI_REGISTRY=http://138.96.255.199:12345/
+export SFI_SM=http://138.96.255.199:12346/
+
+source configSfi.sh
+
+./sfi.py list ple
+./sfi.py show ple.upmc.quetier
