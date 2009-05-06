@@ -64,22 +64,30 @@ variable_usage= """Edit Commands :
 """
 
 def save(changes, config_file):
+    from pprint import pprint
     cfile = open(config_file, 'r')
+    lines = cfile.readlines()
     newlines = []
-    for line in cfile:
-        newlines.append(line)
+    cfile.close()
+    for line in lines:
+        added = False
         for variable in changes:
             if line.startswith(variable):
-                print variable
                 try:
                     value = int(changes[variable])
-                    newlines.append('%s=%s' % (variable, value))
+                    newline = '%s=%s\n' % (variable, value)
+                    print "adding ", newline
+                    newlines.append(newline)
                 except:
                     value = changes[variable]
-                    newlines.append('%s="%s"' % (variable, value))
-    from pprint import pprint
-    pprint(newlines)
-    cfile.close()
+                    newline = '%s="%s"\n' % (variable, value)
+                    print "adding ", newline
+                    newlines.append(newline)
+                added = True
+                break
+        if not added:
+            newlines.append(line) 
+    
     cfile = open(config_file, 'w')
     cfile.writelines(newlines)
     cfile.close()
