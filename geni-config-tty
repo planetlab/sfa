@@ -60,12 +60,29 @@ command_usage += """
 variable_usage= """Edit Commands :
 .\tStops prompting, return to mainloop
 =\tShows default value
-?\tThis help
+?\tThis help    
 """
 
 def save(changes, config_file):
-
-    print "save"
+    cfile = open(config_file, 'r')
+    newlines = []
+    for line in cfile:
+        newlines.append(line)
+        for variable in changes:
+            if line.startswith(variable):
+                print variable
+                try:
+                    value = int(changes[variable])
+                    newlines.append('%s=%s' % (variable, value))
+                except:
+                    value = changes[variable]
+                    newlines.append('%s="%s"' % (variable, value))
+    from pprint import pprint
+    pprint(newlines)
+    cfile.close()
+    cfile = open(config_file, 'w')
+    cfile.writelines(newlines)
+    cfile.close()
 
 def get_defaults():
     geni_config = Config()
@@ -109,7 +126,7 @@ def prompt_variable(variable, default_config):
             raise Excception ('BailOut')
 
         if (answer == "") or (answer == default_value):
-            return answer
+            return default_value
         elif (answer == "."):
             raise Exception ('BailOut')
         elif (answer == "?"):
