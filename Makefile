@@ -20,7 +20,6 @@ $(subdirs): %:
 clean:
 	python setup.py uninstall
 	cd keyconvert && make clean
-	cd - 
 	# XX remove keyconvert   
 
 index: $(init)
