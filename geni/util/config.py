@@ -16,6 +16,8 @@
 
 import os
 import sys
+from geni.util.debug import log
+import traceback
 
 geni =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))+ os.sep + "geni"
 
@@ -36,9 +38,11 @@ class Config:
         files = [file, alt_file, geni_file]
 
         for file in files:
-            try: 
+            try:
                 execfile(file, self.__dict__)
                 loaded = True
+                self.config_file = file
+                break
             except:
                 pass
 
