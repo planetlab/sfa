@@ -176,7 +176,7 @@ class GeniAPI:
         table = self.auth.get_auth_table(auth_hrn)
         records = table.resolve('*', hrn)
         if not records:
-            raise RecordnotFound
+            raise RecordNotFound
         record = records[0]
         type = record.get_type()
         object_gid = record.get_gid_object()
