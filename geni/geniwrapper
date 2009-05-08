@@ -19,7 +19,7 @@
 start() {
         echo -n $"Starting GENIWrapper:  "
 
-        if [ "$GENI_REGISTRY_ENABLE" ]; then
+        if [ "$GENI_REGISTRY_ENABLED" ]; then
             echo "Registry"
             daemon /usr/bin/plc.py -r -d $OPTIONS
         fi
