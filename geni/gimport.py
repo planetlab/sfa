@@ -69,8 +69,6 @@ for path in files:
 if not loaded:
     raise Exception, "Could not find config in " + ", ".join(files)        
 
-keyconvert_fn = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
-
 def un_unicode(str):
    if isinstance(str, unicode):
        return str.encode("ascii", "ignore")
