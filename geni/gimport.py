@@ -1,4 +1,4 @@
-#!/bin/bash/python
+#!/usr/bin/python
 #
 #
 ##
@@ -55,21 +55,22 @@ if not level1_auth or level1_auth in ['']:
 
 keyconvert = 'keyconvert'
 loaded = False
-default_path = "/usr/shre/keyconvert/" + keyconvert
+default_path = "/usr/share/keyconvert/" + keyconvert
 cwd = os.path.dirname(os.path.abspath(__file__))
 alt_path = os.sep.join(cwd.split(os.sep)[:-1] + ['keyconvert', 'keyconvert'])
 geni_path = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
 files = [default_path, alt_path, geni_path]
 for path in files:
+    print os.path.isfile(path), path
     if os.path.isfile(path):
         keyconvert_fn = path
         loaded = True
+        break
 
 if not loaded:
     raise Exception, "Could not find config in " + ", ".join(files)        
 
 keyconvert_fn = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
-alt_keyconvert_fn
 
 def un_unicode(str):
    if isinstance(str, unicode):
