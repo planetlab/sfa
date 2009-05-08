@@ -61,7 +61,6 @@ alt_path = os.sep.join(cwd.split(os.sep)[:-1] + ['keyconvert', 'keyconvert'])
 geni_path = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
 files = [default_path, alt_path, geni_path]
 for path in files:
-    print os.path.isfile(path), path
     if os.path.isfile(path):
         keyconvert_fn = path
         loaded = True
