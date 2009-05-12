@@ -168,17 +168,44 @@ class Nodes(SimpleStorage):
         # Get all network interfaces
         interface_ids = []
         for node in nodes:
-            interface_ids.extend(node['nodenetwork_ids'])
-        interfaces = self.api.plshell.GetNodeNetworks(self.api.plauth, interface_ids)
+            # The field name has changed in plcapi 4.3
+            if self.api.plshell_version in ['4.2']:
+                interface_ids.extend(node['nodenetwork_ids'])
+            elif self.api.plshell_version in ['4.3']:
+                interface_ids.extend(node['interface_ids'])
+            else:
+                raise GeniAPIError, "Unsupported plcapi version ", \
+                                 self.api.plshell_version
+
+        if self.api.plshell_version in ['4.2']:
+            interfaces = self.api.plshell.GetNodeNetworks(self.api.plauth, interface_ids)
+        elif self.api.shell_version in ['4.3']:
+            interfaces = self.api.plshell.GetInterfaces(self.api.plauth, interface_ids)
+        else:
+            raise GeniAPIError, "Unsupported plcapi version ", \
+                                self.api.plshell_version 
         interface_dict = {}
         for interface in interfaces:
-            interface_dict[interface['nodenetwork_id']] = interface
+            if self.api.plshell_version in ['4.2']:
+                interface_dict[interface['nodenetwork_id']] = interface
+            elif self.api.plshell_version in ['4.3']:
+                interface_dict[interface['interface_id']] = interface
+            else:
+                raise GeniAPIError, "Unsupported plcapi version", \
+                                    self.api.plshell_version 
 
         # join nodes with thier interfaces
         for node in nodes:
             node['interfaces'] = []
-            for nodenetwork_id in node['nodenetwork_ids']:
-                node['interfaces'].append(interface_dict[nodenetwork_id])
+            if self.api.plshell_version in ['4.2']:
+                for nodenetwork_id in node['nodenetwork_ids']:
+                    node['interfaces'].append(interface_dict[nodenetwork_id])
+            elif self.api.plshell_version in ['4.3']:
+                for interface_id in node['interface_ids']:
+                    node['interfaces'].append(interface_dict[interface_id])
+            else:
+                raise GeniAPIError, "Unsupported plcapi version", \
+                                    self.api.plshell_version
 
         # convert and threshold to ints
         if self.has_key('timestamp') and self['timestamp']:
