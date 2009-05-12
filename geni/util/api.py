@@ -112,6 +112,7 @@ class GeniAPI:
         self.cert_file = cert_file
         self.credential = None
         self.plshell = self.getPLCShell()
+        self.plshell_version = self.getPLCShellVersion()
         self.basedir = self.config.GENI_BASE_DIR + os.sep
         self.server_basedir = self.basedir + os.sep + "geni" + os.sep
         self.hrn = self.config.GENI_INTERFACE_HRN
@@ -138,6 +139,21 @@ class GeniAPI:
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
             shell.AuthCheck(self.plauth)
             return shell
+
+    def getPLCShellVersion(self):
+        # We need to figure out what version of PLCAPI are talking to.
+        # Some calls we need to make later will be different depending
+        # the api version. 
+        try:
+            # This is probably a bad way to determine api versions
+            # but its easy and will work for now. Lets try to make 
+            # a call that only exists is PLCAPI.4.3. If it fails, we
+            # can assume the api version is 4.2
+            self.plshell.GetTagTypes(self.plauth)
+            return '4.3'
+        except:
+            return '4.2'
+            
 
     def getCredential(self):
         if self.interface in ['registry']:
