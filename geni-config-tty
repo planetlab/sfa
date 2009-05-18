@@ -117,7 +117,7 @@ def validate(changes):
 def get_defaults():
     geni_config = Config()
     plc_vars = {'PLC_API_MAINTENANCE_PASSWORD': 'GENI_PLC_PASSWORD',
-                'PLC_API_MAINTENCE_USER': 'GENI_PLC_USER'
+                'PLC_API_MAINTENANCE_USER': 'GENI_PLC_USER'
                }
     try:
         from geni.util.config import plcConfig
