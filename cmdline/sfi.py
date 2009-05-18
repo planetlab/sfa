@@ -183,6 +183,42 @@ def get_slice_cred(name):
          print "Failed to get slice credential"
          sys.exit(-1)
 
+def delegate_cred(cred, hrn, type = 'authority'):
+    # the gid and hrn of the object we are delegating
+    object_gid = cred.get_gid_object()
+    object_hrn = object_gid.get_hrn()
+
+    if not object_cred.get_delegate():
+        raise Exception, "Error: Object credential %(object_hrn)s does not have delegate bit set" % locals()
+       
+
+    records = registry.resolve(user_cred, hrn)
+    records = filter_records(type, records)
+    
+    if not records:
+        raise Exception, "Error: Didn't find a %(type)s record for %(hrn)s" % locals()
+
+    # the gid of the user who will be delegated too
+    delegee_gid = records[0].get_gid_object()
+    delegee_hrn = delegee_gid.get_hrn()
+    
+    # the key and hrn of the user who will be delegating
+    user_key = Keypair(filename = get_key_file())
+    user_hrn = cred.get_gid_caller().get_hrn()
+
+    dcred = Credential(subject=object_hrn + " delegated to " + delegee_hrn)
+    dcred.set_gid_caller(delegee_gid)
+    dcred.set_gid_object(object_gid)
+    dcred.set_privileges(object_cred.get_privileges())
+    dcred.set_delegate(True)
+    dcred.set_pubkey(object_gid.get_pubkey())
+    dcred.set_issuer(user_key, user_hrn)
+    dcred.set_parent(object_cred)
+    dcred.encode()
+    dcred.sign()
+
+    return dcred
+
 def get_rspec_file(rspec):
    if (os.path.isabs(rspec)):
       file = rspec
