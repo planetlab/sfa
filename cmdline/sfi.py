@@ -187,12 +187,12 @@ def delegate_cred(cred, hrn, type = 'authority'):
     # the gid and hrn of the object we are delegating
     object_gid = cred.get_gid_object()
     object_hrn = object_gid.get_hrn()
-
-    if not object_cred.get_delegate():
+    cred.set_delegate(True)
+    if not cred.get_delegate():
         raise Exception, "Error: Object credential %(object_hrn)s does not have delegate bit set" % locals()
        
 
-    records = registry.resolve(user_cred, hrn)
+    records = registry.resolve(cred, hrn)
     records = filter_records(type, records)
     
     if not records:
@@ -209,11 +209,11 @@ def delegate_cred(cred, hrn, type = 'authority'):
     dcred = Credential(subject=object_hrn + " delegated to " + delegee_hrn)
     dcred.set_gid_caller(delegee_gid)
     dcred.set_gid_object(object_gid)
-    dcred.set_privileges(object_cred.get_privileges())
+    dcred.set_privileges(cred.get_privileges())
     dcred.set_delegate(True)
     dcred.set_pubkey(object_gid.get_pubkey())
     dcred.set_issuer(user_key, user_hrn)
-    dcred.set_parent(object_cred)
+    dcred.set_parent(cred)
     dcred.encode()
     dcred.sign()
 
