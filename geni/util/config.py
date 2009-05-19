@@ -32,6 +32,7 @@ class Config:
 
         loaded = False
         path = os.path.dirname(os.path.abspath(__file__))
+        self.path = path
         filename = file.split(os.sep)[-1]
         alt_file = path + os.sep + 'util' + os.sep + filename
         geni_file = geni + os.sep + 'util' + os.sep + filename
