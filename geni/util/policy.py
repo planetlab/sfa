@@ -6,8 +6,14 @@ from geni.util.debug import log
 class Policy(SimpleStorage):
 
     def __init__(self, api):
-        self.api = api    
-        self.policy_file = os.sep.join([self.api.server_basedir, self.api.interface + '.' + self.api.hrn + '.policy'])
+        self.api = api
+        path = self.api.config.basepath
+        print self.api.config.basepath
+        print path
+        filename = ".".join([self.api.interface, self.api.hrn, "policy"])    
+        print filename
+        filepath = path + os.sep + filename
+        self.policy_file = filepath
         default_policy = {'slice_whitelist': [],
                           'slice_blacklist': [],
                           'node_whitelist': [],

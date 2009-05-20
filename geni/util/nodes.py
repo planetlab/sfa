@@ -20,7 +20,10 @@ class Nodes(SimpleStorage):
         self.api = api
         self.ttl = ttl
         self.threshold = None
-        self.nodes_file = os.sep.join([self.api.server_basedir, self.api.interface +'.'+ self.api.hrn + '.nodes'])
+        path = self.api.config.basepath
+        filename = ".".join([self.api.interface, self.api.hrn, "nodes"])
+        filepath = path + os.sep + filename
+        self.nodes_file = filepath
         SimpleStorage.__init__(self, self.nodes_file)
         self.policy = Policy(api)
         self.load()

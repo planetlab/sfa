@@ -16,7 +16,10 @@ class Slices(SimpleStorage):
         self.api = api
         self.ttl = ttl
         self.threshold = None
-        self.slices_file = os.sep.join([self.api.server_basedir, self.api.interface +'.'+ self.api.hrn + '.slices'])
+        path = self.api.config.basepath
+        filename = ".".join([self.api.interface, self.api.hrn, "slices"])
+        filepath = path + os.sep + filename
+        self.slices_file = filepath
         SimpleStorage.__init__(self, self.slices_file)
         self.policy = Policy(self.api)    
         self.load()
