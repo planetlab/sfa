@@ -7,9 +7,9 @@ class TrustedRootList():
     def __init__(self, dir=None):
         if not dir:
             config = Config()
-            self.basedir = config.path + os.sep + 'trusted_roots'
-        else:
-            self.basedir = dir
+            dir = config.basepath + os.sep + 'trusted_roots'
+        self.basedir = dir
+        
         # create the directory to hold the files
         try:
             os.makedirs(self.basedir)
