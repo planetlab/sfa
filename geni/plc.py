@@ -37,10 +37,10 @@ from optparse import OptionParser
 from geni.util.hierarchy import Hierarchy
 from geni.util.trustedroot import TrustedRootList
 from geni.util.cert import Keypair, Certificate
+from geni.util.config import Config
 from geni.registry import Registry
 from geni.aggregate import Aggregate
 from geni.slicemgr import SliceMgr
-
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():
@@ -76,9 +76,11 @@ def main():
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
- 
-    key_file = "server.key"
-    cert_file = "server.cert"
+
+    config = Config()
+    path = config.path 
+    key_file = path + os.sep + "server.key"
+    cert_file = path + os.sep + "server.cert"
     
     if (options.daemon):  daemon()
 
