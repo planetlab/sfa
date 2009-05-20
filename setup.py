@@ -16,14 +16,14 @@ data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'gen
 symlinks = ['/usr/share/geniwrapper']
 initscripts = ['/etc/init.d/geniwrapper']
         
-if sys.argv[1] in ['uninstall', 'remove', 'delete']:
+if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
     site_packages_only = lambda path: path.endswith('site-packages') 
     site_packages_path = filter(site_packages_only, python_path)
     add_geni_path = lambda path: path + os.sep + 'geni'
     site_packages_path = map(add_geni_path, site_packages_path) 
     remove_dirs = ['/etc/geni/'] + site_packages_path
-    remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py'] + \
+    remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py', '/usr/bin/geni-config-tty'] + \
                     symlinks + initscripts
     
     # remove files   
