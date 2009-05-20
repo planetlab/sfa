@@ -12,8 +12,7 @@ version = '0.2'
 scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py', 'geni-config-tty']
 package_dirs = ['geni', 'geni/util', 'geni/methods']
 data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'geni/util/geni_config', 'cmdline/configSfi.sh']),
-              ('/etc/init.d/', ['geni/geniwrapper'])
-                ]
+              ('/etc/init.d/', ['geni/geniwrapper'])]
 symlinks = ['/usr/share/geniwrapper']
 initscripts = ['/etc/init.d/geniwrapper']
         
@@ -67,10 +66,14 @@ and the Geni API.
     site_packages_path = map(add_geni_path, site_packages_path)
     # python path usualy has /urs/local/lib/ path , filter this out
     site_packages_path = filter(lambda x: 'local' not in x, site_packages_path) 
-    for src in site_packages_path:
-        for dst in symlinks:
-            try: 
-                os.symlink(src, dst)
-            except: pass
-    for initscript in initscripts:
-        os.chmod(initscript, 00744)
+
+    # we can not do this here as installation root might change paths
+    # - baris
+    #
+    # for src in site_packages_path:
+    #     for dst in symlinks:
+    #         try: 
+    #             os.symlink(src, dst)
+    #         except: pass
+    # for initscript in initscripts:
+    #     os.chmod(initscript, 00744)

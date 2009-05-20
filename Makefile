@@ -6,11 +6,11 @@
 init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py 
 
 subdirs := keyconvert #pyOpenSSL-0.9
- 
-all: install $(init) $(subdirs)
 
-install: 
-	python setup.py install
+all: $(init) $(subdirs)
+
+install: all
+	python setup.py install --root=$(DESTDIR)
 
 $(subdirs): $(init)
 
@@ -18,9 +18,8 @@ $(subdirs): %:
 	$(MAKE) -C $@
 
 clean:
-	python setup.py uninstall
+	python setup.py clean
 	cd keyconvert && make clean
-	# XX remove keyconvert   
 
 index: $(init)
 
