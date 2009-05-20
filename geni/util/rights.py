@@ -50,6 +50,8 @@ def determine_rights(type, name):
         rl.add("authority,sa")
     elif type == "ma":
         rl.add("authority,ma")
+    elif type == "authority":
+        r1.add("authority,sa,ma")
     elif type == "slice":
         rl.add("refresh")
         rl.add("embed")
@@ -222,6 +224,8 @@ class RightList:
             rl.add("authority,sa")
         elif type == "ma":
             rl.add("authority,ma")
+        elif type == "authority":
+            rl.add("authority,sa,ma")
         elif type == "slice":
             rl.add("refresh")
             rl.add("embed")
