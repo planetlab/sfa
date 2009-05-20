@@ -67,7 +67,7 @@ for path in files:
         break
 
 if not loaded:
-    raise Exception, "Could not find config in " + ", ".join(files)        
+    raise Exception, "Could not find keyconvert in " + ", ".join(files)        
 
 def un_unicode(str):
    if isinstance(str, unicode):
@@ -290,9 +290,19 @@ def import_site(parent_hrn, site):
     AuthHierarchy = Hierarchy()
     sitename = site['login_base']
     sitename = cleanup_string(sitename)
-
+    
     hrn = parent_hrn + "." + sitename
 
+    # Hardcode 'internet2' into the hrn for sites hosting 
+    # internet2 nodes. This is a special operation for some vini
+    # sites
+    if parent_hrn.find(".vini.") != -1 and 'abbreviated_name' in site:
+        abv_name = site['abbreviated_name']
+        if abv_name.find("I2") != -1 or abv_name.find("NLR") != -1:
+            if sitename.startswith("ii"): sitename.replace("ii", "")
+            if sitename.startswith("nlr"): sitename.replace("nlr", "")
+            hrn = ".".join([parent_hrn, "internet2", sitename]) 
+ 
     report.trace("Import_Site: importing site " + hrn)
 
     # create the authority
