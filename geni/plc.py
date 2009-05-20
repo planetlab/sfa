@@ -78,7 +78,7 @@ def main():
     (options, args) = parser.parse_args()
 
     config = Config()
-    path = config.path 
+    path = config.basepath 
     key_file = path + os.sep + "server.key"
     cert_file = path + os.sep + "server.cert"
     
