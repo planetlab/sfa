@@ -104,11 +104,10 @@ class Hierarchy():
     # @param basedir the base directory to store the hierarchy in
 
     def __init__(self, basedir = None):
-        config = Config()
         if not basedir:
-            basedir = config.GENI_BASE_DIR + os.sep + 'geni' + os.sep
-        self.basedir = os.path.join(basedir, "authorities")
-
+            config = Config()
+            basedir = config.basepath + os.sep + "authorities"
+        self.basedir = basedir
     ##
     # Given a hrn, return the filenames of the GID, private key, and dbinfo
     # files.
