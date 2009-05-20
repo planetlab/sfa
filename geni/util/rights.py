@@ -51,7 +51,7 @@ def determine_rights(type, name):
     elif type == "ma":
         rl.add("authority,ma")
     elif type == "authority":
-        r1.add("authority,sa,ma")
+        rl.add("authority,sa,ma")
     elif type == "slice":
         rl.add("refresh")
         rl.add("embed")
