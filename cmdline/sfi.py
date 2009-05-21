@@ -557,7 +557,7 @@ def resources(opts, args):
    format = opts.format      
    display_rspec(result, format)
    if (opts.file is not None):
-      save_rspec_to_file(opts.file, result)
+      save_rspec_to_file(result, opts.file)
    return
 
 # created named slice with given rspec
