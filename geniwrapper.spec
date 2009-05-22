@@ -54,7 +54,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/gimport.py*
 /usr/bin/plc.py*
 /usr/bin/sfi.py*
-%(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")/geni
+%(python -c "from distutils.sysconfig import get_python_lib(1); print get_python_lib()")/geni
 /usr/share/keyconvert
 
 %post
