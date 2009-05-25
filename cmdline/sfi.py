@@ -498,7 +498,7 @@ def update(opts, args):
        if record.get_name() == user_cred.get_gid_object().get_hrn():
           cred = user_cred
        else:
-          create = get_auth_cred()
+          cred = get_auth_cred()
    elif record.get_type() in ["slice"]:
        try:
            cred = get_slice_cred(record.get_name())
