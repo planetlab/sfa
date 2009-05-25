@@ -10,7 +10,7 @@ subdirs := keyconvert #pyOpenSSL-0.9
 all: $(init) $(subdirs)
 
 install: all
-	python setup.py install --root=$(DESTDIR)
+	python setup.py install --root=$(DESTDIR) --record=GENI_INSTALLED_FILES
 
 $(subdirs): $(init)
 

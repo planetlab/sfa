@@ -43,19 +43,15 @@ make
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR="$RPM_BUILD_ROOT"
 
+# hack to add installed files to the package
+python -c "print '\n'.join(['%s*'%i.strip() for i in open('GENI_INSTALLED_FILES').readlines() if not i.strip().endswith('.pyc')])" |uniq > GENI_INSTALLED_FILES.all
+
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
+%files -f GENI_INSTALLED_FILES.all
 %defattr(-,root,root)
-/etc/init.d/geniwrapper
-/etc/geni
-/usr/bin/geni-config-tty
-/usr/bin/gimport.py*
-/usr/bin/plc.py*
-/usr/bin/sfi.py*
-%(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")/geni
-
 /usr/share/keyconvert
 
 %post
