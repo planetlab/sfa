@@ -5,6 +5,7 @@ from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.record import GeniRecord
 from geni.util.debug import log
+from geni.util.misc import *
 
 class register(Method):
     """
@@ -89,7 +90,8 @@ class register(Method):
 
         elif (type == "node"):
             self.api.geni_fields_to_pl_fields(type, name, geni_fields, pl_fields)
-            login_base = self.api.hrn_to_pl_login_base(auth_name)
+            #login_base = self.api.hrn_to_pl_login_base(auth_name)
+	    login_base = hrn_to_pl_login_base(auth_name)
             pointer = self.api.plshell.AddNode(self.api.plauth, login_base, pl_fields)
             record.set_pointer(pointer)
 
