@@ -55,7 +55,7 @@ plc.py -s -d
 Use:
 ==== 
 
-Copy my private PL ssh key to ~/.sfi/quetier.pkey
+Copy my private PL (RSA) ssh key to ~/.sfi/quetier.pkey
 
 in cmdline
 edit  configSfi.sh
