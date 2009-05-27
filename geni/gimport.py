@@ -389,7 +389,7 @@ def main():
 
     connect_shell()
 
-    sites = shell.GetSites(pl_auth)
+    sites = shell.GetSites(pl_auth, {'peer_id': None})
     for site in sites:
         import_site(import_auth, site)
 
