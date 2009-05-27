@@ -292,17 +292,18 @@ def import_site(parent_hrn, site):
     sitename = cleanup_string(sitename)
     
     hrn = parent_hrn + "." + sitename
-
+    
     # Hardcode 'internet2' into the hrn for sites hosting 
     # internet2 nodes. This is a special operation for some vini
-    # sites
-    if parent_hrn.find(".vini.") != -1 and 'abbreviated_name' in site:
-        abv_name = site['abbreviated_name']
-        if abv_name.find("I2") != -1 or abv_name.find("NLR") != -1:
-            if sitename.startswith("ii"): sitename.replace("ii", "")
-            if sitename.startswith("nlr"): sitename.replace("nlr", "")
+    # sites only
+    if ".vini" in parent_hrn and parent_hrn.endswith('vini'):
+        if sitename.startswith("ii"): 
+            sitename = sitename.replace("ii", "")
             hrn = ".".join([parent_hrn, "internet2", sitename]) 
- 
+        elif sitename.startswith("nlr"): 
+            hrn = ".".join([parent_hrn, "internet2", sitename]) 
+            sitename = sitename.replace("nlr", "")
+         
     report.trace("Import_Site: importing site " + hrn)
 
     # create the authority
@@ -364,8 +365,6 @@ def main():
 
     process_options()
 
-    print "Base Directory: ", config.GENI_BASE_DIR
-
     AuthHierarchy = Hierarchy()
     TrustedRoots = TrustedRootList()
 
@@ -390,6 +389,11 @@ def main():
     connect_shell()
 
     sites = shell.GetSites(pl_auth, {'peer_id': None})
+    # create a fake internet2 site first
+    i2site = {'name': 'Internet2', 'abbreviated_name': 'I2',
+                    'login_base': 'internet2', 'site_id': -1}
+    import_site(import_auth, i2site)
+    
     for site in sites:
         import_site(import_auth, site)
 
