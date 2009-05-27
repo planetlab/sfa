@@ -102,6 +102,8 @@ class get_credential(Method):
         for rec in records:
             if type in ['*'] or rec.get_type() in [type]:
                 record = rec
+        if not record:
+            raise RecordNotFound(hrn)
         gid = record.get_gid_object()
         peer_cert = self.api.auth.peer_cert
         if not peer_cert.is_pubkey(gid.get_pubkey()):
