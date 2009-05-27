@@ -14,12 +14,11 @@
 # Note that Geniwrapper does not access any of the PLC databases directly via
 # a mysql connection; All PLC databases are accessed via PLCAPI.
 
-import os
-import sys
+from os.path import join,dirname,basename,abspath
 from geni.util.debug import log
 import traceback
 
-geni =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))+ os.sep + "geni"
+geni =  join(dirname(dirname(dirname(abspath(__file__)))), "geni")
 
 class Config:
     """
@@ -27,23 +26,23 @@ class Config:
     fast but no type conversions.
     """
 
-    def __init__(self, file = "/etc/geni/geni_config"):
+    def __init__(self, filepath = "/etc/geni/geni_config"):
         # Load plc_config
 
         loaded = False
-        path = os.path.dirname(os.path.abspath(__file__))
+        path = dirname(abspath(__file__))
         self.path = path
-        self.basepath = os.sep.join(self.path.split(os.sep)[:-1])
-        filename = file.split(os.sep)[-1]
-        alt_file = path + os.sep + 'util' + os.sep + filename
-        geni_file = geni + os.sep + 'util' + os.sep + filename
-        files = [file, alt_file, geni_file]
+        self.basepath = dirname(self.path)
+        filename = basename(filepath)
+        alt_file = join(self.path, 'util', filename)
+        geni_file = join(geni, 'util', filename)
+        files = [filepath, alt_file, geni_file]
 
-        for file in files:
+        for config_file in files:
             try:
-                execfile(file, self.__dict__)
+                execfile(config_file, self.__dict__)
                 loaded = True
-                self.config_file = file
+                self.config_file = config_file
                 break
             except:
                 pass
@@ -53,11 +52,11 @@ class Config:
 
         # set up some useful variables
 
-    def load(self, file):
+    def load(self, filepath):
         try:
-            execfile(file, self.__dict__)
+            execfile(filepath, self.__dict__)
         except:
-            raise Exception, "Could not find config in " + file
+            raise Exception, "Could not find config in " + filepath
 
 plcConfig = Config("/etc/planetlab/plc_config")
 
