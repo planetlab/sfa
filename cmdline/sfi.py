@@ -511,6 +511,8 @@ def update(opts, args):
                raise
    elif record.get_type() in ["authority"]:
        cred = get_auth_cred()
+   elif record.get_type() == 'node':
+        cred = get_auth_cred()
    else:
        raise "unknown record type" + record.get_type()
    return registry.update(cred, record)
