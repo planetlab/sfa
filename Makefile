@@ -3,6 +3,7 @@
 #
 # 
 # Meta
+DESTDIR="/"
 init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py 
 
 subdirs := keyconvert #pyOpenSSL-0.9
