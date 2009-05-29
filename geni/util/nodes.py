@@ -182,7 +182,7 @@ class Nodes(SimpleStorage):
 
         if self.api.plshell_version in ['4.2']:
             interfaces = self.api.plshell.GetNodeNetworks(self.api.plauth, interface_ids)
-        elif self.api.shell_version in ['4.3']:
+        elif self.api.plshell_version in ['4.3']:
             interfaces = self.api.plshell.GetInterfaces(self.api.plauth, interface_ids)
         else:
             raise GeniAPIError, "Unsupported plcapi version ", \
