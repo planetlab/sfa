@@ -255,7 +255,6 @@ def load_publickey_string(fn):
        os.remove(outfn)
 
    return key_string
-
 #
 # Generate sub-command parser
 #
