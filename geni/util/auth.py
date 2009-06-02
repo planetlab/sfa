@@ -161,7 +161,8 @@ class Auth:
         else:
             # supplying src_cred==None is only valid when obtaining user
             # credentials.
-            assert(type == "user")
+            #assert(type == "user")
+            
             cred_object_hrn = None
 
         rl = RightList()
