@@ -179,7 +179,7 @@ class Auth:
         elif type == "authority":
             pis = record.get_geni_info().get("pi", [])
             operators = record.get_geni_info().get("operator", [])
-            rl.add("authority")
+            rl.add("authority,sa,ma")
             if (cred_object_hrn in pis):
                 rl.add("sa")
             if (cred_object_hrn in operators):
