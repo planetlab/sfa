@@ -27,6 +27,7 @@ class list(Method):
     def call(self, cred, hrn):
         
         self.api.auth.check(cred, 'list')
+        records = []
         try:
             if not self.api.auth.hierarchy.auth_exists(hrn):
                 raise MissingAuthority(hrn)
