@@ -111,7 +111,7 @@ class get_credential(Method):
 
         rights = self.api.auth.determine_user_rights(None, record)
         if rights.is_empty():
-            raise PermissionError(self.api.auth.client_cred.get_gid_object().get_hrn() + " has no rights to " + record.get_name())
+            raise PermissionError(gid.get_hrn() + " has no rights to " + record.get_name())
 
         # create the credential
         gid = record.get_gid_object()
