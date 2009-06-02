@@ -180,6 +180,7 @@ class GeniAPI:
             self_cred = registry.get_credential(None, type, self.hrn)
             cred = registry.get_credential(self_cred, type, self.hrn)
             cred.save_to_file(cred_filename, save_parents=True)
+            return cred
 
     def getCredentialFromLocalRegistry(self):
         """
