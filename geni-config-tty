@@ -19,6 +19,9 @@ import traceback
 from optparse import OptionParser
 
 from geni.util.config import Config
+from geni.util.hierarchy import *
+from geni.util.misc import *
+
 
 usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_REGISTRY_LEVEL1_AUTH",
@@ -222,6 +225,42 @@ def mainloop (default_config, config_file):
         else:
             print ("Unknown command >%s< -- use h for help" % answer)
 
+    result = {}
+    result.update(defaults)
+    result.update(changes)
+    return result
+    
+def setup_server_key(config_dict):
+    hrn = config_dict.get('GENI_INTERFACE_HRN')
+    print "updating server key ...", 
+    if not hrn: print "nothing to do"
+   
+    # Get the path to the authorities directory hierarchy
+    hierarchy = Hierarchy()
+    path = hierarchy.basedir
+    auth_path = hrn.replace(".", os.sep)
+ 
+    # define some useful variables   
+    key = 'server.key'
+    cert = 'server.cert'
+    hrn_leaf = get_leaf(hrn)
+    if not hrn_leaf:
+        hrn_leaf = hrn
+    new_server_key = os.sep.join([path, auth_path, hrn_leaf])
+    old_server_key = os.sep.join([path, key])
+    old_server_cert = os.sep.join([path, cert])
+
+    # remove old key/cert
+    for fd in [old_server_key, old_server_cert]:
+        if os.path.isfile(fd):
+            os.remove(fd)
+
+    # create new server.key
+    #os.copy(new_server_key, old_server_key)
+    print "%(old_server_key)s copied from %(new_server_key)s" % locals()
+    
+    
+
 ####################
 def main ():
 
@@ -244,8 +283,10 @@ def main ():
     # if -d is specified dont prompt, just configure with defaults
     if '-d' in argv:
         save_config(defaults, config_file)
+        results = defaults
     else:        
-        mainloop (defaults, config_file)
+        results = mainloop (defaults, config_file)
+    setup_server_key(results)
     return 0
 
 if __name__ == '__main__':
