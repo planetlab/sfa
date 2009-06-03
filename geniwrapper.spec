@@ -3,7 +3,7 @@
 
 %define name geniwrapper
 %define version 0.2
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -58,6 +58,9 @@ rm -rf $RPM_BUILD_ROOT
 chmod 0744 /etc/init.d/geniwrapper
 
 %changelog
+* Wed Jun 03 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-3
+- various fixes
+
 * Sat May 30 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-2
 - bugfixes - still a work in progress
 
