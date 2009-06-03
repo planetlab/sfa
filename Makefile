@@ -65,3 +65,7 @@ endif
 force:
 
 .PHONY: all install force clean index tags $(subdirs)
+
+# are the .java files used ?
+tags:	
+	find . -name '*.py' -o -name '*.sh' -o -name '*.ecore'  | grep -v '/\.svn/' | xargs etags
