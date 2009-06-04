@@ -305,7 +305,7 @@ class GeniAPI:
         # for example, the top level authority records which are
         # authorities, but not PL "sites"
         if pointer == -1:
-            record.set_pl_info({})
+            record.update({})
             return
 
         if (type in ["authority", "sa", "ma"]):
@@ -357,7 +357,7 @@ class GeniAPI:
                 pubkeys = [key['key'] for key in keys]
             pl_record['keys'] = pubkeys     
 
-        record.set_pl_info(pl_record)
+        record.update(pl_record)
 
 
     def lookup_users(self, auth_table, user_id_list, role="*"):
@@ -367,7 +367,7 @@ class GeniAPI:
             for user_record in user_records:
                 self.fill_record_info(user_record)
 
-                user_roles = user_record.get_pl_info().get("roles")
+                user_roles = user_record.get("roles")
                 if (role=="*") or (role in user_roles):
                     record_list.append(user_record.get_name())
         return record_list
@@ -378,13 +378,13 @@ class GeniAPI:
 
         if (type == "slice"):
             auth_table = self.auth.get_auth_table(self.auth.get_authority(record.get_name()))
-            person_ids = record.pl_info.get("person_ids", [])
+            person_ids = record.get("person_ids", [])
             researchers = self.lookup_users(auth_table, person_ids)
             geni_info['researcher'] = researchers
 
         elif (type == "authority"):
             auth_table = self.auth.get_auth_table(record.get_name())
-            person_ids = record.pl_info.get("person_ids", [])
+            person_ids = record.get("person_ids", [])
             pis = self.lookup_users(auth_table, person_ids, "pi")
             operators = self.lookup_users(auth_table, person_ids, "tech")
             owners = self.lookup_users(auth_table, person_ids, "admin")
@@ -394,14 +394,14 @@ class GeniAPI:
             # TODO: OrganizationName
 
         elif (type == "node"):
-            geni_info['dns'] = record.pl_info.get("hostname", "")
+            geni_info['dns'] = record.get("hostname", "")
             # TODO: URI, LatLong, IP, DNS
     
         elif (type == "user"):
-            geni_info['email'] = record.pl_info.get("email", "")
+            geni_info['email'] = record.get("email", "")
             # TODO: PostalAddress, Phone
 
-        record.set_geni_info(geni_info)
+        record.update(geni_info)
 
     def fill_record_info(self, record):
         """
@@ -413,13 +413,8 @@ class GeniAPI:
 
     def update_membership_list(self, oldRecord, record, listName, addFunc, delFunc):
         # get a list of the HRNs tht are members of the old and new records^M
-        if oldRecord:
-            if oldRecord.pl_info == None:
-                oldRecord.pl_info = {}
-            oldList = oldRecord.get_geni_info().get(listName, [])
-        else:
-            oldList = []
-        newList = record.get_geni_info().get(listName, [])
+        oldList = oldRecord.get(listName, [])
+        newList = record.get(listName, [])
 
         # if the lists are the same, then we don't have to update anything
         if (oldList == newList):
@@ -440,9 +435,8 @@ class GeniAPI:
                 newIdList.append(userRecord.get_pointer())
 
         # build a list of the old person ids from the person_ids field of the
-        # pl_info
         if oldRecord:
-            oldIdList = oldRecord.pl_info.get("person_ids", [])
+            oldIdList = oldRecord.get("person_ids", [])
             containerId = oldRecord.get_pointer()
         else:
             # if oldRecord==None, then we are doing a Register, instead of an

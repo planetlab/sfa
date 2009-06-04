@@ -168,7 +168,7 @@ class Auth:
         rl = RightList()
 
         if type=="slice":
-            researchers = record.get_geni_info().get("researcher", [])
+            researchers = record.get("researcher", [])
             if (cred_object_hrn in researchers):
                 rl.add("refresh")
                 rl.add("embed")
@@ -177,8 +177,8 @@ class Auth:
                 rl.add("info")
 
         elif type == "authority":
-            pis = record.get_geni_info().get("pi", [])
-            operators = record.get_geni_info().get("operator", [])
+            pis = record.get("pi", [])
+            operators = record.get("operator", [])
             rl.add("authority,sa,ma")
             if (cred_object_hrn in pis):
                 rl.add("sa")
@@ -204,15 +204,15 @@ class Auth:
         if cred_object_hrn in [self.config.GENI_REGISTRY_ROOT_AUTH]:
             return
         if type=="slice":
-            researchers = record.get_geni_info().get("researcher", [])
+            researchers = record.get("researcher", [])
             if not (cred_object_hrn in researchers):
                 raise PermissionError(cred_object_hrn + " is not in researcher list for " + record.get_name())
         elif type == "sa":
-            pis = record.get_geni_info().get("pi", [])
+            pis = record.get("pi", [])
             if not (cred_object_hrn in pis):
                 raise PermissionError(cred_object_hrn + " is not in pi list for " + record.get_name())
         elif type == "ma":
-            operators = record.get_geni_info().get("operator", [])
+            operators = record.get("operator", [])
             if not (cred_object_hrn in operators):
                 raise PermissionError(cred_object_hrn + " is not in operator list for " + record.get_name())
 

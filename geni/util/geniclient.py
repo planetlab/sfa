@@ -177,11 +177,7 @@ class GeniClient():
     # Geni database, the appropriate records will also be created in the
     # PLC databases.
     #
-    # The geni_info and/or pl_info fields must in the record must be filled
-    # out correctly depending on the type of record that is being registered.
     #
-    # TODO: The geni_info member of the record should be parsed and the pl_info
-    # adjusted as necessary (add/remove users from a slice, etc)
     #
     # @param cred credential object specifying rights of the caller
     # @return record to register
@@ -217,7 +213,16 @@ class GeniClient():
         result_dict_list = self.server.resolve(cred.save_to_string(save_parents=True), name)
         result_rec_list = []
         for dict in result_dict_list:
-             result_rec_list.append(GeniRecord(dict=dict))
+            if dict['type'] in ['authority']:
+                result_rec_list.append(AuthorityRecord(dict=dict))
+            elif dict['type'] in ['node']:
+                result_rec_list.append(NodeRecord(dict=dict))
+            elif dict['type'] in ['slice']:
+                result_rec_list.append(SliceRecord(dict=dict))
+            elif dict['type'] in ['user']:
+                result_rec_list.append(UserRecord(dict=dict))
+            else:
+                result_rec_list.append(GeniRecord(dict=dict))
         return result_rec_list
 
     ##
@@ -225,11 +230,7 @@ class GeniClient():
     # PLC information associated with the record. The Geni fields (name, type,
     # GID) are fixed.
     #
-    # The record is expected to have the pl_info field filled in with the data
-    # that should be updated.
     #
-    # TODO: The geni_info member of the record should be parsed and the pl_info
-    # adjusted as necessary (add/remove users from a slice, etc)
     #
     # @param cred credential object specifying rights of the caller
     # @param record a record object to be updated

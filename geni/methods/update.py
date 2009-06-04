@@ -12,12 +12,6 @@ class update(Method):
     PLC information associated with the record. The Geni fields (name, type,
     GID) are fixed.
     
-    The record is expected to have the pl_info field filled in with the data
-    that should be updated.
-    
-    TODO: The geni_info member of the record should be parsed and the pl_info
-    adjusted as necessary (add/remove users from a slice, etc)
-    
     @param cred credential string specifying rights of the caller
     @param record a record dictionary to be updated
 
@@ -60,17 +54,17 @@ class update(Method):
         # update the PLC information that was specified with the record
 
         if (type == "authority"):
-            self.api.plshell.UpdateSite(self.api.plauth, pointer, record.get_pl_info())
+            self.api.plshell.UpdateSite(self.api.plauth, pointer, record)
 
         elif type == "slice":
-            self.api.plshell.UpdateSlice(self.api.plauth, pointer, record.get_pl_info())
+            self.api.plshell.UpdateSlice(self.api.plauth, pointer, record)
 
         elif type == "user":
             # SMBAKER: UpdatePerson only allows a limited set of fields to be
             #    updated. Ideally we should have a more generic way of doing
             #    this. I copied the field names from UpdatePerson.py...
             update_fields = {}
-            all_fields = record.get_pl_info()
+            all_fields = record
             for key in all_fields.keys():
                 if key in ['first_name', 'last_name', 'title', 'email',
                            'password', 'phone', 'url', 'bio', 'accepted_aup',
@@ -79,7 +73,7 @@ class update(Method):
             self.api.plshell.UpdatePerson(self.api.plauth, pointer, update_fields)
 
         elif type == "node":
-            self.api.plshell.UpdateNode(self.api.plauth, pointer, record.get_pl_info())
+            self.api.plshell.UpdateNode(self.api.plauth, pointer, record)
 
         else:
             raise UnknownGeniType(type)

@@ -8,9 +8,9 @@ import report
 from types import StringTypes
 from gid import *
 from geni.util.rspec import *
+from geni.util.parameter import *
 
-
-class GeniRecord:
+class GeniRecord(dict):
     """ 
     The GeniRecord class implements a Geni Record. A GeniRecord is a tuple
     (Name, GID, Type, Info).
@@ -21,8 +21,6 @@ class GeniRecord:
  
     Info is comprised of the following sub-fields
            pointer = a pointer to the record in the PL database
-           pl_info = planetlab-specific info (when talking to client)
-           geni_info = geni-specific info (when talking to client)
  
     The pointer is interpreted depending on the type of the record. For example,
     if the type=="user", then pointer is assumed to be a person_id that indexes
@@ -31,6 +29,16 @@ class GeniRecord:
     A given HRN may have more than one record, provided that the records are
     of different types.
     """
+
+    fields = {
+        'hrn': Parameter(str, "Human readable name of object"),
+        'type': Parameter(str, "Record type"),
+        'gid': Parameter(str, "GID of the object")
+    }
+
+    internal_fields = {
+        'pointer': Parameter(int, "Internal ID")
+    }
 
     ##
     # Create a Geni Record
@@ -43,8 +51,6 @@ class GeniRecord:
 
     def __init__(self, name=None, gid=None, type=None, pointer=None, dict=None, string=None):
         self.dirty = True
-        self.pl_info = None
-        self.geni_info = None
         self.name = None
         self.gid = None
         self.type = None
@@ -61,6 +67,20 @@ class GeniRecord:
             self.load_from_dict(dict)
         if string:
             self.load_from_string(string)
+
+    
+    def update(self, new_dict):
+        if isinstance(new_dict, list):
+            new_dict = new_dict[0]
+
+        # Convert any boolean strings to real bools
+        for key in new_dict:
+            if isinstance(new_dict[key], StringTypes):
+                if new_dict[key].lower() in ["true"]:
+                    new_dict[key] = True
+                elif new_dict[key].lower() in ["false"]:
+                    new_dict[key] = False
+        dict.update(self, new_dict)
 
     ##
     # Set the name of the record
@@ -113,66 +133,6 @@ class GeniRecord:
         """
         self.pointer = pointer
         self.dirty = True
-
-    ##
-    # Set the PLC info of the record
-    #
-    # @param pl_info is a dictionary containing planetlab info
-
-    def set_pl_info(self, pl_info):
-        """
-        Set the PLC info of the record
-        """ 
-        if isinstance(pl_info, list):
-            pl_info = pl_info[0]
-        
-        # Convert any boolean strings to real bools
-        for key in pl_info:
-            if isinstance(pl_info[key], StringTypes):
-                if pl_info[key].lower() in ["true"]:
-                    pl_info[key] = True
-                elif pl_info[key].lower() in ["false"]:
-                    pl_info[key] = False   
-        self.pl_info = pl_info
-        self.dirty = True
-
-    ##
-    # Set the geni info the record
-    #
-    # @param geni_info is a dictionary containing geni info
-
-    def set_geni_info(self, geni_info):
-        """
-        Set the geni info the record
-        """
-        if isinstance(geni_info, list):
-            geni_info = geni_info[0]
-        self.geni_info = geni_info
-        self.dirty = True
-
-    ##
-    # Return the pl_info of the record, or an empty dictionary if none exists
-
-    def get_pl_info(self):
-        """
-        Return the pl_info of the record, or an empty dictionary if none exists
-        """
-        if self.pl_info:
-            return self.pl_info
-        else:
-            return {}
-
-    ##
-    # Return the geni_info of the record, or an empty dictionary if none exists
-
-    def get_geni_info(self):
-        """
-        Return the geni_info of the record, or an empty dictionary if none exists
-        """
-        if self.geni_info:
-            return self.geni_info
-        else:
-            return {}
 
     ##
     # Return the name (HRN) of the record
@@ -230,15 +190,11 @@ class GeniRecord:
         return self.name + "#" + self.type
 
     ##
-    # Returns a list of field names in this record. pl_info, geni_info are not
-    # included because they are not part of the record that is stored in the
-    # database, but are rather computed values from other entities
+    # Returns a list of field names in this record. 
 
     def get_field_names(self):
         """
-        Returns a list of field names in this record. pl_info, geni_info are not
-        included because they are not part of the record that is stored in the
-        database, but are rather computed values from other entities
+        Returns a list of field names in this record.
         """
         return ["name", "gid", "type", "pointer"]
 
@@ -281,18 +237,7 @@ class GeniRecord:
         """
         Return the record in the form of a dictionary
         """
-        dict = {}
-        names = self.get_field_names()
-        for name in names:
-            dict[name] = getattr(self, name)
-
-        if self.pl_info:
-            dict['pl_info'] = self.pl_info
-
-        if self.geni_info:
-            dict['geni_info'] = self.geni_info
-
-        return dict
+        return dict(self)
 
     ##
     # Load the record from a dictionary
@@ -308,14 +253,13 @@ class GeniRecord:
         if gidstr:
             self.set_gid(dict['gid'])
 
-        self.set_type(dict['type'])
         if "pointer" in dict:
            self.set_pointer(dict['pointer'])
-        if "pl_info" in dict and dict['pl_info']:
-           self.set_pl_info(dict["pl_info"])
-        if "geni_info" in dict and dict['geni_info']:
-           self.set_geni_info(dict["geni_info"])
 
+        self.set_type(dict['type'])
+        self['hrn'] = dict['name'] 
+        self.update(dict)        
+    
     ##
     # Save the record to a string. The string contains an XML representation of
     # the record.
@@ -358,37 +302,124 @@ class GeniRecord:
         """
         Walk tree and dump records.
         """
-        print "RECORD", self.name
-        print "        hrn:", self.name
-        print "       type:", self.type
-        print "        gid:"
-        if (not self.gid):
-            print "        None"
-        else:
-            self.get_gid_object().dump(8, dump_parents)
-        print "    pointer:", self.pointer
-
-        print "  geni_info:"
-        geni_info = getattr(self, "geni_info", {})
-        if geni_info:
-            for key in geni_info.keys():
-                print "       ", key, ":", geni_info[key]
-
-        print "    pl_info:"
-        pl_info = getattr(self, "pl_info", {})
-        if pl_info:
-
-            for key in (s for s in pl_info.keys()\
-            if (s.endswith("_ids") or s.endswith("_id")) == False):
-                print "       ", key, ":", pl_info[key]
-
-
+        #print "RECORD", self.name
+        #print "        hrn:", self.name
+        #print "       type:", self.type
+        #print "        gid:"
+        #if (not self.gid):
+        #    print "        None"
+        #else:
+        #    self.get_gid_object().dump(8, dump_parents)
+        #print "    pointer:", self.pointer
+       
+        order = GeniRecord.fields.keys() 
+        for key in self.keys():
+            if key not in order:
+                order.append(key)
+        for key in order:
+            if key in (self and self.fields):
+                if key in 'gid' and self[key]:
+                    gid = GID(string=self[key])
+                    print "     %s:" % key
+                    gid.dump(8, dump_parents)
+                else:    
+                    print "     %s: %s" % (key, self[key])
+    
     def getdict(self):
-        info = {'hrn': self.name, 'type': self.type, 'gid': self.gid}
-        geni_info = getattr(self, "geni_info", {})
-        pl_info = getattr(self, "pl_info", {}) 
-        if geni_info:
-            info.update(geni_info)
-        if pl_info:
-            info.update(pl_info)
-        return info
+        return dict(self)
+    
+
+class UserRecord(GeniRecord):
+
+    fields = {
+        'email': Parameter(str, 'email'),
+        'first_name': Parameter(str, 'First name'),
+        'last_name': Parameter(str, 'Last name'),
+        'title': Parameter(str, 'Title'),
+        'phone': Parameter(str, 'Phone Number'),
+        'sites': Parameter([str], 'List of sites this user belongs to'),
+        'slices': Parameter([str], 'List of slices this user belongs to'),
+        'keys': Parameter([str], 'Public keys'),
+        'enabled': Parameter(bool, 'Is this person enabled'),
+        'date_created': Parameter(int, 'Date and time this record was created'),
+        'last_updated': Parameter(int, 'Date and time of last update'),
+        }
+    fields.update(GeniRecord.fields)
+ 
+    internal_fields = {
+        'roles': Parameter([str], 'List of roles')             
+        }
+    internal_fields.update(GeniRecord.internal_fields)
+    
+class SliceRecord(GeniRecord):
+    fields = {
+        'name': Parameter(str, 'Slice name'),
+        'instantiation': Parameter(str, 'Slice instantiation'),
+        'url': Parameter(str, 'Slice url'),
+        'expires': Parameter(int, 'Date and time this slice exipres'),
+        'persons': Parameter([str], 'List of users for this slice'),
+        'nodes': Parameter([str], 'List of nodes this slice is instantiated on'),
+        'description': Parameter([str], 'Description of this slice'), 
+        'date_created': Parameter(int, 'Date and time this record was created'),
+        }
+    fields.update(GeniRecord.fields)
+
+    internal_fields = {
+        'site': Parameter(str, 'Site this slice belongs to'),
+        'max_nodes': Parameter(int, 'Maximum number of nodes this slice is allowed on')
+        }
+    internal_fields.update(GeniRecord.internal_fields)
+ 
+class NodeRecord(GeniRecord):
+    fields = {
+        'slices': Parameter([str], 'List of instantiated slices on this node'),
+        'hostname': Parameter(str, 'This nodes dns name'),
+        'boot_state': Parameter(str, 'This nodes boot state'),
+        'node_type': Parameter(str, 'Type of node this is'),
+        'last_updated': Parameter(int, 'Date and time of last update'),
+        'slice_ids_whitelist': Parameter([str], 'List of allowed slices on this node'),
+        'date_created': Parameter(int, 'Date and time this node record was created'),
+        }
+    fields.update(GeniRecord.fields)
+
+    internal_fields = {
+        'site': Parameter(str, 'Site this node belongs to'),
+        'session': Parameter(str, 'This nodes session key'),
+        'ssh_rsa_key': Parameter(str, 'Last known ssh host key'),
+        'verified': Parameter(str, 'Whether the node configuration is verified correct'),
+        'last_contact': Parameter(int, 'Date and time this node last phoned home'),
+        'run_level': Parameter(str, 'Run level'),
+        'version': Parameter(str, 'Node software version'),
+        'key': Parameter(str, 'Node key'),
+        'boot_noonce': Parameter(str, 'Random value generate at nodes last boot'),
+        'model': Parameter(str, 'Model of node'),
+        'ports': Parameter([int], 'List of pcu ports this node is connected to') 
+        }
+    internal_fields.update(GeniRecord.internal_fields)
+
+class AuthorityRecord(GeniRecord):
+    fields =  {
+        'operators': Parameter([str], 'List of operators'),
+        'owners': Parameter([str], 'List of owners'),
+        'last_updated': Parameter(int, 'Date and time this record was last updated'),
+        'date_created': Parameter(int, 'Date and time this record was created'),
+        'name': Parameter(str, 'Name'),
+        'abbreviated_name': Parameter(str, 'Abbreviated name'),
+        'login_base': Parameter(str, 'login base'),
+        'enabled': Parameter(bool, 'Is this site enabled'),
+        'url': Parameter(str, 'URL'),
+        'slices': Parameter([str], 'List of slices instantiated by this site'),
+        'nodes': Parameter([str], 'List of nodes at this site'),  
+        'latitude': Parameter(float, 'Decimal latitude of the site'),
+        'longitude': Parameter(float, 'Decimal longitude of the site'),    
+        }
+    fields.update(GeniRecord.fields)
+    
+    internal_fields = {
+        'max_slices': Parameter(int, 'Maximum number of slices this site can instantiate'),
+        'max_slivers': Parameter(int, 'Maximum number of slivers this site can instantiate'),
+        'pi': Parameter([str], 'List of pis'),
+        'is_public': Parameter(bool, 'Is this site public'),
+        
+        }
+    internal_fields.update(GeniRecord.internal_fields) 

@@ -44,8 +44,8 @@ class register(Method):
         if existing_records:
             raise ExistingRecord(name)
 
-        geni_fields = record.get_geni_info()
-        pl_fields = record.get_pl_info()
+        geni_fields = record.as_dict()
+        pl_fields = record.as_dict()
         
         if (type == "sa") or (type=="ma"):
             # update the tree

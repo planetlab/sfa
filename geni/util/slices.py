@@ -129,8 +129,7 @@ class Slices(SimpleStorage):
         records = registry.resolve(credential, hrn)
         for record in records:
             if record.get_type() in ['slice']:
-                slice_info = record.as_dict()
-                slice = slice_info['pl_info']
+                slice = record.as_dict()
         if not slice:
             raise RecordNotFound(slice_hrn)   
 
@@ -149,8 +148,7 @@ class Slices(SimpleStorage):
                 if not site_records:
                     raise RecordNotFound(authority)
                 site_record = site_records[0]
-                site_info = site_record.as_dict()
-                site = site_info['pl_info']
+                site = site_record.as_dict()
                 
                  # add the site
                 site.pop('site_id')
@@ -162,8 +160,7 @@ class Slices(SimpleStorage):
 
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
-        geni_info = slice_info['geni_info']
-        researchers = geni_info['researcher']
+        researchers = slice.get('researcher', [])
         for researcher in researchers:
             person_record = {}
             person_records = registry.resolve(credential, researcher)
@@ -172,7 +169,7 @@ class Slices(SimpleStorage):
                     person_record = record
             if not person_record:
                 pass
-            person_dict = person_record.as_dict()['pl_info']
+            person_dict = person_record.as_dict()
             persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
 
             # Create the person record 

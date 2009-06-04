@@ -92,14 +92,24 @@ class GeniTable():
         result_dict_list = []
         for dict in dict_list:
            if (type=="*") or (dict['type'] == type):
+               dict['hrn'] = dict['name'] 
                result_dict_list.append(dict)
         return result_dict_list
 
     def find(self, type, value, searchfield):
         result_dict_list = self.find_dict(type, value, searchfield)
         result_rec_list = []
-        for dict in result_dict_list:
-            result_rec_list.append(GeniRecord(dict=dict))
+        for result in result_dict_list:
+            if result['type'] in ['authority']:
+                result_rec_list.append(AuthorityRecord(dict=result))
+            elif result['type'] in ['node']:
+                result_rec_list.append(NodeRecord(dict=result))
+            elif result['type'] in ['slice']:
+                result_rec_list.append(SliceRecord(dict=result))
+            elif result['type'] in ['user']:
+                result_rec_list.append(UserRecord(dict=result))
+            else:
+                result_rec_list.append(GeniRecord(dict=result))
         return result_rec_list
 
     def resolve_dict(self, type, hrn):
@@ -117,7 +127,7 @@ class GeniTable():
         result_dict_list = self.list_dict()
         result_rec_list = []
         for dict in result_dict_list:
-            result_rec_list.append(GeniRecord(dict=dict))
+            result_rec_list.append(GeniRecord(dict=dict).as_dict())
         return result_rec_list
 
 def set_geni_table_prefix(x):
