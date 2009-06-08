@@ -285,7 +285,7 @@ class Slices(SimpleStorage):
         slices = self.api.plshell.GetSlices(self.api.plauth, {'name': slicename}, ['slice_id'])
         if not slices:
             raise RecordNotFound(hrn)
-        slice_id = slices[0]
+        slice_id = slices[0]['slice_id']
         attributes = self.api.plshell.GetSliceAttributes(self.api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
         attribute_id = attributes[0]['slice_attribute_id']
         self.api.plshell.UpdateSliceAttribute(self.api.plauth, attribute_id, "0")
