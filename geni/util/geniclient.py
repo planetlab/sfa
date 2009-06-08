@@ -293,8 +293,8 @@ class GeniClient():
     # @param cred a credential identifying the caller (callerGID) and the slice
     #     (objectGID)
 
-    def start_slice(self, cred):
-        result = self.server.start_slice(cred.save_to_string(save_parents=True))
+    def start_slice(self, cred, hrn):
+        result = self.server.start_slice(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ##
@@ -303,8 +303,8 @@ class GeniClient():
     # @param cred a credential identifying the caller (callerGID) and the slice
     #     (objectGID)
 
-    def stop_slice(self, cred):
-        result = self.server.stop_slice(cred.save_to_string(save_parents=True))
+    def stop_slice(self, cred, hrn):
+        result = self.server.stop_slice(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ##
