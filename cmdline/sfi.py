@@ -582,20 +582,23 @@ def delete(opts, args):
 # start named slice
 def start(opts, args):
    global slicemgr
+   slice_hrn = args[0]
    slice_cred = get_slice_cred(args[0])
-   return slicemgr.start_slice(slice_cred)
+   return slicemgr.start_slice(slice_cred, slice_hrn)
 
 # stop named slice
 def stop(opts, args):
    global slicemgr
+   slice_hrn = args[0]
    slice_cred = get_slice_cred(args[0])
-   return slicemgr.stop_slice(slice_cred)
+   return slicemgr.stop_slice(slice_cred, slice_hrn)
 
 # reset named slice
 def reset(opts, args):
    global slicemgr
+   slice_hrn = args[0]
    slice_cred = get_slice_cred(args[0])
-   return slicemgr.reset_slice(slice_cred)
+   return slicemgr.reset_slice(slice_cred, slice_hrn)
 
 #
 #
