@@ -268,9 +268,9 @@ class Slices(SimpleStorage):
 
     def start_slice_smgr(self, hrn):
         credential = self.api.getCredential()
-        aggregates = Aggregates()
+        aggregates = Aggregates(self.api)
         for aggregate in aggregates:
-            aggreegates[aggregate].start_slice(credential, hrn)
+            aggregates[aggregate].start_slice(credential, hrn)
         return 1
 
 
@@ -293,7 +293,7 @@ class Slices(SimpleStorage):
 
     def stop_slice_smgr(self, hrn):
         credential = self.api.getCredential()
-        aggregates = Aggregates()
+        aggregates = Aggregates(self.api)
         for aggregate in aggregates:
-            aggregate[aggregate].stop_slice(credential, hrn)  
+            aggregates[aggregate].stop_slice(credential, hrn)  
 
