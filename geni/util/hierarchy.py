@@ -106,7 +106,7 @@ class Hierarchy():
     def __init__(self, basedir = None):
         if not basedir:
             config = Config()
-            basedir = config.basepath + os.sep + "authorities"
+            basedir = config.config_path + os.sep + "authorities"
         self.basedir = basedir
     ##
     # Given a hrn, return the filenames of the GID, private key, and dbinfo
