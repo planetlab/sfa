@@ -358,13 +358,13 @@ class SliceRecord(GeniRecord):
         'url': Parameter(str, 'Slice url'),
         'expires': Parameter(int, 'Date and time this slice exipres'),
         'persons': Parameter([str], 'List of users for this slice'),
-        'nodes': Parameter([str], 'List of nodes this slice is instantiated on'),
         'description': Parameter([str], 'Description of this slice'), 
         'date_created': Parameter(int, 'Date and time this record was created'),
         }
     fields.update(GeniRecord.fields)
 
     internal_fields = {
+        'nodes': Parameter([str], 'List of nodes this slice is instantiated on'),
         'site': Parameter(str, 'Site this slice belongs to'),
         'max_nodes': Parameter(int, 'Maximum number of nodes this slice is allowed on')
         }
