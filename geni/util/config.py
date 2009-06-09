@@ -30,9 +30,12 @@ class Config:
         # Load plc_config
 
         loaded = False
+        # path to config.py source 
         path = dirname(abspath(__file__))
         self.path = path
+        # parent directory of config.py source
         self.basepath = dirname(self.path)
+        # path to actual config file
         filename = basename(filepath)
         alt_file = join(self.path, 'util', filename)
         geni_file = join(geni, 'util', filename)
@@ -43,6 +46,7 @@ class Config:
                 execfile(config_file, self.__dict__)
                 loaded = True
                 self.config_file = config_file
+                self.config_path = dirname(config_file)
                 break
             except:
                 pass
