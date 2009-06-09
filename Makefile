@@ -1,16 +1,17 @@
 #
 ## (Re)builds Python metafile (__init__.py) and documentation
-#
 # 
-# Meta
+# overwritten by the specfile
 DESTDIR="/"
-init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py 
 
+init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py 
 subdirs := keyconvert #pyOpenSSL-0.9
 
-all: $(init) $(subdirs)
+all: install
 
-install: all
+install: $(init) $(subdirs) install-python
+
+install-python:
 	python setup.py install --root=$(DESTDIR) --record=GENI_INSTALLED_FILES
 
 $(subdirs): $(init)
@@ -20,15 +21,22 @@ $(subdirs): %:
 
 clean:
 	python setup.py clean
-	cd keyconvert && make clean
+	for i in $(subdirs); do make -C $$i clean ; done
 
 index: $(init)
 
 index-clean:
 	rm $(init)
 
-.phony: all install force clean index $(subdirs)
+.phony: all install install-python force clean index $(subdirs)
 
+force:
+
+# are the .java files used ?
+tags:	
+	find . -name '*.py' -o -name '*.sh' -o -name '*.ecore'  | grep -v '/\.svn/' | xargs etags
+
+########## indexes
 geni/__init__.py:
 	(echo '## Please use make index to update this file' ; echo 'all = """' ; cd geni; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' ; echo '""".split()') > $@
 
@@ -62,10 +70,3 @@ ifneq ($(util_now), $(util_files))
 geni/util/__init__.py: force
 endif
 
-force:
-
-.PHONY: all install force clean index tags $(subdirs)
-
-# are the .java files used ?
-tags:	
-	find . -name '*.py' -o -name '*.sh' -o -name '*.ecore'  | grep -v '/\.svn/' | xargs etags
