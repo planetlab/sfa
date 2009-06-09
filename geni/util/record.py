@@ -32,8 +32,8 @@ class GeniRecord(dict):
 
     fields = {
         'hrn': Parameter(str, "Human readable name of object"),
+        'gid': Parameter(str, "GID of the object"),
         'type': Parameter(str, "Record type"),
-        'gid': Parameter(str, "GID of the object")
     }
 
     internal_fields = {
@@ -335,55 +335,53 @@ class UserRecord(GeniRecord):
         'email': Parameter(str, 'email'),
         'first_name': Parameter(str, 'First name'),
         'last_name': Parameter(str, 'Last name'),
-        'title': Parameter(str, 'Title'),
         'phone': Parameter(str, 'Phone Number'),
-        'sites': Parameter([str], 'List of sites this user belongs to'),
-        'slices': Parameter([str], 'List of slices this user belongs to'),
-        'keys': Parameter([str], 'Public keys'),
-        'enabled': Parameter(bool, 'Is this person enabled'),
-        'date_created': Parameter(int, 'Date and time this record was created'),
-        'last_updated': Parameter(int, 'Date and time of last update'),
+        'key': Parameter(str, 'Public key'),
+        'slice': Parameter([str], 'List of slices this user belongs to'),
         }
     fields.update(GeniRecord.fields)
  
     internal_fields = {
-        'roles': Parameter([str], 'List of roles')             
+        'roles': Parameter([str], 'List of roles'),
+        'title': Parameter(str, 'Title'),
+        'sites': Parameter([str], 'List of sites this user belongs to'),
+        'enabled': Parameter(bool, 'Is this person enabled'),
         }
     internal_fields.update(GeniRecord.internal_fields)
     
 class SliceRecord(GeniRecord):
     fields = {
         'name': Parameter(str, 'Slice name'),
-        'instantiation': Parameter(str, 'Slice instantiation'),
         'url': Parameter(str, 'Slice url'),
         'expires': Parameter(int, 'Date and time this slice exipres'),
-        'persons': Parameter([str], 'List of users for this slice'),
+        'researcher': Parameter([str], 'List of users for this slice'),
         'description': Parameter([str], 'Description of this slice'), 
-        'date_created': Parameter(int, 'Date and time this record was created'),
         }
     fields.update(GeniRecord.fields)
 
     internal_fields = {
-        'nodes': Parameter([str], 'List of nodes this slice is instantiated on'),
         'site': Parameter(str, 'Site this slice belongs to'),
+        'instantiation': Parameter(str, 'Slice instantiation'),
+        'nodes': Parameter([str], 'List of nodes this slice is instantiated on'),
         'max_nodes': Parameter(int, 'Maximum number of nodes this slice is allowed on')
         }
     internal_fields.update(GeniRecord.internal_fields)
  
 class NodeRecord(GeniRecord):
     fields = {
-        'slices': Parameter([str], 'List of instantiated slices on this node'),
         'hostname': Parameter(str, 'This nodes dns name'),
-        'boot_state': Parameter(str, 'This nodes boot state'),
         'node_type': Parameter(str, 'Type of node this is'),
-        'last_updated': Parameter(int, 'Date and time of last update'),
-        'slice_ids_whitelist': Parameter([str], 'List of allowed slices on this node'),
-        'date_created': Parameter(int, 'Date and time this node record was created'),
+        'node_type': Parameter(str, 'Type of node this is'),
+        'latitude': Parameter(str, 'latitude'),
+        'longitude': Parameter(str, 'longitude'),
         }
     fields.update(GeniRecord.fields)
 
     internal_fields = {
+        'slice_ids_whitelist': Parameter([str], 'List of allowed slices on this node'),
         'site': Parameter(str, 'Site this node belongs to'),
+        'slices': Parameter([str], 'List of instantiated slices on this node'),
+        'boot_state': Parameter(str, 'This nodes boot state'),
         'session': Parameter(str, 'This nodes session key'),
         'ssh_rsa_key': Parameter(str, 'Last known ssh host key'),
         'verified': Parameter(str, 'Whether the node configuration is verified correct'),
@@ -399,23 +397,22 @@ class NodeRecord(GeniRecord):
 
 class AuthorityRecord(GeniRecord):
     fields =  {
-        'operators': Parameter([str], 'List of operators'),
-        'owners': Parameter([str], 'List of owners'),
-        'last_updated': Parameter(int, 'Date and time this record was last updated'),
-        'date_created': Parameter(int, 'Date and time this record was created'),
         'name': Parameter(str, 'Name'),
-        'abbreviated_name': Parameter(str, 'Abbreviated name'),
         'login_base': Parameter(str, 'login base'),
         'enabled': Parameter(bool, 'Is this site enabled'),
         'url': Parameter(str, 'URL'),
-        'slices': Parameter([str], 'List of slices instantiated by this site'),
         'nodes': Parameter([str], 'List of nodes at this site'),  
-        'latitude': Parameter(float, 'Decimal latitude of the site'),
-        'longitude': Parameter(float, 'Decimal longitude of the site'),    
+        'operator': Parameter([str], 'List of operators'),
+        'researcher': Parameter([str], 'List of researchers'),
+        'PI': Parameter([str], 'List of Principal Investigators'),
         }
     fields.update(GeniRecord.fields)
     
     internal_fields = {
+        'nodes': Parameter([str], 'List of nodes at this site'),  
+        'slices': Parameter([str], 'List of slices instantiated by this site'),
+        'abbreviated_name': Parameter(str, 'Abbreviated name'),
+        'owners': Parameter([str], 'List of owners'),
         'max_slices': Parameter(int, 'Maximum number of slices this site can instantiate'),
         'max_slivers': Parameter(int, 'Maximum number of slivers this site can instantiate'),
         'pi': Parameter([str], 'List of pis'),
