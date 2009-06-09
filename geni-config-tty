@@ -72,12 +72,12 @@ def save_config(changes, config_file):
     
     cfile = open(config_file, 'r')
     lines = cfile.readlines()
-    newlines = []
     cfile.close()
+    newlines = []
     for line in lines:
         added = False
         for variable in changes:
-            if line.startswith(variable):
+            if line.startswith(variable+'='):
                 try:
                     value = int(changes[variable])
                     newline = '%s=%s\n' % (variable, value)
@@ -94,12 +94,13 @@ def save_config(changes, config_file):
     cfile = open(config_file, 'w')
     cfile.writelines(newlines)
     cfile.close()
+    print 'updated config file',config_file
 
 def validate(changes):
     defaults = get_defaults()
     
     if not changes:
-        return
+        return {}
 
     # GENI_INTERFACE_HRN is GENI_REGISTRY_LEVEL1_AUTH, if thats blank it
     # then defaults to GENI_REGISTRY_ROOT_AUTH 
@@ -113,7 +114,7 @@ def validate(changes):
     if 'GENI_REGISTRY_LEVEL1_AUTH' in changes:
         level1_auth = changes['GENI_REGISTRY_LEVEL1_AUTH']
     else:
-        level1_auth = default['GENI_REGISTRY_LEVEL1_AUTH']
+        level1_auth = defaults['GENI_REGISTRY_LEVEL1_AUTH']
                 
     if level1_auth:
         interface_hrn = level1_auth
@@ -197,7 +198,7 @@ def mainloop (default_config, config_file):
             print "help"  
 
         if (answer in ["q","Q"]):
-            return
+            break
         elif (answer == "w"):
             save_config(changes, config_file)
         elif (answer == "u"):
@@ -227,14 +228,13 @@ def mainloop (default_config, config_file):
             print ("Unknown command >%s< -- use h for help" % answer)
 
     result = {}
-    result.update(defaults)
+    result.update(default_config)
     result.update(changes)
     return result
     
 def setup_server_key(config_dict):
     hrn = config_dict.get('GENI_INTERFACE_HRN')
-    print "updating server key ...", 
-    if not hrn: print "nothing to do"
+    if not hrn: return
    
     # Get the path to the authorities directory hierarchy
     hierarchy = Hierarchy()
@@ -258,7 +258,7 @@ def setup_server_key(config_dict):
 
     # create new server.key
     distutils.file_util.copy_file(src=new_server_key, dst=old_server_key, verbose=1)
-    print "%(old_server_key)s copied from %(new_server_key)s" % locals()
+    print "\t\t%(old_server_key)s\ncopied from\t%(new_server_key)s" % locals()
     
     
 
