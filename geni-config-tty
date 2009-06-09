@@ -16,6 +16,7 @@ import os
 import re
 import readline
 import traceback
+import distutils
 from optparse import OptionParser
 
 from geni.util.config import Config
@@ -256,7 +257,7 @@ def setup_server_key(config_dict):
             os.remove(fd)
 
     # create new server.key
-    #os.copy(new_server_key, old_server_key)
+    distutils.file_util.copy_file(src=new_server_key, dst=old_server_key, verbose=1)
     print "%(old_server_key)s copied from %(new_server_key)s" % locals()
     
     
