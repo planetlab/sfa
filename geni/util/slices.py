@@ -251,9 +251,9 @@ class Slices(SimpleStorage):
 
     def start_slice(self, hrn):
         if self.api.interface in ['aggregate']:
-            self.start_slice_aggregate()
+            self.start_slice_aggregate(hrn)
         elif self.api.interface in ['slicemgr']:
-            self.start_slice_smgr()
+            self.start_slice_smgr(hrn)
 
     def start_slice_aggregate(self, hrn):
         slicename = hrn_to_pl_slicename(hrn)
@@ -276,9 +276,9 @@ class Slices(SimpleStorage):
 
     def stop_slice(self, hrn):
         if self.api.interface in ['aggregate']:
-            self.stop_slice_aggregate()
+            self.stop_slice_aggregate(hrn)
         elif self.api.interface in ['slicemgr']:
-            self.stop_slice_smgr()
+            self.stop_slice_smgr(hrn)
 
     def stop_slice_aggregate(self, hrn):
         slicename = hrn_to_pl_slicename(hrn)
