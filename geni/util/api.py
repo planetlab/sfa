@@ -121,8 +121,8 @@ class GeniAPI:
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.GENI_PLC_USER,
-                         'AuthMethod': 'password',
-                         'AuthString': self.config.GENI_PLC_PASSWORD}
+                       'AuthMethod': 'password',
+                       'AuthString': self.config.GENI_PLC_PASSWORD}
         try:
             import PLC.Shell
             shell = PLC.Shell.Shell(globals = globals())
@@ -133,16 +133,15 @@ class GeniAPI:
             plc_host = self.config.GENI_PLC_HOST
             plc_port = self.config.GENI_PLC_PORT
             plc_api_path = self.config.GENI_PLC_API_PATH
-            url = "https://%(plc_host)s:%(plc_port)s/%(plc_api_path)s/" % \
-                   locals()
+            url = "https://%(plc_host)s:%(plc_port)s/%(plc_api_path)s/" % locals()
              
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
             shell.AuthCheck(self.plauth)
             return shell
 
     def getPLCShellVersion(self):
-        # We need to figure out what version of PLCAPI are talking to.
-        # Some calls we need to make later will be different depending
+        # We need to figure out what version of PLCAPI we are talking to.
+        # Some calls we need to make later will be different depending on
         # the api version. 
         try:
             # This is probably a bad way to determine api versions
@@ -290,12 +289,12 @@ class GeniAPI:
     def fill_record_pl_info(self, record):
         """
         Fill in the planetlab specific fields of a Geni record. This
-        involves calling the appropraite PLC method to retrie the 
-        dtabase record for the object.
+        involves calling the appropriate PLC method to retrieve the 
+        database record for the object.
         
-        PLC data is filled into the pl_fino field of the record.
+        PLC data is filled into the pl_info field of the record.
     
-        @param record record to fill in field (in/out param)     
+        @param record: record to fill in field (in/out param)     
         """
         type = record.get_type()
         pointer = record.get_pointer()
@@ -391,15 +390,15 @@ class GeniAPI:
             geni_info['pi'] = pis
             geni_info['operator'] = operators
             geni_info['owner'] = owners
-            # TODO: OrganizationName
+            # xxx TODO: OrganizationName
 
         elif (type == "node"):
             geni_info['dns'] = record.get("hostname", "")
-            # TODO: URI, LatLong, IP, DNS
+            # xxx TODO: URI, LatLong, IP, DNS
     
         elif (type == "user"):
             geni_info['email'] = record.get("email", "")
-            # TODO: PostalAddress, Phone
+            # xxx TODO: PostalAddress, Phone
 
         record.update(geni_info)
 
@@ -412,7 +411,7 @@ class GeniAPI:
         self.fill_record_geni_info(record)
 
     def update_membership_list(self, oldRecord, record, listName, addFunc, delFunc):
-        # get a list of the HRNs tht are members of the old and new records^M
+        # get a list of the HRNs tht are members of the old and new records
         oldList = oldRecord.get(listName, [])
         newList = record.get(listName, [])
 
@@ -434,7 +433,7 @@ class GeniAPI:
                 userRecord = records[0]    
                 newIdList.append(userRecord.get_pointer())
 
-        # build a list of the old person ids from the person_ids field of the
+        # build a list of the old person ids from the person_ids field 
         if oldRecord:
             oldIdList = oldRecord.get("person_ids", [])
             containerId = oldRecord.get_pointer()
@@ -462,7 +461,7 @@ class GeniAPI:
                                         self.plshell.AddPersonToSlice,
                                         self.plshell.DeletePersonFromSlice)
         elif record.type == "authority":
-            # TODO
+            # xxx TODO
             pass
 
 
