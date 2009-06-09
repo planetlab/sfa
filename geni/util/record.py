@@ -34,6 +34,8 @@ class GeniRecord(dict):
         'hrn': Parameter(str, "Human readable name of object"),
         'gid': Parameter(str, "GID of the object"),
         'type': Parameter(str, "Record type"),
+        'last_updated': Parameter(int, 'Date and time of last update'),
+        'date_created': Parameter(int, 'Date and time this record was created'),
     }
 
     internal_fields = {
