@@ -1,29 +1,42 @@
-Dependencies:
-=============
-make
-gcc
-openssl-devel/libssl-dev
-pyOpenSSL >= 0.7
-m2crypto
+========== INSTALL
+Assuming that you've set up your yum repo like for a myplc install,
+you should be abe to just
+# yum install geniwrapper
 
+========== CONFIGURE
 
-Install:
-========
-cd geniwrapper/trunk
-make 
+---
+Inspect your plc config:
 
-
-Configure:
-==========
+[2009.06.09--1l-f8-32-vplc07] / # plc-config-tty 
+Enter command (u for usual changes, w to save, ? for help) s PLC_ROOT_USER
+PLC_ROOT_USER = root@test.onelab.eu
+Enter command (u for usual changes, w to save, ? for help) s PLC_ROOT_PASSWORD
+PLC_ROOT_PASSWORD = test++
+---
 geni-config-tty
 
-or
- 
-edit /etc/geni/geni_config
-* set GENI_PLC_USER to PLC_MAINTENANCE_USER in /etc/planetlab/plc_config
-* set GENI_PLC_PASSWORD to PLC_MAINTENANCE_PASSWORD in /etc/planetlab/plc_config
+* set GENI_PLC_USER		to PLC_ROOT_USER 
+* set GENI_PLC_PASSWORD		to PLC_ROOT_PASSWORD
+write and quit
+
+*NOTE* xxx at this point you get a warning b/c the authorities hierarchy has not been created yet; ignore
+---
+run gimport
+
+[2009.06.09--1l-f8-32-vplc07] / # gimport.py 
+Import: creating top level authorities
+Hierarchy: creating authority: plc
+plc : 
+Import: creating table for authority plc
+NOTICE:  table "geni$plc" does not exist, skipping
+  inserting authority record for plc
+
+--- 
+run geni-config-tty again
 
 copy authorities/ple/ple.pkey to geni/server.key
+
 
 
 Federation:

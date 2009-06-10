@@ -24,7 +24,7 @@ from geni.util.hierarchy import *
 from geni.util.misc import *
 
 
-usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
+all_variables   = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_REGISTRY_LEVEL1_AUTH",
                    "GENI_REGISTRY_ENABLED",
                    "GENI_REGISTRY_HOST", 
@@ -40,6 +40,9 @@ usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_PLC_HOST",
                    "GENI_PLC_PORT",
                    "GENI_PLC_API_PATH"
+                   ]
+usual_variables = ["GENI_PLC_USER",
+                   "GENI_PLC_PASSWORD",    
                    ]
 
 
@@ -247,7 +250,7 @@ def setup_server_key(config_dict):
     hrn_leaf = get_leaf(hrn)
     if not hrn_leaf:
         hrn_leaf = hrn
-    new_server_key = os.sep.join([path, auth_path, hrn_leaf])
+    new_server_key = os.sep.join([path, auth_path, hrn_leaf]) + ".key"
     old_server_key = os.sep.join([path, key])
     old_server_cert = os.sep.join([path, cert])
 
