@@ -43,9 +43,6 @@ class register(Method):
         existing_records = table.resolve(type, name)
         if existing_records:
             raise ExistingRecord(name)
-
-        geni_fields = record.as_dict()
-        pl_fields = record.as_dict()
         
         if (type == "sa") or (type=="ma"):
             # update the tree
@@ -72,27 +69,31 @@ class register(Method):
                 print >> log, "linking ma and sa to the same plc site"
                 pointer = other_rec[0].get_pointer()
             else:
-                self.api.geni_fields_to_pl_fields(type, name, geni_fields, pl_fields)
-                print >> log, "adding site with fields", pl_fields
-                pointer = self.api.plshell.AddSite(self.api.plauth, pl_fields)
+                pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
+                print >> log, "adding site with fields", pl_record
+                pointer = self.api.plshell.AddSite(self.api.plauth, pl_record)
 
             record.set_pointer(pointer)
 
         elif (type == "slice"):
-            self.api.geni_fields_to_pl_fields(type, name, geni_fields, pl_fields)
-            pointer = self.api.plshell.AddSlice(self.api.plauth, pl_fields)
+            pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
+            pointer = self.api.plshell.AddSlice(self.api.plauth, pl_record)
             record.set_pointer(pointer)
 
         elif (type == "user"):
-            self.api.geni_fields_to_pl_fields(type, name, geni_fields, pl_fields)
-            pointer = self.api.plshell.AddPerson(self.api.plauth, pl_fields)
+            pointer = self.api.plshell.AddPerson(self.api.plauth, dict(record))
+            if 'enabled' in record and record['enabled']:
+                self.api.plshell.UpdatePerson(pointer, record['enabled'])
+            login_base = get_leaf(auth_info.hrn)
+            self.api.plshell.AddPersonToSite(pointer, login_base)
+            # What roles should this user have?
+            self.api.plshell.AddRoleToPerson('user', pointer) 
             record.set_pointer(pointer)
 
         elif (type == "node"):
-            self.api.geni_fields_to_pl_fields(type, name, geni_fields, pl_fields)
-            #login_base = self.api.hrn_to_pl_login_base(auth_name)
-	    login_base = hrn_to_pl_login_base(auth_name)
-            pointer = self.api.plshell.AddNode(self.api.plauth, login_base, pl_fields)
+            pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
+            login_base = hrn_to_pl_login_base(auth_name)
+            pointer = self.api.plshell.AddNode(self.api.plauth, login_base, pl_record)
             record.set_pointer(pointer)
 
         else:
