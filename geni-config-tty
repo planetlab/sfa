@@ -250,7 +250,7 @@ def setup_server_key(config_dict):
     hrn_leaf = get_leaf(hrn)
     if not hrn_leaf:
         hrn_leaf = hrn
-    new_server_key = os.sep.join([path, auth_path, hrn_leaf]) + ".key"
+    new_server_key = os.sep.join([path, auth_path, hrn_leaf]) + ".pkey"
     old_server_key = os.sep.join([path, key])
     old_server_cert = os.sep.join([path, cert])
 

@@ -33,10 +33,16 @@ NOTICE:  table "geni$plc" does not exist, skipping
   inserting authority record for plc
 
 --- 
-run geni-config-tty again
+run geni-config-tty again - to initialize /etc/geni/authorities/plc/plc.pkey
 
-copy authorities/ple/ple.pkey to geni/server.key
+[2009.06.09--1l-f8-32-vplc07] / # geni-config-tty 
+Enter command (u for usual changes, w to save, ? for help) q
+                /etc/geni/authorities/server.key
+copied from     /etc/geni/authorities/plc/plc.pkey
+---
 
+
+xxx tested this far xxx
 
 
 Federation:
