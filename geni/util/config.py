@@ -18,7 +18,12 @@ from os.path import join,dirname,basename,abspath
 from geni.util.debug import log
 import traceback
 
-geni =  join(dirname(dirname(dirname(abspath(__file__)))), "geni")
+# xxx the path-search part could use a cleanup; 
+# why would anyone want to store the config in /usr/share/geniwrapper at all ?
+# also, if users want to use this, it might help to store stuff in ~/.sfirc or something
+
+# this would denote "/usr/share/geniwrapper/geni"
+# geni =  join(dirname(dirname(dirname(abspath(__file__)))), "geni")
 
 class Config:
     """
@@ -30,16 +35,19 @@ class Config:
         # Load plc_config
 
         loaded = False
-        # path to config.py source 
+        # path to config.py source - this would be '/usr/share/geniwrapper/geni/util'
         path = dirname(abspath(__file__))
-        self.path = path
+        # self.path not used from the outside
+        #self.path = path
         # parent directory of config.py source
-        self.basepath = dirname(self.path)
+        self.basepath = dirname(path)
         # path to actual config file
         filename = basename(filepath)
-        alt_file = join(self.path, 'util', filename)
-        geni_file = join(geni, 'util', filename)
-        files = [filepath, alt_file, geni_file]
+        # my guess is that alt_file and geni_file are identical
+        alt_file = join(path, 'util', filename)
+        # geni_file = join(geni, 'util', filename)
+        #files = [filepath, alt_file, geni_file]
+        files = [filepath, alt_file]
 
         for config_file in files:
             try:
