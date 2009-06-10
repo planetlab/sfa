@@ -17,9 +17,8 @@ def create_parser():
 (plain or rspec) that meet the specified crieteria. If no criteria is 
 specified, the default action is to return node comon considers 'alive' 
 (resptime > 0)"""
-    options = ['alive']
     cmp_options = ['rwfs', 'uptime', 'loads', 'meminfo', 'kernver', 'cpuspeed', 'txrate', 'rxrate', 'numslices', 'liveslices']
-     
+    option = ['numslices', 'liveslices', 'gbfree'] 
 
     parser = OptionParser(usage=usage,description=description)
     for opt in options:
@@ -35,6 +34,18 @@ def download_file(url, localFile):
     localFile.write(webFile.read())
     localFile.close()    
     
+
+def generate_comon_url(options):
+    url = "select = 'resptime > 0"
+    query_dict = {}
+    query_dict['numslices'] = 'numslices %s= %s'
+    query_dict['liveslices'] = 'liveslices %s= %s'
+    query_dict['gbfree'] = 'gbfree %s= %s'
+    
+    if options.numslices:
+        full_value = options.numslices
+         
+    url += "'"
 
 def get_comon_data():
     date = datetime.now()
@@ -56,6 +67,7 @@ def get_comon_data():
         
 def main():
     parser = create_parser()
+    (options, args) = parser.parse_args()
     comon_file = get_comon_data()
     
 
