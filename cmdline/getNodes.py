@@ -2,6 +2,7 @@
 import sys
 import os
 import traceback
+import urllib
 from datetime import datetime
 from optparse import OptionParser
 from geni.util.rspec import Rspec
@@ -24,28 +25,38 @@ specified, the default action is to return node comon considers 'alive'
     for opt in options:
         parser.add_option("--%s" % opt, dest="%s" % opt, action="store_true", 
                           help = "available options [%s]" % ",".join(cmp_options))
-   return parser    
+   
+    return parser    
 
-def get_comon_data()
+
+def download_file(url, localFile):
+    webFile = urllib.urlopen(url)
+    localFile = open(localFile, 'w')
+    localFile.write(webFile.read())
+    localFile.close()    
+    
+
+def get_comon_data():
     date = datetime.now()
     year = str(date.year)
     month = str(date.month)
     day = str(date.day)
-    for num in [year, month, day]:
-        if len(num) == 1:
-            num = "0" + num
+    if len(month) == 1:
+        month = "0" + month
+    if len(day) == 1:
+        day = "0" + day
      
-    comon_data_file = sfi_dir + os.sep + "comon_data.dat" 
+    comon_data_filename = sfi_dir + os.sep + "comon_data.dat" 
     comon_url = "http://comon.cs.princeton.edu/status/dump_comon_%s%s%s" % (year, month, day)
     
-    # wget comon data and save it 
-    # wget(comon_url)
-    #  
+    print "storing comon data from %s in %s" % (comon_url, comon_data_filename)     
+    download_file(comon_url, comon_data_filename)
 
+    return comon_data_filename
+        
 def main():
     parser = create_parser()
-
-    get_comon_data()
+    comon_file = get_comon_data()
     
 
 if __name__ == '__main__':
