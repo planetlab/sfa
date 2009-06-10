@@ -170,6 +170,8 @@ class Certificate:
    issuerSubject = None
    parent = None
 
+   separator="-----parent-----\n"
+
    ##
    # Create a certificate object.
    #
@@ -211,7 +213,7 @@ class Certificate:
    def load_from_string(self, string):
        # if it is a chain of multiple certs, then split off the first one and
        # load it
-       parts = string.split("-----parent-----", 1)
+       parts = string.split(Certificate.separator, 1)
        self.cert = crypto.load_certificate(crypto.FILETYPE_PEM, parts[0])
 
        # if there are more certs, then create a parent and let the parent load
@@ -236,7 +238,7 @@ class Certificate:
    def save_to_string(self, save_parents=False):
        string = crypto.dump_certificate(crypto.FILETYPE_PEM, self.cert)
        if save_parents and self.parent:
-          string = string + "-----parent-----" + self.parent.save_to_string(save_parents)
+          string = string + Certificate.separator + self.parent.save_to_string(save_parents)
        return string
 
    ##
