@@ -37,22 +37,32 @@ def printRecord(r, depth = 0):
     # Set the dept
     for tab in range(0,depth): line += "    "
     # check if it's nested
-    for i in r.keys(): 
-        if type(r[i]) == dict:
-            # print the parent, carry return
-            print line + "%s :\n" % i
-            #recurse here, increment depth
+    if type(r) == dict:
+        for i in r.keys(): 
+            print line + "%s:" % i
             printRecord(r[i], depth + 1)
+    elif type(r) in (tuple, list):
+        for j in r: printRecord(j, depth + 1)
+    # not nested so just print.
+    else:
+        print line + "%s" %  r
+
+
+def findRoot(r, filter):
+    root = None
+    if type(r) == dict:
+        if not r.has_key(filter):
+            for k in r.keys():
+                root = findRoot(r[k], filter)
+                if root != None: return root
         else:
-            #assume we've hit the bottom
-            if (type(r[i]) == tuple) or (type(r[i]) == list):
-                print line + " %s:" % i
-                for j in r[i]:
-                    if type(j) == dict:
-                        printRecord(j, depth + 2)
-                    else: print line + line + " %s" % j
-            else:
-                print line + " %s:    %s" % (i, r[i])
+            return r[filter]
+    elif type(r) in (tuple, list):
+        for j in r: 
+            root = findRoot(j, filter)
+            if root != None: return root
+    else:
+        return root
 
 def main():
     parser = create_parser(); 
@@ -62,26 +72,27 @@ def main():
     if not options.infile:
         print "You must specify a record file"
         return -1
-    else:
-        try: 
-            record = RecordSpec()
-            print "Openning %s.\n" % options.infile
-            record.parseFile(options.infile)
-        except: raise 
-        record.dict = record.toDict()
+    try: 
+        print "Openning %s.\n" % options.infile
+        f = open(options.infile)
+    except: raise
 
-        if args:
-            print "Filtering on key: %s" % args
+    record = RecordSpec(xml = f)
 
+    if options.DEBUG: 
+        pprint(record.dict)
+        print "#####################################################"
+
+
+    if args:
         if options.DEBUG: 
-            pprint(record.dict)
-            print "#####################################################"
-
-        else:
-            printRecord(record.dict)
+            print "Filtering on key: %s" % args[0]
+            pprint(findRoot(record.dict, args[0]))
+        printRecord({args[0]: findRoot(record.dict, args[0])})
+    else:
+        printRecord(record.dict)
 
 if __name__ == '__main__':
-    main()
-    #try: main()
-    #except Exception, e:
-    #    print e
+    try: main()
+    except Exception, e:
+        print e
