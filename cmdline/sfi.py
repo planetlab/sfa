@@ -365,6 +365,7 @@ def main():
    try:
       dispatch(command, cmd_opts, cmd_args)
    except KeyError:
+      raise 
       print "Command not found:", command
       sys.exit(1)
 
