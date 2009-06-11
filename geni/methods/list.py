@@ -39,7 +39,9 @@ class list(Method):
             credential = self.api.getCredential()
             for registry in registries:
                 if hrn.startswith(registry) and registry not in [self.api.hrn]:
-                    records = registries[registry].list(credential, hrn)
+                    record_list = registries[registry].list(credential, hrn)
+                    for record in record_list:
+                        records.append(record.as_dict()) 
                     return records
         
         return records
