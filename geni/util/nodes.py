@@ -151,7 +151,7 @@ class Nodes(SimpleStorage):
 
         # Get the required nodes
         if not hrn:
-            nodes = self.api.plshell.GetNodes(self.api.plauth)
+            nodes = self.api.plshell.GetNodes(self.api.plauth, {'peer_id': None})
             try:  linkspecs = self.api.plshell.GetLinkSpecs() # if call is supported
             except:  linkspecs = []
         else:
@@ -162,7 +162,7 @@ class Nodes(SimpleStorage):
             else:
                 slice = slices[0]
                 node_ids = slice['node_ids']
-                nodes = self.api.plshell.GetNodes(self.api.plauth, node_ids)
+                nodes = self.api.plshell.GetNodes(self.api.plauth, {'peer_id': None, 'node_ids': node_ids})
 
         # Filter out whitelisted nodes
         public_nodes = lambda n: n.has_key('slice_ids_whitelist') and not n['slice_ids_whitelist']
