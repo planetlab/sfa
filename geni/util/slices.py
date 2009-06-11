@@ -39,7 +39,7 @@ class Slices(SimpleStorage):
                 self.refresh_slices_smgr()
 
     def refresh_slices_aggregate(self):
-        slices = self.api.plshell.GetSlices(self.api.plauth, {}, ['name'])
+        slices = self.api.plshell.GetSlices(self.api.plauth, {'peer_id': None}, ['name'])
         slice_hrns = [slicename_to_hrn(self.api.hrn, slice['name']) for slice in slices]
 
          # update timestamp and threshold
@@ -90,7 +90,7 @@ class Slices(SimpleStorage):
         
     def delete_slice_aggregate(self, hrn):
         slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, [slicename])
+        slices = self.api.plshell.GetSlices(self.api.plauth, {'peer_id': None}, [slicename])
         if not slices:
             return 1        
         slice = slices[0]
