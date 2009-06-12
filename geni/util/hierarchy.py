@@ -134,7 +134,7 @@ class Hierarchy():
     def auth_exists(self, hrn):
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \
             self.get_auth_filenames(hrn)
-    
+        
         return os.path.exists(gid_filename) and \
                os.path.exists(privkey_filename) and \
                os.path.exists(dbinfo_filename)
