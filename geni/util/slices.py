@@ -246,7 +246,6 @@ class Slices(SimpleStorage):
                 print aggregate
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
-    
         return 1
 
 
