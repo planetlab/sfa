@@ -53,22 +53,6 @@ level1_auth = config.GENI_REGISTRY_LEVEL1_AUTH
 if not level1_auth or level1_auth in ['']:
     level1_auth = None
 
-keyconvert = 'keyconvert'
-loaded = False
-default_path = "/usr/share/keyconvert/" + keyconvert
-cwd = os.path.dirname(os.path.abspath(__file__))
-alt_path = os.sep.join(cwd.split(os.sep)[:-1] + ['keyconvert', 'keyconvert'])
-geni_path = config.GENI_BASE_DIR + os.sep + "keyconvert/keyconvert"
-files = [default_path, alt_path, geni_path]
-for path in files:
-    if os.path.isfile(path):
-        keyconvert_fn = path
-        loaded = True
-        break
-
-if not loaded:
-    raise Exception, "Could not find keyconvert in " + ", ".join(files)        
-
 def un_unicode(str):
    if isinstance(str, unicode):
        return str.encode("ascii", "ignore")
@@ -133,52 +117,6 @@ def get_auth_table(auth_name):
 
     return table
 
-def get_pl_pubkey(key_id):
-    keys = shell.GetKeys(pl_auth, [key_id])
-    if keys:
-        key_str = keys[0]['key']
-
-        if "ssh-dss" in key_str:
-            print "XXX: DSA key encountered, ignoring"
-            return None
-
-        # generate temporary files to hold the keys
-        (ssh_f, ssh_fn) = tempfile.mkstemp()
-        ssl_fn = tempfile.mktemp()
-
-        os.write(ssh_f, key_str)
-        os.close(ssh_f)
-
-        if not os.path.exists(keyconvert_fn):
-            report.trace("  keyconvert utility " + str(keyconvert_fn) + " does not exist");
-            sys.exit(-1)
-
-        cmd = keyconvert_fn + " " + ssh_fn + " " + ssl_fn
-        print cmd
-        os.system(cmd)
-
-        # this check leaves the temporary file containing the public key so
-        # that it can be expected to see why it failed.
-        # TODO: for production, cleanup the temporary files
-        if not os.path.exists(ssl_fn):
-            report.trace("  failed to convert key from " + ssh_fn + " to " + ssl_fn)
-            return None
-
-        k = Keypair()
-        try:
-            k.load_pubkey_from_file(ssl_fn)
-        except:
-            print "XXX: Error while converting key: ", key_str
-            k = None
-
-        # remove the temporary files
-        os.remove(ssh_fn)
-        os.remove(ssl_fn)
-
-        return k
-    else:
-        return None
-
 def person_to_hrn(parent_hrn, person):
     # the old way - Lastname_Firstname
     #personname = person['last_name'] + "_" + person['first_name']
@@ -212,7 +150,9 @@ def import_person(parent_hrn, person):
         if key_ids:
             # get the user's private key from the SSH keys they have uploaded
             # to planetlab
-            pkey = get_pl_pubkey(key_ids[0])
+            keys = shell.GetKeys(pl_auth, key_ids)
+            key = keys[0]
+            pkey =convert_public_key(key)
         else:
             # the user has no keys
             report.trace("   person " + hrn + " does not have a PL public key")
