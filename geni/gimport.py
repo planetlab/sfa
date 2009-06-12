@@ -321,7 +321,7 @@ def main():
 
     connect_shell()
 
-    sites = shell.GetSites(pl_auth, {'peer_id': None, 'login_base': 'princeton'})
+    sites = shell.GetSites(pl_auth, {'peer_id': None})
     # create a fake internet2 site first
     i2site = {'name': 'Internet2', 'abbreviated_name': 'I2',
                     'login_base': 'internet2', 'site_id': -1}
