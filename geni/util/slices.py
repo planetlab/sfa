@@ -90,7 +90,7 @@ class Slices(SimpleStorage):
         
     def delete_slice_aggregate(self, hrn):
         slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, {'peer_id': None}, [slicename])
+        slices = self.api.plshell.GetSlices(self.api.plauth, {'peer_id': None, 'name': slicename})
         if not slices:
             return 1        
         slice = slices[0]
@@ -102,6 +102,7 @@ class Slices(SimpleStorage):
         credential = self.api.getCredential()
         aggregates = Aggregates(self.api)
         for aggregate in aggregates:
+            print aggregate
             aggregates[aggregate].delete_slice(credential, hrn)
 
     def create_slice(self, hrn, rspec):
