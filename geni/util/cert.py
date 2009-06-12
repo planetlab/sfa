@@ -21,6 +21,63 @@ from M2Crypto import EVP
 
 from excep import *
 
+def convert_public_key(key):
+    # find the keyconvert program
+    from geni.util.config import Config
+    config = Config()
+    keyconvert = 'keyconvert'
+    loaded = False
+    default_path = "/usr/share/keyconvert/" + keyconvert
+    cwd = os.path.dirname(os.path.abspath(__file__))
+    alt_path = os.sep.join(cwd.split(os.sep)[:-1] + ['keyconvert', 'keyconvert'])
+    geni_path = config.basepath + os.sep + "keyconvert/keyconvert"
+    files = [default_path, alt_path, geni_path]
+    for path in files:
+        if os.path.isfile(path):
+            keyconvert_fn = path
+            loaded = True
+            break
+
+    if not loaded:
+        raise Exception, "Could not find keyconvert in " + ", ".join(files)
+
+    # we can only convert rsa keys 
+    if "ssh-dss" in key:
+        print "XXX: DSA key encountered, ignoring"
+        return None
+    
+    (ssh_f, ssh_fn) = tempfile.mkstemp()
+    ssl_fn = tempfile.mktemp()
+    os.write(ssh_f, key)
+    os.close(ssh_f)
+
+    if not os.path.exists(keyconvert_fn):
+        report.trace("  keyconvet utility " + str(keyconvert_fn) + "does not exist")
+        sys.exit(-1)
+
+    cmd = keyconvert_fn + " " + ssh_fn + " " + ssl_fn
+    os.system(cmd)
+
+    # this check leaves the temporary file containing the public key so
+    # that it can be expected to see why it failed.
+    # TODO: for production, cleanup the temporary files
+    if not os.path.exists(ssl_fn):
+        report.trace("  failed to convert key from " + ssh_fn + " to " + ssl_fn)
+        return None
+
+    k = Keypair()
+    try:
+        k.load_pubkey_from_file(ssl_fn)
+    except:
+        print "XXX: Error while converting key: ", key_str
+        k = None
+
+    # remove the temporary files
+    os.remove(ssh_fn)
+    os.remove(ssl_fn)
+
+    return k
+
 ##
 # Public-private key pairs are implemented by the Keypair class.
 # A Keypair object may represent both a public and private key pair, or it
