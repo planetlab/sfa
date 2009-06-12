@@ -11,7 +11,7 @@ from geni.util.cert import Keypair, Certificate
 from geni.util.credential import Credential
 from geni.util.geniclient import GeniClient, ServerException
 from geni.util.gid import create_uuid
-from geni.util.record import GeniRecord
+from geni.util.record import *
 from geni.util.rspec import Rspec
 from types import StringTypes, ListType
 
@@ -385,7 +385,8 @@ def list(opts, args):
    # filter on person, slice, site, node, etc.  
    # THis really should be in the filter_records funct def comment...
    list = filter_records(opts.type, list)
-   display_records(list)
+   for record in list:
+       print "%s (%s)" % (record['hrn'], record['type'])     
    if opts.file:
        save_records_to_file(opts.file, list)
    return
@@ -398,7 +399,19 @@ def show(opts, args):
    records = filter_records(opts.type, records)
    if not records:
       print "No record of type", opts.type
-   display_records(records, True)
+   for record in records:
+       if record['type'] in ['user']:
+           record = UserRecord(dict = record)
+       elif record['type'] in ['slice']:
+           record = SliceRecord(dict = record)
+       elif record['type'] in ['node']:
+           record = NodeRecord(dict = record)
+       elif record['type'] in ['authority', 'ma', 'sa']:
+           record = AuthorityRecord(dict = record)
+       else:
+           record = GeniRecord(dict = record)
+       record.dump() 
+   
    if opts.file:
        save_records_to_file(opts.file, records)
    return
@@ -470,21 +483,6 @@ def add(opts, args):
    auth_cred = get_auth_cred()
    rec_file = get_record_file(args[0])
    record = load_record_from_file(rec_file)
-
-   # check and see if we need to create a gid for this record. The creator
-   # of the record signals this by filling in the create_gid, create_gid_hrn,
-   # and create_gid_key members.
-   # (note: we'd use an unsigned GID in the record instead, but pyOpenSSL is
-   #   broken and has no way for us to get the key back out of the gid)
-   geni_info = record.get_geni_info()
-   if "create_gid" in geni_info:
-       key_string = geni_info["create_gid_key"].replace("|","\n") # XXX smbaker: the rspec kills newlines
-       gid = registry.create_gid(auth_cred, geni_info["create_gid_hrn"], create_uuid(), key_string)
-       record.set_gid(gid)
-
-       del geni_info["create_gid"]
-       del geni_info["create_gid_hrn"]
-       del geni_info["create_gid_key"]
 
    return registry.register(auth_cred, record)
 
