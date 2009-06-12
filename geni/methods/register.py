@@ -4,6 +4,8 @@ from geni.util.method import Method
 from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.record import GeniRecord
+from geni.util.cert import Keypair, convert_public_key
+from geni.util.gid import *
 from geni.util.debug import log
 from geni.util.misc import *
 
@@ -33,11 +35,22 @@ class register(Method):
         record = GeniRecord(dict = record_dict)
         type = record.get_type()
         name = record.get_name()
+        self.api.auth.verify_object_permission(name)
         auth_name = self.api.auth.get_authority(name)
-        self.api.auth.verify_object_permission(auth_name)
         auth_info = self.api.auth.get_auth_info(auth_name)
         table = self.api.auth.get_auth_table(auth_name)
-        pkey = None
+        
+        # make sure record has a gid
+        if 'gid' not in record:
+            uuid = create_uuid()
+            pkey = Keypair()
+            if 'keys' in record and record['keys']:
+                pkey = convert_public_key(record['keys'][0])
+                
+            gid_object = self.api.auth.hierarchy.create_gid(name, uuid, pkey)
+            gid = gid_object.save_to_string(save_parents=True)
+            record['gid'] = gid
+            record.set_gid(gid)
 
         # check if record already exists
         existing_records = table.resolve(type, name)
@@ -83,11 +96,11 @@ class register(Method):
         elif (type == "user"):
             pointer = self.api.plshell.AddPerson(self.api.plauth, dict(record))
             if 'enabled' in record and record['enabled']:
-                self.api.plshell.UpdatePerson(pointer, record['enabled'])
+                self.api.plshell.UpdatePerson(self.api.plauth, pointer, {'enabled': record['enabled']})
             login_base = get_leaf(auth_info.hrn)
-            self.api.plshell.AddPersonToSite(pointer, login_base)
+            self.api.plshell.AddPersonToSite(self.api.plauth, pointer, login_base)
             # What roles should this user have?
-            self.api.plshell.AddRoleToPerson('user', pointer) 
+            self.api.plshell.AddRoleToPerson(self.api.plauth, 'user', pointer) 
             record.set_pointer(pointer)
 
         elif (type == "node"):
