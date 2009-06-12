@@ -227,7 +227,7 @@ class Certificate:
    issuerSubject = None
    parent = None
 
-   separator="-----parent-----\n"
+   separator="-----parent-----"
 
    ##
    # Create a certificate object.
