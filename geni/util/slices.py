@@ -131,7 +131,7 @@ class Slices(SimpleStorage):
             if record.get_type() in ['slice']:
                 slice = record.as_dict()
         if not slice:
-            raise RecordNotFound(slice_hrn)   
+            raise RecordNotFound(hrn)   
 
         # Make sure slice exists at plc, if it doesnt add it
         slicename = hrn_to_pl_slicename(hrn)
@@ -243,7 +243,6 @@ class Slices(SimpleStorage):
         for aggregate in rspecs.keys():
             try:
                 aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate])
-                print aggregate
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
         return 1
