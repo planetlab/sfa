@@ -141,42 +141,35 @@ def import_person(parent_hrn, person):
 
     table = get_auth_table(parent_hrn)
 
-    person_record = table.resolve("user", hrn)
-    if not person_record:
-        key_ids = []
-        if 'key_ids' in person:    
-            key_ids = person["key_ids"]
-
-        if key_ids:
-            # get the user's private key from the SSH keys they have uploaded
-            # to planetlab
-            keys = shell.GetKeys(pl_auth, key_ids)
-            key = keys[0]
-            pkey =convert_public_key(key)
-        else:
-            # the user has no keys
-            report.trace("   person " + hrn + " does not have a PL public key")
-            pkey = None
+    key_ids = []
+    if 'key_ids' in person:    
+        key_ids = person["key_ids"]
+        
+        # get the user's private key from the SSH keys they have uploaded
+        # to planetlab
+        keys = shell.GetKeys(pl_auth, key_ids)
+        key = keys[0]['key']
+        pkey =convert_public_key(key)
+    else:
+        # the user has no keys
+        report.trace("   person " + hrn + " does not have a PL public key")
 
         # if a key is unavailable, then we still need to put something in the
         # user's GID. So make one up.
-        if not pkey:
-            pkey = Keypair(create=True)
+        pkey = Keypair(create=True)
 
-        person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
+    # create the gid 
+    person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
+    person_record = table.resolve("user", hrn)
+    if not person_record:
         report.trace("  inserting user record for " + hrn)
+        person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         table.insert(person_record)
     else:
-        key_ids = person["key_ids"]
-
-    if key_ids:
-        pkey = get_pl_pubkey(key_ids[0])
-        person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         report.trace("  updating user record for " + hrn)
+        person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         table.update(person_record)
-        
+            
 def import_slice(parent_hrn, slice):
     AuthHierarchy = Hierarchy()
     slicename = slice['name'].split("_",1)[-1]
@@ -328,7 +321,7 @@ def main():
 
     connect_shell()
 
-    sites = shell.GetSites(pl_auth, {'peer_id': None})
+    sites = shell.GetSites(pl_auth, {'peer_id': None, 'login_base': 'princeton'})
     # create a fake internet2 site first
     i2site = {'name': 'Internet2', 'abbreviated_name': 'I2',
                     'login_base': 'internet2', 'site_id': -1}
