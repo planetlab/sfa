@@ -1,0 +1,33 @@
+## Please use make index to update this file
+all = """
+api
+auth
+cert
+config
+credential
+debug
+excep
+faults
+geniclient
+geniserver
+genitable
+geniticket
+gid
+hierarchy
+method
+misc
+nodes
+parameter
+policy
+record
+remoteshell
+report
+rights
+rspec
+slices
+specdict
+storage
+testrspec
+trustedroot
+util
+""".split()
