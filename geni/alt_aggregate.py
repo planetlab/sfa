@@ -73,7 +73,7 @@ class AltAggregate(GeniServer):
         Connect to the registry
         """
         # connect to registry using GeniClient
-        address = self.config.GENI_REGISTRY_HOSTNAME
+        address = self.config.GENI_REGISTRY_HOST
         port = self.config.GENI_REGISTRY_PORT
         url = 'https://%(address)s:%(port)s' % locals()
         self.registry = GeniClient(url, self.key_file, self.cert_file)
