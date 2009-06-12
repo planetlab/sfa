@@ -243,8 +243,9 @@ class Slices(SimpleStorage):
         for aggregate in rspecs.keys():
             try:
                 aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate])
+                print aggregate
             except:
-                print >> log, "Error creating slice %(hrn)% at aggregate %(aggregate)%" % locals()
+                print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
     
         return 1
 
