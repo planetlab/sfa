@@ -102,7 +102,6 @@ class Slices(SimpleStorage):
         credential = self.api.getCredential()
         aggregates = Aggregates(self.api)
         for aggregate in aggregates:
-            print aggregate
             aggregates[aggregate].delete_slice(credential, hrn)
 
     def create_slice(self, hrn, rspec):
