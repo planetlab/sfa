@@ -102,6 +102,10 @@ class register(Method):
             # What roles should this user have?
             self.api.plshell.AddRoleToPerson(self.api.plauth, 'user', pointer) 
             record.set_pointer(pointer)
+	    
+	    # Add the user's key
+            if record['keys']:
+		self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type' : 'ssh', 'key' : record['keys'][0]})
 
         elif (type == "node"):
             pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
