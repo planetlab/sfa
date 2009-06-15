@@ -32,20 +32,6 @@ def create_parser():
    
     return parser    
 
-def printRecord(r, depth = 0):
-    line = ""
-    # Set the dept
-    for tab in range(0,depth): line += "    "
-    # check if it's nested
-    if type(r) == dict:
-        for i in r.keys(): 
-            print line + "%s:" % i
-            printRecord(r[i], depth + 1)
-    elif type(r) in (tuple, list):
-        for j in r: printRecord(j, depth + 1)
-    # not nested so just print.
-    else:
-        print line + "%s" %  r
 
 def editDict(replacewith, recordDict, options):
     # first we find the part of the tree we want to replace
@@ -96,7 +82,8 @@ def main():
     if options.DEBUG:
         print "New Record:\n%s" % record.dict
 
-    printRecord(record.dict)
+    record.pprint()
+
     record.rootNode = record.dict2dom(record.dict)
     s = record.toxml()
     f = open(options.infile,"w")

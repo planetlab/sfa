@@ -288,6 +288,26 @@ class Rspec():
             'EDate' : date}
 
 
+    def pprint(self, r = None, depth = 0):
+        """
+        Pretty print the dict
+        """
+        line = ""
+        if r == None: r = self.dict
+        # Set the dept
+        for tab in range(0,depth): line += "    "
+        # check if it's nested
+        if type(r) == dict:
+            for i in r.keys():
+                print line + "%s:" % i
+                self.pprint(r[i], depth + 1)
+        elif type(r) in (tuple, list):
+            for j in r: self.pprint(j, depth + 1)
+        # not nested so just print.
+        else:
+            print line + "%s" %  r
+    
+
 
 class RecordSpec(Rspec):
 
@@ -303,6 +323,7 @@ class RecordSpec(Rspec):
         if not len(rdict.keys()) == 1:
             record_dict = {self.root_tag : rdict}
         return Rspec.dict2dom(self, record_dict, include_doc)
+
         
 # vim:ts=4:expandtab
     
