@@ -14,30 +14,71 @@ import xml.dom.minidom
 import xml.dom.ext
 import globals
 import apistub
+from types import *
 
 from geni.util.auth import Auth
-from geni.util.parameter import Parameter,Mixed,python_type,xmlrpc_type
+from geni.util.parameter import Parameter,Mixed
 
+complex_types = {}
+services = {}
 
+num_types = 0
+
+class SoapError(Exception):
+     def __init__(self, value):
+         self.value = value
+     def __str__(self):
+         return repr(self.value)
 try:
     set
 except NameError:
     from sets import Set
     set = Set
 
-# Class functions
 
-def param_type(param):
+def name_vector_type(acc,arg):
+    name = name_complex_type(elt)
+    complex_types[arg]=name
+    acc.append(name)
+    return acc
 
-#     if isinstance(param, Mixed) and len(param):
-#         subtypes = [param_type(subparam) for subparam in param]
-#         return " or ".join(subtypes)
-#     elif isinstance(param, (list, tuple, set)) and len(param):
-#         return "array of " + " or ".join([param_type(subparam) for subparam in param])
-#     else:
-#         return xmlrpc_type(python_type(param))
-    return "some type - todo"
+def name_complex_type(arg):
+    if (instanceof(arg, Mixed)):
+        inner_types = reduce(name_vector_type, arg)
+    
+        num_types=num_types+1
+        type_name = "Type%d"%num_types
+        complex_type = types.firstChild.appendChild(types.createElement("wsdl:complexType"))
+        complex_type.setAttribute("name", type_name)
 
+        choice = complex_type.appendChild(complex_type.createElement("xsd:choice"))
+        choice.appendChild(choice.createElement("element"))
+        for i in types:
+            choice.setAttribute("name", "Foobar")
+            choice.setAttribute("minOccurs","1")
+            choice.setAttribute("maxOccurs","1")
+            choice.setAttribute("type", "tns:$i")
+
+        return type_name
+    else:
+        return (name_simple_type(arg))
+
+def name_simple_type(arg):
+    arg_type=arg.type
+    if arg_type == IntType or arg_type == LongType:
+        return "int"
+    elif arg_type == bool:
+        return "boolean"
+    elif arg_type == FloatType:
+        return "double"
+    elif arg_type in StringTypes:
+        return "string"
+    else:
+        pdb.set_trace()
+        raise SoapError, "Cannot handle %s objects" % arg_type
+
+def param_type(arg):
+    return (name_complex_type(arg))
 
 def add_wsdl_ports_and_bindings (wsdl):
     for method in apistub.methods:
@@ -145,12 +186,12 @@ def get_wsdl_definitions():
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>""" % (globals.plc_ns,globals.plc_ns)
         
     wsdl = xml.dom.minidom.parseString(wsdl_text_header)
-
+    
     return wsdl
     
 
-services = {}
 
+types = get_wsdl_definitions()
 wsdl = get_wsdl_definitions()
 add_wsdl_ports_and_bindings(wsdl)
 add_wsdl_service(wsdl)
