@@ -12,6 +12,7 @@ from geni.util.hierarchy import Hierarchy
 from geni.util.rights import RightList
 from geni.util.genitable import *
 from geni.util.config import *
+from geni.util.misc import *
 
 class Auth:
     """
@@ -140,6 +141,9 @@ class Auth:
             return
         if name.startswith(object_hrn + "."):
             return
+        if name.startswith(get_authority(name)):
+            return
+    
         raise PermissionError(name)
 
     def determine_user_rights(self, src_cred, record):
