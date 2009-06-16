@@ -47,7 +47,7 @@ class get_ticket(Method):
         auth_info = self.api.auth.get_auth_info(auth_hrn)
         record = None
         table = self.api.auth.get_auth_table(auth_hrn)
-        records = table.resolve('slice', hrn)
+        record = table.resolve('slice', hrn)
 
         object_gid = record.get_gid_object()
         new_ticket = Ticket(subject = object_gid.get_subject())
