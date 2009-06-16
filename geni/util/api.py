@@ -248,10 +248,9 @@ class GeniAPI:
         if type == "slice":
             if not "instantiation" in pl_record:
                 pl_record["instantiation"] = "delegated"  # "plc-instantiated"
-            if not "name" in pl_record:
-                pl_record["name"] = hrn_to_pl_slicename(hrn)
             if not "max_nodes" in pl_record:
                 pl_record["max_nodes"] = 10
+            pl_record["name"] = hrn_to_pl_slicename(hrn)
 
         elif type == "node":
             if not "hostname" in pl_record:
@@ -357,7 +356,6 @@ class GeniAPI:
             user_records = auth_table.find("user", person_id, "pointer")
             for user_record in user_records:
                 self.fill_record_info(user_record)
-
                 user_roles = user_record.get("roles")
                 if (role=="*") or (role in user_roles):
                     record_list.append(user_record.get_name())
@@ -366,7 +364,6 @@ class GeniAPI:
     def fill_record_geni_info(self, record):
         geni_info = {}
         type = record.get_type()
-
         if (type == "slice"):
             auth_table = self.auth.get_auth_table(self.auth.get_authority(record.get_name()))
             person_ids = record.get("person_ids", [])
