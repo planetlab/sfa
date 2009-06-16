@@ -161,10 +161,12 @@ def add_wsdl_ports_and_bindings (wsdl):
         
         op_el = port_el.appendChild(wsdl.createElement("wsdl:operation"))
         op_el.setAttribute("name", method)
-        inp_el=wsdl.createElement("wsdl:input").setAttribute("message","tns:" + method + "_in"
+        inp_el=wsdl.createElement("wsdl:input")
+        inp_el.setAttribute("message","tns:" + method + "_in")
         inp_el.setAttribute("name",method+"_request")
         op_el.appendChild(inp_el)
-        out_el = wsdl.createElement("wsdl:output").setAttribute("message","tns:" + method + "_out")
+        out_el = wsdl.createElement("wsdl:output")
+        out_el.setAttribute("message","tns:" + method + "_out")
         out_el.setAttribute("name",method+"_response")
         op_el.appendChild(out_el)
 
