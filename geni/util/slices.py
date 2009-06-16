@@ -155,8 +155,13 @@ class Slices(SimpleStorage):
                 site_id = self.api.plshell.AddSite(self.api.plauth, site)
             else:
                 site = sites[0]
-
-            self.api.plshell.AddSlice(self.api.plauth, slice)
+            
+            slice_fields = {}
+            slice_keys = ['name', 'url', 'description']
+            for key in slice_keys:
+                if key in slice and slice[key]:
+                    slice_fields[key] = slice[key]  
+            self.api.plshell.AddSlice(self.api.plauth, slice_fields)
 
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
