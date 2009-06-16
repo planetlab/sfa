@@ -15,7 +15,7 @@ import sys
 import os
 from optparse import OptionParser
 from pprint import pprint
-
+from xml.parsers.expat import ExpatError
 from geni.util.rspec import RecordSpec
 
 
@@ -23,60 +23,64 @@ def create_parser():
     command = sys.argv[0]
     argv = sys.argv[1:]
     usage = "%(command)s [options]" % locals()
-    description = """getRecord will open a record file and print all key/values, or filter results based on a given key or set of keys."""
+    description = """getRecord will parse a supplied (via stdin) record and print all values or key/values, and filter results based on a given key or set of keys."""
     parser = OptionParser(usage=usage,description=description)
-    parser.add_option("-i", "--infile", dest="infile", metavar="FILE", 
-        default=None,  help = "record file path")
     parser.add_option("-d", "--debug", dest="DEBUG", action="store_true",
         default=False,  help = "record file path")
+    parser.add_option("-k", "--key", dest="withkey", action="store_true",
+        default=False,  help = "print keys")
    
     return parser    
 
-def findRoot(r, filter):
-    root = None
-    if type(r) == dict:
-        if not r.has_key(filter):
-            for k in r.keys():
-                root = findRoot(r[k], filter)
-                if root != None: return root
-        else:
-            return r[filter]
-    elif type(r) in (tuple, list):
-        for j in r: 
-            root = findRoot(j, filter)
-            if root != None: return root
+def printRec(record, filters, options):
+    line = ""
+    if len(filters):
+        for filter in filters:
+            if options.DEBUG:  print "Filtering on %s" %filter
+            if options.withkey:
+                line += "%s: " %filter
+            line += "%s\n" % \
+                printVal(record.dict["record"].get(filter, None))
+            print line
     else:
-        return root
+        # print the wole thing
+        for (key, value) in record.dict["record"].iteritems():
+            if options.withkey:
+                line += "%s: " % key
+            line += "%s\n" % printVal(value)
+        print line
+
+# fix the iteratable values
+def printVal(value):
+    line = ""
+    if type(value) in (tuple, list):
+        for i in value:
+            line += "%s " % i
+    else:
+        line += value
+    return line.rstrip("\n")
 
 def main():
     parser = create_parser(); 
     (options, args) = parser.parse_args()
 
-    # Check the the file was specified  
-    if not options.infile:
-        print "You must specify a record file"
-        return -1
-    try: 
-        print "Openning %s.\n" % options.infile
-        f = open(options.infile)
-    except: raise
-
-    record = RecordSpec(xml = f)
+    stdin = sys.stdin.read()
+    
+    record = RecordSpec(xml = stdin)
+    
+    if not record.dict.has_key("record"):
+        raise "RecordError", "Input record does not have 'record' tag."
 
     if options.DEBUG: 
-        pprint(record.dict)
+        record.pprint()
         print "#####################################################"
 
-
-    if args:
-        if options.DEBUG: 
-            print "Filtering on key: %s" % args[0]
-            pprint(findRoot(record.dict, args[0]))
-        record.pprint({args[0]: findRoot(record.dict, args[0])})
-    else:
-        record.pprint(record.dict)
+    printRec(record, args, options)
 
 if __name__ == '__main__':
     try: main()
+    except ExpatError, e:
+        print "RecordError.  Is your record valid XML?"
+        print e
     except Exception, e:
         print e
