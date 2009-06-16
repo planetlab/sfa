@@ -37,35 +37,55 @@ except NameError:
 
 
 def name_vector_type(acc,arg):
-    name = name_complex_type(elt)
+    global complex_types
+    name = name_complex_type(arg)
     complex_types[arg]=name
-    acc.append(name)
+    if (type(arg)==list):
+        acc.append(name)
+    else:
+        python_is_f_braindead = name_complex_type(acc)
+        acc = [python_is_f_braindead,name]
     return acc
 
 def name_complex_type(arg):
-    if (instanceof(arg, Mixed)):
+    global num_types
+    global types
+    types_section = types.firstChild.firstChild
+    if (isinstance(arg, Mixed)):
         inner_types = reduce(name_vector_type, arg)
+        if (inner_types[-1]=="None"):
+            inner_types=inner_types[:-1]
+            min_args = 0
+        else:
+            min_args = 1
     
         num_types=num_types+1
         type_name = "Type%d"%num_types
-        complex_type = types.firstChild.appendChild(types.createElement("wsdl:complexType"))
+        complex_type = types_section.appendChild(types.createElement("wsdl:complexType"))
         complex_type.setAttribute("name", type_name)
 
-        choice = complex_type.appendChild(complex_type.createElement("xsd:choice"))
-        choice.appendChild(choice.createElement("element"))
-        for i in types:
-            choice.setAttribute("name", "Foobar")
-            choice.setAttribute("minOccurs","1")
-            choice.setAttribute("maxOccurs","1")
-            choice.setAttribute("type", "tns:$i")
-
+        choice = complex_type.appendChild(types.createElement("xsd:choice"))
+        for i in inner_types:
+            element = choice.appendChild(types.createElement("element"))
+            element.setAttribute("name", "Foobar")
+            element.setAttribute("type", "tns:%s"%i)
+            element.setAttribute("minOccurs","%d"%min_args)
         return type_name
+    elif (isinstance(arg, Parameter)):
+        return (name_simple_type(arg.type))
+    elif type(arg) == ListType or type(arg) == TupleType:
+        return "sequence"
+    elif type(arg) == DictType or arg == DictType:
+        return "dict"
     else:
         return (name_simple_type(arg))
 
-def name_simple_type(arg):
-    arg_type=arg.type
-    if arg_type == IntType or arg_type == LongType:
+def name_simple_type(arg_type):
+    if arg_type == None:
+        return "none"
+    if arg_type == DictType:
+        return "dict"
+    elif arg_type == IntType or arg_type == LongType:
         return "int"
     elif arg_type == bool:
         return "boolean"
@@ -74,7 +94,7 @@ def name_simple_type(arg):
     elif arg_type in StringTypes:
         return "string"
     else:
-        pdb.set_trace()
+       #pdb.set_trace()
         raise SoapError, "Cannot handle %s objects" % arg_type
 
 def param_type(arg):
@@ -183,19 +203,20 @@ def get_wsdl_definitions():
         xmlns:xsd="http://www.w3.org/2000/10/XMLSchema"
         xmlns:tns="xmlns:%s"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>""" % (globals.plc_ns,globals.plc_ns)
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>
+        """ % (globals.plc_ns,globals.plc_ns)
         
     wsdl = xml.dom.minidom.parseString(wsdl_text_header)
     
     return wsdl
     
 
-
 types = get_wsdl_definitions()
+types.firstChild.appendChild(types.createElement("wsdl:types"))
 wsdl = get_wsdl_definitions()
 add_wsdl_ports_and_bindings(wsdl)
+wsdl_types = wsdl.importNode(types.firstChild.firstChild, True)
+wsdl.firstChild.appendChild(wsdl_types)
 add_wsdl_service(wsdl)
 
-
 xml.dom.ext.PrettyPrint(wsdl)
-
