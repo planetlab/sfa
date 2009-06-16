@@ -1,5 +1,5 @@
-
-all: install
+# 'make' should not install - DESTDIR might be wrong at this stage
+all: keyconvert
 
 keyconvert: 
 	gcc -o keyconvert -lcrypto -ldl keyconvert.c keyconvertmain.c b64decode.c
