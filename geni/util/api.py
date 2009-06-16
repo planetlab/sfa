@@ -401,7 +401,10 @@ class GeniAPI:
 
     def update_membership_list(self, oldRecord, record, listName, addFunc, delFunc):
         # get a list of the HRNs tht are members of the old and new records
-        oldList = oldRecord.get(listName, [])
+        if oldRecord:
+            oldList = oldRecord.get(listName, [])
+        else:
+            oldList = []     
         newList = record.get(listName, [])
 
         # if the lists are the same, then we don't have to update anything
