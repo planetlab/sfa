@@ -35,25 +35,40 @@ except NameError:
     from sets import Set
     set = Set
 
+def fold_complex_type_names(acc, arg):
+    name = arg.doc
+    if (type(acc)==list):
+        acc.append(name)
+    else:
+        python_is_braindead = acc.doc
+        acc = [python_is_braindead,name]
+    return acc
 
-def name_vector_type(acc,arg):
+
+def fold_complex_type(acc, arg):
     global complex_types
     name = name_complex_type(arg)
     complex_types[arg]=name
-    if (type(arg)==list):
+    if (type(acc)==list):
         acc.append(name)
     else:
-        python_is_f_braindead = name_complex_type(acc)
-        acc = [python_is_f_braindead,name]
+        python_is_braindead = name_complex_type(acc)
+        acc = [python_is_braindead,name]
     return acc
 
 def name_complex_type(arg):
     global num_types
     global types
+
+    #if (complex_types.has_key(arg)):
+    #    return complex_types[arg]
+
     types_section = types.firstChild.firstChild
+
     if (isinstance(arg, Mixed)):
-        inner_types = reduce(name_vector_type, arg)
-        if (inner_types[-1]=="None"):
+        inner_types = reduce(fold_complex_type, arg)
+        inner_names = reduce(fold_complex_type_names, arg)
+        if (inner_types[-1]=="none"):
             inner_types=inner_types[:-1]
             min_args = 0
         else:
@@ -65,12 +80,12 @@ def name_complex_type(arg):
         complex_type.setAttribute("name", type_name)
 
         choice = complex_type.appendChild(types.createElement("xsd:choice"))
-        for i in inner_types:
+        for n,t in zip(inner_names,inner_types):
             element = choice.appendChild(types.createElement("element"))
-            element.setAttribute("name", "Foobar")
-            element.setAttribute("type", "tns:%s"%i)
+            element.setAttribute("name", n)
+            element.setAttribute("type", "tns:%s"%t)
             element.setAttribute("minOccurs","%d"%min_args)
-        return type_name
+        return "tns:%s"%type_name
     elif (isinstance(arg, Parameter)):
         return (name_simple_type(arg.type))
     elif type(arg) == ListType or type(arg) == TupleType:
@@ -84,15 +99,15 @@ def name_simple_type(arg_type):
     if arg_type == None:
         return "none"
     if arg_type == DictType:
-        return "dict"
+        return "xsd:dict"
     elif arg_type == IntType or arg_type == LongType:
-        return "int"
+        return "xsd:int"
     elif arg_type == bool:
-        return "boolean"
+        return "xsd:boolean"
     elif arg_type == FloatType:
-        return "double"
+        return "xsd:double"
     elif arg_type in StringTypes:
-        return "string"
+        return "xsd:string"
     else:
        #pdb.set_trace()
         raise SoapError, "Cannot handle %s objects" % arg_type
@@ -146,8 +161,11 @@ def add_wsdl_ports_and_bindings (wsdl):
         
         op_el = port_el.appendChild(wsdl.createElement("wsdl:operation"))
         op_el.setAttribute("name", method)
-        op_el.appendChild(wsdl.createElement("wsdl:input")).setAttribute("message","tns:" + method + "_in")
-        op_el.appendChild(wsdl.createElement("wsdl:output")).setAttribute("message","tns:" + method + "_out")
+        inp_el=wsdl.createElement("wsdl:input")).setAttribute("message","tns:" + method + "_in"
+        inp_el.setAttribute("name",method+"_request")
+        op_el.appendChild(inp_el)
+        out_el = op_el.appendChild(wsdl.createElement("wsdl:output")).setAttribute("message","tns:" + method + "_out")
+        op_el.appendChild(out_el)
 
         # Bindings
 
