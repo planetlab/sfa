@@ -37,7 +37,8 @@ class remove(Method):
         if not record_list:
             raise RecordNotFound(hrn)
         record = record_list[0]
-
+        
+        type = record['type']
         # TODO: sa, ma
         if type == "user":
             self.api.plshell.DeletePerson(self.api.plauth, record.get_pointer())
