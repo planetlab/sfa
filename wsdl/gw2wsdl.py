@@ -2,10 +2,10 @@
 #
 # Sapan Bhatia <sapanb@cs.princeton.edu>
 #
+# This code is under preliminary development. I am going to clean it up
+# once it is tested to work.
 # Generates a WSDL for geniwrapper
-# Current limitations:
-# - Invalid for the following reasons 
-# - The types are python types, not WSDL types
+
 
 import os, sys
 import time
@@ -63,7 +63,7 @@ def name_complex_type(arg):
     #if (complex_types.has_key(arg)):
     #    return complex_types[arg]
 
-    types_section = types.firstChild.firstChild
+    types_section = types.getElementsByTagName("wsdl:types")[0]
 
     if (isinstance(arg, Mixed)):
         inner_types = reduce(fold_complex_type, arg)
@@ -76,14 +76,14 @@ def name_complex_type(arg):
     
         num_types=num_types+1
         type_name = "Type%d"%num_types
-        complex_type = types_section.appendChild(types.createElement("wsdl:complexType"))
+        complex_type = types_section.appendChild(types.createElement("xsd:complexType"))
         complex_type.setAttribute("name", type_name)
 
         choice = complex_type.appendChild(types.createElement("xsd:choice"))
         for n,t in zip(inner_names,inner_types):
             element = choice.appendChild(types.createElement("element"))
             element.setAttribute("name", n)
-            element.setAttribute("type", "tns:%s"%t)
+            element.setAttribute("type", "%s"%t)
             element.setAttribute("minOccurs","%d"%min_args)
         return "tns:%s"%type_name
     elif (isinstance(arg, Parameter)):
@@ -230,13 +230,44 @@ def get_wsdl_definitions():
     wsdl = xml.dom.minidom.parseString(wsdl_text_header)
     
     return wsdl
-    
 
-types = get_wsdl_definitions()
-types.firstChild.appendChild(types.createElement("wsdl:types"))
+def get_wsdl_definitions():
+    wsdl_text_header = """
+        <wsdl:definitions
+        name="auto_generated"
+        targetNamespace="%s"
+        xmlns:xsd="http://www.w3.org/2000/10/XMLSchema"
+        xmlns:tns="xmlns:%s"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>
+        """ % (globals.plc_ns,globals.plc_ns)
+        
+    wsdl = xml.dom.minidom.parseString(wsdl_text_header)
+    
+    return wsdl
+
+def get_wsdl_definitions_and_types():
+    wsdl_text_header = """
+    <wsdl:definitions
+        name="auto_generated"
+        targetNamespace="%s"
+        xmlns:xsd="http://www.w3.org/2000/10/XMLSchema"
+        xmlns:tns="xmlns:%s"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+        <wsdl:types>
+            <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="%s"/>
+        </wsdl:types>
+    </wsdl:definitions> """ % (globals.plc_ns,globals.plc_ns,globals.plc_ns)
+    wsdl = xml.dom.minidom.parseString(wsdl_text_header)
+    return wsdl
+
+    
+types = get_wsdl_definitions_and_types()
+
 wsdl = get_wsdl_definitions()
 add_wsdl_ports_and_bindings(wsdl)
-wsdl_types = wsdl.importNode(types.firstChild.firstChild, True)
+wsdl_types = wsdl.importNode(types.getElementsByTagName("wsdl:types")[0], True)
 wsdl.firstChild.appendChild(wsdl_types)
 add_wsdl_service(wsdl)
 
