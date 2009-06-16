@@ -4,41 +4,52 @@
 # overwritten by the specfile
 DESTDIR="/"
 
-init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py 
-subdirs := keyconvert #pyOpenSSL-0.9
+##########
+all: keyconvert python
 
-all: install
+install: keyconvert-install python-install
 
-install: $(init) $(subdirs) install-python
+clean: keyconvert-clean key-convert-python
 
-install-python:
+.PHONY: all install clean 
+
+##########
+keyconvert:
+	$(MAKE) -C keyconvert
+
+keyconvert-install:
+	$(MAKE) -C keyconvert install
+
+keyconvert-clean:
+	$(MAKE) -C keyconvert clean
+
+.PHONY: keyconvert keyconvert-install keyconvert-clean 
+
+##########
+python: $(init)
+
+python-install:
 	python setup.py install --root=$(DESTDIR) --record=GENI_INSTALLED_FILES
 
-$(subdirs): $(init)
-
-$(subdirs): %:
-	$(MAKE) -C $@
-
-clean:
+python-clean:
 	python setup.py clean
-	for i in $(subdirs); do make -C $$i clean ; done
-
-index: $(init)
-
-index-clean:
 	rm $(init)
 
-.phony: all install install-python force clean index $(subdirs)
-
-force:
+.PHONY: python python-install python-clean
+##########
 
 # are the .java files used ?
 tags:	
 	find . -name '*.py' -o -name '*.sh' -o -name '*.ecore'  | grep -v '/\.svn/' | xargs etags
-
+.PHONY: tags
 
 
 ########## indexes
+init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py 
+
+force:
+.PHONY: force 
+
 geni/__init__.py:
 	(echo '## Please use make index to update this file' ; echo 'all = """' ; cd geni; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' ; echo '""".split()') > $@
 
@@ -106,3 +117,5 @@ else
 	+$(RSYNC) geni-config-tty $(SSHURL)/usr/bin
 endif
 
+.PHONY: sync
+##########
