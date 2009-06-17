@@ -241,17 +241,19 @@ class GeniAPI:
     # @param pl_fields dictionary of PLC fields (output)
 
     def geni_fields_to_pl_fields(self, type, hrn, record):
+
+        def convert_ints(tmpdict, int_fields):
+            for field in int_fields:
+                if field in tmpdict:
+                    tmpdict[field] = int(tmpdict[field])
+
         pl_record = {}
-        for field in record:
-            pl_record[field] = record[field]
+        #for field in record:
+        #    pl_record[field] = record[field]
  
         if type == "slice":
             if not "instantiation" in pl_record:
-                pl_record["instantiation"] = "delegated"  # "plc-instantiated"
-            if not "max_nodes" in pl_record:
-                pl_record["max_nodes"] = 10
-            else:
-                pl_record['max_nodes'] = int(pl_record['max_nodes']) 
+                pl_record["instantiation"] = "plc-instantiated"
             pl_record["name"] = hrn_to_pl_slicename(hrn)
 
         elif type == "node":
