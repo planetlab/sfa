@@ -13,9 +13,9 @@ def create_parser():
     usage = "%(command)s [options]" % locals()
     description = """getNodes will open a rspec file and print all key/values, or filter results based on a given key or set of keys."""
     parser = OptionParser(usage=usage,description=description)
-    parser.add_option("-i", "--infile", dest="infile", default=None,  help = "record file path")
-    parser.add_option("-f", "--filter", dest="filter", default=None,  help = "record file path")
-    parser.add_option("-r", "--recursive", dest="print_children", default=False,  action="store_true", help = "record file path")
+    parser.add_option("-i", "--infile", dest="infile", default=None,  help = "input rspec file")
+    parser.add_option("-f", "--filter", dest="filter", default=None,  help = "filter rspec for this tag")
+    parser.add_option("-r", "--recursive", dest="print_children", default=False,  action="store_true", help = "print the tag's child nodes")
    
     return parser    
 
