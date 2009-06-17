@@ -46,12 +46,9 @@ class remove(Method):
             self.api.plshell.DeleteSlice(self.api.plauth, record.get_pointer())
         elif type == "node":
             self.api.plshell.DeleteNode(self.api.plauth, record.get_pointer())
-        elif (type == "sa") or (type == "ma"):
-            if (type == "sa"):
-                other_rec = table.resolve("ma", record.get_name())
-            elif (type == "ma"):
-                other_rec = table.resolve("sa", record.get_name())
-
+        elif (type in ['authority', 'sa', 'ma']):
+            other_rec = table.resolve(type, record.get_name())
+                
             if other_rec:
                 # sa and ma both map to a site, so if we are deleting one
                 # but the other still exists, then do not delete the site
