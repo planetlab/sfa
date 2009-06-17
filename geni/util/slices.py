@@ -162,7 +162,10 @@ class Slices(SimpleStorage):
                 if key in slice and slice[key]:
                     slice_fields[key] = slice[key]  
             self.api.plshell.AddSlice(self.api.plauth, slice_fields)
-
+            slice = slice_fields
+            slice['node_ids'] = 0
+        else:
+            slice = slices[0]    
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
         researchers = slice.get('researcher', [])
@@ -200,6 +203,8 @@ class Slices(SimpleStorage):
         nodelist = self.api.plshell.GetNodes(self.api.plauth, slice['node_ids'], ['hostname'])
         hostnames = [node['hostname'] for node in nodelist]
 
+        print "XX node_ids", slice['node_ids']
+        print "XX hostnames", hostnames
         # get netspec details
         nodespecs = spec.getDictsByTagName('NodeSpec')
         nodes = []
