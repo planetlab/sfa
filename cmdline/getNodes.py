@@ -1,75 +1,73 @@
 #!/usr/bin/python
+
 import sys
 import os
-import traceback
-import urllib
-from datetime import datetime
 from optparse import OptionParser
+from pprint import pprint
+from types import StringTypes
 from geni.util.rspec import Rspec
-
-sfi_dir = os.path.expanduser("~/.sfi/")
 
 def create_parser():
     command = sys.argv[0]
     argv = sys.argv[1:]
     usage = "%(command)s [options]" % locals()
-    description = """getNodes will query comon and generate a list of nodes 
-(plain or rspec) that meet the specified crieteria. If no criteria is 
-specified, the default action is to return node comon considers 'alive' 
-(resptime > 0)"""
-    cmp_options = ['rwfs', 'uptime', 'loads', 'meminfo', 'kernver', 'cpuspeed', 'txrate', 'rxrate', 'numslices', 'liveslices']
-    option = ['numslices', 'liveslices', 'gbfree'] 
-
+    description = """getNodes will open a rspec file and print all key/values, or filter results based on a given key or set of keys."""
     parser = OptionParser(usage=usage,description=description)
-    for opt in options:
-        parser.add_option("--%s" % opt, dest="%s" % opt, action="store_true", 
-                          help = "available options [%s]" % ",".join(cmp_options))
+    parser.add_option("-i", "--infile", dest="infile", default=None,  help = "record file path")
+    parser.add_option("-f", "--filter", dest="filter", default=None,  help = "record file path")
+    parser.add_option("-r", "--recursive", dest="recursive", default=False,  action="store_true", help = "record file path")
    
     return parser    
 
+print 
 
-def download_file(url, localFile):
-    webFile = urllib.urlopen(url)
-    localFile = open(localFile, 'w')
-    localFile.write(webFile.read())
-    localFile.close()    
-    
+def print_dict(rdict, counter=1):
+    lists = []
+    if not isinstance(rdict, dict):
+        raise "%s not a dict" % rdict 
+    for (key, value) in rdict.items():
+        if isinstance(value, StringTypes):
+            print "    " * counter + "%s: %s" % (key, value)
+        elif isinstance(value, list):
+            for listitem in value:
+                if isinstance(listitem, dict):
+                    lists.append((key, listitem))
+        elif isinstance(value, dict):
+            lists.append((key, value)) 
 
-def generate_comon_url(options):
-    url = "select = 'resptime > 0"
-    query_dict = {}
-    query_dict['numslices'] = 'numslices %s= %s'
-    query_dict['liveslices'] = 'liveslices %s= %s'
-    query_dict['gbfree'] = 'gbfree %s= %s'
-    
-    if options.numslices:
-        full_value = options.numslices
-         
-    url += "'"
-
-def get_comon_data():
-    date = datetime.now()
-    year = str(date.year)
-    month = str(date.month)
-    day = str(date.day)
-    if len(month) == 1:
-        month = "0" + month
-    if len(day) == 1:
-        day = "0" + day
-     
-    comon_data_filename = sfi_dir + os.sep + "comon_data.dat" 
-    comon_url = "http://comon.cs.princeton.edu/status/dump_comon_%s%s%s" % (year, month, day)
-    
-    print "storing comon data from %s in %s" % (comon_url, comon_data_filename)     
-    download_file(comon_url, comon_data_filename)
-
-    return comon_data_filename
+    for (key, listitem) in lists:
+        if isinstance(listitem, dict):
+            print "    " * (counter - 1) + key
+            print_dict(listitem, counter+1)   
         
+
 def main():
-    parser = create_parser()
+    parser = create_parser(); 
     (options, args) = parser.parse_args()
-    comon_file = get_comon_data()
-    
+
+    if not options.infile:
+        print "Rspec file not specified"
+        return 
+        
+    rspec = Rspec()
+    try:
+        rspec.parseFile(options.infile)
+    except:
+        print "Error reading rspec file"
+
+    if options.filter:
+        filter_name = options.filter
+        rspec_dicts = rspec.getDictsByTagName(options.filter)
+        rspec_dict = {filter_name: rspec_dicts}
+    else:
+        rspec_dict = rspec.toDict()     
+
+    print_dict(rspec_dict, options.recursive)
+
+    return
 
 if __name__ == '__main__':
-    main()
+    try: main()
+    except Exception, e:
+        raise
+        print e
