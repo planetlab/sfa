@@ -15,30 +15,35 @@ def create_parser():
     parser = OptionParser(usage=usage,description=description)
     parser.add_option("-i", "--infile", dest="infile", default=None,  help = "record file path")
     parser.add_option("-f", "--filter", dest="filter", default=None,  help = "record file path")
-    parser.add_option("-r", "--recursive", dest="recursive", default=False,  action="store_true", help = "record file path")
+    parser.add_option("-r", "--recursive", dest="print_children", default=False,  action="store_true", help = "record file path")
    
     return parser    
 
 print 
 
-def print_dict(rdict, counter=1):
+def print_dict(rdict, print_children, counter=1):
     lists = []
+    tab = "    "
     if not isinstance(rdict, dict):
         raise "%s not a dict" % rdict 
     for (key, value) in rdict.items():
         if isinstance(value, StringTypes):
-            print "    " * counter + "%s: %s" % (key, value)
+            print tab * counter + "%s: %s" % (key, value)
         elif isinstance(value, list):
             for listitem in value:
                 if isinstance(listitem, dict):
                     lists.append((key, listitem))
         elif isinstance(value, dict):
             lists.append((key, value)) 
-
-    for (key, listitem) in lists:
-        if isinstance(listitem, dict):
-            print "    " * (counter - 1) + key
-            print_dict(listitem, counter+1)   
+    
+    if counter == 1 or print_children: 
+        for (key, listitem) in lists:
+            if isinstance(listitem, dict):
+                print tab * (counter - 1) + key
+                print_dict(listitem, print_children, counter+1)
+    else:
+        keys = set([key for (key, listitem) in lists])
+        if keys: print tab * (counter) + "(children: %s)" % (",".join(keys))    
         
 
 def main():
@@ -61,8 +66,8 @@ def main():
         rspec_dict = {filter_name: rspec_dicts}
     else:
         rspec_dict = rspec.toDict()     
-
-    print_dict(rspec_dict, options.recursive)
+    
+    print_dict(rspec_dict, options.print_children)
 
     return
 
