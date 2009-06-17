@@ -203,8 +203,6 @@ class Slices(SimpleStorage):
         nodelist = self.api.plshell.GetNodes(self.api.plauth, slice['node_ids'], ['hostname'])
         hostnames = [node['hostname'] for node in nodelist]
 
-        print "XX node_ids", slice['node_ids']
-        print "XX hostnames", hostnames
         # get netspec details
         nodespecs = spec.getDictsByTagName('NodeSpec')
         nodes = []
