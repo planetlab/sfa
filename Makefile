@@ -9,7 +9,7 @@ all: keyconvert python
 
 install: keyconvert-install python-install
 
-clean: keyconvert-clean key-convert-python
+clean: keyconvert-clean python-clean
 
 .PHONY: all install clean 
 
