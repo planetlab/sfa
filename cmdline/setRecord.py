@@ -84,7 +84,8 @@ def main():
 
     record.pprint()
 
-    record.rootNode = record.dict2dom(record.dict)
+    record.parseDict(record.dict)
+    
     s = record.toxml()
     f = open(options.infile,"w")
     f.write(s)
