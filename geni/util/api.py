@@ -250,6 +250,8 @@ class GeniAPI:
                 pl_record["instantiation"] = "delegated"  # "plc-instantiated"
             if not "max_nodes" in pl_record:
                 pl_record["max_nodes"] = 10
+            else:
+                pl_record['max_nodes'] = int(pl_record['max_nodes']) 
             pl_record["name"] = hrn_to_pl_slicename(hrn)
 
         elif type == "node":
