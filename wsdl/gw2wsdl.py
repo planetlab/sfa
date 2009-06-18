@@ -63,7 +63,7 @@ def name_complex_type(arg):
     #if (complex_types.has_key(arg)):
     #    return complex_types[arg]
 
-    types_section = types.getElementsByTagName("wsdl:types")[0]
+    types_section = types.getElementsByTagName("xsd:schema")[0]
 
     if (isinstance(arg, Mixed)):
         inner_types = reduce(fold_complex_type, arg)
@@ -89,9 +89,33 @@ def name_complex_type(arg):
     elif (isinstance(arg, Parameter)):
         return (name_simple_type(arg.type))
     elif type(arg) == ListType or type(arg) == TupleType:
-        return "sequence"
-    elif type(arg) == DictType or arg == DictType:
-        return "dict"
+        inner_type = name_complex_type(arg[0]) 
+        num_types=num_types+1
+        type_name = "Type%d"%num_types
+        complex_type = types_section.appendChild(types.createElement("xsd:complexType"))
+        complex_type.setAttribute("name", type_name)
+        complex_content = complex_type.appendChild(types.createElement("xsd:complexContent"))
+        restriction = complex_content.appendChild(types.createElement("restriction"))
+        restriction.setAttribute("base","Array")
+        attribute = restriction.appendChild(types.createElement("attribute"))
+        attribute.setAttribute("wsdl:arrayType",inner_type+"[]")
+        return "tns:%s"%type_name
+        
+    elif type(arg) == DictType or arg == DictType or issubclass(arg, dict):
+        num_types=num_types+1
+        type_name = "Type%d"%num_types
+        complex_type = types_section.appendChild(types.createElement("xsd:complexType"))
+        complex_type.setAttribute("name", type_name)
+        complex_content = complex_type.appendChild(types.createElement("xsd:sequence"))
+ 
+        for k in arg.fields:
+            inner_type = name_complex_type(arg.fields[k]) 
+            element=complex_content.appendChild(types.createElement("xsd:element"))
+            element.setAttribute("name",k)
+            element.setAttribute("type",inner_type)
+
+        return "tns:%s"%type_name 
+
     else:
         return (name_simple_type(arg))
 
@@ -99,7 +123,7 @@ def name_simple_type(arg_type):
     if arg_type == None:
         return "none"
     if arg_type == DictType:
-        return "xsd:dict"
+        return "xsd:anyType"
     elif arg_type == IntType or arg_type == LongType:
         return "xsd:int"
     elif arg_type == bool:
@@ -109,8 +133,8 @@ def name_simple_type(arg_type):
     elif arg_type in StringTypes:
         return "xsd:string"
     else:
-       #pdb.set_trace()
-        raise SoapError, "Cannot handle %s objects" % arg_type
+       pdb.set_trace()
+       raise SoapError, "Cannot handle %s objects" % arg_type
 
 def param_type(arg):
     return (name_complex_type(arg))
@@ -237,7 +261,7 @@ def get_wsdl_definitions():
         name="auto_generated"
         targetNamespace="%s"
         xmlns:xsd="http://www.w3.org/2000/10/XMLSchema"
-        xmlns:tns="xmlns:%s"
+        xmlns:tns="%s"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>
         """ % (globals.plc_ns,globals.plc_ns)
@@ -251,8 +275,8 @@ def get_wsdl_definitions_and_types():
     <wsdl:definitions
         name="auto_generated"
         targetNamespace="%s"
-        xmlns:xsd="http://www.w3.org/2000/10/XMLSchema"
-        xmlns:tns="xmlns:%s"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="%s"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
         <wsdl:types>
