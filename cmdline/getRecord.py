@@ -28,27 +28,30 @@ def create_parser():
     parser.add_option("-d", "--debug", dest="DEBUG", action="store_true",
         default=False,  help = "record file path")
     parser.add_option("-k", "--key", dest="withkey", action="store_true",
-        default=False,  help = "print keys")
+        default=False,  help = "print SSH keys and certificates")
+    parser.add_option("-p", "--plinfo", dest="plinfo", action="store_true",
+        default=False,  help = "print PlanetLab specific internal fields")
    
     return parser    
+
 
 def printRec(record, filters, options):
     line = ""
     if len(filters):
         for filter in filters:
             if options.DEBUG:  print "Filtering on %s" %filter
-            if options.withkey:
-                line += "%s: " %filter
-            line += "%s\n" % \
-                printVal(record.dict["record"].get(filter, None))
-            print line
+            line += "%s: %s\n" % (filter, 
+                printVal(record.dict["record"].get(filter, None)))
+        print line
     else:
         # print the wole thing
         for (key, value) in record.dict["record"].iteritems():
-            if options.withkey:
-                line += "%s: " % key
-            line += "%s\n" % printVal(value)
+            if (not options.withkey and key in ('gid', 'keys')) or\
+                (not options.plinfo and key == 'pl_info'):
+                continue
+            line += "%s: %s\n" % (key, printVal(value))
         print line
+
 
 # fix the iteratable values
 def printVal(value):
@@ -56,9 +59,10 @@ def printVal(value):
     if type(value) in (tuple, list):
         for i in value:
             line += "%s " % i
-    else:
+    elif value != None:
         line += value
     return line.rstrip("\n")
+
 
 def main():
     parser = create_parser(); 
