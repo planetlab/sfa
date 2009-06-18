@@ -23,72 +23,84 @@ def create_parser():
     command = sys.argv[0]
     argv = sys.argv[1:]
     usage = "%(command)s [options]" % locals()
-    description = """getRecord will open a record file and print all key/values, or filter results based on a given key or set of keys."""
+    description = """setRecord will edit a record (from stdin), modify its contents, then print the new record to stdout"""
     parser = OptionParser(usage=usage,description=description)
-    parser.add_option("-i", "--infile", dest="infile", metavar="FILE", 
-        default=None,  help = "record file path")
     parser.add_option("-d", "--debug", dest="DEBUG", action="store_true",
-        default=False,  help = "record file path")
+        default=False,  help = "print debug info")
    
     return parser    
 
 
-def editDict(replacewith, recordDict, options):
-    # first we find the part of the tree we want to replace
-    # and check it exists.
-    for (key, val) in replacewith.items():
-        if not recordDict.has_key(key):
-            print "Cannot find key %s in record %s.  Adding new key."\
-                 % (key, options.infile)
-        else:
-            print "Replacing %s = %s with %s\n" % (key, recordDict[key], val)
-        recordDict[key] = val
-   
-
-def patchDict(args):
+def editDict(args, recordDict, options):
     """
-    Takes the arg list, seperates into tag/value, creates a dict.
+    Takes the arg list, seperates into tag/value, creates a dict, then munges args.
     """
-    patch = {}
+    # find out if its iterable.
     for vect in args:
-        if vect.count("="):
-            patch[vect.split("=")[0]] = vect.split("=")[1]
+        if vect.count("+="):
+            # append value
+            modDict({vect.split("+=")[0]: returnVal(vect.split("+=")[1])},
+                         recordDict, options) 
+ 
+        elif vect.count("="):
+            # reassign value
+            replaceDict({vect.split("=")[0]: returnVal(vect.split("=")[1])},
+                         recordDict, options) 
         else:
-            raise TypeError, "Argument error: Records are updated with key=val\n" \
-                            "%s Unknown key/val" % vect
-    return patch
+            raise TypeError, "Argument error: Records are updated with \n" \
+                            "key=val1,val2,valN or\n" \
+                            "key+=val1,val2,valN \n%s Unknown key/val" % vect
 
+
+def replaceDict(newval, recordDict, options):
+    """
+    Replaces field in dict
+    """
+    # Check type of old field matches type of new field
+    for (key, val) in newval.iteritems():
+        recordDict[key] = val
+
+def modDict(newval, recordDict, options):
+    """
+    Checks type of existing field, addends new field
+    """
+    for (key, val) in newval.iteritems():
+        if (type(recordDict[key]) == list):
+            if (type(val) == list):
+                recordDict[key] = recordDict[key] + val
+            else:
+                recordDict[key].append(val)
+        elif type(val) == list:
+            val.append(recordDict[key])
+            recordDict[key] = val
+        else:
+            recordDict[key] = [recordDict[key], val]
+
+
+def returnVal(arg):
+    """
+    if given input has ",", then its assumed to be a list.
+    """
+    if arg.count(","):
+        return list(arg.split(","))
+    else:
+        return arg
 
 def main():
     parser = create_parser(); 
     (options, args) = parser.parse_args()
 
-    # Check the the file was specified  
-    if not options.infile:
-        print "You must specify a record file"
-        return -1
-    try: 
-        print "Openning %s.\n" % options.infile
-        f = open(options.infile)
-        record = RecordSpec(xml = f)
-        f.close()
-    except: raise
-
+    record = RecordSpec(xml = sys.stdin.read())
 
     if args:
-        patch = patchDict(args)
-        if options.DEBUG:  print "Replace w/ %s" %  patch
-        editDict(patch, record.dict["record"], options)
+        editDict(args, record.dict["record"], options)
     if options.DEBUG:
         print "New Record:\n%s" % record.dict
-
-    record.pprint()
+        record.pprint()
 
     record.parseDict(record.dict)
-    
     s = record.toxml()
-    f = open(options.infile,"w")
-    f.write(s)
+    sys.stdout.write(s)
 
 if __name__ == '__main__':
     try: main()
