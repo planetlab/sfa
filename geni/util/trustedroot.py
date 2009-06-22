@@ -7,7 +7,7 @@ class TrustedRootList():
     def __init__(self, dir=None):
         if not dir:
             config = Config()
-            dir = config.basepath + os.sep + 'trusted_roots'
+            dir = config.config_path + os.sep + 'trusted_roots'
         self.basedir = dir
         
         # create the directory to hold the files
