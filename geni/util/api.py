@@ -255,6 +255,8 @@ class GeniAPI:
             if not "instantiation" in pl_record:
                 pl_record["instantiation"] = "plc-instantiated"
             pl_record["name"] = hrn_to_pl_slicename(hrn)
+	    if "url" in record:
+               pl_record["url"] = record["url"]
 
         elif type == "node":
             if not "hostname" in pl_record:
