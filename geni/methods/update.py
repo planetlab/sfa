@@ -57,7 +57,9 @@ class update(Method):
             self.api.plshell.UpdateSite(self.api.plauth, pointer, record)
 
         elif type == "slice":
-            self.api.plshell.UpdateSlice(self.api.plauth, pointer, record)
+            hrn=record.get_name()
+            pl_record=self.api.geni_fields_to_pl_fields(type, hrn, record)
+            self.api.plshell.UpdateSlice(self.api.plauth, pointer, pl_record)
 
         elif type == "user":
             # SMBAKER: UpdatePerson only allows a limited set of fields to be
