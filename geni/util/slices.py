@@ -168,7 +168,7 @@ class Slices(SimpleStorage):
             slice = slices[0]    
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
-        researchers = slice.get('researcher', [])
+        researchers = record.get('researcher', [])
         for researcher in researchers:
             person_record = {}
             person_records = registry.resolve(credential, researcher)
