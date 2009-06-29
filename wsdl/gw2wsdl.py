@@ -85,7 +85,7 @@ def name_complex_type(arg):
             element.setAttribute("name", n)
             element.setAttribute("type", "%s"%t)
             element.setAttribute("minOccurs","%d"%min_args)
-        return "tns:%s"%type_name
+        return "xsdl:%s"%type_name
     elif (isinstance(arg, Parameter)):
         return (name_simple_type(arg.type))
     elif type(arg) == ListType or type(arg) == TupleType:
@@ -96,10 +96,11 @@ def name_complex_type(arg):
         complex_type.setAttribute("name", type_name)
         complex_content = complex_type.appendChild(types.createElement("xsd:complexContent"))
         restriction = complex_content.appendChild(types.createElement("restriction"))
-        restriction.setAttribute("base","Array")
+        restriction.setAttribute("base","soapenc:Array")
         attribute = restriction.appendChild(types.createElement("attribute"))
+        attribute.setAttribute("ref","soapenc:arrayType")
         attribute.setAttribute("wsdl:arrayType",inner_type+"[]")
-        return "tns:%s"%type_name
+        return "xsdl:%s"%type_name
         
     elif type(arg) == DictType or arg == DictType or issubclass(arg, dict):
         num_types=num_types+1
@@ -114,7 +115,7 @@ def name_complex_type(arg):
             element.setAttribute("name",k)
             element.setAttribute("type",inner_type)
 
-        return "tns:%s"%type_name 
+        return "xsdl:%s"%type_name 
 
     else:
         return (name_simple_type(arg))
@@ -151,7 +152,7 @@ def add_wsdl_ports_and_bindings (wsdl):
         #print
 
         
-        in_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:message"))
+        in_el = wsdl.firstChild.appendChild(wsdl.createElement("message"))
         in_el.setAttribute("name", method + "_in")
 
         for service_name in function.interfaces:
@@ -166,37 +167,37 @@ def add_wsdl_ports_and_bindings (wsdl):
         if (function.accepts):
             (min_args, max_args, defaults) = function.args()
             for (argname,argtype) in zip(max_args,function.accepts):
-                arg_part = in_el.appendChild(wsdl.createElement("wsdl:part"))
+                arg_part = in_el.appendChild(wsdl.createElement("part"))
                 arg_part.setAttribute("name", argname)
                 arg_part.setAttribute("type", param_type(argtype))
                 
         # Return type            
         return_type = function.returns
-        out_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:message"))
+        out_el = wsdl.firstChild.appendChild(wsdl.createElement("message"))
         out_el.setAttribute("name", method + "_out")
-        ret_part = out_el.appendChild(wsdl.createElement("wsdl:part"))
+        ret_part = out_el.appendChild(wsdl.createElement("part"))
         ret_part.setAttribute("name", "returnvalue")
         ret_part.setAttribute("type", param_type(return_type))
 
         # Port connecting arguments with return type
 
-        port_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:portType"))
+        port_el = wsdl.firstChild.appendChild(wsdl.createElement("portType"))
         port_el.setAttribute("name", method + "_port")
         
-        op_el = port_el.appendChild(wsdl.createElement("wsdl:operation"))
+        op_el = port_el.appendChild(wsdl.createElement("operation"))
         op_el.setAttribute("name", method)
-        inp_el=wsdl.createElement("wsdl:input")
+        inp_el=wsdl.createElement("input")
         inp_el.setAttribute("message","tns:" + method + "_in")
         inp_el.setAttribute("name",method+"_request")
         op_el.appendChild(inp_el)
-        out_el = wsdl.createElement("wsdl:output")
+        out_el = wsdl.createElement("output")
         out_el.setAttribute("message","tns:" + method + "_out")
         out_el.setAttribute("name",method+"_response")
         op_el.appendChild(out_el)
 
         # Bindings
 
-        bind_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:binding"))
+        bind_el = wsdl.firstChild.appendChild(wsdl.createElement("binding"))
         bind_el.setAttribute("name", method + "_binding")
         bind_el.setAttribute("type", "tns:" + method + "_port")
         
@@ -205,20 +206,20 @@ def add_wsdl_ports_and_bindings (wsdl):
         soap_bind.setAttribute("transport","http://schemas.xmlsoap.org/soap/http")
 
         
-        wsdl_op = bind_el.appendChild(wsdl.createElement("wsdl:operation"))
+        wsdl_op = bind_el.appendChild(wsdl.createElement("operation"))
         wsdl_op.setAttribute("name", method)
         wsdl_op.appendChild(wsdl.createElement("soap:operation")).setAttribute("soapAction",
                 "urn:" + method)
 
         
-        wsdl_input = wsdl_op.appendChild(wsdl.createElement("wsdl:input"))
+        wsdl_input = wsdl_op.appendChild(wsdl.createElement("input"))
         input_soap_body = wsdl_input.appendChild(wsdl.createElement("soap:body"))
         input_soap_body.setAttribute("use", "encoded")
         input_soap_body.setAttribute("namespace", "urn:" + method)
         input_soap_body.setAttribute("encodingStyle","http://schemas.xmlsoap.org/soap/encoding/")
 
         
-        wsdl_output = wsdl_op.appendChild(wsdl.createElement("wsdl:output"))
+        wsdl_output = wsdl_op.appendChild(wsdl.createElement("output"))
         output_soap_body = wsdl_output.appendChild(wsdl.createElement("soap:body"))
         output_soap_body.setAttribute("use", "encoded")
         output_soap_body.setAttribute("namespace", "urn:" + method)
@@ -227,12 +228,12 @@ def add_wsdl_ports_and_bindings (wsdl):
 
 def add_wsdl_service(wsdl):
     for service in services.keys():
-        service_el = wsdl.firstChild.appendChild(wsdl.createElement("wsdl:service"))
+        service_el = wsdl.firstChild.appendChild(wsdl.createElement("service"))
         service_el.setAttribute("name", service)
 
         for method in services[service]:
             name=method
-            servport_el = service_el.appendChild(wsdl.createElement("wsdl:port"))
+            servport_el = service_el.appendChild(wsdl.createElement("port"))
             servport_el.setAttribute("name", name + "_port")
             servport_el.setAttribute("binding", "tns:" + name + "_binding")
 
@@ -243,28 +244,16 @@ def add_wsdl_service(wsdl):
 def get_wsdl_definitions():
     wsdl_text_header = """
         <wsdl:definitions
-        name="auto_generated"
-        targetNamespace="%s"
-        xmlns:xsd="http://www.w3.org/2000/10/XMLSchema"
-        xmlns:tns="xmlns:%s"
+        name="geniwrapper_autogenerated"
+        targetNamespace="%s/2009/06/sfa.wsdl"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsdl="http://%s/2009/06/schema"
+        xmlns:tns="%s/2009/06/sfa.wsdl"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:soapenc="http://schemas.xmlsoap.org/wsdl/soap/encoding"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>
-        """ % (globals.plc_ns,globals.plc_ns)
-        
-    wsdl = xml.dom.minidom.parseString(wsdl_text_header)
-    
-    return wsdl
-
-def get_wsdl_definitions():
-    wsdl_text_header = """
-        <wsdl:definitions
-        name="auto_generated"
-        targetNamespace="%s"
-        xmlns:xsd="http://www.w3.org/2000/10/XMLSchema"
-        xmlns:tns="%s"
-        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>
-        """ % (globals.plc_ns,globals.plc_ns)
+        """ % (globals.plc_ns,globals.plc_ns,globals.plc_ns)
         
     wsdl = xml.dom.minidom.parseString(wsdl_text_header)
     
@@ -273,16 +262,19 @@ def get_wsdl_definitions():
 def get_wsdl_definitions_and_types():
     wsdl_text_header = """
     <wsdl:definitions
-        name="auto_generated"
-        targetNamespace="%s"
+        name="geniwrapper_autogenerated"
+        targetNamespace="%s/2009/06/sfa.wsdl"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-        xmlns:tns="%s"
+        xmlns:xsdl="http://%s/2009/06/schema"
+        xmlns:tns="%s/2009/06/sfa.wsdl"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:soapenc="http://schemas.xmlsoap.org/wsdl/soap/encoding"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-        <wsdl:types>
-            <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="%s"/>
-        </wsdl:types>
-    </wsdl:definitions> """ % (globals.plc_ns,globals.plc_ns,globals.plc_ns)
+        <types>
+            <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="%s/2009/06/schema"/>
+        </types>
+    </wsdl:definitions> """ % (globals.plc_ns, globals.plc_ns, globals.plc_ns, globals.plc_ns)
     wsdl = xml.dom.minidom.parseString(wsdl_text_header)
     return wsdl
 
@@ -291,7 +283,7 @@ types = get_wsdl_definitions_and_types()
 
 wsdl = get_wsdl_definitions()
 add_wsdl_ports_and_bindings(wsdl)
-wsdl_types = wsdl.importNode(types.getElementsByTagName("wsdl:types")[0], True)
+wsdl_types = wsdl.importNode(types.getElementsByTagName("types")[0], True)
 wsdl.firstChild.appendChild(wsdl_types)
 add_wsdl_service(wsdl)
 
