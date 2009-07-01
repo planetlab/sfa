@@ -2,8 +2,8 @@
 %define url $URL: svn+ssh://svn.planet-lab.org/svn/geniwrapper/trunk/geniwrapper.spec $
 
 %define name geniwrapper
-%define version 0.2
-%define taglevel 7
+%define version 0.8
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -79,3 +79,5 @@ chmod 0744 /etc/init.d/geniwrapper
 * Fri May 18 2009 Baris Metin <tmetin@sophia.inria.fr>
 - initial package
 
+
+%define module_current_branch 0.2
