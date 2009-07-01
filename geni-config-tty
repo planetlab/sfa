@@ -102,11 +102,12 @@ def save_config(changes, config_file):
     print 'updated config file',config_file
 
 def validate(changes):
-    defaults = get_defaults()
-    
+
     if not changes:
         return {}
 
+    defaults = get_defaults()
+    
     # GENI_INTERFACE_HRN is GENI_REGISTRY_LEVEL1_AUTH, if thats blank it
     # then defaults to GENI_REGISTRY_ROOT_AUTH 
     # GENI_REGISTRY_LEVEL1_AUTH, so if either of these are present we must 
@@ -167,7 +168,7 @@ def prompt_variable(variable, default_config):
             raise Exception ('BailOut')
         except KeyboardInterrupt:
             print "\n"
-            raise Excception ('BailOut')
+            raise Exception ('BailOut')
 
         if (answer == "") or (answer == default_value):
             return default_value
@@ -262,8 +263,12 @@ def setup_server_key(config_dict):
             os.remove(fd)
 
     # create new server.key
-    distutils.file_util.copy_file(src=new_server_key, dst=old_server_key, verbose=1)
-    print "\t\t%(old_server_key)s\ncopied from\t%(new_server_key)s" % locals()
+    try:
+        distutils.file_util.copy_file(src=new_server_key, dst=old_server_key, verbose=1)
+        print "\t\t%(old_server_key)s\ncopied from\t%(new_server_key)s" % locals()
+    # this is expected when running geni-config-tty for the first time (before gimport.py)
+    except:
+        print "Could not create %(old_server_key)s - ignore if you haven't run gimport yet"%locals()
     
     
 
