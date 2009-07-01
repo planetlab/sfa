@@ -8,6 +8,7 @@ import os
 import traceback
 import string
 import xmlrpclib
+
 from geni.util.auth import Auth
 from geni.util.config import *
 from geni.util.faults import *
@@ -130,10 +131,7 @@ class GeniAPI:
             return shell
         except ImportError:
             # connect via xmlrpc
-            plc_host = self.config.GENI_PLC_HOST
-            plc_port = self.config.GENI_PLC_PORT
-            plc_api_path = self.config.GENI_PLC_API_PATH
-            url = "https://%(plc_host)s:%(plc_port)s/%(plc_api_path)s/" % locals()
+            url = self.config.GENI_PLC_URL
              
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
             shell.AuthCheck(self.plauth)
@@ -216,7 +214,7 @@ class GeniAPI:
         return new_cred
    
 
-    def loadCredential(self):
+    def loadCredential (self):
         """
         Attempt to load credential from file if it exists. If it doesnt get
         credential from registry.
@@ -521,6 +519,8 @@ class GeniAPI:
             elif interface == SOAPpy:
                 result = faultParameter(NS.ENV_T + ":Server", "Method Failed", method)
                 result._setDetail("Fault %d: %s" % (fault.faultCode, fault.faultString))
+            else:
+                raise
 
         # Return result
         if interface == xmlrpclib:

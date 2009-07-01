@@ -6,7 +6,7 @@ GENI_BASE_DIR="/usr/share/geniwrapper/"
 GENI_INTERFACE_HRN="plc"   
 
 
-# API Debut
+# API Debug
 # Are we logging
 GENI_API_DEBUG=1
 
@@ -22,6 +22,7 @@ GENI_REGISTRY_ROOT_AUTH="plc"
 
 # Level1 Auth
 # The hrn of the registry's level1 auth
+# xxx could be determined from hrn above
 GENI_REGISTRY_LEVEL1_AUTH=""
 
 # Hostname
@@ -61,7 +62,7 @@ GENI_SM_HOST="localhost"
 # Geni slice manager server port  
 GENI_SM_PORT=12347
 
-# PLC Interace Access Configuration
+# PLC Interface Access Configuration
 #
 # PLC user
 # Valid plc account geni interfaces will use for plc requests   
@@ -74,18 +75,9 @@ GENI_PLC_PASSWORD='root'
 
 # Hostname
 # Fully qualified hostname of PLC interface
-GENI_PLC_HOST='localhost'
-
-# Port
-# Port of PLC interface
-GENI_PLC_PORT=443
-
-# API Path
-# Path of PLC api interface 
-GENI_PLC_API_PATH='PLCAPI'
+GENI_PLC_URL='https://localhost:443/PLCAPI/'
 
 # PLC Shell PATH
 # Path of PLC shell. This only applies if Geni interfaces and PLC interface are running on the same 
 # machine
 GENI_PLC_SHELL_PATH='/usr/share/plc_api'
-    

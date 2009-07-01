@@ -37,9 +37,7 @@ all_variables   = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_SM_PORT",
                    "GENI_PLC_USER",
                    "GENI_PLC_PASSWORD",    
-                   "GENI_PLC_HOST",
-                   "GENI_PLC_PORT",
-                   "GENI_PLC_API_PATH"
+                   "GENI_PLC_URL",
                    ]
 usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_REGISTRY_LEVEL1_AUTH",
