@@ -3,7 +3,7 @@
 
 %define name geniwrapper
 %define version 0.2
-%define taglevel 6
+%define taglevel 7
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -58,6 +58,9 @@ rm -rf $RPM_BUILD_ROOT
 chmod 0744 /etc/init.d/geniwrapper
 
 %changelog
+* Wed Jul 01 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-7
+- snapshot for reproducible builds
+
 * Thu Jun 25 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-6
 - snapshot for the convenience of alpha users
 
