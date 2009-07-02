@@ -69,7 +69,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files sfi
 %config (noreplace) /etc/geni/sfi_config
-%{_bindir}/sfi.py
+%{_bindir}/sfi.py*
 %{_bindir}/getNodes.py*
 %{_bindir}/getRecord.py*
 %{_bindir}/setRecord.py*
