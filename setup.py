@@ -8,13 +8,13 @@ from distutils.core import setup, Extension
 import os, sys
 import shutil
 
-version = '0.2'
+version = '0.8'
 scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py', 'config/geni-config-tty']
 package_dirs = ['geni', 'geni/util', 'geni/methods']
 data_files = [('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 'config/geni_config', 'config/sfi_config']),
-              ('/etc/init.d/', ['geni/geniwrapper'])]
+              ('/etc/init.d/', ['geni/init.d/geni'])]
 symlinks = ['/usr/share/geniwrapper']
-initscripts = ['/etc/init.d/geniwrapper']
+initscripts = ['/etc/init.d/geni']
         
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
