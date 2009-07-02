@@ -63,17 +63,17 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/keyconvert/
 /etc/init.d/geni
 %{_bindir}/geni-config-tty
-%{_bindir}/gimport.py
-%{_bindir}/plc.py
+%{_bindir}/gimport.py*
+%{_bindir}/plc.py*
 %{python_sitelib}/*
 
 %files sfi
 %config (noreplace) /etc/geni/sfi_config
 %{_bindir}/sfi.py
-%{_bindir}/getNodes.py
-%{_bindir}/getRecord.py
-%{_bindir}/setRecord.py
-%{_bindir}/genidump.py
+%{_bindir}/getNodes.py*
+%{_bindir}/getRecord.py*
+%{_bindir}/setRecord.py*
+%{_bindir}/genidump.py*
 
 %post
 chkconfig --add geni
