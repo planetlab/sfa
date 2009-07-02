@@ -53,6 +53,10 @@ rm -rf $RPM_BUILD_ROOT
 %files -f GENI_INSTALLED_FILES.all
 %defattr(-,root,root)
 /usr/share/keyconvert
+%config (noreplace) /etc/geni/geni_config
+%config (noreplace) /etc/geni/sfi_config
+%config (noreplace) /etc/geni/aggregates.xml
+%config (noreplace) /etc/geni/registries.xml
 
 %post
 chmod 0744 /etc/init.d/geniwrapper

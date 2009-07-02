@@ -1,10 +1,12 @@
 #!/bin/bash
 
-source configSfi.sh
+export PATH=$PATH:/etc/geni
+source config_sfi
+CWD=$(pwd)
 
 rm -f saved_record.*
 
-python ./sfi.py show -o saved_record.$SFI_USER $SFI_USER
-python ./sfi.py list -o saved_record.$SFI_AUTH $SFI_AUTH
+python $(CWD)/sfi.py show -o saved_record.$SFI_USER $SFI_USER
+python $(CWD)/sfi.py list -o saved_record.$SFI_AUTH $SFI_AUTH
 
 #rm -f saved_record.*

@@ -77,13 +77,13 @@ Use:
 Copy my private PL (RSA) ssh key to ~/.sfi/quetier.pkey
 
 in cmdline
-edit  configSfi.sh
+edit  config_sfi
 export SFI_AUTH=ple.upmc
 export SFI_USER=$SFI_AUTH.quetier
 export SFI_REGISTRY=http://138.96.255.199:12345/
 export SFI_SM=http://138.96.255.199:12346/
 
-source configSfi.sh
+source config_sfi
 
 ./sfi.py list ple
 ./sfi.py show ple.upmc.quetier

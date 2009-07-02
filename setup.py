@@ -11,7 +11,7 @@ import shutil
 version = '0.2'
 scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py', 'config/geni-config-tty']
 package_dirs = ['geni', 'geni/util', 'geni/methods']
-data_files = [('/etc/geni/', ['geni/aggregates.xml', 'geni/registries.xml', 'config/geni_config', 'cmdline/configSfi.sh']),
+data_files = [('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 'config/geni_config', 'config/config_sfi']),
               ('/etc/init.d/', ['geni/geniwrapper'])]
 symlinks = ['/usr/share/geniwrapper']
 initscripts = ['/etc/init.d/geniwrapper']
