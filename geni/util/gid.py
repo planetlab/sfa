@@ -8,8 +8,8 @@
 
 import xmlrpclib
 
+import uuid
 from geni.util.certificate import *
-import geni.util.uuid
 
 ##
 # Create a new uuid. Returns the UUID as a string.
