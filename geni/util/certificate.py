@@ -23,7 +23,7 @@ import M2Crypto
 from M2Crypto import X509
 from M2Crypto import EVP
 
-from faults import *
+from geni.util.faults import *
 
 def convert_public_key(key):
     # find the keyconvert program
