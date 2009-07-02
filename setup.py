@@ -8,7 +8,15 @@ import os, sys
 import shutil
 from distutils.core import setup, Extension
 
-scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py', 'config/geni-config-tty']
+scripts = [ 'geni/gimport.py', 
+            'geni/plc.py', 
+            'config/geni-config-tty',
+            'cmdline/sfi.py', 
+            'cmdline/getNodes.py',
+            'cmdline/getRecord.py',
+            'cmdline/setRecord.py',
+            'cmdline/genidump.py',
+            ]
 package_dirs = ['geni', 'geni/util', 'geni/methods']
 data_files = [ ('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 
                                'config/geni_config', 'config/sfi_config']),
@@ -41,7 +49,8 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
 else:
     
     # avoid repeating what's in the specfile already
-    setup(packages = package_dirs, 
+    setup(name='geni',
+          packages = package_dirs, 
           data_files = data_files,
           ext_modules = [],
           py_modules = [],

@@ -26,12 +26,20 @@ Requires: python
 Requires: pyOpenSSL >= 0.7
 Requires: m2crypto
 
-
-Summary: Geniwrapper
+Summary: the GENI layer around MyPLC
 Group: Applications/System
 
-%description
-Geniwrapper description...
+%package sfi 
+Summary: the GENI layer around MyPLC - client side
+Group: Applications/System
+
+%description 
+Geniwrapper implements the Geni interface which serves as a layer
+between the existing PlanetLab interfaces and the Geni API.
+
+%description sfi
+This package provides the client side of the Geni API, in particular
+sfi.py, together with less important utilities.
 
 %prep
 %setup -q
@@ -43,19 +51,28 @@ make
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR="$RPM_BUILD_ROOT"
 
-# hack to add installed files to the package
-python -c "print '\n'.join(['%s*'%i.strip() for i in open('GENI_INSTALLED_FILES').readlines() if not i.strip().endswith('.pyc')])" |uniq > GENI_INSTALLED_FILES.all
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -f GENI_INSTALLED_FILES.all
+%files 
 %defattr(-,root,root)
-/usr/share/keyconvert
 %config (noreplace) /etc/geni/geni_config
-%config (noreplace) /etc/geni/sfi_config
 %config (noreplace) /etc/geni/aggregates.xml
 %config (noreplace) /etc/geni/registries.xml
+/usr/share/keyconvert/
+/etc/init.d/geni
+%{_bindir}/geni-config-tty
+%{_bindir}/gimport.py
+%{_bindir}/plc.py
+%{python_sitelib}/*
+
+%files sfi
+%config (noreplace) /etc/geni/sfi_config
+%{_bindir}/sfi.py
+%{_bindir}/getNodes.py
+%{_bindir}/getRecord.py
+%{_bindir}/setRecord.py
+%{_bindir}/genidump.py
 
 %post
 chkconfig --add geni
