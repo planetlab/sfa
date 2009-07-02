@@ -7,7 +7,7 @@ import sys
 import os, os.path
 import tempfile
 from optparse import OptionParser
-from geni.util.cert import Keypair, Certificate
+from geni.util.certificate import Keypair, Certificate
 from geni.util.credential import Credential
 from geni.util.geniclient import GeniClient, ServerException
 from geni.util.gid import create_uuid
