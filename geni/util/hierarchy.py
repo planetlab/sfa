@@ -12,14 +12,18 @@
 #      *.DBINFO - database info
 ##
 
+### $Id$
+### $URL$
+
 import os
 import report
-from cert import *
-from credential import *
-from gid import *
-from misc import *
-from config import *
-from geniticket import *
+
+from geni.util.cert import *
+from geni.util.credential import *
+from geni.util.gid import *
+from geni.util.misc import *
+from geni.util.config import *
+from geni.util.geniticket import *
 
 ##
 # The AuthInfo class contains the information for an authority. This information

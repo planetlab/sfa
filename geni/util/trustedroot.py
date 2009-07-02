@@ -1,6 +1,9 @@
+### $Id$
+### $URL$
+
 import os
 
-from gid import *
+from geni.util.gid import *
 from geni.util.config import Config
 
 class TrustedRootList():

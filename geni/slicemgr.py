@@ -1,3 +1,6 @@
+### $Id$
+### $URL$
+
 import os
 import sys
 import datetime
@@ -5,7 +8,7 @@ import time
 
 from geni.util.geniserver import *
 from geni.util.geniclient import *
-from geni.util.excep import *
+from geni.util.faults import *
 from geni.util.misc import *
 
 class SliceMgr(GeniServer):

@@ -3,6 +3,9 @@
 #
 #
 
+### $Id$
+### $URL$
+
 import xmlrpclib
 from types import *
 import textwrap
@@ -12,7 +15,7 @@ import pprint
 
 from types import StringTypes
 
-from geni.util.excep import * 
+from geni.util.faults import * 
 from geni.util.parameter import Parameter, Mixed, python_type, xmlrpc_type
 from geni.util.auth import Auth
 from geni.util.debug import profile, log

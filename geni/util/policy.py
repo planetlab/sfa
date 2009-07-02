@@ -1,3 +1,6 @@
+### $Id$
+### $URL$
+
 import os
 
 from geni.util.storage import *

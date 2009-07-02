@@ -1,5 +1,7 @@
 #!/usr/bin/python
 #
+### $Id$
+### $URL$
 #
 ##
 # Import PLC records into the Geni database. It is indended that this tool be

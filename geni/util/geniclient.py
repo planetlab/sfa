@@ -6,6 +6,9 @@
 # TODO: Investigate ways to combine this with existing PLC API?
 ##
 
+### $Id$
+### $URL$
+
 import xmlrpclib
 
 from gid import *

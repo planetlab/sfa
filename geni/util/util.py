@@ -1,4 +1,8 @@
-from excep import *
+### $Id$
+### $URL$
+
+from faults import *
+
 SR_SUFFIX = '_srr'
 CR_SUFFIX = '_crr'
 

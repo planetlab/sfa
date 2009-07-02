@@ -1,11 +1,13 @@
 #
 # GeniAPI authentication 
 #
+### $Id$
+### $URL$
 #
 
 import time
+
 from geni.util.faults import *
-from geni.util.excep import *
 from geni.util.credential import Credential
 from geni.util.trustedroot import TrustedRootList
 from geni.util.hierarchy import Hierarchy

@@ -5,10 +5,14 @@
 # certificate that stores a tuple of parameters.
 ##
 
-from cert import *
-from rights import *
-from gid import *
+### $Id$
+### $URL$
+
 import xmlrpclib
+
+from geni.util.cert import *
+from geni.util.rights import *
+from geni.util.gid import *
 
 ##
 # Credential is a tuple:
@@ -204,7 +208,9 @@ class Credential(Certificate):
             # make sure the rights given to the child are a subset of the
             # parents rights
             if not self.parent.get_privileges().is_superset(self.get_privileges()):
-                raise ChildRightsNotSubsetOfParent(self.get_subject() + " " + self.parent.get_privileges().save_to_string() + " " + self.get_privileges().save_to_string())
+                raise ChildRightsNotSubsetOfParent(self.get_subject() 
+                                                   + " " + self.parent.get_privileges().save_to_string()
+                                                   + " " + self.get_privileges().save_to_string())
 
         return
 

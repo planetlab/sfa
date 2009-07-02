@@ -3,6 +3,9 @@
 # descendant of the certificate class.
 ##
 
+### $Id$
+### $URL$
+
 from cert import *
 import uuid
 import xmlrpclib

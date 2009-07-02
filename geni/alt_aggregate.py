@@ -1,3 +1,6 @@
+### $Id$
+### $URL$
+
 import os
 import sys
 import datetime
@@ -9,7 +12,7 @@ from geni.util.geniclient import *
 from geni.util.cert import Keypair, Certificate
 from geni.util.credential import Credential
 from geni.util.trustedroot import TrustedRootList
-from geni.util.excep import *
+from geni.util.faults import *
 from geni.util.misc import *
 from geni.util.config import Config
 from geni.util.rspec import Rspec

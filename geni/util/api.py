@@ -1,6 +1,8 @@
 #
 # Geniwrapper XML-RPC and SOAP interfaces
 #
+### $Id$
+### $URL$
 #
 
 import sys

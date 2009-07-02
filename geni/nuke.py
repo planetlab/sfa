@@ -1,3 +1,6 @@
+### $Id$
+### $URL$
+
 ##
 # Delete all the database records for Geni. This tool is used to clean out Geni
 # records during testing.

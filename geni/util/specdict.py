@@ -10,8 +10,10 @@
 # SpecDict.plc_fields defines a one to one mapping of plc attribute to rspec 
 # attribute
 
-from types import StringTypes, ListType
+### $Id$
+### $URL$
 
+from types import StringTypes, ListType
 
 class SpecDict(dict):
     """

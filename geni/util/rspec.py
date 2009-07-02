@@ -1,3 +1,6 @@
+### $Id$
+### $URL$
+
 import sys
 import pprint
 import os

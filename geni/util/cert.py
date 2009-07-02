@@ -10,6 +10,10 @@
 #
 # This module exports two classes: Keypair and Certificate.
 ##
+#
+### $Id$
+### $URL$
+#
 
 import os
 import tempfile
@@ -19,7 +23,7 @@ import M2Crypto
 from M2Crypto import X509
 from M2Crypto import EVP
 
-from excep import *
+from faults import *
 
 def convert_public_key(key):
     # find the keyconvert program

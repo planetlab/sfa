@@ -14,16 +14,20 @@
 # Note that Geniwrapper does not access any of the PLC databases directly via
 # a mysql connection; All PLC databases are accessed via PLCAPI.
 
-from os.path import join,dirname,basename,abspath
-from geni.util.debug import log
+### $Id$
+### $URL$
+
+import os.path
 import traceback
+
+from geni.util.debug import log
 
 # xxx the path-search part could use a cleanup; 
 # why would anyone want to store the config in /usr/share/geniwrapper at all ?
 # also, if users want to use this, it might help to store stuff in ~/.sfirc or something
 
 # this would denote "/usr/share/geniwrapper/geni"
-# geni =  join(dirname(dirname(dirname(abspath(__file__)))), "geni")
+# geni =  join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "geni")
 
 class Config:
     """
@@ -36,17 +40,12 @@ class Config:
 
         loaded = False
         # path to config.py source - this would be '/usr/share/geniwrapper/geni/util'
-        path = dirname(abspath(__file__))
-        # self.path not used from the outside
-        #self.path = path
+        path = os.path.dirname(os.path.abspath(__file__))
         # parent directory of config.py source
-        self.basepath = dirname(path)
+        self.basepath = os.path.dirname(path)
         # path to actual config file
-        filename = basename(filepath)
-        # my guess is that alt_file and geni_file are identical
-        alt_file = join(path, 'util', filename)
-        # geni_file = join(geni, 'util', filename)
-        #files = [filepath, alt_file, geni_file]
+        filename = os.path.basename(filepath)
+        alt_file = os.path.join(path, 'util', filename)
         files = [filepath, alt_file]
 
         for config_file in files:
@@ -54,7 +53,7 @@ class Config:
                 execfile(config_file, self.__dict__)
                 loaded = True
                 self.config_file = config_file
-                self.config_path = dirname(config_file)
+                self.config_path = os.path.dirname(config_file)
                 break
             except:
                 pass

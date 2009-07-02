@@ -4,9 +4,14 @@
 # TODO: Use existing PLC database methods? or keep this separate?
 ##
 
-import report
+### $Id$
+### $URL$
+
 from types import StringTypes
-from gid import *
+
+import geni.util.report
+
+from geni.util.gid import *
 from geni.util.rspec import *
 from geni.util.parameter import *
 

@@ -1,4 +1,8 @@
+### $Id$
+### $URL$
+
 import os
+
 from geni.util.rspec import RecordSpec
 
 class SimpleStorage(dict):

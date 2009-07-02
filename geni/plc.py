@@ -1,5 +1,8 @@
 #!/usr/bin/python
-##
+#
+### $Id$
+### $URL$
+#
 # GENI PLC Wrapper
 #
 # This wrapper implements the Geni Registry and Slice Interfaces on PLC.

@@ -4,8 +4,11 @@
 # Mark Huang <mlhuang@cs.princeton.edu>
 # Copyright (C) 2006 The Trustees of Princeton University
 #
-# $Id: Parameter.py 5574 2007-10-25 20:33:17Z thierry $
+# $Id$
 #
+
+### $Id$
+### $URL$
 
 from types import *
 from geni.util.faults import *

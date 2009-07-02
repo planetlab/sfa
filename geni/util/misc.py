@@ -1,4 +1,7 @@
-from excep import *
+### $Id$
+### $URL$
+
+from faults import *
 
 def get_leaf(hrn):
     parts = hrn.split(".")

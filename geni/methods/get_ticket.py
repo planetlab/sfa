@@ -1,5 +1,7 @@
+### $Id$
+### $URL$
+
 from geni.util.faults import *
-from geni.util.excep import *
 from geni.util.method import Method
 from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth

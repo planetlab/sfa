@@ -6,21 +6,23 @@
 # TODO: investigate ways to combine this with existing PLC server?
 ##
 
-import SimpleXMLRPCServer
+### $Id$
+### $URL$
 
 import sys
 import traceback
 import threading
+import socket, os
+
 import SocketServer
 import BaseHTTPServer
 import SimpleHTTPServer
 import SimpleXMLRPCServer
-import socket, os
+
 from OpenSSL import SSL
 
 from geni.util.cert import *
 from geni.util.credential import *
-from geni.util.excep import *
 from geni.util.faults import *
 from geni.util.api import GeniAPI 
 from geni.util.debug import log

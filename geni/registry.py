@@ -1,5 +1,9 @@
-##
+#
 # Registry is a GeniServer that implements the Registry interface
+#
+### $Id$
+### $URL$
+#
 
 import tempfile
 import os
@@ -14,12 +18,8 @@ try:
 except ImportError:
     GeniClientLight = None            
 from geni.util.genitable import GeniTable
-from geni.util.excep import *
+from geni.util.faults import *
 from geni.util.storage import *
-
-
-#
-
 
 ##
 # Registry is a GeniServer that serves registry and slice operations at PLC.

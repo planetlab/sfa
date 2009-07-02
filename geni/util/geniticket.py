@@ -3,6 +3,9 @@
 # implements GENI tickets
 #
 
+### $Id$
+### $URL$
+
 from cert import *
 from rights import *
 from gid import *

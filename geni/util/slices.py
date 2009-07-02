@@ -1,9 +1,13 @@
+### $Id$
+### $URL$
+
 import datetime
 import time
+
 from geni.util.misc import *
 from geni.util.rspec import *
 from geni.util.specdict import *
-from geni.util.excep import *
+from geni.util.faults import *
 from geni.util.storage import *
 from geni.util.policy import Policy
 from geni.util.debug import log

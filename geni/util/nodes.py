@@ -1,3 +1,6 @@
+### $Id$
+### $URL$
+
 import os
 import time
 import datetime
@@ -6,7 +9,7 @@ import sys
 from geni.util.misc import *
 from geni.util.rspec import *
 from geni.util.specdict import * 
-from geni.util.excep import *
+from geni.util.faults import *
 from geni.util.storage import *
 from geni.util.debug import log
 from geni.util.rspec import *
