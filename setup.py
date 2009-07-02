@@ -20,7 +20,9 @@ scripts = [ 'geni/gimport.py',
 package_dirs = ['geni', 'geni/util', 'geni/methods']
 data_files = [ ('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 
                                'config/geni_config', 'config/sfi_config']),
-               ('/etc/init.d/', ['geni/init.d/geni'])]
+               ('/etc/init.d/', ['geni/init.d/geni']),
+               ('/var/www/html/wsdl', [ 'wsdl/sfa.wsdl' ] ),
+               ]
 symlinks = ['/usr/share/geniwrapper']
 initscripts = ['/etc/init.d/geni']
         

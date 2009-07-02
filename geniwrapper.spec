@@ -64,8 +64,9 @@ make install DESTDIR="$RPM_BUILD_ROOT"
 rm -rf $RPM_BUILD_ROOT
 
 %files
-/usr/share/keyconvert/
 %{python_sitelib}/*
+/usr/share/keyconvert/
+/var/www/html/wsdl/sfa.wsdl
 
 %files plc
 %defattr(-,root,root)
