@@ -40,6 +40,10 @@ def set_servers(options):
       sm_url = os.environ["SFI_SM"]
    else:
       print "No Known Slice Manager"
+      print "Try:"
+      print "    export SFI_SM=http://your.slicemanager.url:12347/"
+      print "Or add this argument to the command line:"
+      print "    --slicemgr=http://your.slicemanager.url:12347/"
       sys.exit(1)
 
    # Set Registry URL
@@ -49,6 +53,10 @@ def set_servers(options):
       reg_url = os.environ["SFI_REGISTRY"]
    else:
       print "No Known Registry Server"
+      print "Try:"
+      print "    export SFI_REGISTRY=http://your.slicemanager.url:12345/"
+      print "Or add this argument to the command line:"
+      print "    --registry=http://your.slicemanager.url:12345/"
       sys.exit(1)
 
    if options.verbose :
@@ -62,6 +70,10 @@ def set_servers(options):
       user = os.environ["SFI_USER"]
    else:
       print "No Known User Name"
+      print "Try:"
+      print "    export SFI_USER=$SFI_AUTH.username"
+      print "Or add this argument to the command line:"
+      print "    --user=username"
       sys.exit(1)
 
    # Set authority HRN
