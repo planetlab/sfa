@@ -21,7 +21,7 @@ import SimpleXMLRPCServer
 
 from OpenSSL import SSL
 
-from geni.util.cert import *
+from geni.util.certificate import *
 from geni.util.credential import *
 from geni.util.faults import *
 from geni.util.api import GeniAPI 

@@ -6,10 +6,11 @@
 ### $Id$
 ### $URL$
 
-from cert import *
-from rights import *
-from gid import *
 import xmlrpclib
+
+from geni.util.certificate import *
+from geni.util.rights import *
+from geni.util.gid import *
 
 # Ticket is tuple:
 #   (gidCaller, gidObject, attributes, rspec, delegate)

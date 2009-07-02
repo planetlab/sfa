@@ -9,7 +9,7 @@ import xmlrpclib
 
 from geni.util.geniserver import GeniServer
 from geni.util.geniclient import *
-from geni.util.cert import Keypair, Certificate
+from geni.util.certificate import Keypair, Certificate
 from geni.util.credential import Credential
 from geni.util.trustedroot import TrustedRootList
 from geni.util.faults import *

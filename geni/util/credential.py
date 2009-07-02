@@ -10,7 +10,7 @@
 
 import xmlrpclib
 
-from geni.util.cert import *
+from geni.util.certificate import *
 from geni.util.rights import *
 from geni.util.gid import *
 

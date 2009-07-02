@@ -6,7 +6,6 @@ cert
 config
 credential
 debug
-excep
 faults
 geniclient
 geniserver
@@ -27,7 +26,6 @@ rspec
 slices
 specdict
 storage
-testrspec
 trustedroot
 util
 """.split()

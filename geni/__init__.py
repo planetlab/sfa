@@ -7,6 +7,4 @@ nuke
 plc
 registry
 slicemgr
-test
-testsm
 """.split()

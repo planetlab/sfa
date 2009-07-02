@@ -21,7 +21,7 @@ import getopt
 import sys
 import tempfile
 
-from geni.util.cert import *
+from geni.util.certificate import *
 from geni.util.trustedroot import *
 from geni.util.hierarchy import *
 from geni.util.record import *

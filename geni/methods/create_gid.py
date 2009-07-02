@@ -5,7 +5,7 @@ from geni.util.faults import *
 from geni.util.method import Method
 from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
-from geni.util.cert import Keypair 
+from geni.util.certificate import Keypair 
 
 class create_gid(Method):
     """

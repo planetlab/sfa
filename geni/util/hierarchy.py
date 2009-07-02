@@ -18,7 +18,7 @@
 import os
 import report
 
-from geni.util.cert import *
+from geni.util.certificate import *
 from geni.util.credential import *
 from geni.util.gid import *
 from geni.util.misc import *

@@ -6,9 +6,10 @@
 ### $Id$
 ### $URL$
 
-from cert import *
-import uuid
 import xmlrpclib
+
+from geni.util.certificate import *
+import geni.util.uuid
 
 ##
 # Create a new uuid. Returns the UUID as a string.

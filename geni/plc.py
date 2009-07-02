@@ -39,7 +39,7 @@ from optparse import OptionParser
 
 from geni.util.hierarchy import Hierarchy
 from geni.util.trustedroot import TrustedRootList
-from geni.util.cert import Keypair, Certificate
+from geni.util.certificate import Keypair, Certificate
 from geni.util.config import Config
 from geni.registry import Registry
 from geni.aggregate import Aggregate
