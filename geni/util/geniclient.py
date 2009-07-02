@@ -313,8 +313,8 @@ class GeniClient():
     # @param cred a credential identifying the caller (callerGID) and the slice
     #     (objectGID)
 
-    def reset_slice(self, cred):
-        result = self.server.reset_slice(cred.save_to_string(save_parents=True))
+    def reset_slice(self, cred, hrn):
+        result = self.server.reset_slice(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ##
