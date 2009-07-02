@@ -46,9 +46,6 @@ make install DESTDIR="$RPM_BUILD_ROOT"
 # hack to add installed files to the package
 python -c "print '\n'.join(['%s*'%i.strip() for i in open('GENI_INSTALLED_FILES').readlines() if not i.strip().endswith('.pyc')])" |uniq > GENI_INSTALLED_FILES.all
 
-%post
-chkconfig --add geni
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -61,7 +58,7 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/geni/registries.xml
 
 %post
-chmod 0744 /etc/init.d/geniwrapper
+chkconfig --add geni
 
 %changelog
 * Wed Jul 01 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-7
