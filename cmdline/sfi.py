@@ -15,7 +15,7 @@ from geni.util.record import *
 from geni.util.rspec import Rspec
 from types import StringTypes, ListType
 
-# xxx todo xxx auto-load ~/.sfi/config_sfi
+# xxx todo xxx auto-load ~/.sfi/sfi_config
 
 sfi_dir = os.path.expanduser("~/.sfi/")
 slicemgr = None

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PATH=$PATH:/etc/geni
-source config_sfi
+source sfi_config
 CWD=$(pwd)
 
 # private key to use when creating GID for new slice
