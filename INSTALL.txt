@@ -1,7 +1,8 @@
 ========== INSTALL
 Assuming that you've set up your yum repo like for a myplc install,
-you should be abe to just
-# yum install geniwrapper
+you should be able to just
+
+# yum install sfa-plc
 
 ========== CONFIGURE
 
