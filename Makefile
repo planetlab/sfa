@@ -26,7 +26,7 @@ keyconvert-clean:
 .PHONY: keyconvert keyconvert-install keyconvert-clean 
 
 ##########
-python: $(init)
+python: index
 
 python-install:
 	python setup.py install --root=$(DESTDIR) --record=GENI_INSTALLED_FILES
@@ -49,6 +49,9 @@ init := geni/__init__.py geni/util/__init__.py geni/methods/__init__.py
 
 force:
 .PHONY: force 
+
+index: $(init)
+.PHONY: index
 
 geni/__init__.py:
 	(echo '## Please use make index to update this file' ; echo 'all = """' ; cd geni; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' ; echo '""".split()') > $@
