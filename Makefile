@@ -117,7 +117,8 @@ ifeq (,$(SSHURL))
 	@exit 1
 else
 	+$(RSYNC) ./geni/ $(SSHURL)/usr/lib/python2.5/site-packages/geni/
-	+$(RSYNC) geni-config-tty $(SSHURL)/usr/bin
+	+$(RSYNC) ./config/geni-config-tty $(SSHURL)/usr/bin
+	$(SSHCOMMAND) exec service geni restart
 endif
 
 .PHONY: sync

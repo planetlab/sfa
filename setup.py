@@ -4,24 +4,21 @@
 Installation script for the geniwrapper module
 """
 
-from distutils.core import setup, Extension
 import os, sys
 import shutil
+from distutils.core import setup, Extension
 
-version = '0.8'
 scripts = ['geni/gimport.py', 'geni/plc.py', 'cmdline/sfi.py', 'config/geni-config-tty']
 package_dirs = ['geni', 'geni/util', 'geni/methods']
-data_files = [('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 'config/geni_config', 'config/sfi_config']),
-              ('/etc/init.d/', ['geni/init.d/geni'])]
+data_files = [ ('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 
+                               'config/geni_config', 'config/sfi_config']),
+               ('/etc/init.d/', ['geni/init.d/geni'])]
 symlinks = ['/usr/share/geniwrapper']
 initscripts = ['/etc/init.d/geni']
         
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
-    site_packages_only = lambda path: path.endswith('site-packages') 
-    site_packages_path = filter(site_packages_only, python_path)
-    add_geni_path = lambda path: path + os.sep + 'geni'
-    site_packages_path = map(add_geni_path, site_packages_path) 
+    site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
     remove_dirs = ['/etc/geni/'] + site_packages_path
     remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py', '/usr/bin/geni-config-tty'] + \
                     symlinks + initscripts
@@ -42,30 +39,20 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
         except: print "failed"
  
 else:
-    setup(name='geniwrapper', 
-      version = version,
-      packages = package_dirs, 
-      data_files = data_files,
-      ext_modules = [],
-      py_modules = [],
-      scripts = scripts,   
-      url = 'http://svn.planet-lab.org/svn/geniwrapper/',
-      description = "Geni API",      
-      long_description = """\
-Geniwrapper implements the Geni interface which serves 
-as a layer between the existing PlanetLab interfaces 
-and the Geni API.
-                    """,
-      license = 'GPL')
+    
+    # avoid repeating what's in the specfile already
+    setup(packages = package_dirs, 
+          data_files = data_files,
+          ext_modules = [],
+          py_modules = [],
+          scripts = scripts,   
+          )
 
     # create symlink to geniwrapper source in /usr/share
     python_path = sys.path
-    site_packages_only = lambda path: path.endswith('site-packages')
-    site_packages_path = filter(site_packages_only, python_path)
-    add_geni_path = lambda path: path + os.sep + 'geni'
-    site_packages_path = map(add_geni_path, site_packages_path)
-    # python path usualy has /urs/local/lib/ path , filter this out
-    site_packages_path = filter(lambda x: 'local' not in x, site_packages_path) 
+    site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
+    # python path usualy has /usr/local/lib/ path , filter this out
+    site_packages_path = [x for x in site_packages_path if 'local' not in x]
 
     # we can not do this here as installation root might change paths
     # - baris
