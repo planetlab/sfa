@@ -1,7 +1,7 @@
 ### $Id$
 ### $URL$
 
-from faults import *
+from geni.util.faults import *
 
 def get_leaf(hrn):
     parts = hrn.split(".")

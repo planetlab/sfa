@@ -11,10 +11,10 @@
 
 import xmlrpclib
 
-from gid import *
-from credential import *
-from record import *
-from geniticket import *
+from geni.util.gid import *
+from geni.util.credential import *
+from geni.util.record import *
+from geni.util.geniticket import *
 
 ##
 # ServerException, ExceptionUnmarshaller

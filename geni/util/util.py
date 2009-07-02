@@ -1,7 +1,7 @@
 ### $Id$
 ### $URL$
 
-from faults import *
+from geni.util.faults import *
 
 SR_SUFFIX = '_srr'
 CR_SUFFIX = '_crr'

@@ -10,8 +10,9 @@
 import report
 
 from pg import DB, ProgrammingError
-from gid import *
-from record import *
+
+from geni.util.gid import *
+from geni.util.record import *
 from geni.util.debug import *
 
 GENI_TABLE_PREFIX = "geni$"
