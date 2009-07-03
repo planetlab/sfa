@@ -128,7 +128,7 @@ def validate(changes):
     return changes                            
 
 def get_defaults():
-    geni_config = Config()
+    sfa_config = Config()
     plc_vars = {'PLC_API_MAINTENANCE_PASSWORD': 'GENI_PLC_PASSWORD',
                 'PLC_API_MAINTENANCE_USER': 'GENI_PLC_USER'
                }
@@ -139,9 +139,9 @@ def get_defaults():
         plc_config = None
     
     defaults = {}
-    for var in dir(geni_config):
+    for var in dir(sfa_config):
         if var.startswith('GENI'):
-            value = eval("geni_config.%s" % var)
+            value = eval("sfa_config.%s" % var)
             defaults[var] = value
 
     # some defaults come from plc_config
@@ -264,7 +264,7 @@ def setup_server_key(config_dict):
     try:
         distutils.file_util.copy_file(src=new_server_key, dst=old_server_key, verbose=1)
         print "\t\t%(old_server_key)s\ncopied from\t%(new_server_key)s" % locals()
-    # this is expected when running geni-config-tty for the first time (before gimport.py)
+    # this is expected when running this tool for the first time (before gimport.py)
     except:
         print "Could not create %(old_server_key)s - ignore if you haven't run gimport yet"%locals()
     
@@ -287,7 +287,7 @@ def main ():
         parser.error("too many arguments")
 
     config_dir = parser.values.config_dir
-    config_file = os.sep.join([config_dir, 'geni_config'])
+    config_file = os.sep.join([config_dir, 'sfa_config'])
     defaults = get_defaults()
     # if -d is specified dont prompt, just configure with defaults
     if '-d' in argv:

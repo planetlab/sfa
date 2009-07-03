@@ -70,11 +70,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plc
 %defattr(-,root,root)
-%config (noreplace) /etc/geni/geni_config
+%config (noreplace) /etc/geni/sfa_config
 %config (noreplace) /etc/geni/aggregates.xml
 %config (noreplace) /etc/geni/registries.xml
 /etc/init.d/geni
-%{_bindir}/geni-config-tty
+%{_bindir}/sfa-config-tty
 %{_bindir}/gimport.py*
 %{_bindir}/plc.py*
 

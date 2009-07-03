@@ -100,7 +100,8 @@ class GeniAPI:
     import geni.methods
     methods = geni.methods.all
     
-    def __init__(self, config = "/etc/geni/geni_config", encoding = "utf-8", peer_cert = None, interface = None, key_file = None, cert_file = None):
+    def __init__(self, config = "/etc/geni/sfa_config", encoding = "utf-8", 
+                 peer_cert = None, interface = None, key_file = None, cert_file = None):
         self.encoding = encoding
 
         # Better just be documenting the API

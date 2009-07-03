@@ -15,7 +15,7 @@ PLC_ROOT_USER = root@test.onelab.eu
 Enter command (u for usual changes, w to save, ? for help) s PLC_ROOT_PASSWORD
 PLC_ROOT_PASSWORD = test++
 ---
-geni-config-tty
+sfa-config-tty
 
 * set GENI_PLC_USER		to PLC_ROOT_USER 
 * set GENI_PLC_PASSWORD		to PLC_ROOT_PASSWORD
@@ -34,9 +34,9 @@ NOTICE:  table "geni$plc" does not exist, skipping
   inserting authority record for plc
 
 --- 
-run geni-config-tty again - to initialize /etc/geni/authorities/plc/plc.pkey
+run sfa-config-tty again - to initialize /etc/geni/authorities/plc/plc.pkey
 
-[2009.06.09--1l-f8-32-vplc07] / # geni-config-tty 
+[2009.06.09--1l-f8-32-vplc07] / # sfa-config-tty 
 Enter command (u for usual changes, w to save, ? for help) q
                 /etc/geni/authorities/server.key
 copied from     /etc/geni/authorities/plc/plc.pkey
@@ -63,7 +63,7 @@ First run:
 python gimport.py
 
 # start the services
-/etc/init.d/geniwrapper start 
+service sfa start
 
 or 
 

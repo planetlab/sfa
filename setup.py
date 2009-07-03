@@ -10,7 +10,7 @@ from distutils.core import setup, Extension
 
 scripts = [ 'geni/gimport.py', 
             'geni/plc.py', 
-            'config/geni-config-tty',
+            'config/sfa-config-tty',
             'cmdline/sfi.py', 
             'cmdline/getNodes.py',
             'cmdline/getRecord.py',
@@ -19,8 +19,8 @@ scripts = [ 'geni/gimport.py',
             ]
 package_dirs = ['geni', 'geni/util', 'geni/methods']
 data_files = [ ('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 
-                               'config/geni_config', 'config/sfi_config']),
-               ('/etc/init.d/', ['geni/init.d/geni']),
+                               'config/sfa_config', 'config/sfi_config']),
+               ('/etc/init.d/', ['geni/init.d/sfa']),
                ('/var/www/html/wsdl', [ 'wsdl/sfa.wsdl' ] ),
                ]
 symlinks = ['/usr/share/geniwrapper']
@@ -30,7 +30,7 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
     site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
     remove_dirs = ['/etc/geni/'] + site_packages_path
-    remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py', '/usr/bin/geni-config-tty'] + \
+    remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py', '/usr/bin/sfa-config-tty'] + \
                     symlinks + initscripts
     
     # remove files   

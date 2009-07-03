@@ -40,7 +40,7 @@ python-clean:
 
 # are the .java files used ?
 tags:	
-	find . -name '*.py' -o -name '*.sh' -o -name '*.ecore'  | grep -v '/\.svn/' | xargs etags
+	find . -type f | egrep -v '/\.svn/|\.py[co]$$|TAGS' | xargs etags
 .PHONY: tags
 
 
@@ -117,7 +117,7 @@ ifeq (,$(SSHURL))
 	@exit 1
 else
 	+$(RSYNC) ./geni/ $(SSHURL)/usr/lib/python2.5/site-packages/geni/
-	+$(RSYNC) ./config/geni-config-tty $(SSHURL)/usr/bin
+	+$(RSYNC) ./config/sfa-config-tty $(SSHURL)/usr/bin
 	$(SSHCOMMAND) exec service geni restart
 endif
 
