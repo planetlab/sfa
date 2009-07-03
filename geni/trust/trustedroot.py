@@ -3,7 +3,7 @@
 
 import os
 
-from geni.util.gid import *
+from geni.trust.gid import *
 from geni.util.config import Config
 
 class TrustedRootList():

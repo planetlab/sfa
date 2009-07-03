@@ -15,8 +15,8 @@ from geni.util.auth import Auth
 from geni.util.config import *
 from geni.util.faults import *
 from geni.util.debug import *
-from geni.util.rights import *
-from geni.util.credential import *
+from geni.trust.rights import *
+from geni.trust.credential import *
 from geni.util.misc import *
 
 # See "2.2 Characters" in the XML specification:

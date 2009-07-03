@@ -1,4 +1,6 @@
+====================
 changes between 0.2 and 0.8 from a user's perspective
+====================
 
 --------------------
 - 3 packages named
@@ -22,10 +24,33 @@ geni-config-tty      ->	  sfa-config-tty
 /etc/sfa/registries.xml
 	are now preserved across rpm updates
 
+
+====================
+changes between 0.2 and 0.8 from a devel's perspective
+====================
+
+cmdline/ has moved to 
+	    sfa/client
+first-class objects involved in the server side 
+	    sfa/server
+plc-dependent code has moved to
+	    sfa/plc
+basic identification/authentication objects (up to credentials) have moved to
+	    sfa/trust
+	    (this also holds in trusted_roots the CA certs of PLC-PLE)
+code for the methods have remained in
+            sfa/methods
+
+init.d instscript is now in
+            sfa/init.d
+
+config files and utilities are in
+            config/ 
+	    (should this move under sfa ?)
+
 -------------------- deprecated
 gacks/
 gui/
 dummy/
 
-nuke.py
-alt_aggregate.py
+some apparently test-related stuff formerly in cmdline hace moved to tests/client

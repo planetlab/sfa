@@ -11,7 +11,7 @@ from types import StringTypes
 
 import geni.util.report
 
-from geni.util.gid import *
+from geni.trust.gid import *
 from geni.util.rspec import *
 from geni.util.parameter import *
 

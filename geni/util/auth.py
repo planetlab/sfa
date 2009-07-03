@@ -8,10 +8,10 @@
 import time
 
 from geni.util.faults import *
-from geni.util.credential import Credential
-from geni.util.trustedroot import TrustedRootList
+from geni.trust.credential import Credential
+from geni.trust.trustedroot import TrustedRootList
 from geni.util.hierarchy import Hierarchy
-from geni.util.rights import RightList
+from geni.trust.rights import RightList
 from geni.util.genitable import *
 from geni.util.config import *
 from geni.util.misc import *

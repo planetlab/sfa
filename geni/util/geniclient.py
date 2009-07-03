@@ -11,8 +11,8 @@
 
 import xmlrpclib
 
-from geni.util.gid import *
-from geni.util.credential import *
+from geni.trust.gid import *
+from geni.trust.credential import *
 from geni.util.record import *
 from geni.util.geniticket import *
 

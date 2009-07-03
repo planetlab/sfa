@@ -11,7 +11,7 @@ import report
 
 from pg import DB, ProgrammingError
 
-from geni.util.gid import *
+from geni.trust.gid import *
 from geni.util.record import *
 from geni.util.debug import *
 

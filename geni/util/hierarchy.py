@@ -18,9 +18,9 @@
 import os
 import report
 
-from geni.util.certificate import *
-from geni.util.credential import *
-from geni.util.gid import *
+from geni.trust.certificate import *
+from geni.trust.credential import *
+from geni.trust.gid import *
 from geni.util.misc import *
 from geni.util.config import *
 from geni.util.geniticket import *

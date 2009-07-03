@@ -18,8 +18,12 @@ scripts = [ 'config/sfa-config-tty',
             'geni/client/genidump.py',
             ]
 package_dirs = [ 'geni', 
-                 'geni/util', 
+                 'geni/client',
                  'geni/methods',
+                 'geni/plc',
+                 'geni/server',
+                 'geni/trust',
+                 'geni/util', 
                  ]
 data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml', 
                                'config/registries.xml', 

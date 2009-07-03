@@ -38,8 +38,8 @@ import os, os.path
 from optparse import OptionParser
 
 from geni.util.hierarchy import Hierarchy
-from geni.util.trustedroot import TrustedRootList
-from geni.util.certificate import Keypair, Certificate
+from geni.trust.trustedroot import TrustedRootList
+from geni.trust.certificate import Keypair, Certificate
 from geni.util.config import Config
 
 from geni.server.registry import Registry

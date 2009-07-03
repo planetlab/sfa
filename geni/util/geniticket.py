@@ -8,9 +8,9 @@
 
 import xmlrpclib
 
-from geni.util.certificate import *
-from geni.util.rights import *
-from geni.util.gid import *
+from geni.trust.certificate import *
+from geni.trust.rights import *
+from geni.trust.gid import *
 
 # Ticket is tuple:
 #   (gidCaller, gidObject, attributes, rspec, delegate)

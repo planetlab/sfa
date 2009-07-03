@@ -6,8 +6,8 @@ from geni.util.method import Method
 from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.record import GeniRecord
-from geni.util.certificate import Keypair, convert_public_key
-from geni.util.gid import *
+from geni.trust.certificate import Keypair, convert_public_key
+from geni.trust.gid import *
 from geni.util.debug import log
 from geni.util.misc import *
 
