@@ -18,9 +18,10 @@
 import os
 import report
 
-from geni.trust.certificate import *
+from geni.trust.certificate import KeyPair
 from geni.trust.credential import *
 from geni.trust.gid import *
+
 from geni.util.misc import *
 from geni.util.config import *
 from geni.util.geniticket import *

@@ -8,16 +8,15 @@ import xmlrpclib
 from types import StringTypes, ListType
 from optparse import OptionParser
 
-from geni.trust.certificate import Keypair, Certificate
+from geni.trust.certificate import Certificate
 from geni.trust.credential import Credential
-from geni.util.geniclient import GeniClient, ServerException
 from geni.trust.gid import create_uuid
+
+from geni.util.geniclient import GeniClient, ServerException
 from geni.util.record import GeniRecord
 from geni.util.rspec import Rspec
 
 def determine_geni_filekind(fn):
-    from geni.trust.certificate import Certificate
-
     cert = Certificate(filename = fn)
 
     data = cert.get_data()

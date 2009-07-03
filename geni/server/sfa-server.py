@@ -37,14 +37,15 @@ slicemgr_port=12347
 import os, os.path
 from optparse import OptionParser
 
-from geni.util.hierarchy import Hierarchy
 from geni.trust.trustedroot import TrustedRootList
 from geni.trust.certificate import Keypair, Certificate
-from geni.util.config import Config
 
 from geni.server.registry import Registry
 from geni.server.aggregate import Aggregate
 from geni.server.slicemgr import SliceMgr
+
+from geni.util.config import Config
+from geni.util.hierarchy import Hierarchy
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():

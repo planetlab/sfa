@@ -1,6 +1,6 @@
 import unittest
 import xmlrpclib
-from geni.trust.certificate import *
+from geni.trust.certificate import Keypair
 from geni.trust.gid import *
 
 class TestGid(unittest.TestCase):

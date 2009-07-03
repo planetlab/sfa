@@ -10,7 +10,7 @@ import os
 import sys
 from xmlrpclib import ServerProxy
 
-from geni.trust.certificate import *
+from geni.trust.certificate import Certificate, Keypair
 from geni.trust.gid import *
 from geni.trust.trustedroot import *
 

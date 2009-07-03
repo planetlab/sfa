@@ -8,7 +8,7 @@
 
 import xmlrpclib
 
-from geni.trust.certificate import *
+from geni.trust.certificate import Certificate
 from geni.trust.rights import *
 from geni.trust.gid import *
 

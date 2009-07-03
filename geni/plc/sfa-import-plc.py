@@ -21,8 +21,9 @@ import getopt
 import sys
 import tempfile
 
-from geni.trust.certificate import *
+from geni.trust.certificate import convert_public_key, Keypair
 from geni.trust.trustedroot import *
+
 from geni.util.hierarchy import *
 from geni.util.record import *
 from geni.util.genitable import *

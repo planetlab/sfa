@@ -11,8 +11,9 @@ from optparse import OptionParser
 
 from geni.trust.certificate import Keypair, Certificate
 from geni.trust.credential import Credential
-from geni.util.geniclient import GeniClient, ServerException
 from geni.trust.gid import create_uuid
+
+from geni.util.geniclient import GeniClient, ServerException
 from geni.util.record import *
 from geni.util.rspec import Rspec
 

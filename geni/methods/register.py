@@ -3,6 +3,7 @@
 
 from geni.trust.certificate import Keypair, convert_public_key
 from geni.trust.gid import *
+
 from geni.util.faults import *
 from geni.util.misc import *
 from geni.util.method import Method

@@ -1,6 +1,5 @@
 import unittest
 import xmlrpclib
-from geni.trust.certificate import *
 from geni.trust.gid import *
 from geni.trust.config import *
 from geni.util.record import *

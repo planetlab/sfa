@@ -1,7 +1,11 @@
+#!/usr/bin/python
+import sys
+sys.path.append('..')
+
 import unittest
 import xmlrpclib
 import base64
-from geni.trust.certificate import *
+from geni.trust.certificate import Keypair
 
 class TestKeypair(unittest.TestCase):
    def setUp(self):

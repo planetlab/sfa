@@ -9,7 +9,7 @@
 import xmlrpclib
 
 import uuid
-from geni.trust.certificate import *
+from geni.trust.certificate import Certificate
 
 ##
 # Create a new uuid. Returns the UUID as a string.
