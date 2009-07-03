@@ -5,6 +5,7 @@ import os
 import time
 import datetime
 import sys
+import traceback
 
 from geni.util.misc import *
 from geni.util.rspec import *
@@ -118,9 +119,11 @@ class Nodes(SimpleStorage):
                 rspec.parseString(agg_rspec)
                 networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
             except:
-                raise
                 # XX print out to some error log
                 print >> log, "Error calling list nodes at aggregate %s" % aggregate
+                traceback.print_exc(log)
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                raise exc_type, exc_value
         # create the rspec dict
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
         resourceDict = {'Rspec': resources}
