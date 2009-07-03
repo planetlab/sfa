@@ -87,7 +87,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/genidump.py*
 
 %pre plc
-[ -f %{_sysconfdir}/init.d/sfa ] && service sfa stop
+[ -f %{_sysconfdir}/init.d/sfa ] && service sfa stop ||:
 
 %post plc
 chkconfig --add sfa
