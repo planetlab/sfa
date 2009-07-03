@@ -34,12 +34,12 @@ NOTICE:  table "geni$plc" does not exist, skipping
   inserting authority record for plc
 
 --- 
-run sfa-config-tty again - to initialize /etc/geni/authorities/plc/plc.pkey
+run sfa-config-tty again - to initialize /etc/sfa/authorities/plc/plc.pkey
 
 [2009.06.09--1l-f8-32-vplc07] / # sfa-config-tty 
 Enter command (u for usual changes, w to save, ? for help) q
-                /etc/geni/authorities/server.key
-copied from     /etc/geni/authorities/plc/plc.pkey
+                /etc/sfa/authorities/server.key
+copied from     /etc/sfa/authorities/plc/plc.pkey
 ---
 
 
@@ -48,7 +48,7 @@ xxx tested this far xxx
 
 Federation:
 ===========
-edit /etc/geni/aggregates.xml and /etc/geni/registries.xml  
+edit /etc/sfa/aggregates.xml and /etc/sfa/registries.xml  
 * set addr to ip or hostname of federated peer
 * set port to geni service port on federated peer
 * set hrn to humarn readable name of federated peer interface

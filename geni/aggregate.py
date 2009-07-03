@@ -41,7 +41,7 @@ class Aggregates(dict):
 
     required_fields = ['hrn', 'addr', 'port']
      
-    def __init__(self, api, file = "/etc/geni/aggregates.xml"):
+    def __init__(self, api, file = "/etc/sfa/aggregates.xml"):
         dict.__init__(self, {})
         self.api = api
 

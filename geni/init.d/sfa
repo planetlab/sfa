@@ -10,7 +10,7 @@
 #
 
 # Source config
-. /etc/geni/sfa_config
+. /etc/sfa/sfa_config
 
 # source function library
 . /etc/init.d/functions

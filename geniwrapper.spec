@@ -70,16 +70,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plc
 %defattr(-,root,root)
-%config (noreplace) /etc/geni/sfa_config
-%config (noreplace) /etc/geni/aggregates.xml
-%config (noreplace) /etc/geni/registries.xml
+%config (noreplace) /etc/sfa/sfa_config
+%config (noreplace) /etc/sfa/aggregates.xml
+%config (noreplace) /etc/sfa/registries.xml
 /etc/init.d/sfa
 %{_bindir}/sfa-config-tty
 %{_bindir}/gimport.py*
 %{_bindir}/plc.py*
 
 %files client
-%config (noreplace) /etc/geni/sfi_config
+%config (noreplace) /etc/sfa/sfi_config
 %{_bindir}/sfi.py*
 %{_bindir}/getNodes.py*
 %{_bindir}/getRecord.py*

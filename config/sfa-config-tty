@@ -277,7 +277,7 @@ def main ():
     argv = sys.argv[1:]
     save = True
     parser = OptionParser(usage=command_usage, version="%prog 1.0")
-    parser.set_defaults(config_dir="/etc/geni",
+    parser.set_defaults(config_dir="/etc/sfa",
                         usual_variables=[])
     parser.add_option("","--configdir",dest="config_dir",action="append", help="specify configuration directory")
     parser.add_option("","--usual_variable",dest="usual_variables",action="append", help="add a usual variable")

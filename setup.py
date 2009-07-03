@@ -18,7 +18,7 @@ scripts = [ 'geni/gimport.py',
             'cmdline/genidump.py',
             ]
 package_dirs = ['geni', 'geni/util', 'geni/methods']
-data_files = [ ('/etc/geni/', ['config/aggregates.xml', 'config/registries.xml', 
+data_files = [ ('/etc/sfa/', ['config/aggregates.xml', 'config/registries.xml', 
                                'config/sfa_config', 'config/sfi_config']),
                ('/etc/init.d/', ['geni/init.d/sfa']),
                ('/var/www/html/wsdl', [ 'wsdl/sfa.wsdl' ] ),
@@ -29,7 +29,7 @@ initscripts = ['/etc/init.d/geni']
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
     site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
-    remove_dirs = ['/etc/geni/'] + site_packages_path
+    remove_dirs = ['/etc/sfa/'] + site_packages_path
     remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py', '/usr/bin/sfa-config-tty'] + \
                     symlinks + initscripts
     

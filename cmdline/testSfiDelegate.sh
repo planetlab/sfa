@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH=$PATH:/etc/geni
+export PATH=$PATH:/etc/sfa
 source sfi_config
 CWD=$(pwd)
 

@@ -35,7 +35,7 @@ class Config:
     fast but no type conversions.
     """
 
-    def __init__(self, filepath = "/etc/geni/sfa_config"):
+    def __init__(self, filepath = "/etc/sfa/sfa_config"):
         # Load plc_config
 
         loaded = False

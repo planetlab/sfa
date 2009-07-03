@@ -46,7 +46,7 @@ class Registries(dict):
 
     required_fields = ['hrn', 'addr', 'port']
 
-    def __init__(self, api, file = "/etc/geni/registries.xml"):
+    def __init__(self, api, file = "/etc/sfa/registries.xml"):
         dict.__init__(self, {})
         self.api = api
     
