@@ -9,8 +9,8 @@ import shutil
 from distutils.core import setup
 
 scripts = [ 'config/sfa-config-tty',
-            'geni/sfa-import-plc.py', 
-            'geni/sfa-plc.py', 
+            'geni/plc/sfa-import-plc.py', 
+            'geni/server/sfa-server.py', 
             'geni/client/sfi.py', 
             'geni/client/getNodes.py',
             'geni/client/getRecord.py',
@@ -38,7 +38,7 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     remove_dirs = ['/etc/sfa/'] + site_packages_path
     remove_files = [ '/usr/bin/sfa-config-tty',
                      '/usr/bin/sfa-import-plc.py', 
-                     '/usr/bin/sfa-plc.py', 
+                     '/usr/bin/sfa-server.py', 
                      '/usr/bin/sfi.py', 
                      '/usr/bin/getNodes.py',
                      '/usr/bin/getRecord.py',

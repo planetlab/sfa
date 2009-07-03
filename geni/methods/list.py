@@ -7,7 +7,7 @@ from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.record import GeniRecord
 
-from geni.registry import Registries
+from geni.server.registry import Registries
 
 class list(Method):
     """

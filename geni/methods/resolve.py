@@ -8,7 +8,7 @@ from geni.util.auth import Auth
 from geni.util.record import GeniRecord
 from geni.util.debug import log
 
-from geni.registry import Registries
+from geni.server.registry import Registries
 
 class resolve(Method):
     """

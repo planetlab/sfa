@@ -67,9 +67,9 @@ service sfa start
 
 or 
 
-sfa-plc.py -r -d
-sfa-plc.py -a -d
-sfa-plc.py -s -d
+sfa-server.py -r -d
+sfa-server.py -a -d
+sfa-server.py -s -d
 
 
 Use:

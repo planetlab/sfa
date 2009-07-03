@@ -8,7 +8,7 @@ changes between 0.2 and 0.8 from a user's perspective
 
 -------------------- new names for commands
 gimport.py	     ->	  sfa-import-plc.py
-plc.py		     ->	  sfa-plc.py
+plc.py		     ->	  sfa-server.py
 geni-config-tty      ->	  sfa-config-tty
 
 -------------------- new names for config files & miscell

@@ -7,6 +7,7 @@
 # description:   Wraps PLCAPI into the GENI compliant API
 #
 # $Id$
+# $URL$
 #
 
 # Source config
@@ -21,17 +22,17 @@ start() {
 
         if [ "$GENI_REGISTRY_ENABLED" ]; then
             echo "Registry"
-            daemon /usr/bin/sfa-plc.py -r -d $OPTIONS
+            daemon /usr/bin/sfa-server.py -r -d $OPTIONS
         fi
 
         if [ "$GENI_AGGREGATE_ENABLED" ]; then
             echo "Aggregate"
-            daemon /usr/bin/sfa-plc.py -a -d $OPTIONS
+            daemon /usr/bin/sfa-server.py -a -d $OPTIONS
         fi
         
         if [ "$GENI_SM_ENABLED" ]; then
             echo "SliceMgr"
-            daemon /usr/bin/sfa-plc.py -s -d $OPTIONS
+            daemon /usr/bin/sfa-server.py -s -d $OPTIONS
         fi
 
         RETVAL=$?
@@ -42,7 +43,7 @@ start() {
 
 stop() {
     echo -n $"Shutting down GENIWrapper: "
-    killproc sfa-plc.py
+    killproc sfa-server.py
     RETVAL=$?
 
     echo

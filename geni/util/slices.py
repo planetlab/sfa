@@ -11,8 +11,8 @@ from geni.util.faults import *
 from geni.util.storage import *
 from geni.util.policy import Policy
 from geni.util.debug import log
-from geni.aggregate import Aggregates
-from geni.registry import Registries
+from geni.server.aggregate import Aggregates
+from geni.server.registry import Registries
 
 class Slices(SimpleStorage):
 
