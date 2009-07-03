@@ -1,7 +1,7 @@
 import unittest
-from credential import *
-from rights import *
-from gid import *
+from geni.trust.credential import *
+from geni.trust.rights import *
+from geni.trust.gid import *
 
 class TestCred(unittest.TestCase):
    def setUp(self):

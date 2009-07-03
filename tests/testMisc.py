@@ -1,5 +1,5 @@
 import unittest
-from misc import *
+from geni.util.misc import *
 
 class TestMisc(unittest.TestCase):
    def setUp(self):

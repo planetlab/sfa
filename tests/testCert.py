@@ -1,6 +1,6 @@
 import unittest
 import xmlrpclib
-from cert import *
+from geni.trust.certificate import *
 
 class TestCert(unittest.TestCase):
    def setUp(self):

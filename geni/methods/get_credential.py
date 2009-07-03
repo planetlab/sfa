@@ -1,13 +1,13 @@
 ### $Id$
 ### $URL$
 
+from geni.trust.credential import *
+from geni.trust.rights import *
 from geni.util.faults import *
 from geni.util.method import Method
 from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 from geni.util.record import GeniRecord
-from geni.trust.credential import *
-from geni.trust.rights import *
 from geni.util.debug import log
 
 class get_credential(Method):

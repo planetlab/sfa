@@ -1,7 +1,7 @@
 import unittest
 import xmlrpclib
-from cert import *
-from gid import *
+from geni.trust.certificate import *
+from geni.trust.gid import *
 
 class TestGid(unittest.TestCase):
    def setUp(self):

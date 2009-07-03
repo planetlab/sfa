@@ -26,7 +26,8 @@ keyconvert-clean:
 .PHONY: keyconvert keyconvert-install keyconvert-clean 
 
 ##########
-python: index
+python: 
+	echo 'nothing to do for python - no __init__ generated anymore'
 
 python-install:
 	python setup.py install --root=$(DESTDIR) --record=GENI_INSTALLED_FILES

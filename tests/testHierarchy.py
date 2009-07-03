@@ -1,8 +1,8 @@
 import unittest
 import os
-from excep import *
-from hierarchy import *
-from config import *
+from geni.util.faults import *
+from geni.util.hierarchy import *
+from geni.util.config import *
 
 BASEDIR = "test_hierarchy"
 PURGE_BASEDIR = "rm -rf test_hierarchy"

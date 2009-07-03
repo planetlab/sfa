@@ -1,9 +1,9 @@
 import unittest
 import xmlrpclib
-from record import *
-from cert import *
-from gid import *
-from config import *
+from geni.trust.certificate import *
+from geni.trust.gid import *
+from geni.trust.config import *
+from geni.util.record import *
 
 class TestRecord(unittest.TestCase):
     def setUp(self):

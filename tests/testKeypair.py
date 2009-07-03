@@ -1,7 +1,7 @@
 import unittest
 import xmlrpclib
 import base64
-from cert import *
+from geni.trust.certificate import *
 
 class TestKeypair(unittest.TestCase):
    def setUp(self):

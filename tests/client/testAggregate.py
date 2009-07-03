@@ -1,6 +1,7 @@
+from pprint import pprint
+
 from geni.util.geniclient import *
 from geni.trust.credential import *
-from pprint import pprint
 
 cred = Credential(filename = 'tmack.pl.sa.cred')
 slicehrn = 'planetlab.us.pl.tmack'
