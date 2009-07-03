@@ -10,14 +10,14 @@ from types import StringTypes, ListType
 
 from geni.util.geniserver import GeniServer
 from geni.util.geniclient import GeniClient
+from geni.util.storage import *
+from geni.util.faults import *
 
 # GeniLight client support is optional
 try:
     from egeni.geniLight_client import *
 except ImportError:
     GeniClientLight = None
-from geni.util.storage import *
-from geni.util.faults import *
 
 
 class Aggregate(GeniServer):

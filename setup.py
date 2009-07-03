@@ -8,8 +8,8 @@ import os, sys
 import shutil
 from distutils.core import setup, Extension
 
-scripts = [ 'geni/gimport.py', 
-            'geni/plc.py', 
+scripts = [ 'geni/sfa-import-plc.py', 
+            'geni/sfa-plc.py', 
             'config/sfa-config-tty',
             'cmdline/sfi.py', 
             'cmdline/getNodes.py',
@@ -30,7 +30,7 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
     site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/'] + site_packages_path
-    remove_files = ['/usr/bin/gimport.py', '/usr/bin/plc.py', '/usr/bin/sfi.py', '/usr/bin/sfa-config-tty'] + \
+    remove_files = ['/usr/bin/sfa-import-plc.py', '/usr/bin/sfa-plc.py', '/usr/bin/sfi.py', '/usr/bin/sfa-config-tty'] + \
                     symlinks + initscripts
     
     # remove files   

@@ -12,14 +12,15 @@ import sys
 
 from geni.util.geniserver import GeniServer
 from geni.util.geniclient import GeniClient
+from geni.util.genitable import GeniTable
+from geni.util.faults import *
+from geni.util.storage import *
+
 # GeniLight client support is optional
 try:
     from egeni.geniLight_client import *
 except ImportError:
     GeniClientLight = None            
-from geni.util.genitable import GeniTable
-from geni.util.faults import *
-from geni.util.storage import *
 
 ##
 # Registry is a GeniServer that serves registry and slice operations at PLC.

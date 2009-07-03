@@ -25,7 +25,7 @@ write and quit
 ---
 run gimport
 
-[2009.06.09--1l-f8-32-vplc07] / # gimport.py 
+[2009.06.09--1l-f8-32-vplc07] / # sfa-import-plc.py 
 Import: creating top level authorities
 Hierarchy: creating authority: plc
 plc : 
@@ -60,16 +60,16 @@ Run:
 
 First run:
 # initialize the registry by running the registry import tool 
-python gimport.py
+python sfa-import-plc.py
 
 # start the services
 service sfa start
 
 or 
 
-plc.py -r -d
-plc.py -a -d
-plc.py -s -d
+sfa-plc.py -r -d
+sfa-plc.py -a -d
+sfa-plc.py -s -d
 
 
 Use:

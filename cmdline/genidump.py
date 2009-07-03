@@ -5,14 +5,15 @@ import sys
 import os, os.path
 import tempfile
 import xmlrpclib
+from types import StringTypes, ListType
 from optparse import OptionParser
+
 from geni.util.certificate import Keypair, Certificate
 from geni.util.credential import Credential
 from geni.util.geniclient import GeniClient, ServerException
 from geni.util.gid import create_uuid
 from geni.util.record import GeniRecord
 from geni.util.rspec import Rspec
-from types import StringTypes, ListType
 
 def determine_geni_filekind(fn):
     from geni.util.certificate import Certificate

@@ -21,17 +21,17 @@ start() {
 
         if [ "$GENI_REGISTRY_ENABLED" ]; then
             echo "Registry"
-            daemon /usr/bin/plc.py -r -d $OPTIONS
+            daemon /usr/bin/sfa-plc.py -r -d $OPTIONS
         fi
 
         if [ "$GENI_AGGREGATE_ENABLED" ]; then
             echo "Aggregate"
-            daemon /usr/bin/plc.py -a -d $OPTIONS
+            daemon /usr/bin/sfa-plc.py -a -d $OPTIONS
         fi
         
         if [ "$GENI_SM_ENABLED" ]; then
             echo "SliceMgr"
-            daemon /usr/bin/plc.py -s -d $OPTIONS
+            daemon /usr/bin/sfa-plc.py -s -d $OPTIONS
         fi
 
         RETVAL=$?
@@ -42,7 +42,7 @@ start() {
 
 stop() {
     echo -n $"Shutting down GENIWrapper: "
-    killproc plc.py
+    killproc sfa-plc.py
     RETVAL=$?
 
     echo

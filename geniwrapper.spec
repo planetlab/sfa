@@ -75,8 +75,8 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/sfa/registries.xml
 /etc/init.d/sfa
 %{_bindir}/sfa-config-tty
-%{_bindir}/gimport.py*
-%{_bindir}/plc.py*
+%{_bindir}/sfa-import-plc.py*
+%{_bindir}/sfa-plc.py*
 
 %files client
 %config (noreplace) /etc/sfa/sfi_config

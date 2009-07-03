@@ -5,6 +5,7 @@ import os
 from optparse import OptionParser
 from pprint import pprint
 from types import StringTypes
+
 from geni.util.rspec import Rspec
 
 def create_parser():

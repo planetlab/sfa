@@ -16,6 +16,7 @@ import os
 from optparse import OptionParser
 from pprint import pprint
 from xml.parsers.expat import ExpatError
+
 from geni.util.rspec import RecordSpec
 
 

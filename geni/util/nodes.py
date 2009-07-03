@@ -14,8 +14,8 @@ from geni.util.storage import *
 from geni.util.debug import log
 from geni.util.rspec import *
 from geni.util.specdict import * 
-from geni.aggregate import Aggregates 
 from geni.util.policy import Policy
+from geni.aggregate import Aggregates 
 
 class Nodes(SimpleStorage):
 

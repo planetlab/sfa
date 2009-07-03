@@ -6,14 +6,15 @@ from __future__ import with_statement
 import sys
 import os, os.path
 import tempfile
+from types import StringTypes, ListType
 from optparse import OptionParser
+
 from geni.util.certificate import Keypair, Certificate
 from geni.util.credential import Credential
 from geni.util.geniclient import GeniClient, ServerException
 from geni.util.gid import create_uuid
 from geni.util.record import *
 from geni.util.rspec import Rspec
-from types import StringTypes, ListType
 
 # xxx todo xxx auto-load ~/.sfi/sfi_config
 

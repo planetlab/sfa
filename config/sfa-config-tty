@@ -264,7 +264,7 @@ def setup_server_key(config_dict):
     try:
         distutils.file_util.copy_file(src=new_server_key, dst=old_server_key, verbose=1)
         print "\t\t%(old_server_key)s\ncopied from\t%(new_server_key)s" % locals()
-    # this is expected when running this tool for the first time (before gimport.py)
+    # this is expected when running this tool for the first time (before sfa-import-plc.py)
     except:
         print "Could not create %(old_server_key)s - ignore if you haven't run gimport yet"%locals()
     
