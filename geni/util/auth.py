@@ -84,7 +84,7 @@ class Auth:
 
         @param auth_name human readable name of authority
         """
-        auth_info = get_auth_info(auth_name)
+        auth_info = self.get_auth_info(auth_name)
         table = GeniTable(hrn=auth_name,
                           cninfo=auth_info.get_dbinfo())
         # if the table doesn't exist, then it means we haven't put any records
