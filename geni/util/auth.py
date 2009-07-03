@@ -222,3 +222,5 @@ class Auth:
             if not (cred_object_hrn in operators):
                 raise PermissionError(cred_object_hrn + " is not in operator list for " + record.get_name())
 
+    def get_authority(self, hrn):
+        return get_authority(hrn)
