@@ -84,7 +84,7 @@ class Auth:
 
         @param auth_name human readable name of authority
         """
-        auth_info = self.get_auth_info(auth_name)
+        auth_info = get_auth_info(auth_name)
         table = GeniTable(hrn=auth_name,
                           cninfo=auth_info.get_dbinfo())
         # if the table doesn't exist, then it means we haven't put any records
@@ -222,24 +222,3 @@ class Auth:
             if not (cred_object_hrn in operators):
                 raise PermissionError(cred_object_hrn + " is not in operator list for " + record.get_name())
 
-    def get_leaf(self, hrn):
-        parts = hrn.split(".")
-        return ".".join(parts[-1:])
-
-    def get_authority(self, hrn):
-        parts = hrn.split(".")
-        return ".".join(parts[:-1])
-
-    def hrn_to_pl_slicename(self, hrn):
-        parts = hrn.split(".")
-        return parts[-2] + "_" + parts[-1]
-
-    # assuming hrn is the hrn of an authority, return the plc authority name
-    def hrn_to_pl_authname(self, hrn):
-        parts = hrn.split(".")
-        return parts[-1]
-
-    # assuming hrn is the hrn of an authority, return the plc login_base
-    def hrn_to_pl_login_base(self, hrn):
-        return self.hrn_to_pl_authname(hrn)
-      

@@ -8,7 +8,6 @@ def get_leaf(hrn):
     return ".".join(parts[-1:])
 
 def get_authority(hrn):
-    
     parts = hrn.split(".")
     return ".".join(parts[:-1])
 
