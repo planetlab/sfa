@@ -30,7 +30,7 @@ python:
 	echo 'nothing to do for python - no __init__ generated anymore'
 
 python-install:
-	python setup.py install --root=$(DESTDIR) --record=GENI_INSTALLED_FILES
+	python setup.py install --root=$(DESTDIR)
 
 python-clean:
 	python setup.py clean
@@ -41,7 +41,7 @@ python-clean:
 
 # are the .java files used ?
 tags:	
-	find . -type f | egrep -v '/\.svn/|\.py[co]$$|TAGS' | xargs etags
+	find . -type f | egrep -v '/\.svn/|TAGS|\.py[co]$$|\.doc$$|\.html$$' | xargs etags
 .PHONY: tags
 
 
