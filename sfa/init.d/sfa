@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# geniwrapper   Wraps PLCAPI into the GENI compliant API
+# sfa   Wraps PLCAPI into the SFA compliant API
 #
 # chkconfig: 2345 5 99
 #
-# description:   Wraps PLCAPI into the GENI compliant API
+# description:   Wraps PLCAPI into the SFA compliant API
 #
 # $Id$
 # $URL$
@@ -18,7 +18,7 @@
 
 
 start() {
-        echo -n $"Starting GENIWrapper:  "
+        echo -n $"Starting SFA:  "
 
         if [ "$GENI_REGISTRY_ENABLED" ]; then
             echo "Registry"
@@ -37,17 +37,17 @@ start() {
 
         RETVAL=$?
         echo
-        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/geniwrapper
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sfa
 
 }
 
 stop() {
-    echo -n $"Shutting down GENIWrapper: "
+    echo -n $"Shutting down SFA: "
     killproc sfa-server.py
     RETVAL=$?
 
     echo
-    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/geniwrapper
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sfa
 }
 
 
@@ -64,13 +64,13 @@ case "$1" in
     start
     ;;
   condrestart)
-    if [ -f /var/lock/subsys/geniwrapper ]; then
+    if [ -f /var/lock/subsys/sfa ]; then
         stop
         start
     fi
     ;;
   status)
-    status geniwrapper
+    status sfa
     RETVAL=$?
     ;;
   *)

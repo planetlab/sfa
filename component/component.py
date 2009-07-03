@@ -1,7 +1,7 @@
 ##
-# Geni Component Wrapper
+# Sfa Component Wrapper
 #
-# This wrapper implements the Geni Slice and Mgmt Interfaces on a node.
+# This wrapper implements the SFA Slice and Mgmt Interfaces on a node.
 #
 ##
 

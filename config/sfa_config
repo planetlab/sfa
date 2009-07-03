@@ -1,5 +1,5 @@
-# Directory where Geni intefaces are installed
-GENI_BASE_DIR="/usr/share/geniwrapper/" 
+# Directory where SFA interfaces are installed
+GENI_BASE_DIR="/usr/share/sfa/" 
 
 # HRN
 # Human readable name for the interfaces

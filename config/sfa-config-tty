@@ -266,7 +266,7 @@ def setup_server_key(config_dict):
         print "\t\t%(old_server_key)s\ncopied from\t%(new_server_key)s" % locals()
     # this is expected when running this tool for the first time (before sfa-import-plc.py)
     except:
-        print "Could not create %(old_server_key)s - ignore if you haven't run gimport yet"%locals()
+        print "Could not create %(old_server_key)s - ignore if you haven't run sfa-import-plc.py yet"%locals()
     
     
 
