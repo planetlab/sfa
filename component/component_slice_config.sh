@@ -1,4 +1,5 @@
 USER=pl_genicw
+# xxx this location is probably wrong now
 KEY_FILE=../cmdline/test.pkey
 DEST_DIR=/home/pl_genicw
 
