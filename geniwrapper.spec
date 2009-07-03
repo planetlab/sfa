@@ -87,7 +87,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/genidump.py*
 
 %post plc
-chkconfig --add geni
+chkconfig --add sfa
 
 %changelog
 * Wed Jul 01 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-7
