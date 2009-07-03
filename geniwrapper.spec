@@ -73,7 +73,7 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/geni/sfa_config
 %config (noreplace) /etc/geni/aggregates.xml
 %config (noreplace) /etc/geni/registries.xml
-/etc/init.d/geni
+/etc/init.d/sfa
 %{_bindir}/sfa-config-tty
 %{_bindir}/gimport.py*
 %{_bindir}/plc.py*
