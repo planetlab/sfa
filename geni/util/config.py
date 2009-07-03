@@ -93,9 +93,9 @@ def get_default_dbinfo():
 
 def get_pl_auth():
     pl_auth = {'Username': plcConfig.PLC_API_MAINTENANCE_USER,
-    'AuthMethod': 'capability',
-    'AuthString':  plcConfig.PLC_API_MAINTENANCE_PASSWORD,
-    "Url": 'https://%s:%s%s' %(plcConfig.PLC_API_HOST, plcConfig.PLC_API_PORT, plcConfig.PLC_API_PATH)
-    }
+               'AuthMethod': 'capability',
+               'AuthString':  plcConfig.PLC_API_MAINTENANCE_PASSWORD,
+               "Url": 'https://%s:%s%s' %(plcConfig.PLC_API_HOST, plcConfig.PLC_API_PORT, plcConfig.PLC_API_PATH)
+               }
 
     return pl_auth
