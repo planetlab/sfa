@@ -6,32 +6,45 @@ Installation script for the geniwrapper module
 
 import os, sys
 import shutil
-from distutils.core import setup, Extension
+from distutils.core import setup
 
-scripts = [ 'geni/sfa-import-plc.py', 
+scripts = [ 'config/sfa-config-tty',
+            'geni/sfa-import-plc.py', 
             'geni/sfa-plc.py', 
-            'config/sfa-config-tty',
             'cmdline/sfi.py', 
             'cmdline/getNodes.py',
             'cmdline/getRecord.py',
             'cmdline/setRecord.py',
             'cmdline/genidump.py',
             ]
-package_dirs = ['geni', 'geni/util', 'geni/methods']
-data_files = [ ('/etc/sfa/', ['config/aggregates.xml', 'config/registries.xml', 
-                               'config/sfa_config', 'config/sfi_config']),
+package_dirs = [ 'geni', 
+                 'geni/util', 
+                 'geni/methods',
+                 ]
+data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml', 
+                               'config/registries.xml', 
+                               'config/sfa_config', 
+                               'config/sfi_config',
+                               ]),
                ('/etc/init.d/', ['geni/init.d/sfa']),
                ('/var/www/html/wsdl', [ 'wsdl/sfa.wsdl' ] ),
                ]
-symlinks = ['/usr/share/geniwrapper']
-initscripts = ['/etc/init.d/geni']
+symlinks = [ '/usr/share/geniwrapper' ]
+initscripts = [ '/etc/init.d/geni' ]
         
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
     site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/'] + site_packages_path
-    remove_files = ['/usr/bin/sfa-import-plc.py', '/usr/bin/sfa-plc.py', '/usr/bin/sfi.py', '/usr/bin/sfa-config-tty'] + \
-                    symlinks + initscripts
+    remove_files = [ '/usr/bin/sfa-config-tty',
+                     '/usr/bin/sfa-import-plc.py', 
+                     '/usr/bin/sfa-plc.py', 
+                     '/usr/bin/sfi.py', 
+                     '/usr/bin/getNodes.py',
+                     '/usr/bin/getRecord.py',
+                     '/usr/bin/setRecord.py',
+                     '/usr/bin/genidump.py',
+                    ] + symlinks + initscripts
     
     # remove files   
     for filepath in remove_files:

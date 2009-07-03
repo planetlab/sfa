@@ -55,9 +55,9 @@ def set_servers(options):
    else:
       print "No Known Registry Server"
       print "Try:"
-      print "    export SFI_REGISTRY=http://your.slicemanager.url:12345/"
+      print "    export SFI_REGISTRY=http://your.registry.url:12345/"
       print "Or add this argument to the command line:"
-      print "    --registry=http://your.slicemanager.url:12345/"
+      print "    --registry=http://your.registry.url:12345/"
       sys.exit(1)
 
    if options.verbose :
@@ -364,10 +364,10 @@ def main():
    verbose = options.verbose
    if verbose :
       print "Resgistry %s, sm %s, dir %s, user %s, auth %s" % (options.registry,
-                                            options.sm,
-                                            options.dir,
-                                            options.user,
-                                            options.auth)
+                                                               options.sm,
+                                                               options.dir,
+                                                               options.user,
+                                                               options.auth)
       print "Command %s" %command
       if command in ("resources"):
          print "resources cmd_opts %s" %cmd_opts.format

@@ -8,7 +8,6 @@ from geni.util.parameter import Parameter, Mixed
 from geni.util.auth import Auth
 
 from geni.util.slices import Slices
-from geni.aggregate import Aggregates
 
 class delete_slice(Method):
     """

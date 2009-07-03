@@ -61,6 +61,7 @@ def daemon():
     os.dup2(crashlog, 2)
 
 def main():
+    # xxx get rid of globals - name consistently CamelCase or under_score
     global AuthHierarchy
     global TrustedRoots
     global registry_port

@@ -26,3 +26,6 @@ geni-config-tty      ->	  sfa-config-tty
 gacks/
 gui/
 dummy/
+
+nuke.py
+alt_aggregate.py
