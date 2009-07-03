@@ -32,13 +32,24 @@ from geni.util.config import *
 # get PL account settings from config module
 pl_auth = get_pl_auth()
 
+def connect_shell():
+    global pl_auth, shell
+
+    # get PL account settings from config module
+    pl_auth = get_pl_auth()
+
+    # connect to planetlab
+    if "Url" in pl_auth:
+        from geni.util import remoteshell
+        shell = remoteshell.RemoteShell()
+    else:
+        import PLC.Shell
+        shell = PLC.Shell.Shell(globals = globals())
+
+    return shell
+
 # connect to planetlab
-if "Url" in pl_auth:
-    from geni.util import remoteshell
-    shell = remoteshell.RemoteShell()
-else:
-    import PLC.Shell
-    shell = PLC.Shell.Shell(globals = globals())
+shell = connect_shell()
 
 ##
 # Two authorities are specified: the root authority and the level1 authority.
@@ -86,22 +97,6 @@ def process_options():
    for opt in options:
        name = opt[0]
        val = opt[1]
-
-def connect_shell():
-    global pl_auth, shell
-
-    # get PL account settings from config module
-    pl_auth = get_pl_auth()
-
-    # connect to planetlab
-    if "Url" in pl_auth:
-        from geni.util import remoteshell
-        shell = remoteshell.RemoteShell()
-    else:
-        import PLC.Shell
-        shell = PLC.Shell.Shell(globals = globals())
-
-    return shell
 
 def get_auth_table(auth_name):
     AuthHierarchy = Hierarchy()
