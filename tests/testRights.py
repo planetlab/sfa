@@ -1,5 +1,5 @@
 import unittest
-from geni.trust.rights import *
+from sfa.trust.rights import *
 
 class TestRight(unittest.TestCase):
    def setUp(self):

@@ -1,5 +1,5 @@
 import unittest
-from geni.util.misc import *
+from sfa.util.misc import *
 
 class TestMisc(unittest.TestCase):
    def setUp(self):

@@ -9,36 +9,36 @@ import shutil
 from distutils.core import setup
 
 scripts = [ 'config/sfa-config-tty',
-            'geni/plc/sfa-import-plc.py', 
-            'geni/server/sfa-server.py', 
-            'geni/client/sfi.py', 
-            'geni/client/getNodes.py',
-            'geni/client/getRecord.py',
-            'geni/client/setRecord.py',
-            'geni/client/genidump.py',
+            'sfa/plc/sfa-import-plc.py', 
+            'sfa/server/sfa-server.py', 
+            'sfa/client/sfi.py', 
+            'sfa/client/getNodes.py',
+            'sfa/client/getRecord.py',
+            'sfa/client/setRecord.py',
+            'sfa/client/genidump.py',
             ]
-package_dirs = [ 'geni', 
-                 'geni/client',
-                 'geni/methods',
-                 'geni/plc',
-                 'geni/server',
-                 'geni/trust',
-                 'geni/util', 
+package_dirs = [ 'sfa', 
+                 'sfa/client',
+                 'sfa/methods',
+                 'sfa/plc',
+                 'sfa/server',
+                 'sfa/trust',
+                 'sfa/util', 
                  ]
 data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml', 
                                'config/registries.xml', 
                                'config/sfa_config', 
                                'config/sfi_config',
                                ]),
-               ('/etc/init.d/', ['geni/init.d/sfa']),
+               ('/etc/init.d/', ['sfa/init.d/sfa']),
                ('/var/www/html/wsdl', [ 'wsdl/sfa.wsdl' ] ),
                ]
-symlinks = [ '/usr/share/geniwrapper' ]
-initscripts = [ '/etc/init.d/geni' ]
+symlinks = [ '/usr/share/sfa' ]
+initscripts = [ '/etc/init.d/sfa' ]
         
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
-    site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
+    site_packages_path = [ path + os.sep + 'sfa' for path in python_path if path.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/'] + site_packages_path
     remove_files = [ '/usr/bin/sfa-config-tty',
                      '/usr/bin/sfa-import-plc.py', 
@@ -68,7 +68,7 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
 else:
     
     # avoid repeating what's in the specfile already
-    setup(name='geni',
+    setup(name='sfa',
           packages = package_dirs, 
           data_files = data_files,
           ext_modules = [],
@@ -78,7 +78,7 @@ else:
 
     # create symlink to geniwrapper source in /usr/share
     python_path = sys.path
-    site_packages_path = [ path + os.sep + 'geni' for path in python_path if path.endswith('site-packages')]
+    site_packages_path = [ path + os.sep + 'sfa' for path in python_path if path.endswith('site-packages')]
     # python path usualy has /usr/local/lib/ path , filter this out
     site_packages_path = [x for x in site_packages_path if 'local' not in x]
 

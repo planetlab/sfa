@@ -1,7 +1,7 @@
 import unittest
 import xmlrpclib
-from geni.trust.certificate import Keypair
-from geni.trust.gid import *
+from sfa.trust.certificate import Keypair
+from sfa.trust.gid import *
 
 class TestGid(unittest.TestCase):
    def setUp(self):

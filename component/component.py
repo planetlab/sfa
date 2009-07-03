@@ -10,15 +10,15 @@ import os
 import sys
 from xmlrpclib import ServerProxy
 
-from geni.trust.certificate import Certificate, Keypair
-from geni.trust.gid import *
-from geni.trust.trustedroot import *
+from sfa.trust.certificate import Certificate, Keypair
+from sfa.trust.gid import *
+from sfa.trust.trustedroot import *
 
-from geni.util.geniserver import *
-from geni.util.faults import *
-from geni.util.misc import *
-from geni.util.record import *
-from geni.util.geniticket import *
+from sfa.util.faults import *
+from sfa.util.misc import *
+from sfa.util.record import *
+from sfa.util.geniticket import *
+from sfa.util.geniserver import *
 
 ##
 # ComponentManager is a GeniServer that serves slice and

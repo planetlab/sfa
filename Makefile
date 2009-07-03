@@ -46,7 +46,7 @@ tags:
 
 ########## indexes
 subdirs = client methods plc server trust util
-init := geni/__init__.py $(foreach subdir, $(subdirs), geni/$(subdir)/__init__.py)
+init := sfa/__init__.py $(foreach subdir, $(subdirs), sfa/$(subdir)/__init__.py)
 
 force:
 .PHONY: force 
@@ -87,9 +87,9 @@ ifeq (,$(SSHURL))
 	@echo "  or   make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr"
 	@exit 1
 else
-	+$(RSYNC) ./geni/ $(SSHURL)/usr/lib/python2.5/site-packages/geni/
+	+$(RSYNC) ./sfa/ $(SSHURL)/usr/lib/python2.5/site-packages/sfa/
 	+$(RSYNC) ./config/sfa-config-tty $(SSHURL)/usr/bin
-	$(SSHCOMMAND) exec service geni restart
+	$(SSHCOMMAND) exec service sfa restart
 endif
 
 .PHONY: sync

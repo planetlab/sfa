@@ -26,28 +26,28 @@ Requires: python
 Requires: pyOpenSSL >= 0.7
 Requires: m2crypto
 
-Summary: the GENI python libraries
+Summary: the SFA python libraries
 Group: Applications/System
 
 %package plc
-Summary: the GENI wrapper arounf MyPLC
+Summary: the SFA wrapper arounf MyPLC
 Group: Applications/System
 Requires: sfa
 
 %package client
-Summary: the GENI experimenter-side CLI
+Summary: the SFA experimenter-side CLI
 Group: Applications/System
 Requires: sfa
 
 %description
-This package provides the python libraries that the Geni implementation requires
+This package provides the python libraries that the SFA implementation requires
 
 %description plc
-Geniwrapper implements the Geni interface which serves as a layer
-between the existing PlanetLab interfaces and the Geni API.
+Geniwrapper implements the SFA interface which serves as a layer
+between the existing PlanetLab interfaces and the SFA API.
 
 %description client
-This package provides the client side of the Geni API, in particular
+This package provides the client side of the SFA API, in particular
 sfi.py, together with other utilities.
 
 %prep

@@ -16,8 +16,8 @@ import globals
 import apistub
 from types import *
 
-from geni.util.auth import Auth
-from geni.util.parameter import Parameter,Mixed
+from sfa.util.auth import Auth
+from sfa.util.parameter import Parameter,Mixed
 
 complex_types = {}
 services = {}

@@ -19,9 +19,9 @@ import traceback
 import distutils.file_util
 from optparse import OptionParser
 
-from geni.util.config import Config
-from geni.util.hierarchy import *
-from geni.util.misc import *
+from sfa.util.config import Config
+from sfa.util.hierarchy import *
+from sfa.util.misc import *
 
 
 all_variables   = ["GENI_REGISTRY_ROOT_AUTH",
@@ -133,7 +133,7 @@ def get_defaults():
                 'PLC_API_MAINTENANCE_USER': 'GENI_PLC_USER'
                }
     try:
-        from geni.util.config import plcConfig
+        from sfa.util.config import plcConfig
         plc_config = plcConfig
     except:
         plc_config = None

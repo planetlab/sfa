@@ -1,8 +1,8 @@
 import unittest
 import xmlrpclib
-from geni.trust.gid import *
-from geni.trust.config import *
-from geni.util.record import *
+from sfa.trust.gid import *
+from sfa.trust.config import *
+from sfa.util.record import *
 
 class TestRecord(unittest.TestCase):
     def setUp(self):

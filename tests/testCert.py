@@ -1,6 +1,6 @@
 import unittest
 import xmlrpclib
-from geni.trust.certificate import Certificate, Keypair
+from sfa.trust.certificate import Certificate, Keypair
 
 class TestCert(unittest.TestCase):
    def setUp(self):

@@ -1,8 +1,8 @@
 import unittest
 import os
-from geni.util.faults import *
-from geni.util.hierarchy import *
-from geni.util.config import *
+from sfa.util.faults import *
+from sfa.util.hierarchy import *
+from sfa.util.config import *
 
 BASEDIR = "test_hierarchy"
 PURGE_BASEDIR = "rm -rf test_hierarchy"
