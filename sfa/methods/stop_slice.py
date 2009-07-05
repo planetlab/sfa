@@ -24,7 +24,7 @@ class stop_slice(Method):
         Parameter(str, "Human readable name of slice to instantiate"),
         ]
 
-    returns = [Parameter(int, "1 if successful")]
+    returns = Parameter(int, "1 if successful")
     
     def call(self, cred, hrn):
        

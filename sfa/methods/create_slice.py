@@ -26,7 +26,7 @@ class create_slice(Method):
         Parameter(str, "Resource specification"),
         ]
 
-    returns = [Parameter(int, "1 if successful")]
+    returns = Parameter(int, "1 if successful")
     
     def call(self, cred, hrn, rspec):
         self.api.auth.check(cred, 'createslice')
