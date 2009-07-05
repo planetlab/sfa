@@ -10,7 +10,7 @@ get_ticket
 list
 register
 remove
-reset_slice
+reset_slices
 resolve
 start_slice
 stop_slice
