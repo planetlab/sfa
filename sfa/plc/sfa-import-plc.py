@@ -24,7 +24,7 @@ import tempfile
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
 
-from sfa.util.hierarchy import *
+from sfa.trust.hierarchy import *
 from sfa.util.record import *
 from sfa.util.genitable import *
 from sfa.util.misc import *

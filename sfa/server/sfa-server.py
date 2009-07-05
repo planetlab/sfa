@@ -45,7 +45,7 @@ from sfa.server.aggregate import Aggregate
 from sfa.server.slicemgr import SliceMgr
 
 from sfa.util.config import Config
-from sfa.util.hierarchy import Hierarchy
+from sfa.trust.hierarchy import Hierarchy
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():

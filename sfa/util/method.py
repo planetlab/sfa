@@ -17,7 +17,7 @@ from types import StringTypes
 
 from sfa.util.faults import * 
 from sfa.util.parameter import Parameter, Mixed, python_type, xmlrpc_type
-from sfa.util.auth import Auth
+from sfa.trust.auth import Auth
 from sfa.util.debug import profile, log
 
 # we inherit object because we use new-style classes for legacy methods

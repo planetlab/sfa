@@ -20,7 +20,7 @@ import distutils.file_util
 from optparse import OptionParser
 
 from sfa.util.config import Config
-from sfa.util.hierarchy import *
+from sfa.trust.hierarchy import *
 from sfa.util.misc import *
 
 

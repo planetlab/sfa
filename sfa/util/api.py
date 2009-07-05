@@ -11,7 +11,7 @@ import traceback
 import string
 import xmlrpclib
 
-from sfa.util.auth import Auth
+from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
 from sfa.util.debug import *

@@ -1,7 +1,7 @@
 import unittest
 import os
 from sfa.util.faults import *
-from sfa.util.hierarchy import *
+from sfa.trust.hierarchy import *
 from sfa.util.config import *
 
 BASEDIR = "test_hierarchy"

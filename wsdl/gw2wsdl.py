@@ -14,7 +14,7 @@ import globals
 import apistub
 from types import *
 
-from sfa.util.auth import Auth
+from sfa.trust.auth import Auth
 from sfa.util.parameter import Parameter,Mixed
 
 complex_types = {}
