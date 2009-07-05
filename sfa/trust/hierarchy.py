@@ -16,8 +16,8 @@
 ### $URL$
 
 import os
-import report
 
+from sfa.util.report import *
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import *
 from sfa.trust.gid import *
