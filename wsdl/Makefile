@@ -19,3 +19,6 @@ aggregate.wsdl: ../sfa/__init__.py
 
 sfa.wsdl: ../sfa/__init__.py
 	PYTHONPATH=../ ./gw2wsdl.py --registry --slice-manager --aggregate > $@
+
+clean:
+	rm -f *wsdl
