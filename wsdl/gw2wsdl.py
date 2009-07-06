@@ -13,12 +13,13 @@ import xml.dom.ext
 import apistub
 import inspect
 
-import globals
-
 from types import *
+from optparse import OptionParser
 
 from sfa.trust.auth import Auth
 from sfa.util.parameter import Parameter,Mixed
+
+import globals
 
 complex_types = {}
 services = {}
@@ -137,7 +138,6 @@ def param_type(arg):
 
 def add_wsdl_ports_and_bindings (wsdl):
     for method in apistub.methods:
-        print "Processing method %s"%method
 
         # Skip system. methods
         if "system." in method:
