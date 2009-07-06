@@ -225,17 +225,19 @@ def add_wsdl_ports_and_bindings (wsdl):
 
 def add_wsdl_service(wsdl):
     for service in services.keys():
-        service_el = wsdl.firstChild.appendChild(wsdl.createElement("service"))
-        service_el.setAttribute("name", service)
+        global interface_options
+        if (getattr(interface_options,service)):
+            service_el = wsdl.firstChild.appendChild(wsdl.createElement("service"))
+            service_el.setAttribute("name", service)
 
-        for method in services[service]:
-            name=method
-            servport_el = service_el.appendChild(wsdl.createElement("port"))
-            servport_el.setAttribute("name", name + "_port")
-            servport_el.setAttribute("binding", "tns:" + name + "_binding")
+            for method in services[service]:
+                    name=method
+                    servport_el = service_el.appendChild(wsdl.createElement("port"))
+                    servport_el.setAttribute("name", name + "_port")
+                    servport_el.setAttribute("binding", "tns:" + name + "_binding")
 
-            soapaddress = servport_el.appendChild(wsdl.createElement("soap:address"))
-            soapaddress.setAttribute("location", "%s/%s" % (globals.plc_ns,service))
+                    soapaddress = servport_el.appendChild(wsdl.createElement("soap:address"))
+                    soapaddress.setAttribute("location", "%s/%s" % (globals.plc_ns,service))
 
 
 def get_wsdl_definitions():
@@ -275,13 +277,28 @@ def get_wsdl_definitions_and_types():
     wsdl = xml.dom.minidom.parseString(wsdl_text_header)
     return wsdl
 
-    
-types = get_wsdl_definitions_and_types()
+def main():
+    global types
+    global interface_options
 
-wsdl = get_wsdl_definitions()
-add_wsdl_ports_and_bindings(wsdl)
-wsdl_types = wsdl.importNode(types.getElementsByTagName("types")[0], True)
-wsdl.firstChild.appendChild(wsdl_types)
-add_wsdl_service(wsdl)
+    parser = OptionParser()
+    parser.add_option("-r", "--registry", dest="registry", action="store_true", 
+                              help="Generate registry.wsdl", metavar="FILE")
+    parser.add_option("-s", "--slice-manager",
+                              action="store_true", dest="slicemgr", 
+                              help="Generate sm.wsdl")
+    parser.add_option("-a", "--aggregate", action="store_true", dest="aggregate",
+                              help="Generate am.wsdl")
 
-xml.dom.ext.PrettyPrint(wsdl)
+    (interface_options, args) = parser.parse_args()
+    types = get_wsdl_definitions_and_types()
+    wsdl = get_wsdl_definitions()
+    add_wsdl_ports_and_bindings(wsdl)
+    wsdl_types = wsdl.importNode(types.getElementsByTagName("types")[0], True)
+    wsdl.firstChild.appendChild(wsdl_types)
+    add_wsdl_service(wsdl)
+
+    xml.dom.ext.PrettyPrint(wsdl)
+
+if __name__ == "__main__":
+        main()

@@ -383,7 +383,7 @@
     <xsd:schema xmlns='http://www.w3.org/2001/XMLSchema' targetNamespace='http://www.planet-lab.org/geniwrapper/2009/07/schema'>
       <xsd:complexType name='Type1'>
         <xsd:choice>
-          <element type='xsd:string' name='uuid' minOccurs='0'/>
+          <element type='xsd:string' name='Unique identifier for new GID (uuid)' minOccurs='0'/>
         </xsd:choice>
       </xsd:complexType>
       <xsd:complexType name='Type2'>
@@ -393,7 +393,7 @@
       </xsd:complexType>
       <xsd:complexType name='Type3'>
         <xsd:choice>
-          <element type='xsd:string' name='hrn' minOccurs='0'/>
+          <element type='xsd:string' name='Human readable name (hrn)' minOccurs='0'/>
         </xsd:choice>
       </xsd:complexType>
       <xsd:simpleType name='Type4'>
