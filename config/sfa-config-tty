@@ -139,7 +139,7 @@ def get_defaults():
     
     defaults = {}
     for var in dir(sfa_config):
-        if var.startswith('GENI'):
+        if var.startswith('SFA'):
             value = eval("sfa_config.%s" % var)
             defaults[var] = value
 
