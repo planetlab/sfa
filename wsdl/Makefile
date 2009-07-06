@@ -4,20 +4,16 @@ ALL := $(SFA) registry.wsdl slice-manager.wsdl aggregate.wsdl
 
 all: $(SFA)
 
-# create missing __init__.py files
-../sfa/__init__.py:
-	make -C .. index
-
-registry.wsdl: ../sfa/__init__.py
+registry.wsdl:
 	PYTHONPATH=../ ./gw2wsdl.py --registry > $@
 
-slice-manager.wsdl: ../sfa/__init__.py
+slice-manager.wsdl:
 	PYTHONPATH=../ ./gw2wsdl.py --slice-manager > $@
 
-aggregate.wsdl: ../sfa/__init__.py
+aggregate.wsdl:
 	PYTHONPATH=../ ./gw2wsdl.py --aggregate > $@
 
-sfa.wsdl: ../sfa/__init__.py
+sfa.wsdl:
 	PYTHONPATH=../ ./gw2wsdl.py --registry --slice-manager --aggregate > $@
 
 clean:

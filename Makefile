@@ -26,7 +26,7 @@ keyconvert-clean:
 .PHONY: keyconvert keyconvert-install keyconvert-clean 
 
 ##########
-python: index
+python: 
 
 python-install:
 	python setup.py install --root=$(DESTDIR)
@@ -43,19 +43,6 @@ tags:
 	find . -type f | egrep -v '/\.svn/|TAGS|\.py[co]$$|\.doc$$|\.html$$' | xargs etags
 .PHONY: tags
 
-
-########## indexes
-subdirs = client methods plc server trust util
-init := sfa/__init__.py $(foreach subdir, $(subdirs), sfa/$(subdir)/__init__.py)
-
-force:
-.PHONY: force 
-
-index: $(init)
-.PHONY: index
-
-$(init):
-	touch $@
 
 ########## sync
 # 2 forms are supported
