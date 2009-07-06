@@ -48,7 +48,6 @@ usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_REGISTRY_LEVEL1_AUTH",
                    "GENI_PLC_USER",
                    "GENI_PLC_PASSWORD",
-                   "GENI_PLC_API_HOST",
                    "GENI_PLC_DB_USER",
                    "GENI_PLC_DB_PASSWORD",
                    ]
