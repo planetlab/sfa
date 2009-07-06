@@ -37,6 +37,18 @@ except NameError:
     from sets import Set
     set = Set
 
+def filter_argname(argname):
+    global interface_options
+    if (not interface_options.lite or (argname!="cred")):
+        if (argname.find('(') != -1):
+            # The name has documentation in it :-/
+            brackright = argname.partition('(')[2]
+            if (brackright.find(')') == -1):
+                    raise Exception("Please fix the argument %s to be well-formed.\n"%argname)
+            inbrack = brackright.partition(')')[0]
+            argname = inbrack
+    return argname
+
 def fold_complex_type_names(acc, arg):
     name = arg.doc
     if (type(acc)==list):
@@ -81,6 +93,7 @@ def name_complex_type(arg):
         choice = complex_type.appendChild(types.createElement("xsd:choice"))
         for n,t in zip(inner_names,inner_types):
             element = choice.appendChild(types.createElement("element"))
+            n = filter_argname(n)
             element.setAttribute("name", n)
             element.setAttribute("type", "%s"%t)
             element.setAttribute("minOccurs","%d"%min_args)
@@ -92,6 +105,7 @@ def name_complex_type(arg):
         num_types=num_types+1
         type_name = "Type%d"%num_types
         complex_type = types_section.appendChild(types.createElement("xsd:simpleType"))
+        type_name = filter_argname(type_name)
         complex_type.setAttribute("name", type_name)
         complex_content = complex_type.appendChild(types.createElement("xsd:list"))
         complex_content.setAttribute("itemType",inner_type)
@@ -100,6 +114,7 @@ def name_complex_type(arg):
         num_types=num_types+1
         type_name = "Type%d"%num_types
         complex_type = types_section.appendChild(types.createElement("xsd:complexType"))
+        type_name = filter_argname(type_name)
         complex_type.setAttribute("name", type_name)
         complex_content = complex_type.appendChild(types.createElement("xsd:sequence"))
  
@@ -164,11 +179,10 @@ def add_wsdl_ports_and_bindings (wsdl):
         if (function.accepts):
             (min_args, max_args, defaults) = function.args()
             for (argname,argtype) in zip(max_args,function.accepts):
-                global interface_options
-                if (not interface_options.lite or (argname!="cred")):
-                    arg_part = in_el.appendChild(wsdl.createElement("part"))
-                    arg_part.setAttribute("name", argname)
-                    arg_part.setAttribute("type", param_type(argtype))
+                argname = filter_argname(argname)
+                arg_part = in_el.appendChild(wsdl.createElement("part"))
+                arg_part.setAttribute("name", argname)
+                arg_part.setAttribute("type", param_type(argtype))
                 
         # Return type            
         return_type = function.returns
