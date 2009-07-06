@@ -40,7 +40,7 @@ python-clean:
 
 # are the .java files used ?
 tags:	
-	find . -type f | egrep -v '/\.svn/|TAGS|\.py[co]$$|\.doc$$|\.html$$' | xargs etags
+	find . -type f | egrep -v '/\.svn/|TAGS|\.py[co]$$|\.doc$$|\.html$$|\.pdf$$' | xargs etags
 .PHONY: tags
 
 
