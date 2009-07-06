@@ -30,7 +30,7 @@ from sfa.util.geniticket import *
 # The AuthInfo class contains the information for an authority. This information
 # includes the GID, private key, and database connection information.
 
-class AuthInfo():
+class AuthInfo:
     hrn = None
     gid_object = None
     gid_filename = None
@@ -102,7 +102,7 @@ class AuthInfo():
 # contains the GID, pkey, and dbinfo files for that authority (as well as
 # subdirectories for each sub-authority)
 
-class Hierarchy():
+class Hierarchy:
     ##
     # Create the hierarchy object.
     #

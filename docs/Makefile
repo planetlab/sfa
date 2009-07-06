@@ -1,11 +1,11 @@
 ### this seems like totally out-of-date
 doc:
-	pythondoc.py ../util/certificate.py ../util/credential.py ../util/gid.py \
-                     ../util/rights.py ../util/config.py ../util/hierarchy.py \
-                     ../util/record.py ../util/geniclient.py \
-                     ../util/geniserver.py 
+	pythondoc.py ../sfa/util/certificate.py ../sfa/util/credential.py ../sfa/util/gid.py \
+                     ../sfa/util/rights.py ../sfa/util/config.py ../sfa/trust/hierarchy.py \
+                     ../sfa/util/record.py ../sfa/util/geniclient.py \
+                     ../sfa/util/geniserver.py 
 
-	pythondoc.py ../registry/registry.py ../registry/import.py \
-                     ../registry/nuke.py
+	pythondoc.py ../sfa/registry/registry.py ../sfa/registry/import.py \
+                     ../sfa/registry/nuke.py
 
 	pythondoc.py ../component/component.py

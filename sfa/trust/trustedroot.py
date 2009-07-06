@@ -6,7 +6,7 @@ import os
 from sfa.trust.gid import *
 from sfa.util.config import Config
 
-class TrustedRootList():
+class TrustedRootList:
     def __init__(self, dir=None):
         if not dir:
             config = Config()

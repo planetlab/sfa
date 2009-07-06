@@ -69,7 +69,7 @@ class GeniTransport(xmlrpclib.Transport):
 # public key that is containing in the GID that the client is providing for
 # those functions that take a GID.
 
-class GeniClient():
+class GeniClient:
     ##
     # Create a new GeniClient object.
     #

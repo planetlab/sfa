@@ -17,7 +17,7 @@ from sfa.util.debug import *
 
 GENI_TABLE_PREFIX = "geni$"
 
-class GeniTable():
+class GeniTable:
     def __init__(self, create=False, hrn="unspecified.default.registry", cninfo=None):
         global GENI_TABLE_PREFIX
 

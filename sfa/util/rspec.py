@@ -8,7 +8,7 @@ import httplib
 from xml.dom import minidom
 from types import StringTypes, ListType
 
-class Rspec():
+class Rspec:
 
     def __init__(self, xml = None, xsd = None, NSURL = None):
         '''
