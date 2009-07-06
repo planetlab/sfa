@@ -152,7 +152,7 @@ class Hierarchy:
     # @param create_parents if true, also create the parents if they do not exist
 
     def create_auth(self, hrn, create_parents=False):
-        report.trace("Hierarchy: creating authority: " + hrn)
+        trace("Hierarchy: creating authority: " + hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
@@ -195,7 +195,7 @@ class Hierarchy:
     # @param hrn the human readable name of the authority to create.
 
     def get_auth_info(self, hrn):
-        #report.trace("Hierarchy: getting authority: " + hrn)
+        #trace("Hierarchy: getting authority: " + hrn)
    
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
