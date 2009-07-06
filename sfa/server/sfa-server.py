@@ -44,7 +44,6 @@ from sfa.server.registry import Registry
 from sfa.server.aggregate import Aggregate
 from sfa.server.slicemgr import SliceMgr
 
-from sfa.util.config import Config
 from sfa.trust.hierarchy import Hierarchy
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
@@ -83,10 +82,10 @@ def main():
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
 
-    config = Config()
-    path = config.basepath 
-    key_file = path + os.sep + "server.key"
-    cert_file = path + os.sep + "server.cert"
+    hierarchy = Hierarchy()
+    path = hierarchy.basedir
+    key_file = os.path.join(path, "server.key")
+    cert_file = os.path.join(path, "server.cert")
     
     if (options.daemon):  daemon()
 

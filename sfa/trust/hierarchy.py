@@ -111,7 +111,7 @@ class Hierarchy:
     def __init__(self, basedir = None):
         if not basedir:
             config = Config()
-            basedir = config.config_path + os.sep + "authorities"
+            basedir = os.path.join(config.config_path, "authorities")
         self.basedir = basedir
     ##
     # Given a hrn, return the filenames of the GID, private key, and dbinfo
