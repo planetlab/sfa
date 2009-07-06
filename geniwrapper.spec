@@ -2,7 +2,7 @@
 
 %define name sfa
 %define version 0.8
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -93,6 +93,11 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Mon Jul 06 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-2
+- cleanup of the config area; no dependency to a PLC config anymore as sfa can be run in standalone
+- config variables in sfa_config now start with SFA_ and not GENI_
+- config.py can be loaded even with no config present
+
 * Sun Jul 05 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-1
 - first step for cleanup and reorganization
 - mass-renaming from geni to sfa (some are still needed)
