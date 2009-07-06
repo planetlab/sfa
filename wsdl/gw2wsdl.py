@@ -164,9 +164,11 @@ def add_wsdl_ports_and_bindings (wsdl):
         if (function.accepts):
             (min_args, max_args, defaults) = function.args()
             for (argname,argtype) in zip(max_args,function.accepts):
-                arg_part = in_el.appendChild(wsdl.createElement("part"))
-                arg_part.setAttribute("name", argname)
-                arg_part.setAttribute("type", param_type(argtype))
+                global interface_options
+                if (not interface_options.lite or (argname!="cred")):
+                    arg_part = in_el.appendChild(wsdl.createElement("part"))
+                    arg_part.setAttribute("name", argname)
+                    arg_part.setAttribute("type", param_type(argtype))
                 
         # Return type            
         return_type = function.returns
@@ -289,8 +291,10 @@ def main():
                               help="Generate sm.wsdl")
     parser.add_option("-a", "--aggregate", action="store_true", dest="aggregate",
                               help="Generate am.wsdl")
-
+    parser.add_option("-l", "--lite", action="store_true", dest="lite",
+                              help="Generate LITE version of the interface, in which calls exclude credentials")
     (interface_options, args) = parser.parse_args()
+
     types = get_wsdl_definitions_and_types()
     wsdl = get_wsdl_definitions()
     add_wsdl_ports_and_bindings(wsdl)

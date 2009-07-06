@@ -424,52 +424,6 @@
       </xsd:simpleType>
     </xsd:schema>
   </types>
-  <service name='aggregate'>
-    <port binding='tns:create_slice_binding' name='create_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/aggregate'/>
-    </port>
-    <port binding='tns:delete_slice_binding' name='delete_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/aggregate'/>
-    </port>
-    <port binding='tns:get_resources_binding' name='get_resources_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/aggregate'/>
-    </port>
-    <port binding='tns:get_slices_binding' name='get_slices_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/aggregate'/>
-    </port>
-    <port binding='tns:reset_slices_binding' name='reset_slices_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/aggregate'/>
-    </port>
-    <port binding='tns:start_slice_binding' name='start_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/aggregate'/>
-    </port>
-    <port binding='tns:stop_slice_binding' name='stop_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/aggregate'/>
-    </port>
-  </service>
-  <service name='slicemgr'>
-    <port binding='tns:create_slice_binding' name='create_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/slicemgr'/>
-    </port>
-    <port binding='tns:delete_slice_binding' name='delete_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/slicemgr'/>
-    </port>
-    <port binding='tns:get_resources_binding' name='get_resources_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/slicemgr'/>
-    </port>
-    <port binding='tns:get_slices_binding' name='get_slices_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/slicemgr'/>
-    </port>
-    <port binding='tns:reset_slices_binding' name='reset_slices_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/slicemgr'/>
-    </port>
-    <port binding='tns:start_slice_binding' name='start_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/slicemgr'/>
-    </port>
-    <port binding='tns:stop_slice_binding' name='stop_slice_port'>
-      <soap:address location='http://www.planet-lab.org/geniwrapper/slicemgr'/>
-    </port>
-  </service>
   <service name='registry'>
     <port binding='tns:create_gid_binding' name='create_gid_port'>
       <soap:address location='http://www.planet-lab.org/geniwrapper/registry'/>
