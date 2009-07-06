@@ -10,8 +10,11 @@ import time
 import pdb
 import xml.dom.minidom
 import xml.dom.ext
-import globals
 import apistub
+import inspect
+
+import globals
+
 from types import *
 
 from sfa.trust.auth import Auth
@@ -59,6 +62,7 @@ def name_complex_type(arg):
 
     types_section = types.getElementsByTagName("xsd:schema")[0]
 
+    #pdb.set_trace()
     if (isinstance(arg, Mixed)):
         inner_types = reduce(fold_complex_type, arg)
         inner_names = reduce(fold_complex_type_names, arg)
@@ -91,8 +95,7 @@ def name_complex_type(arg):
         complex_content = complex_type.appendChild(types.createElement("xsd:list"))
         complex_content.setAttribute("itemType",inner_type)
         return "xsdl:%s"%type_name
-        
-    elif type(arg) == DictType or arg == DictType or issubclass(arg, dict):
+    elif type(arg) == DictType or arg == DictType or (inspect.isclass(arg) and issubclass(arg, dict)):
         num_types=num_types+1
         type_name = "Type%d"%num_types
         complex_type = types_section.appendChild(types.createElement("xsd:complexType"))
@@ -106,11 +109,13 @@ def name_complex_type(arg):
             element.setAttribute("type",inner_type)
 
         return "xsdl:%s"%type_name 
-
     else:
         return (name_simple_type(arg))
 
 def name_simple_type(arg_type):
+    # A Parameter is reported as an instance, even though it is serialized as a type <>
+    if type(arg_type) == InstanceType:
+        return (name_simple_type(arg_type.type))
     if arg_type == None:
         return "none"
     if arg_type == DictType:
@@ -132,6 +137,8 @@ def param_type(arg):
 
 def add_wsdl_ports_and_bindings (wsdl):
     for method in apistub.methods:
+        print "Processing method %s"%method
+
         # Skip system. methods
         if "system." in method:
             continue
