@@ -1,2 +1,2 @@
 all: sfa.wsdl
-	PYTHONPATH=../ ./gw2wsdl.py > sfa.wsdl
+	PYTHONPATH=../ ./gw2wsdl.py --registry --sm --am > sfa.wsdl
