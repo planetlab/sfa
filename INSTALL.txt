@@ -118,7 +118,7 @@ At this stage you should be able to run sfi command. Some sample outputs are:
 (b) On each PLC, edit the /etc/sfa/registries.xml file
 
     set addr to ip or hostname of federated (remote) peer
-    set port to geni service port on federated (remote) peer
+    set port to sfa service port on federated (remote) peer
     set hrn to human readable name of federated (remote) peer interface
 Sample configuration:
 

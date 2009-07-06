@@ -65,7 +65,7 @@ SFA_SM_PORT=12347
 # PLC Interface Access Configuration
 #
 # PLC user
-# Valid plc account geni interfaces will use for plc requests   
+# sfa services will use this account for issuing plc requests - must have admin rights
 
 SFA_PLC_USER='root@localhost.localdomain'
 
@@ -78,8 +78,7 @@ SFA_PLC_PASSWORD='root'
 SFA_PLC_URL='https://localhost:443/PLCAPI/'
 
 # PLC Shell PATH
-# Path of PLC shell. This only applies if Geni interfaces and PLC interface are running on the same 
-# machine
+# This only applies if sfa services and PLC interface are running on the same machine
 SFA_PLC_SHELL_PATH='/usr/share/plc_api'
 
 # PLC DB Name

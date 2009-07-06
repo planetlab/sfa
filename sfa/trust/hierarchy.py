@@ -24,7 +24,7 @@ from sfa.trust.gid import *
 
 from sfa.util.misc import *
 from sfa.util.config import *
-from sfa.util.geniticket import *
+from sfa.util.sfaticket import SfaTicket
 
 ##
 # The AuthInfo class contains the information for an authority. This information
@@ -318,7 +318,7 @@ class Hierarchy:
         auth_info = self.get_auth_info(hrn)
         gid = auth_info.get_gid_object()
 
-        ticket = Ticket(subject=hrn)
+        ticket = SfaTicket(subject=hrn)
         ticket.set_gid_caller(gid)
         ticket.set_gid_object(gid)
         ticket.set_delegate(True)

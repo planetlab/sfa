@@ -16,7 +16,7 @@ from sfa.util.geniclient import GeniClient, ServerException
 from sfa.util.record import GeniRecord
 from sfa.util.rspec import Rspec
 
-def determine_geni_filekind(fn):
+def determine_sfa_filekind(fn):
     cert = Certificate(filename = fn)
 
     data = cert.get_data()
@@ -78,7 +78,7 @@ def main():
         return -1
 
    filename = args[0]
-   kind = determine_geni_filekind(filename)
+   kind = determine_sfa_filekind(filename)
 
    if kind=="credential":
        cred = Credential(filename = filename)

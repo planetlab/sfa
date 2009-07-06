@@ -17,7 +17,7 @@ from sfa.trust.trustedroot import *
 from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.record import *
-from sfa.util.geniticket import *
+from sfa.util.sfaticket import SfaTicket
 from sfa.util.geniserver import *
 
 ##
@@ -124,7 +124,7 @@ class ComponentManager(GeniServer):
     # @param ticket_string the string representation of the ticket
 
     def decode_ticket(self, ticket_string):
-        self.client_ticket = Ticket(string = ticket_string)
+        self.client_ticket = SfaTicket(string = ticket_string)
         self.client_gid = self.client_ticket.get_gid_caller()
         self.object_gid = self.client_ticket.get_gid_object()
 
@@ -144,7 +144,7 @@ class ComponentManager(GeniServer):
             if self.object_gid:
                 self.object_gid.verify_chain(self.trusted_cert_list)
 
-    def geni_ticket_to_plc_ticket(self, ticket):
+    def sfa_ticket_to_plc_ticket(self, ticket):
         ticket_attrs = ticket.get_attributes()
         ticket_rspec = ticket.get_rspec()
 
@@ -211,7 +211,7 @@ class ComponentManager(GeniServer):
 
         print "ticket received for", self.object_gid.get_hrn()
 
-        pt = self.geni_ticket_to_plc_ticket(ticket)
+        pt = self.sfa_ticket_to_plc_ticket(ticket)
 
         print "plticket", pt
 

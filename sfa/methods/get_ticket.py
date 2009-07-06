@@ -5,7 +5,7 @@ from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
-from sfa.util.geniticket import *
+from sfa.util.sfaticket import SfaTicket
 
 class get_ticket(Method):
     """
@@ -51,7 +51,7 @@ class get_ticket(Method):
         record = table.resolve('slice', hrn)
 
         object_gid = record.get_gid_object()
-        new_ticket = Ticket(subject = object_gid.get_subject())
+        new_ticket = SfaTicket(subject = object_gid.get_subject())
         new_ticket.set_gid_caller(self.client_gid)
         new_ticket.set_gid_object(object_gid)
         new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)

@@ -1,6 +1,5 @@
-# tickets.py
 #
-# implements GENI tickets
+# implements SFA tickets
 #
 
 ### $Id$
@@ -20,7 +19,7 @@ from sfa.trust.gid import *
 #    attributes = slice attributes (keys, vref, instantiation, etc)
 #    rspec = resources
 
-class Ticket(Certificate):
+class SfaTicket(Certificate):
     gidCaller = None
     gidObject = None
     attributes = {}

@@ -14,7 +14,7 @@ import xmlrpclib
 from sfa.trust.gid import *
 from sfa.trust.credential import *
 from sfa.util.record import *
-from sfa.util.geniticket import *
+from sfa.util.sfaticket import SfaTicket
 
 ##
 # ServerException, ExceptionUnmarshaller
@@ -358,7 +358,7 @@ class GeniClient:
 
     def get_ticket(self, cred, name, rspec):
         ticket_str = self.server.get_ticket(cred.save_to_string(save_parents=True), name, rspec)
-        ticket = Ticket(string=ticket_str)
+        ticket = SfaTicket(string=ticket_str)
         return ticket
 
     ##
