@@ -20,17 +20,17 @@
 start() {
         echo -n $"Starting SFA:  "
 
-        if [ "$GENI_REGISTRY_ENABLED" ]; then
+        if [ "$SFA_REGISTRY_ENABLED" ]; then
             echo "Registry"
             daemon /usr/bin/sfa-server.py -r -d $OPTIONS
         fi
 
-        if [ "$GENI_AGGREGATE_ENABLED" ]; then
+        if [ "$SFA_AGGREGATE_ENABLED" ]; then
             echo "Aggregate"
             daemon /usr/bin/sfa-server.py -a -d $OPTIONS
         fi
         
-        if [ "$GENI_SM_ENABLED" ]; then
+        if [ "$SFA_SM_ENABLED" ]; then
             echo "SliceMgr"
             daemon /usr/bin/sfa-server.py -s -d $OPTIONS
         fi

@@ -21,8 +21,8 @@ These two configuration parameters are required for SFA server configuration
 
 (a) # sfa-config-tty
 
- set GENI_PLC_USER	to     PLC_ROOT_USER 
- set GENI_PLC_PASSWORD	to     PLC_ROOT_PASSWORD
+ set SFA_PLC_USER	to     PLC_ROOT_USER 
+ set SFA_PLC_PASSWORD	to     PLC_ROOT_PASSWORD
 write and quit
 
 *NOTE* at this point you get a warning b/c the authorities hierarchy has not been created yet; ignore

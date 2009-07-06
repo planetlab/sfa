@@ -45,11 +45,11 @@ class Config:
 def get_default_dbinfo():
     config = Config()
     dbinfo={
-        'dbname' : config.GENI_PLC_DB_NAME,
-        'address' : config.GENI_PLC_DB_HOST,
-        'port' : config.GENI_PLC_DB_PORT,
-        'user' : config.GENI_PLC_DB_USER,
-        'password' : config.GENI_PLC_DB_PASSWORD
+        'dbname' : config.SFA_PLC_DB_NAME,
+        'address' : config.SFA_PLC_DB_HOST,
+        'port' : config.SFA_PLC_DB_PORT,
+        'user' : config.SFA_PLC_DB_USER,
+        'password' : config.SFA_PLC_DB_PASSWORD
         }
     return dbinfo
 
@@ -66,9 +66,9 @@ def get_default_dbinfo():
 def get_pl_auth():
     config = Config()
     pl_auth = {
-        'Username': config.GENI_PLC_USER,
+        'Username': config.SFA_PLC_USER,
         'AuthMethod': 'capability',
-        'AuthString':  config.GENI_PLC_PASSWORD,
-        "Url": config.GENI_PLC_URL
+        'AuthString':  config.SFA_PLC_PASSWORD,
+        "Url": config.SFA_PLC_URL
         }
     return pl_auth

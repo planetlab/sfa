@@ -91,7 +91,7 @@ class Method (object):
             result = self.call(*args, **kwds)
             runtime = time.time() - start
 
-            if self.api.config.GENI_API_DEBUG or hasattr(self, 'message'):
+            if self.api.config.SFA_API_DEBUG or hasattr(self, 'message'):
                 # XX print to some log file
                 # print >> log, "some output"
 	            pass
@@ -106,7 +106,7 @@ class Method (object):
             fault.faultString = caller + ": " +  self.name + ": " + fault.faultString
             runtime = time.time() - start
 	    
-            if self.api.config.GENI_API_DEBUG:
+            if self.api.config.SFA_API_DEBUG:
                 # XX print to some log file
                 #print >> log, "Some debugging output"              
                 pass 

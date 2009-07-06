@@ -117,16 +117,16 @@ class GeniAPI:
         self.credential = None
         self.plshell = self.getPLCShell()
         self.plshell_version = self.getPLCShellVersion()
-        self.basedir = self.config.GENI_BASE_DIR + os.sep
+        self.basedir = self.config.SFA_BASE_DIR + os.sep
         self.server_basedir = self.basedir + os.sep + "geni" + os.sep
-        self.hrn = self.config.GENI_INTERFACE_HRN
+        self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
 
 
     def getPLCShell(self):
-        self.plauth = {'Username': self.config.GENI_PLC_USER,
+        self.plauth = {'Username': self.config.SFA_PLC_USER,
                        'AuthMethod': 'password',
-                       'AuthString': self.config.GENI_PLC_PASSWORD}
+                       'AuthString': self.config.SFA_PLC_PASSWORD}
         try:
             import PLC.Shell
             shell = PLC.Shell.Shell(globals = globals())
@@ -134,7 +134,7 @@ class GeniAPI:
             return shell
         except ImportError:
             # connect via xmlrpc
-            url = self.config.GENI_PLC_URL
+            url = self.config.SFA_PLC_URL
              
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
             shell.AuthCheck(self.plauth)

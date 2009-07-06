@@ -62,8 +62,8 @@ shell = connect_shell()
 #level1_auth = "planetlab.us"
 config = Config()
 
-root_auth = config.GENI_REGISTRY_ROOT_AUTH
-level1_auth = config.GENI_REGISTRY_LEVEL1_AUTH
+root_auth = config.SFA_REGISTRY_ROOT_AUTH
+level1_auth = config.SFA_REGISTRY_LEVEL1_AUTH
 if not level1_auth or level1_auth in ['']:
     level1_auth = None
 

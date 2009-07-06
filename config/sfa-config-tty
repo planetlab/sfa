@@ -24,32 +24,32 @@ from sfa.trust.hierarchy import *
 from sfa.util.misc import *
 
 
-all_variables   = ["GENI_REGISTRY_ROOT_AUTH",
-                   "GENI_REGISTRY_LEVEL1_AUTH",
-                   "GENI_REGISTRY_ENABLED",
-                   "GENI_REGISTRY_HOST", 
-                   "GENI_REGISTRY_PORT",
-                   "GENI_AGGREGATE_ENABLED",
-                   "GENI_AGGREGATE_HOST",
-                   "GENI_AGGREGATE_PORT",
-                   "GENI_SM_ENABLED",
-                   "GENI_SM_HOST",
-                   "GENI_SM_PORT",
-                   "GENI_PLC_USER",
-                   "GENI_PLC_PASSWORD",    
-                   "GENI_PLC_URL",
-                   "GENI_PLC_DB_NAME",
-                   "GENI_PLC_DB_HOST",
-                   "GENI_PLC_DB_PORT",
-                   "GENI_PLC_DB_USER",
-                   "GENI_PLC_DB_PASSWORD",
+all_variables   = ["SFA_REGISTRY_ROOT_AUTH",
+                   "SFA_REGISTRY_LEVEL1_AUTH",
+                   "SFA_REGISTRY_ENABLED",
+                   "SFA_REGISTRY_HOST", 
+                   "SFA_REGISTRY_PORT",
+                   "SFA_AGGREGATE_ENABLED",
+                   "SFA_AGGREGATE_HOST",
+                   "SFA_AGGREGATE_PORT",
+                   "SFA_SM_ENABLED",
+                   "SFA_SM_HOST",
+                   "SFA_SM_PORT",
+                   "SFA_PLC_USER",
+                   "SFA_PLC_PASSWORD",    
+                   "SFA_PLC_URL",
+                   "SFA_PLC_DB_NAME",
+                   "SFA_PLC_DB_HOST",
+                   "SFA_PLC_DB_PORT",
+                   "SFA_PLC_DB_USER",
+                   "SFA_PLC_DB_PASSWORD",
                    ]
-usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
-                   "GENI_REGISTRY_LEVEL1_AUTH",
-                   "GENI_PLC_USER",
-                   "GENI_PLC_PASSWORD",
-                   "GENI_PLC_DB_USER",
-                   "GENI_PLC_DB_PASSWORD",
+usual_variables = ["SFA_REGISTRY_ROOT_AUTH",
+                   "SFA_REGISTRY_LEVEL1_AUTH",
+                   "SFA_PLC_USER",
+                   "SFA_PLC_PASSWORD",
+                   "SFA_PLC_DB_USER",
+                   "SFA_PLC_DB_PASSWORD",
                    ]
 
 
@@ -113,25 +113,25 @@ def validate(changes):
 
     defaults = get_defaults()
     
-    # GENI_INTERFACE_HRN is GENI_REGISTRY_LEVEL1_AUTH, if thats blank it
-    # then defaults to GENI_REGISTRY_ROOT_AUTH 
-    # GENI_REGISTRY_LEVEL1_AUTH, so if either of these are present we must 
-    # update GENI_INTERFACE_HRN
-    if 'GENI_REGISTRY_ROOT_AUTH' in changes:
-        root_auth = changes['GENI_REGISTRY_ROOT_AUTH']
+    # SFA_INTERFACE_HRN is SFA_REGISTRY_LEVEL1_AUTH, if thats blank it
+    # then defaults to SFA_REGISTRY_ROOT_AUTH 
+    # SFA_REGISTRY_LEVEL1_AUTH, so if either of these are present we must 
+    # update SFA_INTERFACE_HRN
+    if 'SFA_REGISTRY_ROOT_AUTH' in changes:
+        root_auth = changes['SFA_REGISTRY_ROOT_AUTH']
     else:
-        root_auth = defaults['GENI_REGISTRY_ROOT_AUTH']
+        root_auth = defaults['SFA_REGISTRY_ROOT_AUTH']
              
-    if 'GENI_REGISTRY_LEVEL1_AUTH' in changes:
-        level1_auth = changes['GENI_REGISTRY_LEVEL1_AUTH']
+    if 'SFA_REGISTRY_LEVEL1_AUTH' in changes:
+        level1_auth = changes['SFA_REGISTRY_LEVEL1_AUTH']
     else:
-        level1_auth = defaults['GENI_REGISTRY_LEVEL1_AUTH']
+        level1_auth = defaults['SFA_REGISTRY_LEVEL1_AUTH']
                 
     if level1_auth:
         interface_hrn = level1_auth
     else:
         interface_hrn = root_auth
-    changes['GENI_INTERFACE_HRN'] = interface_hrn
+    changes['SFA_INTERFACE_HRN'] = interface_hrn
     return changes                            
 
 def get_defaults():
@@ -230,7 +230,7 @@ def mainloop (default_config, config_file):
     return result
     
 def setup_server_key(config_dict):
-    hrn = config_dict.get('GENI_INTERFACE_HRN')
+    hrn = config_dict.get('SFA_INTERFACE_HRN')
     if not hrn: return
    
     # Get the path to the authorities directory hierarchy

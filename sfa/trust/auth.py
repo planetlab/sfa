@@ -207,7 +207,7 @@ class Auth:
 
         type = record.get_type()
         cred_object_hrn = src_cred.get_gid_object().get_hrn()
-        if cred_object_hrn in [self.config.GENI_REGISTRY_ROOT_AUTH]:
+        if cred_object_hrn in [self.config.SFA_REGISTRY_ROOT_AUTH]:
             return
         if type=="slice":
             researchers = record.get("researcher", [])

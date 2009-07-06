@@ -1,98 +1,98 @@
 # Directory where SFA interfaces are installed
-GENI_BASE_DIR="/usr/share/sfa/" 
+SFA_BASE_DIR="/usr/share/sfa/" 
 
 # HRN
 # Human readable name for the interfaces
-GENI_INTERFACE_HRN="plc"   
+SFA_INTERFACE_HRN="plc"   
 
 
 # API Debug
 # Are we logging
-GENI_API_DEBUG=1
+SFA_API_DEBUG=1
 
 # Registry Configuration
 #
 # Enabled
 # Enable the registry interface 
-GENI_REGISTRY_ENABLED=1
+SFA_REGISTRY_ENABLED=1
 
 # Root Auth
 # The hrn of the registry's root auth
-GENI_REGISTRY_ROOT_AUTH="plc"
+SFA_REGISTRY_ROOT_AUTH="plc"
 
 # Level1 Auth
 # The hrn of the registry's level1 auth
 # xxx could be determined from hrn above
-GENI_REGISTRY_LEVEL1_AUTH=""
+SFA_REGISTRY_LEVEL1_AUTH=""
 
 # Hostname
 # The fully qualified hostname of the registry server
-GENI_REGISTRY_HOST="localhost"
+SFA_REGISTRY_HOST="localhost"
 
 # Port
 # Geni registry port
-GENI_REGISTRY_PORT=12345
+SFA_REGISTRY_PORT=12345
 
 
 ## Aggregate Configuration
 ##
 ## Enable aggregate inteface
 ## Enable the aggregate inteface.
-GENI_AGGREGATE_ENABLED=1
+SFA_AGGREGATE_ENABLED=1
 #
 ## Hostname
 ## The fully qualified hostname of the aggregate server
-GENI_AGGREGATE_HOST="localhost"
+SFA_AGGREGATE_HOST="localhost"
 #
 ## Port
 ## Geni aggregate server port
-GENI_AGGREGATE_PORT=12346
+SFA_AGGREGATE_PORT=12346
 
 # Slice Manager Configuration
 #
 # Enabled
 # Enable the slice manager  
-GENI_SM_ENABLED=1 
+SFA_SM_ENABLED=1 
 
 # Host
 ## The fully qualified hostname or IP address of the slice manager server
-GENI_SM_HOST="localhost"
+SFA_SM_HOST="localhost"
 
 # Port
 # Geni slice manager server port  
-GENI_SM_PORT=12347
+SFA_SM_PORT=12347
 
 # PLC Interface Access Configuration
 #
 # PLC user
 # Valid plc account geni interfaces will use for plc requests   
 
-GENI_PLC_USER='root@localhost.localdomain'
+SFA_PLC_USER='root@localhost.localdomain'
 
 # Password
 # Password for user account
-GENI_PLC_PASSWORD='root'
+SFA_PLC_PASSWORD='root'
 
 # Hostname
 # Fully qualified hostname of PLC interface
-GENI_PLC_URL='https://localhost:443/PLCAPI/'
+SFA_PLC_URL='https://localhost:443/PLCAPI/'
 
 # PLC Shell PATH
 # Path of PLC shell. This only applies if Geni interfaces and PLC interface are running on the same 
 # machine
-GENI_PLC_SHELL_PATH='/usr/share/plc_api'
+SFA_PLC_SHELL_PATH='/usr/share/plc_api'
 
 # PLC DB Name
-GENI_PLC_DB_NAME='planetlab5'
+SFA_PLC_DB_NAME='planetlab5'
 
 # PLC DB Host
-GENI_PLC_DB_HOST='www.planet-lab.org'
+SFA_PLC_DB_HOST='www.planet-lab.org'
 
 # PLC DB port
-GENI_PLC_DB_PORT=5432
+SFA_PLC_DB_PORT=5432
 
 # PLC DB User
-GENI_PLC_DB_USER='pgsqluser'
+SFA_PLC_DB_USER='pgsqluser'
 
 # PLC DB Password
-GENI_PLC_DB_PASSWORD=''
+SFA_PLC_DB_PASSWORD=''
