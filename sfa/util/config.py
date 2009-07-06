@@ -35,7 +35,7 @@ class Config:
 
     def load(self, config_file):
         try:
-            execfile(self.config_file, self.__dict__)
+            execfile(config_file, self.__dict__)
             self.config_file = config_file
             self.config_path = os.path.dirname(config_file)
         except IOError, e:
