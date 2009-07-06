@@ -207,8 +207,8 @@ def mainloop (default_config, config_file):
                     raise
         elif (answer in ["e","E"]):
             try:
-                prompt_variable (cdef,cread,cwrite,category,variable,
-                                 show_comments,False)
+                for varname in all_variables:
+                    changes[varname] = prompt_variable(varname, default_config)
             except Exception, inst:
                 if (str(inst) != 'BailOut'):
                     raise
