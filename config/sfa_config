@@ -69,7 +69,7 @@ GENI_SM_PORT=12347
 
 GENI_PLC_USER='root@localhost.localdomain'
 
-# Passowrd
+# Password
 # Password for user account
 GENI_PLC_PASSWORD='root'
 
@@ -81,3 +81,18 @@ GENI_PLC_URL='https://localhost:443/PLCAPI/'
 # Path of PLC shell. This only applies if Geni interfaces and PLC interface are running on the same 
 # machine
 GENI_PLC_SHELL_PATH='/usr/share/plc_api'
+
+# PLC DB Name
+GENI_PLC_DB_NAME='planetlab5'
+
+# PLC DB Host
+GENI_PLC_DB_HOST='www.planet-lab.org'
+
+# PLC DB port
+GENI_PLC_DB_PORT=5432
+
+# PLC DB User
+GENI_PLC_DB_USER='pgsqluser'
+
+# PLC DB Password
+GENI_PLC_DB_PASSWORD=''

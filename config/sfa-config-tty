@@ -38,11 +38,19 @@ all_variables   = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_PLC_USER",
                    "GENI_PLC_PASSWORD",    
                    "GENI_PLC_URL",
+                   "GENI_PLC_DB_NAME",
+                   "GENI_PLC_DB_HOST",
+                   "GENI_PLC_DB_PORT",
+                   "GENI_PLC_DB_USER",
+                   "GENI_PLC_DB_PASSWORD",
                    ]
 usual_variables = ["GENI_REGISTRY_ROOT_AUTH",
                    "GENI_REGISTRY_LEVEL1_AUTH",
                    "GENI_PLC_USER",
-                   "GENI_PLC_PASSWORD",    
+                   "GENI_PLC_PASSWORD",
+                   "GENI_PLC_API_HOST",
+                   "GENI_PLC_DB_USER",
+                   "GENI_PLC_DB_PASSWORD",
                    ]
 
 
@@ -129,26 +137,12 @@ def validate(changes):
 
 def get_defaults():
     sfa_config = Config()
-    plc_vars = {'PLC_API_MAINTENANCE_PASSWORD': 'GENI_PLC_PASSWORD',
-                'PLC_API_MAINTENANCE_USER': 'GENI_PLC_USER'
-               }
-    try:
-        from sfa.util.config import plcConfig
-        plc_config = plcConfig
-    except:
-        plc_config = None
     
     defaults = {}
     for var in dir(sfa_config):
         if var.startswith('GENI'):
             value = eval("sfa_config.%s" % var)
             defaults[var] = value
-
-    # some defaults come from plc_config
-    for var in dir(plc_config):
-        if var in plc_vars:
-            value = eval("plc_config.%s" % var)
-            defaults[plc_vars[var]] = value
 
     return defaults       
 

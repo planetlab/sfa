@@ -22,63 +22,35 @@ import traceback
 
 from sfa.util.debug import log
 
-# xxx the path-search part could use a cleanup; 
-# why would anyone want to store the config in /usr/share/geniwrapper at all ?
-# also, if users want to use this, it might help to store stuff in ~/.sfirc or something
-
-# this would denote "/usr/share/geniwrapper/geni"
-# geni =  join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "geni")
-
 class Config:
     """
     Parse the bash/Python/PHP version of the configuration file. Very
     fast but no type conversions.
     """
 
-    def __init__(self, filepath = "/etc/sfa/sfa_config"):
-        # Load plc_config
+    def __init__(self, config_file = "/etc/sfa/sfa_config"):
+        self.config_file = None
+        self.config_path = None
+        self.load(config_file)
 
-        loaded = False
-        # path to config.py source - this would be '/usr/share/geniwrapper/geni/util'
-        path = os.path.dirname(os.path.abspath(__file__))
-        # parent directory of config.py source
-        self.basepath = os.path.dirname(path)
-        # path to actual config file
-        filename = os.path.basename(filepath)
-        alt_file = os.path.join(path, 'util', filename)
-        files = [filepath, alt_file]
-
-        for config_file in files:
-            try:
-                execfile(config_file, self.__dict__)
-                loaded = True
-                self.config_file = config_file
-                self.config_path = os.path.dirname(config_file)
-                break
-            except:
-                pass
-
-        if not loaded:
-            raise Exception, "Could not find config in " + ", ".join(files)
-
-        # set up some useful variables
-
-    def load(self, filepath):
+    def load(self, config_file):
         try:
-            execfile(filepath, self.__dict__)
-        except:
-            raise Exception, "Could not find config in " + filepath
+            execfile(self.config_file, self.__dict__)
+            self.config_file = config_file
+            self.config_path = os.path.dirname(config_file)
+        except IOError, e:
+            raise IOError, "Could not find the configuration file: %s" % config_file
 
-plcConfig = Config("/etc/planetlab/plc_config")
 
 def get_default_dbinfo():
-    dbinfo={ 'dbname' : plcConfig.PLC_DB_NAME,
-    'address' : plcConfig.PLC_DB_HOST,
-    'port' : plcConfig.PLC_DB_PORT,
-    'user' : plcConfig.PLC_DB_USER,
-    'password' : plcConfig.PLC_DB_PASSWORD
-	}
-
+    config = Config()
+    dbinfo={
+        'dbname' : config.GENI_PLC_DB_NAME,
+        'address' : config.GENI_PLC_DB_HOST,
+        'port' : config.GENI_PLC_DB_PORT,
+        'user' : config.GENI_PLC_DB_USER,
+        'password' : config.GENI_PLC_DB_PASSWORD
+        }
     return dbinfo
 
 ##
@@ -92,10 +64,11 @@ def get_default_dbinfo():
 # field from the dictionary. 
 
 def get_pl_auth():
-    pl_auth = {'Username': plcConfig.PLC_API_MAINTENANCE_USER,
-               'AuthMethod': 'capability',
-               'AuthString':  plcConfig.PLC_API_MAINTENANCE_PASSWORD,
-               "Url": 'https://%s:%s%s' %(plcConfig.PLC_API_HOST, plcConfig.PLC_API_PORT, plcConfig.PLC_API_PATH)
-               }
-
+    config = Config()
+    pl_auth = {
+        'Username': config.GENI_PLC_USER,
+        'AuthMethod': 'capability',
+        'AuthString':  config.GENI_PLC_PASSWORD,
+        "Url": config.GENI_PLC_URL
+        }
     return pl_auth

@@ -397,7 +397,11 @@ def main():
 def list(opts, args):
    global registry
    user_cred = get_user_cred()
-   list = registry.list(user_cred, args[0])
+   try:
+      list = registry.list(user_cred, args[0])
+   except IndexError:
+      raise Exception, "Not enough parameters for the 'list' command"
+      
    # filter on person, slice, site, node, etc.  
    # THis really should be in the filter_records funct def comment...
    list = filter_records(opts.type, list)
