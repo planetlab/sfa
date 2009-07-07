@@ -258,6 +258,8 @@ class GeniAPI:
             pl_record["name"] = hrn_to_pl_slicename(hrn)
 	    if "url" in record:
                pl_record["url"] = record["url"]
+	    if "description" in record:
+	        pl_record["description"] = record["description"]
 
         elif type == "node":
             if not "hostname" in pl_record:
