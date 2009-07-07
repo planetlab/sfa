@@ -9,55 +9,10 @@
 ### $Id$
 ### $URL$
 
-import xmlrpclib
-
 from sfa.trust.gid import *
 from sfa.trust.credential import *
 from sfa.util.record import *
 from sfa.util.sfaticket import SfaTicket
-
-##
-# ServerException, ExceptionUnmarshaller
-#
-# Used to convert server exception strings back to an exception.
-#    from usenet, Raghuram Devarakonda
-
-class ServerException(Exception):
-    pass
-
-class ExceptionUnmarshaller(xmlrpclib.Unmarshaller):
-    def close(self):
-        try:
-            return xmlrpclib.Unmarshaller.close(self)
-        except xmlrpclib.Fault, e:
-            raise ServerException(e.faultString)
-
-##
-# GeniTransport
-#
-# A transport for XMLRPC that works on top of HTTPS
-
-class GeniTransport(xmlrpclib.Transport):
-    key_file = None
-    cert_file = None
-    def make_connection(self, host):
-        # create a HTTPS connection object from a host descriptor
-        # host may be a string, or a (host, x509-dict) tuple
-        import httplib
-        host, extra_headers, x509 = self.get_host_info(host)
-        try:
-            HTTPS = httplib.HTTPS()
-        except AttributeError:
-            raise NotImplementedError(
-                "your version of httplib doesn't support HTTPS"
-                )
-        else:
-            return httplib.HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
-
-    def getparser(self):
-        unmarshaller = ExceptionUnmarshaller()
-        parser = xmlrpclib.ExpatParser(unmarshaller)
-        return parser, unmarshaller
 
 ##
 # The GeniClient class provides stubs for executing Geni operations. A given
@@ -77,15 +32,22 @@ class GeniClient:
     # @param key_file = private key file of client
     # @param cert_file = x.509 cert containing the client's public key. This
     #      could be a GID certificate, or any x.509 cert.
+    # @param protocol The ORPC protocol to use. Can be "soap" or "xmlrpc"
 
-    def __init__(self, url, key_file, cert_file):
+    def __init__(self, url, key_file, cert_file, protocol="xmlrpc"):
        self.url = url
        self.key_file = key_file
        self.cert_file = cert_file
-       self.transport = GeniTransport()
-       self.transport.key_file = self.key_file
-       self.transport.cert_file = self.cert_file
-       self.server = xmlrpclib.ServerProxy(self.url, self.transport, allow_none=True)
+
+       if (protocol=="xmlrpc"):
+           import xmlrpcprotocol  
+           self.server = xmlrpcprotocol.get_server(self.url, self.key_file, self.cert_file)
+       elif (protocol=="soap"):
+           import soapprotocol
+           self.server = soapprotocol.get_server(self.url, self.key_file, self.cert_file)
+       else:
+           raise Exception("Attempted use of undefined protocol %s"%protocol)
+
 
     # -------------------------------------------------------------------------
     # Registry Interface
