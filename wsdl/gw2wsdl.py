@@ -42,10 +42,10 @@ def filter_argname(argname):
     if (not interface_options.lite or (argname!="cred")):
         if (argname.find('(') != -1):
             # The name has documentation in it :-/
-            brackright = argname.partition('(')[2]
+            brackright = argname.split('(')[1]
             if (brackright.find(')') == -1):
                     raise Exception("Please fix the argument %s to be well-formed.\n"%argname)
-            inbrack = brackright.partition(')')[0]
+            inbrack = brackright.split(')')[0]
             argname = inbrack
     return argname
 
