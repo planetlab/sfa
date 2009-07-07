@@ -65,7 +65,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %{python_sitelib}/*
-/usr/share/keyconvert/
+/usr/bin/keyconvert
 /var/www/html/wsdl/sfa.wsdl
 
 %files plc

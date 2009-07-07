@@ -26,7 +26,7 @@ from M2Crypto import EVP
 from sfa.util.faults import *
 
 def convert_public_key(key):
-    keyconvert_path = "/usr/share/keyconvert/keyconvert"
+    keyconvert_path = "/usr/bin/keyconvert"
     if not os.path.isfile(keyconvert_path):
         raise IOError, "Could not find keyconvert in %s" % keyconvert_path
 
