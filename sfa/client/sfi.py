@@ -13,7 +13,7 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.gid import create_uuid
 
-from sfa.util.geniclient import GeniClient, ServerException
+from sfa.util.newgeniclient import GeniClient
 from sfa.util.record import *
 from sfa.util.rspec import Rspec
 
@@ -91,8 +91,8 @@ def set_servers(options):
    cert_file = get_cert_file(key_file)
 
    # Establish connection to server(s)
-   slicemgr = GeniClient(sm_url, key_file, cert_file)
-   registry = GeniClient(reg_url, key_file, cert_file)
+   slicemgr = GeniClient(sm_url, key_file, cert_file, options.protocol)
+   registry = GeniClient(reg_url, key_file, cert_file, options.protocol)
    return
 
 #
@@ -340,6 +340,9 @@ def create_parser():
    parser.add_option("-v", "--verbose",
         action="store_true", dest="verbose", default=False,
         help="verbose mode")
+   parser.add_option("-p", "--protocol",
+        dest="protocol", default="xmlrpc",
+        help="RPC protocol (xmlrpc or soap)")
    parser.disable_interspersed_args()
 
    return parser
