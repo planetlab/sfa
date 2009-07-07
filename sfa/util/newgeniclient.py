@@ -1,16 +1,18 @@
 ##
-# This is a rehash of geniclient.py, changed to be agnostic to the messaging protocol,
-# i.e., SOAP or XMLRPC. Please use this file if you want to support the SOAP protocol.
-# 
-# If all you need is XMLRPC, use geniclient (not newgeniclient)
+# This module implements the client-side of the Geni API. Stubs are provided
+# that convert the supplied parameters to the necessary format and send them
+# via XMLRPC to a Geni Server.
+#
+# TODO: Investigate ways to combine this with existing PLC API?
 ##
 
-
+### $Id: geniclient.py 14306 2009-07-06 20:38:44Z thierry $
+### $URL: https://svn.planet-lab.org/svn/geniwrapper/trunk/sfa/util/geniclient.py $
 
 from sfa.trust.gid import *
 from sfa.trust.credential import *
 from sfa.util.record import *
-from sfa.util.sfaticket import *
+from sfa.util.sfaticket import SfaTicket
 
 ##
 # The GeniClient class provides stubs for executing Geni operations. A given
