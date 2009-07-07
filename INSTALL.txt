@@ -47,9 +47,7 @@ Import: importing person plc.pl.root
 Import: creating table for authority plc.pl
 NOTICE:  table "geni$plc$pl" does not exist, skipping
 
-(c) # cp /etc/sfa/authorities/plc/plc.pkey /usr/lib/python2.5/site-packages/sfa/server.key
-
-(d) # service sfa start
+(c) # service sfa start
 
 This will start Registry, Slice Manager and Aggregate Manager. Your ps command output would like:
 
