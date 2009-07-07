@@ -257,24 +257,24 @@ def import_site(parent_hrn, site):
             if persons:
                 try: 
                     import_person(hrn, persons[0])
-                except:
-                    report.trace("Failed to import: %s" % persons[0])
+                except Exception, e:
+                    report.trace("Failed to import: %s (%s)" % (persons[0], e))
     if 'slice_ids' in site:
         for slice_id in site['slice_ids']:
             slices = shell.GetSlices(pl_auth, [slice_id])
             if slices:
                 try:
                     import_slice(hrn, slices[0])
-                except:
-                    report.trace("Failed to import: %s" % slices[0])
+                except Exception, e:
+                    report.trace("Failed to import: %s (%s)" % (slices[0], e))
     if 'node_ids' in site:
         for node_id in site['node_ids']:
             nodes = shell.GetNodes(pl_auth, [node_id])
             if nodes:
                 try:
                     import_node(hrn, nodes[0])
-                except:
-                    report.trace("Failed to import: %s" % nodes[0])
+                except Exception, e:
+                    report.trace("Failed to import: %s (%s)" % (nodes[0], e))
 
 def create_top_level_auth_records(hrn):
     parent_hrn = get_authority(hrn)
