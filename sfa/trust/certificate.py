@@ -26,24 +26,9 @@ from M2Crypto import EVP
 from sfa.util.faults import *
 
 def convert_public_key(key):
-    # find the keyconvert program
-    from sfa.util.config import Config
-    config = Config()
-    keyconvert = 'keyconvert'
-    loaded = False
-    default_path = "/usr/share/keyconvert/" + keyconvert
-    cwd = os.path.dirname(os.path.abspath(__file__))
-    alt_path = os.sep.join(cwd.split(os.sep)[:-1] + ['keyconvert', 'keyconvert'])
-    geni_path = config.basepath + os.sep + "keyconvert/keyconvert"
-    files = [default_path, alt_path, geni_path]
-    for path in files:
-        if os.path.isfile(path):
-            keyconvert_fn = path
-            loaded = True
-            break
-
-    if not loaded:
-        raise Exception, "Could not find keyconvert in " + ", ".join(files)
+    keyconvert_path = "/usr/share/keyconvert/keyconvert"
+    if not os.path.isfile(keyconvert_path):
+        raise IOError, "Could not find keyconvert in %s" % keyconvert_path
 
     # we can only convert rsa keys 
     if "ssh-dss" in key:
@@ -55,11 +40,7 @@ def convert_public_key(key):
     os.write(ssh_f, key)
     os.close(ssh_f)
 
-    if not os.path.exists(keyconvert_fn):
-        report.trace("  keyconvet utility " + str(keyconvert_fn) + "does not exist")
-        sys.exit(-1)
-
-    cmd = keyconvert_fn + " " + ssh_fn + " " + ssl_fn
+    cmd = keyconvert_path + " " + ssh_fn + " " + ssl_fn
     os.system(cmd)
 
     # this check leaves the temporary file containing the public key so
