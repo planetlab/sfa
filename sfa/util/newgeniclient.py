@@ -6,8 +6,6 @@
 ##
 
 
-import xmlrpcprotocol
-import soapprotocol
 
 from sfa.trust.gid import *
 from sfa.trust.credential import *
@@ -40,8 +38,10 @@ class GeniClient:
        self.cert_file = cert_file
 
        if (protocol=="xmlrpc"):
+           import xmlrpcprotocol  
            self.server = xmlrpcprotocol.get_server(self.url, self.key_file, self.cert_file)
        elif (protocol=="soap"):
+           import soapprotocol
            self.server = soapprotocol.get_server(self.url, self.key_file, self.cert_file)
        else:
            raise Exception("Attempted use of undefined protocol %s"%protocol)
