@@ -32,19 +32,19 @@ class GeniClient:
     # @param key_file = private key file of client
     # @param cert_file = x.509 cert containing the client's public key. This
     #      could be a GID certificate, or any x.509 cert.
-    # @param protocol The ORPC protocol to use. Can be "soapprotocol" or "xmlrpcprotocol"
+    # @param protocol The ORPC protocol to use. Can be "soap" or "xmlrpc"
 
-    def __init__(self, url, key_file, cert_file, protocol="xmlrpcprotocol"):
+    def __init__(self, url, key_file, cert_file, protocol="xmlrpc"):
        self.url = url
        self.key_file = key_file
        self.cert_file = cert_file
 
-       if (protocol=="xmlrpcprotocol"):
+       if (protocol=="xmlrpc"):
            self.server = xmlrpcprotocol.get_server(self.url, self.key_file, self.cert_file)
-       elif (protocol=="soapprotocol"):
+       elif (protocol=="soap"):
            self.server = soapprotocol.get_server(self.url, self.key_file, self.cert_file)
        else:
-           raise Exception("Attempted use of undefined protocol"%protocol)
+           raise Exception("Attempted use of undefined protocol %s"%protocol)
 
 
     # -------------------------------------------------------------------------
