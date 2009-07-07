@@ -20,7 +20,7 @@ class Slices(SimpleStorage):
         self.api = api
         self.ttl = ttl
         self.threshold = None
-        path = self.api.config.basepath
+        path = self.api.config.config_path
         filename = ".".join([self.api.interface, self.api.hrn, "slices"])
         filepath = path + os.sep + filename
         self.slices_file = filepath
