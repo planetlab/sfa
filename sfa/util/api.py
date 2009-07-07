@@ -167,7 +167,7 @@ class GeniAPI:
         Get our credential from a remote registry using a geniclient connection
         """
         type = 'authority'
-        path = self.config.basepath
+        path = self.config.config_path
         filename = ".".join([self.interface, self.hrn, type, "cred"])
         cred_filename = path + os.sep + filename
         try:
