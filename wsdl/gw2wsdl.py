@@ -54,8 +54,8 @@ def fold_complex_type_names(acc, arg):
     if (type(acc)==list):
         acc.append(name)
     else:
-        python_is_braindead = acc.doc
-        acc = [python_is_braindead,name]
+        p_i_b = acc.doc
+        acc = [p_i_b,name]
     return acc
 
 def fold_complex_type(acc, arg):
@@ -65,8 +65,8 @@ def fold_complex_type(acc, arg):
     if (type(acc)==list):
         acc.append(name)
     else:
-        python_is_braindead = name_complex_type(acc)
-        acc = [python_is_braindead,name]
+        p_i_b = name_complex_type(acc)
+        acc = [p_i_b,name]
     return acc
 
 def name_complex_type(arg):
@@ -189,7 +189,7 @@ def add_wsdl_ports_and_bindings (wsdl):
         out_el = wsdl.firstChild.appendChild(wsdl.createElement("message"))
         out_el.setAttribute("name", method + "_out")
         ret_part = out_el.appendChild(wsdl.createElement("part"))
-        ret_part.setAttribute("name", "returnvalue")
+        ret_part.setAttribute("name", "Result")
         ret_part.setAttribute("type", param_type(return_type))
 
         # Port connecting arguments with return type
