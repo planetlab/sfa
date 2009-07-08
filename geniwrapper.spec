@@ -2,7 +2,7 @@
 
 %define name sfa
 %define version 0.8
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -93,6 +93,13 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Wed Jul 08 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-3
+- clean up in xmlrpc/soap, --protocol option to chose between both
+- keyconvert packaged in /usr/bin, no /usr/share/keyconvert anymore
+- hopefully more helpful context in case of crashes when importing
+- bugfixes for using only /etc/sfa for site-dep files
+- bugfixes in wsdl generation
+
 * Mon Jul 06 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-2
 - cleanup of the config area; no dependency to a PLC config anymore as sfa can be run in standalone
 - config variables in sfa_config now start with SFA_ and not GENI_
