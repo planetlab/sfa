@@ -15,7 +15,7 @@ from sfa.trust.gid import *
 from sfa.util.record import *
 from sfa.util.debug import *
 
-GENI_TABLE_PREFIX = "geni$"
+GENI_TABLE_PREFIX = "sfa$"
 
 class GeniTable:
     def __init__(self, create=False, hrn="unspecified.default.registry", cninfo=None):

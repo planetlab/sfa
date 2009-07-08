@@ -34,7 +34,7 @@ Import: creating top level authorities
 Hierarchy: creating authority: plc
 plc : 
 Import: creating table for authority plc
-NOTICE:  table "geni$plc" does not exist, skipping
+NOTICE:  table "sfa$plc" does not exist, skipping
   inserting authority record for plc
 Import: adding plc to trusted list
 Import_Site: importing site plc.internet2
@@ -45,7 +45,7 @@ Hierarchy: creating authority: plc.pl
   inserting authority record for plc.pl
 Import: importing person plc.pl.root
 Import: creating table for authority plc.pl
-NOTICE:  table "geni$plc$pl" does not exist, skipping
+NOTICE:  table "sfa$plc$pl" does not exist, skipping
 
 (c) # service sfa start
 
