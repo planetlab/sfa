@@ -168,7 +168,7 @@ class Rspec:
         """
         read an xml string and store it as a dom object.
         """
-        xml = xml.replace('\n', '').replace('\t', '').replace(' ', '').strip()
+        xml = xml.replace('\n', '').replace('\t', '').strip()
         dom = minidom.parseString(xml)
         self.rootNode = dom.childNodes[0]
 
