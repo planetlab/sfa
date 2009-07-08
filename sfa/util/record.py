@@ -272,10 +272,8 @@ class GeniRecord(dict):
         Save the record to a string. The string contains an XML representation of
         the record.
         """
-        dict = self.as_dict()
-        filteredDict = {}
-        for key in self.public.keys():
-            filteredDict[key] = dict[key]
+        recorddict = self.as_dict()
+        filteredDict = dict([(key, val) for (key, val) in recorddict.iteritems() if key in self.public.keys()])
         record = RecordSpec()
         record.parseDict(filteredDict)
         str = record.toxml()
