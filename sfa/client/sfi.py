@@ -589,8 +589,7 @@ def create(opts, args):
    slice_hrn = args[0]
    slice_cred = get_slice_cred(slice_hrn)
    rspec_file = get_rspec_file(args[1])
-   with open(rspec_file) as f:
-      rspec = f.read()
+   rspec=open(rspec_file).read()
    return slicemgr.create_slice(slice_cred, slice_hrn, rspec)
 
 # delete named slice
