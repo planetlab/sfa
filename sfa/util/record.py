@@ -18,9 +18,9 @@ from sfa.util.parameter import *
 class GeniRecord(dict):
     """ 
     The GeniRecord class implements a Geni Record. A GeniRecord is a tuple
-    (Name, GID, Type, Info).
+    (Hrn, GID, Type, Info).
  
-    Name specifies the HRN of the object
+    Hrn specifies the Human Readable Name of the object
     GID is the GID of the object
     Type is user | authority | slice | component
  
@@ -39,8 +39,8 @@ class GeniRecord(dict):
         'hrn': Parameter(str, "Human readable name of object"),
         'gid': Parameter(str, "GID of the object"),
         'type': Parameter(str, "Record type"),
-        #'last_updated': Parameter(int, 'Date and time of last update'),
-        #'date_created': Parameter(int, 'Date and time this record was created'),
+        'last_updated': Parameter(int, 'Date and time of last update'),
+        'date_created': Parameter(int, 'Date and time this record was created'),
     }
 
     ##
@@ -52,14 +52,14 @@ class GeniRecord(dict):
     # @param pointer is a pointer to a PLC record
     # @param dict if !=None, then fill in this record from the dictionary
 
-    def __init__(self, name=None, gid=None, type=None, pointer=None, dict=None, string=None):
+    def __init__(self, hrn=None, gid=None, type=None, pointer=None, dict=None, string=None):
         self.dirty = True
-        self.name = None
+        self.hrn = None
         self.gid = None
         self.type = None
         self.pointer = None
-        if name:
-            self.set_name(name)
+        if hrn:
+            self.set_name(hrn)
         if gid:
             self.set_gid(gid)
         if type:
@@ -88,13 +88,13 @@ class GeniRecord(dict):
     ##
     # Set the name of the record
     #
-    # @param name is a string containing the HRN
+    # @param hrn is a string containing the HRN
 
-    def set_name(self, name):
+    def set_name(self, hrn):
         """
         Set the name of the record
         """
-        self.name = name
+        self.hrn = hrn
         self.dirty = True
 
     ##
@@ -144,7 +144,7 @@ class GeniRecord(dict):
         """
         Return the name (HRN) of the record
         """
-        return self.name
+        return self.hrn
 
     ##
     # Return the type of the record
@@ -190,7 +190,7 @@ class GeniRecord(dict):
         Geni. This key is used to uniquely identify the record in the Geni
         database.
         """
-        return self.name + "#" + self.type
+        return self.hrn + "#" + self.type
 
     ##
     # Returns a list of field names in this record. 
@@ -199,16 +199,16 @@ class GeniRecord(dict):
         """
         Returns a list of field names in this record.
         """
-        return ["name", "gid", "type", "pointer"]
+        return self.fields.keys()
 
     ##
-    # Given a field name ("name", "gid", ...) return the value of that field.
+    # Given a field name ("hrn", "gid", ...) return the value of that field.
     #
-    # @param name is the name of field to be returned
+    # @param fieldname is the name of field to be returned
 
     def get_field_value_string(self, fieldname):
         """
-        Given a field name ("name", "gid", ...) return the value of that field.
+        Given a field name ("hrn", "gid", ...) return the value of that field.
         """
         if fieldname == "key":
             val = self.get_key()
@@ -251,7 +251,7 @@ class GeniRecord(dict):
         """
         Load the record from a dictionary 
         """
-        self.set_name(dict['name'])
+        self.set_name(dict['hrn'])
         gidstr = dict.get("gid", None)
         if gidstr:
             self.set_gid(dict['gid'])
@@ -260,7 +260,6 @@ class GeniRecord(dict):
            self.set_pointer(dict['pointer'])
 
         self.set_type(dict['type'])
-        self['hrn'] = dict['hrn'] 
         self.update(dict)        
     
     ##
