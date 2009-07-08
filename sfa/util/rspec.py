@@ -96,7 +96,7 @@ class Rspec:
                  siblingdict = self.toGenDict(child, None, siblingdict,curNodeName)
 
             for attribute in nodeDom.attributes.keys():
-                parentdict = self.appendToDictOrCreate(parentdict, curNodeName, nodeDom.getAttribute(attribute))
+                siblingdict = self.appendToDictOrCreate(siblingdict, attribute, nodeDom.getAttribute(attribute))
 
         if (parentdict is not None):
             parentdict = self.appendToDictOrCreate(parentdict, curNodeName, siblingdict)
