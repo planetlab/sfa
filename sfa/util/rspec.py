@@ -70,6 +70,42 @@ class Rspec:
         return node
   
  
+    def appendToDictOrCreate(self, dict, key, value):
+        if (dict.has_key(key)):
+            dict[key].append(value)
+        else:
+            dict[key]=[value]
+        return dict
+
+    def toGenDict(self, nodeDom=None, parentdict={}, siblingdict={}, parent=None):
+        """
+        convert an XML to a nested dict:
+          * Non-terminal nodes (elements with string children and attributes) are simple dictionaries
+          * Terminal nodes (the rest) are nested dictionaries
+        """
+
+        if (not nodeDom):
+            nodeDom=self.rootNode
+
+        curNodeName = nodeDom.localName
+
+        if (nodeDom.nodeValue):
+            siblingdict = self.appendToDictOrCreate(siblingdict, parent, nodeDom.nodeValue)
+        elif (nodeDom.hasChildNodes()):
+            for child in nodeDom.childNodes:
+                 siblingdict = self.toGenDict(child, None, siblingdict,curNodeName)
+
+            for attribute in nodeDom.attributes.keys():
+                parentdict = self.appendToDictOrCreate(parentdict, curNodeName, nodeDom.getAttribute(attribute))
+
+        if (parentdict is not None):
+            parentdict = self.appendToDictOrCreate(parentdict, curNodeName, siblingdict)
+            return parentdict
+        else:
+            return siblingdict
+
+
+
     def toDict(self, nodeDom = None):
         """
         convert this rspec to a dict and return it.
@@ -132,7 +168,7 @@ class Rspec:
         """
         read an xml string and store it as a dom object.
         """
-        xml = xml.replace('\n', '').replace('\t', '').strip()
+        xml = xml.replace('\n', '').replace('\t', '').replace(' ', '').strip()
         dom = minidom.parseString(xml)
         self.rootNode = dom.childNodes[0]
 
