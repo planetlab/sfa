@@ -104,12 +104,18 @@ def name_complex_type(arg):
         inner_type = name_complex_type(arg[0]) 
         num_types=num_types+1
         type_name = "Type%d"%num_types
-        complex_type = types_section.appendChild(types.createElement("xsd:simpleType"))
+        complex_type = types_section.appendChild(types.createElement("xsd:complexType"))
         type_name = filter_argname(type_name)
         complex_type.setAttribute("name", type_name)
-        complex_content = complex_type.appendChild(types.createElement("xsd:list"))
-        complex_content.setAttribute("itemType",inner_type)
+        complex_content = complex_type.appendChild(types.createElement("xsd:complexContent"))
+        restriction = complex_content.appendChild(types.createElement("xsd:restriction"))
+        restriction.setAttribute("base","soapenc:Array")
+        attribute = restriction.appendChild(types.createElement("xsd:attribute"))
+        attribute.setAttribute("ref","soapenc:arrayType")
+        attribute.setAttribute("wsdl:arrayType","wsdl:%s[]"%inner_type)
+
         return "xsdl:%s"%type_name
+
     elif type(arg) == DictType or arg == DictType or (inspect.isclass(arg) and issubclass(arg, dict)):
         num_types=num_types+1
         type_name = "Type%d"%num_types
@@ -266,7 +272,7 @@ def get_wsdl_definitions():
         xmlns:xsdl="%s/2009/07/schema"
         xmlns:tns="%s/2009/07/sfa.wsdl"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:soapenc="http://schemas.xmlsoap.org/wsdl/soap/encoding"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>
         """ % (globals.plc_ns,globals.plc_ns,globals.plc_ns)
         
@@ -284,7 +290,7 @@ def get_wsdl_definitions_and_types():
         xmlns:xsdl="%s/2009/07/schema"
         xmlns:tns="%s/2009/07/sfa.wsdl"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:soapenc="http://schemas.xmlsoap.org/wsdl/soap/encoding"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
         <types>
             <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="%s/2009/07/schema"/>
