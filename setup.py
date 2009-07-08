@@ -31,7 +31,6 @@ data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml',
                                'config/sfi_config',
                                ]),
                ('/etc/init.d/', ['sfa/init.d/sfa']),
-               ('/var/www/html/wsdl', [ 'wsdl/sfa.wsdl' ] ),
                ]
 symlinks = [ '/usr/share/sfa' ]
 initscripts = [ '/etc/init.d/sfa' ]

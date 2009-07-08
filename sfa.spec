@@ -66,7 +66,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %{python_sitelib}/*
 /usr/bin/keyconvert
-/var/www/html/wsdl/sfa.wsdl
+/var/www/html/wsdl/*.wsdl
 
 %files plc
 %defattr(-,root,root)

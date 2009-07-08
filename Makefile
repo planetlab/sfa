@@ -5,11 +5,11 @@
 DESTDIR="/"
 
 ##########
-all: keyconvert python
+all: keyconvert python wsdl
 
-install: keyconvert-install python-install
+install: keyconvert-install python-install wsdl-install
 
-clean: keyconvert-clean python-clean
+clean: keyconvert-clean python-clean wsdl-clean
 
 .PHONY: all install clean 
 
@@ -36,6 +36,18 @@ python-clean:
 	rm $(init)
 
 .PHONY: python python-install python-clean
+##########
+wsdl: 
+	$(MAKE) -C wsdl 
+
+# propagate DESTDIR from the specfile
+wsdl-install:
+	$(MAKE) -C wsdl install 
+
+wsdl-clean:
+	$(MAKE) -C wsdl clean
+
+.PHONY: wsdl wsdl-install wsdl-clean
 ##########
 
 # are the .java files used ?
