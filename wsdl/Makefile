@@ -1,8 +1,8 @@
 # attempt to update at build-time
-SFA := sfa.wsdl
-ALL := $(SFA) registry.wsdl slice-manager.wsdl aggregate.wsdl 
 
-all: $(SFA)
+ALL := sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl 
+
+all: $(ALL)
 
 registry.wsdl:
 	PYTHONPATH=../ ./gw2wsdl.py --registry > $@
@@ -18,3 +18,5 @@ sfa.wsdl:
 
 clean:
 	rm -f *wsdl
+
+.PHONY: all clean
