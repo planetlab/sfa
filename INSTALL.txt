@@ -4,25 +4,30 @@ This installation note assumes that you have installed and configured MyPLC in t
 
 # yum install sfa-plc sfa-client
 
-Note that the above command installs both sfa server (sfa-plc) and sfa client packages along with necessary dependency packages. Depending on the requirements, you may choose 
-to install the appropriate one (server, client or both) for you. For e.g. to set up your own SFA server on top of your MyPLC, you need sfa-plc. On the other hand, if you plan to use an existing SFA server, you would typically need the sfa-client only.
+Note that the above command installs both sfa server (sfa-plc) and sfa client packages along with necessary dependency packages. Depending on the requirements, you may choose to install the appropriate one (server, client or both) for you. For e.g. to set up your own SFA server on top of your MyPLC, you need sfa-plc. On the other hand, if you plan to use an existing SFA server, you would typically need the sfa-client only.
 -------
-2) Note down the PLC_ROOT_USER and PLC_ROOT_PASSWORD of your MyPLC installation:
+2) Note down the PLC_ROOT_USER, PLC_ROOT_PASSWORD, PLC_DB_USER and PLC_DB_PASSWORD of your MyPLC installation:
 
 # plc-config-tty 
 Enter command (u for usual changes, w to save, ? for help) s PLC_ROOT_USER
 PLC_ROOT_USER = root@test.onelab.eu
 Enter command (u for usual changes, w to save, ? for help) s PLC_ROOT_PASSWORD
 PLC_ROOT_PASSWORD = test++
+Enter command (u for usual changes, w to save, ? for help) s PLC_DB_USER
+PLC_DB_USER = pgsqluser
+Enter command (u for usual changes, w to save, ? for help) s PLC_DB_PASSWORD
+PLC_DB_PASSWORD = 4a333aba-a322-41b1-9c05-90b4f34d1332
 
-These two configuration parameters are required for SFA server configuration
+These four configuration parameters are required for SFA server configuration
 -------
 3) Configure and start SFA servers: 
 
 (a) # sfa-config-tty
 
- set SFA_PLC_USER	to     PLC_ROOT_USER 
- set SFA_PLC_PASSWORD	to     PLC_ROOT_PASSWORD
+ set SFA_PLC_USER    		to     PLC_ROOT_USER 
+ set SFA_PLC_PASSWORD		to     PLC_ROOT_PASSWORD
+ set SFA_PLC_DB_USER   		to     PLC_DB_USER
+ set SFA_PLC_DB_PASSWORD	to     PLC_DB_PASSWORD
 write and quit
 
 *NOTE* at this point you get a warning b/c the authorities hierarchy has not been created yet; ignore
@@ -49,7 +54,7 @@ NOTICE:  table "sfa$plc$pl" does not exist, skipping
 
 (c) # service sfa start
 
-This will start Registry, Slice Manager and Aggregate Manager. Your ps command output would like:
+This will start Registry, Slice Manager and Aggregate Manager. Your ps command output would look like:
 
 # ps -ef | grep python
 root     24944     1  0 May11 ?        00:00:00 /usr/bin/python /usr/bin/sfa-server.py -r -d
