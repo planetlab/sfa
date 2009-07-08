@@ -25,7 +25,7 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
 
 from sfa.util.faults import *
-from sfa.util.api import GeniAPI 
+from sfa.plc.api import GeniAPI 
 from sfa.util.debug import log
 
 ##

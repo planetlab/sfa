@@ -35,16 +35,12 @@ class GeniRecord(dict):
     of different types.
     """
 
-    fields = {
+    public = {
         'hrn': Parameter(str, "Human readable name of object"),
         'gid': Parameter(str, "GID of the object"),
         'type': Parameter(str, "Record type"),
         #'last_updated': Parameter(int, 'Date and time of last update'),
         #'date_created': Parameter(int, 'Date and time this record was created'),
-    }
-
-    internal_fields = {
-        'pointer': Parameter(int, "Internal ID")
     }
 
     ##
@@ -224,13 +220,13 @@ class GeniRecord(dict):
             return str(val)
 
     ##
-    # Given a list of field names, return a list of values for those fields.
+    # Given a list of field names, return a list of values for those public.
     #
     # @param fieldnames is a list of field names
 
     def get_field_value_strings(self, fieldnames):
         """
-        Given a list of field names, return a list of values for those fields.
+        Given a list of field names, return a list of values for those public.
         """
         strs = []
         for fieldname in fieldnames:
@@ -249,7 +245,7 @@ class GeniRecord(dict):
     ##
     # Load the record from a dictionary
     #
-    # @param dict dictionary to load record fields from
+    # @param dict dictionary to load record public from
 
     def load_from_dict(self, dict):
         """
@@ -277,8 +273,11 @@ class GeniRecord(dict):
         the record.
         """
         dict = self.as_dict()
+        filteredDict = {}
+        for key in self.public.keys():
+            filteredDict[key] = dict[key]
         record = RecordSpec()
-        record.parseDict(dict)
+        record.parseDict(filteredDict)
         str = record.toxml()
         #str = xmlrpclib.dumps((dict,), allow_none=True)
         return str
@@ -319,12 +318,12 @@ class GeniRecord(dict):
         #    self.get_gid_object().dump(8, dump_parents)
         #print "    pointer:", self.pointer
        
-        order = GeniRecord.fields.keys() 
+        order = GeniRecord.public.keys() 
         for key in self.keys():
             if key not in order:
                 order.append(key)
         for key in order:
-            if key in (self and self.fields):
+            if key in (self and self.public):
                 if key in 'gid' and self[key]:
                     gid = GID(string=self[key])
                     print "     %s:" % key
@@ -338,72 +337,40 @@ class GeniRecord(dict):
 
 class UserRecord(GeniRecord):
 
-    fields = {
+    public = {
         'email': Parameter(str, 'email'),
         'first_name': Parameter(str, 'First name'),
         'last_name': Parameter(str, 'Last name'),
         'phone': Parameter(str, 'Phone Number'),
         'key': Parameter(str, 'Public key'),
-        'slice': Parameter([str], 'List of slices this user belongs to'),
+        'slices': Parameter([str], 'List of slices this user belongs to'),
         }
-    fields.update(GeniRecord.fields)
- 
-    internal_fields = {
-        'roles': Parameter([str], 'List of roles'),
-        'title': Parameter(str, 'Title'),
-        'sites': Parameter([str], 'List of sites this user belongs to'),
-        'enabled': Parameter(bool, 'Is this person enabled'),
-        }
-    internal_fields.update(GeniRecord.internal_fields)
+    public.update(GeniRecord.public)
     
 class SliceRecord(GeniRecord):
-    fields = {
+    public = {
         'name': Parameter(str, 'Slice name'),
         'url': Parameter(str, 'Slice url'),
         'expires': Parameter(int, 'Date and time this slice exipres'),
         'researcher': Parameter([str], 'List of users for this slice'),
         'description': Parameter([str], 'Description of this slice'), 
         }
-    fields.update(GeniRecord.fields)
+    public.update(GeniRecord.public)
 
-    internal_fields = {
-        'site': Parameter(str, 'Site this slice belongs to'),
-        'instantiation': Parameter(str, 'Slice instantiation'),
-        'nodes': Parameter([str], 'List of nodes this slice is instantiated on'),
-        'max_nodes': Parameter(int, 'Maximum number of nodes this slice is allowed on')
-        }
-    internal_fields.update(GeniRecord.internal_fields)
  
 class NodeRecord(GeniRecord):
-    fields = {
+    public = {
         'hostname': Parameter(str, 'This nodes dns name'),
         'node_type': Parameter(str, 'Type of node this is'),
         'node_type': Parameter(str, 'Type of node this is'),
         'latitude': Parameter(str, 'latitude'),
         'longitude': Parameter(str, 'longitude'),
         }
-    fields.update(GeniRecord.fields)
+    public.update(GeniRecord.public)
 
-    internal_fields = {
-        'slice_ids_whitelist': Parameter([str], 'List of allowed slices on this node'),
-        'site': Parameter(str, 'Site this node belongs to'),
-        'slices': Parameter([str], 'List of instantiated slices on this node'),
-        'boot_state': Parameter(str, 'This nodes boot state'),
-        'session': Parameter(str, 'This nodes session key'),
-        'ssh_rsa_key': Parameter(str, 'Last known ssh host key'),
-        'verified': Parameter(str, 'Whether the node configuration is verified correct'),
-        'last_contact': Parameter(int, 'Date and time this node last phoned home'),
-        'run_level': Parameter(str, 'Run level'),
-        'version': Parameter(str, 'Node software version'),
-        'key': Parameter(str, 'Node key'),
-        'boot_noonce': Parameter(str, 'Random value generate at nodes last boot'),
-        'model': Parameter(str, 'Model of node'),
-        'ports': Parameter([int], 'List of pcu ports this node is connected to') 
-        }
-    internal_fields.update(GeniRecord.internal_fields)
 
 class AuthorityRecord(GeniRecord):
-    fields =  {
+    public =  {
         'name': Parameter(str, 'Name'),
         'login_base': Parameter(str, 'login base'),
         'enabled': Parameter(bool, 'Is this site enabled'),
@@ -413,17 +380,6 @@ class AuthorityRecord(GeniRecord):
         'researcher': Parameter([str], 'List of researchers'),
         'PI': Parameter([str], 'List of Principal Investigators'),
         }
-    fields.update(GeniRecord.fields)
+    public.update(GeniRecord.public)
     
-    internal_fields = {
-        'nodes': Parameter([str], 'List of nodes at this site'),  
-        'slices': Parameter([str], 'List of slices instantiated by this site'),
-        'abbreviated_name': Parameter(str, 'Abbreviated name'),
-        'owners': Parameter([str], 'List of owners'),
-        'max_slices': Parameter(int, 'Maximum number of slices this site can instantiate'),
-        'max_slivers': Parameter(int, 'Maximum number of slivers this site can instantiate'),
-        'pi': Parameter([str], 'List of pis'),
-        'is_public': Parameter(bool, 'Is this site public'),
-        
-        }
-    internal_fields.update(GeniRecord.internal_fields) 
+

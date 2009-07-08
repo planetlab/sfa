@@ -6,7 +6,7 @@ from sfa.util.misc import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
-from sfa.util.slices import Slices
+from sfa.plc.slices import Slices
 
 class get_slices(Method):
     """

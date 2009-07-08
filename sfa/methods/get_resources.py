@@ -5,7 +5,8 @@ from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
-from sfa.util.nodes import Nodes
+
+from sfa.plc.nodes import Nodes
 
 class get_resources(Method):
     """
