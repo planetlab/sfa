@@ -112,7 +112,7 @@ def name_complex_type(arg):
         restriction.setAttribute("base","soapenc:Array")
         attribute = restriction.appendChild(types.createElement("xsd:attribute"))
         attribute.setAttribute("ref","soapenc:arrayType")
-        attribute.setAttribute("wsdl:arrayType","wsdl:%s[]"%inner_type)
+        attribute.setAttribute("wsdl:arrayType","%s[]"%inner_type)
 
         return "xsdl:%s"%type_name
 
