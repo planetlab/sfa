@@ -260,7 +260,7 @@ class GeniRecord(dict):
            self.set_pointer(dict['pointer'])
 
         self.set_type(dict['type'])
-        self['hrn'] = dict['name'] 
+        self['hrn'] = dict['hrn'] 
         self.update(dict)        
     
     ##
