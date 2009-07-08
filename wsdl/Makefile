@@ -1,8 +1,8 @@
 # attempt to update at build-time
 
-ALL := sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl 
+WSDLS = sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl 
 
-all: $(ALL)
+all: $(WSDLS)
 
 registry.wsdl:
 	PYTHONPATH=../ ./gw2wsdl.py --registry > $@
@@ -19,10 +19,7 @@ sfa.wsdl:
 #################### install
 # DESTDIR set but the calling Makefile in ../
 INSTALL_PATH=/var/www/html/wsdl
-INSTALLED=$(foreach wsdl,$(ALL),$(DESTDIR)$(INSTALL_PATH)/$(wsdl))
-
-foo:
-	@echo INSTALLED=$(INSTALLED)
+INSTALLED=$(foreach wsdl,$(WSDLS),$(DESTDIR)$(INSTALL_PATH)/$(wsdl))
 
 install: $(INSTALLED)
 
