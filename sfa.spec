@@ -2,7 +2,7 @@
 
 %define name sfa
 %define version 0.8
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -93,6 +93,9 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Wed Jul 08 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-4
+- rename geniwrapper.spec into sfa.spec
+
 * Wed Jul 08 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-3
 - clean up in xmlrpc/soap, --protocol option to chose between both
 - keyconvert packaged in /usr/bin, no /usr/share/keyconvert anymore
