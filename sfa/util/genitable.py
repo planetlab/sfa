@@ -45,13 +45,15 @@ class GeniTable:
         
         querystr = "CREATE TABLE " + self.tablename + " ( \
                 key text, \
-                name text, \
+                hrn text, \
                 gid text, \
                 type text, \
-                pointer integer);"
+                pointer integer, \
+                date_created timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+                last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP);"
         template = "CREATE INDEX %s_%s_idx ON %s (%s);"
         indexes = [template % ( self.tablename, field, self.tablename, field) \
-                   for field in ['name', 'type' ]]
+                   for field in ['key', 'hrn', 'type','pointer']]
         # IF EXISTS doenst exist in postgres < 8.2
         try:
             self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
@@ -96,7 +98,6 @@ class GeniTable:
         result_dict_list = []
         for dict in dict_list:
            if (type=="*") or (dict['type'] == type):
-               dict['hrn'] = dict['name'] 
                result_dict_list.append(dict)
         return result_dict_list
 
@@ -117,10 +118,10 @@ class GeniTable:
         return result_rec_list
 
     def resolve_dict(self, type, hrn):
-        return self.find_dict(type, hrn, "name")
+        return self.find_dict(type, hrn, "hrn")
 
     def resolve(self, type, hrn):
-        return self.find(type, hrn, "name")
+        return self.find(type, hrn, "hrn")
 
     def list_dict(self):
         query_str = "SELECT * FROM " + self.tablename
