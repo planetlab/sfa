@@ -77,7 +77,7 @@ class Rspec:
             dict[key]=[value]
         return dict
 
-    def toGenDict(self, nodeDom=None, parentdict=None, siblingdict={}, parent=None):
+    def toDict(self, nodeDom=None, parentdict=None, siblingdict={}, parent=None):
         """
         convert an XML to a nested dict:
           * Non-terminal nodes (elements with string children and attributes) are simple dictionaries
@@ -95,13 +95,13 @@ class Rspec:
                 if (child.nodeValue):
                     siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
                 else:
-                    childdict = self.toGenDict(child, None, childdict, curNodeName)
+                    childdict = self.toDict(child, None, childdict, curNodeName)
 
             child = nodeDom.childNodes[-1]
             if (child.nodeValue):
                 siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
             else:
-                siblingdict = self.toGenDict(child, siblingdict, childdict, curNodeName)
+                siblingdict = self.toDict(child, siblingdict, childdict, curNodeName)
 
             # Keep the attributes separate from text nodes
             attrdict={}
@@ -120,40 +120,40 @@ class Rspec:
 
 
 
-    def toDict(self, nodeDom = None):
-        """
-        convert this rspec to a dict and return it.
-        """
-        node = {}
-        if not nodeDom:
-             nodeDom = self.rootNode
-  
-        elementName = nodeDom.nodeName
-        if elementName and not elementName.startswith("#"):
-            # attributes have tags and values.  get {tag: value}, else {type: value}
-            node[elementName] = self._attributeDict(nodeDom)
-            # resolve the child nodes.
-            if nodeDom.hasChildNodes():
-                for child in nodeDom.childNodes:
-                    childName = self._getName(child)
-                    # skip null children 
-                    if not childName:
-                        continue
-                    # initialize the possible array of children        
-                    if not node[elementName].has_key(childName):
-                        node[elementName][childName] = []
-                    # if child node has text child nodes
-                    # append the children to the array as strings
-                    if child.hasChildNodes() and isinstance(child.childNodes[0], minidom.Text):
-                        for nextchild in child.childNodes:
-                            node[elementName][childName].append(nextchild.data)
-                    # convert element child node to dict
-                    else:       
-                        childdict = self.toDict(child)
-                        for value in childdict.values():
-                            node[elementName][childName].append(value)
-                    #node[childName].append(self.toDict(child))
-        return node
+#    def toDict(self, nodeDom = None):
+#        """
+#        convert this rspec to a dict and return it.
+#        """
+#        node = {}
+#        if not nodeDom:
+#             nodeDom = self.rootNode
+#  
+#        elementName = nodeDom.nodeName
+#        if elementName and not elementName.startswith("#"):
+#            # attributes have tags and values.  get {tag: value}, else {type: value}
+#            node[elementName] = self._attributeDict(nodeDom)
+#            # resolve the child nodes.
+#            if nodeDom.hasChildNodes():
+#                for child in nodeDom.childNodes:
+#                    childName = self._getName(child)
+#                    # skip null children 
+#                    if not childName:
+#                        continue
+#                    # initialize the possible array of children        
+#                    if not node[elementName].has_key(childName):
+#                        node[elementName][childName] = []
+#                    # if child node has text child nodes
+#                    # append the children to the array as strings
+#                    if child.hasChildNodes() and isinstance(child.childNodes[0], minidom.Text):
+#                        for nextchild in child.childNodes:
+#                            node[elementName][childName].append(nextchild.data)
+#                    # convert element child node to dict
+#                    else:       
+#                        childdict = self.toDict(child)
+#                        for value in childdict.values():
+#                            node[elementName][childName].append(value)
+#                    #node[childName].append(self.toDict(child))
+#        return node
 
   
     def toxml(self):
