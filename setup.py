@@ -32,7 +32,6 @@ data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml',
                                ]),
                ('/etc/init.d/', ['sfa/init.d/sfa']),
                ]
-symlinks = [ '/usr/share/sfa' ]
 initscripts = [ '/etc/init.d/sfa' ]
         
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
@@ -41,13 +40,14 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     remove_dirs = ['/etc/sfa/'] + site_packages_path
     remove_files = [ '/usr/bin/sfa-config-tty',
                      '/usr/bin/sfa-import-plc.py', 
+                     '/usr/bin/sfa-nuke-plc.py', 
                      '/usr/bin/sfa-server.py', 
                      '/usr/bin/sfi.py', 
                      '/usr/bin/getNodes.py',
                      '/usr/bin/getRecord.py',
                      '/usr/bin/setRecord.py',
                      '/usr/bin/genidump.py',
-                    ] + symlinks + initscripts
+                    ] + initscripts
     
     # remove files   
     for filepath in remove_files:
@@ -75,19 +75,3 @@ else:
           scripts = scripts,   
           )
 
-    # create symlink to geniwrapper source in /usr/share
-    python_path = sys.path
-    site_packages_path = [ path + os.sep + 'sfa' for path in python_path if path.endswith('site-packages')]
-    # python path usualy has /usr/local/lib/ path , filter this out
-    site_packages_path = [x for x in site_packages_path if 'local' not in x]
-
-    # we can not do this here as installation root might change paths
-    # - baris
-    #
-    # for src in site_packages_path:
-    #     for dst in symlinks:
-    #         try: 
-    #             os.symlink(src, dst)
-    #         except: pass
-    # for initscript in initscripts:
-    #     os.chmod(initscript, 00744)

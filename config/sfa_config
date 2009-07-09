@@ -73,19 +73,14 @@ SFA_PLC_USER='root@localhost.localdomain'
 # Password for user account
 SFA_PLC_PASSWORD='root'
 
-# Hostname
-# Fully qualified hostname of PLC interface
+# Full URL of PLC interface
 SFA_PLC_URL='https://localhost:443/PLCAPI/'
-
-# PLC Shell PATH
-# This only applies if sfa services and PLC interface are running on the same machine
-SFA_PLC_SHELL_PATH='/usr/share/plc_api'
 
 # PLC DB Name
 SFA_PLC_DB_NAME='planetlab5'
 
 # PLC DB Host
-SFA_PLC_DB_HOST='www.planet-lab.org'
+SFA_PLC_DB_HOST='localhost'
 
 # PLC DB port
 SFA_PLC_DB_PORT=5432

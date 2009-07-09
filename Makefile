@@ -79,6 +79,11 @@ RSYNC_EXCLUDES		:= --exclude .svn --exclude CVS --exclude '*~' --exclude TAGS $(
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
 RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
+BINS =	./config/sfa-config-tty ./sfa/plc/sfa-import-plc.py ./sfa/plc/sfa-nuke-plc.py \
+	./sfa/server/sfa-server.py \
+	./sfa/client/sfi.py ./sfa/client/getNodes.py ./sfa/client/getRecord.py \
+	./sfa/client/setRecord.py ./sfa/client/genidump.py
+
 sync:
 ifeq (,$(SSHURL))
 	@echo "sync: You must define, either PLC, or PLCHOST & GUEST, on the command line"
@@ -87,7 +92,7 @@ ifeq (,$(SSHURL))
 	@exit 1
 else
 	+$(RSYNC) ./sfa/ $(SSHURL)/usr/lib/python2.5/site-packages/sfa/
-	+$(RSYNC) ./config/sfa-config-tty $(SSHURL)/usr/bin
+	+$(RSYNC)  $(BINS) $(SSHURL)/usr/bin
 	$(SSHCOMMAND) exec service sfa restart
 endif
 

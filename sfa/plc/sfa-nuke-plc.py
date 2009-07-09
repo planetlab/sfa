@@ -1,3 +1,4 @@
+#!/usr/bin/python
 ##
 # Delete all the database records for Geni. This tool is used to clean out Geni
 # records during testing.
@@ -11,11 +12,10 @@ import sys
 
 from sfa.trust.hierarchy import *
 from sfa.util.record import *
-from sfa.util.genitable import *
+from sfa.util.genitable import GeniTable
 from sfa.util.config import *
 
 def process_options():
-   global hrn
 
    (options, args) = getopt.getopt(sys.argv[1:], '', [])
    for opt in options:
@@ -26,7 +26,7 @@ def main():
     process_options()
 
     print "purging geni records from database"
-    geni_records_purge(get_default_dbinfo())
+    GeniTable.geni_records_purge(get_default_dbinfo())
 
 if __name__ == "__main__":
     main()

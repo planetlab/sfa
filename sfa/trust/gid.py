@@ -7,8 +7,8 @@
 ### $URL$
 
 import xmlrpclib
-
 import uuid
+
 from sfa.trust.certificate import Certificate
 
 ##

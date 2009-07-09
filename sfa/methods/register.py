@@ -8,9 +8,11 @@ from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.trust.auth import Auth
 from sfa.util.record import GeniRecord
 from sfa.util.debug import log
+
+from sfa.trust.auth import Auth
+from sfa.trust.gid import create_uuid
 
 class register(Method):
     """

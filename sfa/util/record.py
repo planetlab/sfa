@@ -229,10 +229,7 @@ class GeniRecord(dict):
         """
         Given a list of field names, return a list of values for those public.
         """
-        strs = []
-        for fieldname in fieldnames:
-            strs.append(self.get_field_value_string(fieldname))
-        return strs
+        return [ self.get_field_value_string (fieldname) for fieldname in fieldnames ]
 
     ##
     # Return the record in the form of a dictionary

@@ -10,9 +10,8 @@ from optparse import OptionParser
 
 from sfa.trust.certificate import Certificate
 from sfa.trust.credential import Credential
-from sfa.trust.gid import create_uuid
 
-from sfa.util.geniclient import GeniClient, ServerException
+from sfa.util.geniclient import GeniClient
 from sfa.util.record import GeniRecord
 from sfa.util.rspec import Rspec
 

@@ -48,6 +48,7 @@ usual_variables = ["SFA_REGISTRY_ROOT_AUTH",
                    "SFA_REGISTRY_LEVEL1_AUTH",
                    "SFA_PLC_USER",
                    "SFA_PLC_PASSWORD",
+                   "SFA_PLC_DB_HOST",
                    "SFA_PLC_DB_USER",
                    "SFA_PLC_DB_PASSWORD",
                    ]

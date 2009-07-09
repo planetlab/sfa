@@ -15,16 +15,16 @@ from sfa.trust.gid import *
 from sfa.util.record import *
 from sfa.util.debug import *
 
-GENI_TABLE_PREFIX = "sfa$"
-
 class GeniTable:
+
+    GENI_TABLE_PREFIX = "sfa$"
+
     def __init__(self, create=False, hrn="unspecified.default.registry", cninfo=None):
-        global GENI_TABLE_PREFIX
 
         self.hrn = hrn
 
         # pgsql doesn't like table names with "." in them, to replace it with "$"
-        self.tablename = GENI_TABLE_PREFIX + self.hrn.replace(".", "$")
+        self.tablename = GeniTable.GENI_TABLE_PREFIX + self.hrn.replace(".", "$")
 
         # establish a connection to the pgsql server
         self.cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
@@ -135,19 +135,15 @@ class GeniTable:
             result_rec_list.append(GeniRecord(dict=dict).as_dict())
         return result_rec_list
 
-def set_geni_table_prefix(x):
-    global GENI_TABLE_PREFIX
+    @staticmethod
+    def geni_records_purge(cninfo):
 
-    GENI_TABLE_PREFIX = x
-
-def geni_records_purge(cninfo):
-    global GENI_TABLE_PREFIX
-
-    cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
-    tableList = cnx.get_tables()
-    for table in tableList:
-        if table.startswith(GENI_TABLE_PREFIX) or \
-           table.startswith('public.' + GENI_TABLE_PREFIX) or \
-           table.startswith('public."' + GENI_TABLE_PREFIX):
-               report.trace("dropping table " + table)
-               cnx.query("DROP TABLE " + table)
+        cnx = DB(cninfo['dbname'], cninfo['address'], 
+                 port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
+        tableList = cnx.get_tables()
+        for table in tableList:
+            if table.startswith(GeniTable.GENI_TABLE_PREFIX) or \
+                    table.startswith('public.' + GeniTable.GENI_TABLE_PREFIX) or \
+                    table.startswith('public."' + GeniTable.GENI_TABLE_PREFIX):
+                report.trace("dropping table " + table)
+                cnx.query("DROP TABLE " + table)

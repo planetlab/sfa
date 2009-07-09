@@ -6,6 +6,8 @@ from sfa.trust.certificate import Keypair
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
+
+from sfa.trust.gid import create_uuid
 from sfa.trust.auth import Auth
 
 class create_gid(Method):

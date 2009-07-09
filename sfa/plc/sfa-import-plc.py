@@ -21,14 +21,16 @@ import getopt
 import sys
 import tempfile
 
-from sfa.trust.certificate import convert_public_key, Keypair
-from sfa.trust.trustedroot import *
-
-from sfa.trust.hierarchy import *
 from sfa.util.record import *
-from sfa.util.genitable import *
+from sfa.util.genitable import GeniTable
 from sfa.util.misc import *
 from sfa.util.config import *
+from sfa.util.report import trace, error
+
+from sfa.trust.certificate import convert_public_key, Keypair
+from sfa.trust.trustedroot import *
+from sfa.trust.hierarchy import *
+from sfa.trust.gid import create_uuid
 
 # get PL account settings from config module
 pl_auth = get_pl_auth()
@@ -41,8 +43,8 @@ def connect_shell():
 
     # connect to planetlab
     if "Url" in pl_auth:
-        from sfa.plc import remoteshell
-        shell = remoteshell.RemoteShell()
+        from sfa.plc.remoteshell import RemoteShell
+        shell = RemoteShell()
     else:
         import PLC.Shell
         shell = PLC.Shell.Shell(globals = globals())
@@ -110,7 +112,7 @@ def get_auth_table(auth_name):
     # into this authority yet.
 
     if not table.exists():
-        report.trace("Import: creating table for authority " + auth_name)
+        trace("Import: creating table for authority " + auth_name)
         table.create()
 
     return table
@@ -135,7 +137,7 @@ def import_person(parent_hrn, person):
     if len(hrn) > 64:
         hrn = hrn[:64]
 
-    report.trace("Import: importing person " + hrn)
+    trace("Import: importing person " + hrn)
 
     table = get_auth_table(parent_hrn)
 
@@ -150,7 +152,7 @@ def import_person(parent_hrn, person):
         pkey =convert_public_key(key)
     else:
         # the user has no keys
-        report.trace("   person " + hrn + " does not have a PL public key")
+        trace("   person " + hrn + " does not have a PL public key")
 
         # if a key is unavailable, then we still need to put something in the
         # user's GID. So make one up.
@@ -160,11 +162,11 @@ def import_person(parent_hrn, person):
     person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
     person_record = table.resolve("user", hrn)
     if not person_record:
-        report.trace("  inserting user record for " + hrn)
+        trace("  inserting user record for " + hrn)
         person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         table.insert(person_record)
     else:
-        report.trace("  updating user record for " + hrn)
+        trace("  updating user record for " + hrn)
         person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         table.update(person_record)
             
@@ -174,11 +176,11 @@ def import_slice(parent_hrn, slice):
     slicename = cleanup_string(slicename)
 
     if not slicename:
-        report.error("Import_Slice: failed to parse slice name " + slice['name'])
+        error("Import_Slice: failed to parse slice name " + slice['name'])
         return
 
     hrn = parent_hrn + "." + slicename
-    report.trace("Import: importing slice " + hrn)
+    trace("Import: importing slice " + hrn)
 
     table = get_auth_table(parent_hrn)
 
@@ -187,7 +189,7 @@ def import_slice(parent_hrn, slice):
         pkey = Keypair(create=True)
         slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         slice_record = GeniRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
-        report.trace("  inserting slice record for " + hrn)
+        trace("  inserting slice record for " + hrn)
         table.insert(slice_record)
 
 def import_node(parent_hrn, node):
@@ -196,7 +198,7 @@ def import_node(parent_hrn, node):
     nodename = cleanup_string(nodename)
 
     if not nodename:
-        report.error("Import_node: failed to parse node name " + node['hostname'])
+        error("Import_node: failed to parse node name " + node['hostname'])
         return
 
     hrn = parent_hrn + "." + nodename
@@ -205,7 +207,7 @@ def import_node(parent_hrn, node):
     if len(hrn) > 64:
         hrn = hrn[:64]
 
-    report.trace("Import: importing node " + hrn)
+    trace("Import: importing node " + hrn)
 
     table = get_auth_table(parent_hrn)
 
@@ -214,7 +216,7 @@ def import_node(parent_hrn, node):
         pkey = Keypair(create=True)
         node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         node_record = GeniRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
-        report.trace("  inserting node record for " + hrn)
+        trace("  inserting node record for " + hrn)
         table.insert(node_record)
 
 def import_site(parent_hrn, site):
@@ -235,7 +237,7 @@ def import_site(parent_hrn, site):
             hrn = ".".join([parent_hrn, "internet2", sitename]) 
             sitename = sitename.replace("nlr", "")
          
-    report.trace("Import_Site: importing site " + hrn)
+    trace("Import_Site: importing site " + hrn)
 
     # create the authority
     if not AuthHierarchy.auth_exists(hrn):
@@ -248,7 +250,7 @@ def import_site(parent_hrn, site):
     auth_record = table.resolve("authority", hrn)
     if not auth_record:
         auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
-        report.trace("  inserting authority record for " + hrn)
+        trace("  inserting authority record for " + hrn)
         table.insert(auth_record)
 
     if 'person_ids' in site: 
@@ -258,7 +260,7 @@ def import_site(parent_hrn, site):
                 try: 
                     import_person(hrn, persons[0])
                 except Exception, e:
-                    report.trace("Failed to import: %s (%s)" % (persons[0], e))
+                    trace("Failed to import: %s (%s)" % (persons[0], e))
     if 'slice_ids' in site:
         for slice_id in site['slice_ids']:
             slices = shell.GetSlices(pl_auth, [slice_id])
@@ -266,7 +268,7 @@ def import_site(parent_hrn, site):
                 try:
                     import_slice(hrn, slices[0])
                 except Exception, e:
-                    report.trace("Failed to import: %s (%s)" % (slices[0], e))
+                    trace("Failed to import: %s (%s)" % (slices[0], e))
     if 'node_ids' in site:
         for node_id in site['node_ids']:
             nodes = shell.GetNodes(pl_auth, [node_id])
@@ -274,7 +276,7 @@ def import_site(parent_hrn, site):
                 try:
                     import_node(hrn, nodes[0])
                 except Exception, e:
-                    report.trace("Failed to import: %s (%s)" % (nodes[0], e))
+                    trace("Failed to import: %s (%s)" % (nodes[0], e))
 
 def create_top_level_auth_records(hrn):
     parent_hrn = get_authority(hrn)
@@ -287,7 +289,7 @@ def create_top_level_auth_records(hrn):
     auth_record = table.resolve("authority", hrn)
     if not auth_record:
         auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
-        report.trace("  inserting authority record for " + hrn)
+        trace("  inserting authority record for " + hrn)
         table.insert(auth_record)
 
 def main():

@@ -11,11 +11,11 @@ from optparse import OptionParser
 
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
-from sfa.trust.gid import create_uuid
 
 from sfa.util.geniclient import GeniClient
 from sfa.util.record import *
 from sfa.util.rspec import Rspec
+from sfa.util.xmlrpcprotocol import ServerException
 
 # xxx todo xxx auto-load ~/.sfi/sfi_config
 
