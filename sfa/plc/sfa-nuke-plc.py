@@ -13,7 +13,7 @@ import sys
 from sfa.trust.hierarchy import *
 from sfa.util.record import *
 from sfa.util.genitable import GeniTable
-from sfa.util.config import *
+from sfa.util.config import Config
 
 def process_options():
 
@@ -26,7 +26,7 @@ def main():
     process_options()
 
     print "purging geni records from database"
-    GeniTable.geni_records_purge(get_default_dbinfo())
+    GeniTable.geni_records_purge(Config().get_plc_dbinfo())
 
 if __name__ == "__main__":
     main()

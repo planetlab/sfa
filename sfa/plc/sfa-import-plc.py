@@ -24,7 +24,7 @@ import tempfile
 from sfa.util.record import *
 from sfa.util.genitable import GeniTable
 from sfa.util.misc import *
-from sfa.util.config import *
+from sfa.util.config import Config
 from sfa.util.report import trace, error
 
 from sfa.trust.certificate import convert_public_key, Keypair
@@ -32,23 +32,22 @@ from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
 from sfa.trust.gid import create_uuid
 
+config = Config()
+
 # get PL account settings from config module
-pl_auth = get_pl_auth()
+plc_auth = config.get_plc_auth()
 
+shell = None
 def connect_shell():
-    global pl_auth, shell
-
-    # get PL account settings from config module
-    pl_auth = get_pl_auth()
+    global plc_auth
 
     # connect to planetlab
-    if "Url" in pl_auth:
+    if "Url" in plc_auth:
         from sfa.plc.remoteshell import RemoteShell
         shell = RemoteShell()
     else:
         import PLC.Shell
         shell = PLC.Shell.Shell(globals = globals())
-
     return shell
 
 # connect to planetlab
@@ -62,7 +61,6 @@ shell = connect_shell()
 
 #root_auth = "planetlab"
 #level1_auth = "planetlab.us"
-config = Config()
 
 root_auth = config.SFA_REGISTRY_ROOT_AUTH
 level1_auth = config.SFA_REGISTRY_LEVEL1_AUTH
@@ -147,7 +145,7 @@ def import_person(parent_hrn, person):
         
         # get the user's private key from the SSH keys they have uploaded
         # to planetlab
-        keys = shell.GetKeys(pl_auth, key_ids)
+        keys = shell.GetKeys(plc_auth, key_ids)
         key = keys[0]['key']
         pkey =convert_public_key(key)
     else:
@@ -255,7 +253,7 @@ def import_site(parent_hrn, site):
 
     if 'person_ids' in site: 
         for person_id in site['person_ids']:
-            persons = shell.GetPersons(pl_auth, [person_id])
+            persons = shell.GetPersons(plc_auth, [person_id])
             if persons:
                 try: 
                     import_person(hrn, persons[0])
@@ -263,7 +261,7 @@ def import_site(parent_hrn, site):
                     trace("Failed to import: %s (%s)" % (persons[0], e))
     if 'slice_ids' in site:
         for slice_id in site['slice_ids']:
-            slices = shell.GetSlices(pl_auth, [slice_id])
+            slices = shell.GetSlices(plc_auth, [slice_id])
             if slices:
                 try:
                     import_slice(hrn, slices[0])
@@ -271,7 +269,7 @@ def import_site(parent_hrn, site):
                     trace("Failed to import: %s (%s)" % (slices[0], e))
     if 'node_ids' in site:
         for node_id in site['node_ids']:
-            nodes = shell.GetNodes(pl_auth, [node_id])
+            nodes = shell.GetNodes(plc_auth, [node_id])
             if nodes:
                 try:
                     import_node(hrn, nodes[0])
@@ -319,9 +317,7 @@ def main():
     root = AuthHierarchy.get_auth_info(root_auth)
     TrustedRoots.add_gid(root.get_gid_object())
 
-    connect_shell()
-
-    sites = shell.GetSites(pl_auth, {'peer_id': None})
+    sites = shell.GetSites(plc_auth, {'peer_id': None})
     # create a fake internet2 site first
     i2site = {'name': 'Internet2', 'abbreviated_name': 'I2',
                     'login_base': 'internet2', 'site_id': -1}

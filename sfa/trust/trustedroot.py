@@ -9,8 +9,8 @@ from sfa.util.config import Config
 class TrustedRootList:
     def __init__(self, dir=None):
         if not dir:
-            config = Config()
-            dir = config.config_path + os.sep + 'trusted_roots'
+            # keep trusted roots in /etc/sfa
+            dir = Config().config_path + os.sep + 'trusted_roots'
         self.basedir = dir
         
         # create the directory to hold the files

@@ -10,7 +10,7 @@ class Policy(SimpleStorage):
 
     def __init__(self, api):
         self.api = api
-        path = self.api.config.config_path
+        path = self.api.config.SFA_BASE_DIR
         filename = ".".join([self.api.interface, self.api.hrn, "policy"])    
         filepath = path + os.sep + filename
         self.policy_file = filepath

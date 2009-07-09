@@ -1,6 +1,3 @@
-# Directory where SFA interfaces are installed
-SFA_BASE_DIR="/usr/share/sfa/" 
-
 # HRN
 # Human readable name for the interfaces
 SFA_INTERFACE_HRN="plc"   
@@ -90,3 +87,7 @@ SFA_PLC_DB_USER='pgsqluser'
 
 # PLC DB Password
 SFA_PLC_DB_PASSWORD=''
+
+# Directory internal data gets stored
+# using /etc/sfa until gec5 but /usr/share/sfa would be a more reasonable choice
+SFA_BASE_DIR="/etc/sfa"

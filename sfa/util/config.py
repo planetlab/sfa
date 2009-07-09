@@ -42,33 +42,29 @@ class Config:
             raise IOError, "Could not find the configuration file: %s" % config_file
 
 
-def get_default_dbinfo():
-    config = Config()
-    dbinfo={
-        'dbname' : config.SFA_PLC_DB_NAME,
-        'address' : config.SFA_PLC_DB_HOST,
-        'port' : config.SFA_PLC_DB_PORT,
-        'user' : config.SFA_PLC_DB_USER,
-        'password' : config.SFA_PLC_DB_PASSWORD
-        }
-    return dbinfo
+    def get_plc_dbinfo(self):
+        return {
+            'dbname' : self.SFA_PLC_DB_NAME,
+            'address' : self.SFA_PLC_DB_HOST,
+            'port' : self.SFA_PLC_DB_PORT,
+            'user' : self.SFA_PLC_DB_USER,
+            'password' : self.SFA_PLC_DB_PASSWORD
+            }
 
-##
-# Geniwrapper uses a PLCAPI connection to perform operations on the registry,
-# such as creating and deleting slices. This connection requires an account
-# on the PLC server with full administrator access.
-#
-# The Url parameter controls whether the connection uses PLCAPI directly (i.e.
-# Geniwrapper is located on the same machine as PLC), or uses a XMLRPC connection
-# to the PLC machine. If you wish to use the API directly, then remove the Url
-# field from the dictionary. 
+    ##
+    # Geniwrapper uses a PLCAPI connection to perform operations on the registry,
+    # such as creating and deleting slices. This connection requires an account
+    # on the PLC server with full administrator access.
+    #
+    # The Url parameter controls whether the connection uses PLCAPI directly (i.e.
+    # Geniwrapper is located on the same machine as PLC), or uses a XMLRPC connection
+    # to the PLC machine. If you wish to use the API directly, then remove the Url
+    # field from the dictionary. 
 
-def get_pl_auth():
-    config = Config()
-    pl_auth = {
-        'Username': config.SFA_PLC_USER,
-        'AuthMethod': 'capability',
-        'AuthString':  config.SFA_PLC_PASSWORD,
-        "Url": config.SFA_PLC_URL
-        }
-    return pl_auth
+    def get_plc_auth(self):
+        return {
+            'AuthMethod': 'capability',
+            'Username': self.SFA_PLC_USER,
+            'AuthString':  self.SFA_PLC_PASSWORD,
+            "Url": self.SFA_PLC_URL
+            }

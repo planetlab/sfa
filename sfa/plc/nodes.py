@@ -24,7 +24,7 @@ class Nodes(SimpleStorage):
         self.api = api
         self.ttl = ttl
         self.threshold = None
-        path = self.api.config.config_path
+        path = self.api.config.SFA_BASE_DIR
         filename = ".".join([self.api.interface, self.api.hrn, "nodes"])
         filepath = path + os.sep + filename
         self.nodes_file = filepath

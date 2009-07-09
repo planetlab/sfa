@@ -23,7 +23,7 @@ from sfa.trust.credential import *
 from sfa.trust.gid import GID, create_uuid
 
 from sfa.util.misc import *
-from sfa.util.config import *
+from sfa.util.config import Config
 from sfa.util.sfaticket import SfaTicket
 
 ##
@@ -111,7 +111,7 @@ class Hierarchy:
     def __init__(self, basedir = None):
         if not basedir:
             config = Config()
-            basedir = os.path.join(config.config_path, "authorities")
+            basedir = os.path.join(config.SFA_BASE_DIR, "authorities")
         self.basedir = basedir
     ##
     # Given a hrn, return the filenames of the GID, private key, and dbinfo
@@ -182,7 +182,7 @@ class Hierarchy:
 
         # XXX TODO: think up a better way for the dbinfo to work
 
-        dbinfo = get_default_dbinfo()
+        dbinfo = Config().get_plc_dbinfo()
         dbinfo_file = file(dbinfo_filename, "w")
         dbinfo_file.write(str(dbinfo))
         dbinfo_file.close()
