@@ -1,7 +1,6 @@
 ### $Id$
 ### $URL$
 
-import pdb
 import sys
 import pprint
 import os
