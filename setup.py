@@ -4,12 +4,13 @@
 Installation script for the geniwrapper module
 """
 
-import os, sys
+import sys, os, os.path
 import shutil
 from distutils.core import setup
 
-scripts = [ 'config/sfa-config-tty',
+bins = [ 'config/sfa-config-tty',
             'sfa/plc/sfa-import-plc.py', 
+            'sfa/plc/sfa-nuke-plc.py', 
             'sfa/server/sfa-server.py', 
             'sfa/client/sfi.py', 
             'sfa/client/getNodes.py',
@@ -17,6 +18,8 @@ scripts = [ 'config/sfa-config-tty',
             'sfa/client/setRecord.py',
             'sfa/client/genidump.py',
             ]
+remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in bins ]
+
 package_dirs = [ 'sfa', 
                  'sfa/client',
                  'sfa/methods',
@@ -38,16 +41,7 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
     site_packages_path = [ path + os.sep + 'sfa' for path in python_path if path.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/'] + site_packages_path
-    remove_files = [ '/usr/bin/sfa-config-tty',
-                     '/usr/bin/sfa-import-plc.py', 
-                     '/usr/bin/sfa-nuke-plc.py', 
-                     '/usr/bin/sfa-server.py', 
-                     '/usr/bin/sfi.py', 
-                     '/usr/bin/getNodes.py',
-                     '/usr/bin/getRecord.py',
-                     '/usr/bin/setRecord.py',
-                     '/usr/bin/genidump.py',
-                    ] + initscripts
+    remove_files = remove_bins + initscripts
     
     # remove files   
     for filepath in remove_files:
@@ -72,6 +66,6 @@ else:
           data_files = data_files,
           ext_modules = [],
           py_modules = [],
-          scripts = scripts,   
+          scripts = bins,   
           )
 
