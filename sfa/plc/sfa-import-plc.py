@@ -140,7 +140,7 @@ def import_person(parent_hrn, person):
     table = get_auth_table(parent_hrn)
 
     key_ids = []
-    if 'key_ids' in person:    
+    if 'key_ids' in person and person['key_ids']:    
         key_ids = person["key_ids"]
         
         # get the user's private key from the SSH keys they have uploaded
