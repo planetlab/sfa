@@ -214,7 +214,10 @@ class GeniRecord(dict):
         if fieldname == "key":
             val = self.get_key()
         else:
-            val = self[fieldname] 
+            try:
+                val = getattr(self, fieldname)
+            except:
+                val = self[fieldname] 
         if isinstance(val, str):
             return "'" + str(val) + "'"
         else:
