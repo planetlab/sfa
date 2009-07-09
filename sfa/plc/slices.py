@@ -186,7 +186,8 @@ class Slices(SimpleStorage):
 
             # Create the person record 
             if not persons:
-                self.api.plshell.AddPerson(self.api.plauth, person_dict)
+                person_id=self.api.plshell.AddPerson(self.api.plauth, person_dict)
+		self.api.plshell.UpdatePerson(self.api.plauth, person_id, {'enabled' : True})
                 key_ids = []
             else:
                 key_ids = persons[0]['key_ids']
