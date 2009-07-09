@@ -92,7 +92,7 @@ class Rspec:
         if (nodeDom.hasChildNodes()):
             childdict={}
             for attribute in nodeDom.attributes.keys():
-                siblingdict = self.appendToDictOrCreate(siblingdict, attribute, nodeDom.getAttribute(attribute))
+                childdict = self.appendToDictOrCreate(childdict, attribute, nodeDom.getAttribute(attribute))
 
             for child in nodeDom.childNodes[:-1]:
                 if (child.nodeValue):
