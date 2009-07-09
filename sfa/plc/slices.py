@@ -187,6 +187,11 @@ class Slices(SimpleStorage):
             # Create the person record 
             if not persons:
                 person_id=self.api.plshell.AddPerson(self.api.plauth, person_dict)
+
+		# The line below enables the user account on the remote aggregate soon after it is created.
+		# without this the user key is not transfered to the slice (as GetSlivers returns key of only enabled users),
+		# which prevents the user from login to the slice. We may do additional checks before enabling the user.
+
 		self.api.plshell.UpdatePerson(self.api.plauth, person_id, {'enabled' : True})
                 key_ids = []
             else:
