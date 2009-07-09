@@ -41,7 +41,7 @@ def connect_shell():
 
     # connect to planetlab
     if "Url" in pl_auth:
-        import remoteshell
+        from sfa.plc import remoteshell
         shell = remoteshell.RemoteShell()
     else:
         import PLC.Shell
