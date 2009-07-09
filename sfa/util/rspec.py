@@ -77,7 +77,7 @@ class Rspec:
             dict[key]=[value]
         return dict
 
-    def toGenDict(self, nodeDom=None, parentdict={}, siblingdict={}, parent=None):
+    def toGenDict(self, nodeDom=None, parentdict=None, siblingdict={}, parent=None):
         """
         convert an XML to a nested dict:
           * Non-terminal nodes (elements with string children and attributes) are simple dictionaries
@@ -89,17 +89,25 @@ class Rspec:
 
         curNodeName = nodeDom.localName
 
-        if (nodeDom.nodeValue):
-            siblingdict = self.appendToDictOrCreate(siblingdict, parent, nodeDom.nodeValue)
-        elif (nodeDom.hasChildNodes()):
-            for child in nodeDom.childNodes:
-                 siblingdict = self.toGenDict(child, None, siblingdict,curNodeName)
+        if (nodeDom.hasChildNodes()):
+            childdict={}
+            for child in nodeDom.childNodes[:-1]:
+                if (child.nodeValue):
+                    siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
+                else:
+                    childdict = self.toGenDict(child, None, childdict, curNodeName)
+
+            child = nodeDom.childNodes[-1]
+            if (child.nodeValue):
+                siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
+            else:
+                siblingdict = self.toGenDict(child, siblingdict, childdict, curNodeName)
 
             for attribute in nodeDom.attributes.keys():
                 siblingdict = self.appendToDictOrCreate(siblingdict, attribute, nodeDom.getAttribute(attribute))
 
         if (parentdict is not None):
-            parentdict = self.appendToDictOrCreate(parentdict, curNodeName, siblingdict)
+            parentdict = self.appendToDictOrCreate(parentdict, parent, siblingdict)
             return parentdict
         else:
             return siblingdict
