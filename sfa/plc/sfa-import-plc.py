@@ -161,11 +161,11 @@ def import_person(parent_hrn, person):
     person_record = table.resolve("user", hrn)
     if not person_record:
         report.trace("  inserting user record for " + hrn)
-        person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
+        person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         table.insert(person_record)
     else:
         report.trace("  updating user record for " + hrn)
-        person_record = GeniRecord(name=hrn, gid=person_gid, type="user", pointer=person['person_id'])
+        person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         table.update(person_record)
             
 def import_slice(parent_hrn, slice):
@@ -186,7 +186,7 @@ def import_slice(parent_hrn, slice):
     if not slice_record:
         pkey = Keypair(create=True)
         slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        slice_record = GeniRecord(name=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
+        slice_record = GeniRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
         report.trace("  inserting slice record for " + hrn)
         table.insert(slice_record)
 
@@ -213,7 +213,7 @@ def import_node(parent_hrn, node):
     if not node_record:
         pkey = Keypair(create=True)
         node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        node_record = GeniRecord(name=hrn, gid=node_gid, type="node", pointer=node['node_id'])
+        node_record = GeniRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
         report.trace("  inserting node record for " + hrn)
         table.insert(node_record)
 
@@ -247,7 +247,7 @@ def import_site(parent_hrn, site):
 
     auth_record = table.resolve("authority", hrn)
     if not auth_record:
-        auth_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
+        auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
         report.trace("  inserting authority record for " + hrn)
         table.insert(auth_record)
 
@@ -286,7 +286,7 @@ def create_top_level_auth_records(hrn):
 
     auth_record = table.resolve("authority", hrn)
     if not auth_record:
-        auth_record = GeniRecord(name=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
+        auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
         report.trace("  inserting authority record for " + hrn)
         table.insert(auth_record)
 
