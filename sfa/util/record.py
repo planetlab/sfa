@@ -35,7 +35,8 @@ class GeniRecord(dict):
     of different types.
     """
 
-    public = {
+    ### the wsdl generator assumes this is named 'fields'
+    fields = {
         'hrn': Parameter(str, "Human readable name of object"),
         'gid': Parameter(str, "GID of the object"),
         'type': Parameter(str, "Record type"),
@@ -272,7 +273,7 @@ class GeniRecord(dict):
         the record.
         """
         recorddict = self.as_dict()
-        filteredDict = dict([(key, val) for (key, val) in recorddict.iteritems() if key in self.public.keys()])
+        filteredDict = dict([(key, val) for (key, val) in recorddict.iteritems() if key in self.fields.keys()])
         record = RecordSpec()
         record.parseDict(filteredDict)
         str = record.toxml()
@@ -315,12 +316,12 @@ class GeniRecord(dict):
         #    self.get_gid_object().dump(8, dump_parents)
         #print "    pointer:", self.pointer
        
-        order = GeniRecord.public.keys() 
+        order = GeniRecord.fields.keys() 
         for key in self.keys():
             if key not in order:
                 order.append(key)
         for key in order:
-            if key in (self and self.public):
+            if key in (self and self.fields):
                 if key in 'gid' and self[key]:
                     gid = GID(string=self[key])
                     print "     %s:" % key
@@ -334,7 +335,7 @@ class GeniRecord(dict):
 
 class UserRecord(GeniRecord):
 
-    public = {
+    fields = {
         'email': Parameter(str, 'email'),
         'first_name': Parameter(str, 'First name'),
         'last_name': Parameter(str, 'Last name'),
@@ -342,32 +343,32 @@ class UserRecord(GeniRecord):
         'key': Parameter(str, 'Public key'),
         'slices': Parameter([str], 'List of slices this user belongs to'),
         }
-    public.update(GeniRecord.public)
+    fields.update(GeniRecord.fields)
     
 class SliceRecord(GeniRecord):
-    public = {
+    fields = {
         'name': Parameter(str, 'Slice name'),
         'url': Parameter(str, 'Slice url'),
         'expires': Parameter(int, 'Date and time this slice exipres'),
         'researcher': Parameter([str], 'List of users for this slice'),
         'description': Parameter([str], 'Description of this slice'), 
         }
-    public.update(GeniRecord.public)
+    fields.update(GeniRecord.fields)
 
  
 class NodeRecord(GeniRecord):
-    public = {
+    fields = {
         'hostname': Parameter(str, 'This nodes dns name'),
         'node_type': Parameter(str, 'Type of node this is'),
         'node_type': Parameter(str, 'Type of node this is'),
         'latitude': Parameter(str, 'latitude'),
         'longitude': Parameter(str, 'longitude'),
         }
-    public.update(GeniRecord.public)
+    fields.update(GeniRecord.fields)
 
 
 class AuthorityRecord(GeniRecord):
-    public =  {
+    fields =  {
         'name': Parameter(str, 'Name'),
         'login_base': Parameter(str, 'login base'),
         'enabled': Parameter(bool, 'Is this site enabled'),
@@ -377,6 +378,6 @@ class AuthorityRecord(GeniRecord):
         'researcher': Parameter([str], 'List of researchers'),
         'PI': Parameter([str], 'List of Principal Investigators'),
         }
-    public.update(GeniRecord.public)
+    fields.update(GeniRecord.fields)
     
 
