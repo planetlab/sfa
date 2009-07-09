@@ -5,6 +5,7 @@
 import sys
 import os, os.path
 import tempfile
+import traceback
 from types import StringTypes, ListType
 from optparse import OptionParser
 
@@ -15,6 +16,7 @@ from sfa.util.geniclient import GeniClient
 from sfa.util.record import *
 from sfa.util.rspec import Rspec
 from sfa.util.xmlrpcprotocol import ServerException
+from sfa.util.config import Config
 
 # xxx todo xxx auto-load ~/.sfi/sfi_config
 
@@ -34,56 +36,61 @@ def set_servers(options):
    global user
    global authority
 
+   config_file = sfi_dir + os.sep + "sfi_config"
+   try:
+      config = Config (config_file)
+   except:
+      print "Failed to read configuration file",config_file
+      print "Make sure to remove the export clauses and to add quotes"
+      if not options.verbose:
+         print "Re-run with -v for more details"
+      else:
+         traceback.print_exc()
+      sys.exit(1)
+
+   errors=0
    # Set SliceMgr URL
    if (options.sm is not None):
       sm_url = options.sm
-   elif ("SFI_SM" in os.environ):
-      sm_url = os.environ["SFI_SM"]
+   elif hasattr(config,"SFI_SM"):
+      sm_url = config.SFI_SM
    else:
-      print "No Known Slice Manager"
-      print "Try:"
-      print "    export SFI_SM=http://your.slicemanager.url:12347/"
-      print "Or add this argument to the command line:"
-      print "    --slicemgr=http://your.slicemanager.url:12347/"
-      sys.exit(1)
+      print "You need to set e.g. SFI_SM='http://your.slicemanager.url:12347/' in %s"%config_file
+      errors +=1 
 
    # Set Registry URL
    if (options.registry is not None):
       reg_url = options.registry
-   elif ("SFI_REGISTRY" in os.environ):
-      reg_url = os.environ["SFI_REGISTRY"]
+   elif hasattr(config,"SFI_REGISTRY"):
+      reg_url = config.SFI_REGISTRY
    else:
-      print "No Known Registry Server"
-      print "Try:"
-      print "    export SFI_REGISTRY=http://your.registry.url:12345/"
-      print "Or add this argument to the command line:"
-      print "    --registry=http://your.registry.url:12345/"
+      print "You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in %s"%config_file
+      errors +=1 
+
+   # Set user HRN
+   if (options.user is not None):
+      user = options.user
+   elif hasattr(config,"SFI_USER"):
+      user = config.SFI_USER
+   else:
+      print "You need to set e.g. SFI_USER='plc.princeton.username' in %s"%config_file
+      errors +=1 
+
+   # Set authority HRN
+   if (options.auth is not None):
+      authority = options.auth
+   elif hasattr(config,"SFI_AUTH"):
+      authority = config.SFI_AUTH
+   else:
+      print "You need to set e.g. SFI_AUTH='plc.princeton' in %s"%config_file
+      errors +=1 
+
+   if errors:
       sys.exit(1)
 
    if options.verbose :
       print "Contacting Slice Manager at:", sm_url
       print "Contacting Registry at:", reg_url
-
-   # Set user HRN
-   if (options.user is not None):
-      user = options.user
-   elif ("SFI_USER" in os.environ):
-      user = os.environ["SFI_USER"]
-   else:
-      print "No Known User Name"
-      print "Try:"
-      print "    export SFI_USER=$SFI_AUTH.username"
-      print "Or add this argument to the command line:"
-      print "    --user=username"
-      sys.exit(1)
-
-   # Set authority HRN
-   if (options.auth is not None):
-      authority = options.auth
-   elif ("SFI_AUTH" in os.environ):
-      authority = os.environ["SFI_AUTH"]
-   else:
-      authority = None
 
    # Get key and certificate
    key_file = get_key_file()

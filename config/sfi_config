@@ -1,16 +1,16 @@
 # user-level configuration for sfi
 
 ### hrn of your authority
-export SFI_AUTH=plc.princeton
+SFI_AUTH='plc.princeton'
 # or planetlab.us.arizona
 
 ### your user hrn
-export SFI_USER=plc.princeton.faiyaza
+SFI_USER='plc.princeton.faiyaza'
 # or planetlab.us.arizona.Baker_Scott 
 # or planetlab.us.arizona.Hartman_John
 
 ### where to find the registry
-export SFI_REGISTRY=http://www.planet-lab.org:12345/
+SFI_REGISTRY='http://www.planet-lab.org:12345/'
 
 # where to find the slice manager
-export SFI_SM=http://www.planet-lab.org:12347/
+SFI_SM='http://www.planet-lab.org:12347/'

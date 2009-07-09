@@ -15,7 +15,6 @@ import sys
 import os
 import re
 import readline
-import traceback
 import distutils.file_util
 from optparse import OptionParser
 
