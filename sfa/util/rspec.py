@@ -1,6 +1,7 @@
 ### $Id$
 ### $URL$
 
+import pdb
 import sys
 import pprint
 import os
@@ -91,9 +92,6 @@ class Rspec:
 
         if (nodeDom.hasChildNodes()):
             childdict={}
-            for attribute in nodeDom.attributes.keys():
-                childdict = self.appendToDictOrCreate(childdict, attribute, nodeDom.getAttribute(attribute))
-
             for child in nodeDom.childNodes[:-1]:
                 if (child.nodeValue):
                     siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
@@ -105,8 +103,15 @@ class Rspec:
                 siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
             else:
                 siblingdict = self.toGenDict(child, siblingdict, childdict, curNodeName)
+
+            # Keep the attributes separate from text nodes
+            attrdict={}
+            for attribute in nodeDom.attributes.keys():
+                attrdict = self.appendToDictOrCreate(attrdict, attribute, nodeDom.getAttribute(attribute))
+            if (attrdict):
+                self.appendToDictOrCreate(siblingdict, curNodeName, attrdict)
         else:
-            siblingdict[curNodeName]=[]
+            self.appendToDictOrCreate(siblingdict, curNodeName, [])
             
         if (parentdict is not None):
             parentdict = self.appendToDictOrCreate(parentdict, parent, siblingdict)
