@@ -91,6 +91,9 @@ class Rspec:
 
         if (nodeDom.hasChildNodes()):
             childdict={}
+            for attribute in nodeDom.attributes.keys():
+                siblingdict = self.appendToDictOrCreate(siblingdict, attribute, nodeDom.getAttribute(attribute))
+
             for child in nodeDom.childNodes[:-1]:
                 if (child.nodeValue):
                     siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
@@ -102,10 +105,9 @@ class Rspec:
                 siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
             else:
                 siblingdict = self.toGenDict(child, siblingdict, childdict, curNodeName)
-
-            for attribute in nodeDom.attributes.keys():
-                siblingdict = self.appendToDictOrCreate(siblingdict, attribute, nodeDom.getAttribute(attribute))
-
+        else:
+            siblingdict[curNodeName]=[]
+            
         if (parentdict is not None):
             parentdict = self.appendToDictOrCreate(parentdict, parent, siblingdict)
             return parentdict
