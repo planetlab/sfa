@@ -52,8 +52,10 @@ Import: importing person plc.pl.root
 Import: creating table for authority plc.pl
 NOTICE:  table "sfa$plc$pl" does not exist, skipping
 
-(c) # service sfa start
+(c)  run sfa-config-tty again and select q to come out of the config command
+This will initialize /etc/sfa/authorities/server.key from /etc/sfa/authorities/plc/plc.pkey 
 
+(d) # service sfa start
 This will start Registry, Slice Manager and Aggregate Manager. Your ps command output would look like:
 
 # ps -ef | grep python
