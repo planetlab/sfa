@@ -91,6 +91,8 @@ class Rspec:
 
         if (nodeDom.hasChildNodes()):
             childdict={}
+            for attribute in nodeDom.attributes.keys():
+                childdict = self.appendToDictOrCreate(childdict, attribute, nodeDom.getAttribute(attribute))
             for child in nodeDom.childNodes[:-1]:
                 if (child.nodeValue):
                     siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
@@ -100,17 +102,16 @@ class Rspec:
             child = nodeDom.childNodes[-1]
             if (child.nodeValue):
                 siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, child.nodeValue)
+                if (childdict):
+                    siblingdict = self.appendToDictOrCreate(siblingdict, curNodeName, childdict)
             else:
                 siblingdict = self.toDict(child, siblingdict, childdict, curNodeName)
-
-            # Keep the attributes separate from text nodes
-            attrdict={}
-            for attribute in nodeDom.attributes.keys():
-                attrdict = self.appendToDictOrCreate(attrdict, attribute, nodeDom.getAttribute(attribute))
-            if (attrdict):
-                self.appendToDictOrCreate(siblingdict, curNodeName, attrdict)
         else:
-            self.appendToDictOrCreate(siblingdict, curNodeName, [])
+            childdict={}
+            for attribute in nodeDom.attributes.keys():
+                childdict = self.appendToDictOrCreate(childdict, attribute, nodeDom.getAttribute(attribute))
+
+            self.appendToDictOrCreate(siblingdict, curNodeName, childdict)
             
         if (parentdict is not None):
             parentdict = self.appendToDictOrCreate(parentdict, parent, siblingdict)
