@@ -89,5 +89,5 @@ SFA_PLC_DB_USER='pgsqluser'
 SFA_PLC_DB_PASSWORD=''
 
 # Directory internal data gets stored
-# using /etc/sfa until gec5 but /usr/share/sfa would be a more reasonable choice
+# using /etc/sfa until gec5 but /var/lib/sfa would be a more reasonable choice
 SFA_BASE_DIR="/etc/sfa"
