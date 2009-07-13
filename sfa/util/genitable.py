@@ -83,7 +83,6 @@ class GeniTable:
         self.cnx.query(query_str)
 
     def update(self, record):
-fof
         names = record.get_field_names()
         pairs = []
         for name in names:
