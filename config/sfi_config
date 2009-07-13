@@ -1,13 +1,15 @@
 # user-level configuration for sfi
 
 ### hrn of your authority
+# For instance, the hrn of a user at the Princeton site on PlanetLab (PLC)
+# would be plc.princeton.  Likewise if the user was part of the NYU site, the HRN
+# would be plc.nyu
 SFI_AUTH='plc.princeton'
-# or planetlab.us.arizona
 
 ### your user hrn
+# This is your authority.<your user name on PlanetLab>
 SFI_USER='plc.princeton.faiyaza'
-# or planetlab.us.arizona.Baker_Scott 
-# or planetlab.us.arizona.Hartman_John
+#
 
 ### where to find the registry
 SFI_REGISTRY='http://www.planet-lab.org:12345/'
