@@ -321,7 +321,7 @@ class GeniRecord(dict):
             if key not in order:
                 order.append(key)
         for key in order:
-            if key in (self and self.fields):
+            if key in self and key in self.fields:
                 if key in 'gid' and self[key]:
                     gid = GID(string=self[key])
                     print "     %s:" % key
