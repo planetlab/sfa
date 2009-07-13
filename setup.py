@@ -27,6 +27,8 @@ package_dirs = [ 'sfa',
                  'sfa/server',
                  'sfa/trust',
                  'sfa/util', 
+                 'sfa/rspecs',
+                 'sfa/rspecs/aggregates'
                  ]
 data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml', 
                                'config/registries.xml', 
