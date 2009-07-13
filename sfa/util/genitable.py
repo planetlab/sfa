@@ -73,7 +73,7 @@ class GeniTable:
 
     def insert(self, record):
         dont_insert = ['date_created', 'last_updated']
-        fields = [field for field in  record.keys() if field not in dont_insert]  
+        fields = [field for field in  record.fields.keys() if field not in dont_insert]  
         fieldnames = ["key"] + fields
         fieldvals = record.get_field_value_strings(fieldnames)
         query_str = "INSERT INTO " + self.tablename + \
