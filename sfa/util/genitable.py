@@ -74,7 +74,7 @@ class GeniTable:
     def insert(self, record):
         dont_insert = ['date_created', 'last_updated']
         fields = [field for field in  record.fields.keys() if field not in dont_insert]  
-        fieldnames = ["key"] + fields
+        fieldnames = ["key", "pointer"] + fields
         fieldvals = record.get_field_value_strings(fieldnames)
         query_str = "INSERT INTO " + self.tablename + \
                        "(" + ",".join(fieldnames) + ") " + \
@@ -83,6 +83,7 @@ class GeniTable:
         self.cnx.query(query_str)
 
     def update(self, record):
+fof
         names = record.get_field_names()
         pairs = []
         for name in names:
