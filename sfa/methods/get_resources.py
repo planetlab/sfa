@@ -5,8 +5,10 @@ from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
-
+from sfa.util.config import Config
 from sfa.plc.nodes import Nodes
+# RSpecManager_pl is not used. This is just to resolve issues with the dynamic __import__ that comes later.
+import sfa.rspecs.aggregates.rspec_manager_pl
 
 class get_resources(Method):
     """
@@ -29,13 +31,17 @@ class get_resources(Method):
     returns = Parameter(str, "String representatin of an rspec")
     
     def call(self, cred, hrn=None):
-        
-        self.api.auth.check(cred, 'listnodes')
-        nodes = Nodes(self.api)
-        if hrn:
-            rspec = nodes.get_rspec(hrn)
+        sfa_aggregate_type = Config().get_sfa_aggregate_type()=='pl'
+        if (sfa_aggregate_type == 'pl'):
+            self.api.auth.check(cred, 'listnodes')
+            nodes = Nodes(self.api)
+            if hrn:
+                rspec = nodes.get_rspec(hrn)
+            else:
+                nodes.refresh()
+                rspec = nodes['rspec']
         else:
-            nodes.refresh()
-            rspec = nodes['rspec']
+            rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type)
+            rspec = rspec_manager.get_rspec(hrn)
         
         return rspec
