@@ -177,7 +177,7 @@ def get_auth_cred():
    else:
       # bootstrap authority credential from user credential
       user_cred = get_user_cred()
-      auth_cred = registry.get_credential(user_cred, "sa", authority)
+      auth_cred = registry.get_credential(user_cred, "authority", authority)
       if auth_cred:
          auth_cred.save_to_file(file, save_parents=True)
          if verbose:
