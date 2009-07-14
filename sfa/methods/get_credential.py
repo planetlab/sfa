@@ -43,7 +43,7 @@ class get_credential(Method):
             auth_hrn = hrn
         auth_info = self.api.auth.get_auth_info(auth_hrn)
         table = self.api.auth.get_auth_table(auth_hrn)
-        records = table.resolve('*', hrn)
+        records = table.resolve(type, hrn)
         if not records:
             raise RecordNotFound(hrn)
         record = records[0]
