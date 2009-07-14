@@ -141,11 +141,11 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 
         It was copied out from SimpleXMLRPCServer.py and modified to shutdown the socket cleanly.
         """
-        self.api = GeniAPI(peer_cert = self.server.peer_cert, 
+        try:
+            self.api = GeniAPI(peer_cert = self.server.peer_cert, 
                            interface = self.server.interface, 
                            key_file = self.server.key_file, 
                            cert_file = self.server.cert_file)
-        try:
             # get arguments
             request = self.rfile.read(int(self.headers["content-length"]))
             # In previous versions of SimpleXMLRPCServer, _dispatch
