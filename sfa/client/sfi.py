@@ -324,7 +324,7 @@ def create_cmd_parser(command, additional_cmdargs = None):
         parser.add_option("-f", "--format", dest="format", type="choice",
            help="display format (text|xml)",default="text",
            choices=("text","xml"))
-      parser.add_option("-o", "--output", dest="file",
+        parser.add_option("-o", "--output", dest="file",
            help="output XML to file", metavar="FILE", default=None)
    if command in ("delegate"):
       parser.add_option("-u", "--user",
