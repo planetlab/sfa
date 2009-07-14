@@ -309,6 +309,12 @@ def create_cmd_parser(command, additional_cmdargs = None):
 
    parser = OptionParser(usage="sfi [sfi_options] %s [options] %s" \
       % (command, cmdargs[command]))
+
+   # This option is for all commands
+   parser.add_option("-x", "--dumpformat", dest="dumpformat", type="choice",
+           help="dump format (text|xml)",default="text",
+           choices=("text","xml"))
+
    if command in ("resources"):
       parser.add_option("-f", "--format", dest="format",type="choice",
            help="display format (dns|ip|rspec)",default="rspec",
@@ -439,7 +445,11 @@ def show(opts, args):
            record = AuthorityRecord(dict = record)
        else:
            record = GeniRecord(dict = record)
-       record.dump() 
+
+       if (opts.dumpformat=="text"):
+            record.dump() 
+       else:
+            print record.save_to_string()
    
    if opts.file:
        save_records_to_file(opts.file, records)
