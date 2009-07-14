@@ -314,14 +314,17 @@ def create_cmd_parser(command, additional_cmdargs = None):
       parser.add_option("-f", "--format", dest="format",type="choice",
            help="display format (dns|ip|xml)",default="xml",
            choices=("dns","ip","xml"))
-      parser.add_option("-o", "--output", dest="file",
-           help="output XML to file", metavar="FILE", default=None)
-
+      
    if command in ("list", "show", "remove"):
       parser.add_option("-t", "--type", dest="type",type="choice",
            help="type filter (user|slice|sa|ma|node|aggregate)",
            choices=("user","slice","sa","ma","node","aggregate", "all"),
            default="all")
+      
+   if command in ("resources","show"):
+      parser.add_option("-o", "--output", dest="file",
+           help="output XML to file", metavar="FILE", default=None)
+
    if command in ("show", "list"):
         parser.add_option("-f", "--format", dest="format", type="choice",
            help="display format (text|xml)",default="text",
