@@ -321,7 +321,7 @@ def create_cmd_parser(command, additional_cmdargs = None):
            choices=("user","slice","sa","ma","node","aggregate", "all"),
            default="all")
       
-   if command in ("resources","show"):
+   if command in ("resources","show", "list"):
       parser.add_option("-o", "--output", dest="file",
            help="output XML to file", metavar="FILE", default=None)
 
@@ -590,7 +590,7 @@ def slices(opts, args):
 # show rspec for named slice
 def resources(opts, args):
    global slicemgr
-   if args: 
+   if args:
        slice_cred = get_slice_cred(args[0])
        result = slicemgr.get_resources(slice_cred, args[0])
    else:
