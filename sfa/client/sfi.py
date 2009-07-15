@@ -453,10 +453,10 @@ class Sfi:
        dcred.sign()
     
        if opts.delegate_user:
-           dest_fn = os.path.join(self.sfi_dir, self.get_leaf(delegee_hrn) + "_" 
+           dest_fn = os.path.join(self.options.sfi_dir, self.get_leaf(delegee_hrn) + "_" 
                                   + self.get_leaf(object_hrn) + ".cred")
        elif opts.delegate_slice:
-           dest_fn = os.path_join(self.sfi_dir, self.get_leaf(delegee_hrn) + "_slice_" 
+           dest_fn = os.path_join(self.options.sfi_dir, self.get_leaf(delegee_hrn) + "_slice_" 
                                   + self.get_leaf(object_hrn) + ".cred")
     
        dcred.save_to_file(dest_fn, save_parents = True)
@@ -606,7 +606,7 @@ class Sfi:
     
     def save_rspec_to_file(self,rspec, filename):
        if not filename.startswith(os.sep):
-           filename = self.sfi_dir + filename
+           filename = self.options.sfi_dir + filename
        if not filename.endswith(".rspec"):
            filename = filename + ".rspec"
     
@@ -646,7 +646,7 @@ class Sfi:
     
     def save_record_to_file(self,filename, record):
        if not filename.startswith(os.sep):
-           filename = self.sfi_dir + filename
+           filename = self.options.sfi_dir + filename
        str = record.save_to_string()
        file(filename, "w").write(str)
        return
