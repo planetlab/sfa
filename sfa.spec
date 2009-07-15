@@ -2,7 +2,7 @@
 
 %define name sfa
 %define version 0.8
-%define taglevel 4
+%define taglevel 5
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -94,6 +94,11 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Wed Jul 15 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-5
+- snapshot july 15 - has gone through superficial manual testing
+- hopefully a good basis for gec5 demo
+- multi-dir sfi client tested as well
+
 * Wed Jul 08 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-4
 - rename geniwrapper.spec into sfa.spec
 
