@@ -6,14 +6,13 @@
 ### $Id$
 ### $URL$
 
-import xmlrpclib
+import os, time
 from types import *
-import textwrap
-import os
-import time
-import pprint
-
 from types import StringTypes
+import traceback
+import textwrap
+import xmlrpclib
+
 
 from sfa.util.faults import * 
 from sfa.util.parameter import Parameter, Mixed, python_type, xmlrpc_type
@@ -107,9 +106,7 @@ class Method (object):
             runtime = time.time() - start
 	    
             if self.api.config.SFA_API_DEBUG:
-                # XX print to some log file
-                #print >> log, "Some debugging output"              
-                pass 
+                traceback.print_exc()
             raise fault
 
 
