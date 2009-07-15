@@ -33,13 +33,13 @@ class create_slice(Method):
     
     def call(self, cred, hrn, rspec):
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
+        self.api.auth.check(cred, 'createslice')
         if (sfa_aggregate_type == 'pl'):
-            self.api.auth.check(cred, 'createslice')
             slices = Slices(self.api)
             slices.create_slice(hrn, rspec)    
         else:
             # To clean up after July 21 - SB    
             rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type)
-            rspec = rspec_manager.create_slice(hrn, rspec)
+            rspec = rspec_manager.create_slice(self.api, hrn, rspec)
         
         return 1 

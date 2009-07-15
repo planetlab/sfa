@@ -32,8 +32,9 @@ class get_resources(Method):
     
     def call(self, cred, hrn=None):
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
+
+        self.api.auth.check(cred, 'listnodes')
         if (sfa_aggregate_type == 'pl'):
-            self.api.auth.check(cred, 'listnodes')
             nodes = Nodes(self.api)
             if hrn:
                 rspec = nodes.get_rspec(hrn)
