@@ -6,7 +6,6 @@ SFA_VINI_DEFAULT_RSPEC = '/etc/sfa/vini.rspec'
 
 """
 Copied from create_slice_aggregate() in sfa.plc.slices.  
-I could even call that directly.
 """
 def create_slice_vini_aggregate(api, hrn, nodes):    
         # Get the slice record from geni
@@ -108,10 +107,20 @@ def create_slice_vini_aggregate(api, hrn, nodes):
         return 1
 
 
-def get_rspec(hrn):
+def get_rspec(api, hrn):
     rspec = None
     
     if (hrn):
+        # Convert HRN to slice name
+        # Get SliceTags for the slice
+
+        # Construct LinkSpecs from the topo_rspec SliceTags
+        # The first field is the NodeId of the remote node.
+        # So the endpoints are the SliceTag node and the remote node.
+
+        # How to:
+        # - avoid duplicates?
+        # - verify both ends of the link?
         pass
     else:
         # Return canned response for now...
