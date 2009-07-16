@@ -88,7 +88,7 @@ class Nodes(SimpleStorage):
         self.update(node_details)
         self.write()       
  
-    def refresh_nodes_smgr(self):
+    def get_remote_resources(self, hrn = None):
         # convert and threshold to ints
         if self.has_key('timestamp') and self['timestamp']:
             hr_timestamp = self['timestamp']
@@ -114,7 +114,7 @@ class Nodes(SimpleStorage):
         for aggregate in aggregates:
             try:
                 # get the rspec from the aggregate
-                agg_rspec = aggregates[aggregate].get_resources(credential)
+                agg_rspec = aggregates[aggregate].get_resources(credential, hrn)
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
                 networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
@@ -129,7 +129,11 @@ class Nodes(SimpleStorage):
         resourceDict = {'Rspec': resources}
         # convert rspec dict to xml
         rspec.parseDict(resourceDict)
+        return rspec
 
+    def refresh_node_smgr(self):
+
+        rspec = self.get_remote_resources()        
         # filter according to policy
         blist = self.policy['node_blacklist']
         wlist = self.policy['node_whitelist']    
@@ -149,8 +153,29 @@ class Nodes(SimpleStorage):
         self.update(nodedict)
         self.write()
 
-
     def get_rspec(self, hrn = None):
+
+        if self.api.interface in ['slicemgr']:
+            return self.get_rspec_smgr(hrn)
+        elif self.api.interface in ['aggregate']:
+            return self.get_rspec_aggregate(hrn)     
+
+    def get_rspec_smgr(self, hrn = None):
+        aggregates = Aggregates(self.api)
+        credential = self.api.getCredential()
+        rspecs = {}
+        
+        # send the request to all known aggregates
+        for aggregate in aggregates:
+            try:
+                rspec = aggregates[aggregate].get_resources(credential, hrn)
+                tmp_rspec = Rspec()
+                tmp_rspec.parseString(rspec)
+            except:
+                print >> log, "Error calling get resources at aggregate %(aggregate)s" % locals()
+
+
+    def get_rspec_aggregate(self, hrn = None):
         """
         Get resource information from PLC
         """
