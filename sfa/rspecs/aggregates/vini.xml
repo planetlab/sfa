@@ -1,4 +1,4 @@
-<Rspec name="max" targetNamespace="http://www.vini-veritas.net/sfa/rspec/vinispec.rspec"
+<Rspec name="vini" targetNamespace="http://www.vini-veritas.net/sfa/rspec/vinispec.rspec"
                   xmlns:tns="http://www.vini-veritas.net/sfa/rspec/vinispec.rspec"
                   xmlns="http://www.planet-lab.org/sfa/rspec/">
   <Capacity>
