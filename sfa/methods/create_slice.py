@@ -7,6 +7,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.plc.slices import Slices
+from sfa.util.config import Config
 # RSpecManager_pl is not used. This is just to resolve issues with the dynamic __import__ that comes later.
 import sfa.rspecs.aggregates.rspec_manager_pl
 

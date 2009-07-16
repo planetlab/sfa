@@ -18,8 +18,7 @@ def link_endpoints(links):
     nodes=[]
     for l in links:
         nodes.extend(topology[l])
-    return l
-
+    return nodes
 
 def lock_state_file():
     # Noop for demo
@@ -150,15 +149,16 @@ def bootstrap_slice(api, hrn, added_nodes, deleted_nodes):
 
         return 1
 
-def alloc_nodes(hrn, links_to_add, links_to_delete):
+def alloc_links(api, links_to_add, links_to_drop, foo):
+
+def alloc_nodes(api,hrn, links_to_add, links_to_delete):
     
     nodes_to_add = link_endpoints(links_to_add)
     nodes_to_delete = link_endpoints(links_to_delete)
 
-    #bootstrap_slice(api, hrn, nodes_to_add, nodes_to_delete)
+    pdb.set_trace()
+    bootstrap_slice(api, hrn, nodes_to_add, nodes_to_delete)
 
-    for r in requested_allocations:
-        print "Requesting "+r
 
 def get_rspec(hrn):
     # Eg. config line:
