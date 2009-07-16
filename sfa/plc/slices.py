@@ -109,21 +109,37 @@ class Slices(SimpleStorage):
             aggregates[aggregate].delete_slice(credential, hrn)
 
     def create_slice(self, hrn, rspec):
-        # check our slice policy before we procede
+        
+	# check our slice policy before we procede
         whitelist = self.policy['slice_whitelist']     
         blacklist = self.policy['slice_blacklist']
-        
+       
         if whitelist and hrn not in whitelist or \
            blacklist and hrn in blacklist:
             policy_file = self.policy.policy_file
             print >> log, "Slice %(hrn)s not allowed by policy %(policy_file)s" % locals()
             return 1
+
+	
         if self.api.interface in ['aggregate']:     
             self.create_slice_aggregate(hrn, rspec)
         elif self.api.interface in ['slicemgr']:
             self.create_slice_smgr(hrn, rspec)
 
-    def create_slice_aggregate(self, hrn, rspec, peer = None):    
+    def create_slice_aggregate(self, hrn, rspec):
+	# Becaues of myplc federation,  we first need to determine if this
+	# slice belongs to out local plc or a myplc peer. We will assume it 
+	# is a local site, unless we find out otherwise  
+	peer = None
+	# get this slice's authority (site)
+        slice_authority = get_authority(hrn)
+        # get this site's authority (sfa root authority or sub authority)
+        site_authority = get_authority(slice_authority)
+        # check if we are already peered with this site_authority at ple, if so
+        peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
+        for peer_record in peers:
+            if site_authority in peer_record.values():
+                peer = peer_record['shortname']		  			    
         spec = Rspec(rspec)
         # Get the slice record from geni
         slice = {}
@@ -167,13 +183,14 @@ class Slices(SimpleStorage):
             slice_fields = {}
             slice_keys = ['name', 'url', 'description']
             for key in slice_keys:
-                if key in slice and slice[key]:
-                    slice_fields[key] = slice[key]
+                if key in slice_record and slice_record[key]:
+                    slice_fields[key] = slice_record[key]
 
             # add the slice  
             slice_id = self.api.plshell.AddSlice(self.api.plauth, slice_fields)
             slice = slice_fields
             #this belongs to a peer
+	
             if peer:
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice_id, peer, slice_record['pointer'])
             slice['node_ids'] = 0
@@ -277,21 +294,12 @@ class Slices(SimpleStorage):
 
         # notify the aggregates
         for aggregate in rspecs.keys():
-            # we are already federated with this aggregate using plc federation, 
-            # we must pass our peer name to that aggregate so they can call BindObjectToPeer
-            local_peer_name = None
-            peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peername', 'shortname', 'hrn_root'])
-            for peer in peers:
-                names = peer.values()
-                if aggregate in names:
-                    local_peer_name = self.api.hrn
-                          
             try:
                 # send the whloe rspec to the local aggregate
                 if aggregate in [self.api.hrn]:
-                    aggregates[aggregate].create_slice(credential, hrn, rspec, local_peer_name)
+                    aggregates[aggregate].create_slice(credential, hrn, rspec)
                 else:
-                    aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate], local_peer_name)
+                    aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate])
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
         return 1
