@@ -83,7 +83,9 @@ class GeniTable:
         self.cnx.query(query_str)
 
     def update(self, record):
+        dont_update = ['date_created', 'last_updated']
         names = record.get_field_names()
+        names = [name for name in names if name not in dont_update]
         pairs = []
         for name in names:
            val = record.get_field_value_string(name)
