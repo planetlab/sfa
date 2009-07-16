@@ -122,8 +122,8 @@ class Slices(SimpleStorage):
             self.create_slice_aggregate(hrn, rspec)
         elif self.api.interface in ['slicemgr']:
             self.create_slice_smgr(hrn, rspec)
- 
-    def create_slice_aggregate(self, hrn, rspec):    
+
+    def create_slice_aggregate(self, hrn, rspec, peer = None):    
         spec = Rspec(rspec)
         # Get the slice record from geni
         slice = {}
@@ -133,8 +133,8 @@ class Slices(SimpleStorage):
         records = registry.resolve(credential, hrn)
         for record in records:
             if record.get_type() in ['slice']:
-                slice = record.as_dict()
-        if not slice:
+                slice_record = record.as_dict()
+        if not slice_record:
             raise RecordNotFound(hrn)   
 
         # Make sure slice exists at plc, if it doesnt add it
@@ -155,18 +155,27 @@ class Slices(SimpleStorage):
                 site = site_record.as_dict()
                 
                  # add the site
-                site.pop('site_id')
+                remote_site_id = site.pop('site_id')
                 site_id = self.api.plshell.AddSite(self.api.plauth, site)
+                # this belongs to a peer 
+                if peer:
+                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
             else:
                 site = sites[0]
             
+            # create slice object
             slice_fields = {}
             slice_keys = ['name', 'url', 'description']
             for key in slice_keys:
                 if key in slice and slice[key]:
-                    slice_fields[key] = slice[key]  
-            self.api.plshell.AddSlice(self.api.plauth, slice_fields)
+                    slice_fields[key] = slice[key]
+
+            # add the slice  
+            slice_id = self.api.plshell.AddSlice(self.api.plauth, slice_fields)
             slice = slice_fields
+            #this belongs to a peer
+            if peer:
+                self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice_id, peer, slice_record['pointer'])
             slice['node_ids'] = 0
         else:
             slice = slices[0]    
@@ -188,17 +197,21 @@ class Slices(SimpleStorage):
             if not persons:
                 person_id=self.api.plshell.AddPerson(self.api.plauth, person_dict)
 
-		# The line below enables the user account on the remote aggregate soon after it is created.
-		# without this the user key is not transfered to the slice (as GetSlivers returns key of only enabled users),
-		# which prevents the user from login to the slice. We may do additional checks before enabling the user.
+                # The line below enables the user account on the remote 
+                # aggregate soon after it is created. without this the 
+                # user key is not transfered to the slice (as GetSlivers 
+                # returns key of only enabled users), which prevents the 
+                # user from login to the slice. We may do additional checks 
+                # before enabling the user.
 
-		self.api.plshell.UpdatePerson(self.api.plauth, person_id, {'enabled' : True})
+                self.api.plshell.UpdatePerson(self.api.plauth, person_id, {'enabled' : True})
+                if peer:
+                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
                 key_ids = []
             else:
                 key_ids = persons[0]['key_ids']
 
             self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)        
-
             # Get this users local keys
             keylist = self.api.plshell.GetKeys(self.api.plauth, key_ids, ['key'])
             keys = [key['key'] for key in keylist]
@@ -207,7 +220,12 @@ class Slices(SimpleStorage):
             for personkey in person_dict['keys']:
                 if personkey not in keys:
                     key = {'key_type': 'ssh', 'key': personkey}
-                    self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
+                    if peer:
+                        # XX Need to get the key_id from remote registry somehow 
+                        #self.api.plshell.BindObjectToPeer(self.api.plauth, 'key', None, peer, key_id)   
+                        pass
+                    else:
+                        self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
 
         # find out where this slice is currently running
         nodelist = self.api.plshell.GetNodes(self.api.plauth, slice['node_ids'], ['hostname'])
@@ -259,8 +277,21 @@ class Slices(SimpleStorage):
 
         # notify the aggregates
         for aggregate in rspecs.keys():
+            # we are already federated with this aggregate using plc federation, 
+            # we must pass our peer name to that aggregate so they can call BindObjectToPeer
+            local_peer_name = None
+            peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peername', 'shortname', 'hrn_root'])
+            for peer in peers:
+                names = peer.values()
+                if aggregate in names:
+                    local_peer_name = self.api.hrn
+                          
             try:
-                aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate])
+                # send the whloe rspec to the local aggregate
+                if aggregate in [self.api.hrn]:
+                    aggregates[aggregate].create_slice(credential, hrn, rspec, local_peer_name)
+                else:
+                    aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate], local_peer_name)
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
         return 1
