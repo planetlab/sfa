@@ -44,6 +44,6 @@ class get_resources(Method):
         else:
             # To clean up after July 21 - SB    
             rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
-            rspec = rspec_manager.get_rspec(hrn)
+            rspec = rspec_manager.get_rspec(self.api, hrn)
         
         return rspec
