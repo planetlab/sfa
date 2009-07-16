@@ -40,7 +40,7 @@ class create_slice(Method):
             slices.create_slice(hrn, rspec)    
         else:
             # To clean up after July 21 - SB    
-            rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type)
+            rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
             rspec = rspec_manager.create_slice(self.api, hrn, rspec)
         
         return 1 
