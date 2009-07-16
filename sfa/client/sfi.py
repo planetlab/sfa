@@ -467,7 +467,10 @@ class Sfi:
     #   - have to first retrieve the record to be removed
     def remove(self,opts, args):
        auth_cred = self.get_auth_cred()
-       return self.registry.remove(auth_cred, opts.type, args[0])
+       type = opts.type 
+       if type in ['all']:
+           type = '*'                   
+       return self.registry.remove(auth_cred, type, args[0])
     
     # add named registry record
     def add(self,opts, args):
