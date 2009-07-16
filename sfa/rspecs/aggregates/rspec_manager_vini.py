@@ -1,4 +1,6 @@
+from sfa.util.faults import *
 from sfa.util.rspec import Rspec
+from sfa.server.registry import Registries
 import sys
 import pdb
 
@@ -126,12 +128,16 @@ def get_rspec(api, hrn):
         # Return canned response for now...
         r = Rspec()
         r.parseFile(SFA_VINI_DEFAULT_RSPEC)
-        rspec = r.toGenDict()
+        rspec = r.toxml()
 
     return rspec
 
 
-def create_slice(api, hrn, rspec):
+def create_slice(api, hrn, xml):
+    r = Rspec()
+    r.parseString(xml)
+    rspec = r.toGenDict()
+
     # Check request against current allocations
     # Request OK
 
