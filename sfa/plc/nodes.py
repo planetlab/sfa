@@ -131,7 +131,7 @@ class Nodes(SimpleStorage):
         rspec.parseDict(resourceDict)
         return rspec
 
-    def refresh_node_smgr(self):
+    def refresh_nodes_smgr(self):
 
         rspec = self.get_remote_resources()        
         # filter according to policy
@@ -161,19 +161,9 @@ class Nodes(SimpleStorage):
             return self.get_rspec_aggregate(hrn)     
 
     def get_rspec_smgr(self, hrn = None):
-        aggregates = Aggregates(self.api)
-        credential = self.api.getCredential()
-        rspecs = {}
         
-        # send the request to all known aggregates
-        for aggregate in aggregates:
-            try:
-                rspec = aggregates[aggregate].get_resources(credential, hrn)
-                tmp_rspec = Rspec()
-                tmp_rspec.parseString(rspec)
-            except:
-                print >> log, "Error calling get resources at aggregate %(aggregate)s" % locals()
-
+	rspec = self.get_remote_resources(hrn)
+	return rspec.toxml()
 
     def get_rspec_aggregate(self, hrn = None):
         """
