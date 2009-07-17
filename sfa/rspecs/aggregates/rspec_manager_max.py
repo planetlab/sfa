@@ -12,24 +12,73 @@ from sfa.util.policy import Policy
 from sfa.util.debug import log
 from sfa.server.aggregate import Aggregates
 from sfa.server.registry import Registries
+from sfa.util.faults import *
+
+import xml.dom.minidom
 
 SFA_MAX_CONF_FILE = '/etc/sfa/max_allocations'
 SFA_MAX_DEFAULT_RSPEC = '/etc/sfa/max_physical.xml'
 
-# Topology 
+topology = {}
 
-topology = {'pl23':('planetlab2.dragon.maxgigapop.net','planetlab3.dragon.maxgigapop.net'),
-            'pl24':('planetlab2.dragon.maxgigapop.net','planetlab4.dragon.maxgigapop.net'),
-            'pl25':('planetlab2.dragon.maxgigapop.net','planetlab5.dragon.maxgigapop.net'),
-            'pl34':('planetlab3.dragon.maxgigapop.net','planetlab4.dragon.maxgigapop.net'),
-            'pl35':('planetlab3.dragon.maxgigapop.net','planetlab5.dragon.maxgigapop.net'),
-            'pl45':('planetlab4.dragon.maxgigapop.net','planetlab5.dragon.maxgigapop.net')
-            }
+class GeniOutOfResource(GeniFault):
+    def __init__(self, interface):
+        faultString = "Interface " + interface + " not available"
+        GeniFault.__init__(self, 100, faultString, '')
 
-def link_endpoints(links):
+class GeniNoPairRspec(GeniFault):
+    def __init__(self, interface, interface2):
+        faultString = "Interface " + interface + " should be paired with " + interface2
+        GeniFault.__init__(self, 100, faultString, '')
+
+# Returns a mapping from interfaces to the nodes they lie on and their peer interfaces
+# i -> node,i_peer
+
+def get_interface_map():
+    r = Rspec()
+    r.parseFile(SFA_MAX_DEFAULT_RSPEC)
+    rspec = r.toDict()
+    capacity = rspec['rspec']['capacity']
+    netspec = capacity[0]['netspec'][0]
+    linkdefs = {}
+    for n in netspec['nodespec']:
+        ifspecs = n['ifspec']
+        nodename = n['node']
+        for i in ifspecs:
+            ifname = i['name']
+            linkid = i['linkid']
+
+            if (linkdefs.has_key(linkid)):
+                linkdefs[linkid].extend([(nodename,ifname)])
+            else:
+                linkdefs[linkid]=[(nodename,ifname)]
+    
+    # topology maps interface x interface -> link,node1,node2
+    topology={}
+
+    for k in linkdefs.keys():
+        (n1,i1) = linkdefs[k][0]
+        (n2,i2) = linkdefs[k][1]
+
+        topology[i1] = (n1, i2)
+        topology[i2] = (n2, i1)
+        
+
+    return topology    
+
+    
+
+#def allocations_to_rspec(allocations):
+#    rspec = xml.minidom.parseFile(SFA_MAX_DEFAULT_RSPEC)
+#    req = rspec.firstChild.appendChild(rspec.createElement("request"))
+#    for a in allocations:
+#        (link,
+        
+    
+def if_endpoints(ifs):
     nodes=[]
-    for l in links:
-        nodes.extend(topology[l])
+    for l in ifs:
+        nodes.extend([topology[l][0]])
     return nodes
 
 def lock_state_file():
@@ -45,17 +94,19 @@ def read_alloc_dict():
     rows = open(SFA_MAX_CONF_FILE).read().split('\n')
     for r in rows:
         columns = r.split(' ')
-        if (len(columns)>2):
+        if (len(columns)==2):
             hrn = columns[0]
             allocs = columns[1].split(',')
-            alloc_dict[hrn]=allocs
+            ipallocs = map(lambda alloc:alloc.split('/'), allocs)
+            alloc_dict[hrn]=ipallocs
     return alloc_dict
 
 def commit_alloc_dict(d):
     f = open(SFA_MAX_CONF_FILE, 'w')
     for hrn in d.keys():
         columns = d[hrn]
-        row = hrn+' '+','.join(columns)+'\n'
+        ipcolumns = map(lambda x:"/".join(x), columns)
+        row = hrn+' '+','.join(ipcolumns)+'\n'
         f.write(row)
     f.close()
 
@@ -67,22 +118,23 @@ def collapse_alloc_dict(d):
 
 
 def alloc_links(api, links_to_add, links_to_drop, foo):
-    pdb.set_trace()
-    for l in links_to_add:
-        (node1,ip1,node2,ip2) = l
-        api.plshell.AddSliceTag(api.plauth, [slicename], ['node_ids'])
+    #for l in links_to_add:
+        #(node1,ip1,node2,ip2) = l
+        #api.plshell.AddSliceTag(api.plauth, [slicename], ['node_ids'])
     return True
 
-def alloc_nodes(api,hrn, requested_links):
+def alloc_nodes(api,hrn, requested_ifs):
     
-    requested_nodes = link_endpoints(requested_links)
+    requested_nodes = if_endpoints(requested_ifs)
 
-    create_slice_max_aggregate(api, hrn, requested_nodes)
+    #create_slice_max_aggregate(api, hrn, requested_nodes)
 
 # Taken from slices.py
 
 def create_slice_max_aggregate(api, hrn, nodes):
     # Get the slice record from geni
+    global topology
+    topology = get_interface_map()
     slice = {}
     registries = Registries(api)
     registry = registries[api.hrn]
@@ -194,7 +246,7 @@ def get_rspec(api, hrn):
 
     allocations = read_alloc_dict()
     if (hrn):
-        ret_rspec = rspec(allocations[hrn])
+        ret_rspec = allocations_to_rspec(allocations[hrn])
     else:
         ret_rspec = open(SFA_MAX_DEFAULT_RSPEC).read()
 
@@ -202,9 +254,11 @@ def get_rspec(api, hrn):
 
 
 def create_slice(api, hrn, rspec_xml):
+    global topology
+    topology = get_interface_map()
+
     # Check if everything in rspec is either allocated by hrn
     # or not allocated at all.
-
     r = Rspec()
     r.parseString(rspec_xml)
     rspec = r.toDict()
@@ -220,9 +274,16 @@ def create_slice(api, hrn, rspec_xml):
         current_hrn_allocations=[]
 
     # Check request against current allocations
-    for a in requested_allocations:
-        if (a not in current_hrn_allocations and a in current_allocations):
-            return False
+    requested_interfaces = map(lambda(elt):elt[0], requested_allocations)
+    current_interfaces = map(lambda(elt):elt[0], current_allocations)
+    current_hrn_interfaces = map(lambda(elt):elt[0], current_hrn_allocations)
+
+    pdb.set_trace()
+    for a in requested_interfaces:
+        if (a not in current_hrn_interfaces and a in current_interfaces):
+            raise GeniOutOfResource(a)
+        if (topology[a][1] not in requested_interfaces):
+            raise GeniNoPairRspec(a,topology[a][1])
     # Request OK
 
     # Allocations to delete
@@ -232,7 +293,7 @@ def create_slice(api, hrn, rspec_xml):
             allocations_to_delete.extend([a])
 
     # Ok, let's do our thing
-    alloc_nodes(api, hrn, requested_allocations)
+    alloc_nodes(api, hrn, requested_interfaces)
     alloc_links(api, hrn, requested_allocations, allocations_to_delete)
     allocations[hrn] = requested_allocations
     commit_alloc_dict(allocations)
@@ -242,23 +303,21 @@ def create_slice(api, hrn, rspec_xml):
     return True
 
 def rspec_to_allocations(rspec):
-    links = []
+    ifs = []
     try:
-        linkspecs = rspec['rspec']['request'][0]['netspec'][0]['linkspec']
-        for l in linkspecs:
-            links.extend([l['name'].replace('tns:','')])
-        
+        ifspecs = rspec['rspec']['request'][0]['ifspec']
+        for l in ifspecs:
+            ifs.extend([(l['name'].replace('tns:',''),l['ip'])])
     except KeyError:
         # Bad Rspec
         pass
-    return links
+    return ifs
 
 def main():
+    t = get_interface_map()
     r = Rspec()
     rspec_xml = open(sys.argv[1]).read()
-    r.parseString(rspec_xml)
-    rspec = r.toDict()
-    create_slice(None,'plc',rspec)
+    create_slice(None,'foo',rspec_xml)
     
 if __name__ == "__main__":
     main()

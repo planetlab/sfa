@@ -30,9 +30,7 @@
         </netspec>
     </capacity>
     <request>
-        <netspec name="default_mesh">
-            <linkspec name="tns:pl23"/>
-            <linkspec name="tns:pl34"/>
-        </netspec>
+        <ifspec name="tns:pl23" ip="10.0.0.1"/>
+        <ifspec name="tns:pl32" ip="10.0.0.2"/>
     </request>
 </rspec>
