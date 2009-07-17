@@ -1,4 +1,5 @@
 from sfa.util.faults import *
+from sfa.util.misc import *
 from sfa.util.rspec import Rspec
 from sfa.server.registry import Registries
 import sys
