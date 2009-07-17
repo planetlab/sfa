@@ -70,7 +70,6 @@ def get_interface_map():
 def allocations_to_rspec(allocations):
     rspec = xml.dom.minidom.parse(SFA_MAX_DEFAULT_RSPEC)
     req = rspec.firstChild.appendChild(rspec.createElement("request"))
-    pdb.set_trace()
     for (iname,ip) in allocations:
         ifspec = req.appendChild(rspec.createElement("ifspec"))
         ifspec.setAttribute("name","tns:"+iname)
@@ -282,7 +281,6 @@ def create_slice(api, hrn, rspec_xml):
     current_interfaces = map(lambda(elt):elt[0], current_allocations)
     current_hrn_interfaces = map(lambda(elt):elt[0], current_hrn_allocations)
 
-    pdb.set_trace()
     for a in requested_interfaces:
         if (a not in current_hrn_interfaces and a in current_interfaces):
             raise GeniOutOfResource(a)
