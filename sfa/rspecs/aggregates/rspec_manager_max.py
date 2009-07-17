@@ -18,6 +18,7 @@ import xml.dom.minidom
 
 SFA_MAX_CONF_FILE = '/etc/sfa/max_allocations'
 SFA_MAX_DEFAULT_RSPEC = '/etc/sfa/max_physical.xml'
+SFA_MAX_CANNED_RSPEC = '/etc/sfa/max_physical_canned.xml'
 
 topology = {}
 
@@ -251,7 +252,7 @@ def get_rspec(api, hrn):
     if (hrn and allocations.has_key(hrn)):
             ret_rspec = allocations_to_rspec(allocations[hrn])
     else:
-        ret_rspec = open(SFA_MAX_DEFAULT_RSPEC).read()
+        ret_rspec = open(SFA_MAX_CANNED_RSPEC).read()
 
     return (ret_rspec)
 

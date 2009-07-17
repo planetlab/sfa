@@ -1,6 +1,5 @@
-<rspec name="max" targetNamespace="http://www.maxgigapop.net/sfa/rspec/vlanspec.rspec"
-                  xmlns:tns="http://www.maxgigapop.net/sfa/rspec/vlanspec.rspec"
-                  xmlns="http://www.planet-lab.org/sfa/rspec/">
+<rspec name="max" 
+    xmlns="http://www.maxgigapop.net/sfa/rspec/07/09">
     <capacity>
         <netspec name="predefined_physical_topology">
             <nodespec name="planetlab2">
