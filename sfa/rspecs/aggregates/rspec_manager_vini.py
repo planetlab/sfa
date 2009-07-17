@@ -2,6 +2,7 @@ from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.rspec import Rspec
 from sfa.server.registry import Registries
+from sfa.plc.nodes import *
 import sys
 import pdb
 
@@ -120,6 +121,12 @@ def get_rspec(api, hrn):
     rspec = None
     
     if (hrn):
+        # XX rspec is expected to be xml, not None.
+        # call the default sfa.plc.nodes.get_rspec() methods
+        # until things are complete here
+        nodes = Nodes(api)	
+        rspec = nodes.get_rspec(hrn)     
+		
         # Convert HRN to slice name
         # Get SliceTags for the slice
 
