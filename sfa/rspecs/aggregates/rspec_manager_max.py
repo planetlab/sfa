@@ -61,11 +61,11 @@ def alloc_links(api, links_to_add, links_to_drop, foo):
 
 def alloc_nodes(api,hrn, requested_links, links_to_delete):
     
-    nodes_to_add = link_endpoints(links_to_add)
+    requested_nodes = link_endpoints(requested_links)
     nodes_to_delete = link_endpoints(links_to_delete)
 
     pdb.set_trace()
-    create_slice_max_aggregate(api, hrn, nodes_to_add, nodes_to_delete)
+    create_slice_max_aggregate(api, hrn, requested_nodes, nodes_to_delete)
 
 # Taken from slices.py
 
