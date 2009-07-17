@@ -189,9 +189,13 @@ def get_rspec(hrn):
     return (allocations_to_rspec_dict(current_allocations))
 
 
-def create_slice(api, hrn, rspec):
+def create_slice(api, hrn, rspec_xml):
     # Check if everything in rspec is either allocated by hrn
     # or not allocated at all.
+
+    r = Rspec()
+    r.parseString(rspec_xml)
+    rspec = r.toDict()
 
     lock_state_file()
 
