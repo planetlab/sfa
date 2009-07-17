@@ -12,7 +12,9 @@ from sfa.util.policy import Policy
 from sfa.util.debug import log
 from sfa.server.aggregate import Aggregates
 from sfa.server.registry import Registries
+
 SFA_MAX_CONF_FILE = '/etc/sfa/max_allocations'
+SFA_MAX_DEFAULT_RSPEC = '/etc/sfa/max_physical.xml'
 
 # Topology 
 
@@ -65,13 +67,16 @@ def collapse_alloc_dict(d):
 
 
 def alloc_links(api, links_to_add, links_to_drop, foo):
+    pdb.set_trace()
+    for l in links_to_add:
+        (node1,ip1,node2,ip2) = l
+        api.plshell.AddSliceTag(api.plauth, [slicename], ['node_ids'])
     return True
 
 def alloc_nodes(api,hrn, requested_links):
     
     requested_nodes = link_endpoints(requested_links)
 
-    pdb.set_trace()
     create_slice_max_aggregate(api, hrn, requested_nodes)
 
 # Taken from slices.py
@@ -183,17 +188,17 @@ def create_slice_max_aggregate(api, hrn, nodes):
     return 1
 
 
-def get_rspec(hrn):
+def get_rspec(api, hrn):
     # Eg. config line:
     # plc.princeton.sapan vlan23,vlan45
 
     allocations = read_alloc_dict()
     if (hrn):
-        current_allocations = allocations[hrn]
+        ret_rspec = rspec(allocations[hrn])
     else:
-        current_allocations = collapse_alloc_dict(allocations)
+        ret_rspec = open(SFA_MAX_DEFAULT_RSPEC).read()
 
-    return (allocations_to_rspec_dict(current_allocations))
+    return (ret_rspec)
 
 
 def create_slice(api, hrn, rspec_xml):
