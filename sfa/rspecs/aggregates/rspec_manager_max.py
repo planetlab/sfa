@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from sfa.util.rspec import Rspec
 import sys
 import pdb
@@ -53,112 +55,125 @@ def collapse_alloc_dict(d):
         ret.extend(d[k])
     return ret
 
-#def bootstrap_slice(api, hrn, added_nodes, deleted_nodes):    
-#        # This code is taken from slices.py
-#        # To clean up after 21 July
-#        # Get the slice record from geni
-#        slice = {}
-#        registries = Registries(api)
-#        registry = registries[self.api.hrn]
-#        credential = self.api.getCredential()
-#        records = registry.resolve(credential, hrn)
-#        for record in records:
-#            if record.get_type() in ['slice']:
-#                slice = record.as_dict()
-#        if not slice:
-#            raise RecordNotFound(hrn)   
-#
-#        # Make sure slice exists at plc, if it doesnt add it
-#        slicename = hrn_to_pl_slicename(hrn)
-#        slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids'])
-#        if not slices:
-#            parts = slicename.split("_")
-#            login_base = parts[0]
-#            # if site doesnt exist add it
-#            sites = api.plshell.GetSites(api.plauth, [login_base])
-#            if not sites:
-#                authority = get_authority(hrn)
-#                site_records = registry.resolve(credential, authority)
-#                site_record = {}
-#                if not site_records:
-#                    raise RecordNotFound(authority)
-#                site_record = site_records[0]
-#                site = site_record.as_dict()
-#                
-#                 # add the site
-#                site.pop('site_id')
-#                site_id = api.plshell.AddSite(api.plauth, site)
-#            else:
-#                site = sites[0]
-#            
-#            slice_fields = {}
-#            slice_keys = ['name', 'url', 'description']
-#            for key in slice_keys:
-#                if key in slice and slice[key]:
-#                    slice_fields[key] = slice[key]  
-#            api.plshell.AddSlice(api.plauth, slice_fields)
-#            slice = slice_fields
-#            slice['node_ids'] = 0
-#        else:
-#            slice = slices[0]    
-#        # get the list of valid slice users from the registry and make 
-#        # they are added to the slice 
-#        researchers = record.get('researcher', [])
-#        for researcher in researchers:
-#            person_record = {}
-#            person_records = registry.resolve(credential, researcher)
-#            for record in person_records:
-#                if record.get_type() in ['user']:
-#                    person_record = record
-#            if not person_record:
-#                pass
-#            person_dict = person_record.as_dict()
-#            persons = api.plshell.GetPersons(api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
-#
-#            # Create the person record 
-#            if not persons:
-#                person_id=api.plshell.AddPerson(api.plauth, person_dict)
-#
-#        # The line below enables the user account on the remote aggregate soon after it is created.
-#        # without this the user key is not transfered to the slice (as GetSlivers returns key of only enabled users),
-#        # which prevents the user from login to the slice. We may do additional checks before enabling the user.
-#
-#        api.plshell.UpdatePerson(api.plauth, person_id, {'enabled' : True})
-#                #key_ids = []
-#            #else:
-#                #key_ids = persons[0]['key_ids']
-#
-#            api.plshell.AddPersonToSlice(api.plauth, person_dict['email'], slicename)        
-#
-#            # Get this users local keys
-#            keylist = api.plshell.GetKeys(api.plauth, key_ids, ['key'])
-#            keys = [key['key'] for key in keylist]
-#
-#            # add keys that arent already there 
-#            for personkey in person_dict['keys']:
-#                if personkey not in keys:
-#                    key = {'key_type': 'ssh', 'key': personkey}
-#                    api.plshell.AddPersonKey(api.plauth, person_dict['email'], key)
-#
-#        # find out where this slice is currently running
-#        nodelist = api.plshell.GetNodes(api.plauth, slice['node_ids'], ['hostname'])
-#        hostnames = [node['hostname'] for node in nodelist]
-#
-#        api.plshell.AddSliceToNodes(self.api.plauth, slicename, added_nodes) 
-#        api.plshell.DeleteSliceFromNodes(self.api.plauth, slicename, deleted_nodes)
-#
-#        return 1
 
 def alloc_links(api, links_to_add, links_to_drop, foo):
     return True
 
-def alloc_nodes(api,hrn, links_to_add, links_to_delete):
+def alloc_nodes(api,hrn, requested_links, links_to_delete):
     
     nodes_to_add = link_endpoints(links_to_add)
     nodes_to_delete = link_endpoints(links_to_delete)
 
     pdb.set_trace()
-    bootstrap_slice(api, hrn, nodes_to_add, nodes_to_delete)
+    create_slice_max_aggregate(api, hrn, nodes_to_add, nodes_to_delete)
+
+# Taken from slices.py
+
+def create_slice_max_aggregate(api, hrn, nodes):
+    # Get the slice record from geni
+    slice = {}
+    registries = Registries(api)
+    registry = registries[api.hrn]
+    credential = api.getCredential()
+    records = registry.resolve(credential, hrn)
+    for record in records:
+        if record.get_type() in ['slice']:
+            slice = record.as_dict()
+    if not slice:
+        raise RecordNotFound(hrn)   
+
+    # Make sure slice exists at plc, if it doesnt add it
+    slicename = hrn_to_pl_slicename(hrn)
+    slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids'])
+    if not slices:
+        parts = slicename.split("_")
+        login_base = parts[0]
+        # if site doesnt exist add it
+        sites = api.plshell.GetSites(api.plauth, [login_base])
+        if not sites:
+            authority = get_authority(hrn)
+            site_records = registry.resolve(credential, authority)
+            site_record = {}
+            if not site_records:
+                raise RecordNotFound(authority)
+            site_record = site_records[0]
+            site = site_record.as_dict()
+                
+            # add the site
+            site.pop('site_id')
+            site_id = api.plshell.AddSite(api.plauth, site)
+        else:
+            site = sites[0]
+            
+        slice_fields = {}
+        slice_keys = ['name', 'url', 'description']
+        for key in slice_keys:
+            if key in slice and slice[key]:
+                slice_fields[key] = slice[key]  
+        api.plshell.AddSlice(api.plauth, slice_fields)
+        slice = slice_fields
+        slice['node_ids'] = 0
+    else:
+        slice = slices[0]    
+
+    # get the list of valid slice users from the registry and make 
+    # they are added to the slice 
+    researchers = record.get('researcher', [])
+    for researcher in researchers:
+        person_record = {}
+        person_records = registry.resolve(credential, researcher)
+        for record in person_records:
+            if record.get_type() in ['user']:
+                person_record = record
+        if not person_record:
+            pass
+        person_dict = person_record.as_dict()
+        persons = api.plshell.GetPersons(api.plauth, [person_dict['email']],
+                                         ['person_id', 'key_ids'])
+
+        # Create the person record 
+        if not persons:
+            person_id=api.plshell.AddPerson(api.plauth, person_dict)
+
+            # The line below enables the user account on the remote aggregate
+            # soon after it is created.
+            # without this the user key is not transfered to the slice
+            # (as GetSlivers returns key of only enabled users),
+            # which prevents the user from login to the slice.
+            # We may do additional checks before enabling the user.
+
+            api.plshell.UpdatePerson(api.plauth, person_id, {'enabled' : True})
+            key_ids = []
+        else:
+            key_ids = persons[0]['key_ids']
+
+        api.plshell.AddPersonToSlice(api.plauth, person_dict['email'],
+                                     slicename)        
+
+        # Get this users local keys
+        keylist = api.plshell.GetKeys(api.plauth, key_ids, ['key'])
+        keys = [key['key'] for key in keylist]
+
+        # add keys that arent already there 
+        for personkey in person_dict['keys']:
+            if personkey not in keys:
+                key = {'key_type': 'ssh', 'key': personkey}
+                api.plshell.AddPersonKey(api.plauth, person_dict['email'], key)
+
+    # find out where this slice is currently running
+    nodelist = api.plshell.GetNodes(api.plauth, slice['node_ids'],
+                                    ['hostname'])
+    hostnames = [node['hostname'] for node in nodelist]
+
+    # remove nodes not in rspec
+    deleted_nodes = list(set(hostnames).difference(nodes))
+    # add nodes from rspec
+    added_nodes = list(set(nodes).difference(hostnames))
+
+    api.plshell.AddSliceToNodes(api.plauth, slicename, added_nodes) 
+    api.plshell.DeleteSliceFromNodes(api.plauth, slicename, deleted_nodes)
+
+    return 1
 
 
 def get_rspec(hrn):
