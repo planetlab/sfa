@@ -3,6 +3,8 @@
 
 import datetime
 import time
+import traceback
+import sys
 
 from sfa.util.misc import *
 from sfa.util.rspec import *
@@ -13,7 +15,7 @@ from sfa.util.policy import Policy
 from sfa.util.debug import log
 from sfa.server.aggregate import Aggregates
 from sfa.server.registry import Registries
-import traceback
+
 class Slices(SimpleStorage):
 
     def __init__(self, api, ttl = .5):
@@ -106,7 +108,13 @@ class Slices(SimpleStorage):
         credential = self.api.getCredential()
         aggregates = Aggregates(self.api)
         for aggregate in aggregates:
-            aggregates[aggregate].delete_slice(credential, hrn)
+            try:
+                aggregates[aggregate].delete_slice(credential, hrn)
+            except:
+                print >> log, "Error calling list nodes at aggregate %s" % aggregate
+                traceback.print_exc(log)
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                print exc_type, exc_value, exc_traceback
 
     def create_slice(self, hrn, rspec):
         
