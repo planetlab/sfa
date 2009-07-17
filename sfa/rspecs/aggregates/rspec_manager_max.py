@@ -81,7 +81,7 @@ def allocations_to_rspec(allocations):
 def if_endpoints(ifs):
     nodes=[]
     for l in ifs:
-        nodes.extend([topology[l][0]])
+        nodes.extend(topology[l][0])
     return nodes
 
 def lock_state_file():
@@ -319,7 +319,8 @@ def main():
     t = get_interface_map()
     r = Rspec()
     rspec_xml = open(sys.argv[1]).read()
-    get_rspec(None,'foo')
+    #get_rspec(None,'foo')
+    create_slice(None, "foo", rspec_xml)
     
 if __name__ == "__main__":
     main()
