@@ -123,7 +123,7 @@ class Nodes(SimpleStorage):
                 print >> log, "Error calling list nodes at aggregate %s" % aggregate
                 traceback.print_exc(log)
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                raise exc_type, exc_value
+                print exc_type, exc_value, exc_traceback
         # create the rspec dict
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
         resourceDict = {'Rspec': resources}
