@@ -249,8 +249,8 @@ def get_rspec(api, hrn):
     # plc.princeton.sapan vlan23,vlan45
 
     allocations = read_alloc_dict()
-    if (hrn):
-        ret_rspec = allocations_to_rspec(allocations[hrn])
+    if (hrn and allocations.has_key(hrn)):
+            ret_rspec = allocations_to_rspec(allocations[hrn])
     else:
         ret_rspec = open(SFA_MAX_DEFAULT_RSPEC).read()
 
