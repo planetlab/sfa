@@ -222,6 +222,11 @@
       </SiteLinkSpec>
       <SiteLinkSpec>
 	<endpoint>I2Houston</endpoint>
+	<endpoint>I2KansasCity</endpoint>
+	<bw>1000Mbit</bw>
+      </SiteLinkSpec>
+      <SiteLinkSpec>
+	<endpoint>I2Houston</endpoint>
 	<endpoint>I2LosAngeles</endpoint>
 	<bw>1000Mbit</bw>
       </SiteLinkSpec>
@@ -352,6 +357,11 @@
       <LinkSpec>
 	<endpoint>i2chic1</endpoint>
 	<endpoint>i2wash1</endpoint>
+	<bw>1Mbit</bw>
+      </LinkSpec>
+      <LinkSpec>
+	<endpoint>i2hous1</endpoint>
+	<endpoint>i2kans1</endpoint>
 	<bw>1Mbit</bw>
       </LinkSpec>
       <LinkSpec>
