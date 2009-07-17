@@ -67,12 +67,16 @@ def get_interface_map():
     return topology    
 
     
+def allocations_to_rspec(allocations):
+    rspec = xml.dom.minidom.parse(SFA_MAX_DEFAULT_RSPEC)
+    req = rspec.firstChild.appendChild(rspec.createElement("request"))
+    pdb.set_trace()
+    for (iname,ip) in allocations:
+        ifspec = req.appendChild(rspec.createElement("ifspec"))
+        ifspec.setAttribute("name","tns:"+iname)
+        ifspec.setAttribute("ip",ip)
 
-#def allocations_to_rspec(allocations):
-#    rspec = xml.minidom.parseFile(SFA_MAX_DEFAULT_RSPEC)
-#    req = rspec.firstChild.appendChild(rspec.createElement("request"))
-#    for a in allocations:
-#        (link,
+    return rspec.toxml()
         
     
 def if_endpoints(ifs):
@@ -127,7 +131,7 @@ def alloc_nodes(api,hrn, requested_ifs):
     
     requested_nodes = if_endpoints(requested_ifs)
 
-    #create_slice_max_aggregate(api, hrn, requested_nodes)
+    create_slice_max_aggregate(api, hrn, requested_nodes)
 
 # Taken from slices.py
 
@@ -317,7 +321,7 @@ def main():
     t = get_interface_map()
     r = Rspec()
     rspec_xml = open(sys.argv[1]).read()
-    create_slice(None,'foo',rspec_xml)
+    get_rspec(None,'foo')
     
 if __name__ == "__main__":
     main()
