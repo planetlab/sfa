@@ -15,6 +15,7 @@ class Node:
         self.shortname = self.hostname.replace('.vini-veritas.net', '')
         self.site_id = node['site_id']
         self.ipaddr = socket.gethostbyname(self.hostname)
+        self.links = []
 
     def get_link_id(self, remote):
         if self.id < remote.id:
@@ -54,15 +55,15 @@ class Node:
             adj_nodes.append(nodes[id])
         return adj_nodes
     
-    def init_rspecs(self):
-        self.rspecs = []
+    def init_links(self):
+        self.links = []
         
-    def add_rspec(self, remote):
+    def add_link(self, remote, bw):
         my_ip = self.get_virt_ip(remote)
         remote_ip = remote.get_virt_ip(self)
         net = self.get_virt_net(remote)
-        rspec = remote.id, remote.ipaddr, "1Mbit", my_ip, remote_ip, net
-        self.rspecs.append(rspec)
+        link = remote.id, remote.ipaddr, bw, my_ip, remote_ip, net
+        self.links.append(link)
 
         
 class Site:
@@ -222,30 +223,15 @@ class Slicetag:
         self.deleted = True
         self.updated = True
     
-    def write(self, slices, nodes, dryrun):
-        if not dryrun:
-            if self.changed:
-                if int(self.id) > 0:
-                    UpdateSliceTag(self.id, self.value)
-                else:
-                    AddSliceTag(self.slice_id, self.tagname, self.value, self.node_id)
-            elif self.deleted and int(self.id) > 0:
-                DeleteSliceTag(self.id)
-        else:
-            slice = slices[self.slice_id].name
-            if self.node_id:
-                node = nodes[tag.node_id].hostname
-            if self.updated:
-                if self.deleted:
-                    self.value = "deleted"
-                elif not self.changed:
-                    self.value = "no change"
-                if int(self.id) < 0:
-                    self.id = "new"
-                if self.node_id:
-                    print "[%s] %s: %s (%s, %s)" % (self.id, self.tagname, self.value, slice, node)
-                else:
-                    print "[%s] %s: %s (%s)" % (self.id, self.tagname, self.value, slice)
+    def write(self, api):
+        if self.changed:
+            if int(self.id) > 0:
+                api.plshell.UpdateSliceTag(api.plauth, self.id, self.value)
+            else:
+                api.plshell.AddSliceTag(api.plauth, self.slice_id, 
+                                        self.tagname, self.value, self.node_id)
+        elif self.deleted and int(self.id) > 0:
+            api.plshell.DeleteSliceTag(api.plauth, self.id)
 
 
 """
@@ -487,6 +473,51 @@ def create_slice(api, hrn, xml):
     create_slice_vini_aggregate(api, hrn, nodes)
 
     # Add VINI-specific topology attributes to slice here
+    try:
+        linkspecs = rspec['Rspec'][0]['Request'][0]['NetSpec'][0]['LinkSpec']
+        if linkspecs:
+            slicename = hrn_to_pl_slicename(hrn)
+
+            # Grab all the PLC info we'll need at once
+            slice = get_slice(api, slicename)
+            if slice:
+                nodes = get_nodes(api)
+                tags = get_slice_tags(api)
+
+                slice.update_tag('vini_topo', 'manual', tags)
+                slice.assign_egre_key(tags)
+                slice.turn_on_netns(tags)
+                slice.add_cap_net_admin(tags)
+
+                nodedict = {}
+                for (k, v) in get_nodedict(rspec).iteritems():
+                    for id in nodes:
+                        if v == nodes[id].hostname:
+                            nodedict[k] = nodes[id]
+
+                for l in linkspecs:
+                    n1 = nodedict[l['endpoint'][0]]
+                    n2 = nodedict[l['endpoint'][1]]
+                    bw = l['bw'][0]
+                    n1.add_link(n2, bw)
+                    n2.add_link(n1, bw)
+
+                for node in slice.get_nodes(nodes):
+                    if node.links:
+                        topo_str = "%s" % node.links
+                        slice.update_tag('topo_rspec', topo_str, tags, node)
+
+                # Update slice tags in database
+                for i in tags:
+                    tag = tags[i]
+                    if tag.slice_id == slice.id:
+                        if tag.tagname == 'topo_rspec' and not tag.updated:
+                            tag.delete()
+                        tag.write(api)
+    except KeyError:
+        # Bad Rspec
+        pass
+    
 
     return True
 
