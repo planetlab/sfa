@@ -59,13 +59,12 @@ def collapse_alloc_dict(d):
 def alloc_links(api, links_to_add, links_to_drop, foo):
     return True
 
-def alloc_nodes(api,hrn, requested_links, links_to_delete):
+def alloc_nodes(api,hrn, requested_links):
     
     requested_nodes = link_endpoints(requested_links)
-    nodes_to_delete = link_endpoints(links_to_delete)
 
     pdb.set_trace()
-    create_slice_max_aggregate(api, hrn, requested_nodes, nodes_to_delete)
+    create_slice_max_aggregate(api, hrn, requested_nodes)
 
 # Taken from slices.py
 
@@ -220,7 +219,7 @@ def create_slice(api, hrn, rspec_xml):
             allocations_to_delete.extend([a])
 
     # Ok, let's do our thing
-    alloc_nodes(api, hrn, requested_allocations, allocations_to_delete)
+    alloc_nodes(api, hrn, requested_allocations)
     alloc_links(api, hrn, requested_allocations, allocations_to_delete)
     allocations[hrn] = requested_allocations
     commit_alloc_dict(allocations)
