@@ -121,16 +121,16 @@ def collapse_alloc_dict(d):
     return ret
 
 
-def alloc_links(api, links_to_add, links_to_drop, foo):
-    #for l in links_to_add:
-        #(node1,ip1,node2,ip2) = l
-        #api.plshell.AddSliceTag(api.plauth, [slicename], ['node_ids'])
+def alloc_links(api, hrn, links_to_add, links_to_drop):
+    pdb.set_trace()
+    slicename=hrn_to_pl_slicename(hrn)
+    for (iface,ip) in links_to_add:
+        node = topology[iface][0][0]
+        api.plshell.AddSliceTag(api.plauth, slicename, "ip_addresses", ip, node)
     return True
 
 def alloc_nodes(api,hrn, requested_ifs):
-    
     requested_nodes = if_endpoints(requested_ifs)
-
     create_slice_max_aggregate(api, hrn, requested_nodes)
 
 # Taken from slices.py
@@ -321,7 +321,7 @@ def main():
     r = Rspec()
     rspec_xml = open(sys.argv[1]).read()
     #get_rspec(None,'foo')
-    create_slice(None, "foo", rspec_xml)
+    create_slice(None, "plc.princeton.sap0", rspec_xml)
     
 if __name__ == "__main__":
     main()
