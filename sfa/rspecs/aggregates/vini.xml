@@ -1,4 +1,4 @@
-<Rspec name="vini" xmlns="http://www.planet-lab.org/sfa/rspec/">
+<RSpec name="vini" xmlns="http://www.planet-lab.org/sfa/rspec/">
   <Capacity>
     <NetSpec name="physical_topology">
       <SiteSpec name="I2Atlanta">
@@ -394,4 +394,4 @@
       </LinkSpec>
     </NetSpec>
   </Request>
-</Rspec>
+</RSpec>
