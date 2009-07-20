@@ -1,6 +1,4 @@
-<Rspec name="vini" targetNamespace="http://www.vini-veritas.net/sfa/rspec/vinispec.rspec"
-                  xmlns:tns="http://www.vini-veritas.net/sfa/rspec/vinispec.rspec"
-                  xmlns="http://www.planet-lab.org/sfa/rspec/">
+<Rspec name="vini" xmlns="http://www.planet-lab.org/sfa/rspec/">
   <Capacity>
     <NetSpec name="physical_topology">
       <SiteSpec name="I2Atlanta">
