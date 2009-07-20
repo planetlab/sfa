@@ -122,7 +122,6 @@ def collapse_alloc_dict(d):
 
 
 def alloc_links(api, hrn, links_to_add, links_to_drop):
-    pdb.set_trace()
     slicename=hrn_to_pl_slicename(hrn)
     for (iface,ip) in links_to_add:
         node = topology[iface][0][0]
