@@ -282,6 +282,8 @@ def create_top_level_auth_records(hrn):
     if not parent_hrn:
         parent_hrn = hrn    
     auth_info = AuthHierarchy.get_auth_info(parent_hrn)
+    if level1_auth:
+        auth_info = AuthHierarchy.get_auth_info(hrn)
     table = get_auth_table(parent_hrn)
 
     auth_record = table.resolve("authority", hrn)
