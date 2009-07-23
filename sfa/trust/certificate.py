@@ -162,10 +162,20 @@ class Keypair:
    def as_pem(self):
       return crypto.dump_privatekey(crypto.FILETYPE_PEM, self.key)
 
+   ##
+   # Return an M2Crypto key object
+
    def get_m2_pkey(self):
       if not self.m2key:
          self.m2key = M2Crypto.EVP.load_key_string(self.as_pem())
       return self.m2key
+
+   ##
+   # Returns a string containing the public key represented by this object.
+
+   def get_pubkey_string(self):
+      m2pkey = self.get_m2_pkey()
+      return base64.b64encode(m2pkey.as_der())
 
    ##
    # Return an OpenSSL pkey object
