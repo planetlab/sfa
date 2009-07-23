@@ -2,7 +2,7 @@
 
 %define name sfa
 %define version 0.8
-%define taglevel 5
+%define taglevel 6
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -94,6 +94,10 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Thu Jul 23 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-6
+- snapshot after the GEC5 demo
+- should be the last tag set in the geniwrapper module, are we are now moving to the sfa module
+
 * Wed Jul 15 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-5
 - snapshot july 15 - has gone through superficial manual testing
 - hopefully a good basis for gec5 demo
