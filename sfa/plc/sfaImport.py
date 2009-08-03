@@ -279,7 +279,24 @@ class sfaImport:
                     except Exception, e:
                         trace("Failed to import: %s (%s)" % (nodes[0], e))     
 
-    def delete_record(self, hrn, type = "*"):
+    def delete_record(self, parent_hrn, object, type):
+        # get the hrn
+        hrn = None
+        if type in ['slice'] and 'name' in object and object['name']:
+            slice_name = object['name'].split("_")[0]
+            hrn = parent_hrn + "." + slice_name
+        elif type in ['user', 'person'] and 'email' in object and object['email']:
+            person_name = object['email'].split('@')[0]
+            hrn = parent_hrn + "." + person_name
+        elif type in ['node'] and 'hostname' in object and object['hostname']:
+            node_name =  object['hostname'].replace('.','_')  
+            hrn = parent_hrn + "." + node_name
+        elif type in ['site'] and 'login_base' in object and object['login_base']:
+            site_name = object['login_base']
+            hrn = parent_hrn + "." + site_name         
+        else:
+            return
+
         auth_name = self.get_auth_table(hrn)
         table = self.AuthHierarchy.get_auth_table(auth_name)
         record_list = table.resolve(type, hrn)
