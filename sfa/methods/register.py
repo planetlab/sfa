@@ -109,8 +109,8 @@ class register(Method):
             record.set_pointer(pointer)
 	    
 	    # Add the user's key
-            if record['keys']:
-		self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type' : 'ssh', 'key' : record['keys'][0]})
+            if record['key']:
+		self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type' : 'ssh', 'key' : record['key']})
 
         elif (type == "node"):
             pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
