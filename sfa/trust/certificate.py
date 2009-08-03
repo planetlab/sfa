@@ -18,6 +18,7 @@
 import os
 import tempfile
 import base64
+import traceback
 from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
@@ -54,7 +55,8 @@ def convert_public_key(key):
     try:
         k.load_pubkey_from_file(ssl_fn)
     except:
-        print "XXX: Error while converting key: ", key_str
+        print "XXX: Error while converting key: ", key
+        traceback.print_exc()
         k = None
 
     # remove the temporary files
