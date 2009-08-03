@@ -49,8 +49,8 @@ class register(Method):
         if 'gid' not in record:
             uuid = create_uuid()
             pkey = Keypair(create=True)
-            if 'keys' in record and record['keys']:
-                pkey = convert_public_key(record['keys'][0])
+            if 'keys' in record and record['key']:
+                pkey = convert_public_key(record['key'])
             
             gid_object = self.api.auth.hierarchy.create_gid(name, uuid, pkey)
             gid = gid_object.save_to_string(save_parents=True)
