@@ -78,10 +78,8 @@ class register(Method):
 
             # if registering a sa, see if a ma already exists
             # if registering a ma, see if a sa already exists
-            if (type == "sa"):
-                other_rec = table.resolve("ma", record.get_name())
-            elif (type == "ma"):
-                other_rec = table.resolve("sa", record.get_name())
+            if type in ["authority", "sa", "ma"]:
+                other_rec = table.resolve("authority", record.get_name())
 
             if other_rec:
                 print >> log, "linking ma and sa to the same plc site"
