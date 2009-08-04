@@ -297,8 +297,7 @@ class sfaImport:
         else:
             return
 
-        auth_name = self.get_auth_table(hrn)
-        table = self.AuthHierarchy.get_auth_table(auth_name)
+        table = self.get_auth_table(parent_hrn)
         record_list = table.resolve(type, hrn)
         if not record_list:
             return
