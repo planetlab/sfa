@@ -140,16 +140,16 @@ class Slices(SimpleStorage):
         peer = None
         
         # get this slice's authority (site)
-        #slice_authority = get_authority(hrn)
+        slice_authority = get_authority(hrn)
         
         # get this site's authority (sfa root authority or sub authority)
-        #site_authority = get_authority(slice_authority)
+        site_authority = get_authority(slice_authority)
         
-        # check if we are already peered with this site_authority at ple, if so
-        #peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
-        #for peer_record in peers:
-        #    if site_authority in peer_record.values():
-        #        peer = peer_record['shortname']		  			    
+        # check if we are already peered with this site_authority, if so
+        peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
+        for peer_record in peers:
+            if site_authority in peer_record.values():
+                peer = peer_record['shortname']		  			    
 
         spec = Rspec(rspec)
         # Get the slice record from geni
@@ -186,9 +186,8 @@ class Slices(SimpleStorage):
                 remote_site_id = site.pop('site_id')
                 site_id = self.api.plshell.AddSite(self.api.plauth, site)
                 # this belongs to a peer 
-                #if peer:
-                #    print site_id, peer, remote_site_id
-                #    self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
+                if peer:
+                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
             else:
                 site = sites[0]
             
@@ -204,11 +203,12 @@ class Slices(SimpleStorage):
             slice = slice_fields
             
             #this belongs to a peer
-            #if peer:
-            #    self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice_id, peer, slice_record['pointer'])
-            slice['node_ids'] = 0
+            if peer:
+                self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice_id, peer, slice_record['pointer'])
+            slice['node_ids'] = []
         else:
-            slice = slices[0]    
+            slice = slices[0]
+            slice_id = slice['slice_id']    
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
         researchers = record.get('researcher', [])
@@ -235,13 +235,21 @@ class Slices(SimpleStorage):
                 # before enabling the user.
 
                 self.api.plshell.UpdatePerson(self.api.plauth, person_id, {'enabled' : True})
-                #if peer:
-                #    self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+                if peer:
+                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
                 key_ids = []
             else:
+                preson_id = person[0]['person_id'] 
                 key_ids = persons[0]['key_ids']
 
-            self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)        
+            # if this is a peer person, we must unbind them from the peer or PLCAPI will throw
+            # an error
+            if peer:
+                self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer)
+            self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)   
+            if peer:
+               self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+
             # Get this users local keys
             keylist = self.api.plshell.GetKeys(self.api.plauth, key_ids, ['key'])
             keys = [key['key'] for key in keylist]
@@ -250,11 +258,11 @@ class Slices(SimpleStorage):
             for personkey in person_dict['keys']:
                 if personkey not in keys:
                     key = {'key_type': 'ssh', 'key': personkey}
-                    #if peer:
-                        # XX Need to get the key_id from remote registry somehow 
-                        #self.api.plshell.BindObjectToPeer(self.api.plauth, 'key', None, peer, key_id)   
-                        #pass
+                    if peer:
+                        self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
                     self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
+                    if peer:
+                        self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
 
         # find out where this slice is currently running
         nodelist = self.api.plshell.GetNodes(self.api.plauth, slice['node_ids'], ['hostname'])
@@ -274,8 +282,12 @@ class Slices(SimpleStorage):
         # add nodes from rspec
         added_nodes = list(set(nodes).difference(hostnames))
 
+        if peer:
+            self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', slice_id, peer)
         self.api.plshell.AddSliceToNodes(self.api.plauth, slicename, added_nodes) 
         self.api.plshell.DeleteSliceFromNodes(self.api.plauth, slicename, deleted_nodes)
+        if peer:
+            self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice_id, peer, slice_record['pointer'])
 
         return 1
 
