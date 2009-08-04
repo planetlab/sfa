@@ -62,7 +62,7 @@ class register(Method):
         if existing_records:
             raise ExistingRecord(name)
         
-        if (type == "sa") or (type=="ma"):
+        if type in ["authority", "sa", "ma"]:
             # update the tree
             if not self.api.auth.hierarchy.auth_exists(name):
                 self.api.auth.hierarchy.create_auth(name)
