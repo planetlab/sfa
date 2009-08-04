@@ -144,7 +144,7 @@ class sfaImport:
 
             # get the user's private key from the SSH keys they have uploaded
             # to planetlab
-            keys = shell.GetKeys(plc_auth, key_ids)
+            keys = self.shell.GetKeys(plc_auth, key_ids)
             key = keys[0]['key']
             pkey = convert_public_key(key)
         else:
