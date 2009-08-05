@@ -239,7 +239,7 @@ class Slices(SimpleStorage):
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
                 key_ids = []
             else:
-                preson_id = person[0]['person_id'] 
+                preson_id = persons[0]['person_id'] 
                 key_ids = persons[0]['key_ids']
 
             # if this is a peer person, we must unbind them from the peer or PLCAPI will throw
