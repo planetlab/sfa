@@ -31,6 +31,26 @@ class Slices(SimpleStorage):
         self.load()
 
 
+    def get_peer(self, hrn):
+        # Becaues of myplc federation,  we first need to determine if this
+        # slice belongs to out local plc or a myplc peer. We will assume it 
+        # is a local site, unless we find out otherwise  
+        peer = None
+
+        # get this slice's authority (site)
+        slice_authority = get_authority(hrn)
+
+        # get this site's authority (sfa root authority or sub authority)
+        site_authority = get_authority(slice_authority)
+
+        # check if we are already peered with this site_authority, if so
+        peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
+        for peer_record in peers:
+            if site_authority in peer_record.values():
+                peer = peer_record['shortname']
+
+        return peer
+
     def refresh(self):
         """
         Update the cached list of slices
@@ -95,13 +115,20 @@ class Slices(SimpleStorage):
             self.delete_slice_smgr(hrn)
         
     def delete_slice_aggregate(self, hrn):
+
         slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, {'peer_id': None, 'name': slicename})
+        slices = self.api.plshell.GetSlices(self.api.plauth, {'name': slicename})
         if not slices:
             return 1        
         slice = slices[0]
 
+        # determine if this is a peer slice
+        peer = self.get_peer(hrn)
+        if peer:
+            self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', slice['slice_id'], peer)
         self.api.plshell.DeleteSliceFromNodes(self.api.plauth, slicename, slice['node_ids'])
+        if peer:
+            self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
         return 1
 
     def delete_slice_smgr(self, hrn):
@@ -134,22 +161,9 @@ class Slices(SimpleStorage):
             self.create_slice_smgr(hrn, rspec)
 
     def create_slice_aggregate(self, hrn, rspec):
-        # Becaues of myplc federation,  we first need to determine if this
-        # slice belongs to out local plc or a myplc peer. We will assume it 
-        # is a local site, unless we find out otherwise  
-        peer = None
-        
-        # get this slice's authority (site)
-        slice_authority = get_authority(hrn)
-        
-        # get this site's authority (sfa root authority or sub authority)
-        site_authority = get_authority(slice_authority)
-        
-        # check if we are already peered with this site_authority, if so
-        peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
-        for peer_record in peers:
-            if site_authority in peer_record.values():
-                peer = peer_record['shortname']		  			    
+
+        # Determine if this is a peer slice
+        peer = self.get_peer(hrn)
 
         spec = Rspec(rspec)
         # Get the slice record from geni
