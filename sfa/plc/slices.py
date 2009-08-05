@@ -167,7 +167,7 @@ class Slices(SimpleStorage):
 
         # Make sure slice exists at plc, if it doesnt add it
         slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, [slicename], ['node_ids'])
+        slices = self.api.plshell.GetSlices(self.api.plauth, [slicename], ['slice_id', 'node_ids'])
         if not slices:
             parts = slicename.split("_")
             login_base = parts[0]
@@ -239,7 +239,7 @@ class Slices(SimpleStorage):
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
                 key_ids = []
             else:
-                preson_id = persons[0]['person_id'] 
+                person_id = persons[0]['person_id'] 
                 key_ids = persons[0]['key_ids']
 
             # if this is a peer person, we must unbind them from the peer or PLCAPI will throw
