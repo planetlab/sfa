@@ -47,7 +47,10 @@ def editDict(args, recordDict, options):
             replaceDict({vect.split("=")[0]: returnVal(vect.split("=")[1])},
                          recordDict, options) 
         else:
-            raise TypeError, "Argument error: Records are updated with \n" \
+			if vect in recordDict:
+				del recordDict[vect]
+			else:
+            	raise TypeError, "Argument error: Records are updated with \n" \
                             "key=val1,val2,valN or\n" \
                             "key+=val1,val2,valN \n%s Unknown key/val" % vect
 
