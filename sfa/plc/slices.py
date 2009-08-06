@@ -6,6 +6,7 @@ import time
 import traceback
 import sys
 
+from types import StringTypes
 from sfa.util.misc import *
 from sfa.util.rspec import *
 from sfa.util.specdict import *
@@ -46,7 +47,8 @@ class Slices(SimpleStorage):
         # check if we are already peered with this site_authority, if so
         peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
         for peer_record in peers:
-            if site_authority in peer_record.values():
+            names = [name.lower() for name in peer_record.values() if isinstance(name, StringTypes)]
+            if site_authority in names:
                 peer = peer_record['shortname']
 
         return peer
@@ -340,6 +342,7 @@ class Slices(SimpleStorage):
                     aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate])
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
+                traceback.print_exc()
         return 1
 
 
