@@ -42,7 +42,7 @@ class Slices(SimpleStorage):
         slice_authority = get_authority(hrn)
 
         # get this site's authority (sfa root authority or sub authority)
-        site_authority = get_authority(slice_authority)
+        site_authority = get_authority(slice_authority).lower()
 
         # check if we are already peered with this site_authority, if so
         peers = self.api.plshell.GetPeers(self.api.plauth, {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
