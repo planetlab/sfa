@@ -261,9 +261,9 @@ class GeniAPI:
 
         elif type == "node":
             if not "hostname" in pl_record:
-                if not "dns" in record:
-                    raise MissingGeniInfo("dns")
-                pl_record["hostname"] = record["dns"]
+                if not "hostname" in record:
+                    raise MissingGeniInfo("hostname")
+                pl_record["hostname"] = record["hostname"]
             if not "model" in pl_record:
                 pl_record["model"] = "geni"
 
