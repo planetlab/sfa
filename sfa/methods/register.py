@@ -119,7 +119,11 @@ class register(Method):
         else:
             raise UnknownGeniType(type)
 
-        table.insert(record)
+        # SFA upcalls may exist in PLCAPI and they could have already added the
+        # record for us. Lets check if the record already exists  
+        existing_records = table.resolve(type, name)
+        if not existing_records:
+            table.insert(record)
 
         # update membership for researchers, pis, owners, operators
         self.api.update_membership(None, record)
