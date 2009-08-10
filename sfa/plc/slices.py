@@ -275,7 +275,7 @@ class Slices(SimpleStorage):
                 if personkey not in keys:
                     key = {'key_type': 'ssh', 'key': personkey}
                     if peer:
-                        self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+                        self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer)
                     self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
                     if peer:
                         self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
