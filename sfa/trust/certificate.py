@@ -523,6 +523,9 @@ class Certificate:
             if self.is_signed_by_cert(trusted_cert):
                 #print self.get_subject(), "is signed by a root"
                 return
+            # if the public keys are the same then we are set
+            if self.is_pubkey(trusted_cert.get_pubkey()):
+                return
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
