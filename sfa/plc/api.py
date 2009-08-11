@@ -43,7 +43,7 @@ def xmlrpclib_escape(s, replace = string.replace):
     # Replace invalid 7-bit control characters with '?'
     return s.translate(xml_escape_table)
 
-def sfa_xmlrpclib_dump(self, value, write):
+def xmlrpclib_dump(self, value, write):
     """
     xmlrpclib cannot marshal instances of subclasses of built-in
     types. This function overrides xmlrpclib.Marshaller.__dump so that
@@ -74,7 +74,7 @@ def sfa_xmlrpclib_dump(self, value, write):
         f(*args)
 
 # You can't hide from me!
-xmlrpclib.Marshaller._Marshaller__dump = sfa_xmlrpclib_dump
+xmlrpclib.Marshaller._Marshaller__dump = xmlrpclib_dump
 
 # SOAP support is optional
 try:
