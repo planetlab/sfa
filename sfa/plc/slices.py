@@ -271,14 +271,16 @@ class Slices(SimpleStorage):
             keys = [key['key'] for key in keylist]
 
             # add keys that arent already there 
+	    key_ids=person_record['key_ids']
             for personkey in person_dict['keys']:
                 if personkey not in keys:
                     key = {'key_type': 'ssh', 'key': personkey}
                     if peer:
                         self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer)
-                    self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
+                    key_id=self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
                     if peer:
-                        self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+			 self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+			 self.api.plshell.BindObjectToPeer(self.api.plauth, 'key', key_id, peer, key_ids.pop(0))
 
         # find out where this slice is currently running
         nodelist = self.api.plshell.GetNodes(self.api.plauth, slice['node_ids'], ['hostname'])
