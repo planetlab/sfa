@@ -399,6 +399,21 @@ def create_slice_vini_aggregate(api, hrn, nodes):
     # add nodes from rspec
     added_nodes = list(set(nodes).difference(hostnames))
 
+"""
+    print >> sys.stderr, "Slice on nodes:"
+    for n in hostnames:
+        print >> sys.stderr, n
+    print >> sys.stderr, "Wants nodes:"
+    for n in nodes:
+        print >> sys.stderr, n
+    print >> sys.stderr, "Deleting nodes:"
+    for n in deleted_nodes:
+        print >> sys.stderr, n
+    print >> sys.stderr, "Adding nodes:"
+    for n in added_nodes:
+        print >> sys.stderr, n
+"""
+
     api.plshell.AddSliceToNodes(api.plauth, slicename, added_nodes) 
     api.plshell.DeleteSliceFromNodes(api.plauth, slicename, deleted_nodes)
 
@@ -411,7 +426,7 @@ def get_rspec(api, hrn):
     
     if (hrn):
         slicename = hrn_to_pl_slicename(hrn)
-        defaultrspec = default.toGenDict()
+        defaultrspec = default.toDict()
         nodedict = get_nodedict(defaultrspec)
 
         # call the default sfa.plc.nodes.get_rspec() method
@@ -462,9 +477,8 @@ def get_rspec(api, hrn):
 
 
 def create_slice(api, hrn, xml):
-    r = Rspec()
-    r.parseString(xml)
-    rspec = r.toGenDict()
+    r = Rspec(xml)
+    rspec = r.toDict()
 
     # Check request against current allocations
     # Request OK
@@ -474,7 +488,7 @@ def create_slice(api, hrn, xml):
 
     # Add VINI-specific topology attributes to slice here
     try:
-        linkspecs = rspec['Rspec'][0]['Request'][0]['NetSpec'][0]['LinkSpec']
+        linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
         if linkspecs:
             slicename = hrn_to_pl_slicename(hrn)
 
@@ -524,10 +538,10 @@ def create_slice(api, hrn, xml):
 def get_nodedict(rspec):
     nodedict = {}
     try:    
-        sitespecs = rspec['Rspec'][0]['Capacity'][0]['NetSpec'][0]['SiteSpec']
+        sitespecs = rspec['Rspec']['Capacity'][0]['NetSpec'][0]['SiteSpec']
         for s in sitespecs:
             for node in s['NodeSpec']:
-                nodedict[node['name'][0]] = node['hostname'][0]
+                nodedict[node['name']] = node['hostname'][0]
     except KeyError:
         pass
 
@@ -538,7 +552,7 @@ def rspec_to_nodeset(rspec):
     nodes = set()
     try:
         nodedict = get_nodedict(rspec)
-        linkspecs = rspec['Rspec'][0]['Request'][0]['NetSpec'][0]['LinkSpec']
+        linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
         for l in linkspecs:
             for e in l['endpoint']:
                 nodes.add(nodedict[e])
@@ -551,7 +565,7 @@ def rspec_to_nodeset(rspec):
 def main():
     r = Rspec()
     r.parseFile(sys.argv[1])
-    rspec = r.toGenDict()
+    rspec = r.toDict()
     create_slice(None,'plc',rspec)
     
 if __name__ == "__main__":
