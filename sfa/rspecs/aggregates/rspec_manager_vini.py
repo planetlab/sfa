@@ -7,6 +7,7 @@ import sys
 import socket
 
 SFA_VINI_DEFAULT_RSPEC = '/etc/sfa/vini.rspec'
+SFA_VINI_WHITELIST = '/etc/sfa/vini.whitelist'
 
 class Node:
     def __init__(self, node):
@@ -399,7 +400,7 @@ def create_slice_vini_aggregate(api, hrn, nodes):
     # add nodes from rspec
     added_nodes = list(set(nodes).difference(hostnames))
 
-"""
+    """
     print >> sys.stderr, "Slice on nodes:"
     for n in hostnames:
         print >> sys.stderr, n
@@ -412,7 +413,7 @@ def create_slice_vini_aggregate(api, hrn, nodes):
     print >> sys.stderr, "Adding nodes:"
     for n in added_nodes:
         print >> sys.stderr, n
-"""
+    """
 
     api.plshell.AddSliceToNodes(api.plauth, slicename, added_nodes) 
     api.plshell.DeleteSliceFromNodes(api.plauth, slicename, deleted_nodes)
@@ -479,6 +480,16 @@ def get_rspec(api, hrn):
 def create_slice(api, hrn, xml):
     r = Rspec(xml)
     rspec = r.toDict()
+
+    ### Check the whitelist
+    ### It consists of lines of the form: <slice hrn> <bw>
+    whitelist = {}
+    f = open(SFA_VINI_WHITELIST)
+    for line in f.readlines():
+        (slice, bw) = line.split()
+        whitelist[slice] = bw
+    if not hrn in whitelist:
+        raise PermissionError("%s not in VINI whitelist" % hrn)
 
     # Check request against current allocations
     # Request OK
