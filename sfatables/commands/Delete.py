@@ -1,9 +1,10 @@
 import os, time
+from sfa.sfatables.command import Add
 
-class Command:
-    options = []
-    help = ''
-    key=''
+class Add(Command):
+    options = [('-D','--delete')]
+    help = 'Delete a rule from a chain'
+    key='delete_rule'
     matches = False
     targets = False
 

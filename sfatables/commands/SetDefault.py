@@ -1,9 +1,10 @@
 import os, time
+from sfa.sfatables.command import Add
 
-class Command:
-    options = []
-    help = ''
-    key=''
+class SetDefault(Command):
+    options = [('-P','--default')]
+    help = 'Set the default rule for a chain'
+    key='add_rule'
     matches = False
     targets = False
 

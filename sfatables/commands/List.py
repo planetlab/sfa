@@ -1,9 +1,10 @@
 import os, time
+from sfa.sfatables.command import Add
 
-class Command:
-    options = []
-    help = ''
-    key=''
+class List(Command):
+    options = [('-L','--list')]
+    help = 'List a chain'
+    key='list_rule'
     matches = False
     targets = False
 

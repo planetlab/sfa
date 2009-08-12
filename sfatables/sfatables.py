@@ -14,7 +14,9 @@ from optparse import OptionParser
 
 def load_extensions(module):
     command_dict={}
-    commands = __import__(module,fromlist=[".".join(module.split('.')[:-1])])
+    module_path = ".".join(module.split('.')[:-1])
+    pdb.set_trace()
+    commands = __import__(module,fromlist=[module_path])
 
     for command_name in commands.all:
         command_module = getattr(commands, command_name)
@@ -40,9 +42,10 @@ def main():
     command_parser = create_parser(command_dict)
     (options, args) = command_parser.parse_args()
 
-    if (len(options.keys() != 1):
+    if (len(options.keys()) != 1):
         raise Exception("sfatables takes one command at a time.\n")
 
+    pdb.set_trace()
     selected_command = command_dict[options.keys()[0]]
 
     match_options = None
@@ -51,12 +54,12 @@ def main():
     if (selected_command.matches):
         match_dict = load_extensions("sfa.sfatables.matches")
         match_parser = create_parser(match_dict)
-        (options, args) = match_parser.parse_args(args[2:]) # Change to next location of --
+        (options, args) = match_parser.parse_args(args[2:]) 
 
     if (selected_command.targets):
         match_dict = load_extensions("sfa.sfatables.targets")
         target_parser = create_parser(match_dict)
-        (options, args) = target_parser.parse_args(args[5:]) # Change to next location of --
+        (options, args) = target_parser.parse_args(args[5:]) 
 
     command(options, match_options, target_options)
 

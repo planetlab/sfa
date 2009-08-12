@@ -1,9 +1,10 @@
 import os, time
+from sfa.sfatables.command import Add
 
-class Command:
-    options = []
-    help = ''
-    key=''
+class Add(Command):
+    options = [('-A','--add')]
+    help = 'Add a rule to a chain'
+    key='add_rule'
     matches = False
     targets = False
 
