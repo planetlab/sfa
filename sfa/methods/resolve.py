@@ -7,8 +7,8 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.record import GeniRecord
 from sfa.util.debug import log
-
 from sfa.server.registry import Registries
+from sfa.util.prefixTree import prefixTree
 
 class resolve(Method):
     """
@@ -32,33 +32,50 @@ class resolve(Method):
         
         self.api.auth.check(cred, 'resolve')
         good_records = [] 
-        try:
-            auth_hrn = self.api.auth.get_authority(hrn)
-            if not auth_hrn:
-                auth_hrn = hrn
-            table = self.api.auth.get_auth_table(auth_hrn)
-            records = table.resolve('*', hrn)
-            if not records:
-                raise RecordNotFound(hrn) 
-            good_records = []
-            for record in records:
-                try:
-                    self.api.fill_record_info(record)
-                    good_records.append(record)
-                except PlanetLabRecordDoesNotExist:
-                    # silently drop the ones that are missing in PL
-                    print >> log, "ignoring geni record ", record.get_name(), \
-                              " because pl record does not exist"
-                    table.remove(record)
-        except:
-            # is this a foreign record
-            registries = Registries(self.api)
-            credential = self.api.getCredential()
-            for registry in registries:
-                if hrn.startswith(registry) and not registry in [self.api.hrn]:
-                    records = registries[registry].resolve(credential, hrn)
-                    good_records = records
-        dicts = [record.as_dict() for record in good_records]
 
-        return dicts    
+        # load all know registry names into a prefix tree and attempt to find
+        # the longest matching prefix
+        registries = Registries(self.api)
+        hrns = registries.keys()
+        tree = prefixTree()
+        tree.load(hrns)
+        registry_hrn = tree.best_match(hrn)
+
+        #if there was no match then this record belongs to an unknow registry
+        if not registry_hrn:
+            raise MissingAuthority(hrn)
+
+        # if the best match (longest matching hrn) is not the local registry,
+        # forward the request
+        if registry_hrn != self.api.hrn:
+            credential = self.api.getCredential()
+            try:
+                records = registries[registry_hrn].resolve(credential, hrn)
+                good_records = [record.as_dict() for record in record_list]
+                if good_records:
+                    return good_records
+            except:
+                pass 
+
+        # if we still havnt found the record yet, try the local registry
+        auth_hrn = self.api.auth.get_authority(hrn)
+        if not auth_hrn:
+            auth_hrn = hrn
+        table = self.api.auth.get_auth_table(auth_hrn)
+        records = table.resolve('*', hrn)
+        if not records:
+            raise RecordNotFound(hrn) 
+        for record in records:
+            try:
+                self.api.fill_record_info(record)
+                good_records.append(dict(record))
+            except PlanetLabRecordDoesNotExist:
+                raise
+                # silently drop the ones that are missing in PL
+                print >> log, "ignoring geni record ", record.get_name(), \
+                              " because pl record does not exist"
+                table.remove(record)
+
+
+        return good_records    
             
