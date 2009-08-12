@@ -1,0 +1,17 @@
+Examples:
+
+Add rules:
+
+e.g. 
+* sfatables -A INCOMING --requestor-hrn ple.emaniacs.* -j ACCEPT
+* sfatables -A INCOMING --requestor-hrn ple.* -j RESTRICT_NODES --include-only ple.emaniacs.pool_ple
+
+or
+
+* sfatables -A INCOMING --requestor-hrn=plc.princeton.coblitz requested=plc.tp.*[tp_coblitz=true] -> result=true
+requester=plc.princeton.other_whitelisted_slice requested=plc.tp.*[tp_coblitz=true] -> result=true
+requester=* requested=plc.tp.*[tp_coblitz=true] -> result=false
+
+Default policy:
+
+* sfatables -P INCOMING REJECT
