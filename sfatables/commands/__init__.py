@@ -1,5 +1,6 @@
 all = """
-add
-delete
-list
+Add
+Delete
+List
+SetDefault
 """.split()

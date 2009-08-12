@@ -12,7 +12,9 @@ import os
 import pdb
 from optparse import OptionParser
 
-def load_extensions(module):
+from sfatables import commands, matches, targets
+
+def load_extensions(module, list):
     command_dict={}
     module_path = ".".join(module.split('.')[:-1])
     pdb.set_trace()
@@ -38,7 +40,7 @@ def create_parser(command_dict):
 
 
 def main():
-    command_dict = load_extensions("sfa.sfatables.commands")
+    command_dict = load_extensions("sfatables.commands")
     command_parser = create_parser(command_dict)
     (options, args) = command_parser.parse_args()
 
@@ -52,12 +54,12 @@ def main():
     target_options = None
 
     if (selected_command.matches):
-        match_dict = load_extensions("sfa.sfatables.matches")
+        match_dict = load_extensions("sfatables.matches")
         match_parser = create_parser(match_dict)
         (options, args) = match_parser.parse_args(args[2:]) 
 
     if (selected_command.targets):
-        match_dict = load_extensions("sfa.sfatables.targets")
+        match_dict = load_extensions("sfatables.targets")
         target_parser = create_parser(match_dict)
         (options, args) = target_parser.parse_args(args[5:]) 
 
