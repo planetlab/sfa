@@ -516,14 +516,14 @@ class Certificate:
         # until a certificate is found that is signed by a trusted root.
 
         # TODO: verify expiration time
-        print "====Verify Chain====="
+        #print "====Verify Chain====="
         # if this cert is signed by a trusted_cert, then we are set
         for trusted_cert in trusted_certs:
-            print "***************"
+            #print "***************"
             # TODO: verify expiration of trusted_cert ?
-            print "CLIENT CERT", self.dump()
-            print "TRUSTED CERT", trusted_cert.dump()
-            print "Client is signed by Trusted?", self.is_signed_by_cert(trusted_cert)
+            #print "CLIENT CERT", self.dump()
+            #print "TRUSTED CERT", trusted_cert.dump()
+            #print "Client is signed by Trusted?", self.is_signed_by_cert(trusted_cert)
             if self.is_signed_by_cert(trusted_cert):
                 #print self.get_subject(), "is signed by a root"
                 return
