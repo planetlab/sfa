@@ -1,6 +1,6 @@
 ### $Id$
 ### $URL$
-
+import traceback
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
@@ -51,11 +51,11 @@ class resolve(Method):
             credential = self.api.getCredential()
             try:
                 records = registries[registry_hrn].resolve(credential, hrn)
-                good_records = [record.as_dict() for record in record_list]
+                good_records = [record.as_dict() for record in records]
                 if good_records:
                     return good_records
             except:
-                pass 
+                traceback.print_exc()
 
         # if we still havnt found the record yet, try the local registry
         auth_hrn = self.api.auth.get_authority(hrn)
