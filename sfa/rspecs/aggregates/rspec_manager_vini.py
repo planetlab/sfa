@@ -5,9 +5,57 @@ from sfa.server.registry import Registries
 from sfa.plc.nodes import *
 import sys
 import socket
+import re
 
 SFA_VINI_DEFAULT_RSPEC = '/etc/sfa/vini.rspec'
 SFA_VINI_WHITELIST = '/etc/sfa/vini.whitelist'
+
+# Taken from bwlimit.py
+#
+# See tc_util.c and http://physics.nist.gov/cuu/Units/binary.html. Be
+# warned that older versions of tc interpret "kbps", "mbps", "mbit",
+# and "kbit" to mean (in this system) "kibps", "mibps", "mibit", and
+# "kibit" and that if an older version is installed, all rates will
+# be off by a small fraction.
+suffixes = {
+    "":         1,
+    "bit":	1,
+    "kibit":	1024,
+    "kbit":	1000,
+    "mibit":	1024*1024,
+    "mbit":	1000000,
+    "gibit":	1024*1024*1024,
+    "gbit":	1000000000,
+    "tibit":	1024*1024*1024*1024,
+    "tbit":	1000000000000,
+    "bps":	8,
+    "kibps":	8*1024,
+    "kbps":	8000,
+    "mibps":	8*1024*1024,
+    "mbps":	8000000,
+    "gibps":	8*1024*1024*1024,
+    "gbps":	8000000000,
+    "tibps":	8*1024*1024*1024*1024,
+    "tbps":	8000000000000
+}
+
+
+def get_tc_rate(s):
+    """
+    Parses an integer or a tc rate string (e.g., 1.5mbit) into bits/second
+    """
+
+    if type(s) == int:
+        return s
+    m = re.match(r"([0-9.]+)(\D*)", s)
+    if m is None:
+        return -1
+    suffix = m.group(2).lower()
+    if suffixes.has_key(suffix):
+        return int(float(m.group(1)) * suffixes[suffix])
+    else:
+        return -1
+
 
 class Node:
     def __init__(self, node):
@@ -486,10 +534,25 @@ def create_slice(api, hrn, xml):
     whitelist = {}
     f = open(SFA_VINI_WHITELIST)
     for line in f.readlines():
-        (slice, bw) = line.split()
-        whitelist[slice] = bw
-    if not hrn in whitelist:
+        (slice, maxbw) = line.split()
+        whitelist[slice] = maxbw
+        
+    if hrn in whitelist:
+        maxbps = get_tc_rate(whitelist[hrn])
+    else:
         raise PermissionError("%s not in VINI whitelist" % hrn)
+        
+    ### Check to make sure that the slice isn't requesting more
+    ### than its maximum bandwidth.
+    linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
+    if linkspecs:
+        for l in linkspecs:
+            bw = l['bw'][0]
+            bps = get_tc_rate(bw)
+            if bps <= 0:
+                raise GeniInvalidArgument(bw, "BW")
+            if bps > maxbps:
+                raise PermissionError(" %s requested %s but max BW is %s" % (hrn, bw, whitelist[hrn]))
 
     # Check request against current allocations
     # Request OK
