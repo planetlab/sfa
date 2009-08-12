@@ -87,7 +87,7 @@ class sfaImport:
         AuthHierarchy = self.AuthHierarchy
         auth_info = AuthHierarchy.get_auth_info(auth_name)
 
-        table = GeniTable(cninfo=auth_info.get_dbinfo())
+        table = GeniTable(hrn=auth_name, cninfo=auth_info.get_dbinfo())
 
         # if the table doesn't exist, then it means we haven't put any records
         # into this authority yet.

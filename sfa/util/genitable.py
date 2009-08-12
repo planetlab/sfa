@@ -17,11 +17,14 @@ from sfa.util.debug import *
 
 class GeniTable:
 
-    GENI_TABLE_PREFIX = "sfa"
+    GENI_TABLE_PREFIX = "sfa$"
 
-    def __init__(self, create=False, cninfo=None):
+    def __init__(self, create=False, hrn="unspecified.default.registry", cninfo=None):
 
-        self.tablename = GeniTable.GENI_TABLE_PREFIX 
+        self.hrn = hrn
+
+        # pgsql doesn't like table names with "." in them, to replace it with "$"
+        self.tablename = GeniTable.GENI_TABLE_PREFIX + self.hrn.replace(".", "$")
 
         # establish a connection to the pgsql server
         self.cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
@@ -39,13 +42,9 @@ class GeniTable:
         return False
 
     def create(self):
-        seln't like table names with "." in them, to
-
-        # pgsql doesn't like table names with "." in them, to.hrn = hrn
         
         querystr = "CREATE TABLE " + self.tablename + " ( \
                 key text, \
-                authority text, \
                 hrn text, \
                 gid text, \
                 type text, \
@@ -54,7 +53,7 @@ class GeniTable:
                 last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP);"
         template = "CREATE INDEX %s_%s_idx ON %s (%s);"
         indexes = [template % ( self.tablename, field, self.tablename, field) \
-                   for field in ['key', 'authority', 'hrn', 'type','pointer']]
+                   for field in ['key', 'hrn', 'type','pointer']]
         # IF EXISTS doenst exist in postgres < 8.2
         try:
             self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
