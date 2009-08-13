@@ -1,5 +1,5 @@
 import os, time
-from sfa.sfatables.command import Add
+from sfatables.command import Command
 
 class List(Command):
     options = [('-L','--list')]

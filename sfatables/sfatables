@@ -1,0 +1,85 @@
+#!/usr/bin/python 
+# SFAtables is a tool for restricting access to an SFA aggregate in a generic
+# and extensible way. 
+
+# It is modeled using abstractions in iptables. Specifically, 'matches' specify
+# criteria for matching certain requests, 'targets' specify actions that treat
+# requests in a certain way, and 'chains' are used to group related
+# match-action pairs.
+
+import sys
+import os
+import pdb
+from optparse import OptionParser
+
+from sfatables import commands, matches, targets
+
+def load_extensions(module, list):
+    command_dict={}
+
+    for command_name in list:
+        command_module = __import__(".".join([module,command_name]),fromlist=[module])
+        command = getattr(command_module, command_name)
+        command_dict[command_name]=command()
+
+    return command_dict
+
+def create_parser(command_dict):
+    parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
+                             description='See "man sfatables" for more detail.')
+    
+    for k in command_dict.keys():
+        command = command_dict[k]
+        for (short_option,long_option) in command.options:
+            parser.add_option(short_option,long_option,dest=command.type,action=command.action,const=k,help=command.help,metavar="CHAIN")
+
+    return parser
+
+
+def partition(sep, lst):
+    ret = []
+    curpart = []
+    for item in lst:
+        if (item==sep):
+            ret.append(curpart)
+            curpart=[]
+        else:
+            curpart.append(item)
+    ret.append(curpart)
+
+    return ret
+
+
+def main():
+    # Segment command line into three blobs, one each for the command, match and target respectively.
+    
+    pargs = partition('--', sys.argv[1:])
+
+    command_dict = load_extensions("sfatables.commands",commands.all)
+    command_parser = create_parser(command_dict)
+    (options, args) = command_parser.parse_args()
+
+    command = command_dict[options.command]
+
+    if (command.matches):
+        if (len(pargs)<2):
+            raise Exception("Must specify match for this command")
+        match_dict = load_extensions("sfatables.matches",matches.all)
+        match_parser = create_parser(match_dict)
+        (match_options, args) = match_parser.parse_args(pargs[1])
+    else:
+        match_options=None
+
+    if (command.targets):
+        if (len(pargs)<3):
+            raise Exception("Must specify a target for this command")
+        match_dict = load_extensions("sfatables.targets",targets.all)
+        target_parser = create_parser(match_dict)
+        (target_options, args) = target_parser.parse_args(pargs[2])
+    else:
+        target_options = None
+
+    command(options, match_options, target_options)
+
+if __name__=='__main__':
+    main()

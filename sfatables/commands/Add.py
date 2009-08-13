@@ -1,19 +1,16 @@
 import os, time
-from sfa.sfatables.command import Add
+from sfatables.command import Command
 
 class Add(Command):
     options = [('-A','--add')]
     help = 'Add a rule to a chain'
-    key='add_rule'
-    matches = False
-    targets = False
+    matches = True
+    targets = True
 
     def __init__(self):
         return
 
-    def call(self):
+    def call(self, command_options, match_options, target_options):
         # Override this function
         return True
 
-    def __call__(self, option, opt_str, value, parser, *args, **kwargs):
-        return self.call(option)

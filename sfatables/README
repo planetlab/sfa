@@ -8,10 +8,6 @@ e.g.
 
 or
 
-* sfatables -A INCOMING --requestor-hrn=plc.princeton.coblitz requested=plc.tp.*[tp_coblitz=true] -> result=true
-requester=plc.princeton.other_whitelisted_slice requested=plc.tp.*[tp_coblitz=true] -> result=true
-requester=* requested=plc.tp.*[tp_coblitz=true] -> result=false
-
 Default policy:
 
 * sfatables -P INCOMING REJECT
