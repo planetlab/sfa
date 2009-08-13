@@ -29,7 +29,6 @@ class Aggregate(GeniServer):
     # @param port the port to listen on
     # @param key_file private key filename of registry
     # @param cert_file certificate filename containing public key (could be a GID file)     
-
     def __init__(self, ip, port, key_file, cert_file):
         GeniServer.__init__(self, ip, port, key_file, cert_file)
         self.server.interface = 'aggregate'
@@ -44,7 +43,7 @@ class Aggregates(dict):
     def __init__(self, api, file = "/etc/sfa/aggregates.xml"):
         dict.__init__(self, {})
         self.api = api
-
+        self.interfaces = []
         # create default connection dict
         connection_dict = {}
         for field in self.required_fields:
@@ -70,7 +69,6 @@ class Aggregates(dict):
         self.aggregate_info.load()
         self.connectAggregates()
 
-
     def connectAggregates(self):
         """
         Get connection details for the trusted peer aggregates from file and 
@@ -87,6 +85,7 @@ class Aggregates(dict):
                 hrn, address, port = aggregate['hrn'], aggregate['addr'], aggregate['port']
                 if not hrn or not address or not port:
                     continue
+                self.interfaces.append(aggregate)
                 # check which client we should use
                 # geniclient is default
                 client_type = 'geniclient'
@@ -109,4 +108,5 @@ class Aggregates(dict):
         port = self.api.config.SFA_AGGREGATE_PORT
         url = 'http://%(address)s:%(port)s' % locals()
         self[self.api.hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)
-                   
+
+

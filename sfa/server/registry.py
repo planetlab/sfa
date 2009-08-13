@@ -50,7 +50,8 @@ class Registries(dict):
     def __init__(self, api, file = "/etc/sfa/registries.xml"):
         dict.__init__(self, {})
         self.api = api
-    
+        self.interfaces = []
+       
         # create default connection dict
         connection_dict = {}
         for field in self.required_fields:
@@ -93,7 +94,7 @@ class Registries(dict):
                 hrn, address, port = registry['hrn'], registry['addr'], registry['port']
                 if not hrn or not address or not port:
                     continue
-
+                self.interfaces.append(registry)
                 # check which client we should use
                 # geniclient is default
                 client_type = 'geniclient'
