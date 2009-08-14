@@ -3,11 +3,30 @@ Examples:
 Add rules:
 
 e.g. 
-* sfatables -A INCOMING --requestor-hrn ple.emaniacs.* -j ACCEPT
-* sfatables -A INCOMING --requestor-hrn ple.* -j RESTRICT_NODES --include-only ple.emaniacs.pool_ple
+* sfatables -A INCOMING --requester-hrn ple.emaniacs.* -j ACCEPT
+* sfatables -A INCOMING --requester-hrn ple.* -j RESTRICT_NODES --include-only-nodegroup ple.emaniacs.pool_ple
 
 or
 
 Default policy:
 
 * sfatables -P INCOMING REJECT
+
+
+Overview:
+
+- The OUTGOING chain is for restricting access by hiding resources. Run as a filter on the output of get_resources. Good for resources to be marked 'unavailable.'
+
+- The INCOMING chain is for restricting access through denial. Run as a filter on the input to set_resources.  Good for restricting access to resources.
+
+- A 'match' is a program that decides if a certain request matches a set of specified criteria (e.g. user.hrn==x or slice.site.slices > 20) 
+
+- A 'target' is an action to perform as a result of a match (e.g. remove nodes plc.tp.* or restrict nodes to plc.some_nodegroup)
+
+Additionally, specifying rules in this chain and making the resulting policy available to users lets them optimize their allocation within the space of possibilities they have.
+E.g. if the policy is that your site is limited to < 1000 slivers (e.g. sfatables -A INCOMING --requester-hrn plc.* -j GLOBAL_LIMIT --site-sliver-limit 1000). 
+
+- On startup, sfa loads the available set of matches and targets. In doing so, it remembers the input that these matches and targets need. E.g., a 'user hrn' match
+only requires the user's HRN. A site's slice count match may require the number of slices/site. The config file consists of a set of 
+
+- When sfa needs to invoke sfatables, it passes a 'rule context' (i.e. the parameter to the sfatables command line) along with the input from the current context to the appropriate match. If it returns True, then it goes on to invoke target specified by the rule, and uses the filtered version of the rspec that it produces.
