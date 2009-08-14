@@ -1,0 +1,9 @@
+<rspec-match>
+<context-input>
+<sfa><user><hrn>plc.princeton.sapan</hrn></user></sfa>
+</context-input>
+
+<rule-input>
+<sfa><user><hrn>plc.princeton</hrn></user></sfa>
+</rule-input>
+</rspec-match>
