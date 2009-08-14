@@ -44,7 +44,7 @@ def editDict(args, recordDict, options):
  
         elif vect.count("="):
             # reassign value
-            replaceDict({vect.split("=")[0]: returnVal(vect.split("=")[1])},
+            replaceDict({vect.split("=")[0]: returnVal("=".join(vect.split("=")[1:]))},
                          recordDict, options) 
         else:
             if vect in recordDict:
