@@ -218,8 +218,17 @@ class GeniClient:
         result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
         return result
 
+    ## list info about all known aggregates
+
     def get_aggregates(self, cred, hrn=None):
-        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
+        result = self.server.get_aggregates(cred.save_to_string(save_parents=True), hrn)
+        return result
+
+
+    ## list info about all known registries
+
+    def get_registries(self, cred, hrn=None):
+        result = self.server.get_registries(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ## get policy

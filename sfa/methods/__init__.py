@@ -3,7 +3,9 @@ all = """
 create_gid
 create_slice
 delete_slice
+get_aggregates
 get_credential
+get_registries
 get_resources
 get_slices
 get_ticket

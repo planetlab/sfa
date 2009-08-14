@@ -276,6 +276,8 @@ class Sfi:
                   "remove": "name",
                   "add": "record",
                   "update": "record",
+                  "aggregates": "[name]",
+                  "registries": "[name]",   
                   "slices": "",
                   "resources": "[name]",
                   "create": "name rspec",
@@ -507,7 +509,28 @@ class Sfi:
        else:
            raise "unknown record type" + record.get_type()
        return self.registry.update(cred, record)
+   
     
+    def aggregates(self, opts, args):
+        user_cred = self.get_user_cred()
+        hrn = None
+        if args: 
+            hrn = args[0]
+        
+        result = self.registry.get_aggregates(user_cred, hrn)
+        self.display_list(result)
+        return 
+
+    def registries(self, opts, args):
+        user_cred = self.get_user_cred()
+        hrn = None
+        if args:
+            hrn = args[0]
+        
+        result = self.registry.get_registries(user_cred, hrn)
+        self.display_list(result)
+        return
+ 
     #
     # Slice-related commands
     #
