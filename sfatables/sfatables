@@ -14,17 +14,17 @@ import libxml2
 from optparse import OptionParser
 
 from sfatables import commands, matches, targets
-from sfatables import Xmlextension
+from sfatables.xmlextension import Xmlextension
 
 def load_commands(module, list):
-    ext_dict={}
+    command_dict={}
 
     for command_name in list:
         command_module = __import__(".".join([module,command_name]),fromlist=[module])
         command = getattr(command_module, command_name)
         command_dict[command_name]=command()
 
-    return ext_dict
+    return command_dict
 
 def load_xml_extensions(module, list):
     ext_dict={}
@@ -51,8 +51,8 @@ def xml_ext_create_parser(ext_dict):
     parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
                              description='See "man sfatables" for more detail.')
     
-    for k in command_dict.keys():
-        command = command_dict[k]
+    for k in ext_dict.keys():
+        command = ext_dict[k]
         for arg in command.arguments:
             parser.add_option(None,"--"+arg,dest=arg,help=command.help,metavar=command.operand)
 
