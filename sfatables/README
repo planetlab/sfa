@@ -30,3 +30,10 @@ E.g. if the policy is that your site is limited to < 1000 slivers (e.g. sfatable
 only requires the user's HRN. A site's slice count match may require the number of slices/site. The config file consists of a set of 
 
 - When sfa needs to invoke sfatables, it passes a 'rule context' (i.e. the parameter to the sfatables command line) along with the input from the current context to the appropriate match. If it returns True, then it goes on to invoke target specified by the rule, and uses the filtered version of the rspec that it produces.
+
+
+Specifics:
+
+- On startup sfa calls sfatables.load(), which loads available commands, matches and targets
+
+- When invoking sfatables 

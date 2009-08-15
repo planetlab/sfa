@@ -10,19 +10,31 @@
 import sys
 import os
 import pdb
+import libxml2
 from optparse import OptionParser
 
 from sfatables import commands, matches, targets
+from sfatables import Xmlextension
 
-def load_extensions(module, list):
-    command_dict={}
+def load_commands(module, list):
+    ext_dict={}
 
     for command_name in list:
         command_module = __import__(".".join([module,command_name]),fromlist=[module])
         command = getattr(command_module, command_name)
         command_dict[command_name]=command()
 
-    return command_dict
+    return ext_dict
+
+def load_xml_extensions(module, list):
+    ext_dict={}
+
+    for ext_name in list:
+        module = Xmlextension(ext_name)
+        ext_dict[ext_name]=module
+
+    return ext_dict
+
 
 def create_parser(command_dict):
     parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
@@ -32,6 +44,17 @@ def create_parser(command_dict):
         command = command_dict[k]
         for (short_option,long_option) in command.options:
             parser.add_option(short_option,long_option,dest=command.type,action=command.action,const=k,help=command.help,metavar="CHAIN")
+
+    return parser
+
+def xml_ext_create_parser(ext_dict):
+    parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
+                             description='See "man sfatables" for more detail.')
+    
+    for k in command_dict.keys():
+        command = command_dict[k]
+        for arg in command.arguments:
+            parser.add_option(None,"--"+arg,dest=arg,help=command.help,metavar=command.operand)
 
     return parser
 
@@ -55,7 +78,7 @@ def main():
     
     pargs = partition('--', sys.argv[1:])
 
-    command_dict = load_extensions("sfatables.commands",commands.all)
+    command_dict = load_commands("sfatables.commands",commands.all)
     command_parser = create_parser(command_dict)
     (options, args) = command_parser.parse_args()
 
@@ -64,7 +87,7 @@ def main():
     if (command.matches):
         if (len(pargs)<2):
             raise Exception("Must specify match for this command")
-        match_dict = load_extensions("sfatables.matches",matches.all)
+        match_dict = load_xml_extensions("sfatables.matches",matches.all)
         match_parser = create_parser(match_dict)
         (match_options, args) = match_parser.parse_args(pargs[1])
     else:
@@ -73,7 +96,7 @@ def main():
     if (command.targets):
         if (len(pargs)<3):
             raise Exception("Must specify a target for this command")
-        match_dict = load_extensions("sfatables.targets",targets.all)
+        match_dict = load_xml_extensions("sfatables.targets",targets.all)
         target_parser = create_parser(match_dict)
         (target_options, args) = target_parser.parse_args(pargs[2])
     else:

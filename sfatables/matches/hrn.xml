@@ -7,8 +7,8 @@ as the one matched by this rule.
 
 -->
 
-<match xmlns="http://www.planet-lab.org/sfa/sfatables/match/2009/8">
-    <sfa-input select="//sfa//user/hrn"/>
-    <rule-input select="//request//user/hrn"/>
+<match>
+    <context select="//sfa//user/hrn"/>
+    <rule><argument param="user-hrn"/></rule-input>
     <processor name="hrn.xsl"/>
 </match>
