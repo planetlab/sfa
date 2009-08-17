@@ -130,8 +130,8 @@ class GeniClient:
     #
     # @return list of record objects
 
-    def list(self, cred, auth_hrn):
-        result_dict_list = self.server.list(cred.save_to_string(save_parents=True), auth_hrn)
+    def list(self, cred, auth_hrn, caller_cred=None):
+        result_dict_list = self.server.list(cred.save_to_string(save_parents=True), auth_hrn, caller_cred)
         result_rec_list = []
         for dict in result_dict_list:
              result_rec_list.append(GeniRecord(dict=dict))
@@ -214,21 +214,12 @@ class GeniClient:
     # @param cred a credential
     # @param hrn slice hrn
 
-    def get_resources(self, cred, hrn=None):
-        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
+    def get_resources(self, cred, hrn=None, caller_cred=None):
+        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn, caller_cred)
         return result
-
-    ## list info about all known aggregates
 
     def get_aggregates(self, cred, hrn=None):
-        result = self.server.get_aggregates(cred.save_to_string(save_parents=True), hrn)
-        return result
-
-
-    ## list info about all known registries
-
-    def get_registries(self, cred, hrn=None):
-        result = self.server.get_registries(cred.save_to_string(save_parents=True), hrn)
+        result = self.server.get_resources(cred.save_to_string(save_parents=True), hrn)
         return result
 
     ## get policy
@@ -244,8 +235,8 @@ class GeniClient:
     # @param cred a credential
     # @param rspec resource specification defining how to instantiate the slice
     
-    def create_slice(self, cred, hrn, rspec):
-        result = self.server.create_slice(cred.save_to_string(save_parents=True), hrn, rspec)
+    def create_slice(self, cred, hrn, rspec, caller_cred=None):
+        result = self.server.create_slice(cred.save_to_string(save_parents=True), hrn, rspec, caller_cred)
         return result
 
 
@@ -253,8 +244,8 @@ class GeniClient:
     #
     # @param cred a credential
     # @param hrn slice to delete
-    def delete_slice(self, cred, hrn):
-        result = self.server.delete_slice(cred.save_to_string(save_parents=True), hrn)
+    def delete_slice(self, cred, hrn, caller_cred=None):
+        result = self.server.delete_slice(cred.save_to_string(save_parents=True), hrn, caller_cred)
         return result    
 
     # ------------------------------------------------------------------------
@@ -297,8 +288,8 @@ class GeniClient:
     # @param cred a credential identifying the caller (callerGID) and the slice
     #     (objectGID)
 
-    def delete_slice(self, cred, hrn):
-        result = self.server.delete_slice(cred.save_to_string(save_parents=True), hrn)
+    def delete_slice(self, cred, hrn, caller_cred=None):
+        result = self.server.delete_slice(cred.save_to_string(save_parents=True), hrn, caller_cred)
         return result
 
     ##

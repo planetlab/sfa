@@ -19,6 +19,8 @@ from sfa.trust.rights import *
 from sfa.trust.credential import *
 from sfa.util.misc import *
 
+from sfa.util.sfalogging import *
+
 # See "2.2 Characters" in the XML specification:
 #
 # #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD]
@@ -119,7 +121,7 @@ class GeniAPI:
         self.plshell_version = self.getPLCShellVersion()
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
-
+	self.logger=get_sfa_logger()
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
@@ -495,7 +497,6 @@ class GeniAPI:
         """
         Handle an XML-RPC or SOAP request from the specified source.
         """
-
         # Parse request into method name and arguments
         try:
             interface = xmlrpclib
@@ -535,3 +536,4 @@ class GeniAPI:
             data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
 
         return data
+

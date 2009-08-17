@@ -19,7 +19,7 @@ from sfa.server.registry import Registries
 
 class Slices(SimpleStorage):
 
-    def __init__(self, api, ttl = .5):
+    def __init__(self, api, ttl = .5, caller_cred=None):
         self.api = api
         self.ttl = ttl
         self.threshold = None
@@ -30,6 +30,7 @@ class Slices(SimpleStorage):
         SimpleStorage.__init__(self, self.slices_file)
         self.policy = Policy(self.api)    
         self.load()
+	self.caller_cred=caller_cred
 
 
     def get_peer(self, hrn):
@@ -138,7 +139,7 @@ class Slices(SimpleStorage):
         aggregates = Aggregates(self.api)
         for aggregate in aggregates:
             try:
-                aggregates[aggregate].delete_slice(credential, hrn)
+                aggregates[aggregate].delete_slice(credential, hrn, caller_cred=self.caller_cred)
             except:
                 print >> log, "Error calling list nodes at aggregate %s" % aggregate
                 traceback.print_exc(log)
@@ -339,9 +340,9 @@ class Slices(SimpleStorage):
             try:
                 # send the whloe rspec to the local aggregate
                 if aggregate in [self.api.hrn]:
-                    aggregates[aggregate].create_slice(credential, hrn, rspec)
+                    aggregates[aggregate].create_slice(credential, hrn, rspec, caller_cred=self.caller_cred)
                 else:
-                    aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate])
+                    aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate], caller_cred=self.caller_cred)
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
                 traceback.print_exc()
