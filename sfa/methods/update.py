@@ -6,6 +6,8 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.record import GeniRecord
+from sfa.trust.certificate import Keypair, convert_public_key
+from sfa.trust.gid import *
 from sfa.util.debug import log
 
 class update(Method):
@@ -76,6 +78,39 @@ class update(Method):
                     update_fields[key] = all_fields[key]
             self.api.plshell.UpdatePerson(self.api.plauth, pointer, update_fields)
 
+            if 'key' in record and record['key']:
+                # must check this key against the previous one if it exists
+                persons = self.api.plshell.GetPersons(self.api.plauth, [pointer], ['key_ids'])
+                person = persons[0]
+                keys = person['key_ids']
+                keys = GetKeys(person['key_ids'])
+                key_exists = False
+                # Delete all stale keys
+                for key in keys:
+                    if record['key'] != key['key']:
+                        self.api.plshell.DeleteKey(self.api.plauth, key['key_id'])
+                    else:
+                        key_exists = True
+                if not key_exists:
+                    self.api.plshell.AddPersonKey(pointer, {'key_type': 'ssh', 'key': record['key']})
+
+                # find the existing geni record
+                hrn = record['hrn']
+                auth_name = self.api.auth.get_authority(hrn)
+                auth_info = self.api.auth.get_auth_info(auth_name)
+                table = self.api.auth.get_auth_table(auth_name)
+                person_records = table.resolve('user', hrn)
+                person_record = person_records[0]
+                
+                # update the openssl key and gid
+                pkey = convert_public_key(record['key'])
+                uuid = create_uuid()
+                gid_object = self.api.auth.hierarchy.create_gid(hrn, uuid, pkey)
+                gid = gid_object.save_to_string(save_parents=True)
+                person_record['gid'] = gid
+                person_record.set_gid(gid)
+                table.update(person_record)
+                 
         elif type == "node":
             self.api.plshell.UpdateNode(self.api.plauth, pointer, record)
 
