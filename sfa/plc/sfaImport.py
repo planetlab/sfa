@@ -284,7 +284,7 @@ class sfaImport:
         if type in ['slice'] and 'name' in object and object['name']:
             slice_name = object['name'].split("_")[0]
             hrn = parent_hrn + "." + slice_name
-        elif type in ['user', 'person'] and 'email' in object and object['email']:
+        elif type in ['user'] and 'email' in object and object['email']:
             person_name = object['email'].split('@')[0]
             hrn = parent_hrn + "." + person_name
         elif type in ['node'] and 'hostname' in object and object['hostname']:
