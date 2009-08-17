@@ -6,6 +6,7 @@ from sfa.util.misc import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
+from sfa.trust.credential import Credential
 
 from sfa.plc.slices import Slices
 
@@ -27,9 +28,14 @@ class delete_slice(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn):
+    def call(self, cred, hrn, caller_cred=None):
        
+	if caller_cred==None:
+	   caller_cred=cred
+	#log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+
         self.api.auth.check(cred, 'deleteslice')
-        slices = Slices(self.api)
+        slices = Slices(self.api, caller_cred=caller_cred)
         slices.delete_slice(hrn)
         return 1

@@ -9,6 +9,7 @@ from sfa.util.config import Config
 from sfa.plc.nodes import Nodes
 # RSpecManager_pl is not used. This is just to resolve issues with the dynamic __import__ that comes later.
 import sfa.rspecs.aggregates.rspec_manager_pl
+from sfa.trust.credential import Credential
 
 class get_resources(Method):
     """
@@ -30,12 +31,18 @@ class get_resources(Method):
 
     returns = Parameter(str, "String representatin of an rspec")
     
-    def call(self, cred, hrn=None):
+    def call(self, cred, hrn=None, caller_cred=None):
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
 
         self.api.auth.check(cred, 'listnodes')
+	if caller_cred==None:
+	   caller_cred=cred
+
+        #log the call
+	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+
         if (sfa_aggregate_type == 'pl'):
-            nodes = Nodes(self.api)
+            nodes = Nodes(self.api, caller_cred=caller_cred)
             if hrn:
                 rspec = nodes.get_rspec(hrn)
             else:
