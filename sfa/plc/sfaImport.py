@@ -292,10 +292,16 @@ class sfaImport:
             hrn = parent_hrn + "." + node_name
         elif type in ['site'] and 'login_base' in object and object['login_base']:
             site_name = object['login_base']
-            hrn = parent_hrn + "." + site_name         
+            hrn = parent_hrn
+            parent_hrn = get_authority(hrn)
+            type = "authority"
+            # delete the site table
+            site_table = self.get_auth_table(hrn)
+            site_table.drop()
         else:
             return
-
+        
+        # delete the record
         table = self.get_auth_table(parent_hrn)
         record_list = table.resolve(type, hrn)
         if not record_list:

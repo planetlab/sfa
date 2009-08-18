@@ -139,6 +139,15 @@ class GeniTable:
             result_rec_list.append(GeniRecord(dict=dict).as_dict())
         return result_rec_list
 
+    def drop(self):
+        try:
+            self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
+        except ProgrammingError:
+            try:
+                self.cnx.query('DROP TABLE ' + self.tablename)
+            except ProgrammingError:
+                pass
+    
     @staticmethod
     def geni_records_purge(cninfo):
 
