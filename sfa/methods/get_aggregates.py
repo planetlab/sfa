@@ -1,6 +1,6 @@
 ### $Id: get_slices.py 14387 2009-07-08 18:19:11Z faiyaza $
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/get_aggregates.py $
-
+from types import StringTypes
 from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.method import Method
@@ -32,4 +32,16 @@ class get_aggregates(Method):
        
         self.api.auth.check(cred, 'list')
         aggregates = Aggregates(self.api)
-        return aggregates.interfaces
+        hrn_list = [] 
+        if hrn:
+            if isinstance(hrn, StringTypes):
+                hrn_list = [hrn]
+            elif isinstance(hrn, list):
+                hrn_list = hrn
+        
+        if not hrn_list:
+            interfaces = aggregates.interfaces
+        else:
+            interfaces = [interface for interface in aggregates.interfaces if interface['hrn'] in hrn_list]
+      
+        return interfaces
