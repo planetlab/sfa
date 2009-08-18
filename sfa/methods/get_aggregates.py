@@ -32,6 +32,4 @@ class get_aggregates(Method):
        
         self.api.auth.check(cred, 'list')
         aggregates = Aggregates(self.api)
-        print "SHIT"
-        print aggregates.interfaces
         return aggregates.interfaces
