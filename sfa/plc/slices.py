@@ -207,6 +207,8 @@ class Slices(SimpleStorage):
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
             else:
                 site = sites[0]
+                site_id = site['site_id']
+                remote_site_id = site['peer_site_id']
             
             # create slice object
             slice_fields = {}
@@ -263,9 +265,13 @@ class Slices(SimpleStorage):
             # an error
             if peer:
                 self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer)
-            self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)   
+                self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'site', site_id,  peer)
+
+            self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)
+            self.api.plshell.AddPersonToSite(self.api.plauth, person_dict['email'], site_id)   
             if peer:
-               self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+                self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+                self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id) 
 
             # Get this users local keys
             keylist = self.api.plshell.GetKeys(self.api.plauth, key_ids, ['key'])
