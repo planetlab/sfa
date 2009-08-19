@@ -107,6 +107,8 @@ class Aggregates(dict):
         address = self.api.config.SFA_AGGREGATE_HOST
         port = self.api.config.SFA_AGGREGATE_PORT
         url = 'http://%(address)s:%(port)s' % locals()
+        local_aggregate = {'hrn': self.api.hrn, 'addr': ext_ip, 'port': port}
+        self.interfaces.append(local_aggregate) 
         self[self.api.hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)
 
 

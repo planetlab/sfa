@@ -116,5 +116,7 @@ class Registries(dict):
         address = self.api.config.SFA_REGISTRY_HOST
         port = self.api.config.SFA_REGISTRY_PORT
         url = 'http://%(address)s:%(port)s' % locals()
+        local_registry = {'hrn': self.api.hrn, 'addr': address, 'port': port}
+        self.interfaces.append(local_registry)
         self[self.api.hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)            
     
