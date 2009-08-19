@@ -274,7 +274,7 @@ class Rspec:
         """
         Convert a dictionary into a dom object and store it.
         """
-        self.rootNode = self.dict2dom(rdict, include_doc)
+        self.rootNode = self.dict2dom(rdict, include_doc).childNodes[0]
  
  
     def getDictsByTagName(self, tagname, dom = None):
