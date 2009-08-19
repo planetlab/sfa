@@ -89,7 +89,8 @@ class Sfi:
        # Get key and certificate
        key_file = self.get_key_file()
        cert_file = self.get_cert_file(key_file)
-    
+       self.key_file = key_file
+       self.cert_file = cert_file 
        # Establish connection to server(s)
        self.slicemgr = GeniClient(sm_url, key_file, cert_file, self.options.protocol)
        self.registry = GeniClient(reg_url, key_file, cert_file, self.options.protocol)
@@ -306,7 +307,13 @@ class Sfi:
            parser.add_option("-f", "--format", dest="format",type="choice",
                              help="display format ([xml]|dns|ip)",default="xml",
                              choices=("xml","dns","ip"))
-
+           parser.add_option("-a", "--aggregate", dest="aggregate",
+                             default=None, help="aggregate hrn")  
+    
+       if command in ("create"):
+           parser.add_option("-a", "--aggregate", dest="aggregate",default=None,
+                             help="aggregate hrn") 
+ 
        if command in ("list", "show", "remove"):
           parser.add_option("-t", "--type", dest="type",type="choice",
                             help="type filter ([all]|user|slice|sa|ma|node|aggregate)",
@@ -546,13 +553,22 @@ class Sfi:
     
     # show rspec for named slice
     def resources(self,opts, args):
+       user_cred = self.get_user_cred()
+       server = self.slicemgr
+       if opts.aggregate:
+            aggregates = self.registry.get_aggregates(user_cred, opts.aggregate)
+            if not aggregates:
+                raise Exception, "No such aggregate %s" % opts.aggregate
+            aggregate = aggregates[0]
+            url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])     
+            server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
        if args:
-           slice_cred = self.get_slice_cred(args[0])
-           result = self.slicemgr.get_resources(slice_cred, args[0])
+            slice_cred = self.get_slice_cred(args[0])
+            result = server.get_resources(slice_cred, args[0])
        else:
-           user_cred = self.get_user_cred()
-           result = self.slicemgr.get_resources(user_cred)
-       format = opts.format      
+            result = server.get_resources(user_cred)
+       format = opts.format
+       
        self.display_rspec(result, format)
        if (opts.file is not None):
           self.save_rspec_to_file(result, opts.file)
@@ -561,10 +577,19 @@ class Sfi:
     # created named slice with given rspec
     def create(self,opts, args):
        slice_hrn = args[0]
+       user_cred = self.get_user_cred()
        slice_cred = self.get_slice_cred(slice_hrn)
        rspec_file = self.get_rspec_file(args[1])
        rspec=open(rspec_file).read()
-       return self.slicemgr.create_slice(slice_cred, slice_hrn, rspec)
+       server = self.slicemgr
+       if opts.aggregate:
+           aggregates = self.registry.get_aggregates(user_cred, opts.aggregate)
+           if not aggregates:
+               raise Exception, "No such aggregate %s" % opts.aggregate
+           aggregate = aggregates[0]
+           url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
+           server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
+       return server.create_slice(slice_cred, slice_hrn, rspec)
     
     # delete named slice
     def delete(self,opts, args):
