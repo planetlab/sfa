@@ -25,7 +25,7 @@ class ViniRspec(Rspec):
                 ndict = {}
                 ndict['hostname'] = [node.hostname]
                 ndict['name'] = node.tag
-                ndict['bw'] = ['999Mbit']
+                ndict['bw'] = [format_tc_rate(node.bps)] 
                 nodespecs.append(ndict)
             sdict['NodeSpec'] = nodespecs
             sdict['name'] = site.name
@@ -35,7 +35,7 @@ class ViniRspec(Rspec):
                 if sl.site1 == site:
                     sldict = {}
                     sldict['endpoint'] = [sl.site1.name, sl.site2.name]
-                    sldict['bw'] = [str(sl.availMbps) + "Mbit"]
+                    sldict['bw'] = [format_tc_rate(sl.bps)]
                     sitelinkspecs.append(sldict)
                     
         d['Rspec']['Capacity'][0]['NetSpec'][0]['SiteSpec'] = sitespecs

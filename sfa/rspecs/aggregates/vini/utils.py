@@ -48,14 +48,29 @@ def get_tc_rate(s):
     else:
         return -1
 
+def format_tc_rate(rate):
+    """
+    Formats a bits/second rate into a tc rate string
+    """
+
+    if rate >= 1000000000 and (rate % 1000000000) == 0:
+        return "%.0fgbit" % (rate / 1000000000.)
+    elif rate >= 1000000 and (rate % 1000000) == 0:
+        return "%.0fmbit" % (rate / 1000000.)
+    elif rate >= 1000:
+        return "%.0fkbit" % (rate / 1000.)
+    else:
+        return "%.0fbit" % rate
+
 
 class Node:
-    def __init__(self, node):
+    def __init__(self, node, mbps = 1000):
         self.id = node['node_id']
         self.hostname = node['hostname']
         self.shortname = self.hostname.replace('.vini-veritas.net', '')
         self.site_id = node['site_id']
         self.ipaddr = socket.gethostbyname(self.hostname)
+        self.bps = mbps * 1000000
         self.links = []
 
     def get_link_id(self, remote):
@@ -106,14 +121,22 @@ class Node:
             self.tag = s.tag + index
         else:
             self.tag = None
-        
+
+    # Assumes there is at most one SiteLink between two sites
+    def get_sitelink(self, node, sites):
+        site1 = sites[self.site_id]
+        site2 = sites[node.site_id]
+        sl = site1.sitelinks.intersection(site2.sitelinks)
+        if len(sl):
+            return sl.pop()
+        return None
+    
 
 class SiteLink:
     def __init__(self, site1, site2, mbps = 1000):
         self.site1 = site1
         self.site2 = site2
-        self.totalMbps = mbps
-        self.availMbps = mbps
+        self.bps = mbps * 1000000
         
         site1.add_sitelink(self)
         site2.add_sitelink(self)
@@ -126,7 +149,7 @@ class Site:
         self.name = site['abbreviated_name']
         self.tag = site['login_base']
         self.public = site['is_public']
-        self.sitelinks = []
+        self.sitelinks = set()
 
     def get_sitenodes(self, nodes):
         n = []
@@ -135,7 +158,7 @@ class Site:
         return n
     
     def add_sitelink(self, link):
-        self.sitelinks.append(link)
+        self.sitelinks.add(link)
     
     
 class Slice:
@@ -362,8 +385,24 @@ def get_topology(api):
     
     for (s1, s2) in PhysicalLinks:
         SiteLink(sites[s1], sites[s2])
-
+        
     for id in nodes:
         nodes[id].add_tag(sites)
+        
+    for t in tags:
+        tag = tags[t]
+        if tag.tagname == 'topo_rspec':
+            node1 = nodes[tag.node_id]
+            l = eval(tag.value)
+            for (id, realip, bw, lvip, rvip, vnet) in l:
+                allocbps = get_tc_rate(bw)
+                node1.bps -= allocbps
+                try:
+                    node2 = nodes[id]
+                    if node1.id < node2.id:
+                        sl = node1.get_sitelink(node2, sites)
+                        sl.bps -= allocbps
+                except:
+                    pass
         
     return (sites, nodes, tags)
