@@ -3,10 +3,10 @@ from sfa.util.misc import *
 from sfa.util.rspec import Rspec
 from sfa.server.registry import Registries
 from sfa.plc.nodes import *
-from sfa.rspecs.aggregates.vini_utils import *
+from sfa.rspecs.aggregates.vini.utils import *
+from sfa.rspecs.aggregates.vini.rspec import *
 import sys
 
-SFA_VINI_DEFAULT_RSPEC = '/etc/sfa/vini.rspec'
 SFA_VINI_WHITELIST = '/etc/sfa/vini.whitelist'
 
 """
@@ -134,62 +134,54 @@ def create_slice_vini_aggregate(api, hrn, nodes):
     return 1
 
 def get_rspec(api, hrn):
-    # Get default rspec
-    default = Rspec()
-    default.parseFile(SFA_VINI_DEFAULT_RSPEC)
+    rspec = ViniRspec()  
+    (sites, nodes, tags) = get_topology(api)  
+
+    rspec.updateCapacity(sites, nodes)
     
     if (hrn):
         slicename = hrn_to_pl_slicename(hrn)
-        defaultrspec = default.toDict()
-        nodedict = get_nodedict(defaultrspec)
-
-        # call the default sfa.plc.nodes.get_rspec() method
-        nodes = Nodes(api)	
-        rspec = nodes.get_rspec(hrn)     
-
-        # Grab all the PLC info we'll need at once
         slice = get_slice(api, slicename)
         if slice:
-            nodes = get_nodes(api)
-            tags = get_slice_tags(api)
+            slice.hrn = hrn
+            rspec.updateRequest(slice, nodes, tags)
+        else:
+            # call the default sfa.plc.nodes.get_rspec() method
+            return Nodes(api).get_rspec(hrn)     
 
-            # Add the node tags from the Capacity statement to Node objects
-            for (k, v) in nodedict.iteritems():
-                for id in nodes:
-                    if v == nodes[id].hostname:
-                        nodes[id].tag = k
-
-            endpoints = []
-            for node in slice.get_nodes(nodes):
-                linktag = slice.get_tag('topo_rspec', tags, node)
-                if linktag:
-                    l = eval(linktag.value)
-                    for (id, realip, bw, lvip, rvip, vnet) in l:
-                        endpoints.append((node.id, id, bw))
-            
-            if endpoints:
-                linkspecs = []
-                for (l, r, bw) in endpoints:
-                    if (r, l, bw) in endpoints:
-                        if l < r:
-                            edict = {}
-                            edict['endpoint'] = [nodes[l].tag, nodes[r].tag]
-                            edict['bw'] = [bw]
-                            linkspecs.append(edict)
-
-                d = default.toDict()
-                d['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec'] = linkspecs
-                d['Rspec']['Request'][0]['NetSpec'][0]['name'] = hrn
-                new = Rspec()
-                new.parseDict(d)
-                rspec = new.toxml()
-    else:
-        # Return canned response for now...
-        rspec = default.toxml()
-
-    return rspec
+    return rspec.toxml()
 
 
+"""
+Check the requested topology against the available topology and capacity
+"""
+def check_request(hrn, rspec, nodes, sites, sitelinks, maxbw):
+    linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
+    if linkspecs:
+        for l in linkspecs:
+            n1 = Node.lookup(l['endpoint'][0])
+            n2 = Node.lookup(l['endpoint'][1])
+            bw = l['bw'][0]
+            reqbps = get_tc_rate(bw)
+            maxbps = get_tc_rate(maxbw)
+
+            if reqbps <= 0:
+                raise GeniInvalidArgument(bw, "BW")
+            if reqbps > maxbps:
+                raise PermissionError(" %s requested %s but max BW is %s" % 
+                                      (hrn, bw, maxbw))
+
+            if adjacent_nodes(n1, n2, sites, sitelinks):
+                availbps = get_avail_bps(n1, n2, sites, sitelinks)
+                if availbps < reqbps:
+                    raise PermissionError("%s: capacity exceeded" % hrn)
+            else:
+                raise PermissionError("%s: nodes %s and %s not adjacent" 
+                                      % (hrn, n1.tag, n2.tag))
+
+"""
+Hook called via 'sfi.py create'
+"""
 def create_slice(api, hrn, xml):
     r = Rspec(xml)
     rspec = r.toDict()
@@ -203,24 +195,15 @@ def create_slice(api, hrn, xml):
         whitelist[slice] = maxbw
         
     if hrn in whitelist:
-        maxbps = get_tc_rate(whitelist[hrn])
+        maxbw = whitelist[hrn]
     else:
         raise PermissionError("%s not in VINI whitelist" % hrn)
         
-    ### Check to make sure that the slice isn't requesting more
-    ### than its maximum bandwidth.
-    linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
-    if linkspecs:
-        for l in linkspecs:
-            bw = l['bw'][0]
-            bps = get_tc_rate(bw)
-            if bps <= 0:
-                raise GeniInvalidArgument(bw, "BW")
-            if bps > maxbps:
-                raise PermissionError(" %s requested %s but max BW is %s" % (hrn, bw, whitelist[hrn]))
+    # Construct picture of global topology
+    (sites, nodes, tags) = get_topology(api)
 
     # Check request against current allocations
-    # Request OK
+    #check_request(hrn, rspec, nodes, sites, sitelinks, maxbw)
 
     nodes = rspec_to_nodeset(rspec)
     create_slice_vini_aggregate(api, hrn, nodes)
@@ -230,13 +213,8 @@ def create_slice(api, hrn, xml):
         linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
         if linkspecs:
             slicename = hrn_to_pl_slicename(hrn)
-
-            # Grab all the PLC info we'll need at once
             slice = get_slice(api, slicename)
             if slice:
-                nodes = get_nodes(api)
-                tags = get_slice_tags(api)
-
                 slice.update_tag('vini_topo', 'manual', tags)
                 slice.assign_egre_key(tags)
                 slice.turn_on_netns(tags)

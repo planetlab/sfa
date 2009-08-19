@@ -1,5 +1,6 @@
 import re
 import socket
+from sfa.rspecs.aggregates.vini.topology import *
 
 # Taken from bwlimit.py
 #
@@ -86,14 +87,6 @@ class Node:
         
     def get_site(self, sites):
         return sites[self.site_id]
-            
-    def adjacent_nodes(self, sites, nodes, node_ids):
-        mysite = self.get_site(sites)
-        adj_ids = mysite.adj_node_ids.intersection(node_ids)
-        adj_nodes = []
-        for id in adj_ids:
-            adj_nodes.append(nodes[id])
-        return adj_nodes
     
     def init_links(self):
         self.links = []
@@ -104,14 +97,36 @@ class Node:
         net = self.get_virt_net(remote)
         link = remote.id, remote.ipaddr, bw, my_ip, remote_ip, net
         self.links.append(link)
+        
+    def add_tag(self, sites):
+        s = self.get_site(sites)
+        words = self.hostname.split(".")
+        index = words[0].replace("node", "")
+        if index.isdigit():
+            self.tag = s.tag + index
+        else:
+            self.tag = None
+        
 
+class SiteLink:
+    def __init__(self, site1, site2, mbps = 1000):
+        self.site1 = site1
+        self.site2 = site2
+        self.totalMbps = mbps
+        self.availMbps = mbps
+        
+        site1.add_sitelink(self)
+        site2.add_sitelink(self)
+        
         
 class Site:
     def __init__(self, site):
         self.id = site['site_id']
         self.node_ids = site['node_ids']
-        self.adj_site_ids = set()
-        self.adj_node_ids = set()
+        self.name = site['abbreviated_name']
+        self.tag = site['login_base']
+        self.public = site['is_public']
+        self.sitelinks = []
 
     def get_sitenodes(self, nodes):
         n = []
@@ -119,11 +134,9 @@ class Site:
             n.append(nodes[i])
         return n
     
-    def add_adjacency(self, site):
-        self.adj_site_ids.add(site.id)
-        for n in site.node_ids:
-            self.adj_node_ids.add(n)
-        
+    def add_sitelink(self, link):
+        self.sitelinks.append(link)
+    
     
 class Slice:
     def __init__(self, slice):
@@ -277,9 +290,9 @@ class Slicetag:
 """
 Create a dictionary of site objects keyed by site ID
 """
-def get_sites():
+def get_sites(api):
     tmp = []
-    for site in GetSites():
+    for site in api.plshell.GetSites(api.plauth):
         t = site['site_id'], Site(site)
         tmp.append(t)
     return dict(tmp)
@@ -334,4 +347,23 @@ def free_egre_key(slicetags):
         
     return "%s" % key
    
+"""
+Return the network topology.
+The topology consists of:
+* a dictionary mapping site IDs to Site objects
+* a dictionary mapping node IDs to Node objects
+* the Site objects are connected via SiteLink objects representing
+  the physical topology and available bandwidth
+"""
+def get_topology(api):
+    sites = get_sites(api)
+    nodes = get_nodes(api)
+    tags = get_slice_tags(api)
+    
+    for (s1, s2) in PhysicalLinks:
+        SiteLink(sites[s1], sites[s2])
 
+    for id in nodes:
+        nodes[id].add_tag(sites)
+        
+    return (sites, nodes, tags)
