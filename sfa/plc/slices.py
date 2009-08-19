@@ -184,7 +184,7 @@ class Slices(SimpleStorage):
 
         # Make sure slice exists at plc, if it doesnt add it
         slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, [slicename], ['slice_id', 'node_ids'])
+        slices = self.api.plshell.GetSlices(self.api.plauth, [slicename], ['slice_id', 'node_ids', 'site_id'] )
         if not slices:
             parts = slicename.split("_")
             login_base = parts[0]
