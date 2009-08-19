@@ -185,11 +185,11 @@ class Slices(SimpleStorage):
         # Make sure slice exists at plc, if it doesnt add it
         slicename = hrn_to_pl_slicename(hrn)
         slices = self.api.plshell.GetSlices(self.api.plauth, [slicename], ['slice_id', 'node_ids', 'site_id'] )
+        parts = slicename.split("_")
+        login_base = parts[0]
+        # if site doesnt exist add it
+        sites = self.api.plshell.GetSites(self.api.plauth, [login_base])
         if not slices:
-            parts = slicename.split("_")
-            login_base = parts[0]
-            # if site doesnt exist add it
-            sites = self.api.plshell.GetSites(self.api.plauth, [login_base])
             if not sites:
                 authority = get_authority(hrn)
                 site_records = registry.resolve(credential, authority)
@@ -229,6 +229,7 @@ class Slices(SimpleStorage):
             slice = slices[0]
             slice_id = slice['slice_id']
             site_id = slice['site_id']    
+            remote_site_id = sites[0]['peer_site_id']
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
         researchers = record.get('researcher', [])
