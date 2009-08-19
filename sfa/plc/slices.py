@@ -227,7 +227,8 @@ class Slices(SimpleStorage):
             slice['node_ids'] = []
         else:
             slice = slices[0]
-            slice_id = slice['slice_id']    
+            slice_id = slice['slice_id']
+            site_id = slice['site_id']    
         # get the list of valid slice users from the registry and make 
         # they are added to the slice 
         researchers = record.get('researcher', [])
