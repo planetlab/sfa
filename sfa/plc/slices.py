@@ -169,19 +169,30 @@ class Slices(SimpleStorage):
         peer = self.get_peer(hrn)
 
         spec = Rspec(rspec)
-        # Get the slice record from geni
+        # Get the slice record from sfa
         slice = {}
         slice_record = None
         registries = Registries(self.api)
         registry = registries[self.api.hrn]
         credential = self.api.getCredential()
-        records = registry.resolve(credential, hrn)
-        for record in records:
+        slice_records = registry.resolve(credential, hrn)
+        for record in slice_records:
             if record.get_type() in ['slice']:
                 slice_record = record.as_dict()
         if not slice_record:
-            raise RecordNotFound(hrn)   
+            raise RecordNotFound(hrn)  
 
+        # Get the slice's site record
+        authority = get_authority(hrn)
+        site_records = registry.resolve(credential, get_authority(hrn))
+        site = {}
+        for site_record in site_records:
+            if record.get_type() in ['authority']:
+                site = record.as_dict()
+        if not site:
+            raise RecordNotFound(hrn)
+        remote_site_id = site.pop('site_id')
+            
         # Make sure slice exists at plc, if it doesnt add it
         slicename = hrn_to_pl_slicename(hrn)
         slices = self.api.plshell.GetSlices(self.api.plauth, [slicename], ['slice_id', 'node_ids', 'site_id'] )
@@ -191,24 +202,14 @@ class Slices(SimpleStorage):
         sites = self.api.plshell.GetSites(self.api.plauth, [login_base])
         if not slices:
             if not sites:
-                authority = get_authority(hrn)
-                site_records = registry.resolve(credential, authority)
-                site_record = {}
-                if not site_records:
-                    raise RecordNotFound(authority)
-                site_record = site_records[0]
-                site = site_record.as_dict()
-                
-                 # add the site
-                remote_site_id = site.pop('site_id')
+                # add the site
                 site_id = self.api.plshell.AddSite(self.api.plauth, site)
                 # this belongs to a peer 
                 if peer:
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
             else:
-                site = sites[0]
-                site_id = site['site_id']
-                remote_site_id = site['peer_site_id']
+                site_id = sites[0]['site_id']
+                remote_site_id = sites[0]['peer_site_id']
             
             # create slice object
             slice_fields = {}
@@ -280,7 +281,7 @@ class Slices(SimpleStorage):
             keys = [key['key'] for key in keylist]
 
             # add keys that arent already there 
-	    key_ids=person_record['key_ids']
+            key_ids=person_record['key_ids']
             for personkey in person_dict['keys']:
                 if personkey not in keys:
                     key = {'key_type': 'ssh', 'key': personkey}
