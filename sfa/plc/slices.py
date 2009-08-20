@@ -184,13 +184,13 @@ class Slices(SimpleStorage):
 
         # Get the slice's site record
         authority = get_authority(hrn)
-        site_records = registry.resolve(credential, get_authority(hrn))
+        site_records = registry.resolve(credential, authority)
         site = {}
         for site_record in site_records:
             if site_record.get_type() in ['authority']:
                 site = site_record.as_dict()
         if not site:
-            raise RecordNotFound(hrn)
+            raise RecordNotFound(authority)
         remote_site_id = site.pop('site_id')
             
         # Make sure slice exists at plc, if it doesnt add it
