@@ -258,7 +258,7 @@ class Slices(SimpleStorage):
 
                 self.api.plshell.UpdatePerson(self.api.plauth, person_id, {'enabled' : True})
                 if peer:
-                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
                 key_ids = []
             else:
                 person_id = persons[0]['person_id'] 
@@ -273,7 +273,7 @@ class Slices(SimpleStorage):
             self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)
             self.api.plshell.AddPersonToSite(self.api.plauth, person_dict['email'], site_id)   
             if peer:
-                self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+                self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id) 
 
             # Get this users local keys
@@ -281,7 +281,7 @@ class Slices(SimpleStorage):
             keys = [key['key'] for key in keylist]
 
             # add keys that arent already there 
-            key_ids=person_record['key_ids']
+            key_ids=person_dict['key_ids']
             for personkey in person_dict['keys']:
                 if personkey not in keys:
                     key = {'key_type': 'ssh', 'key': personkey}
@@ -289,7 +289,7 @@ class Slices(SimpleStorage):
                         self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer)
                     key_id=self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
                     if peer:
-			 self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_record['pointer'])
+			 self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
 			 self.api.plshell.BindObjectToPeer(self.api.plauth, 'key', key_id, peer, key_ids.pop(0))
 
         # find out where this slice is currently running
