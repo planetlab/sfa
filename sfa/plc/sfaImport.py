@@ -102,20 +102,22 @@ class sfaImport:
     def create_top_level_auth_records(self, hrn):
         AuthHierarchy = self.AuthHierarchy
         
-        # if root doesnt exist, create it
+        # if auth records for this hrn dont exist, create it
         if not AuthHierarchy.auth_exists(hrn):
             AuthHierarchy.create_auth(hrn)
         
-        # get the parent hrn
-        parent_hrn = get_authority(hrn)
-        if not parent_hrn:
-            parent_hrn = hrn
 
         # get the auth info of the newly created root auth (parent)
         # or level1_auth if it exists
-        auth_info = AuthHierarchy.get_auth_info(parent_hrn)
         if self.level1_auth:
             auth_info = AuthHierarchy.get_auth_info(hrn)
+            parent_hrn = hrn
+        else:
+            parent_hrn = get_authority(hrn)
+            if not parent_hrn:
+                parent_hrn = hrn
+            auth_info = AuthHierarchy.get_auth_info(parent_hrn)
+            
         table = self.get_auth_table(parent_hrn)
 
         auth_record = table.resolve("authority", hrn)

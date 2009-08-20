@@ -58,18 +58,18 @@ def main():
         level1_auth = None
     
     print "Import: creating top level authorities"
-    sfaImporter.create_top_level_auth_records(root_auth)
-    if level1_auth:
+    if not level1_auth:
+        sfaImporter.create_top_level_auth_records(root_auth)
+        import_auth = root_auth
+    else:
         if not AuthHierarchy.auth_exists(level1_auth):
             AuthHierarchy.create_auth(level1_auth)
         sfaImporter.create_top_level_auth_records(level1_auth)
         import_auth = level1_auth
-    else:
-        import_auth = root_auth
 
-    print "Import: adding", root_auth, "to trusted list"
-    root = AuthHierarchy.get_auth_info(root_auth)
-    TrustedRoots.add_gid(root.get_gid_object())
+    print "Import: adding", import_auth, "to trusted list"
+    authority = AuthHierarchy.get_auth_info(import_auth)
+    TrustedRoots.add_gid(authority.get_gid_object())
 
     sites = shell.GetSites(plc_auth, {'peer_id': None})
     # create a fake internet2 site first

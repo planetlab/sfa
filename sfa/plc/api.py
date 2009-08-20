@@ -18,7 +18,6 @@ from sfa.util.debug import *
 from sfa.trust.rights import *
 from sfa.trust.credential import *
 from sfa.util.misc import *
-
 from sfa.util.sfalogging import *
 
 # See "2.2 Characters" in the XML specification:
@@ -189,7 +188,9 @@ class GeniAPI:
 
         hrn = self.hrn
         auth_hrn = self.auth.get_authority(hrn)
-        if not auth_hrn:
+    
+        # is this a root or sub authority
+        if not auth_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
         table = self.auth.get_auth_table(auth_hrn)

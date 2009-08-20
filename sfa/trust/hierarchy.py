@@ -110,8 +110,8 @@ class Hierarchy:
 
     def __init__(self, basedir = None):
         if not basedir:
-            config = Config()
-            basedir = os.path.join(config.SFA_BASE_DIR, "authorities")
+            self.config = Config()
+            basedir = os.path.join(self.config.SFA_BASE_DIR, "authorities")
         self.basedir = basedir
     ##
     # Given a hrn, return the filenames of the GID, private key, and dbinfo
@@ -226,7 +226,7 @@ class Hierarchy:
         gid = GID(subject=hrn, uuid=uuid, hrn=hrn)
 
         parent_hrn = get_authority(hrn)
-        if not parent_hrn:
+        if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
             gid.set_issuer(pkey, hrn)
@@ -289,7 +289,7 @@ class Hierarchy:
         cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
 
         parent_hrn = get_authority(hrn)
-        if not parent_hrn:
+        if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
             cred.set_issuer(auth_info.get_pkey_object(), hrn)

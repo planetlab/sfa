@@ -118,7 +118,7 @@ class Auth:
         @param name human readable name of object        
         """
         auth_name = self.get_authority(name)
-        if not auth_name:
+        if not auth_name or name == self.config.SFA_INTERFACE_HRN:
             # the root authority belongs to the registry by default?
             # TODO: is this true?
             return

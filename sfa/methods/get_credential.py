@@ -39,7 +39,9 @@ class get_credential(Method):
         self.api.auth.check(cred, 'getcredential')
         self.api.auth.verify_object_belongs_to_me(hrn)
         auth_hrn = self.api.auth.get_authority(hrn)
-        if not auth_hrn:
+
+        # Is this a root or sub authority 
+        if not auth_hrn or hrn == self.api.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.api.auth.get_auth_info(auth_hrn)
         table = self.api.auth.get_auth_table(auth_hrn)
@@ -91,10 +93,12 @@ class get_credential(Method):
         @return string representation of a credential object
         """
         self.api.auth.verify_object_belongs_to_me(hrn)
-
         auth_hrn = self.api.auth.get_authority(hrn)
-        if not auth_hrn:
+        
+        # is this a root or sub authority
+        if not auth_hrn or hrn == self.api.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
+
         auth_info = self.api.auth.get_auth_info(auth_hrn)
 
         # find a record that matches
