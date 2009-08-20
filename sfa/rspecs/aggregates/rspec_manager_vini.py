@@ -135,16 +135,17 @@ def create_slice_vini_aggregate(api, hrn, nodes):
 
 def get_rspec(api, hrn):
     rspec = ViniRspec()  
-    (sites, nodes, tags) = get_topology(api)  
+    topo = Topology(api)  
 
-    rspec.updateCapacity(sites, nodes)
+    rspec.updateCapacity(topo)
     
     if (hrn):
         slicename = hrn_to_pl_slicename(hrn)
         slice = get_slice(api, slicename)
         if slice:
             slice.hrn = hrn
-            rspec.updateRequest(slice, nodes, tags)
+            topo.nodeTopoFromSliceTags(slice)
+            rspec.updateRequest(slice, topo)
         else:
             # call the default sfa.plc.nodes.get_rspec() method
             return Nodes(api).get_rspec(hrn)     
@@ -183,9 +184,6 @@ def check_request(hrn, rspec, nodes, sites, sitelinks, maxbw):
 Hook called via 'sfi.py create'
 """
 def create_slice(api, hrn, xml):
-    r = Rspec(xml)
-    rspec = r.toDict()
-
     ### Check the whitelist
     ### It consists of lines of the form: <slice hrn> <bw>
     whitelist = {}
@@ -199,85 +197,27 @@ def create_slice(api, hrn, xml):
     else:
         raise PermissionError("%s not in VINI whitelist" % hrn)
         
-    # Construct picture of global topology
-    (sites, nodes, tags) = get_topology(api)
+    rspec = ViniRspec(xml)
+    topo = Topology(api)
+    
+    topo.nodeTopoFromRspec(rspec)
 
     # Check request against current allocations
     #check_request(hrn, rspec, nodes, sites, sitelinks, maxbw)
-
-    nodes = rspec_to_nodeset(rspec)
-    create_slice_vini_aggregate(api, hrn, nodes)
-
-    # Add VINI-specific topology attributes to slice here
-    try:
-        linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
-        if linkspecs:
-            slicename = hrn_to_pl_slicename(hrn)
-            slice = get_slice(api, slicename)
-            if slice:
-                slice.update_tag('vini_topo', 'manual', tags)
-                slice.assign_egre_key(tags)
-                slice.turn_on_netns(tags)
-                slice.add_cap_net_admin(tags)
-
-                nodedict = {}
-                for (k, v) in get_nodedict(rspec).iteritems():
-                    for id in nodes:
-                        if v == nodes[id].hostname:
-                            nodedict[k] = nodes[id]
-
-                for l in linkspecs:
-                    n1 = nodedict[l['endpoint'][0]]
-                    n2 = nodedict[l['endpoint'][1]]
-                    bw = l['bw'][0]
-                    n1.add_link(n2, bw)
-                    n2.add_link(n1, bw)
-
-                for node in slice.get_nodes(nodes):
-                    if node.links:
-                        topo_str = "%s" % node.links
-                        slice.update_tag('topo_rspec', topo_str, tags, node)
-
-                # Update slice tags in database
-                for i in tags:
-                    tag = tags[i]
-                    if tag.slice_id == slice.id:
-                        if tag.tagname == 'topo_rspec' and not tag.updated:
-                            tag.delete()
-                        tag.write(api)
-    except KeyError:
-        # Bad Rspec
-        pass
     
+    nodes = topo.nodesInTopo()
+    hostnames = []
+    for node in nodes:
+        hostnames.append(node.hostname)
+    create_slice_vini_aggregate(api, hrn, hostnames)
+
+    slicename = hrn_to_pl_slicename(hrn)
+    slice = get_slice(api, slicename)
+    if slice:
+        topo.updateSliceTags(slice)    
 
     return True
 
-def get_nodedict(rspec):
-    nodedict = {}
-    try:    
-        sitespecs = rspec['Rspec']['Capacity'][0]['NetSpec'][0]['SiteSpec']
-        for s in sitespecs:
-            for node in s['NodeSpec']:
-                nodedict[node['name']] = node['hostname'][0]
-    except KeyError:
-        pass
-
-    return nodedict
-
-	
-def rspec_to_nodeset(rspec):
-    nodes = set()
-    try:
-        nodedict = get_nodedict(rspec)
-        linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
-        for l in linkspecs:
-            for e in l['endpoint']:
-                nodes.add(nodedict[e])
-    except KeyError:
-        # Bad Rspec
-        pass
-    
-    return nodes
 
 def main():
     r = Rspec()

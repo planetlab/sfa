@@ -64,14 +64,14 @@ def format_tc_rate(rate):
 
 
 class Node:
-    def __init__(self, node, mbps = 1000):
+    def __init__(self, node, bps = 1000 * 1000000):
         self.id = node['node_id']
         self.hostname = node['hostname']
         self.shortname = self.hostname.replace('.vini-veritas.net', '')
         self.site_id = node['site_id']
         self.ipaddr = socket.gethostbyname(self.hostname)
-        self.bps = mbps * 1000000
-        self.links = []
+        self.bps = bps
+        self.links = set()
 
     def get_link_id(self, remote):
         if self.id < remote.id:
@@ -103,15 +103,22 @@ class Node:
     def get_site(self, sites):
         return sites[self.site_id]
     
-    def init_links(self):
-        self.links = []
-        
-    def add_link(self, remote, bw):
+    def get_topo_rspec(self, link):
+        if link.end1 == self:
+            remote = link.end2
+        elif link.end2 == self:
+            remote = link.end1
+        else:
+            raise Error("Link does not connect to Node")
+            
         my_ip = self.get_virt_ip(remote)
         remote_ip = remote.get_virt_ip(self)
         net = self.get_virt_net(remote)
-        link = remote.id, remote.ipaddr, bw, my_ip, remote_ip, net
-        self.links.append(link)
+        bw = format_tc_rate(link.bps)
+        return (remote.id, remote.ipaddr, bw, my_ip, remote_ip, net)
+        
+    def add_link(self, link):
+        self.links.add(link)
         
     def add_tag(self, sites):
         s = self.get_site(sites)
@@ -122,24 +129,24 @@ class Node:
         else:
             self.tag = None
 
-    # Assumes there is at most one SiteLink between two sites
+    # Assumes there is at most one Link between two sites
     def get_sitelink(self, node, sites):
         site1 = sites[self.site_id]
         site2 = sites[node.site_id]
-        sl = site1.sitelinks.intersection(site2.sitelinks)
+        sl = site1.links.intersection(site2.links)
         if len(sl):
             return sl.pop()
         return None
     
 
-class SiteLink:
-    def __init__(self, site1, site2, mbps = 1000):
-        self.site1 = site1
-        self.site2 = site2
-        self.bps = mbps * 1000000
+class Link:
+    def __init__(self, end1, end2, bps = 1000 * 1000000):
+        self.end1 = end1
+        self.end2 = end2
+        self.bps = bps
         
-        site1.add_sitelink(self)
-        site2.add_sitelink(self)
+        end1.add_link(self)
+        end2.add_link(self)
         
         
 class Site:
@@ -149,7 +156,7 @@ class Site:
         self.name = site['abbreviated_name']
         self.tag = site['login_base']
         self.public = site['is_public']
-        self.sitelinks = set()
+        self.links = set()
 
     def get_sitenodes(self, nodes):
         n = []
@@ -157,8 +164,8 @@ class Site:
             n.append(nodes[i])
         return n
     
-    def add_sitelink(self, link):
-        self.sitelinks.add(link)
+    def add_link(self, link):
+        self.links.add(link)
     
     
 class Slice:
@@ -311,6 +318,151 @@ class Slicetag:
 
 
 """
+A topology is a compound object consisting of:
+* a dictionary mapping site IDs to Site objects
+* a dictionary mapping node IDs to Node objects
+* the Site objects are connected via SiteLink objects representing
+  the physical topology and available bandwidth
+* the Node objects are connected via Link objects representing
+  the requested or assigned virtual topology of a slice
+"""
+class Topology:
+    def __init__(self, api):
+        self.api = api
+        self.sites = get_sites(api)
+        self.nodes = get_nodes(api)
+        self.tags = get_slice_tags(api)
+        self.sitelinks = []
+        self.nodelinks = []
+    
+        for (s1, s2) in PhysicalLinks:
+            self.sitelinks.append(Link(self.sites[s1], self.sites[s2]))
+        
+        for id in self.nodes:
+            self.nodes[id].add_tag(self.sites)
+        
+        for t in self.tags:
+            tag = self.tags[t]
+            if tag.tagname == 'topo_rspec':
+                node1 = self.nodes[tag.node_id]
+                l = eval(tag.value)
+                for (id, realip, bw, lvip, rvip, vnet) in l:
+                    allocbps = get_tc_rate(bw)
+                    node1.bps -= allocbps
+                    try:
+                        node2 = self.nodes[id]
+                        if node1.id < node2.id:
+                            sl = node1.get_sitelink(node2, self.sites)
+                            sl.bps -= allocbps
+                    except:
+                        pass
+
+    
+    def lookupSite(self, id):
+        val = None
+        try:
+            val = self.sites[id]
+        except:
+            raise KeyError("site ID %s not found" % id)
+        return val
+    
+    def getSites(self):
+        sites = []
+        for s in self.sites:
+            sites.append(self.sites[s])
+        return sites
+        
+    def lookupNode(self, id):
+        val = None
+        try:
+            val = self.nodes[id]
+        except:
+            raise KeyError("node ID %s not found" % id)
+        return val
+    
+    def getNodes(self):
+        nodes = []
+        for n in self.nodes:
+            nodes.append(self.nodes[n])
+        return nodes
+    
+    def nodesInTopo(self):
+        nodes = []
+        for n in self.nodes:
+            if self.nodes[n].links:
+                nodes.append(self.nodes[n])
+        return nodes
+            
+    def lookupSliceTag(self, id):
+        val = None
+        try:
+            val = self.tags[id]
+        except:
+            raise KeyError("slicetag ID %s not found" % id)
+        return val
+    
+    def getSliceTags(self):
+        tags = []
+        for t in self.tags:
+            tags.append(self.tags[t])
+        return tags
+    
+    def nodeTopoFromRspec(self, rspec):
+        if self.nodelinks:
+            raise Error("virtual topology already present")
+            
+        rspecdict = rspec.toDict()
+        nodedict = {}
+        for node in self.getNodes():
+            nodedict[node.tag] = node
+            
+        linkspecs = rspecdict['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']    
+        for l in linkspecs:
+            n1 = nodedict[l['endpoint'][0]]
+            n2 = nodedict[l['endpoint'][1]]
+            bps = get_tc_rate(l['bw'][0])
+            self.nodelinks.append(Link(n1, n2, bps))
+ 
+    def nodeTopoFromSliceTags(self, slice):
+        if self.nodelinks:
+            raise Error("virtual topology already present")
+            
+        for node in slice.get_nodes(self.nodes):
+            linktag = slice.get_tag('topo_rspec', self.tags, node)
+            if linktag:
+                l = eval(linktag.value)
+                for (id, realip, bw, lvip, rvip, vnet) in l:
+                    if node.id < id:
+                        bps = get_tc_rate(bw)
+                        remote = self.lookupNode(id)
+                        self.nodelinks.append(Link(node, remote, bps))
+
+    def updateSliceTags(self, slice):
+        if not self.nodelinks:
+            return
+ 
+        slice.update_tag('vini_topo', 'manual', self.tags)
+        slice.assign_egre_key(self.tags)
+        slice.turn_on_netns(self.tags)
+        slice.add_cap_net_admin(self.tags)
+
+        for node in slice.get_nodes(self.nodes):
+            linkdesc = []
+            for link in node.links:
+                linkdesc.append(node.get_topo_rspec(link))
+            if linkdesc:
+                topo_str = "%s" % linkdesc
+                slice.update_tag('topo_rspec', topo_str, self.tags, node)
+
+        # Update slice tags in database
+        for tag in self.getSliceTags():
+            if tag.slice_id == slice.id:
+                if tag.tagname == 'topo_rspec' and not tag.updated:
+                    tag.delete()
+                tag.write(self.api)
+
+
+"""
 Create a dictionary of site objects keyed by site ID
 """
 def get_sites(api):
@@ -370,39 +522,3 @@ def free_egre_key(slicetags):
         
     return "%s" % key
    
-"""
-Return the network topology.
-The topology consists of:
-* a dictionary mapping site IDs to Site objects
-* a dictionary mapping node IDs to Node objects
-* the Site objects are connected via SiteLink objects representing
-  the physical topology and available bandwidth
-"""
-def get_topology(api):
-    sites = get_sites(api)
-    nodes = get_nodes(api)
-    tags = get_slice_tags(api)
-    
-    for (s1, s2) in PhysicalLinks:
-        SiteLink(sites[s1], sites[s2])
-        
-    for id in nodes:
-        nodes[id].add_tag(sites)
-        
-    for t in tags:
-        tag = tags[t]
-        if tag.tagname == 'topo_rspec':
-            node1 = nodes[tag.node_id]
-            l = eval(tag.value)
-            for (id, realip, bw, lvip, rvip, vnet) in l:
-                allocbps = get_tc_rate(bw)
-                node1.bps -= allocbps
-                try:
-                    node2 = nodes[id]
-                    if node1.id < node2.id:
-                        sl = node1.get_sitelink(node2, sites)
-                        sl.bps -= allocbps
-                except:
-                    pass
-        
-    return (sites, nodes, tags)

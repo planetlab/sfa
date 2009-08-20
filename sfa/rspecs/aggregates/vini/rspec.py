@@ -5,21 +5,21 @@ import sys
 SFA_VINI_DEFAULT_RSPEC = '/etc/sfa/vini.rspec'
 
 class ViniRspec(Rspec):
-    def __init__(self):
-        Rspec.__init__(self)
-        self.parseFile(SFA_VINI_DEFAULT_RSPEC)
+    def __init__(self, xml = None, xsd = None, NSURL = None):
+        Rspec.__init__(self, xml, xsd, NSURL)
+        if not xml:
+            self.parseFile(SFA_VINI_DEFAULT_RSPEC)
         
-    def updateCapacity(self, sites, nodes):
+    def updateCapacity(self, topo):
         d = self.toDict()
         sitespecs = []
         sitelinkspecs = []
-        for s in sites:
-            site = sites[s]
+        for site in topo.getSites():
             if not site.public:
                 continue
             sdict = {}
             nodespecs = []
-            for node in site.get_sitenodes(nodes):
+            for node in site.get_sitenodes(topo.nodes):
                 if not node.tag:
                     continue
                 ndict = {}
@@ -31,10 +31,10 @@ class ViniRspec(Rspec):
             sdict['name'] = site.name
             sitespecs.append(sdict)
             
-            for sl in site.sitelinks:
-                if sl.site1 == site:
+            for sl in site.links:
+                if sl.end1 == site:
                     sldict = {}
-                    sldict['endpoint'] = [sl.site1.name, sl.site2.name]
+                    sldict['endpoint'] = [sl.end1.name, sl.end2.name]
                     sldict['bw'] = [format_tc_rate(sl.bps)]
                     sitelinkspecs.append(sldict)
                     
@@ -43,26 +43,15 @@ class ViniRspec(Rspec):
         self.parseDict(d)
 
 
-    def updateRequest(self, slice, nodes, tags):
-        endpoints = []
-        for node in slice.get_nodes(nodes):
-            linktag = slice.get_tag('topo_rspec', tags, node)
-            if linktag:
-                l = eval(linktag.value)
-                for (id, realip, bw, lvip, rvip, vnet) in l:
-                    endpoints.append((node.id, id, bw))
-            
-        if endpoints:
-            linkspecs = []
-            for (l, r, bw) in endpoints:
-                if (r, l, bw) in endpoints:
-                    if l < r:
-                        edict = {}
-                        edict['endpoint'] = [nodes[l].tag, nodes[r].tag]
-                        edict['bw'] = [bw]
-                        linkspecs.append(edict)
+    def updateRequest(self, slice, topo):
+        linkspecs = []
+        for link in topo.nodelinks:
+            edict = {}
+            edict['endpoint'] = [link.end1.tag, link.end2.tag]
+            edict['bw'] = [format_tc_rate(link.bps)]
+            linkspecs.append(edict)
 
-            d = self.toDict()
-            d['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec'] = linkspecs
-            d['Rspec']['Request'][0]['NetSpec'][0]['name'] = slice.hrn
-            self.parseDict(d)
+        d = self.toDict()
+        d['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec'] = linkspecs
+        d['Rspec']['Request'][0]['NetSpec'][0]['name'] = slice.hrn
+        self.parseDict(d)
