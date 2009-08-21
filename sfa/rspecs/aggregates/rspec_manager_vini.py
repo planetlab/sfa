@@ -134,23 +134,18 @@ def create_slice_vini_aggregate(api, hrn, nodes):
     return 1
 
 def get_rspec(api, hrn):
-    rspec = ViniRspec()  
-    topo = Topology(api)  
-
-    rspec.updateCapacity(topo)
-    
+    topo = Topology(api)      
     if (hrn):
         slicename = hrn_to_pl_slicename(hrn)
         slice = get_slice(api, slicename)
         if slice:
             slice.hrn = hrn
             topo.nodeTopoFromSliceTags(slice)
-            rspec.updateRequest(slice, topo)
         else:
             # call the default sfa.plc.nodes.get_rspec() method
             return Nodes(api).get_rspec(hrn)     
 
-    return rspec.toxml()
+    return topo.toxml(hrn)
 
 
 """
@@ -197,7 +192,7 @@ def create_slice(api, hrn, xml):
     else:
         raise PermissionError("%s not in VINI whitelist" % hrn)
         
-    rspec = ViniRspec(xml)
+    rspec = Rspec(xml)
     topo = Topology(api)
     
     topo.nodeTopoFromRspec(rspec)

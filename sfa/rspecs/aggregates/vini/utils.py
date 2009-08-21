@@ -2,6 +2,68 @@ import re
 import socket
 from sfa.rspecs.aggregates.vini.topology import *
 
+default_topo_xml = """
+            <LinkSpec>
+                <endpoint>i2atla1</endpoint>
+                <endpoint>i2chic1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2atla1</endpoint>
+                <endpoint>i2hous1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2atla1</endpoint>
+                <endpoint>i2wash1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2chic1</endpoint>
+                <endpoint>i2kans1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2chic1</endpoint>
+                <endpoint>i2wash1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2hous1</endpoint>
+                <endpoint>i2kans1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2hous1</endpoint>
+                <endpoint>i2losa1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2kans1</endpoint>
+                <endpoint>i2salt1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2losa1</endpoint>
+                <endpoint>i2salt1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2losa1</endpoint>
+                <endpoint>i2seat1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2newy1</endpoint>
+                <endpoint>i2wash1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>
+            <LinkSpec>
+                <endpoint>i2salt1</endpoint>
+                <endpoint>i2seat1</endpoint>
+                <bw>1Mbit</bw>
+            </LinkSpec>"""
+      
 # Taken from bwlimit.py
 #
 # See tc_util.c and http://physics.nist.gov/cuu/Units/binary.html. Be
@@ -153,7 +215,7 @@ class Site:
     def __init__(self, site):
         self.id = site['site_id']
         self.node_ids = site['node_ids']
-        self.name = site['abbreviated_name']
+        self.name = site['abbreviated_name'].replace(" ", "_")
         self.tag = site['login_base']
         self.public = site['is_public']
         self.links = set()
@@ -460,6 +522,73 @@ class Topology:
                 if tag.tagname == 'topo_rspec' and not tag.updated:
                     tag.delete()
                 tag.write(self.api)
+                
+    def toxml(self, hrn = None):
+        xml = """<?xml version="1.0"?>
+<Rspec xmlns="http://www.planet-lab.org/sfa/rspec/" name="vini">
+    <Capacity>
+        <NetSpec name="physical_topology">"""
+
+        for site in self.getSites():
+            if not site.public:
+                continue
+            
+            xml += """
+            <SiteSpec name="%s"> """ % site.name
+
+            for node in site.get_sitenodes(self.nodes):
+                if not node.tag:
+                    continue
+                
+                xml += """
+                <NodeSpec name="%s">
+                    <hostname>%s</hostname>
+                    <bw>%s</bw>
+                </NodeSpec>""" % (node.tag, node.hostname, format_tc_rate(node.bps))
+            xml += """
+            </SiteSpec>"""
+            
+        for link in self.sitelinks:
+            xml += """
+            <SiteLinkSpec>
+                <endpoint>%s</endpoint>
+                <endpoint>%s</endpoint> 
+                <bw>%s</bw>
+            </SiteLinkSpec>""" % (link.end1.name, link.end2.name, format_tc_rate(link.bps))
+            
+        
+        if hrn:
+            name = hrn
+        else:
+            name = 'default_topology'
+        xml += """
+        </NetSpec>
+    </Capacity>
+    <Request>
+        <NetSpec name="%s">""" % name
+        
+        if hrn:
+            for link in self.nodelinks:
+                xml += """
+            <LinkSpec>
+                <endpoint>%s</endpoint>
+                <endpoint>%s</endpoint> 
+                <bw>%s</bw>
+            </LinkSpec>""" % (link.end1.tag, link.end2.tag, format_tc_rate(link.bps))
+        else:
+            xml += default_topo_xml
+            
+        xml += """
+        </NetSpec>
+    </Request>
+</Rspec>"""
+
+        # Remove all leading whitespace and newlines
+        lines = xml.split("\n")
+        noblanks = ""
+        for line in lines:
+            noblanks += line.strip()
+        return noblanks
 
 
 """
