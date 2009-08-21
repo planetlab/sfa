@@ -1,5 +1,6 @@
 import re
 import socket
+from sfa.util.faults import *
 from sfa.rspecs.aggregates.vini.topology import *
 
 default_topo_xml = """
@@ -469,6 +470,16 @@ class Topology:
             tags.append(self.tags[t])
         return tags
     
+    def lookupSiteLink(self, node1, node2):
+        site1 = self.sites[node1.site_id]
+        site2 = self.sites[node2.site_id]
+        for link in self.sitelinks:
+            if site1 == link.end1 and site2 == link.end2:
+                return link
+            if site2 == link.end1 and site1 == link.end2:
+                return link
+        return None
+    
     def nodeTopoFromRspec(self, rspec):
         if self.nodelinks:
             raise Error("virtual topology already present")
@@ -523,6 +534,29 @@ class Topology:
                     tag.delete()
                 tag.write(self.api)
                 
+    """
+    Check the requested topology against the available topology and capacity
+    """
+    def verifyNodeTopo(self, hrn, topo, maxbw):
+        maxbps = get_tc_rate(maxbw)
+        for link in self.nodelinks:
+            if link.bps <= 0:
+                raise GeniInvalidArgument(bw, "BW")
+            if link.bps > maxbps:
+                raise PermissionError(" %s requested %s but max BW is %s" % 
+                                      (hrn, format_tc_rate(link.bps), maxbw))
+                
+            n1 = link.end1
+            n2 = link.end2
+            sitelink = self.lookupSiteLink(n1, n2)
+            if not sitelink:
+                raise PermissionError("%s: nodes %s and %s not adjacent" % (hrn, n1.tag, n2.tag))
+            if sitelink.bps < link.bps:
+                raise PermissionError("%s: insufficient capacity between %s and %s" % (hrn, n1.tag, n2.tag))
+                
+    """
+    Produce XML directly from the topology specification.
+    """
     def toxml(self, hrn = None):
         xml = """<?xml version="1.0"?>
 <Rspec xmlns="http://www.planet-lab.org/sfa/rspec/" name="vini">

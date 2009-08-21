@@ -148,32 +148,6 @@ def get_rspec(api, hrn):
     return topo.toxml(hrn)
 
 
-"""
-Check the requested topology against the available topology and capacity
-"""
-def check_request(hrn, rspec, nodes, sites, sitelinks, maxbw):
-    linkspecs = rspec['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']
-    if linkspecs:
-        for l in linkspecs:
-            n1 = Node.lookup(l['endpoint'][0])
-            n2 = Node.lookup(l['endpoint'][1])
-            bw = l['bw'][0]
-            reqbps = get_tc_rate(bw)
-            maxbps = get_tc_rate(maxbw)
-
-            if reqbps <= 0:
-                raise GeniInvalidArgument(bw, "BW")
-            if reqbps > maxbps:
-                raise PermissionError(" %s requested %s but max BW is %s" % 
-                                      (hrn, bw, maxbw))
-
-            if adjacent_nodes(n1, n2, sites, sitelinks):
-                availbps = get_avail_bps(n1, n2, sites, sitelinks)
-                if availbps < reqbps:
-                    raise PermissionError("%s: capacity exceeded" % hrn)
-            else:
-                raise PermissionError("%s: nodes %s and %s not adjacent" 
-                                      % (hrn, n1.tag, n2.tag))
 
 """
 Hook called via 'sfi.py create'
@@ -198,7 +172,7 @@ def create_slice(api, hrn, xml):
     topo.nodeTopoFromRspec(rspec)
 
     # Check request against current allocations
-    #check_request(hrn, rspec, nodes, sites, sitelinks, maxbw)
+    topo.verifyNodeTopo(hrn, topo, maxbw)
     
     nodes = topo.nodesInTopo()
     hostnames = []
