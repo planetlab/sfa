@@ -289,8 +289,11 @@ class Slices(SimpleStorage):
                         self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer)
                     key_id=self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
                     if peer:
-			 self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
-			 self.api.plshell.BindObjectToPeer(self.api.plauth, 'key', key_id, peer, key_ids.pop(0))
+                        self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
+                        # BindObjectToPeer may faill if type is key and it's already bound to the peer
+                        # so lets just put a try/except here
+                        try: self.api.plshell.BindObjectToPeer(self.api.plauth, 'key', key_id, peer, key_ids.pop(0))
+                        except: pass
 
         # find out where this slice is currently running
         nodelist = self.api.plshell.GetNodes(self.api.plauth, slice['node_ids'], ['hostname'])
