@@ -83,7 +83,7 @@ class update(Method):
                 persons = self.api.plshell.GetPersons(self.api.plauth, [pointer], ['key_ids'])
                 person = persons[0]
                 keys = person['key_ids']
-                keys = GetKeys(person['key_ids'])
+                keys = self.api.plshell.GetKeys(self.api.plauth, person['key_ids'])
                 key_exists = False
                 # Delete all stale keys
                 for key in keys:
@@ -92,7 +92,7 @@ class update(Method):
                     else:
                         key_exists = True
                 if not key_exists:
-                    self.api.plshell.AddPersonKey(pointer, {'key_type': 'ssh', 'key': record['key']})
+                    self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type': 'ssh', 'key': record['key']})
 
                 # find the existing geni record
                 hrn = record['hrn']
@@ -107,9 +107,9 @@ class update(Method):
                 uuid = create_uuid()
                 gid_object = self.api.auth.hierarchy.create_gid(hrn, uuid, pkey)
                 gid = gid_object.save_to_string(save_parents=True)
-                person_record['gid'] = gid
-                person_record.set_gid(gid)
-                table.update(person_record)
+                record['gid'] = gid
+                record.set_gid(gid)
+                table.update(record)
                  
         elif type == "node":
             self.api.plshell.UpdateNode(self.api.plauth, pointer, record)

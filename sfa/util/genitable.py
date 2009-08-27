@@ -84,12 +84,12 @@ class GeniTable:
 
     def update(self, record):
         dont_update = ['date_created', 'last_updated']
-        names = record.get_field_names()
-        names = [name for name in names if name not in dont_update]
+        fields = [field for field in  record.fields.keys() if field not in dont_update]  
+        fieldvals = record.get_field_value_strings(fields)
         pairs = []
-        for name in names:
-           val = record.get_field_value_string(name)
-           pairs.append(name + " = " + val)
+        for field in fields:
+            val = record.get_field_value_string(field)
+            pairs.append(field + " = " + val)
         update = ", ".join(pairs)
 
         query_str = "UPDATE " + self.tablename+ " SET " + update + " WHERE key = '" + record.get_key() + "'"
