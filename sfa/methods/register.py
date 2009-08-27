@@ -62,7 +62,7 @@ class register(Method):
         if existing_records:
             raise ExistingRecord(name)
         
-        if type in ["authority", "sa", "ma"]:
+        if type in ["authority"]:
             # update the tree
             if not self.api.auth.hierarchy.auth_exists(name):
                 self.api.auth.hierarchy.create_auth(name)
@@ -76,28 +76,31 @@ class register(Method):
             gid = auth_info.get_gid_object()
             record.set_gid(gid.save_to_string(save_parents=True))
 
-            # if registering a sa, see if a ma already exists
-            # if registering a ma, see if a sa already exists
-            if type in ["authority", "sa", "ma"]:
-                other_rec = table.resolve("authority", record.get_name())
-
-            if other_rec:
-                print >> log, "linking ma and sa to the same plc site"
-                pointer = other_rec[0].get_pointer()
-            else:
-                pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
-                print >> log, "adding site with fields", pl_record
+            pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
+            sites = self.api.plshell.GetSites(self.api.plauth, [pl_record['login_base']])
+            if not sites:    
                 pointer = self.api.plshell.AddSite(self.api.plauth, pl_record)
+            else:
+                pointer = sites[0]['site_id']
 
             record.set_pointer(pointer)
 
         elif (type == "slice"):
             pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
-            pointer = self.api.plshell.AddSlice(self.api.plauth, pl_record)
+            slices = self.api.plshell.GetSlices(self.api.plauth, [pl_record['name']])
+            if not slices: 
+                pointer = self.api.plshell.AddSlice(self.api.plauth, pl_record)
+            else:
+                pointer = slices[0]['slice_id']
             record.set_pointer(pointer)
 
         elif (type == "user"):
-            pointer = self.api.plshell.AddPerson(self.api.plauth, dict(record))
+            persons = self.api.plshell.GetPersons(self.api.plauth, [record['email']])
+            if not persons:
+                pointer = self.api.plshell.AddPerson(self.api.plauth, dict(record))
+            else:
+                pointer = persons[0]['person_id']
+ 
             if 'enabled' in record and record['enabled']:
                 self.api.plshell.UpdatePerson(self.api.plauth, pointer, {'enabled': record['enabled']})
             login_base = get_leaf(auth_info.hrn)
@@ -113,7 +116,11 @@ class register(Method):
         elif (type == "node"):
             pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
             login_base = hrn_to_pl_login_base(auth_name)
-            pointer = self.api.plshell.AddNode(self.api.plauth, login_base, pl_record)
+            nodes = self.api.plshell.GetNodes(self.api.plauth, [pl_record['hostname']])
+            if not nodes:
+                pointer = self.api.plshell.AddNode(self.api.plauth, login_base, pl_record)
+            else:
+                pointer = nodes[0]['node_id']
             record.set_pointer(pointer)
 
         else:
