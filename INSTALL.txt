@@ -1,4 +1,8 @@
 This installation note assumes that you have installed and configured MyPLC in the usual manner, and you have set up your yum repo like for a MyPLC install.
+
+Once you have completed the server configuration, a brief introduction to the SFA user tools is here:
+    http://svn.planet-lab.org/wiki/SFAGuide
+
 -----
 1) Install the SFA packages:
 
