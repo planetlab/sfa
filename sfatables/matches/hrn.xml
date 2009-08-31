@@ -9,6 +9,12 @@ as the one matched by this rule.
 
 <match>
     <context select="//sfa//user/hrn"/>
-    <rule><argument param="user-hrn"/></rule-input>
-    <processor name="hrn.xsl"/>
+    <rule>
+        <argument>
+            <name>user-hrn</name>
+            <help>HRN of the user requesting resouces</help>
+            <operand>HRN</operand>
+        </argument>
+    </rule>
+    <processor filename="hrn.xsl"/>
 </match>

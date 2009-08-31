@@ -1,18 +1,17 @@
 #!/usr/bin/python 
-# SFAtables is a tool for restricting access to an SFA aggregate in a generic
-# and extensible way. 
 
-# It is modeled using abstractions in iptables. Specifically, 'matches' specify
-# criteria for matching certain requests, 'targets' specify actions that treat
-# requests in a certain way, and 'chains' are used to group related
-# match-action pairs.
+# This file parses an sfatables command and generates XML files that parameterize
+# matches and targets. Each such XML file defines a rule. Rules are dropped in directories
+# that represent 'chains.' SFA loads rules from various chains and invokes them at certain
+# 'hook points.' For example, it invokes rules in the 'OUTGOING' chain before returning
+# the output of 'get_resources.'
 
 import sys
 import os
 import pdb
 import libxml2
-from optparse import OptionParser
 
+from optparse import OptionParser
 from sfatables import commands, matches, targets
 from sfatables.xmlextension import Xmlextension
 
@@ -47,12 +46,13 @@ def create_parser(command_dict):
 
     return parser
 
-def xml_ext_create_parser(ext_dict):
+def create_parser_xml_ext(ext_dict):
     parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
                              description='See "man sfatables" for more detail.')
     
     for k in ext_dict.keys():
         command = ext_dict[k]
+        pdb.set_trace()
         for arg in command.arguments:
             parser.add_option(None,"--"+arg,dest=arg,help=command.help,metavar=command.operand)
 
@@ -74,8 +74,7 @@ def partition(sep, lst):
 
 
 def main():
-    # Segment command line into three blobs, one each for the command, match and target respectively.
-    
+    # sfatables <command> -- <match> -- <target>
     pargs = partition('--', sys.argv[1:])
 
     command_dict = load_commands("sfatables.commands",commands.all)
@@ -88,7 +87,10 @@ def main():
         if (len(pargs)<2):
             raise Exception("Must specify match for this command")
         match_dict = load_xml_extensions("sfatables.matches",matches.all)
-        match_parser = create_parser(match_dict)
+        match_parser = create_parser_xml_ext(match_dict)
+        matches_str = ",".join(match_dict.keys())
+        match_parser.add_option('-m','--match',dest='match_name',help='Match name (one of %s)'%matches_str, metavar = 'MATCH')
+
         (match_options, args) = match_parser.parse_args(pargs[1])
     else:
         match_options=None
@@ -96,9 +98,11 @@ def main():
     if (command.targets):
         if (len(pargs)<3):
             raise Exception("Must specify a target for this command")
-        match_dict = load_xml_extensions("sfatables.targets",targets.all)
-        target_parser = create_parser(match_dict)
+        target_dict = load_xml_extensions("sfatables.targets",targets.all)
+        target_parser = create_parser_xml_ext(target_dict)
+        targets = ",".join(target_dict.keys())
         (target_options, args) = target_parser.parse_args(pargs[2])
+        target_parser.add_option('-j','--jump',dest='target_name',help='Target name (one of %s)'%targets, metavar = 'TARGET')
     else:
         target_options = None
 

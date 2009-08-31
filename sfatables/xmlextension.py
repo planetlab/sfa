@@ -1,4 +1,12 @@
+# Matches and targets are specified using XML files.
+# They provide the following information:
+#   - The context required by the match
+#   - The processor that actually implements the match or target
+#   - The parameters that the processor needs to evaluate the context
+
 import libxml2
+
+match_dir = 'matches'
 
 class Xmlextension:
     context = ""
@@ -6,25 +14,31 @@ class Xmlextension:
     operand = "VALUE"
     arguments = []
 
-    def __init__(filename):
+    def __init__(self, component_name):
+        filename = match_dir+"/"+component_name+".xml"
         self.xmldoc = libxml2.parseFile(filename)
-        # TODO: Check xmldoc against a schema
 
-        p = self.xmldoc.XPathNewContext()
+        # TODO: Check xmldoc against a schema
+        p = self.xmldoc.xpathNewContext()
 
         # <context select="..."/>
         # <rule><argument param="..."/></rule>
         # <processor name="..."/>
 
         context = p.xpathEval('//context/@select')
-        self.context = context[0].value
+        self.context = context[0].content
 
-        processor = p.xpathEval('//processor@name')
-        self.context = processor[0].value
+        processor = p.xpathEval('//processor/@filename')
+        self.context = processor[0].content
 
-        params = p.xpathEval('//rule/argument/@param')
-        self.arguments = [node.value for node in params]
+        name = p.xpathEval('//rule/argument/name')
+        help = p.xpathEval('//rule/argument/help')
+        target = p.xpathEval('//rule/argument/operand')
 
+        self.arguments = map(lambda (name,help,target):{'name':name.content,'help':help.content,'target':target.content}, zip(name,help,target))
+        
+        p.xpathFreeContext()
+        self.xmldoc.freeDoc()
 
         return
 
