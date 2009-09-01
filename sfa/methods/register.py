@@ -44,14 +44,17 @@ class register(Method):
         auth_name = self.api.auth.get_authority(name)
         auth_info = self.api.auth.get_auth_info(auth_name)
         table = self.api.auth.get_auth_table(auth_name)
-        
+        pub_key = None  
         # make sure record has a gid
         if 'gid' not in record:
             uuid = create_uuid()
             pkey = Keypair(create=True)
             if 'key' in record and record['key']:
-	      for key in record['key']:	
-                pkey = convert_public_key(key)
+                if isinstance(record['key'], list):
+                    pub_key = reocrd['key'][0]
+                else:
+                    pub_key = record['key']
+                pkey = convert_public_key(pub_key)
             
             gid_object = self.api.auth.hierarchy.create_gid(name, uuid, pkey)
             gid = gid_object.save_to_string(save_parents=True)
@@ -111,9 +114,8 @@ class register(Method):
             record.set_pointer(pointer)
 	    
 	    # Add the user's key
-            if 'key' in record and record['key']:
-	       for key in record['key']:
-                self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type' : 'ssh', 'key' : key})
+            if pub_key:
+                self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type' : 'ssh', 'key' : pub_key})
 
         elif (type == "node"):
             pl_record = self.api.geni_fields_to_pl_fields(type, name, record)
