@@ -51,7 +51,7 @@ class register(Method):
             pkey = Keypair(create=True)
             if 'key' in record and record['key']:
                 if isinstance(record['key'], list):
-                    pub_key = reocrd['key'][0]
+                    pub_key = record['key'][0]
                 else:
                     pub_key = record['key']
                 pkey = convert_public_key(pub_key)
