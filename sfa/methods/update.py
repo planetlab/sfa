@@ -85,6 +85,11 @@ class update(Method):
                 keys = person['key_ids']
                 keys = self.api.plshell.GetKeys(self.api.plauth, person['key_ids'])
                 key_exists = False
+                if isinstance(record['key'], list):
+                    new_key = record['key'][0]
+                else:
+                    new_key = record['key']
+  
                 # Delete all stale keys
                 for key in keys:
                     if record['key'] != key['key']:
@@ -92,7 +97,7 @@ class update(Method):
                     else:
                         key_exists = True
                 if not key_exists:
-                    self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type': 'ssh', 'key': record['key']})
+                    self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type': 'ssh', 'key': new_key})
 
                 # find the existing geni record
                 hrn = record['hrn']
@@ -103,7 +108,7 @@ class update(Method):
                 person_record = person_records[0]
                 
                 # update the openssl key and gid
-                pkey = convert_public_key(record['key'])
+                pkey = convert_public_key(new_key)
                 uuid = create_uuid()
                 gid_object = self.api.auth.hierarchy.create_gid(hrn, uuid, pkey)
                 gid = gid_object.save_to_string(save_parents=True)
