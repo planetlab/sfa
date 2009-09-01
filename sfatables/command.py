@@ -15,5 +15,5 @@ class Command:
         # Override this function
         return True
 
-    def __call__(self, coption, moptions, toptions):
+    def __call__(self, coptions, moptions, toptions):
         return self.call(coptions,moptions,toptions)
