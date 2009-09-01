@@ -30,7 +30,7 @@ class Slices(SimpleStorage):
         SimpleStorage.__init__(self, self.slices_file)
         self.policy = Policy(self.api)    
         self.load()
-	self.caller_cred=caller_cred
+        self.caller_cred=caller_cred
 
 
     def get_peer(self, hrn):
@@ -337,26 +337,36 @@ class Slices(SimpleStorage):
         rspecs = {}
         aggregates = Aggregates(self.api)
         credential = self.api.getCredential()
-        # only attempt to extract information about the aggregates we know about
-        for aggregate in aggregates:
-            netspec = spec.getDictByTagNameValue('NetSpec', aggregate)
-            if netspec:
-                # creat a plc dict 
-                resources = {'start_time': start_time, 'end_time': end_time, 'networks': netspec}
-                resourceDict = {'Rspec': resources}
-                tempspec.parseDict(resourceDict)
-                rspecs[aggregate] = tempspec.toxml()
 
-        # notify the aggregates
-        for aggregate in rspecs.keys():
+        # split the netspecs into individual rspecs
+        netspecs = spec.getDictsByTagName('NetSpec')
+        for netspec in netspecs:
+            net_hrn = netspec['name']
+            resources = {'start_time': start_time, 'end_time': end_time, 'networks': net_hrn}
+            resourceDict = {'Rspec': resources}
+            tempspec.parseDict(resourceDict)
+            rspecs[net_hrn] = tempspec.toxml()
+
+        # send each rspec to the appropriate aggregate/sm 
+        for net_hrn in rspecs:
             try:
-                # send the whloe rspec to the local aggregate
-                if aggregate in [self.api.hrn]:
-                    aggregates[aggregate].create_slice(credential, hrn, rspec, caller_cred=self.caller_cred)
+                # if we are directly connected to the aggregate then we can just send them the rspec
+                # if not, then we may be connected to an sm thats connected to the aggregate  
+                if net_hrn in aggregates:
+                    # send the whloe rspec to the local aggregate
+                    if net_hrn in [self.api.hrn]:
+                        aggregates[net_hrn].create_slice(credential, hrn, rspec, caller_cred=self.caller_cred)
+                    else:
+                        aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], caller_cred=self.caller_cred)
                 else:
-                    aggregates[aggregate].create_slice(credential, hrn, rspecs[aggregate], caller_cred=self.caller_cred)
+                    # lets forward this rspec to a sm that knows about the network    
+                    for aggregate in aggregates:
+                        network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
+                        if network_networks:
+                            aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], caller_cred=self.caller_cred)
+                     
             except:
-                print >> log, "Error creating slice %(hrn)s at aggregate %(aggregate)s" % locals()
+                print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % locals()
                 traceback.print_exc()
         return 1
 
