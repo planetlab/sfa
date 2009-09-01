@@ -63,6 +63,8 @@ class update(Method):
         elif type == "slice":
             hrn=record.get_name()
             pl_record=self.api.geni_fields_to_pl_fields(type, hrn, record)
+            if 'name' in pl_reocrd:
+                pl_record.pop('name')
             self.api.plshell.UpdateSlice(self.api.plauth, pointer, pl_record)
 
         elif type == "user":
