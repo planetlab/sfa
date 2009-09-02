@@ -38,22 +38,29 @@ class List(Command):
         p.xpathFreeContext()
         xmldoc.freeDoc()
 
-        return {'name':ext_name, 'arguments':'argument_str'}
+        return {'name':ext_name, 'arguments':argument_str}
 
-    def call(self, command_options, match_options, target_options):
-        chain = command_options.args[0]
-        chain_dir = sfatables_config + "/" + chain
-        rule_list = []
-        broken_semantics = os.walk(chain_dir)
+    def get_rule_list(self, chain_dir_path):
+        broken_semantics = os.walk(chain_dir_path)
+        rule_numbers = {}
+
         for (root, dirs, files) in broken_semantics:
             for file in files:
                 if (file.startswith('sfatables')):
                     (magic,number,type) = file.split('-')
-                    rule_list.append(int(number))
+                    rule_numbers[int(number)]=1
 
+        rule_list = rule_numbers.keys()
         rule_list.sort()
+        return rule_list
 
-        pretty = Pretty(['Rule','Match','Target','Arguments'])
+    def call(self, command_options, match_options, target_options):
+        chain = command_options.args[0]
+        chain_dir = sfatables_config + "/" + chain
+
+        rule_list = self.get_rule_list(chain_dir)
+
+        pretty = Pretty(['Rule','Match','Arguments','Target','Arguments'])
 
         for number in rule_list:
             match_file = "sfatables-%d-%s"%(number,'match')
@@ -65,7 +72,7 @@ class List(Command):
             match_info = self.get_info (match_path)
             target_info = self.get_info (target_path)
 
-            pretty.push_row(["%d"%number,  match_info['name'], match_info['arguments'], target_info['arguments']])
+            pretty.push_row(["%d"%number,  match_info['name'], match_info['arguments'], target_info['name'], target_info['arguments']])
         
         
         pretty.pprint()

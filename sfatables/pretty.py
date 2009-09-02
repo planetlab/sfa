@@ -25,8 +25,6 @@ class Pretty:
             cur_line = ""
             num = 0
 
-            import pdb
-            pdb.set_trace()
             for r in rule:
                 cur_line = cur_line + "%s "%r
                 if (self.column_width[num] > len(r)):

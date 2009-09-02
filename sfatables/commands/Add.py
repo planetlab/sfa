@@ -24,9 +24,7 @@ class Add(Command):
                     if (number>last_rule_number):
                         last_rule_number = number
 
-        return "sfatables-%d-%s"%(last_rule_number,type)
-
-
+        return "sfatables-%d-%s"%(last_rule_number+1,type)
 
     def call(self, command_options, match_options, target_options):
         filename = match_dir + "/"+match_options.match_name+".xml"
@@ -51,10 +49,9 @@ class Add(Command):
 
         chain = command_options.args[0]
         filename = self.getnextfilename('match',chain)
-        xmldoc.saveFile(filename)
+        file_path = sfatables_config + '/' + chain + '/' + filename
+        xmldoc.saveFile(file_path)
         p.xpathFreeContext()
         xmldoc.freeDoc()
 
-
         return True
-
