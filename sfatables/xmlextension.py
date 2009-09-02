@@ -5,8 +5,7 @@
 #   - The parameters that the processor needs to evaluate the context
 
 import libxml2
-
-match_dir = 'matches'
+from sfatables.globals import *
 
 class Xmlextension:
     context = ""

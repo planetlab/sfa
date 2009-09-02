@@ -78,7 +78,8 @@ def main():
 
     command_dict = load_commands("sfatables.commands",commands.all)
     command_parser = create_parser(command_dict)
-    (options, args) = command_parser.parse_args()
+    (options, args) = command_parser.parse_args(pargs[0])
+    setattr(options, 'args', args)
 
     command = command_dict[options.command]
 
@@ -89,8 +90,17 @@ def main():
         match_parser = create_parser_xml_ext(match_dict)
         matches_str = ",".join(match_dict.keys())
         match_parser.add_option('-m','--match',dest='match_name',help='Match name (one of %s)'%matches_str, metavar = 'MATCH')
-
         (match_options, args) = match_parser.parse_args(pargs[1])
+        try:
+            match_name = match_options.match_name
+        except Exception:
+            print "Must specify match name with -m"
+
+        if (match_dict.has_key(match_name)):
+            setattr(match_options, 'arguments', match_dict[match_name].arguments)
+        else:
+            raise Exception('Match %s not found'%match_name)
+
     else:
         match_options=None
 
@@ -102,6 +112,16 @@ def main():
         targets_str = ",".join(target_dict.keys())
         target_parser.add_option('-j','--jump',dest='target_name',help='Target name (one of %s)'%targets, metavar = 'TARGET')
         (target_options, args) = target_parser.parse_args(pargs[2])
+        try:
+            target_name = target_options.target_name
+        except Exception:
+            print "Must specify target name with -m"
+
+#        if (target_dict.has_key(target_name)):
+#            setattr(target_options, 'arguments', target_dict[target_name].arguments)
+#        else:
+#            raise Exception('Target %s not found'%target_name)
+
     else:
         target_options = None
 
