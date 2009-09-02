@@ -16,19 +16,19 @@ class Add(Command):
         dir = sfatables_config + chain;
         last_rule_number = 1
 
-        for file in os.walk(dir):
-            if (file.startswith('sfatables-')):
-                number_str = file.split('-')[1]
-                number = int(number_str)
-                if (number>last_rule_number):
-                    last_rule_number = number
+        for (root, dirs, files) in os.walk(dir):
+            for file in files:
+                if (file.startswith('sfatables-')):
+                    number_str = file.split('-')[1]
+                    number = int(number_str)
+                    if (number>last_rule_number):
+                        last_rule_number = number
 
         return "sfatables-%d-%s"%(last_rule_number,type)
 
 
 
     def call(self, command_options, match_options, target_options):
-        import pdb
         filename = match_dir + "/"+match_options.match_name+".xml"
         xmldoc = libxml2.parseFile(filename)
     
@@ -49,10 +49,9 @@ class Add(Command):
                     valueNode.addContent(option_value)
                     context[0].addChild(valueNode)
 
-        pdb.set_trace()
         chain = command_options.args[0]
         filename = self.getnextfilename('match',chain)
-        xmldoc.saveFile(match_dir + '/' + chain + '/' + filename)
+        xmldoc.saveFile(filename)
         p.xpathFreeContext()
         xmldoc.freeDoc()
 

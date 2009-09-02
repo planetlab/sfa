@@ -7,7 +7,7 @@ as the one matched by this rule.
 
 -->
 
-<match>
+<match name="hrn">
     <context select="//sfa//user/hrn"/>
     <rule>
         <argument>
