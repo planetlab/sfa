@@ -16,4 +16,5 @@ class List(Command):
         return True
 
     def __call__(self, option, opt_str, value, parser, *args, **kwargs):
+
         return self.call(option)
