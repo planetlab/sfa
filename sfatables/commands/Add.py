@@ -52,7 +52,7 @@ class Add(Command):
         pdb.set_trace()
         chain = command_options.args[0]
         filename = self.getnextfilename('match',chain)
-        xmldoc.saveFile(filename)
+        xmldoc.saveFile(match_dir + '/' + chain + '/' + filename)
         p.xpathFreeContext()
         xmldoc.freeDoc()
 
