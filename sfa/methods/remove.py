@@ -46,6 +46,7 @@ class remove(Method):
 	  if self.api.plshell.GetPersons(self.api.plauth, record.get_pointer()):
             self.api.plshell.DeletePerson(self.api.plauth, record.get_pointer())
         elif type == "slice":
+	  if self.api.plshell.GetSlices(self.api.plauth, record.get_pointer()):
             self.api.plshell.DeleteSlice(self.api.plauth, record.get_pointer())
         elif type == "node":
             self.api.plshell.DeleteNode(self.api.plauth, record.get_pointer())
