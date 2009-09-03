@@ -4,6 +4,13 @@ WSDLS = sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl
 
 all: $(WSDLS)
 
+# temporary: turn off wsdl generation as it is failing
+TEMPORARY_OFF = yes
+
+ifdef TEMPORARY_OFF
+%.wsdl:
+	touch $@
+else
 registry.wsdl:
 	PYTHONPATH=../ ./sfa2wsdl.py --registry > $@
 
@@ -15,6 +22,7 @@ aggregate.wsdl:
 
 sfa.wsdl:
 	PYTHONPATH=../ ./sfa2wsdl.py --registry --slice-manager --aggregate > $@
+endif
 
 #################### install
 # DESTDIR set but the calling Makefile in ../
