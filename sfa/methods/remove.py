@@ -43,6 +43,7 @@ class remove(Method):
         type = record['type']
         # TODO: sa, ma
         if type == "user":
+	  if self.api.plshell.GetPersons(self.api.plauth, record.get_pointer()):
             self.api.plshell.DeletePerson(self.api.plauth, record.get_pointer())
         elif type == "slice":
             self.api.plshell.DeleteSlice(self.api.plauth, record.get_pointer())
