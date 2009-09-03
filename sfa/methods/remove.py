@@ -41,25 +41,17 @@ class remove(Method):
         record = record_list[0]
         
         type = record['type']
-        # TODO: sa, ma
         if type == "user":
-	  if self.api.plshell.GetPersons(self.api.plauth, record.get_pointer()):
-            self.api.plshell.DeletePerson(self.api.plauth, record.get_pointer())
+            if self.api.plshell.GetPersons(self.api.plauth, record.get_pointer()):
+                self.api.plshell.DeletePerson(self.api.plauth, record.get_pointer())
         elif type == "slice":
-	  if self.api.plshell.GetSlices(self.api.plauth, record.get_pointer()):
-            self.api.plshell.DeleteSlice(self.api.plauth, record.get_pointer())
+            if self.api.plshell.GetSlices(self.api.plauth, record.get_pointer()):
+                self.api.plshell.DeleteSlice(self.api.plauth, record.get_pointer())
         elif type == "node":
-            self.api.plshell.DeleteNode(self.api.plauth, record.get_pointer())
-        elif (type in ['authority', 'sa', 'ma']):
-            other_rec = table.resolve(type, record.get_name())
-                
-            if other_rec:
-                # sa and ma both map to a site, so if we are deleting one
-                # but the other still exists, then do not delete the site
-                print >> log, "not removing site", record.get_name(), "because either sa or ma still exists"
-                pass
-            else:
-                print >> log, "removing site", record.get_name()
+            if self.api.plshell.GetNodes(self.api.plauth, record.get_pointer()):
+                self.api.plshell.DeleteNode(self.api.plauth, record.get_pointer())
+        elif type == "authority":
+            if self.api.plshell.GetSites(self.api.plauth, record.get_pointer()):
                 self.api.plshell.DeleteSite(self.api.plauth, record.get_pointer())
         else:
             raise UnknownGeniType(type)
