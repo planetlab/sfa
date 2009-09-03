@@ -42,7 +42,10 @@ class remove(Method):
         
         type = record['type']
         if type == "user":
-            if self.api.plshell.GetPersons(self.api.plauth, record.get_pointer()):
+            persons = self.api.plshell.GetPersons(self.api.plauth, record.get_pointer())
+            # only delete this person if he has site ids. if he doesnt, it probably means 
+            # he was just removed from a site, not actually deleted
+            if persons and persons[0]['site_ids']:
                 self.api.plshell.DeletePerson(self.api.plauth, record.get_pointer())
         elif type == "slice":
             if self.api.plshell.GetSlices(self.api.plauth, record.get_pointer()):
