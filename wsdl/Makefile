@@ -5,16 +5,16 @@ WSDLS = sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl
 all: $(WSDLS)
 
 registry.wsdl:
-	PYTHONPATH=../ ./gw2wsdl.py --registry > $@
+	PYTHONPATH=../ ./sfa2wsdl.py --registry > $@
 
 slice-manager.wsdl:
-	PYTHONPATH=../ ./gw2wsdl.py --slice-manager > $@
+	PYTHONPATH=../ ./sfa2wsdl.py --slice-manager > $@
 
 aggregate.wsdl:
-	PYTHONPATH=../ ./gw2wsdl.py --aggregate > $@
+	PYTHONPATH=../ ./sfa2wsdl.py --aggregate > $@
 
 sfa.wsdl:
-	PYTHONPATH=../ ./gw2wsdl.py --registry --slice-manager --aggregate > $@
+	PYTHONPATH=../ ./sfa2wsdl.py --registry --slice-manager --aggregate > $@
 
 #################### install
 # DESTDIR set but the calling Makefile in ../
