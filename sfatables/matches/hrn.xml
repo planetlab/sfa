@@ -8,7 +8,8 @@ as the one matched by this rule.
 -->
 
 <match name="hrn">
-    <context select="//sfa//user/hrn"/>
+    <!-- Empty context. We _always_ get the hrn of the current user -->
+    <context select="//sfa/current/user@hrn"/>
     <rule>
         <argument>
             <name>user-hrn</name>

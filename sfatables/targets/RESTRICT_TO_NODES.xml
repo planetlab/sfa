@@ -1,0 +1,18 @@
+<target name="RESTRICT_TO_NODES">
+    <!-- The context is empty, since this target does not require any input from SFA -->
+    <context select=""/>
+    <rule>
+        <argument>
+            <name>whitelist</name>
+            <help>Prefix of nodes to whitelist for this match.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>blacklist</name>
+            <help>Prefix of nodes to blacklist for this match.</help>
+            <operand>PREFIX</operand>
+        </argument>
+
+    </rule>
+    <processor filename="restrict_to_nodes.xsl"/>
+</match>

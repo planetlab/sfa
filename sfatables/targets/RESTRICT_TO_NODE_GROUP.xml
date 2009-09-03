@@ -1,0 +1,19 @@
+<target name="RESTRICT_TO_NODE_GROUP">
+    <!-- In this case, we need the list of nodes in the [white,black]-listed nodegroups. We specify these with an XPath expression.
+         The expression can have SFA variables, specified using the prefix '%' -->
+    <context select="//sfa/nodes/node[name=%whitelist]/@name" name="whitelist"/>
+    <context select="//sfa/nodes/node[name=%blacklist]/@name" name="blacklist"/>
+    <rule>
+        <argument>
+            <name>whitelist</name>
+            <help>Name of whitelisted node group</help>
+            <operand>NODE-GROUP</operand>
+        </argument>
+        <argument>
+            <name>blacklist</name>
+            <help>Name of the blacklisted node group</help>
+            <operand>NODE-GROUP</operand>
+        </argument>
+    </rule>
+    <processor filename="restrict_to_nodes.xsl"/>
+</match>
