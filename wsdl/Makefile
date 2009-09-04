@@ -8,7 +8,7 @@ all: $(WSDLS)
 TEMPORARY_OFF = yes
 
 ifdef TEMPORARY_OFF
-%.wsdl:
+registry.wsdl slice-manager.wsdl aggregate.wsdl sfa.wsdl:
 	touch $@
 else
 registry.wsdl:
