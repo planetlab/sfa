@@ -6,6 +6,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.record import GeniRecord
+from sfa.util.genitable import GeniTable
 from sfa.util.debug import log
 
 class remove(Method):
@@ -33,29 +34,31 @@ class remove(Method):
     def call(self, cred, type, hrn):
         self.api.auth.check(cred, "remove")
         self.api.auth.verify_object_permission(hrn)
-        auth_name = self.api.auth.get_authority(hrn)
-        table = self.api.auth.get_auth_table(auth_name)
-        record_list = table.resolve(type, hrn)
-        if not record_list:
+        table = GeniTable()
+        filter = {'hrn': hrn}
+        if type not in ['all', '*']:
+            filter['type'] = type
+        records = table.find(filter)
+        if not records:
             raise RecordNotFound(hrn)
-        record = record_list[0]
+        record = records[0]
         
         type = record['type']
         if type == "user":
-            persons = self.api.plshell.GetPersons(self.api.plauth, record.get_pointer())
+            persons = self.api.plshell.GetPersons(self.api.plauth, record['pointer'])
             # only delete this person if he has site ids. if he doesnt, it probably means 
             # he was just removed from a site, not actually deleted
             if persons and persons[0]['site_ids']:
-                self.api.plshell.DeletePerson(self.api.plauth, record.get_pointer())
+                self.api.plshell.DeletePerson(self.api.plauth, record['pointer'])
         elif type == "slice":
-            if self.api.plshell.GetSlices(self.api.plauth, record.get_pointer()):
-                self.api.plshell.DeleteSlice(self.api.plauth, record.get_pointer())
+            if self.api.plshell.GetSlices(self.api.plauth, record['pointer']):
+                self.api.plshell.DeleteSlice(self.api.plauth, record['pointer'])
         elif type == "node":
-            if self.api.plshell.GetNodes(self.api.plauth, record.get_pointer()):
-                self.api.plshell.DeleteNode(self.api.plauth, record.get_pointer())
+            if self.api.plshell.GetNodes(self.api.plauth, record['pointer']):
+                self.api.plshell.DeleteNode(self.api.plauth, record['pointer'])
         elif type == "authority":
-            if self.api.plshell.GetSites(self.api.plauth, record.get_pointer()):
-                self.api.plshell.DeleteSite(self.api.plauth, record.get_pointer())
+            if self.api.plshell.GetSites(self.api.plauth, record['pointer']):
+                self.api.plshell.DeleteSite(self.api.plauth, record['pointer'])
         else:
             raise UnknownGeniType(type)
 

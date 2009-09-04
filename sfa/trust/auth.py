@@ -76,26 +76,6 @@ class Auth:
         return self.hierarchy.get_auth_info(auth_hrn)
 
 
-    def get_auth_table(self, auth_name):
-        """
-        Given an authority name, return the database table for that authority.
-        If the databse table does not exist, then one will be automatically
-        created.
-
-        @param auth_name human readable name of authority
-        """
-        auth_info = self.get_auth_info(auth_name)
-        table = GeniTable(hrn=auth_name,
-                          cninfo=auth_info.get_dbinfo())
-        # if the table doesn't exist, then it means we haven't put any records
-        # into this authority yet.
-
-        if not table.exists():
-            print >> log, "Registry: creating table for authority", auth_name
-            table.create()
-    
-        return table
-
     def veriry_auth_belongs_to_me(self, name):
         """
         Verify that an authority belongs to our hierarchy. 
@@ -161,7 +141,7 @@ class Auth:
         verify_cancreate_credential()
         """
 
-        type = record.get_type()
+        type = record['type']
         if src_cred:
             cred_object_hrn = src_cred.get_gid_object().get_hrn()
         else:

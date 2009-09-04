@@ -6,6 +6,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.record import GeniRecord
+from sfa.util.genitable import GeniTable
 from sfa.server.registry import Registries
 from sfa.util.prefixTree import prefixTree
 from sfa.trust.credential import Credential
@@ -30,11 +31,11 @@ class list(Method):
     def call(self, cred, hrn, caller_cred=None):
 
         self.api.auth.check(cred, 'list')
-	if caller_cred==None:
-	   caller_cred=cred
+        if caller_cred==None:
+            caller_cred=cred
 
-	#log the call
-	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        #log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
         records = []
 
         # load all know registry names into a prefix tree and attempt to find
@@ -52,7 +53,7 @@ class list(Method):
         # if the best match (longest matching hrn) is not the local registry,
         # forward the request
         if registry_hrn != self.api.hrn:
-	    credential = self.api.getCredential()
+            credential = self.api.getCredential()
             try:
                 record_list = registries[registry_hrn].list(credential, hrn, caller_cred=caller_cred)
                 records = [record.as_dict() for record in record_list]
@@ -65,7 +66,7 @@ class list(Method):
         if not self.api.auth.hierarchy.auth_exists(hrn):
             raise MissingAuthority(hrn)
         
-        table = self.api.auth.get_auth_table(hrn)
-        records = table.list()
-          
+        table = GeniTable()
+        records = table.find({'authority': hrn})
+        
         return records

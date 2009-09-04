@@ -83,21 +83,6 @@ class sfaImport:
             import PLC.Shell
             self.shell = PLC.Shell.Shell(globals = globals())        
 
-    def get_auth_table(self, auth_name):
-        AuthHierarchy = self.AuthHierarchy
-        auth_info = AuthHierarchy.get_auth_info(auth_name)
-
-        table = GeniTable(hrn=auth_name, cninfo=auth_info.get_dbinfo())
-
-        # if the table doesn't exist, then it means we haven't put any records
-        # into this authority yet.
-
-        if not table.exists():
-            trace("Import: creating table for authority " + auth_name)
-            table.create()
-
-        return table
-
 
     def create_top_level_auth_records(self, hrn):
         AuthHierarchy = self.AuthHierarchy
@@ -118,9 +103,9 @@ class sfaImport:
                 parent_hrn = hrn
             auth_info = AuthHierarchy.get_auth_info(parent_hrn)
             
-        table = self.get_auth_table(parent_hrn)
+        table = GeniTable()
+        auth_record = table.find({'type': 'authority', 'hrn': hrn})
 
-        auth_record = table.resolve("authority", hrn)
         if not auth_record:
             auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
             trace("  inserting authority record for " + hrn)
@@ -137,7 +122,7 @@ class sfaImport:
 
         trace("Import: importing person " + hrn)
 
-        table = self.get_auth_table(parent_hrn)
+        table = GeniTable()
 
         key_ids = []
         if 'key_ids' in person and person['key_ids']:
@@ -158,7 +143,7 @@ class sfaImport:
 
         # create the gid
         person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        person_record = table.resolve("user", hrn)
+        person_record = table.find({'type': 'user', 'hrn': hrn})
         if not person_record:
             trace("  inserting user record for " + hrn)
             person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
@@ -180,9 +165,9 @@ class sfaImport:
         hrn = parent_hrn + "." + slicename
         trace("Import: importing slice " + hrn)
 
-        table = self.get_auth_table(parent_hrn)
+        table = GeniTable()
 
-        slice_record = table.resolve("slice", hrn)
+        slice_record = table.find({'type': 'sslice', 'hrn': hrn})
         if not slice_record:
             pkey = Keypair(create=True)
             slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
@@ -207,9 +192,9 @@ class sfaImport:
 
         trace("Import: importing node " + hrn)
 
-        table = self.get_auth_table(parent_hrn)
+        table = GeniTable()
 
-        node_record = table.resolve("node", hrn)
+        node_record = table.find({'type': 'node', 'hrn': hrn})
         if not node_record:
             pkey = Keypair(create=True)
             node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
@@ -247,9 +232,9 @@ class sfaImport:
 
         auth_info = AuthHierarchy.get_auth_info(hrn)
 
-        table = self.get_auth_table(parent_hrn)
+        table = GeniTable()
 
-        auth_record = table.resolve("authority", hrn)
+        auth_record = table.find({'type': 'authority', 'hrn': 'hrn'})
         if not auth_record:
             auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
             trace("  inserting authority record for " + hrn)
@@ -282,6 +267,7 @@ class sfaImport:
 
     def delete_record(self, parent_hrn, object, type):
         # get the hrn
+        table = GeniTable()
         hrn = None
         if type in ['slice'] and 'name' in object and object['name']:
             slice_name = object['name'].split("_")[0]
@@ -297,16 +283,14 @@ class sfaImport:
             hrn = parent_hrn
             parent_hrn = get_authority(hrn)
             type = "authority"
-            # delete the site table
-            site_table = self.get_auth_table(hrn)
-            site_table.drop()
+            # delete all records whos authority is this site
+            records = table.find({'authority': hrn})
+            for record in records:
+                table.remove(record)
         else:
             return
         
         # delete the record
-        table = self.get_auth_table(parent_hrn)
-        record_list = table.resolve(type, hrn)
-        if not record_list:
-            return
-        record = record_list[0]
-        table.remove(record)        
+        record_list = table.find({'type': type, 'hrn': hrn})
+        for record in record_list:
+            table.remove(record)        

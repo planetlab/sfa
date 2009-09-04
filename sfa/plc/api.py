@@ -19,6 +19,7 @@ from sfa.trust.rights import *
 from sfa.trust.credential import *
 from sfa.util.misc import *
 from sfa.util.sfalogging import *
+from sfa.util.genitable import *
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -120,7 +121,7 @@ class GeniAPI:
         self.plshell_version = self.getPLCShellVersion()
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
-	self.logger=get_sfa_logger()
+        self.logger=get_sfa_logger()
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
@@ -193,12 +194,12 @@ class GeniAPI:
         if not auth_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
-        table = self.auth.get_auth_table(auth_hrn)
-        records = table.resolve('*', hrn)
+        table = GeniTable()
+        records = table.find(hrn)
         if not records:
             raise RecordNotFound
         record = records[0]
-        type = record.get_type()
+        type = record['type']
         object_gid = record.get_gid_object()
         new_cred = Credential(subject = object_gid.get_subject())
         new_cred.set_gid_caller(object_gid)
@@ -297,8 +298,8 @@ class GeniAPI:
     
         @param record: record to fill in field (in/out param)     
         """
-        type = record.get_type()
-        pointer = record.get_pointer()
+        type = record['type']
+        pointer = record['pointer']
         auth_hrn = self.hrn
         login_base = ''
         # records with pointer==-1 do not have plc info associated with them.
@@ -320,7 +321,7 @@ class GeniAPI:
             raise UnknownGeniType(type)
         
         if not pl_res:
-            raise PlanetLabRecordDoesNotExist(record.get_name())
+            raise PlanetLabRecordDoesNotExist(record['hrn'])
 
         # convert ids to hrns
         pl_record = pl_res[0]
@@ -360,32 +361,31 @@ class GeniAPI:
         record.update(pl_record)
 
 
-    def lookup_users(self, auth_table, user_id_list, role="*"):
+    def lookup_users(self, user_id_list, role="*"):
+        table = GeniTable() 
         record_list = []
         for person_id in user_id_list:
-            user_records = auth_table.find("user", person_id, "pointer")
+            user_records = table.find({'type': 'user', 'pointer': person_id})
             for user_record in user_records:
                 self.fill_record_info(user_record)
                 user_roles = user_record.get("roles")
                 if (role=="*") or (role in user_roles):
-                    record_list.append(user_record.get_name())
+                    record_list.append(user_record['hrn'])
         return record_list
 
     def fill_record_geni_info(self, record):
         geni_info = {}
-        type = record.get_type()
+        type = record['type']
         if (type == "slice"):
-            auth_table = self.auth.get_auth_table(self.auth.get_authority(record.get_name()))
             person_ids = record.get("person_ids", [])
-            researchers = self.lookup_users(auth_table, person_ids)
+            researchers = self.lookup_users(person_ids)
             geni_info['researcher'] = researchers
 
         elif (type == "authority"):
-            auth_table = self.auth.get_auth_table(record.get_name())
             person_ids = record.get("person_ids", [])
-            pis = self.lookup_users(auth_table, person_ids, "pi")
-            operators = self.lookup_users(auth_table, person_ids, "tech")
-            owners = self.lookup_users(auth_table, person_ids, "admin")
+            pis = self.lookup_users(person_ids, "pi")
+            operators = self.lookup_users(person_ids, "tech")
+            owners = self.lookup_users(person_ids, "admin")
             geni_info['pi'] = pis
             geni_info['operator'] = operators
             geni_info['owner'] = owners
@@ -424,16 +424,10 @@ class GeniAPI:
         # build a list of the new person ids, by looking up each person to get
         # their pointer
         newIdList = []
-        for hrn in newList:
-            auth_hrn = self.auth.get_authority(hrn)
-            if not auth_hrn:
-                auth_hrn = hrn
-            auth_info = self.auth.get_auth_info(auth_hrn)
-            table = self.auth.get_auth_table(auth_hrn)
-            records = table.resolve('user', hrn)
-            if records:
-                userRecord = records[0]    
-                newIdList.append(userRecord.get_pointer())
+        table = GeniTable()
+        records = table.find({'type': 'user', 'hrn': newList})
+        for record in records:
+            newIdList.append(record['pointer'])
 
         # build a list of the old person ids from the person_ids field 
         if oldRecord:

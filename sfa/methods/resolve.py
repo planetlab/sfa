@@ -6,6 +6,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.record import GeniRecord
+from sfa.util.genitable import GeniTable
 from sfa.util.debug import log
 from sfa.server.registry import Registries
 from sfa.util.prefixTree import prefixTree
@@ -58,11 +59,8 @@ class resolve(Method):
                 traceback.print_exc()
 
         # if we still havnt found the record yet, try the local registry
-        auth_hrn = self.api.auth.get_authority(hrn)
-        if not auth_hrn:
-            auth_hrn = hrn
-        table = self.api.auth.get_auth_table(auth_hrn)
-        records = table.resolve('*', hrn)
+        table = GeniTable()
+        records = table.find(hrn)
         if not records:
             raise RecordNotFound(hrn) 
         for record in records:

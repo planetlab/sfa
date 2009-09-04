@@ -14,6 +14,8 @@ from sfa.trust.gid import *
 import sfa.util.report
 from sfa.util.rspec import *
 from sfa.util.parameter import *
+from sfa.util.misc import *
+
 
 class GeniRecord(dict):
     """ 
@@ -36,14 +38,20 @@ class GeniRecord(dict):
     """
 
     ### the wsdl generator assumes this is named 'fields'
+    internal_fields = {
+        'record_id': Parameter(int, 'An id that uniquely identifies this record'),
+        'pointer': Parameter(int, 'An id that uniquely identifies this record in an external database ')
+    }
+
     fields = {
+        'authority': Parameter(str, "The authority for this record"),
         'hrn': Parameter(str, "Human readable name of object"),
         'gid': Parameter(str, "GID of the object"),
         'type': Parameter(str, "Record type"),
         'last_updated': Parameter(int, 'Date and time of last update'),
         'date_created': Parameter(int, 'Date and time this record was created'),
     }
-
+    all_fields = dict(fields.items() + internal_fields.items())
     ##
     # Create a Geni Record
     #
@@ -71,8 +79,7 @@ class GeniRecord(dict):
             self.load_from_dict(dict)
         if string:
             self.load_from_string(string)
-
-    
+        
     def update(self, new_dict):
         if isinstance(new_dict, list):
             new_dict = new_dict[0]
@@ -96,6 +103,7 @@ class GeniRecord(dict):
         Set the name of the record
         """
         self.hrn = hrn
+        self['hrn'] = hrn
         self.dirty = True
 
     ##
@@ -110,8 +118,10 @@ class GeniRecord(dict):
 
         if isinstance(gid, StringTypes):
             self.gid = gid
+            self['gid'] = gid
         else:
             self.gid = gid.save_to_string(save_parents=True)
+            self['gid'] = gid.save_to_string(save_parents=True)
         self.dirty = True
 
     ##
@@ -124,6 +134,7 @@ class GeniRecord(dict):
         Set the type of the record
         """
         self.type = type
+        self['type'] = type
         self.dirty = True
 
     ##
@@ -136,6 +147,7 @@ class GeniRecord(dict):
         Set the pointer of the record
         """
         self.pointer = pointer
+        self['pointer'] = pointer
         self.dirty = True
 
     ##
@@ -181,19 +193,6 @@ class GeniRecord(dict):
         return GID(string=self.gid)
 
     ##
-    # Return a key that uniquely identifies this record among all records in
-    # Geni. This key is used to uniquely identify the record in the Geni
-    # database.
-
-    def get_key(self):
-        """
-        Return a key that uniquely identifies this record among all records in
-        Geni. This key is used to uniquely identify the record in the Geni
-        database.
-        """
-        return self.hrn + "#" + self.type
-
-    ##
     # Returns a list of field names in this record. 
 
     def get_field_names(self):
@@ -211,8 +210,8 @@ class GeniRecord(dict):
         """
         Given a field name ("hrn", "gid", ...) return the value of that field.
         """
-        if fieldname == "key":
-            val = self.get_key()
+        if fieldname == "authority":
+            val = get_authority(self['hrn'])
         else:
             try:
                 val = getattr(self, fieldname)

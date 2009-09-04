@@ -7,7 +7,9 @@ from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
+from sfa.trust.gid import GID
 from sfa.util.record import GeniRecord
+from sfa.util.genitable import *
 from sfa.util.debug import log
 
 class get_credential(Method):
@@ -44,8 +46,8 @@ class get_credential(Method):
         if not auth_hrn or hrn == self.api.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.api.auth.get_auth_info(auth_hrn)
-        table = self.api.auth.get_auth_table(auth_hrn)
-        records = table.resolve(type, hrn)
+        table = GeniTable()
+        records = table.find({'type': type, 'hrn': hrn})
         if not records:
             raise RecordNotFound(hrn)
         record = records[0]
@@ -59,12 +61,14 @@ class get_credential(Method):
 
         # TODO: Check permission that self.client_cred can access the object
 
-        object_gid = record.get_gid_object()
-        new_cred = Credential(subject = object_gid.get_subject())
+        gid = record['gid']
+        gid_object = GID(string=gid)
+
+        new_cred = Credential(subject = gid_object.get_subject())
         new_cred.set_gid_caller(self.api.auth.client_gid)
-        new_cred.set_gid_object(object_gid)
+        new_cred.set_gid_object(gid_object)
         new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
-        new_cred.set_pubkey(object_gid.get_pubkey())
+        new_cred.set_pubkey(gid_object.get_pubkey())
         new_cred.set_privileges(rights)
         new_cred.set_delegate(True)
 
@@ -103,13 +107,11 @@ class get_credential(Method):
 
         # find a record that matches
         record = None
-        table = self.api.auth.get_auth_table(auth_hrn)
-        records = table.resolve('*', hrn)
-        for rec in records:
-            if type in ['*'] or rec.get_type() in [type]:
-                record = rec
-        if not record:
+        table = GeniTable()
+        records = table.find({'type': type, 'hrn':  hrn})
+        if not records:
             raise RecordNotFound(hrn)
+        record = records[0]
         gid = record.get_gid_object()
         peer_cert = self.api.auth.peer_cert
         if not peer_cert.is_pubkey(gid.get_pubkey()):

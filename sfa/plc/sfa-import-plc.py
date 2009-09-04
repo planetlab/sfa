@@ -53,7 +53,9 @@ def main():
     plc_auth = sfaImporter.plc_auth 
     AuthHierarchy = sfaImporter.AuthHierarchy
     TrustedRoots = sfaImporter.TrustedRoots
-    
+    table = GeniTable()
+    table.create()
+
     if not level1_auth or level1_auth in ['']:
         level1_auth = None
     
@@ -76,7 +78,7 @@ def main():
     i2site = {'name': 'Internet2', 'abbreviated_name': 'I2',
                     'login_base': 'internet2', 'site_id': -1}
     sfaImporter.import_site(import_auth, i2site)
-    
+            
     for site in sites:
         sfaImporter.import_site(import_auth, site)
 
