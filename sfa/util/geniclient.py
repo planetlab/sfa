@@ -222,6 +222,10 @@ class GeniClient:
         result = self.server.get_aggregates(cred.save_to_string(save_parents=True), hrn)
         return result
 
+    def get_registries(self, cred, hrn=None):
+	result = self.server.get_registries(cred.save_to_string(save_parents=True), hrn)
+	return result
+
     ## get policy
     #
     # @param cred a credential
