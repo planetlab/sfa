@@ -426,8 +426,8 @@ class GeniAPI:
         newIdList = []
         table = GeniTable()
         records = table.find({'type': 'user', 'hrn': newList})
-        for record in records:
-            newIdList.append(record['pointer'])
+        for rec in records:
+            newIdList.append(rec['pointer'])
 
         # build a list of the old person ids from the person_ids field 
         if oldRecord:
