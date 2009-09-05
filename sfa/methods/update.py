@@ -40,7 +40,7 @@ class update(Method):
         self.api.auth.verify_object_permission(hrn)
         table = GeniTable()
         # make sure the record exists
-        records = table.find({'type': type, 'hrn': hrn})
+        records = table.findObjects({'type': type, 'hrn': hrn})
         if not records:
             raise RecordNotFound(hrn)
         record = records[0]
