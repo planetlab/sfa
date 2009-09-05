@@ -108,7 +108,7 @@ class get_credential(Method):
         # find a record that matches
         record = None
         table = GeniTable()
-        records = table.find({'type': type, 'hrn':  hrn})
+        records = table.findObjects({'type': type, 'hrn':  hrn})
         if not records:
             raise RecordNotFound(hrn)
         record = records[0]
