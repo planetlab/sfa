@@ -195,7 +195,7 @@ class GeniAPI:
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
         table = GeniTable()
-        records = table.find(hrn)
+        records = table.findObjects(hrn)
         if not records:
             raise RecordNotFound
         record = records[0]
