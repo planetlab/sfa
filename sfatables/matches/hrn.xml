@@ -1,10 +1,8 @@
 <!-- 
-"sfa-input" specifies the subset of the requestor context that this match needs to see. It is specified as an xpath expression.
+"context" specifies the subset of the requestor context that this match needs to see. It is specified as an xpath expression.
 For this simple match, we just need to look at sfa-input. 
 
-"rule" specifies an xpath/xquery expression that evaluates the match. In this case, we just check if the requestor's HRN is the same
-as the one matched by this rule.
-
+"rule" specifies a set of arguments that the match accepts.
 -->
 
 <match name="hrn">
