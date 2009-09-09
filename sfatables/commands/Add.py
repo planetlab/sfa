@@ -39,8 +39,6 @@ class Add(Command):
 
             if (hasattr(match_options,option_name)):
                 context = p.xpathEval("//rule/argument[name='%s']"%option_name)
-                import pdb
-                pdb.set_trace()
                 if (not context):
                     raise Exception('Unknown option %s for match %s'%(option,option['name']))
                 else:
