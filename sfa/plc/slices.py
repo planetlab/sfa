@@ -342,7 +342,7 @@ class Slices(SimpleStorage):
         netspecs = spec.getDictsByTagName('NetSpec')
         for netspec in netspecs:
             net_hrn = netspec['name']
-            resources = {'start_time': start_time, 'end_time': end_time, 'networks': net_hrn}
+            resources = {'start_time': start_time, 'end_time': end_time, 'networks': netspec}
             resourceDict = {'Rspec': resources}
             tempspec.parseDict(resourceDict)
             rspecs[net_hrn] = tempspec.toxml()
