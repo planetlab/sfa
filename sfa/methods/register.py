@@ -13,6 +13,7 @@ from sfa.util.genitable import GeniTable
 from sfa.util.debug import log
 from sfa.trust.auth import Auth
 from sfa.trust.gid import create_uuid
+from sfa.trust.credential import Credential
 
 class register(Method):
     """
@@ -35,8 +36,13 @@ class register(Method):
 
     returns = Parameter(int, "String representation of gid object")
     
-    def call(self, cred, record_dict):
+    def call(self, cred, record_dict, caller_cred=None):
         self.api.auth.check(cred, "register")
+	if caller_cred==None:
+	   caller_cred=cred
+	
+	#log the call
+	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
         record = GeniRecord(dict = record_dict)
         table = GeniTable()
         type = record['type']

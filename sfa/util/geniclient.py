@@ -149,8 +149,8 @@ class GeniClient:
     #
     # @return GID object for the newly-registered record
 
-    def register(self, cred, record):
-        gid_str = self.server.register(cred.save_to_string(save_parents=True), record.as_dict())
+    def register(self, cred, record, caller_cred=None):
+        gid_str = self.server.register(cred.save_to_string(save_parents=True), record.as_dict(), caller_cred)
         return GID(string = gid_str)
 
     ##
@@ -161,8 +161,8 @@ class GeniClient:
     # @param type
     # @param hrn
 
-    def remove(self, cred, type, hrn):
-        result = self.server.remove(cred.save_to_string(save_parents=True), type, hrn)
+    def remove(self, cred, type, hrn, caller_cred=None):
+        result = self.server.remove(cred.save_to_string(save_parents=True), type, hrn, caller_cred)
         return result
 
     ##
@@ -174,8 +174,8 @@ class GeniClient:
     # @param cred credential object specifying rights of the caller
     # @param name human readable name of object
 
-    def resolve(self, cred, name):
-        result_dict_list = self.server.resolve(cred.save_to_string(save_parents=True), name)
+    def resolve(self, cred, name, caller_cred=None):
+        result_dict_list = self.server.resolve(cred.save_to_string(save_parents=True), name, caller_cred)
         result_rec_list = []
         for dict in result_dict_list:
             if dict['type'] in ['authority']:
@@ -200,8 +200,8 @@ class GeniClient:
     # @param cred credential object specifying rights of the caller
     # @param record a record object to be updated
 
-    def update(self, cred, record):
-        result = self.server.update(cred.save_to_string(save_parents=True), record.as_dict())
+    def update(self, cred, record, caller_cred=None):
+        result = self.server.update(cred.save_to_string(save_parents=True), record.as_dict(), caller_cred)
         return result
 
 

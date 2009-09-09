@@ -10,6 +10,7 @@ from sfa.util.genitable import GeniTable
 from sfa.util.debug import log
 from sfa.server.registry import Registries
 from sfa.util.prefixTree import prefixTree
+from sfa.trust.credential import Credential
 
 class resolve(Method):
     """
@@ -29,9 +30,14 @@ class resolve(Method):
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn):
+    def call(self, cred, hrn, caller_cred=None):
         
-        self.api.auth.check(cred, 'resolve')
+	self.api.auth.check(cred, 'resolve')
+	if caller_cred==None:
+	   caller_cred=cred
+
+	#log the call
+	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
         good_records = [] 
 
         # load all know registry names into a prefix tree and attempt to find
@@ -51,7 +57,7 @@ class resolve(Method):
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
             try:
-                records = registries[registry_hrn].resolve(credential, hrn)
+                records = registries[registry_hrn].resolve(credential, hrn, caller_cred=caller_cred)
                 good_records = [record.as_dict() for record in records]
                 if good_records:
                     return good_records

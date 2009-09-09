@@ -10,6 +10,7 @@ from sfa.util.genitable import GeniTable
 from sfa.trust.certificate import Keypair, convert_public_key
 from sfa.trust.gid import *
 from sfa.util.debug import log
+from sfa.trust.credential import Credential
 
 class update(Method):
     """
@@ -32,8 +33,13 @@ class update(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record_dict):
+    def call(self, cred, record_dict, caller_cred=None):
         self.api.auth.check(cred, "update")
+	if caller_cred==None:
+	   caller_cred=cred
+
+	#log the call
+	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
         new_record = GeniRecord(dict = record_dict)
         type = new_record['type']
         hrn = new_record['hrn']
