@@ -13,7 +13,7 @@ from sfatables.commands.List import *
 from sfatables.xmlrule import *
 
 class SFATablesRules:
-    sorted_rule_list = None
+    sorted_rule_list = []
 
     def __init__(self, chain_name):
         chain_dir_path = "%s/%s"%(sfatables_config,chain_name)
@@ -28,3 +28,15 @@ class SFATablesRules:
             intermediate_rspec  = rule.apply(intermediate_rspec)
 
         return intermediate_rspec
+
+def main():
+    incoming = SFATablesRules('INCOMING')
+    outgoing = SFATablesRules('OUTGOING')
+
+    print "%d rules loaded for INCOMING chain\n"%len(incoming.sorted_rule_list)
+    print "%d rules loaded for OUTGOING chain\n"%len(outgoing.sorted_rule_list)
+
+    return
+
+if __name__=="__main__":
+    main()

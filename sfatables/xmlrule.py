@@ -1,7 +1,7 @@
 import libxml2
 from sfatables.globals import *
 
-class Xmlrule:
+class XMLRule:
     rule_number = None
     chain = None
     xmldoc = None
@@ -26,13 +26,12 @@ class Xmlrule:
 
         p.xpathFreeContext()
 
-        return 
 
     def wrap_rspec (self, type, rspec):
         argument = self.arguments[type]
         p = rspec.xmldoc.xpathNewContext()
         root_node = p.xpathEval('/RSpec')
-        if (!root_node or !len(root_node)):
+        if (not root_node or not root_node):
             raise Exception('An evil aggregate manager sent me a malformed RSpec. Please see the stack trace to identify it.')
 
         root_node.addChild(arguments[type])
