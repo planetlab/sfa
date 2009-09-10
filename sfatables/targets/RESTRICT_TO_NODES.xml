@@ -12,7 +12,6 @@
             <help>Prefix of nodes to blacklist for this match.</help>
             <operand>PREFIX</operand>
         </argument>
-
     </rule>
     <processor filename="restrict_to_nodes.xsl"/>
-</match>
+</target>

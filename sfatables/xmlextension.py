@@ -13,8 +13,10 @@ class Xmlextension:
     operand = "VALUE"
     arguments = []
 
-    def __init__(self, component_name):
-        filename = match_dir+"/"+component_name+".xml"
+    def __init__(self, dir, component_name):
+        filename = dir+"/"+component_name+".xml"
+        import pdb
+        pdb.set_trace()
         self.xmldoc = libxml2.parseFile(filename)
 
         # TODO: Check xmldoc against a schema

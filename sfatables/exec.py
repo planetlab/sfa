@@ -19,7 +19,7 @@ class SFATablesRules:
         chain_dir_path = "%s/%s"%(sfatables_config,chain_name)
         rule_list = List().get_rule_list(chain_dir_path)
         for rule_number in rule_list:
-            self.sorted_rule_list.append(XMLRule(rule_number))
+            self.sorted_rule_list.append(XMLRule(chain_name, rule_number))
         return
 
     def apply(self, rspec):

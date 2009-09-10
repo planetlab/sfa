@@ -26,18 +26,18 @@ class Add(Command):
 
         return "sfatables-%d-%s"%(last_rule_number+1,type)
 
-    def call(self, command_options, match_options, target_options):
-        filename = match_dir + "/"+match_options.match_name+".xml"
+    def call_gen(self, dir, options):
+        filename = dir + "/"+options.name+".xml"
         xmldoc = libxml2.parseFile(filename)
     
         p = xmldoc.xpathNewContext()
 
-        supplied_arguments = match_options.arguments
+        supplied_arguments = options.arguments
         for option in supplied_arguments:
             option_name = option['name']
-            option_value = getattr(match_options,option_name)
+            option_value = getattr(options,option_name)
 
-            if (hasattr(match_options,option_name)):
+            if (hasattr(options,option_name)):
                 context = p.xpathEval("//rule/argument[name='%s']"%option_name)
                 if (not context):
                     raise Exception('Unknown option %s for match %s'%(option,option['name']))
@@ -55,3 +55,10 @@ class Add(Command):
         xmldoc.freeDoc()
 
         return True
+
+    def call(self, command_options, match_options, target_options):
+        ret = self.call_gen(match_dir, match_options)
+        if (ret):
+            ret = self.call_gen(target_dir, target_options)
+
+        return ret

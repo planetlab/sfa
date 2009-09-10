@@ -11,7 +11,7 @@ class XMLRule:
     context = {'match':None,'target':None}
 
     def load_xml_extension (self, type, chain, rule_number):
-        filename = sfatables_config+"/"+chain+"/"+"sfatables-%d-%s.xml"%(rule_number,type)
+        filename = sfatables_config+"/"+chain+"/"+"sfatables-%d-%s"%(rule_number,type)
 
         self.xmldoc = libxml2.parseFile(filename)
         p = self.xmldoc.xpathNewContext()
@@ -21,7 +21,7 @@ class XMLRule:
 
         processor = p.xpathEval('//processor/@filename')
 
-        self.processor[type] = processor[0].content
+        self.processors[type] = processor[0].content
         self.arguments[type] = p.xpathEval('//rule')
 
         p.xpathFreeContext()
