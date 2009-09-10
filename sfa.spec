@@ -2,7 +2,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -94,6 +94,13 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Thu Sep 10 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-0.9-1
+- unified single SFA database in the PLC-DB
+- upcalls from  PLCAPI to SFA methods
+- SFA call traceability and logging features
+- many bug fixes
+- includes first/rough version of sfatables for policy implementation
+
 * Thu Jul 23 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.8-6
 - snapshot after the GEC5 demo
 - should be the last tag set in the geniwrapper module, are we are now moving to the sfa module
