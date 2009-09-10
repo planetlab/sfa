@@ -38,11 +38,11 @@ class register(Method):
     
     def call(self, cred, record_dict, caller_cred=None):
         self.api.auth.check(cred, "register")
-	if caller_cred==None:
-	   caller_cred=cred
+        if caller_cred==None:
+	        caller_cred=cred
 	
-	#log the call
-	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
+        #log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
         record = GeniRecord(dict = record_dict)
         table = GeniTable()
         type = record['type']
@@ -112,8 +112,13 @@ class register(Method):
  
             if 'enabled' in record and record['enabled']:
                 self.api.plshell.UpdatePerson(self.api.plauth, pointer, {'enabled': record['enabled']})
-            login_base = get_leaf(auth_name)
-            self.api.plshell.AddPersonToSite(self.api.plauth, pointer, login_base)
+           
+            # add this persons to the site only if he is being added for the first
+            # time by sfa and doesont already exist in plc     
+            if not persons or not persons[0]['site_ids']:
+                login_base = get_leaf(auth_name)
+                self.api.plshell.AddPersonToSite(self.api.plauth, pointer, login_base)
+
             # What roles should this user have?
             self.api.plshell.AddRoleToPerson(self.api.plauth, 'user', pointer) 
             record.set_pointer(pointer)
