@@ -32,12 +32,12 @@ class resolve(Method):
     
     def call(self, cred, hrn, caller_cred=None):
         
-	self.api.auth.check(cred, 'resolve')
-	if caller_cred==None:
-	   caller_cred=cred
+        self.api.auth.check(cred, 'resolve')
+        if caller_cred==None:
+            caller_cred=cred
 
-	#log the call
-	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        #log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
         good_records = [] 
 
         # load all know registry names into a prefix tree and attempt to find
