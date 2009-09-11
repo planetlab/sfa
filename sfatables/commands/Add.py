@@ -13,7 +13,7 @@ class Add(Command):
         return
 
     def getnextfilename(self,type,chain):
-        dir = sfatables_config + chain;
+        dir = sfatables_config + "/"+chain;
         last_rule_number = 1
 
         for (root, dirs, files) in os.walk(dir):
@@ -26,7 +26,7 @@ class Add(Command):
 
         return "sfatables-%d-%s"%(last_rule_number+1,type)
 
-    def call_gen(self, dir, options):
+    def call_gen(self, chain, type, dir, options):
         filename = dir + "/"+options.name+".xml"
         xmldoc = libxml2.parseFile(filename)
     
@@ -47,8 +47,7 @@ class Add(Command):
                     valueNode.addContent(option_value)
                     context[0].addChild(valueNode)
 
-        chain = command_options.args[0]
-        filename = self.getnextfilename('match',chain)
+        filename = self.getnextfilename(type,chain)
         file_path = sfatables_config + '/' + chain + '/' + filename
         xmldoc.saveFile(file_path)
         p.xpathFreeContext()
@@ -57,8 +56,9 @@ class Add(Command):
         return True
 
     def call(self, command_options, match_options, target_options):
-        ret = self.call_gen(match_dir, match_options)
+        chain = command_options.args[0]
+        ret = self.call_gen(chain, 'match',match_dir, match_options)
         if (ret):
-            ret = self.call_gen(target_dir, target_options)
+            ret = self.call_gen(chain, 'target',target_dir, target_options)
 
         return ret

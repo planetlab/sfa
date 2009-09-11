@@ -111,24 +111,22 @@ def main():
         target_dict = load_xml_extensions("sfatables.targets",target_dir,targets.all)
         target_parser = create_parser_xml_ext(target_dict)
         targets_str = ",".join(target_dict.keys())
-        target_parser.add_option('-j','--jump',dest='target_name',help='Target name (one of %s)'%targets, metavar = 'TARGET')
+        target_parser.add_option('-j','--jump',dest='name',help='Target name (one of %s)'%targets, metavar = 'TARGET')
         (target_options, args) = target_parser.parse_args(pargs[2])
         try:
-            target_name = target_options.target_name
+            name = target_options.name
         except Exception:
             print "Must specify target name with -m"
 
-        if (target_dict.has_key(target_name)):
-            setattr(target_options, 'arguments', target_dict[target_name].arguments)
+        if (target_dict.has_key(name)):
+            setattr(target_options, 'arguments', target_dict[name].arguments)
         else:
-            raise Exception('Target %s not found'%target_name)
+            raise Exception('Target %s not found'%name)
 
     else:
         target_options = None
 
     command(options, match_options, target_options)
 
-if __name__=='__main__':
-    main()
 if __name__=='__main__':
     main()

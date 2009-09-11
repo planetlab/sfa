@@ -15,8 +15,6 @@ class Xmlextension:
 
     def __init__(self, dir, component_name):
         filename = dir+"/"+component_name+".xml"
-        import pdb
-        pdb.set_trace()
         self.xmldoc = libxml2.parseFile(filename)
 
         # TODO: Check xmldoc against a schema
