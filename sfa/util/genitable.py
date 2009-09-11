@@ -74,19 +74,20 @@ class GeniTable(list):
         self.cnx.query(query_str)
 
     def insert(self, record):
-        dont_insert = ['date_created', 'last_updated']
-        fields = [field for field in  record.fields.keys() if field not in dont_insert]  
-        fieldnames = ["pointer"] + fields
+        dont_insert = ['date_created', 'last_updated', 'record_id']
+        fieldnames = [field for field in  record.all_fields.keys() if field not in dont_insert]  
         fieldvals = record.get_field_value_strings(fieldnames)
         query_str = "INSERT INTO " + self.tablename + \
                        "(" + ",".join(fieldnames) + ") " + \
                        "VALUES(" + ",".join(fieldvals) + ")"
         #print query_str
         self.cnx.query(query_str)
+        results = self.find(record)
+        return results[0]['record_id']
 
     def update(self, record):
-        dont_update = ['date_created', 'last_updated']
-        fields = [field for field in  record.fields.keys() if field not in dont_update]  
+        dont_update = ['date_created', 'last_updated', 'record_id']
+        fields = [field for field in  record.all_fields.keys() if field not in dont_update]  
         fieldvals = record.get_field_value_strings(fields)
         pairs = []
         for field in fields:
@@ -96,7 +97,6 @@ class GeniTable(list):
 
         query_str = "UPDATE %s SET %s WHERE record_id = %s" % \
                     (self.tablename, update, record['record_id'])
-        #print query_str
         self.cnx.query(query_str)
 
     def quote(self, value):
