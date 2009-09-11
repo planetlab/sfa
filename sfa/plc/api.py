@@ -128,14 +128,15 @@ class GeniAPI:
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
         try:
+            self.plshell_type = 'direct'
             import PLC.Shell
             shell = PLC.Shell.Shell(globals = globals())
             shell.AuthCheck(self.plauth)
             return shell
         except ImportError:
+            self.plshell_type = 'xmlrpc' 
             # connect via xmlrpc
             url = self.config.SFA_PLC_URL
-             
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
             shell.AuthCheck(self.plauth)
             return shell
@@ -309,7 +310,7 @@ class GeniAPI:
             record.update({})
             return
 
-        if (type in ["authority", "sa", "ma"]):
+        if (type in ["authority"]):
             pl_res = self.plshell.GetSites(self.plauth, [pointer])
         elif (type == "slice"):
             pl_res = self.plshell.GetSlices(self.plauth, [pointer])
@@ -450,13 +451,11 @@ class GeniAPI:
     # add people who are in the new list, but not the oldList
         for personId in newIdList:
             if not (personId in oldIdList):
-                print "adding id", personId, "to", record.get_name()
                 addFunc(self.plauth, personId, containerId)
 
         # remove people who are in the old list, but not the new list
         for personId in oldIdList:
             if not (personId in newIdList):
-                print "removing id", personId, "from", record.get_name()
                 delFunc(self.plauth, personId, containerId)
 
     def update_membership(self, oldRecord, record):
