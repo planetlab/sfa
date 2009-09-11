@@ -72,7 +72,11 @@ class Filter(Parameter, dict):
 
     def __init__(self, fields = {}, filter = {}, doc = "Attribute filter"):
         # Store the filter in our dict instance
-        dict.__init__(self, filter)
+        valid_fields = {}
+        for field in filter:
+            if field in fields:
+                valid_fields[field] = filter[field]
+        dict.__init__(self, valid_fields)
 
         # Declare ourselves as a type of parameter that can take
         # either a value or a list of values for each of the specified
