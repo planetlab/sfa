@@ -361,34 +361,42 @@ class GeniAPI:
         record.update(pl_record)
 
 
-    def lookup_users(self, user_id_list, role="*"):
-        table = GeniTable() 
-        record_list = []
-        for person_id in user_id_list:
-            user_records = table.find({'type': 'user', 'pointer': person_id})
-            for user_record in user_records:
-                self.fill_record_info(user_record)
-                user_roles = user_record.get("roles")
-                if (role=="*") or (role in user_roles):
-                    record_list.append(user_record['hrn'])
-        return record_list
 
     def fill_record_geni_info(self, record):
         geni_info = {}
         type = record['type']
+        table = GeniTable()
         if (type == "slice"):
             person_ids = record.get("person_ids", [])
-            researchers = self.lookup_users(person_ids)
+            persons = table.find({'type': 'user', 'pointer': person_ids})
+            researchers = [person['hrn'] for person in persons]
             geni_info['researcher'] = researchers
 
         elif (type == "authority"):
             person_ids = record.get("person_ids", [])
-            pis = self.lookup_users(person_ids, "pi")
-            operators = self.lookup_users(person_ids, "tech")
-            owners = self.lookup_users(person_ids, "admin")
-            geni_info['pi'] = pis
-            geni_info['operator'] = operators
-            geni_info['owner'] = owners
+            persons = table.find({'type': 'user', 'pointer': person_ids})
+            persons_dict = {}
+            for person in persons:
+                persons_dict[person['pointer']] = person 
+            pl_persons = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'roles'])
+            pis, techs, admins = [], [], []
+            for person in pl_persons:
+                pointer = person['person_id']
+                
+                if pointer not in persons_dict:
+                    # this means there is not sfa record for this user
+                    continue    
+                hrn = persons_dict[pointer]['hrn']    
+                if 'pi' in person['roles']:
+                    pis.append(hrn)
+                if 'tech' in person['roles']:
+                    techs.append(hrn)
+                if 'admin' in person['roles']:
+                    admins.append(hrn)
+            
+            geni_info['PI'] = pis
+            geni_info['operator'] = techs
+            geni_info['owner'] = admins
             # xxx TODO: OrganizationName
 
         elif (type == "node"):
