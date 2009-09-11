@@ -177,7 +177,7 @@ class sfaImport:
 
     def import_node(self, parent_hrn, node):
         AuthHierarchy = self.AuthHierarchy
-        nodename = node['hostname'].replace(".", "_")
+        nodename = node['hostname'].split(".")[0]
         nodename = cleanup_string(nodename)
 
         if not nodename:
