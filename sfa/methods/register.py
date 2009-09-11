@@ -71,7 +71,13 @@ class register(Method):
         existing_records = table.find({'type': type, 'hrn': hrn})
         if existing_records:
             raise ExistingRecord(hrn)
-        
+        else:
+            # We will update the pointer later
+            record['pointer'] = -1 
+            record.set_pointer(-1)
+            record_id = table.insert(record)
+            record['record_id'] = record_id
+ 
         if type in ["authority"]:
             # update the tree
             if not self.api.auth.hierarchy.auth_exists(hrn):
@@ -103,7 +109,7 @@ class register(Method):
                 pointer = slices[0]['slice_id']
             record.set_pointer(pointer)
 
-        elif (type == "user"):
+        elif  (type == "user"):
             persons = self.api.plshell.GetPersons(self.api.plauth, [record['email']])
             if not persons:
                 pointer = self.api.plshell.AddPerson(self.api.plauth, dict(record))
@@ -112,17 +118,15 @@ class register(Method):
  
             if 'enabled' in record and record['enabled']:
                 self.api.plshell.UpdatePerson(self.api.plauth, pointer, {'enabled': record['enabled']})
-           
             # add this persons to the site only if he is being added for the first
             # time by sfa and doesont already exist in plc     
             if not persons or not persons[0]['site_ids']:
                 login_base = get_leaf(auth_name)
                 self.api.plshell.AddPersonToSite(self.api.plauth, pointer, login_base)
-
+        
             # What roles should this user have?
             self.api.plshell.AddRoleToPerson(self.api.plauth, 'user', pointer) 
             record.set_pointer(pointer)
-	    
             # Add the user's key
             if pub_key:
                 self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type' : 'ssh', 'key' : pub_key})
@@ -140,11 +144,7 @@ class register(Method):
         else:
             raise UnknownGeniType(type)
 
-        # SFA upcalls may exist in PLCAPI and they could have already added the
-        # record for us. Lets check if the record already exists  
-        existing_records = table.find({'type': type, 'hrn': hrn})
-        if not existing_records:
-            table.insert(record)
+        table.update(record)
 
         # update membership for researchers, pis, owners, operators
         self.api.update_membership(None, record)
