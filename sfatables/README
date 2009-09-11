@@ -1,3 +1,12 @@
+sfatables is a tool for defining access and admission control policies in an SFA network, in much the same way as iptables is for ip networks. This file gives an overview of the tool and then describes its design and implementation.
+
+EXAMPLES
+--------
+
+An sfatables configuration consists of lists of rules that are applied to incoming and outgoing rspecs. Each rule consists of a 'match spec' and a 'target spec.' A match spec evaluates a request and determines if it matches a given set of criteria, and the corresponding 'target spec' specifies the action in such a case.
+
+Let's start by defining a few policies
+
 Examples:
 
 Add rules:

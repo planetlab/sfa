@@ -17,11 +17,11 @@ class List(Command):
         return
 
 
-    def get_info(self, xmlextension_path):
+    def get_info(self, type, xmlextension_path):
         xmldoc = libxml2.parseFile(xmlextension_path)
         p = xmldoc.xpathNewContext()
         
-        ext_name_node = p.xpathEval("/match/@name")
+        ext_name_node = p.xpathEval("/%s/@name"%type)
         ext_name = ext_name_node[0].content
 
         name_nodes = p.xpathEval("//rule/argument[value!='']/name")
@@ -69,8 +69,8 @@ class List(Command):
             match_path = sfatables_config + '/' + chain + '/' + match_file
             target_path = sfatables_config + '/' + chain + '/' + target_file
             
-            match_info = self.get_info (match_path)
-            target_info = self.get_info (target_path)
+            match_info = self.get_info ('match',match_path)
+            target_info = self.get_info ('target',target_path)
 
             pretty.push_row(["%d"%number,  match_info['name'], match_info['arguments'], target_info['name'], target_info['arguments']])
         
