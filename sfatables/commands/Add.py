@@ -14,11 +14,11 @@ class Add(Command):
 
     def getnextfilename(self,type,chain):
         dir = sfatables_config + "/"+chain;
-        last_rule_number = 1
+        last_rule_number = 0
 
         for (root, dirs, files) in os.walk(dir):
             for file in files:
-                if (file.startswith('sfatables-')):
+                if (file.startswith('sfatables-') and file.endswith(type)):
                     number_str = file.split('-')[1]
                     number = int(number_str)
                     if (number>last_rule_number):
