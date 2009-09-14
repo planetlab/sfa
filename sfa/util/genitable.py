@@ -82,8 +82,15 @@ class GeniTable(list):
                        "VALUES(" + ",".join(fieldvals) + ")"
         #print query_str
         self.cnx.query(query_str)
-        results = self.find(record)
-        return results[0]['record_id']
+        result = self.find({'hrn': record['hrn'], 'type': record['type']})
+        if not result:
+            record_id = None
+        elif isinstance(result, list):
+            record_id = result[0]['record_id']
+        else:
+            record_id = result['record_id']
+
+        return record_id
 
     def update(self, record):
         dont_update = ['date_created', 'last_updated', 'record_id']
