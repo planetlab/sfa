@@ -191,7 +191,7 @@ and the corresponding target processor:
 Contexts
 --------
 
-Matches and targets are associated with contexts. A target may use a variety of criteria to process a request, and may need to look them up in the SFA database. The 'context' contains an xpath expression that isolates the items that a match refers to. The XML spec corresponding to this expression corresponds to an abstract database schema defined as part of the library. SFA is responsible for evaluating this expression, obtaining the data items that the match needs and providing them to the match at the time of evaluation.
+Matches and targets are associated with specific contexts. A target may use a variety of criteria to process a request, and may need to look them up in the SFA database. The 'context' contains an xpath expression that isolates the items that a match refers to. The XML spec corresponding to this expression corresponds to an abstract database schema defined as part of the library. SFA is responsible for evaluating this expression, obtaining the data items that the match needs and providing them to the match at the time of evaluation.
 
 
 
