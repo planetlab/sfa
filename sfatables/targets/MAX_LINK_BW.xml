@@ -1,0 +1,13 @@
+<target name="MAX_LINK_BANDWIDTH">
+    <!-- The context is empty, since this target does not require any input from SFA -->
+    <context select=""/>
+    <rule>
+        <argument>
+            <name>max-link-bandwidth</name>
+            <help>Maximum link bandwidth.</help>
+            <operand>bps</operand>
+        </argument>
+        </argument>
+    </rule>
+    <processor filename="max_link_banwidth.xsl"/>
+</target>
