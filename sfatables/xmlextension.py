@@ -12,6 +12,7 @@ class Xmlextension:
     processor = ""
     operand = "VALUE"
     arguments = []
+    terminal = 0 
 
     def __init__(self, dir, component_name):
         filename = dir+"/"+component_name+".xml"
@@ -33,6 +34,9 @@ class Xmlextension:
         name = p.xpathEval('//rule/argument/name')
         help = p.xpathEval('//rule/argument/help')
         target = p.xpathEval('//rule/argument/operand')
+
+        context = p.xpathEval('//attributes/attribute[@terminal="yes"]')
+        self.terminal = (context != [])
 
         self.arguments = map(lambda (name,help,target):{'name':name.content,'help':help.content,'target':target.content}, zip(name,help,target))
         
