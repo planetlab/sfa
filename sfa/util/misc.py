@@ -28,8 +28,8 @@ def hostname_to_hrn(auth_hrn, login_base, hostname):
     """
     Convert hrn to plantelab name.
     """
-    genihostname = "_".join(hostname.split("."))
-    return ".".join([auth_hrn, login_base, genihostname])
+    genihostname = ".".join([auth_hrn, login_base, hostname.split(".")[0]])
+    return genihostname
 
 def slicename_to_hrn(auth_hrn, slicename):
     """
