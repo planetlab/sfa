@@ -40,3 +40,10 @@ def slicename_to_hrn(auth_hrn, slicename):
 
     return slice_hrn
 
+def email_to_hrn(auth_hrn, email):
+    parts = email.split("@")
+    username = parts[0]
+    username = username.replace(".", "_") 
+    person_hrn = ".".join([auth_hrn, username])
+    
+    return person_hrn 
