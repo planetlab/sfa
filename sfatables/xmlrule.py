@@ -5,6 +5,7 @@ class XMLRule:
     rule_number = None
     chain = None
     xmldoc = None
+    terminal = 0
 
     arguments = {'match':None,'target':None}
     processors = {'match':None,'target':None}
@@ -21,6 +22,10 @@ class XMLRule:
 
         processor = p.xpathEval('//processor/@filename')
 
+        context = p.xpathEval('//attributes/attribute[@terminal="yes"]')
+        if (context != []):
+            self.terminal = 1
+        
         self.processors[type] = processor[0].content
         self.arguments[type] = p.xpathEval('//rule')
 
