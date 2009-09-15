@@ -9,6 +9,13 @@ class Command:
     action = 'store_const'
 
     def __init__(self):
+        self.options = []
+        self.help = ''
+        self.type = 'command'
+        self.matches = False
+        self.targets = False
+        self.action = 'store_const'
+
         return
 
     def call(self, coptions, moptions, toptions):

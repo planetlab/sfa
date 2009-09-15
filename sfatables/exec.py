@@ -13,9 +13,8 @@ from sfatables.commands.List import *
 from sfatables.xmlrule import *
 
 class SFATablesRules:
-    sorted_rule_list = []
-
     def __init__(self, chain_name):
+        self.sorted_rule_list = []
         chain_dir_path = "%s/%s"%(sfatables_config,chain_name)
         rule_list = List().get_rule_list(chain_dir_path)
         for rule_number in rule_list:

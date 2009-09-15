@@ -8,13 +8,13 @@ import libxml2
 from sfatables.globals import *
 
 class Xmlextension:
-    context = ""
-    processor = ""
-    operand = "VALUE"
-    arguments = []
-    terminal = 0 
-
     def __init__(self, dir, component_name):
+        self.context = ""
+        self.processor = ""
+        self.operand = "VALUE"
+        self.arguments = []
+        self.terminal = 0
+
         filename = dir+"/"+component_name+".xml"
         self.xmldoc = libxml2.parseFile(filename)
 
