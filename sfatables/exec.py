@@ -32,9 +32,39 @@ def main():
     incoming = SFATablesRules('INCOMING')
     outgoing = SFATablesRules('OUTGOING')
 
+    rspec = """
+<rspec>
+    <sfatables-input>
+        <rule>
+            <argument>
+                <name>whitelist</name>
+                <value>plc.princeton</value>
+            </argument>
+            <argument>
+                <name>blacklist</name>
+                <value>plc.princeton.planetlab-04</value>
+            </argument>
+        </rule>
+    </sfatables-input>
+    <request>
+        <nodespec>
+            <node name="plc.princeton.planetlab-01"/>
+            <node name="plc.princeton.planetlab-02"/>
+            <node name="plc.princeton.planetlab-03"/>
+            <node name="plc.princeton.planetlab-04"/>
+            <node name="plc.mit.csail.planetlab3"/>
+        </nodespec>
+    </request>
+</rspec>
+    """
+
+    
     print "%d rules loaded for INCOMING chain\n"%len(incoming.sorted_rule_list)
     print "%d rules loaded for OUTGOING chain\n"%len(outgoing.sorted_rule_list)
 
+    newrspec = incoming.apply(rspec)
+    import pdb
+    pdb.set_trace()
     return
 
 if __name__=="__main__":

@@ -12,7 +12,12 @@ class XMLRule:
     context = {'match':None,'target':None}
 
     def apply_processor(self, type, rspec):
-        processor = processors[type]
+        processor = self.processors[type]
+
+        # XXX TO CLEAN UP
+        filepath = 'processors/' + processor
+        # XXX
+
         styledoc = libxml2.parseFile(processor)
         style = libxslt.parseStylesheetDoc(styledoc)
         doc = libxml2.parseDoc(rspec)
