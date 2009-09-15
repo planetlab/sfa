@@ -59,7 +59,7 @@ XPath is used to select sets of nodes in an XML file. It is like the
 'SELECT' command in SQL, but has the advantage of applying to tree
 structures, which are more general than relations. That is, while a
 relation (a table) has a depth = 2, a tree can have an arbitrary
-depth. This property allows us to consicely refer to 'the nodes in the
+depth. This property allows us to consicely refer to criteria such as 'the nodes in the
 site corresponding to a user named Alice.' This particular command
 might look like: '/user[name='Alice']/site/node.'
 
@@ -83,7 +83,7 @@ differences.
 
 * Some terms have an '@' in them, meaning that they are attributes;
   e.g., to retrieve the value of p in the following data, we would use
-  the expression "//x/y/@p"
+  the expression "/x/y/@p"
 
    <x>
    <y p="q"/>
@@ -182,7 +182,7 @@ This is exactly what the previous fragment of code says, albeit in a
 different format.
 
 Example target
-------------
+--------------
 
 Targets are specified just like matches. If you haven't read the match
 example, then now is a good time to do that. Here's an example target:
@@ -239,17 +239,15 @@ and the corresponding target processor:
 Contexts
 --------
 
-Matches and targets are associated with specific contexts. A target
-may use a variety of criteria to process a request, and may need to
-look them up in the SFA database. The 'context' contains an xpath
-expression that isolates the items that a match refers to. The XML
-spec corresponding to this expression corresponds to an abstract
-database schema defined as part of the library. SFA is responsible for
-evaluating this expression, obtaining the data items that the match
-needs and providing them to the match at the time of evaluation.
+Matches and targets are associated with specific contexts. A target may use a
+variety of criteria to process a request, and may need to look them up in the
+SFA database. The 'context' contains an xpath expression that isolates the
+items that a match or target may refer to. For example, if a match needs access
+to the nodes corresponding to a slice's site, then the context may be '/sfa/slice[@name=/context/slice/@name]/nodes'.
+
 
 Here's a summary of the model:
--------------------------
+-----------------------------
 
 An AM can inherit from a set of elements (E).
 
