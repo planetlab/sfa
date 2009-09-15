@@ -34,15 +34,23 @@ def main():
 
     rspec = """
 <rspec>
+    <context-input>
+        <sfa><user><hrn>plc.princeton.sapan</hrn></user></sfa>
+    </context-input>
+
     <sfatables-input>
         <rule>
+            <argument>
+                <name>hrn</name>
+                <value>plc</value>
+            </argument>
             <argument>
                 <name>whitelist</name>
                 <value>plc.princeton</value>
             </argument>
             <argument>
                 <name>blacklist</name>
-                <value>plc.princeton.planetlab-04</value>
+                <value>plc.tp</value>
             </argument>
         </rule>
     </sfatables-input>
@@ -52,7 +60,7 @@ def main():
             <node name="plc.princeton.planetlab-02"/>
             <node name="plc.princeton.planetlab-03"/>
             <node name="plc.princeton.planetlab-04"/>
-            <node name="plc.mit.csail.planetlab3"/>
+            <node name="plc.tp.planetlab3"/>
         </nodespec>
     </request>
 </rspec>
@@ -63,8 +71,7 @@ def main():
     print "%d rules loaded for OUTGOING chain\n"%len(outgoing.sorted_rule_list)
 
     newrspec = incoming.apply(rspec)
-    import pdb
-    pdb.set_trace()
+    print newrspec
     return
 
 if __name__=="__main__":
