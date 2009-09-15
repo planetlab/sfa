@@ -243,7 +243,11 @@ class Slices(SimpleStorage):
             if not person_record:
                 pass
             person_dict = person_record.as_dict()
-            persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
+	    if peer:
+	       peer_id=self.api.plshell.GetPeers(self.api.plauth, {'shortname' : peer}, ['peer_id'])[0]['peer_id']
+               persons = self.api.plshell.GetPersons(self.api.plauth, {'email' : [person_dict['email']], 'peer_id' : peer_id}, ['person_id', 'key_ids'])
+	    else:
+               persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
 
             # Create the person record 
             if not persons:
