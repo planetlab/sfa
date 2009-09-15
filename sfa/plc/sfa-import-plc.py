@@ -90,15 +90,18 @@ def main():
             
     # Get all plc sites
     sites = shell.GetSites(plc_auth)
+    sites_dict = {}
+    for site in sites:
+        sites_dict[site['login_base']] = site 
     
     # Get all plc users
-    persons = shell.GetPersons(plc_auth, {}, ['person_id', 'email', 'key_ids'])
+    persons = shell.GetPersons(plc_auth, {}, ['person_id', 'email', 'key_ids', 'site_ids'])
     persons_dict = {}
     for person in persons:
         persons_dict[person['person_id']] = person
 
     # Get all plc nodes  
-    nodes = shell.GetNodes(plc_auth, {}, ['node_id', 'hostname'])
+    nodes = shell.GetNodes(plc_auth, {}, ['node_id', 'hostname', 'site_id'])
     nodes_dict = {}
     for node in nodes:
         nodes_dict[node['node_id']] = node
@@ -149,45 +152,49 @@ def main():
                 sfaImporter.import_person(site_hrn, person)
 
         
-        # remove any record in existing_hrns that does not 
-        # have a plc record
-        site_existing_records_only = lambda (r_hrn, r_type): r_hrn.startswith(site_hrn)
-        site_existing_records = filter(site_existing_records_only, existing_records.keys())
-        for (record_hrn, type) in site_existing_records:
-            found = False
-            if type == 'user':
-                for person in persons_dict.values():
-                    tmp_hrn = email_to_hrn(site_hrn, person['email'])
-                    if record_hrn == tmp_hrn:
-                        found = True
-
-            elif type == 'node':
-                for node in nodes_dict.values():
-                    tmp_hrn = hostname_to_hrn(import_auth, site['login_base'], node['hostname'])
-                    if record_hrn == tmp_hrn:
-                        found = True
-            elif type == 'slice':
-                for slice in slices_dict.values():
-                    tmp_hrn = slicename_to_hrn(import_auth, slice['name'])
-                    if record_hrn == tmp_hrn:
-                        found = True
-            else:
-                continue
- 
-            if not found:
-                trace("Import: Removing %s %s" % (type, record_hrn)) 
-                record_object = existing_records[(record_hrn, type)]
-                sfaImporter.delete_record(record_hrn, type)
-    
-    # remove stale site_records    
-    site_records_only = lambda(r_hrn, r_type): r_type == 'authority' and r_hrn != import_auth
-    site_records = filter(site_records_only, existing_records.keys())
-    for (record_hrn, type) in site_records:
+    # remove stale records    
+    for (record_hrn, type) in existing_records.keys():
         found = False
-        for site in sites:
-            site_hrn = import_auth + "." + site['login_base']
-            if site_hrn == record_hrn:
-                found = True
+        if record_hrn == import_auth:
+            continue    
+        if type == 'authority':    
+            for site in sites:
+                site_hrn = import_auth + "." + site['login_base']
+                if site_hrn == record_hrn:
+                    found = True
+                    break
+
+        elif type == 'user':
+            login_base = get_leaf(get_authority(record_hrn))
+            username = get_leaf(record_hrn)
+            site = sites_dict[login_base]
+            for person in persons:
+                tmp_username = person['email'].split("@")[0]
+                alt_username = person['email'].split("@")[0].replace(".", "_")
+                if username in [tmp_username, alt_username] and site['site_id'] in person['site_ids']:
+                    found = True
+                    break
+        
+        elif type == 'slice':
+            slicename = hrn_to_pl_slicename(record_hrn)
+            site = sites_dict[login_base]
+            for slice in slices:
+                if slicename == slice['name']:
+                    found = True
+                    break    
+ 
+        elif type == 'node':
+            login_base = get_leaf(get_authority(record_hrn))
+            nodename = get_leaf(record_hrn)
+            site = sites_dict[login_base]
+            for node in nodes:
+                tmp_nodename = node['hostname'].split(".")[0]
+                if tmp_nodename == nodename and node['site_id'] == site['site_id']:
+                    found = True
+                    break  
+        else:
+            continue 
+        
         if not found:
             trace("Import: Removing %s %s" % (type,  record_hrn))
             record_object = existing_records[(record_hrn, type)]
