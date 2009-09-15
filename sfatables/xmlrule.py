@@ -1,4 +1,5 @@
 import libxml2
+import libxslt
 from sfatables.globals import *
 
 class XMLRule:
@@ -18,11 +19,11 @@ class XMLRule:
         filepath = 'processors/' + processor
         # XXX
 
-        styledoc = libxml2.parseFile(processor)
+        styledoc = libxml2.parseFile(filepath)
         style = libxslt.parseStylesheetDoc(styledoc)
         doc = libxml2.parseDoc(rspec)
         result = style.applyStylesheet(doc, None)
-        processed_result = style.saveResultToString(result, 0)
+        stylesheet_result = style.saveResultToString(result)
         style.freeStylesheet()
         doc.freeDoc()
         result.freeDoc()

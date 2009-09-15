@@ -16,7 +16,6 @@ class List(Command):
     def __init__(self):
         return
 
-
     def get_info(self, type, xmlextension_path):
         xmldoc = libxml2.parseFile(xmlextension_path)
         p = xmldoc.xpathNewContext()
