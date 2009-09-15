@@ -126,7 +126,6 @@ class sfaImport:
             pkey = Keypair(create=True)
 
         # create the gid
-        print "*", hrn
         person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         table = GeniTable()
         person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
@@ -229,57 +228,10 @@ class sfaImport:
             auth_record['record_id'] = existing_record['record_id']
             table.update(auth_record)
 
-        #if 'person_ids' in site:
-        #    for person_id in site['person_ids']:
-        #        persons = shell.GetPersons(plc_auth, [person_id])
-        #        if persons:
-        #            try:
-        #                self.import_person(hrn, persons[0])
-        #            except Exception, e:
-        #                trace("Failed to import: %s (%s)" % (persons[0], e))
-        #if 'slice_ids' in site:
-        #    for slice_id in site['slice_ids']:
-        #        slices = shell.GetSlices(plc_auth, [slice_id])
-        #        if slices:
-        #            try:
-        #                self.import_slice(hrn, slices[0])
-        #            except Exception, e:
-        #                trace("Failed to import: %s (%s)" % (slices[0], e))
-        #if 'node_ids' in site:
-        #    for node_id in site['node_ids']:
-        #        nodes = shell.GetNodes(plc_auth, [node_id])
-        #        if nodes:
-        #            try:
-        #                self.import_node(hrn, nodes[0])
-        #            except Exception, e:
-        #                trace("Failed to import: %s (%s)" % (nodes[0], e))     
 
-    def delete_record(self, parent_hrn, object, type):
-        # get the hrn
-        table = GeniTable()
-        hrn = None
-        if type in ['slice'] and 'name' in object and object['name']:
-            slice_name = object['name'].split("_")[0]
-            hrn = parent_hrn + "." + slice_name
-        elif type in ['user'] and 'email' in object and object['email']:
-            person_name = object['email'].split('@')[0]
-            hrn = parent_hrn + "." + person_name
-        elif type in ['node'] and 'hostname' in object and object['hostname']:
-            node_name =  object['hostname'].replace('.','_')  
-            hrn = parent_hrn + "." + node_name
-        elif type in ['site'] and 'login_base' in object and object['login_base']:
-            site_name = object['login_base']
-            hrn = parent_hrn
-            parent_hrn = get_authority(hrn)
-            type = "authority"
-            # delete all records whos authority is this site
-            records = table.find({'authority': hrn})
-            for record in records:
-                table.remove(record)
-        else:
-            return
-        
+    def delete_record(self, hrn, type):
         # delete the record
+        table = GeniTable()
         record_list = table.find({'type': type, 'hrn': hrn})
         for record in record_list:
             table.remove(record)        

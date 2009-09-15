@@ -115,10 +115,9 @@ def main():
         # import if hrn is not in list of existing hrns or if the hrn exists
         # but its not a site record
         if site_hrn not in existing_hrns or \
-           (site_hrn, 'authority') not in existing_records:   
+           (site_hrn, 'authority') not in existing_records:
             sfaImporter.import_site(import_auth, site)
-
-        
+             
         # import node records
         for node_id in site['node_ids']:
             if node_id not in nodes_dict:
@@ -148,6 +147,53 @@ def main():
             if hrn not in existing_hrns or \
                (hrn, 'user') not in existing_records:
                 sfaImporter.import_person(site_hrn, person)
+
+        
+        # remove any record in existing_hrns that does not 
+        # have a plc record
+        site_existing_records_only = lambda (r_hrn, r_type): r_hrn.startswith(site_hrn)
+        site_existing_records = filter(site_existing_records_only, existing_records.keys())
+        for (record_hrn, type) in site_existing_records:
+            found = False
+            if type == 'user':
+                for person in persons_dict.values():
+                    tmp_hrn = email_to_hrn(site_hrn, person['email'])
+                    if record_hrn == tmp_hrn:
+                        found = True
+
+            elif type == 'node':
+                for node in nodes_dict.values():
+                    tmp_hrn = hostname_to_hrn(import_auth, site['login_base'], node['hostname'])
+                    if record_hrn == tmp_hrn:
+                        found = True
+            elif type == 'slice':
+                for slice in slices_dict.values():
+                    tmp_hrn = slicename_to_hrn(import_auth, slice['name'])
+                    if record_hrn == tmp_hrn:
+                        found = True
+            else:
+                continue
+ 
+            if not found:
+                trace("Import: Removing %s %s" % (type, record_hrn)) 
+                record_object = existing_records[(record_hrn, type)]
+                sfaImporter.delete_record(record_hrn, type)
+    
+    # remove stale site_records    
+    site_records_only = lambda(r_hrn, r_type): r_type == 'authority' and r_hrn != import_auth
+    site_records = filter(site_records_only, existing_records.keys())
+    for (record_hrn, type) in site_records:
+        found = False
+        for site in sites:
+            site_hrn = import_auth + "." + site['login_base']
+            if site_hrn == record_hrn:
+                found = True
+        if not found:
+            trace("Import: Removing %s %s" % (type,  record_hrn))
+            record_object = existing_records[(record_hrn, type)]
+            sfaImporter.delete_record(record_hrn, type) 
+                                   
+                    
         
 if __name__ == "__main__":
     main()
