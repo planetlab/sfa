@@ -41,6 +41,9 @@ class get_resources(Method):
         #log the call
 	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
 
+        # This code needs to be cleaned up so that 'pl' is treated as just another RSpec manager.
+        # The change ought to be straightforward as soon as we define PL's new RSpec.
+
         if (sfa_aggregate_type == 'pl'):
             nodes = Nodes(self.api, caller_cred=caller_cred)
             if hrn:
@@ -49,7 +52,6 @@ class get_resources(Method):
                 nodes.refresh()
                 rspec = nodes['rspec']
         else:
-            # To clean up after July 21 - SB    
             rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
             rspec = rspec_manager.get_rspec(self.api, hrn)
         
