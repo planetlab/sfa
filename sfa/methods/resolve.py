@@ -66,7 +66,7 @@ class resolve(Method):
 
         # if we still havnt found the record yet, try the local registry
         table = GeniTable()
-        records = table.find(hrn)
+        records = table.findObjects(hrn)
         if not records:
             raise RecordNotFound(hrn) 
         for record in records:
