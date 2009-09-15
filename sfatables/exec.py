@@ -24,7 +24,7 @@ class SFATablesRules:
     def apply(self, rspec):
         intermediate_rspec = rspec
         for rule in self.sorted_rule_list:
-            intermediate_rspec  = rule.apply(intermediate_rspec)
+            intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
 
         return intermediate_rspec
 

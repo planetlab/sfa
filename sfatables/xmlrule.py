@@ -11,6 +11,45 @@ class XMLRule:
     processors = {'match':None,'target':None}
     context = {'match':None,'target':None}
 
+    def apply_processor(self, type, rspec):
+        processor = processors[type]
+        styledoc = libxml2.parseFile(processor)
+        style = libxslt.parseStylesheetDoc(styledoc)
+        doc = libxml2.parseDoc(rspec)
+        result = style.applyStylesheet(doc, None)
+        processed_result = style.saveResultToString(result, 0)
+        style.freeStylesheet()
+        doc.freeDoc()
+        result.freeDoc()
+
+        return stylesheet_result
+
+    def match(self, rspec):
+        match_result = self.apply_processor('match',rspec) 
+        return (match_result=='True')
+
+    def target(self, rspec):
+        target_result = self.apply_processor('target',rspec)
+        return target_result
+
+    def apply_interpreted(self, rspec):
+        # Interpreted
+        #
+        # output =
+        #    if (match(match_args, rspec)
+        #       then target(target_args, rspec)
+        #       else rspec
+
+        if (self.match(rspec)):
+            return self.target(rspec)
+        else:
+            return rspec
+
+
+    def apply_compiled(rspec):
+        # Not supported yet
+        return None
+
     def load_xml_extension (self, type, chain, rule_number):
         filename = sfatables_config+"/"+chain+"/"+"sfatables-%d-%s"%(rule_number,type)
 
