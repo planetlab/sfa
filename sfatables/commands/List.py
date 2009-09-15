@@ -54,6 +54,10 @@ class List(Command):
         return rule_list
 
     def call(self, command_options, match_options, target_options):
+        if (len(command_options.args) < 1):
+            print "Please specify the name of the chain you would like to list, e.g. sfatables -L INCOMING."
+            return
+
         chain = command_options.args[0]
         chain_dir = sfatables_config + "/" + chain
 

@@ -15,7 +15,8 @@ class Delete(Command):
     def call(self, command_options, match_options, target_options):
 
         if (len(command_options.args)<2):
-            print "Please specify the chain and the rule number to delete, e.g. sfatables -D INCOMING 1"
+            print "Please specify the chain and the rule number to delete, e.g. sfatables -D INCOMING 1."
+            return
 
         chain = command_options.args[0]
 
