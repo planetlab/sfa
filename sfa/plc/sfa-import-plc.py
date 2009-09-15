@@ -89,25 +89,25 @@ def main():
         existing_hrns.append(result['hrn']) 
             
     # Get all plc sites
-    sites = shell.GetSites(plc_auth)
+    sites = shell.GetSites(plc_auth, {'peer_id': None})
     sites_dict = {}
     for site in sites:
         sites_dict[site['login_base']] = site 
     
     # Get all plc users
-    persons = shell.GetPersons(plc_auth, {}, ['person_id', 'email', 'key_ids', 'site_ids'])
+    persons = shell.GetPersons(plc_auth, {'peer_id': None}, ['person_id', 'email', 'key_ids', 'site_ids'])
     persons_dict = {}
     for person in persons:
         persons_dict[person['person_id']] = person
 
     # Get all plc nodes  
-    nodes = shell.GetNodes(plc_auth, {}, ['node_id', 'hostname', 'site_id'])
+    nodes = shell.GetNodes(plc_auth, {'peer_id': None}, ['node_id', 'hostname', 'site_id'])
     nodes_dict = {}
     for node in nodes:
         nodes_dict[node['node_id']] = node
 
     # Get all plc slices
-    slices = shell.GetSlices(plc_auth, {}, ['slice_id', 'name'])
+    slices = shell.GetSlices(plc_auth, {'peer_id': None}, ['slice_id', 'name'])
     slices_dict = {}
     for slice in slices:
         slices_dict[slice['slice_id']] = slice
@@ -167,17 +167,17 @@ def main():
         elif type == 'user':
             login_base = get_leaf(get_authority(record_hrn))
             username = get_leaf(record_hrn)
-            site = sites_dict[login_base]
-            for person in persons:
-                tmp_username = person['email'].split("@")[0]
-                alt_username = person['email'].split("@")[0].replace(".", "_")
-                if username in [tmp_username, alt_username] and site['site_id'] in person['site_ids']:
-                    found = True
-                    break
+            if login_base in sites_dict:
+                site = sites_dict[login_base]
+                for person in persons:
+                    tmp_username = person['email'].split("@")[0]
+                    alt_username = person['email'].split("@")[0].replace(".", "_")
+                    if username in [tmp_username, alt_username] and site['site_id'] in person['site_ids']:
+                        found = True
+                        break
         
         elif type == 'slice':
             slicename = hrn_to_pl_slicename(record_hrn)
-            site = sites_dict[login_base]
             for slice in slices:
                 if slicename == slice['name']:
                     found = True
@@ -186,12 +186,13 @@ def main():
         elif type == 'node':
             login_base = get_leaf(get_authority(record_hrn))
             nodename = get_leaf(record_hrn)
-            site = sites_dict[login_base]
-            for node in nodes:
-                tmp_nodename = node['hostname'].split(".")[0]
-                if tmp_nodename == nodename and node['site_id'] == site['site_id']:
-                    found = True
-                    break  
+            if login_base in sites_dict:
+                site = sites_dict[login_base]
+                for node in nodes:
+                    tmp_nodename = node['hostname'].split(".")[0]
+                    if tmp_nodename == nodename and node['site_id'] == site['site_id']:
+                        found = True
+                        break  
         else:
             continue 
         
