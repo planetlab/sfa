@@ -7,7 +7,6 @@
             <help>Maximum link bandwidth.</help>
             <operand>bps</operand>
         </argument>
-        </argument>
     </rule>
     <processor filename="max_link_banwidth.xsl"/>
 </target>

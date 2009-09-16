@@ -91,6 +91,7 @@ def main():
         match_parser = create_parser_xml_ext(match_dict)
         matches_str = ",".join(match_dict.keys())
         match_parser.add_option('-m','--match',dest='name',help='Match name (one of %s)'%matches_str, metavar = 'MATCH')
+        match_parser.add_option('-n','--negate',dest='negate',help='Negate result',action=store_true)
         (match_options, args) = match_parser.parse_args(pargs[1])
         try:
             name = match_options.name
