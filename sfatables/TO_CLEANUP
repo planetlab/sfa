@@ -1,0 +1,2 @@
+1# Load sfatables rules only once, not on every request.
+2# Set request context based on the context requested by the match/target.

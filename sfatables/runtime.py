@@ -21,6 +21,7 @@ class SFATablesRules:
             self.sorted_rule_list.append(XMLRule(chain_name, rule_number))
         return
 
+
     def apply(self, rspec):
         intermediate_rspec = rspec
         for rule in self.sorted_rule_list:
