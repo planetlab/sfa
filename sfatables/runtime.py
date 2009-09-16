@@ -26,6 +26,8 @@ class SFATablesRules:
         intermediate_rspec = rspec
         for rule in self.sorted_rule_list:
             intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
+            if (rule.terminal):
+                break
 
         return intermediate_rspec
 
@@ -33,37 +35,8 @@ def main():
     incoming = SFATablesRules('INCOMING')
     outgoing = SFATablesRules('OUTGOING')
 
-    rspec = """
-<rspec>
-    <request-context>
-        <sfa><user><hrn>plc.princeton.sapan</hrn></user></sfa>
-    </request-context>
+    rspec = open(sys.argv[1]).read()
 
-    <sfatables-rule>
-            <argument>
-                <name>hrn</name>
-                <value>plc</value>
-            </argument>
-            <argument>
-                <name>whitelist</name>
-                <value>plc.princeton</value>
-            </argument>
-            <argument>
-                <name>blacklist</name>
-                <value>plc.tp</value>
-            </argument>
-    </sfatables-rule>
-    <request>
-        <nodespec>
-            <node name="plc.princeton.planetlab-01"/>
-            <node name="plc.princeton.planetlab-02"/>
-            <node name="plc.princeton.planetlab-03"/>
-            <node name="plc.princeton.planetlab-04"/>
-            <node name="plc.tp.planetlab3"/>
-        </nodespec>
-    </request>
-</rspec>
-    """
 
     
     print "%d rules loaded for INCOMING chain\n"%len(incoming.sorted_rule_list)
