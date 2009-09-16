@@ -43,11 +43,29 @@ def process_options():
        name = opt[0]
        val = opt[1]
 
+
+def load_keys(filename):
+    keys = {}
+    tmp_dict = {}
+    try:
+        execfile(filename, tmp_dict)
+        if 'keys' in tmp_dict:
+            keys = tmp_dict['keys']
+        return keys
+    except:
+        return keys
+
+def save_keys(filename, keys):
+    f = open(filename, 'w')
+    f.write("keys = %s" % str(keys))
+    f.close()
+
 def main():
     process_options()
     config = Config()
     root_auth = config.SFA_REGISTRY_ROOT_AUTH
     level1_auth = config.SFA_REGISTRY_LEVEL1_AUTH
+    keys_filename = config.config_path + os.sep + 'person_keys.py' 
     sfaImporter = sfaImport()
     shell = sfaImporter.shell
     plc_auth = sfaImporter.plc_auth 
@@ -83,6 +101,8 @@ def main():
     # create dict of all existing sfa records
     existing_records = {}
     existing_hrns = []
+    key_ids = []
+    person_keys = {} 
     results = table.find()
     for result in results:
         existing_records[(result['hrn'], result['type'])] = result
@@ -99,6 +119,21 @@ def main():
     persons_dict = {}
     for person in persons:
         persons_dict[person['person_id']] = person
+        key_ids.extend(person['key_ids'])
+
+    # Get all public keys
+    keys = shell.GetKeys(plc_auth, {'peer_id': None, 'key_id': key_ids})
+    keys_dict = {}
+    for key in keys:
+        keys_dict[key['key_id']] = key['key']
+
+    # create a dict of person keys keyed on key_id 
+    old_person_keys = load_keys(keys_filename)
+    for person in persons:
+        pubkeys = []
+        for key_id in person['key_ids']:
+            pubkeys.append(keys_dict[key_id])
+        person_keys[person['person_id']] = pubkeys
 
     # Get all plc nodes  
     nodes = shell.GetNodes(plc_auth, {'peer_id': None}, ['node_id', 'hostname', 'site_id'])
@@ -147,11 +182,22 @@ def main():
                 continue 
             person = persons_dict[person_id]
             hrn = email_to_hrn(site_hrn, person['email'])
+            old_keys = []
+            new_keys = []
+            if person_id in old_person_keys:
+                old_keys = old_person_keys[person_id]
+            if person_id in person_keys:
+                new_keys = person_keys[person_id]
+            update_record = False
+            for key in new_keys:
+                if key not in old_keys:
+                    update_record = True 
+
             if hrn not in existing_hrns or \
-               (hrn, 'user') not in existing_records:
+               (hrn, 'user') not in existing_records or update_record:
                 sfaImporter.import_person(site_hrn, person)
 
-        
+    
     # remove stale records    
     for (record_hrn, type) in existing_records.keys():
         found = False
@@ -201,7 +247,9 @@ def main():
             record_object = existing_records[(record_hrn, type)]
             sfaImporter.delete_record(record_hrn, type) 
                                    
-                    
+    # save pub keys
+    trace('saving current pub keys') 
+    save_keys(keys_filename, person_keys)                
         
 if __name__ == "__main__":
     main()

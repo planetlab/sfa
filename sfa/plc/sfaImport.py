@@ -129,11 +129,12 @@ class sfaImport:
         person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         table = GeniTable()
         person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
-        try:
+        existing_records = table.find({'hrn': hrn, 'type': 'user', 'pointer': person['person_id']})
+        if not existing_records:
             table.insert(person_record)
-        except:
+        else:
             trace("Import: %s exists, updating " % hrn)
-            existing_record = table.find(person_record)
+            existing_record = existing_records[0]
             person_record['record_id'] = existing_record['record_id']
             table.update(person_record)
 
@@ -153,11 +154,12 @@ class sfaImport:
         slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         slice_record = GeniRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
         table = GeniTable()
-        try:
+        existing_records = table.find({'hrn': hrn, 'type': 'slice', 'pointer': slice['slice_id']})
+        if not existing_records:
             table.insert(slice_record)
-        except:
+        else:
             trace("Import: %s exists, updating " % hrn)
-            existing_record = table.find(slice_record)
+            existing_record = existing_records[0]
             slice_record['record_id'] = existing_record['record_id']
             table.update(slice_record)
 
@@ -181,11 +183,12 @@ class sfaImport:
         pkey = Keypair(create=True)
         node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         node_record = GeniRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
-        try:
+        existing_records = table.find({'hrn': hrn, 'type': 'node', 'pointer': node['node_id']})
+        if not existing_records:
             table.insert(node_record)
-        except:
+        else:
             trace("Import: %s exists, updating " % hrn)
-            existing_record = table.find(node_record)
+            existing_record = existing_records[0]
             node_record['record_id'] = existing_record['record_id']
             table.update(node_record)
 
@@ -220,11 +223,12 @@ class sfaImport:
 
         table = GeniTable()
         auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
-        try:
+        existing_records = table.find({'hrn': hrn, 'type': 'authority', 'pointer': site['site_id']})
+        if not existing_records:
             table.insert(auth_record)
-        except:
+        else:
             trace("Import: %s exists, updating " % hrn)
-            existing_record = table.find(auth_record)
+            existing_record = existing_record[0]
             auth_record['record_id'] = existing_record['record_id']
             table.update(auth_record)
 
