@@ -200,13 +200,17 @@ def main():
     
     # remove stale records    
     for (record_hrn, type) in existing_records.keys():
-        found = False
+        # if this is the interface name dont do anything
         if record_hrn == import_auth:
             continue    
+        
+        found = False
+        record = existing_records[(record_hrn, type)]
+        
         if type == 'authority':    
             for site in sites:
                 site_hrn = import_auth + "." + site['login_base']
-                if site_hrn == record_hrn:
+                if site_hrn == record_hrn and site['site_id'] == record['pointer']:
                     found = True
                     break
 
@@ -218,14 +222,17 @@ def main():
                 for person in persons:
                     tmp_username = person['email'].split("@")[0]
                     alt_username = person['email'].split("@")[0].replace(".", "_")
-                    if username in [tmp_username, alt_username] and site['site_id'] in person['site_ids']:
+                    if username in [tmp_username, alt_username] and \
+                       site['site_id'] in person['site_ids'] and \
+                       person['person_id'] == record['pointer']:
                         found = True
                         break
         
         elif type == 'slice':
             slicename = hrn_to_pl_slicename(record_hrn)
             for slice in slices:
-                if slicename == slice['name']:
+                if slicename == slice['name'] and \
+                   slice['slice_id'] == record['pointer']:
                     found = True
                     break    
  
@@ -236,7 +243,9 @@ def main():
                 site = sites_dict[login_base]
                 for node in nodes:
                     tmp_nodename = node['hostname'].split(".")[0]
-                    if tmp_nodename == nodename and node['site_id'] == site['site_id']:
+                    if tmp_nodename == nodename and \
+                       node['site_id'] == site['site_id'] and \
+                       node['node_id'] == record['pointer']:
                         found = True
                         break  
         else:
