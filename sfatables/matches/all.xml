@@ -1,0 +1,12 @@
+<!-- 
+"context" specifies the subset of the requestor context that this match needs to see. It is specified as an xpath expression.
+For this simple match, we just need to look at sfa-input. 
+
+"rule" specifies a set of arguments that the match accepts.
+-->
+
+<match name="all">
+    <!-- Empty context. We _always_ get the hrn of the current user -->
+    <context select=""/>
+    <processor filename="all.xsl"/>
+</match>
