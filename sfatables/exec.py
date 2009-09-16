@@ -34,12 +34,11 @@ def main():
 
     rspec = """
 <rspec>
-    <context-input>
+    <request-context>
         <sfa><user><hrn>plc.princeton.sapan</hrn></user></sfa>
-    </context-input>
+    </request-context>
 
-    <sfatables-input>
-        <rule>
+    <sfatables-rule>
             <argument>
                 <name>hrn</name>
                 <value>plc</value>
@@ -52,8 +51,7 @@ def main():
                 <name>blacklist</name>
                 <value>plc.tp</value>
             </argument>
-        </rule>
-    </sfatables-input>
+    </sfatables-rule>
     <request>
         <nodespec>
             <node name="plc.princeton.planetlab-01"/>

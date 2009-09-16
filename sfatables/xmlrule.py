@@ -41,8 +41,6 @@ class XMLRule:
         return stylesheet_result
 
     def match(self, rspec):
-        import pdb
-        pdb.set_trace()
         match_result = self.apply_processor('match',rspec,"//result/@verdict") 
         return (match_result=='True')
 
