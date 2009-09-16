@@ -135,7 +135,10 @@ class GeniTable(list):
         elif isinstance(record_filter, int):
             record_filter = Filter(GeniRecord.all_fields, {'record_id':[record_filter]})    
             sql += " AND (%s) %s" % record_filter.sql("AND")
+
         results = self.cnx.query(sql).dictresult()
+        if isinstance(results, dict):
+            results = [results]
         return results
 
     def findObjects(self, record_filter = None):
