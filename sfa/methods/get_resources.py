@@ -7,9 +7,10 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.config import Config
 from sfa.plc.nodes import Nodes
-# RSpecManager_pl is not used. This is just to resolve issues with the dynamic __import__ that comes later.
+# RSpecManager_pl is not used. This line is a check that ensures that everything is in place for the import to work.
 import sfa.rspecs.aggregates.rspec_manager_pl
 from sfa.trust.credential import Credential
+from sfatables.runtime import SFATablesRules
 
 class get_resources(Method):
     """
@@ -55,4 +56,11 @@ class get_resources(Method):
             rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
             rspec = rspec_manager.get_rspec(self.api, hrn)
         
-        return rspec
+        # Filter the outgoing rspec using sfatables
+        outgoing_rules = SFATablesRules('OUTGOING')
+        
+        outgoing_rules.set_user_(caller_cred.callerGID.hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+
+        filtered_rspec = outgoing_rules.apply(rspec)
+
+        return filtered_rspec
