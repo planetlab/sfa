@@ -1,7 +1,7 @@
 <rspec-match>
-<context-input>
+<request-context>
 <sfa><user><hrn>plc.princeton.sapan</hrn></user></sfa>
-</context-input>
+</request-context>
 
 <rule-input>
 <sfa><user><hrn>plc.princeton</hrn></user></sfa>
