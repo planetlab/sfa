@@ -1,0 +1,32 @@
+<!-- run "runtime.py sfarspec" to apply current rule set to this file -->
+
+<rspec>
+    <request-context>
+        <sfa><user><hrn>plc.princeton.sapanb</hrn></user></sfa>
+    </request-context>
+
+    <sfatables-rule>
+            <argument>
+                <name>hrn</name>
+                <value>plc</value>
+            </argument>
+            <argument>
+                <name>whitelist</name>
+                <value>plc.princeton</value>
+            </argument>
+            <argument>
+                <name>blacklist</name>
+                <value>plc.tp</value>
+            </argument>
+    </sfatables-rule>
+    <request>
+        <nodespec>
+            <node name="plc.princeton.planetlab-01"/>
+            <node name="plc.princeton.planetlab-02"/>
+            <node name="plc.princeton.planetlab-03"/>
+            <node name="plc.princeton.planetlab-04"/>
+            <node name="plc.tp.planetlab3"/>
+        </nodespec>
+    </request>
+</rspec>
+    """
