@@ -43,7 +43,7 @@ class create_slice(Method):
         # Filter the incoming rspec using sfatables
         incoming_rules = SFATablesRules('OUTGOING')
             
-        incoming_rules.set_user_(caller_cred.callerGID.hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+        incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
 
         rspec = incoming_rules.apply(requested_rspec)
 

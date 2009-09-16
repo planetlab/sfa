@@ -59,7 +59,7 @@ class get_resources(Method):
         # Filter the outgoing rspec using sfatables
         outgoing_rules = SFATablesRules('OUTGOING')
         
-        outgoing_rules.set_user_(caller_cred.callerGID.hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+        outgoing_rules.set_user(caller_cred.callerGID.hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
 
         filtered_rspec = outgoing_rules.apply(rspec)
 
