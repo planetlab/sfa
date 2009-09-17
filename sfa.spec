@@ -25,6 +25,7 @@ BuildRequires: make
 Requires: python
 Requires: pyOpenSSL >= 0.7
 Requires: m2crypto
+Requires: libxslt-python
 
 Summary: the SFA python libraries
 Group: Applications/System
@@ -94,6 +95,9 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Thu Sep 17 2009 Baris Metin <tmetin@sophia.inria.fr>
+- added libxslt-python dependency
+
 * Thu Sep 10 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-0.9-1
 - unified single SFA database in the PLC-DB
 - upcalls from  PLCAPI to SFA methods
