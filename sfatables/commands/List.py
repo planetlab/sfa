@@ -2,8 +2,8 @@ import os, time
 import libxml2
 import pdb
 
-from globals import *
-from pretty import Pretty
+from sfatables.globals import *
+from sfatables.pretty import Pretty
 from sfatables.command import Command
 
 class List(Command):
