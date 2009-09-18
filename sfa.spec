@@ -2,7 +2,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -95,6 +95,13 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Fri Sep 18 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-0.9-2
+- compatibility with RefreshPeer
+- incremental mechanism for importing PLC records into SFA tables
+- unified single database (still inside the underlying PLC db postgresql server)
+- includes/improves call traceability and logging features
+- several bug fixes
+
 * Thu Sep 17 2009 Baris Metin <tmetin@sophia.inria.fr>
 - added libxslt-python dependency
 
