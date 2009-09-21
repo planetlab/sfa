@@ -41,15 +41,6 @@ class Config:
         except IOError, e:
             raise IOError, "Could not find the configuration file: %s" % config_file
 
-    ##
-    #
-    # Very hacky - to change after July 21.
-    # 
-    # The generation/parsing of RSpecs is based on the value returned by this function. vini and max
-    # use some new code, while pl uses old code. As long as you don't set SFA_AGGREGATE_RSPEC_TYPE in your
-    # config file, the new code will not apply to your deployment.
-    #
-
     def get_aggregate_rspec_type(self):
         if (hasattr(self,'SFA_AGGREGATE_RSPEC_TYPE')):
             return self.SFA_AGGREGATE_RSPEC_TYPE

@@ -117,8 +117,12 @@ class GeniAPI:
         self.key_file = key_file
         self.cert_file = cert_file
         self.credential = None
-        self.plshell = self.getPLCShell()
-        self.plshell_version = self.getPLCShellVersion()
+        
+        # Initialize the PLC shell only if SFA wraps a myPLC
+        if (self.config.get_aggregate_rspec_type() == 'pl'):
+            self.plshell = self.getPLCShell()
+            self.plshell_version = self.getPLCShellVersion()
+
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
