@@ -1,4 +1,4 @@
 <match name="slice-whitelist">
-    <context select="//sfa/current/slice@hrn"/>
+    <context select="//request-context/slice@hrn"/>
     <processor filename="slice-whitelist.xsl"/>
 </match>
