@@ -5,7 +5,7 @@
         <sfa><user><hrn>plc.princeton.sapanb</hrn></user></sfa>
     </request-context>
 
-    <sfatables-rule>
+    <rule-context>
             <argument>
                 <name>hrn</name>
                 <value>plc</value>
@@ -18,7 +18,7 @@
                 <name>blacklist</name>
                 <value>plc.tp</value>
             </argument>
-    </sfatables-rule>
+    </rule-context>
     <request>
         <nodespec>
             <node name="plc.princeton.planetlab-01"/>

@@ -29,7 +29,8 @@ class SFATablesRules:
             if (rule.terminal):
                 break
 
-        return intermediate_rspec
+        final_rspec = XMLRule().wrap_up(intermediate_rspec) 
+        return final_rspec
 
 def main():
     incoming = SFATablesRules('INCOMING')
@@ -37,8 +38,6 @@ def main():
 
     rspec = open(sys.argv[1]).read()
 
-
-    
     print "%d rules loaded for INCOMING chain\n"%len(incoming.sorted_rule_list)
     print "%d rules loaded for OUTGOING chain\n"%len(outgoing.sorted_rule_list)
 

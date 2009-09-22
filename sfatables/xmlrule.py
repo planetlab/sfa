@@ -7,6 +7,7 @@ class XMLRule:
     chain = None
     xmldoc = None
     terminal = 0
+    final_processor = '__sfatables_wrap_up__.xsl'
 
     arguments = {'match':None,'target':None}
     processors = {'match':None,'target':None}
@@ -37,6 +38,19 @@ class XMLRule:
         doc.freeDoc()
         result.freeDoc()
 
+        return stylesheet_result
+
+    def wrap_up(self, rspec):
+        filepath = 'processors/' + self.final_processor
+
+        styledoc = libxml2.parseFile(filepath)
+        style = libxslt.parseStylesheetDoc(styledoc)
+        doc = libxml2.parseDoc(rspec)
+        result = style.applyStylesheet(doc, None)
+        stylesheet_result = style.saveResultToString(result)
+        style.freeStylesheet()
+        doc.freeDoc()
+        result.freeDoc()
 
         return stylesheet_result
 
@@ -97,13 +111,12 @@ class XMLRule:
         root_node.addChild(arguments[type])
         return rspec
 
-    def __init__(self, chain, rule_number):
-
-        self.load_xml_extension('match', chain, rule_number)
-        self.load_xml_extension('target',chain, rule_number)
-        self.rule_number = rule_number
-        self.chain = chain
-
+    def __init__(self, chain=None, rule_number=None):
+        if (chain and rule_number):
+            self.load_xml_extension('match', chain, rule_number)
+            self.load_xml_extension('target',chain, rule_number)
+            self.rule_number = rule_number
+            self.chain = chain
         return
         
     def free(self):
