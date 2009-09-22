@@ -1,4 +1,4 @@
-<target name="RESTRICT_PROP">
+<target name="RESTRICT_SLICE_PROP">
     <!-- The context is empty, since this target does not require any input from SFA -->
     <rule element="link">
     <context select=""/>
