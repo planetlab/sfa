@@ -41,6 +41,17 @@ class Config:
         except IOError, e:
             raise IOError, "Could not find the configuration file: %s" % config_file
 
+    def get_openflow_aggrMgr_info(self):
+        aggr_mgr_ip = 'localhost'
+        if (hasattr(self,'OPENFLOW_AGGREGATE_MANAGER_IP')):
+            aggr_mgr_ip = self.OPENFLOW_AGGREGATE_MANAGER_IP
+
+        aggr_mgr_port = 2603
+        if (hasattr(self,'OPENFLOW_AGGREGATE_MANAGER_PORT')):
+            aggr_mgr_port = self.OPENFLOW_AGGREGATE_MANAGER_PORT
+
+        return (aggr_mgr_ip,aggr_mgr_port)
+
     def get_aggregate_rspec_type(self):
         if (hasattr(self,'SFA_AGGREGATE_RSPEC_TYPE')):
             return self.SFA_AGGREGATE_RSPEC_TYPE
