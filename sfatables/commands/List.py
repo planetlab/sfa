@@ -25,6 +25,12 @@ class List(Command):
 
         name_nodes = p.xpathEval("//rule/argument[value!='']/name")
         value_nodes = p.xpathEval("//rule/argument[value!='']/value")
+        element_nodes = p.xpathEval("//argument[value!='']/parent::rule/@element")
+
+        if (len(element_nodes)>1):
+            raise Exception("Invalid rule %s contains multiple elements."%xmlextension_path)
+
+        element = element_nodes[0].content
 
         names = [n.content for n in name_nodes]
         values = [v.content for v in value_nodes]
@@ -37,7 +43,7 @@ class List(Command):
         p.xpathFreeContext()
         xmldoc.freeDoc()
 
-        return {'name':ext_name, 'arguments':argument_str}
+        return {'name':ext_name, 'arguments':argument_str, 'element':element}
 
     def get_rule_list(self, chain_dir_path):
         broken_semantics = os.walk(chain_dir_path)
@@ -63,7 +69,7 @@ class List(Command):
 
         rule_list = self.get_rule_list(chain_dir)
 
-        pretty = Pretty(['Rule','Match','Arguments','Target','Arguments'])
+        pretty = Pretty(['Rule','Match','Arguments','Target','Element','Arguments'])
 
         for number in rule_list:
             match_file = "sfatables-%d-%s"%(number,'match')
@@ -75,7 +81,7 @@ class List(Command):
             match_info = self.get_info ('match',match_path)
             target_info = self.get_info ('target',target_path)
 
-            pretty.push_row(["%d"%number,  match_info['name'], match_info['arguments'], target_info['name'], target_info['arguments']])
+            pretty.push_row(["%d"%number,  match_info['name'], match_info['arguments'], target_info['name'], target_info['element'], target_info['arguments']])
         
         
         pretty.pprint()
