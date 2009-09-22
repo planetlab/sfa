@@ -113,7 +113,7 @@ def main():
         target_parser = create_parser_xml_ext(target_dict)
         targets_str = ",".join(target_dict.keys())
         target_parser.add_option('-j','--jump',dest='name',help='Target name (one of %s)'%targets, metavar = 'TARGET')
-        target_parser.add_option('-e','--element',dest='element',help='Element name'%targets, metavar = 'ELEMENT')
+        target_parser.add_option('-e','--element',dest='element',help='Element name', metavar = 'ELEMENT')
         (target_options, args) = target_parser.parse_args(pargs[2])
         try:
             name = target_options.name

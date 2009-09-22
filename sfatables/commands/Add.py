@@ -33,15 +33,19 @@ class Add(Command):
         p = xmldoc.xpathNewContext()
 
         supplied_arguments = options.arguments
-        element = options.element
+        if (hasattr(options,'element') and options.element):
+            element = options.element
+        else:
+            element='*'
+
         for option in supplied_arguments:
             option_name = option['name']
             option_value = getattr(options,option_name)
 
             if (hasattr(options,option_name)):
-                context = p.xpathEval("//rule[@element='%s' or @element='*']/argument[name='%s']"%element, option_name)
+                context = p.xpathEval("//rule[@element='%s' or @element='*']/argument[name='%s']"%(element, option_name))
                 if (not context):
-                    raise Exception('Unknown option %s for match %s'%(option,option['name']))
+                    raise Exception('Unknown option %s for match %s and element %s'%(option,option['name'], element))
                 else:
                     # Add the value of option
                     valueNode = libxml2.newNode('value')
