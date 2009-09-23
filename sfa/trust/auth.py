@@ -123,8 +123,8 @@ class Auth:
             return
         if name.startswith(object_hrn + "."):
             return
-        if name.startswith(get_authority(name)):
-            return
+        #if name.startswith(get_authority(name)):
+            #return
     
         raise PermissionError(name)
 
