@@ -17,4 +17,5 @@ resolve
 start_slice
 stop_slice
 update
+remove_remote_object
 """.split()
