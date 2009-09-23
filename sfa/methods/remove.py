@@ -9,6 +9,7 @@ from sfa.util.record import GeniRecord
 from sfa.util.genitable import GeniTable
 from sfa.util.debug import log
 from sfa.trust.credential import Credential
+from sfa.server.registry import Registries
 
 class remove(Method):
     """
@@ -48,8 +49,16 @@ class remove(Method):
         if not records:
             raise RecordNotFound(hrn)
         record = records[0]
-        
         type = record['type']
+
+	credential = self.api.getCredential()
+       	registries = Registries(self.api) 
+	# Try to remove the object from the PLCDB of federated agg.
+	# This is attempted before removing the object from the local agg's PLCDB and sfa table
+	if hrn.startswith(self.api.hrn) and type in ['user', 'slice', 'authority']:
+	   for registry in registries:
+	     if registry not in [self.api.hrn]:
+	        result=registries[registry].remove_remote_object(credential, hrn, record)
         if type == "user":
             persons = self.api.plshell.GetPersons(self.api.plauth, record['pointer'])
             # only delete this person if he has site ids. if he doesnt, it probably means 
@@ -69,5 +78,7 @@ class remove(Method):
             raise UnknownGeniType(type)
 
         table.remove(record)
+           
+	# forward the call after replacing the root hrn
 
         return 1

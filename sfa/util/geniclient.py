@@ -345,3 +345,6 @@ class GeniClient:
         return result
 
 
+    def remove_remote_object(self, cred, hrn, record):
+        result = self.server.remove_remote_object(cred.save_to_string(save_parents=True), hrn, record)
+        return result
