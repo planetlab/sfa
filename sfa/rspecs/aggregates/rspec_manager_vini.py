@@ -194,5 +194,8 @@ def main():
     rspec = r.toDict()
     create_slice(None,'plc',rspec)
     
+def fetch_context(slice_hrn, user_hrn, contexts):
+    return None
+
 if __name__ == "__main__":
     main()

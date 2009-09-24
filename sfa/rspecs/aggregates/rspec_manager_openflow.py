@@ -139,6 +139,9 @@ def get_rspec(cred, hrn=None):
         print "IO error"
     return None
 
+def fetch_context(slice_hrn, user_hrn, contexts):
+    return None
+
 #def main():
 #    r = Rspec()
 #    r.parseFile(sys.argv[1])
