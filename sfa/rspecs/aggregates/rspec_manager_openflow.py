@@ -3,11 +3,20 @@ from sfa.util.misc import *
 from sfa.util.rspec import Rspec
 from sfa.server.registry import Registries
 from sfa.plc.nodes import *
-from sfa.util.config import Config
-
 import sys
+
+# Probably the following is not essential
+#from soaplib.wsgi_soap import SimpleWSGISoapApp
+#from soaplib.serializers.primitive import *
+#from soaplib.serializers.clazz import *
+
 import socket
 import struct
+
+SOAP_INTERFACE_PORT = 7889
+AGGREGATE_MANAGER_PORT = 2603
+AGGREGATE_MANAGER_IP = 'localhost'
+#AGGREGATE_MANAGER_IP = 'openflowvisor.stanford.edu'
 
 # Message IDs for all the GENI light calls
 # This will be used by the aggrMgr controller
@@ -55,17 +64,14 @@ def connect(server, port):
     return sock
     
 def connect_aggrMgr():
-    (aggr_mgr_ip, aggr_mgr_port) = Config().get_openflow_aggrMgr_info()
-    print """Connecting to port %d of %s""" % (aggr_mgr_port, aggr_mgr_ip)
-    return connect(aggr_mgr_ip, aggr_mgr_port)
+    return connect(AGGREGATE_MANAGER_IP, AGGREGATE_MANAGER_PORT)
 
 def generate_slide_id(cred, hrn):
     if cred == None:
         cred = ""
     if hrn == None:
         hrn = ""
-    #return str(cred) + '_' + str(hrn)
-    return str(hrn)
+    return cred + '_' + hrn
 
 def msg_aggrMgr(cred, hrn, msg_id):
     slice_id = generate_slide_id(cred, hrn)
@@ -104,14 +110,13 @@ def create_slice(cred, hrn, rspec):
     if DEBUG: print "Received create_slice call"
     slice_id = generate_slide_id(cred, hrn)
 
-    msg = struct.pack('> B%ds%ds' % (len(slice_id)+1, len(rspec)), SFA_CREATE_SLICE, slice_id, rspec)
+    msg = struct.pack('> B%ds%ds' % len(slice_id), SFA_CREATE_SLICE, slice_id, rspec)
     buf = struct.pack('> H', len(msg)+2) + msg
 
     try:
         aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
-        print "Sent %d bytes and closing connection" % len(buf)
         return 1
     except socketerror, message:
         print "Socket error"
@@ -119,8 +124,8 @@ def create_slice(cred, hrn, rspec):
         print "IO error"
     return 0
 
-def get_rspec(cred, hrn=None):
-    if DEBUG: print "Received get_rspec call"
+def get_resources(cred, hrn=None):
+    if DEBUG: print "Received get_resources call"
     slice_id = generate_slide_id(cred, hrn)
 
     msg = struct.pack('> B%ds' % len(slice_id), SFA_GET_RESOURCES, slice_id)
@@ -142,11 +147,11 @@ def get_rspec(cred, hrn=None):
 def fetch_context(slice_hrn, user_hrn, contexts):
     return None
 
-#def main():
-#    r = Rspec()
-#    r.parseFile(sys.argv[1])
-#    rspec = r.toDict()
-#    create_slice(None,'plc',rspec)
+def main():
+    r = Rspec()
+    r.parseFile(sys.argv[1])
+    rspec = r.toDict()
+    create_slice(None,'plc',rspec)
     
-#if __name__ == "__main__":
-#    main()
+if __name__ == "__main__":
+    main()
