@@ -75,7 +75,7 @@ class resolve(Method):
                 good_records.append(dict(record))
             except PlanetLabRecordDoesNotExist:
                 # silently drop the ones that are missing in PL
-                print >> log, "ignoring geni record ", record.get_name(), \
+                print >> log, "ignoring geni record ", record['hrn'], \
                               " because pl record does not exist"
                 table.remove(record)
 
