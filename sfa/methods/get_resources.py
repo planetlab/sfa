@@ -45,6 +45,7 @@ class get_resources(Method):
         # This code needs to be cleaned up so that 'pl' is treated as just another RSpec manager.
         # The change ought to be straightforward as soon as we define PL's new RSpec.
 
+        rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
         if (sfa_aggregate_type == 'pl'):
             nodes = Nodes(self.api, caller_cred=caller_cred)
             if hrn:
@@ -53,14 +54,13 @@ class get_resources(Method):
                 nodes.refresh()
                 rspec = nodes['rspec']
         else:
-            rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
             rspec = rspec_manager.get_rspec(self.api, hrn)
         
         # Filter the outgoing rspec using sfatables
         outgoing_rules = SFATablesRules('OUTGOING')
         
-        outgoing_rules.set_user(caller_cred.callerGID.hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
-
+        request_context = rspec_manager.fetch_context(hrn, Credential(string=caller_cred).get_gid_caller().get_hrn(),outgoing_rules.contexts)
+        outgoing_rules.set_context(request_context) 
         filtered_rspec = outgoing_rules.apply(rspec)
 
         return filtered_rspec

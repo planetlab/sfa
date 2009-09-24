@@ -40,24 +40,27 @@ class create_slice(Method):
 	#log the call
 	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
 
+        rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
         # Filter the incoming rspec using sfatables
         incoming_rules = SFATablesRules('OUTGOING')
             
         incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
 
+        contexts = incoming_rules.contexts
+        request_context = rspec_manager.get_context(hrn, Credential(string=caller_cred.get_gid_caller().get_hrn()), contexts)
+        incoming_rules.set_context(request_context)
         rspec = incoming_rules.apply(requested_rspec)
 
 
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
         self.api.auth.check(cred, 'createslice')
+
         if (sfa_aggregate_type == 'pl'):
             slices = Slices(self.api, caller_cred=caller_cred)
             slices.create_slice(hrn, rspec)    
         else:
             # To clean up after July 21 - SB    
-            rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
             rspec = rspec_manager.create_slice(self.api, hrn, rspec)
 
-            
         
         return 1 
