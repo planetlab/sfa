@@ -5,21 +5,7 @@
         <sfa><user><hrn>plc.princeton.sapanb</hrn></user></sfa>
     </request-context>
 
-    <rule-context>
-            <argument>
-                <name>hrn</name>
-                <value>plc</value>
-            </argument>
-            <argument>
-                <name>whitelist</name>
-                <value>plc.princeton</value>
-            </argument>
-            <argument>
-                <name>blacklist</name>
-                <value>plc.tp</value>
-            </argument>
-    </rule-context>
-    <request>
+     <request>
         <nodespec>
             <node name="plc.princeton.planetlab-01"/>
             <node name="plc.princeton.planetlab-02"/>

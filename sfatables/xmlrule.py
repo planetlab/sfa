@@ -34,6 +34,7 @@ class XMLRule:
             p.xpathFreeContext()
         else:
             stylesheet_result = style.saveResultToString(result)
+
         style.freeStylesheet()
         doc.freeDoc()
         result.freeDoc()
