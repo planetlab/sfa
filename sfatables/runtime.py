@@ -22,6 +22,9 @@ class SFATablesRules:
         return
 
 
+    def set_context(self, request_context):
+        return
+
     def apply(self, rspec):
         intermediate_rspec = rspec
         for rule in self.sorted_rule_list:
