@@ -35,10 +35,10 @@ class create_slice(Method):
     returns = Parameter(int, "1 if successful")
     
     def call(self, cred, hrn, requested_rspec, caller_cred=None):
-	if caller_cred==None:
-	   caller_cred=cred
-	#log the call
-	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        if caller_cred==None:
+            caller_cred=cred
+        #log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
 
         rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
         # Filter the incoming rspec using sfatables
