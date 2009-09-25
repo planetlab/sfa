@@ -36,11 +36,11 @@ class get_resources(Method):
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
 
         self.api.auth.check(cred, 'listnodes')
-	if caller_cred==None:
-	   caller_cred=cred
+        if caller_cred==None:
+            caller_cred=cred
 
         #log the call
-	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
 
         # This code needs to be cleaned up so that 'pl' is treated as just another RSpec manager.
         # The change ought to be straightforward as soon as we define PL's new RSpec.
