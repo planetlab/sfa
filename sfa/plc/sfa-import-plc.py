@@ -26,10 +26,11 @@ from sfa.util.genitable import GeniTable
 from sfa.util.misc import *
 from sfa.util.config import Config
 from sfa.util.report import trace, error
-
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
+from sfa.plc.api import *
+from sfa.util.geniclient import *
 from sfa.trust.gid import create_uuid
 from sfa.plc.sfaImport import *
 
@@ -63,6 +64,8 @@ def save_keys(filename, keys):
 def main():
     process_options()
     config = Config()
+    if not config.SFA_REGISTRY_ENABLED:
+        sys.exit(0)
     root_auth = config.SFA_REGISTRY_ROOT_AUTH
     level1_auth = config.SFA_REGISTRY_LEVEL1_AUTH
     keys_filename = config.config_path + os.sep + 'person_keys.py' 
@@ -257,7 +260,7 @@ def main():
             sfaImporter.delete_record(record_hrn, type) 
                                    
     # save pub keys
-    trace('saving current pub keys') 
+    trace('saving current pub keys')
     save_keys(keys_filename, person_keys)                
         
 if __name__ == "__main__":
