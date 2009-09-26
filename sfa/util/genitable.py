@@ -10,6 +10,7 @@
 import report
 import  pgdb
 from pg import DB, ProgrammingError
+from sfa.util.PostgreSQL import *
 from sfa.trust.gid import *
 from sfa.util.record import *
 from sfa.util.debug import *
@@ -24,9 +25,10 @@ class GeniTable(list):
 
         # pgsql doesn't like table names with "." in them, to replace it with "$"
         self.tablename = GeniTable.GENI_TABLE_PREFIX
-
+        self.config = Config()
+        self.db = PostgreSQL(self.config)
         # establish a connection to the pgsql server
-        cninfo = Config().get_plc_dbinfo()     
+        cninfo = self.config.get_plc_dbinfo()     
         self.cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
 
         if record_filter:
@@ -42,12 +44,31 @@ class GeniTable(list):
             return True
         return False
 
+    def db_fields(self, obj=None):
+        
+        db_fields = self.db.fields(self.GENI_TABLE_PREFIX)
+        return dict( [ (key,value) for (key, value) in obj.items() \
+                        if key in db_fields and
+                        self.is_writable(key, value, GeniRecord.fields)] )      
+
+    @staticmethod
+    def is_writable (key,value,dict):
+        # if not mentioned, assume it's writable (e.g. deleted ...)
+        if key not in dict: return True
+        # if mentioned but not linked to a Parameter object, idem
+        if not isinstance(dict[key], Parameter): return True
+        # if not marked ro, it's writable
+        if not dict[key].ro: return True
+
+        return False
+
     def create(self):
         
         querystr = "CREATE TABLE " + self.tablename + " ( \
                 record_id serial PRIMARY KEY , \
                 hrn text NOT NULL, \
                 authority text NOT NULL, \
+                peer_authority text, \
                 gid text, \
                 type text NOT NULL, \
                 pointer integer, \
@@ -55,7 +76,7 @@ class GeniTable(list):
                 last_updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP);"
         template = "CREATE INDEX %s_%s_idx ON %s (%s);"
         indexes = [template % ( self.tablename, field, self.tablename, field) \
-                   for field in ['hrn', 'type', 'authority', 'pointer']]
+                   for field in ['hrn', 'type', 'authority', 'peer_authority', 'pointer']]
         # IF EXISTS doenst exist in postgres < 8.2
         try:
             self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
@@ -74,15 +95,15 @@ class GeniTable(list):
         self.cnx.query(query_str)
 
     def insert(self, record):
-        dont_insert = ['date_created', 'last_updated', 'record_id']
-        fieldnames = [field for field in  record.all_fields.keys() if field not in dont_insert]  
-        fieldvals = record.get_field_value_strings(fieldnames)
+        db_fields = self.db_fields(record)
+        keys = db_fields.keys()
+        values = [self.db.param(key, value) for (key, value) in db_fields.items()]
         query_str = "INSERT INTO " + self.tablename + \
-                       "(" + ",".join(fieldnames) + ") " + \
-                       "VALUES(" + ",".join(fieldvals) + ")"
-        #print query_str
-        self.cnx.query(query_str)
-        result = self.find({'hrn': record['hrn'], 'type': record['type']})
+                       "(" + ",".join(keys) + ") " + \
+                       "VALUES(" + ",".join(values) + ")"
+        self.db.do(query_str, db_fields)
+        self.db.commit()
+        result = self.find({'hrn': record['hrn'], 'type': record['type'], 'peer_authority': record['peer_authority']})
         if not result:
             record_id = None
         elif isinstance(result, list):
@@ -93,18 +114,18 @@ class GeniTable(list):
         return record_id
 
     def update(self, record):
-        dont_update = ['date_created', 'last_updated', 'record_id']
-        fields = [field for field in  record.all_fields.keys() if field not in dont_update]  
-        fieldvals = record.get_field_value_strings(fields)
+        db_fields = self.db_fields(record)
+        keys = db_fields.keys()
+        values = [self.db.param(key, value) for (key, value) in db_fields.items()]
         pairs = []
-        for field in fields:
-            val = record.get_field_value_string(field)
-            pairs.append(field + " = " + val)
+        for (key, value) in db_fields.items():
+            pairs.append(key + " = " + value)
         update = ", ".join(pairs)
 
         query_str = "UPDATE %s SET %s WHERE record_id = %s" % \
                     (self.tablename, update, record['record_id'])
-        self.cnx.query(query_str)
+        self.db.do(query_str, db_fields)
+        self.db.commit()
 
     def quote(self, value):
         """
