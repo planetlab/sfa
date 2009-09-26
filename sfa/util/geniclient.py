@@ -145,13 +145,26 @@ class GeniClient:
     #
     #
     # @param cred credential object specifying rights of the caller
-    # @return record to register
+    # @param record to register
     #
     # @return GID object for the newly-registered record
 
     def register(self, cred, record, caller_cred=None):
         gid_str = self.server.register(cred.save_to_string(save_parents=True), record.as_dict(), caller_cred)
         return GID(string = gid_str)
+
+    
+    ##
+    # Register a peer object with the registry. 
+    #
+    #
+    # @param cred credential object specifying rights of the caller
+    # @param record to register
+    #
+    # @return GID object for the newly-registered record
+
+    def register_peer_object(self, cred, record, caller_cred=None):
+        return self.server.register_peer_object(cred.save_to_string(save_parents=True), record, caller_cred)
 
     ##
     # Remove an object from the registry. If the object represents a PLC object,
@@ -162,7 +175,18 @@ class GeniClient:
     # @param hrn
 
     def remove(self, cred, type, hrn, caller_cred=None):
-        result = self.server.remove(cred.save_to_string(save_parents=True), type, hrn, caller_cred)
+        return self.server.remove(cred.save_to_string(save_parents=True), type, hrn, caller_cred)
+
+    ##
+    # Remove a peer object from the registry. If the object represents a PLC object,
+    # then the PLC records will also be removed.
+    #
+    # @param cred credential object specifying rights of the caller
+    # @param type
+    # @param hrn
+
+    def remove_peer_object(self, cred, type, hrn, peer_auth, caller_cred=None):
+        result = self.server.remove_peer_object(cred.save_to_string(save_parents=True), type, hrn, peer_auth, caller_cred)
         return result
 
     ##
