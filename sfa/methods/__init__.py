@@ -11,11 +11,12 @@ get_slices
 get_ticket
 list
 register
+register_peer_object
 remove
 reset_slices
 resolve
 start_slice
 stop_slice
 update
-remove_remote_object
+remove_peer_object
 """.split()

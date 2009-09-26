@@ -11,7 +11,7 @@ from sfa.util.config import Config
 # RSpecManager_pl is not used. It's used to make sure the module is in place.
 import sfa.rspecs.aggregates.rspec_manager_pl
 from sfa.trust.credential import Credential
-from sfatables.runtime import SFATablesRules
+#from sfatables.runtime import SFATablesRules
 
 
 class create_slice(Method):
@@ -37,23 +37,25 @@ class create_slice(Method):
     def call(self, cred, hrn, requested_rspec, caller_cred=None):
         if caller_cred==None:
             caller_cred=cred
+        
+        self.api.auth.check(cred, 'createslice')
+
         #log the call
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
 
+        sfa_aggregate_type = Config().get_aggregate_rspec_type()
         rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
         # Filter the incoming rspec using sfatables
-        incoming_rules = SFATablesRules('OUTGOING')
+        #incoming_rules = SFATablesRules('OUTGOING')
             
-        incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+        #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
 
-        contexts = incoming_rules.contexts
-        request_context = rspec_manager.get_context(hrn, Credential(string=caller_cred.get_gid_caller().get_hrn()), contexts)
-        incoming_rules.set_context(request_context)
-        rspec = incoming_rules.apply(requested_rspec)
+        #contexts = incoming_rules.contexts
+        #request_context = rspec_manager.get_context(hrn, Credential(string=caller_cred.get_gid_caller().get_hrn()), contexts)
+        #incoming_rules.set_context(request_context)
+        #rspec = incoming_rules.apply(requested_rspec)
+        rspec = requested_rspec
 
-
-        sfa_aggregate_type = Config().get_aggregate_rspec_type()
-        self.api.auth.check(cred, 'createslice')
 
         if (sfa_aggregate_type == 'pl'):
             slices = Slices(self.api, caller_cred=caller_cred)
