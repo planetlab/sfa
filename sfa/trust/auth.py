@@ -64,6 +64,16 @@ class Auth:
 
         return True
 
+
+    def verify_cred_is_me(self, credential):
+        is_me = False 
+        cred = Credential(string=credential)
+        caller_gid = cred.get_gid_caller()
+        caller_hrn = caller_gid.get_hrn()
+        if caller_hrn != self.config.SFA_INTERFACE_HRN:
+            raise GeniPermissionError(self.config.SFA_INTEFACE_HRN)
+
+        return   
         
     def get_auth_info(self, auth_hrn):
         """
