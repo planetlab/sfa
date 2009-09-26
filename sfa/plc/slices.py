@@ -12,6 +12,7 @@ from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
 from sfa.util.storage import *
+from sfa.util.record import GeniRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.debug import log
@@ -194,7 +195,8 @@ class Slices(SimpleStorage):
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)   
             # mark this site as an sfa peer record
             if sfa_peer:
-                #regsitry.register_peer(credential, authority, 'authority', sfa_peer)
+                peer_dict = {'type': 'authority', 'hrn': authority, 'peer_authority': sfa_peer, 'pointer': site_id} 
+                registry.register_peer_object(credential, peer_dict)
                 pass
         else:
             site_id = sites[0]['site_id']
@@ -231,7 +233,8 @@ class Slices(SimpleStorage):
 
             # mark this slice as an sfa peer record
             if sfa_peer:
-                #registry.register_peer(credential, slice_hrn, 'slice', authority)
+                peer_dict = {'type': 'slice', 'hrn': slice_hrn, 'peer_authority': sfa_peer, 'pointer': slice_id} 
+                registry.register_peer_object(credential, peer_dict)
                 pass
 
             #this belongs to a peer
@@ -275,7 +278,8 @@ class Slices(SimpleStorage):
                 
                 # mark this person as an sfa peer record
                 if sfa_peer:
-                    #registry.register_peer(credential, researcher, 'user', authority)
+                    peer_dict = {'type': 'user', 'hrn': researcher, 'peer_authority': sfa_peer, 'pointer': person_id} 
+                    registry.register_peer_object(credential, peer_dict)
                     pass
 
                 if peer:
