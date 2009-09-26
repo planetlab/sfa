@@ -45,6 +45,7 @@ class GeniRecord(dict):
 
     fields = {
         'authority': Parameter(str, "The authority for this record"),
+        'peer_authority': Parameter(str, "The peer authority for this record"),
         'hrn': Parameter(str, "Human readable name of object"),
         'gid': Parameter(str, "GID of the object"),
         'type': Parameter(str, "Record type"),
@@ -61,7 +62,7 @@ class GeniRecord(dict):
     # @param pointer is a pointer to a PLC record
     # @param dict if !=None, then fill in this record from the dictionary
 
-    def __init__(self, hrn=None, gid=None, type=None, pointer=None, dict=None, string=None):
+    def __init__(self, hrn=None, gid=None, type=None, pointer=None, peer_authority=None, dict=None, string=None):
         self.dirty = True
         self.hrn = None
         self.gid = None
@@ -75,6 +76,8 @@ class GeniRecord(dict):
             self.set_type(type)
         if pointer:
             self.set_pointer(pointer)
+        if peer_authority:
+            self.set_peer_auth(peer_authority)
         if dict:
             self.load_from_dict(dict)
         if string:
@@ -148,6 +151,12 @@ class GeniRecord(dict):
         """
         self.pointer = pointer
         self['pointer'] = pointer
+        self.dirty = True
+
+
+    def set_peer_auth(self, peer_authority):
+        self.peer_authority = peer_authority
+        self['peer_authority'] = peer_authority
         self.dirty = True
 
     ##
