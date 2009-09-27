@@ -129,6 +129,7 @@ class sfaImport:
         person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         table = GeniTable()
         person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
+        person_record['authority'] = get_authority(person_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'user', 'pointer': person['person_id']})
         if not existing_records:
             table.insert(person_record)
@@ -153,6 +154,7 @@ class sfaImport:
         pkey = Keypair(create=True)
         slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         slice_record = GeniRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
+        slice_record['authority'] = get_authority(slice_record['hrn'])
         table = GeniTable()
         existing_records = table.find({'hrn': hrn, 'type': 'slice', 'pointer': slice['slice_id']})
         if not existing_records:
@@ -183,6 +185,7 @@ class sfaImport:
         pkey = Keypair(create=True)
         node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
         node_record = GeniRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
+        node_record['authority'] = get_authority(node_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'node', 'pointer': node['node_id']})
         if not existing_records:
             table.insert(node_record)
@@ -223,6 +226,7 @@ class sfaImport:
 
         table = GeniTable()
         auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
+        auth_record['authority'] = get_authority(auth_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'authority', 'pointer': site['site_id']})
         if not existing_records:
             table.insert(auth_record)
