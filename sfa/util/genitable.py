@@ -117,13 +117,9 @@ class GeniTable(list):
         db_fields = self.db_fields(record)
         keys = db_fields.keys()
         values = [self.db.param(key, value) for (key, value) in db_fields.items()]
-        pairs = []
-        for (key, value) in db_fields.items():
-            pairs.append(key + " = " + value)
-        update = ", ".join(pairs)
-
+        columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
         query_str = "UPDATE %s SET %s WHERE record_id = %s" % \
-                    (self.tablename, update, record['record_id'])
+                    (self.tablename, ", ".join(columns), record['record_id'])
         self.db.do(query_str, db_fields)
         self.db.commit()
 

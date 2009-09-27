@@ -35,7 +35,7 @@ class remove_peer_object(Method):
         if caller_cred==None:
             caller_cred=cred
         #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), record['hrn'], self.name))
         
         self.api.auth.check(cred, "remove")
 
@@ -44,7 +44,7 @@ class remove_peer_object(Method):
         except: self.api.auth.verify_cred_is_me(cred)
         
         table = GeniTable()
-        hrn, type, peer_auth = record['hrn'], record['type']
+        hrn, type = record['hrn'], record['type']
         records = table.find({'hrn': hrn, 'type': type })
         for record in records:
             self.remove_plc_record(record)
@@ -66,12 +66,12 @@ class remove_peer_object(Method):
            
         elif type == "slice":
             slices=self.api.plshell.GetSlices(self.api.plauth, {'slice_id' : record['pointer']})
-	        if not slices:
+            if not slices:
                 return 1
-	        slice=slices[0]
+            slice=slices[0]
             if slice['peer_id']:
                 peer = self.get_peer_name(slice['peer_id']) 
-	            self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', slice['slice_id'], peer)
+                self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', slice['slice_id'], peer)
             self.api.plshell.DeleteSlice(self.api.plauth, slice['slice_id'])
         elif type == "authority":
             sites=self.api.plshell.GetSites(self.api.plauth, {'site_id' : record['pointer']})

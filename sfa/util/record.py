@@ -68,6 +68,7 @@ class GeniRecord(dict):
         self.gid = None
         self.type = None
         self.pointer = None
+        self.set_peer_auth(peer_authority)
         if hrn:
             self.set_name(hrn)
         if gid:
@@ -76,8 +77,6 @@ class GeniRecord(dict):
             self.set_type(type)
         if pointer:
             self.set_pointer(pointer)
-        if peer_authority:
-            self.set_peer_auth(peer_authority)
         if dict:
             self.load_from_dict(dict)
         if string:

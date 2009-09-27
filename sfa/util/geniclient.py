@@ -185,8 +185,8 @@ class GeniClient:
     # @param type
     # @param hrn
 
-    def remove_peer_object(self, cred, type, hrn, peer_auth, caller_cred=None):
-        result = self.server.remove_peer_object(cred.save_to_string(save_parents=True), type, hrn, peer_auth, caller_cred)
+    def remove_peer_object(self, cred, record, caller_cred=None):
+        result = self.server.remove_peer_object(cred.save_to_string(save_parents=True), record, caller_cred)
         return result
 
     ##

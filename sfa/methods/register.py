@@ -44,12 +44,11 @@ class register(Method):
         #log the call
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
         record = GeniRecord(dict = record_dict)
-        table = GeniTable()
+        record['authority'] = get_authority(record['hrn'])
         type = record['type']
         hrn = record['hrn']
-        auth_name = get_authority(hrn)
         self.api.auth.verify_object_permission(hrn)
-        auth_info = self.api.auth.get_auth_info(auth_name)
+        auth_info = self.api.auth.get_auth_info(record['authority'])
         pub_key = None  
         # make sure record has a gid
         if 'gid' not in record:
@@ -68,6 +67,7 @@ class register(Method):
             record.set_gid(gid)
 
         # check if record already exists
+        table = GeniTable()
         existing_records = table.find({'type': type, 'hrn': hrn})
         if existing_records:
             raise ExistingRecord(hrn)
