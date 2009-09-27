@@ -121,7 +121,7 @@ class register(Method):
             # add this persons to the site only if he is being added for the first
             # time by sfa and doesont already exist in plc     
             if not persons or not persons[0]['site_ids']:
-                login_base = get_leaf(auth_name)
+                login_base = get_leaf(record['authority'])
                 self.api.plshell.AddPersonToSite(self.api.plauth, pointer, login_base)
         
             # What roles should this user have?
@@ -133,7 +133,7 @@ class register(Method):
 
         elif (type == "node"):
             pl_record = self.api.geni_fields_to_pl_fields(type, hrn, record)
-            login_base = hrn_to_pl_login_base(auth_name)
+            login_base = hrn_to_pl_login_base(record['authority'])
             nodes = self.api.plshell.GetNodes(self.api.plauth, [pl_record['hostname']])
             if not nodes:
                 pointer = self.api.plshell.AddNode(self.api.plauth, login_base, pl_record)
