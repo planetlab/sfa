@@ -34,12 +34,12 @@ class remove(Method):
     returns = Parameter(int, "1 if successful")
     
     def call(self, cred, type, hrn, caller_cred=None):
+        if caller_cred==None:
+            caller_cred=cred
+        #log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+
         self.api.auth.check(cred, "remove")
-	if caller_cred==None:
-	   caller_cred=cred
-	
-	#log the call
-	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
         self.api.auth.verify_object_permission(hrn)
         table = GeniTable()
         filter = {'hrn': hrn}
@@ -51,14 +51,15 @@ class remove(Method):
         record = records[0]
         type = record['type']
 
-	credential = self.api.getCredential()
+        credential = self.api.getCredential()
        	registries = Registries(self.api) 
-	# Try to remove the object from the PLCDB of federated agg.
-	# This is attempted before removing the object from the local agg's PLCDB and sfa table
-	if hrn.startswith(self.api.hrn) and type in ['user', 'slice', 'authority']:
-	   for registry in registries:
-	     if registry not in [self.api.hrn]:
-	        result=registries[registry].remove_remote_object(credential, hrn, record)
+
+        # Try to remove the object from the PLCDB of federated agg.
+        # This is attempted before removing the object from the local agg's PLCDB and sfa table
+        if hrn.startswith(self.api.hrn) and type in ['user', 'slice', 'authority']:
+            for registry in registries:
+                if registry not in [self.api.hrn]:
+                    result=registries[registry].remove_peer_object(credential, record)
         if type == "user":
             persons = self.api.plshell.GetPersons(self.api.plauth, record['pointer'])
             # only delete this person if he has site ids. if he doesnt, it probably means 
