@@ -54,7 +54,6 @@ class register_peer_object(Method):
         record['authority'] = get_authority(record['hrn'])
         # verify permissions
         self.api.auth.verify_cred_is_me(cred)
-        self.api.auth.verify_object_permission(hrn)
 
         # check if record already exists
         table = GeniTable()
