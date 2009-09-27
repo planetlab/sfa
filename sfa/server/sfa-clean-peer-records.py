@@ -38,14 +38,15 @@ def main():
     # get local peer records
     table = GeniTable()
     peer_records = table.find({'~peer_authority': None})
-
-    # get a list of authorities contained in the peer record list
     for peer_record in peer_records:
         peer_auth = peer_record['peer_authority']
         if peer_auth in registries:
-            records = registries[peer_auth].resolve(credential, peer_record['hrn'])
-            if not records:
-                table.remove(peer_record) 
+            try:
+                records = registries[peer_auth].resolve(credential, peer_record['hrn'])
+            except:
+                # an exception will be thrown if the record doenst exist
+                # if so remove the record from the local registry
+                registries[sfa_api.hrn].remove_peer_object(credential, peer_record)
 
 if __name__ == '__main__':
     main()
