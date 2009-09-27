@@ -96,6 +96,7 @@ class Auth:
         @param auth_name human readable name of authority
         """
 
+        # get auth info will throw an exception if the authority doesnt exist
         self.get_auth_info(name)
 
 
@@ -108,9 +109,9 @@ class Auth:
         @param name human readable name of object        
         """
         auth_name = self.get_authority(name)
-        if not auth_name or name == self.config.SFA_INTERFACE_HRN:
-            # the root authority belongs to the registry by default?
-            # TODO: is this true?
+        if not auth_name:
+            auth_name = name 
+        if name == self.config.SFA_INTERFACE_HRN:
             return
         self.verify_auth_belongs_to_me(auth_name) 
              
