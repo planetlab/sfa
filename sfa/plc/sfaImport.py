@@ -95,6 +95,7 @@ class sfaImport:
 
         if not auth_record:
             auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
+            auth_record['authority'] = get_authority(auth_record['hrn'])
             trace("  inserting authority record for " + hrn)
             table.insert(auth_record)
 
