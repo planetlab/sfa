@@ -97,7 +97,11 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         self.interface = None
         self.key_file = key_file
         self.cert_file = cert_file
-        SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, True, None)
+	#for compatibility with python 2.4 (centos53)
+	if sys.version_info < (2, 5):
+	   SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)
+	else:
+           SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, True, None)
         SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         ctx.use_privatekey_file(key_file)
