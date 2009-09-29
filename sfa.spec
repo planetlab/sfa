@@ -1,4 +1,9 @@
-%define url $URL: svn+ssh://svn.planet-lab.org/svn/geniwrapper/trunk/geniwrapper.spec $
+
+#
+# $Id$
+#
+
+%define url $URL$
 
 %define name sfa
 %define version 0.9
@@ -20,6 +25,8 @@ Vendor: PlanetLab
 Packager: PlanetLab Central <support@planet-lab.org>
 Distribution: PlanetLab %{plrelease}
 URL: %(echo %{url} | cut -d ' ' -f 2)
+Summary: the SFA python libraries
+Group: Applications/System
 
 BuildRequires: make
 Requires: python
@@ -27,8 +34,11 @@ Requires: pyOpenSSL >= 0.7
 Requires: m2crypto
 Requires: libxslt-python
 
-Summary: the SFA python libraries
-Group: Applications/System
+# python 2.5 has uuid module added, for python 2.4 we still need it 
+%define uuid_missing %(`python -c "import uuid" 2> /dev/null ; echo $?`)
+%if uuid_missing
+Requires: python-uuid
+%endif
 
 %package plc
 Summary: the SFA wrapper arounf MyPLC
