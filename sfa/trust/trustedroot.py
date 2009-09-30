@@ -4,13 +4,9 @@
 import os
 
 from sfa.trust.gid import *
-from sfa.util.config import Config
 
 class TrustedRootList:
-    def __init__(self, dir=None):
-        if not dir:
-            # keep trusted roots in /etc/sfa
-            dir = Config().config_path + os.sep + 'trusted_roots'
+    def __init__(self, dir):
         self.basedir = dir
         
         # create the directory to hold the files

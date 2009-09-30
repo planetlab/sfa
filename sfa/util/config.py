@@ -41,6 +41,9 @@ class Config:
         except IOError, e:
             raise IOError, "Could not find the configuration file: %s" % config_file
 
+    def get_trustedroots_dir(self):
+        return self.config_path + os.sep + 'trusted_roots'
+
     def get_openflow_aggrMgr_info(self):
         aggr_mgr_ip = 'localhost'
         if (hasattr(self,'OPENFLOW_AGGREGATE_MANAGER_IP')):

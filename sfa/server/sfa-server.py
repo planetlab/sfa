@@ -46,6 +46,8 @@ from sfa.server.slicemgr import SliceMgr
 
 from sfa.trust.hierarchy import Hierarchy
 
+from sfa.util.config import Config
+
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():
     """Daemonize the current process."""
@@ -110,7 +112,7 @@ def main():
 
     AuthHierarchy = Hierarchy()
 
-    TrustedRoots = TrustedRootList()
+    TrustedRoots = TrustedRootList(Config().get_trustedroots_dir())
 
     # start registry server
     if (options.registry):

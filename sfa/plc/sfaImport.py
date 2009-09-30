@@ -52,7 +52,7 @@ class sfaImport:
 
     def __init__(self):
         self.AuthHierarchy = Hierarchy()
-        self.TrustedRoots = TrustedRootList()
+        self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir())
 
         self.config = Config()
         self.plc_auth = self.config.get_plc_auth()
