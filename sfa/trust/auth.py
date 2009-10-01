@@ -24,10 +24,10 @@ class Auth:
     def __init__(self, peer_cert = None, config = None ):
         self.peer_cert = peer_cert
         self.hierarchy = Hierarchy()
-        self.trusted_cert_list = TrustedRootList().get_list() 
         if not config:
-            self.config = Config() 
-    
+            self.config = Config()
+        self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
+
 
     def check(self, cred, operation):
         """
