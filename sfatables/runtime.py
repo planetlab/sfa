@@ -13,7 +13,7 @@ from sfatables.xmlrule import *
 
 class SFATablesRules:
     def __init__(self, chain_name):
-        self.context = None # placeholder for rspec_manger
+        self.contexts = None # placeholder for rspec_manger
         self.sorted_rule_list = []
         chain_dir_path = os.path.join(sfatables_config,chain_name)
         rule_list = List().get_rule_list(chain_dir_path)

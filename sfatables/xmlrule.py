@@ -42,7 +42,11 @@ class XMLRule:
         return stylesheet_result
 
     def wrap_up(self, rspec):
-        filepath = 'processors/' + self.final_processor
+        filepath = os.path.join(sfatables_config, 'processors', self.final_processor)
+
+        if not os.path.exists(filepath):
+            # TODO: final_processor is not there yet
+            return rspec
 
         styledoc = libxml2.parseFile(filepath)
         style = libxslt.parseStylesheetDoc(styledoc)
