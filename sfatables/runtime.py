@@ -6,15 +6,16 @@ import pdb
 import libxml2
 
 from optparse import OptionParser
-from sfatables import commands, matches, targets
+from sfatables import commands
 from sfatables.globals import *
 from sfatables.commands.List import *
 from sfatables.xmlrule import *
 
 class SFATablesRules:
     def __init__(self, chain_name):
+        self.context = None # placeholder for rspec_manger
         self.sorted_rule_list = []
-        chain_dir_path = "%s/%s"%(sfatables_config,chain_name)
+        chain_dir_path = os.path.join(sfatables_config,chain_name)
         rule_list = List().get_rule_list(chain_dir_path)
         for rule_number in rule_list:
             self.sorted_rule_list.append(XMLRule(chain_name, rule_number))
@@ -38,11 +39,10 @@ def main():
     incoming = SFATablesRules('INCOMING')
     outgoing = SFATablesRules('OUTGOING')
 
+    print "%d rules loaded for INCOMING chain"%len(incoming.sorted_rule_list)
+    print "%d rules loaded for OUTGOING chain"%len(outgoing.sorted_rule_list)
+
     rspec = open(sys.argv[1]).read()
-
-    print "%d rules loaded for INCOMING chain\n"%len(incoming.sorted_rule_list)
-    print "%d rules loaded for OUTGOING chain\n"%len(outgoing.sorted_rule_list)
-
     newrspec = incoming.apply(rspec)
     print newrspec
     return
