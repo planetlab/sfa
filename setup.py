@@ -73,7 +73,6 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
             print "success"
         except: print "failed"
     # remove directories 
-    print remove_dirs
     for directory in remove_dirs: 
         print "removing", directory, "...",
         try: 
