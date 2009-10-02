@@ -27,18 +27,22 @@ class List(Command):
         value_nodes = p.xpathEval("//rule/argument[value!='']/value")
         element_nodes = p.xpathEval("//argument[value!='']/parent::rule/@element")
 
+        print element_nodes, type, xmlextension_path
         if (len(element_nodes)>1):
             raise Exception("Invalid rule %s contains multiple elements."%xmlextension_path)
 
-        element = element_nodes[0].content
+        element = []
+        argument_str = ""
+        if element_nodes:
+            element = element_nodes[0].content
 
-        names = [n.content for n in name_nodes]
-        values = [v.content for v in value_nodes]
+            names = [n.content for n in name_nodes]
+            values = [v.content for v in value_nodes]
 
-        name_values = zip(names,values)
-        name_value_pairs = map(lambda (n,v):n+'='+v, name_values)
+            name_values = zip(names,values)
+            name_value_pairs = map(lambda (n,v):n+'='+v, name_values)
 
-        argument_str = ",".join(name_value_pairs)
+            argument_str = ",".join(name_value_pairs)
 
         p.xpathFreeContext()
         xmldoc.freeDoc()
@@ -65,7 +69,7 @@ class List(Command):
             return
 
         chain = command_options.args[0]
-        chain_dir = sfatables_config + "/" + chain
+        chain_dir = os.path.join(sfatables_config, chain)
 
         rule_list = self.get_rule_list(chain_dir)
 
@@ -77,16 +81,20 @@ class List(Command):
 
             match_path = sfatables_config + '/' + chain + '/' + match_file
             target_path = sfatables_config + '/' + chain + '/' + target_file
-            
+
             match_info = self.get_info ('match',match_path)
             target_info = self.get_info ('target',target_path)
 
-            pretty.push_row(["%d"%number,  match_info['name'], match_info['arguments'], target_info['name'], target_info['element'], target_info['arguments']])
-        
-        
+            pretty.push_row(["%d"%number,
+                             match_info['name'],
+                             match_info['arguments'],
+                             target_info['name'],
+                             target_info['element'],
+                             target_info['arguments']])
+
         pretty.pprint()
 
-            
+
 
 
 

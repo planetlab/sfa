@@ -27,7 +27,7 @@ class Add(Command):
         return "sfatables-%d-%s"%(last_rule_number+1,type)
 
     def call_gen(self, chain, type, dir, options):
-        filename = dir + "/"+options.name+".xml"
+        filename = os.path.join(dir, options.name+".xml")
         xmldoc = libxml2.parseFile(filename)
     
         p = xmldoc.xpathNewContext()
@@ -53,7 +53,9 @@ class Add(Command):
                     context[0].addChild(valueNode)
 
         filename = self.getnextfilename(type,chain)
-        file_path = sfatables_config + '/' + chain + '/' + filename
+        file_path = os.path.join(sfatables_config, chain, filename)
+        if not os.path.isdir(os.path.dirname(file_path)):
+            os.makedirs(os.path.dirname(file_path))
         xmldoc.saveFile(file_path)
         p.xpathFreeContext()
         xmldoc.freeDoc()
