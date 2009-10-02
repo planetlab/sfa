@@ -17,7 +17,7 @@ class XMLRule:
         processor = self.processors[type]
 
         # XXX TO CLEAN UP
-        filepath = 'processors/' + processor
+        filepath = os.path.join(sfatables_config, 'processors', processor)
         # XXX
 
         styledoc = libxml2.parseFile(filepath)

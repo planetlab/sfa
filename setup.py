@@ -5,6 +5,7 @@ Installation script for the geniwrapper module
 """
 
 import sys, os, os.path
+from glob import glob
 import shutil
 from distutils.core import setup
 
@@ -17,6 +18,7 @@ bins = [ 'config/sfa-config-tty',
             'sfa/client/getRecord.py',
             'sfa/client/setRecord.py',
             'sfa/client/genidump.py',
+            'sfatables/sfatables',
             ]
 remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in bins ]
 
@@ -29,23 +31,37 @@ package_dirs = [ 'sfa',
                  'sfa/util', 
                  'sfa/rspecs',
                  'sfa/rspecs/aggregates',
-                 'sfa/rspecs/aggregates/vini'
+                 'sfa/rspecs/aggregates/vini',
+                 'sfatables',
+                 'sfatables/commands',
+                 'sfatables/processors',
                  ]
-data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml', 
-                               'config/registries.xml', 
-                               'config/sfa_config', 
-                               'config/sfi_config',
-                               ]),
-               ('/etc/init.d/', ['sfa/init.d/sfa']),
-               ]
+
+data_files = [('/etc/sfa/', [ 'config/aggregates.xml',
+                              'config/registries.xml',
+                              'config/sfa_config',
+                              'config/sfi_config']),
+              ('/etc/sfatables/matches/', glob('sfatables/matches/*')),
+              ('/etc/sfatables/targets/', glob('sfatables/targets/*')),
+              ('/etc/init.d/', ['sfa/init.d/sfa'])]
+
+# add sfatables processors as data_files
+processor_files = [f for f in glob('sfatables/processors/*') if os.path.isfile(f)]
+data_files.append(('/etc/sfatables/processors/', processor_files))
+processor_subdirs = [d for d in glob('sfatables/processors/*') if os.path.isdir(d)]
+for d in processor_subdirs:
+    etc_dir = os.path.join("/etc/sfatables/processors", os.path.basename(d))
+    d_files = [f for f in glob(d + '/*') if os.path.isfile(f)]
+    data_files.append((etc_dir, processor_files))
+
 initscripts = [ '/etc/init.d/sfa' ]
-        
+
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
     site_packages_path = [ path + os.sep + 'sfa' for path in python_path if path.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/'] + site_packages_path
     remove_files = remove_bins + initscripts
-    
+
     # remove files   
     for filepath in remove_files:
         print "removing", filepath, "...",
@@ -60,15 +76,12 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
             shutil.rmtree(directory)
             print "success"
         except: print "failed"
- 
 else:
-    
     # avoid repeating what's in the specfile already
     setup(name='sfa',
           packages = package_dirs, 
           data_files = data_files,
           ext_modules = [],
           py_modules = [],
-          scripts = bins,   
-          )
+          scripts = bins)
 

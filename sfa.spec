@@ -50,6 +50,11 @@ Summary: the SFA experimenter-side CLI
 Group: Applications/System
 Requires: sfa
 
+%package sfatables
+Summary: sfatables policy tool for SFA
+Group: Applications/System
+Requires: sfa
+
 %description
 This package provides the python libraries that the SFA implementation requires
 
@@ -60,6 +65,11 @@ between the existing PlanetLab interfaces and the SFA API.
 %description client
 This package provides the client side of the SFA API, in particular
 sfi.py, together with other utilities.
+
+%description sfatables
+sfatables is a tool for defining access and admission control policies
+in an SFA network, in much the same way as iptables is for ip
+networks.
 
 %prep
 %setup -q
@@ -97,6 +107,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/getRecord.py*
 %{_bindir}/setRecord.py*
 %{_bindir}/genidump.py*
+
+%files sfatables
+/etc/sfatables/*
+%{_bindir}/sfatables
+%{python_sitelib}/sfatables/*
 
 %pre plc
 [ -f %{_sysconfdir}/init.d/sfa ] && service sfa stop ||:
