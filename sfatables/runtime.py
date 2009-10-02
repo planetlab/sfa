@@ -7,7 +7,6 @@ import libxml2
 
 from optparse import OptionParser
 from sfatables import commands, matches, targets
-from sfatables.xmlextension import Xmlextension
 from sfatables.globals import *
 from sfatables.commands.List import *
 from sfatables.xmlrule import *

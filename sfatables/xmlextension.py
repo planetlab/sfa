@@ -8,15 +8,14 @@ import libxml2
 from sfatables.globals import *
 
 class Xmlextension:
-    def __init__(self, dir, component_name):
+    def __init__(self, file_path):
         self.context = ""
         self.processor = ""
         self.operand = "VALUE"
         self.arguments = []
         self.terminal = 0
 
-        filename = dir+"/"+component_name+".xml"
-        self.xmldoc = libxml2.parseFile(filename)
+        self.xmldoc = libxml2.parseFile(file_path)
 
         # TODO: Check xmldoc against a schema
         p = self.xmldoc.xpathNewContext()

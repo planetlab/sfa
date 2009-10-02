@@ -21,7 +21,6 @@ bins = [ 'config/sfa-config-tty',
             'sfa/client/genidump.py',
             'sfatables/sfatables',
             ]
-remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in bins ]
 
 package_dirs = [ 'sfa', 
                  'sfa/client',
@@ -38,12 +37,13 @@ package_dirs = [ 'sfa',
                  'sfatables/processors',
                  ]
 
+
 data_files = [('/etc/sfa/', [ 'config/aggregates.xml',
                               'config/registries.xml',
                               'config/sfa_config',
                               'config/sfi_config']),
-              ('/etc/sfatables/matches/', glob('sfatables/matches/*')),
-              ('/etc/sfatables/targets/', glob('sfatables/targets/*')),
+              ('/etc/sfatables/matches/', glob('sfatables/matches/*.xml')),
+              ('/etc/sfatables/targets/', glob('sfatables/targets/*.xml')),
               ('/etc/init.d/', ['sfa/init.d/sfa'])]
 
 # add sfatables processors as data_files
@@ -59,8 +59,10 @@ initscripts = [ '/etc/init.d/sfa' ]
 
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
-    site_packages_path = [ path + os.sep + 'sfa' for path in python_path if path.endswith('site-packages')]
-    remove_dirs = ['/etc/sfa/'] + site_packages_path
+    site_packages_path = [ os.path.join(p,'sfa') for p in python_path if p.endswith('site-packages')]
+    site_packages_path += [ os.path.join(p,'sfatables') for p in python_path if p.endswith('site-packages')]
+    remove_dirs = ['/etc/sfa/', '/etc/sfatables'] + site_packages_path
+    remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in bins ]
     remove_files = remove_bins + initscripts
 
     # remove files   
@@ -71,6 +73,7 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
             print "success"
         except: print "failed"
     # remove directories 
+    print remove_dirs
     for directory in remove_dirs: 
         print "removing", directory, "...",
         try: 

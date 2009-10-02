@@ -86,12 +86,11 @@ make install DESTDIR="$RPM_BUILD_ROOT"
 rm -rf $RPM_BUILD_ROOT
 
 %files
+# sfa and sfatables depend each other.
+/etc/sfatables/*
 %{python_sitelib}/*
 /usr/bin/keyconvert
 /var/www/html/wsdl/*.wsdl
-# sfa and sfatables depend each other.
-/etc/sfatables/*
-%{python_sitelib}/sfatables/*
 
 
 %files plc

@@ -9,10 +9,11 @@
 import sys
 import os
 import pdb
+import glob
 import libxml2
 
 from optparse import OptionParser
-from sfatables import commands, matches, targets
+from sfatables import commands
 from sfatables.xmlextension import Xmlextension
 from sfatables.globals import *
 
@@ -26,12 +27,16 @@ def load_commands(module, list):
 
     return command_dict
 
-def load_xml_extensions(module, dir, list):
+def load_xml_extensions(module, ext_dir):
     ext_dict={}
 
-    for ext_name in list:
-        module = Xmlextension(dir, ext_name)
+    exts = glob.glob(ext_dir + os.path.sep + "*")
+    for ext in exts:
+        module = Xmlextension(ext)
+        # get the filename and get rid of the ".xml" extension
+        ext_name = os.path.extsep.join(os.path.splitext(os.path.basename(ext))[:-1])
         ext_dict[ext_name]=module
+        print "Loaded:", ext_name, ext
 
     return ext_dict
 
@@ -87,7 +92,7 @@ def main():
     if (command.matches):
         if (len(pargs)<2):
             raise Exception("Must specify match for this command")
-        match_dict = load_xml_extensions("sfatables.matches",match_dir, matches.all)
+        match_dict = load_xml_extensions("sfatables.matches",match_dir)
         match_parser = create_parser_xml_ext(match_dict)
         matches_str = ",".join(match_dict.keys())
         match_parser.add_option('-m','--match',dest='name',help='Match name (one of %s)'%matches_str, metavar = 'MATCH')
@@ -109,10 +114,10 @@ def main():
     if (command.targets):
         if (len(pargs)<3):
             raise Exception("Must specify a target for this command")
-        target_dict = load_xml_extensions("sfatables.targets",target_dir,targets.all)
+        target_dict = load_xml_extensions("sfatables.targets",target_dir)
         target_parser = create_parser_xml_ext(target_dict)
         targets_str = ",".join(target_dict.keys())
-        target_parser.add_option('-j','--jump',dest='name',help='Target name (one of %s)'%targets, metavar = 'TARGET')
+        target_parser.add_option('-j','--jump',dest='name',help='Target name (one of %s)'%targets_str, metavar = 'TARGET')
         target_parser.add_option('-e','--element',dest='element',help='Element name', metavar = 'ELEMENT')
         (target_options, args) = target_parser.parse_args(pargs[2])
         try:

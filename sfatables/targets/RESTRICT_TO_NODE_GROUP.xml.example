@@ -16,4 +16,4 @@
         </argument>
     </rule>
     <processor filename="restrict_to_nodes.xsl"/>
-</match>
+</target>
