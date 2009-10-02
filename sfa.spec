@@ -97,6 +97,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/sfa
 %{_bindir}/sfa-config-tty
 %{_bindir}/sfa-import-plc.py*
+%{_bindir}/sfa-clean-peer-records.py*
 %{_bindir}/sfa-nuke-plc.py*
 %{_bindir}/sfa-server.py*
 
