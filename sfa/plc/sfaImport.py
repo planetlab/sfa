@@ -52,9 +52,8 @@ class sfaImport:
 
     def __init__(self):
         self.AuthHierarchy = Hierarchy()
-        self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir())
-
         self.config = Config()
+        self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))
         self.plc_auth = self.config.get_plc_auth()
         self.root_auth = self.config.SFA_REGISTRY_ROOT_AUTH
         self.level1_auth = self.config.SFA_REGISTRY_LEVEL1_AUTH
