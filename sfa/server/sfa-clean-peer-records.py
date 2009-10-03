@@ -10,6 +10,8 @@ from sfa.util.config import Config
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.report import trace, error
 from sfa.server.registry import Registries
+from sfa.util.xmlrpcprotocol import ServerException
+import socket
 
 def main():
     config = Config()
@@ -43,10 +45,11 @@ def main():
         if peer_auth in registries:
             try:
                 records = registries[peer_auth].resolve(credential, peer_record['hrn'])
-            except:
+            except ServerException:	
                 # an exception will be thrown if the record doenst exist
                 # if so remove the record from the local registry
                 registries[sfa_api.hrn].remove_peer_object(credential, peer_record)
-
+            except:	
+		pass
 if __name__ == '__main__':
     main()
