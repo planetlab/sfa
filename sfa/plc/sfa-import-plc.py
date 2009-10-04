@@ -200,15 +200,14 @@ def main():
                (hrn, 'user') not in existing_records or update_record:
                 sfaImporter.import_person(site_hrn, person)
 
-    
     # remove stale records    
     for (record_hrn, type) in existing_records.keys():
+        record = existing_records[(record_hrn, type)]
         # if this is the interface name dont do anything
-        if record_hrn == import_auth:
+        if record_hrn == import_auth or record['peer_authority']:
             continue    
         
         found = False
-        record = existing_records[(record_hrn, type)]
         
         if type == 'authority':    
             for site in sites:
