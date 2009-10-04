@@ -93,7 +93,7 @@ class remove_peer_object(Method):
         if not peers:
             raise GeniInvalidArgument, "No such peer"
         peer = peers[0]
-        return peer['peername'] 
+        return peer['shortname'] 
 
 
 
