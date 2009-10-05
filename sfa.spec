@@ -7,7 +7,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -123,6 +123,9 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Mon Oct 05 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-3
+- Compatibility with RP, two additional methods to handle remote objects, call tracability and logging, PLCDB now has single table for sfa records, preliminary version of sfatables (still under development)
+
 * Fri Sep 18 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-0.9-2
 - compatibility with RefreshPeer
 - incremental mechanism for importing PLC records into SFA tables
