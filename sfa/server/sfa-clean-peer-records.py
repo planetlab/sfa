@@ -2,6 +2,7 @@
 
 import sys
 import os
+import traceback
 from sfa.util.misc import *
 from sfa.util.genitable import GeniTable
 from sfa.util.geniclient import GeniClient
@@ -45,11 +46,11 @@ def main():
         if peer_auth in registries:
             try:
                 records = registries[peer_auth].resolve(credential, peer_record['hrn'])
-            except ServerException:	
+            except ServerException:
                 # an exception will be thrown if the record doenst exist
                 # if so remove the record from the local registry
                 registries[sfa_api.hrn].remove_peer_object(credential, peer_record)
-            except:	
-		pass
+            except:
+		traceback.print_exc()
 if __name__ == '__main__':
     main()
