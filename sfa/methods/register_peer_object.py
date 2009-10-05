@@ -61,6 +61,7 @@ class register_peer_object(Method):
         if existing_records:
             for existing_record in existing_records:
                 if existing_record['pointer'] != record['pointer']:
+                    record['record_id'] = existing_record['record_id']
                     table.update(record)
             return 1
         record_id = table.insert(record)
