@@ -59,6 +59,9 @@ class register_peer_object(Method):
         table = GeniTable()
         existing_records = table.find({'type': type, 'hrn': hrn, 'peer_authority': peer_authority})
         if existing_records:
+            for existing_record in existing_records:
+                if existing_record['pointer'] != record['pointer']:
+                    table.update(record)
             return 1
         record_id = table.insert(record)
  
