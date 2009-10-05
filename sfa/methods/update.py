@@ -120,6 +120,6 @@ class update(Method):
             raise UnknownGeniType(type)
 
         # update membership for researchers, pis, owners, operators
-        self.api.update_membership(record, record)
+        self.api.update_membership(record, new_record)
 
         return 1
