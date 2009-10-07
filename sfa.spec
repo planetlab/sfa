@@ -7,7 +7,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 3
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -123,6 +123,10 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Wed Oct 07 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-4
+- Bug fix on update and remove_peer_object methods
+- Compatibility with RP, preliminiary version of sfatables, call tracability and logging
+
 * Mon Oct 05 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-3
 - Compatibility with RP, two additional methods to handle remote objects, call tracability and logging, PLCDB now has single table for sfa records, preliminary version of sfatables (still under development)
 
