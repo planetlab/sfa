@@ -54,8 +54,6 @@ class create_slice(Method):
         request_context = rspec_manager.fetch_context(hrn, Credential(string=caller_cred).get_gid_caller().get_hrn(), contexts)
         incoming_rules.set_context(request_context)
         rspec = incoming_rules.apply(requested_rspec)
-        rspec = requested_rspec
-
 
         if (sfa_aggregate_type == 'pl'):
             slices = Slices(self.api, caller_cred=caller_cred)
