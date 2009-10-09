@@ -7,7 +7,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 4
+%define taglevel 5
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -123,6 +123,10 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Fri Oct 09 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-5
+- Create_slice and get_resources methods are connected to sfatables.
+- Other features include compatibility with RP, handling remote objects created as part of federation, preliminary version of sfatables, call tracability and logging.
+
 * Wed Oct 07 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-4
 - Bug fix on update and remove_peer_object methods
 - Compatibility with RP, preliminiary version of sfatables, call tracability and logging
