@@ -119,7 +119,8 @@ class GeniAPI:
         self.credential = None
         
         # Initialize the PLC shell only if SFA wraps a myPLC
-        if (self.config.get_aggregate_rspec_type() == 'pl'):
+        rspec_type = self.config.get_aggregate_rspec_type()
+        if (rspec_type == 'pl' or rspec_type == 'vini'):
             self.plshell = self.getPLCShell()
             self.plshell_version = self.getPLCShellVersion()
 
