@@ -219,6 +219,7 @@ class Site:
         self.name = site['abbreviated_name'].replace(" ", "_")
         self.tag = site['login_base']
         self.public = site['is_public']
+        self.enabled = site['enabled']
         self.links = set()
 
     def get_sitenodes(self, nodes):
@@ -564,7 +565,7 @@ class Topology:
         <NetSpec name="physical_topology">"""
 
         for site in self.getSites():
-            if not site.public:
+            if not (site.public and site.enabled):
                 continue
             
             xml += """
