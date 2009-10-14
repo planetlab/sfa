@@ -203,6 +203,9 @@ class Keypair:
       k.verify_update(data)
       return M2Crypto.m2.verify_final(k.ctx, base64.b64decode(sig), k.pkey)
 
+   def compute_hash(self, value):
+      return self.sign_string(str(value))      
+
 ##
 # The certificate class implements a general purpose X509 certificate, making
 # use of the appropriate pyOpenSSL or M2Crypto abstractions. It also adds
