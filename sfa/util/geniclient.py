@@ -9,6 +9,7 @@
 ### $Id$
 ### $URL$
 
+from sfa.trust.certificate import *
 from sfa.trust.gid import *
 from sfa.trust.credential import *
 from sfa.util.record import *
@@ -35,18 +36,20 @@ class GeniClient:
     # @param protocol The ORPC protocol to use. Can be "soap" or "xmlrpc"
 
     def __init__(self, url, key_file, cert_file, protocol="xmlrpc"):
-       self.url = url
-       self.key_file = key_file
-       self.cert_file = cert_file
+        self.url = url
+        self.key_file = key_file
+        self.cert_file = cert_file
+        self.key = Keypair(filename = self.key_file)
+    
 
-       if (protocol=="xmlrpc"):
-           import xmlrpcprotocol  
-           self.server = xmlrpcprotocol.get_server(self.url, self.key_file, self.cert_file)
-       elif (protocol=="soap"):
-           import soapprotocol
-           self.server = soapprotocol.get_server(self.url, self.key_file, self.cert_file)
-       else:
-           raise Exception("Attempted use of undefined protocol %s"%protocol)
+        if (protocol=="xmlrpc"):
+            import xmlrpcprotocol  
+            self.server = xmlrpcprotocol.get_server(self.url, self.key_file, self.cert_file)
+        elif (protocol=="soap"):
+            import soapprotocol
+            self.server = soapprotocol.get_server(self.url, self.key_file, self.cert_file)
+        else:
+            raise Exception("Attempted use of undefined protocol %s"%protocol)
 
 
     # -------------------------------------------------------------------------
@@ -78,13 +81,18 @@ class GeniClient:
     #
     # @return a GID object
 
-    def get_gid(self, name):
-       gid_str_list = self.server.get_gid(name)
-       gid_list = []
-       for str in gid_str_list:
-           gid_list.append(GID(string=str))
-       return gid_list
+    #def get_gid(self, name):
+    #   gid_str_list = self.server.get_gid(name)
+    #   gid_list = []
+    #   for str in gid_str_list:
+    #       gid_list.append(GID(string=str))
+    #  return gid_list
 
+
+    def get_gid(self, cert, hrn, type, request_hash):
+        cert_string = cert.save_to_string(save_parents=True)
+        gid_str = self.server.get_gid(cert_string, hrn, type, request_hash)
+        return GID(string=gid_str)
     ##
     # Get_self_credential a degenerate version of get_credential used by a
     # client to get his initial credential when he doesn't have one. This is

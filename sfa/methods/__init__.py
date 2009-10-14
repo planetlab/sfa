@@ -5,6 +5,7 @@ create_slice
 delete_slice
 get_aggregates
 get_credential
+get_gid
 get_registries
 get_resources
 get_slices

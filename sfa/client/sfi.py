@@ -89,6 +89,7 @@ class Sfi:
        # Get key and certificate
        key_file = self.get_key_file()
        cert_file = self.get_cert_file(key_file)
+       self.key = Keypair(filename=key_file) 
        self.key_file = key_file
        self.cert_file = cert_file 
        # Establish connection to server(s)
@@ -137,7 +138,23 @@ class Sfi:
              print "Writing self-signed certificate to", file
           cert.save_to_file(file)
           return file
-    
+   
+    def get_gid(self):
+        file = os.path.join(self.options.sfi_dir, self.get_leaf(self.user) + ".gid")
+        if (os.path.isfile(file)):
+            gid = GID(filename=file)
+            return gid
+        else:
+            cert = Certificate(self.cert_file)
+            cert_str = cert.save_to_string(save_parents=True)
+            request_hash = self.key.compute_hash([cert_str, self.user, "user"])
+            gid_str = self.registry.get_gid(cert, self.user, "user", request_hash)
+            gid = GID(string=gid_str)
+            if self.options.verbose:
+                print "Writing user gid to", file
+            gid.save_to_file(file, save_parents=True)
+            return gid       
+ 
     def get_user_cred(self):
        file = os.path.join(self.options.sfi_dir, self.get_leaf(self.user) + ".cred")
        if (os.path.isfile(file)):
@@ -272,7 +289,8 @@ class Sfi:
     # Generate sub-command parser
     #
     def create_cmd_parser(self,command, additional_cmdargs = None):
-       cmdargs = {"list": "name",
+       cmdargs = {"gid": "",
+                  "list": "name",
                   "show": "name",
                   "remove": "name",
                   "add": "record",
@@ -341,7 +359,7 @@ class Sfi:
 
        # Generate command line parser
        parser = OptionParser(usage="sfi [options] command [command_options] [command_args]",
-                             description="Commands: list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset")
+                             description="Commands: gid,list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset")
        parser.add_option("-r", "--registry", dest="registry",
                          help="root registry", metavar="URL", default=None)
        parser.add_option("-s", "--slicemgr", dest="sm",
@@ -372,7 +390,12 @@ class Sfi:
     #
     # Registry-related commands
     #
-    
+   
+    def gid(self, opts, args):
+       gid = self.get_gid()
+       print "GID: %s" % (gid.save_to_string(save_parents=True))
+       return   
+ 
     # list entires in named authority registry
     def list(self,opts, args):
        user_cred = self.get_user_cred()
