@@ -15,6 +15,7 @@ from sfa.trust.hierarchy import Hierarchy
 from sfa.util.genitable import GeniTable
 from sfa.util.config import *
 from sfa.util.misc import *
+from sfa.trust.gid import GID
 
 class Auth:
     """
@@ -47,7 +48,7 @@ class Auth:
 
         # make sure the client_gid matches client's certificate
         peer_cert = self.peer_cert
-        if not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
+        if peer_cert and not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
             raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())
 
         # make sure the client is allowed to perform the operation
@@ -64,6 +65,53 @@ class Auth:
 
         return True
 
+
+    def verifyGidRequestHash(self, gid, hash, arglist):
+        key = gid.get_pubkey()
+        if not key.verify_string(str(arglist), hash):
+            raise BadRequestHash(hash)
+
+    def verifyCredRequestHash(self, cred, hash, arglist):
+        gid = cred.get_gid_caller()
+        self.verifyGidRequestHash(gid, hash, arglist)
+
+    def validateGid(self, gid):
+        if self.trusted_cert_list:
+            gid.verify_chain(self.trusted_cert_list)
+
+    def validateCred(self, cred):
+        if self.trusted_cert_list:
+            cred.verify_chain(self.trusted_cert_list)
+            caller_gid = cred.get_gid_caller()
+            object_gid = cred.get_gid_object()
+            if caller_gid:
+                caller_gid.verify_chain(self.trusted_cert_list)
+            if object_gid:
+                object_gid.verify_chain(self.trusted_cert_list)
+
+    def authenticateGid(self, gidStr, argList, requestHash):
+        gid = GID(string = gidStr)
+        self.validateGid(gid)
+        self.verifyGidRequestHash(gid, requestHash, argList)
+        return gid
+
+    def authenticateCred(self, credStr, argList, requestHash):
+        cred = Credential(string = credStr)
+        self.validateCred(cred)
+        self.verifyCredRequestHash(cred, requestHash, argList)
+        return cred
+
+    def authenticateCert(self, certStr, requestHash):
+        cert = Certificate(string=certStr)
+        self.validateCert(self, cert)   
+
+    def gidNoop(self, gidStr, value, requestHash):
+        self.authenticateGid(gidStr, [gidStr, value], requestHash)
+        return value
+
+    def credNoop(self, credStr, value, requestHash):
+        self.authenticateCred(credStr, [credStr, value], requestHash)
+        return value
 
     def verify_cred_is_me(self, credential):
         is_me = False 
