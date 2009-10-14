@@ -1,6 +1,7 @@
 ### $Id$
 ### $URL$
 
+import time
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
@@ -50,6 +51,7 @@ class update(Method):
         if not records:
             raise RecordNotFound(hrn)
         record = records[0]
+        record['last_updated'] = time.gmtime()
          
         # Update_membership needs the membership lists in the existing record
         # filled in, so it can see if members were added or removed
