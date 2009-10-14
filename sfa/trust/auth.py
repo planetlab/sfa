@@ -46,11 +46,6 @@ class Auth:
         if not self.client_gid:
             raise MissingCallerGID(self.client_cred.get_subject())
 
-        # make sure the client_gid matches client's certificate
-        peer_cert = self.peer_cert
-        if peer_cert and not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
-            raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())
-
         # make sure the client is allowed to perform the operation
         if operation:
             if not self.client_cred.can_perform(operation):
@@ -65,6 +60,11 @@ class Auth:
 
         return True
 
+    def verifyPeerCert(self):
+        # make sure the client_gid matches client's certificate
+        peer_cert = self.peer_cert
+        if not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
+            raise ConnectionKeyGIDMismatch(self.client_gid.get_subject()            
 
     def verifyGidRequestHash(self, gid, hash, arglist):
         key = gid.get_pubkey()
