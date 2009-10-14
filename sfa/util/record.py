@@ -15,9 +15,9 @@ import sfa.util.report
 from sfa.util.rspec import *
 from sfa.util.parameter import *
 from sfa.util.misc import *
+from sfa.util.genitable import Row
 
-
-class GeniRecord(dict):
+class GeniRecord(Row):
     """ 
     The GeniRecord class implements a Geni Record. A GeniRecord is a tuple
     (Hrn, GID, Type, Info).
@@ -37,9 +37,13 @@ class GeniRecord(dict):
     of different types.
     """
 
+    table_name = 'sfa'
+    
+    primary_key = 'record_id'
+
     ### the wsdl generator assumes this is named 'fields'
     internal_fields = {
-        'record_id': Parameter(int, 'An id that uniquely identifies this record'),
+        'record_id': Parameter(int, 'An id that uniquely identifies this record', ro=True),
         'pointer': Parameter(int, 'An id that uniquely identifies this record in an external database ')
     }
 
@@ -81,6 +85,10 @@ class GeniRecord(dict):
             self.load_from_dict(dict)
         if string:
             self.load_from_string(string)
+
+
+    def validate_last_updated(self, last_updated):
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         
     def update(self, new_dict):
         if isinstance(new_dict, list):
