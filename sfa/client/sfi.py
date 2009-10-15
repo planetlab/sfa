@@ -11,11 +11,12 @@ from optparse import OptionParser
 
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
-
 from sfa.util.geniclient import GeniClient
 from sfa.util.record import *
 from sfa.util.rspec import Rspec
 from sfa.util.xmlrpcprotocol import ServerException
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol
+import sfa.util.soapprotocol as soapprotocol
 from sfa.util.config import Config
 
 class Sfi:
@@ -91,10 +92,12 @@ class Sfi:
        cert_file = self.get_cert_file(key_file)
        self.key = Keypair(filename=key_file) 
        self.key_file = key_file
-       self.cert_file = cert_file 
+       self.cert_file = cert_file
+       self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
        self.slicemgr = GeniClient(sm_url, key_file, cert_file, self.options.protocol)
-       self.registry = GeniClient(reg_url, key_file, cert_file, self.options.protocol)
+       #self.registry = GeniClient(reg_url, key_file, cert_file, self.options.protocol)
+       self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file)  
        return
     
     #
@@ -145,10 +148,9 @@ class Sfi:
             gid = GID(filename=file)
             return gid
         else:
-            cert = Certificate(self.cert_file)
-            cert_str = cert.save_to_string(save_parents=True)
+            cert_str = self.cert.save_to_string(save_parents=True)
             request_hash = self.key.compute_hash([cert_str, self.user, "user"])
-            gid_str = self.registry.get_gid(cert, self.user, "user", request_hash)
+            gid_str = self.registry.get_gid(cert_str, self.user, "user", request_hash)
             gid = GID(string=gid_str)
             if self.options.verbose:
                 print "Writing user gid to", file
@@ -162,12 +164,14 @@ class Sfi:
           return user_cred
        else:
           # bootstrap user credential
-          user_cred = self.registry.get_credential(None, "user", self.user)
+          request_hash = self.key.compute_hash([None, "user", self.user])
+          user_cred = self.registry.get_credential(None, "user", self.user, request_hash)
           if user_cred:
-             user_cred.save_to_file(file, save_parents=True)
+             cred = Credential(string=user_cred)
+             cred.save_to_file(file, save_parents=True)
              if self.options.verbose:
                 print "Writing user credential to", file
-             return user_cred
+             return cred
           else:
              print "Failed to get user credential"
              sys.exit(-1)
@@ -184,13 +188,15 @@ class Sfi:
           return auth_cred
        else:
           # bootstrap authority credential from user credential
-          user_cred = self.get_user_cred()
-          auth_cred = self.registry.get_credential(user_cred, "authority", self.authority)
+          user_cred = self.get_user_cred().save_to_string(save_parents=True)
+          request_hash = self.key.compute_hash([user_cred, "authority", self.authority])
+          auth_cred = self.registry.get_credential(user_cred, "authority", self.authority, request_hash)
           if auth_cred:
-             auth_cred.save_to_file(file, save_parents=True)
+             cred = Credential(string=auth_cred)
+             cred.save_to_file(file, save_parents=True)
              if self.options.verbose:
                 print "Writing authority credential to", file
-             return auth_cred
+             return cred
           else:
              print "Failed to get authority credential"
              sys.exit(-1)
@@ -398,9 +404,11 @@ class Sfi:
  
     # list entires in named authority registry
     def list(self,opts, args):
-       user_cred = self.get_user_cred()
+       user_cred = self.get_user_cred().save_to_string(save_parents=True)
+       hrn = args[0]
+       request_hash = self.key.compute_hash([user_cred, hrn])    
        try:
-          list = self.registry.list(user_cred, args[0])
+          list = self.registry.list(user_cred, hrn, request_hash)
        except IndexError:
           raise Exception, "Not enough parameters for the 'list' command"
           
@@ -415,8 +423,10 @@ class Sfi:
     
     # show named registry record
     def show(self,opts, args):
-       user_cred = self.get_user_cred()
-       records = self.registry.resolve(user_cred, args[0])
+       user_cred = self.get_user_cred().save_to_string(save_parents=True)
+       hrn = args[0]
+       request_hash = self.key.compute_hash([user_cred, hrn])    
+       records = self.registry.resolve(user_cred, hrn, request_hash)
        records = self.filter_records(opts.type, records)
        if not records:
           print "No record of type", opts.type
@@ -506,11 +516,13 @@ class Sfi:
     
     # add named registry record
     def add(self,opts, args):
-       auth_cred = self.get_auth_cred()
-       rec_file = self.get_record_file(args[0])
-       record = self.load_record_from_file(rec_file)
-    
-       return self.registry.register(auth_cred, record)
+       auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
+       record_filepath = args[0]
+       rec_file = self.get_record_file(record_filepath)
+       record = self.load_record_from_file(rec_file).as_dict()
+       request_hash = self.key.compute_hash([auth_cred, record])
+   
+       return self.registry.register(auth_cred, record, request_hash)
     
     # update named registry entry
     def update(self,opts, args):
@@ -705,7 +717,7 @@ class Sfi:
     def filter_records(self,type, records):
        filtered_records = []
        for record in records:
-           if (record.get_type() == type) or (type == "all"):
+           if (record['type'] == type) or (type == "all"):
                filtered_records.append(record)
        return filtered_records
     
@@ -719,6 +731,16 @@ class Sfi:
            index = index + 1
     
     def save_record_to_file(self,filename, record):
+       if record['type'] in ['user']:
+           record = UserRecord(dict = record)
+       elif record['type'] in ['slice']:
+           record = SliceRecord(dict = record)
+       elif record['type'] in ['node']:
+           record = NodeRecord(dict = record)
+       elif record['type'] in ['authority', 'ma', 'sa']:
+          record = AuthorityRecord(dict = record)
+       else:
+           record = GeniRecord(dict = record) 
        if not filename.startswith(os.sep):
            filename = self.options.sfi_dir + filename
        str = record.save_to_string()
@@ -734,7 +756,6 @@ class Sfi:
     # Main: parse arguments and dispatch to command
     #
     def main(self):
-    
        parser = self.create_parser()
        (options, args) = parser.parse_args()
        self.options = options
