@@ -490,7 +490,7 @@ class Topology:
         for node in self.getNodes():
             nodedict[node.tag] = node
             
-        linkspecs = rspecdict['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec']    
+        linkspecs = rspecdict['RSpec']['Request'][0]['NetSpec'][0]['LinkSpec']    
         for l in linkspecs:
             n1 = nodedict[l['endpoint'][0]]
             n2 = nodedict[l['endpoint'][1]]

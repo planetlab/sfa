@@ -38,8 +38,8 @@ class ViniRspec(Rspec):
                     sldict['bw'] = [format_tc_rate(sl.bps)]
                     sitelinkspecs.append(sldict)
                     
-        d['Rspec']['Capacity'][0]['NetSpec'][0]['SiteSpec'] = sitespecs
-        d['Rspec']['Capacity'][0]['NetSpec'][0]['SiteLinkSpec'] = sitelinkspecs
+        d['RSpec']['Capacity'][0]['NetSpec'][0]['SiteSpec'] = sitespecs
+        d['RSpec']['Capacity'][0]['NetSpec'][0]['SiteLinkSpec'] = sitelinkspecs
         self.parseDict(d)
 
 
@@ -52,6 +52,6 @@ class ViniRspec(Rspec):
             linkspecs.append(edict)
 
         d = self.toDict()
-        d['Rspec']['Request'][0]['NetSpec'][0]['LinkSpec'] = linkspecs
-        d['Rspec']['Request'][0]['NetSpec'][0]['name'] = slice.hrn
+        d['RSpec']['Request'][0]['NetSpec'][0]['LinkSpec'] = linkspecs
+        d['RSpec']['Request'][0]['NetSpec'][0]['name'] = slice.hrn
         self.parseDict(d)
