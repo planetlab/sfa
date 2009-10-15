@@ -11,7 +11,7 @@ import sys
 import traceback
 import xmlrpclib
 from mod_python import apache
-
+from sfa.util.debug import log
 from sfa.plc.api import GeniAPI
 
 api = GeniAPI(interface='registry')
