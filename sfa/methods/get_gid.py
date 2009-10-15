@@ -34,6 +34,7 @@ class get_gid(Method):
     
     def call(self, cert, hrn, type, requestHash):
       
+        self.api.auth.verify_object_belongs_to_me(hrn)
         certificate = Certificate(string=cert) 
         table = GeniTable()
         records = table.find({'hrn': hrn, 'type': type})
@@ -43,8 +44,8 @@ class get_gid(Method):
         gidStr = record['gid']
         gid = GID(string=gidStr)
          
-        #if not certificate.is_pubkey(gid.get_pubkey()):
-        #    raise ConnectionKeyGIDMismatch(gid.get_subject())
+        if not certificate.is_pubkey(gid.get_pubkey()):
+            raise ConnectionKeyGIDMismatch(gid.get_subject())
         
         # authenticate the gid
         self.api.auth.authenticateGid(gidStr, [cert, hrn, type], requestHash)
