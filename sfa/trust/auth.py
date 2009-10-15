@@ -68,7 +68,7 @@ class Auth:
         # make sure the client_gid matches client's certificate
         peer_cert = self.peer_cert
         if not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
-            raise ConnectionKeyGIDMismatch(self.client_gid.get_subject()            
+            raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())            
 
     def verifyGidRequestHash(self, gid, hash, arglist):
         key = gid.get_pubkey()
