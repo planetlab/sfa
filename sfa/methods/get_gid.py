@@ -26,8 +26,8 @@ class get_gid(Method):
     
     accepts = [
         Parameter(str, "Certificate string"),
-        
-        Parameter(str, "Human readable name (hrn)")  
+        Parameter(str, "Human readable name (hrn)"),  
+        Parameter(str, "Request hash")  
         ]
 
     returns = [Parameter(dict, "Aggregate interface information")]
