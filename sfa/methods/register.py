@@ -38,7 +38,12 @@ class register(Method):
     returns = Parameter(int, "String representation of gid object")
     
     def call(self, cred, record_dict, request_hash, caller_cred=None):
-        self.api.auth.authenticateCred(cred, [cred, record_dict], request_hash)
+        # This cred will be an authority cred, not a user, so we cant use it to 
+        # authenticate the caller's request_hash. Let just get the caller's gid
+        # from the cred and authenticate using that 
+        client_gid = Credential(string=cred).get_gid_caller()
+        client_gid_str = client_gid.save_to_string()
+        self.api.auth.authenticateGid(cred, [cred, record_dict], request_hash)
         self.api.auth.check(cred, "register")
         if caller_cred==None:
 	        caller_cred=cred
