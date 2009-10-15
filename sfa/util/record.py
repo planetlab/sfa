@@ -15,7 +15,7 @@ import sfa.util.report
 from sfa.util.rspec import *
 from sfa.util.parameter import *
 from sfa.util.misc import *
-from sfa.util.genitable import Row
+from sfa.util.row import Row
 
 class GeniRecord(Row):
     """ 
