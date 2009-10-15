@@ -25,13 +25,15 @@ class resolve(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name (hrn)")
+        Parameter(str, "Human readable name (hrn)"),
+        Parameter(str, "Request hash")
         ]
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, caller_cred=None):
+    def call(self, cred, hrn, request_hash, caller_cred=None):
         
+        self.api.auth.authenticateCred(cred, [cred, hrn], request_hash) 
         self.api.auth.check(cred, 'resolve')
         if caller_cred==None:
             caller_cred=cred

@@ -29,15 +29,18 @@ class get_credential(Method):
     accepts = [
         Mixed(Parameter(str, "credential"),
               Parameter(None, "No credential")),  
-        Parameter(str, "Human readable name (hrn)")
+        Parameter(str, "Human readable name (hrn)"),
+        Parameter(str, "Request hash")
         ]
 
     returns = Parameter(str, "String representation of a credential object")
 
-    def call(self, cred, type, hrn):
+    def call(self, cred, type, hrn, request_hash):
         if not cred:
-            return self.get_self_credential(type, hrn)
+            return self.get_self_credential(type, hrn, request_hash)
 
+        # authenticate the cred
+        self.api.auth.authenticateCred(cred, [cred, type, hrn], request_hash)
         self.api.auth.check(cred, 'getcredential')
         self.api.auth.verify_object_belongs_to_me(hrn)
         auth_hrn = self.api.auth.get_authority(hrn)
@@ -80,7 +83,7 @@ class get_credential(Method):
 
         return new_cred.save_to_string(save_parents=True)
 
-    def get_self_credential(self, type, hrn):
+    def get_self_credential(self, type, hrn, request_hash):
         """
         get_self_credential a degenerate version of get_credential used by a client
         to get his initial credential when de doesnt have one. This is the same as
@@ -98,8 +101,9 @@ class get_credential(Method):
         """
         self.api.auth.verify_object_belongs_to_me(hrn)
         auth_hrn = self.api.auth.get_authority(hrn)
-        
-        # is this a root or sub authority
+         
+        # if this is a root or sub authority get_authority will return
+        # an empty string
         if not auth_hrn or hrn == self.api.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
 
@@ -113,13 +117,13 @@ class get_credential(Method):
             raise RecordNotFound(hrn)
         record = records[0]
         gid = record.get_gid_object()
-        peer_cert = self.api.auth.peer_cert
-        if not peer_cert.is_pubkey(gid.get_pubkey()):
-           raise ConnectionKeyGIDMismatch(gid.get_subject())
-
         rights = self.api.auth.determine_user_rights(None, record)
         if rights.is_empty():
             raise PermissionError(gid.get_hrn() + " has no rights to " + record.get_name())
+       
+        # authenticate the gid
+        gid_str = gid.save_to_string(save_parents=True)
+        self.api.auth.authenticateGid(gid_str, [None, type, hrn], request_hash)
 
         # create the credential
         gid = record.get_gid_object()
@@ -136,5 +140,4 @@ class get_credential(Method):
 
         cred.encode()
         cred.sign()
-
         return cred.save_to_string(save_parents=True)
