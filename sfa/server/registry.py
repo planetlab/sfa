@@ -11,11 +11,12 @@ import time
 import sys
 
 from sfa.util.geniserver import GeniServer
-from sfa.util.geniclient import GeniClient
 from sfa.util.genitable import GeniTable
 from sfa.util.faults import *
 from sfa.util.storage import *
-
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol
+import sfa.util.soapprotocol as soapprotocol
+ 
 # GeniLight client support is optional
 try:
     from egeni.geniLight_client import *
@@ -109,7 +110,7 @@ class Registries(dict):
                 if client_type in ['geniclientlight'] and GeniClientLight:
                     self[hrn] = GeniClientLight(url, self.api.key_file, self.api.cert_file) 
                 else:    
-                    self[hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)
+                    self[hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
 
         # set up a connection to the local registry
         # connect to registry using GeniClient
@@ -118,5 +119,5 @@ class Registries(dict):
         url = 'http://%(address)s:%(port)s' % locals()
         local_registry = {'hrn': self.api.hrn, 'addr': address, 'port': port}
         self.interfaces.append(local_registry)
-        self[self.api.hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)            
+        self[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)            
     

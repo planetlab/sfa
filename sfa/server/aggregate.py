@@ -9,9 +9,10 @@ import xmlrpclib
 from types import StringTypes, ListType
 
 from sfa.util.geniserver import GeniServer
-from sfa.util.geniclient import GeniClient
 from sfa.util.storage import *
 from sfa.util.faults import *
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol
+import sfa.util.soapprotocol as soapprotocol
 
 # GeniLight client support is optional
 try:
@@ -100,7 +101,7 @@ class Aggregates(dict):
                 if client_type in ['geniclientlight'] and GeniClientLight:
                     self[hrn] = GeniClientLight(url, self.api.key_file, self.api.cert_file)
                 else:
-                    self[hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)
+                    self[hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
 
         # set up a connection to the local registry
         # connect to registry using GeniClient
@@ -109,6 +110,6 @@ class Aggregates(dict):
         url = 'http://%(address)s:%(port)s' % locals()
         local_aggregate = {'hrn': self.api.hrn, 'addr': address, 'port': port}
         self.interfaces.append(local_aggregate) 
-        self[self.api.hrn] = GeniClient(url, self.api.key_file, self.api.cert_file)
+        self[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
 
 
