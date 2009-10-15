@@ -45,6 +45,10 @@ class Auth:
         # make sure the client_gid is not blank
         if not self.client_gid:
             raise MissingCallerGID(self.client_cred.get_subject())
+       
+        # validate the client cert if it exists
+        if peer_cert:
+            self.verifyPeerCert()                   
 
         # make sure the client is allowed to perform the operation
         if operation:
