@@ -205,8 +205,13 @@ def main():
         record = existing_records[(record_hrn, type)]
         # if this is the interface name dont do anything
         if record_hrn == import_auth or record['peer_authority']:
-            continue    
-        
+            continue
+        # dont delete vini's internet2 placeholdder record
+        # normally this would be deleted becuase it does not have a plc record 
+        if ".vini" in import_auth and import_auth.endswith('vini') and \
+           record_hrn.endswith("internet2"):     
+            continue
+
         found = False
         
         if type == 'authority':    
