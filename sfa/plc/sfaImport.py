@@ -210,11 +210,11 @@ class sfaImport:
         # sites only
         if ".vini" in parent_hrn and parent_hrn.endswith('vini'):
             if sitename.startswith("ii"):
-                sitename = sitename.replace("ii", "")
+                #sitename = sitename.replace("ii", "")
                 hrn = ".".join([parent_hrn, "internet2", sitename])
             elif sitename.startswith("nlr"):
+                #sitename = sitename.replace("nlr", "")
                 hrn = ".".join([parent_hrn, "internet2", sitename])
-                sitename = sitename.replace("nlr", "")
 
         trace("Import_Site: importing site " + hrn)
 
@@ -235,6 +235,8 @@ class sfaImport:
             existing_record = existing_record[0]
             auth_record['record_id'] = existing_record['record_id']
             table.update(auth_record)
+
+        return hrn
 
 
     def delete_record(self, hrn, type):

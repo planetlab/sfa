@@ -157,7 +157,7 @@ def main():
         # but its not a site record
         if site_hrn not in existing_hrns or \
            (site_hrn, 'authority') not in existing_records:
-            sfaImporter.import_site(import_auth, site)
+            site_hrn = sfaImporter.import_site(import_auth, site)
              
         # import node records
         for node_id in site['node_ids']:
