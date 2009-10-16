@@ -42,8 +42,8 @@ class register(Method):
         # authenticate the caller's request_hash. Let just get the caller's gid
         # from the cred and authenticate using that 
         client_gid = Credential(string=cred).get_gid_caller()
-        client_gid_str = client_gid.save_to_string()
-        self.api.auth.authenticateGid(cred, [cred, record_dict], request_hash)
+        client_gid_str = client_gid.save_to_string(save_parents=True)
+        self.api.auth.authenticateGid(client_gid_str, [cred], request_hash)
         self.api.auth.check(cred, "register")
         if caller_cred==None:
 	        caller_cred=cred

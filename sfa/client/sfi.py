@@ -508,11 +508,14 @@ class Sfi:
     # removed named registry record
     #   - have to first retrieve the record to be removed
     def remove(self,opts, args):
-       auth_cred = self.get_auth_cred()
+       auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
+       hrn = args[0]
        type = opts.type 
        if type in ['all']:
-           type = '*'                   
-       return self.registry.remove(auth_cred, type, args[0])
+           type = '*'
+       arg_list = [auth_cred, type, hrn]
+       request_hash = self.key.compute_hash(arg_list)                   
+       return self.registry.remove(auth_cred, type, hrn, request_hash)
     
     # add named registry record
     def add(self,opts, args):
@@ -520,8 +523,8 @@ class Sfi:
        record_filepath = args[0]
        rec_file = self.get_record_file(record_filepath)
        record = self.load_record_from_file(rec_file).as_dict()
-       request_hash = self.key.compute_hash([auth_cred, record])
-   
+       arg_list = [auth_cred]
+       request_hash = self.key.compute_hash(arg_list)
        return self.registry.register(auth_cred, record, request_hash)
     
     # update named registry entry
@@ -529,28 +532,31 @@ class Sfi:
        user_cred = self.get_user_cred()
        rec_file = self.get_record_file(args[0])
        record = self.load_record_from_file(rec_file)
-       if record.get_type() == "user":
+       if record['type'] == "user":
            if record.get_name() == user_cred.get_gid_object().get_hrn():
-              cred = user_cred
+              cred = user_cred.save_to_string(save_parents=True)
            else:
-              cred = self.get_auth_cred()
-       elif record.get_type() in ["slice"]:
+              cred = self.get_auth_cred().save_to_string(save_parents=True)
+       elif record['type'] in ["slice"]:
            try:
-               cred = self.get_slice_cred(record.get_name())
+               cred = self.get_slice_cred(record.get_name()).save_to_string(save_parents=True)
            except ServerException, e:
                # XXX smbaker -- once we have better error return codes, update this
                # to do something better than a string compare
                if "Permission error" in e.args[0]:
-                   cred = self.get_auth_cred()
+                   cred = self.get_auth_cred().save_to_string(save_parents=True)
                else:
                    raise
        elif record.get_type() in ["authority"]:
-           cred = self.get_auth_cred()
+           cred = self.get_auth_cred().save_to_string(save_parents=True)
        elif record.get_type() == 'node':
-            cred = self.get_auth_cred()
+           cred = self.get_auth_cred().save_to_string(save_parents=True)
        else:
            raise "unknown record type" + record.get_type()
-       return self.registry.update(cred, record)
+       record = record.as_dict()
+       arg_list = [cred]  
+       request_hash = self.key.compute_hash(arg_list)
+       return self.registry.update(cred, record, request_hash)
    
     
     def aggregates(self, opts, args):
