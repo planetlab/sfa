@@ -209,7 +209,7 @@ class sfaImport:
         # internet2 nodes. This is a special operation for some vini
         # sites only
         if ".vini" in parent_hrn and parent_hrn.endswith('vini'):
-            if sitename.startswith("ii"):
+            if sitename.startswith("i2"):
                 #sitename = sitename.replace("ii", "")
                 hrn = ".".join([parent_hrn, "internet2", sitename])
             elif sitename.startswith("nlr"):
