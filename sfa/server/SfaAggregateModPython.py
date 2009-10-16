@@ -13,6 +13,7 @@ import xmlrpclib
 from mod_python import apache
 
 from sfa.plc.api import GeniAPI
+from sfa.util.debug import log
 
 api = GeniAPI(interface='aggregate')
 
