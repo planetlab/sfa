@@ -95,9 +95,10 @@ class Sfi:
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
-       self.slicemgr = GeniClient(sm_url, key_file, cert_file, self.options.protocol)
+       #self.slicemgr = GeniClient(sm_url, key_file, cert_file, self.options.protocol)
        #self.registry = GeniClient(reg_url, key_file, cert_file, self.options.protocol)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file)  
+       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file)  
        return
     
     #
