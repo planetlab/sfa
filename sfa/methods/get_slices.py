@@ -29,5 +29,5 @@ class get_slices(Method):
         self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, 'listslices')
         slices = Slices(self.api)
-        slices.refresh()    
+        slices.refresh()
         return slices['hrn']
