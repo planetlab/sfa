@@ -560,7 +560,7 @@ class Topology:
     """
     def toxml(self, hrn = None):
         xml = """<?xml version="1.0"?>
-<Rspec xmlns="http://www.planet-lab.org/sfa/rspec/" name="vini">
+<RSpec xmlns="http://www.planet-lab.org/sfa/rspec/" name="vini">
     <Capacity>
         <NetSpec name="physical_topology">"""
 
@@ -616,7 +616,7 @@ class Topology:
         xml += """
         </NetSpec>
     </Request>
-</Rspec>"""
+</RSpec>"""
 
         # Remove all leading whitespace and newlines
         lines = xml.split("\n")
