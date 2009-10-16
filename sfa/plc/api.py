@@ -17,6 +17,7 @@ from sfa.util.faults import *
 from sfa.util.debug import *
 from sfa.trust.rights import *
 from sfa.trust.credential import *
+from sfa.trust.certificate import *
 from sfa.util.misc import *
 from sfa.util.sfalogging import *
 from sfa.util.genitable import *
@@ -115,7 +116,9 @@ class GeniAPI:
         self.auth = Auth(peer_cert)
         self.interface = interface
         self.key_file = key_file
+        self.key = Keypair(filename=self.key_file)
         self.cert_file = cert_file
+        self.cert = Certificate(filename=self.cert_file)
         self.credential = None
         
         # Initialize the PLC shell only if SFA wraps a myPLC
@@ -183,10 +186,16 @@ class GeniAPI:
             from sfa.server.registry import Registries
             registries = Registries(self)
             registry = registries[self.hrn]
-            self_cred = registry.get_credential(None, type, self.hrn)
-            cred = registry.get_credential(self_cred, type, self.hrn)
+            # get self credential
+            arg_list = [None,type,self.hrn]
+            request_hash=self.key.compute_hash(arg_list)
+            self_cred = registry.get_credential(None, type, self.hrn, request_hash)
+            # get credential
+            arg_list = [self_cred,type,self.hrn]
+            request_hash=self.key.compute_hash(arg_list)
+            cred = registry.get_credential(self_cred, type, self.hrn, request_hash)
             cred.save_to_file(cred_filename, save_parents=True)
-            return cred
+            return cred.save_to_string(save_parents=True)
 
     def getCredentialFromLocalRegistry(self):
         """
@@ -222,7 +231,7 @@ class GeniAPI:
         new_cred.encode()
         new_cred.sign()
 
-        return new_cred
+        return new_cred.save_to_string(save_parents=True)
    
 
     def loadCredential (self):
