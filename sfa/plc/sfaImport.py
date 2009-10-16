@@ -232,7 +232,7 @@ class sfaImport:
             table.insert(auth_record)
         else:
             trace("Import: %s exists, updating " % hrn)
-            existing_record = existing_record[0]
+            existing_record = existing_records[0]
             auth_record['record_id'] = existing_record['record_id']
             table.update(auth_record)
 
