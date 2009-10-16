@@ -22,12 +22,18 @@ class start_slice(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name of slice to instantiate"),
+        Parameter(str, "Request hash")
         ]
 
     returns = [Parameter(int, "1 if successful")]
     
-    def call(self, cred, hrn):
-       
+    def call(self, cred, hrn, request_hash):
+        # This cred will be an slice cred, not a user, so we cant use it to
+        # authenticate the caller's request_hash. Let just get the caller's gid
+        # from the cred and authenticate using that
+        client_gid = Credential(string=cred).get_gid_caller()
+        client_gid_str = client_gid.save_to_string(save_parents=True)
+        self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'startslice')
         slices = Slices(self.api)
         slices.start_slice(hrn)

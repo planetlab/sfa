@@ -30,14 +30,21 @@ class create_slice(Method):
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name of slice to instantiate"),
         Parameter(str, "Resource specification"),
+        Parameter(str, "Request hash")
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, requested_rspec, caller_cred=None):
+    def call(self, cred, hrn, requested_rspec, request_hash, caller_cred=None):
         if caller_cred==None:
             caller_cred=cred
         
+        # This cred will be an slice cred, not a user, so we cant use it to
+        # authenticate the caller's request_hash. Let just get the caller's gid
+        # from the cred and authenticate using that
+        client_gid = Credential(string=cred).get_gid_caller()
+        client_gid_str = client_gid.save_to_string(save_parents=True)
+        self.api.auth.authenticateGid(client_gid_str, [cred, hrn, requested_rspec], request_hash)
         self.api.auth.check(cred, 'createslice')
 
         #log the call

@@ -31,12 +31,14 @@ class create_gid(Method):
         Parameter(str, "Human readable name (hrn)"),
         Mixed(Parameter(str, "Unique identifier for new GID (uuid)"),
               Parameter(None, "Unique identifier (uuid) not specified")),   
-        Parameter(str, "public-key string")
+        Parameter(str, "public-key string"),
+        Parameter(str, "Request hash"),
         ]
 
     returns = Parameter(str, "String represeneation of a GID object")
     
-    def call(self, cred, hrn, uuid, pubkey_str):
+    def call(self, cred, hrn, uuid, request_hash, pubkey_str):
+        self.api.auth.authenticateCred(cred, [cred, hrn, uuid], request_hash)
         self.api.auth.check(cred, "getcredential")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(hrn)

@@ -23,13 +23,14 @@ class get_registries(Method):
         Parameter(str, "Credential string"),
         
         Mixed(Parameter(str, "Human readable name (hrn)"),
-              Parameter(None, "hrn not specified"))  
+              Parameter(None, "hrn not specified")),
+        Parameter(str, "Request hash")  
         ]
 
     returns = [Parameter(dict, "Registry interface information")]
     
-    def call(self, cred, hrn = None):
-       
+    def call(self, cred, hrn = None, request_hash=None):
+        self.api.auth.authenticateCred(cred, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'list')
         registries = Registries(self.api)
         hrn_list = []

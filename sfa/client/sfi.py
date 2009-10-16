@@ -560,22 +560,24 @@ class Sfi:
    
     
     def aggregates(self, opts, args):
-        user_cred = self.get_user_cred()
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = None
         if args: 
             hrn = args[0]
-        
-        result = self.registry.get_aggregates(user_cred, hrn)
+        arg_list = [user_cred, hrn]  
+        request_hash = self.key.compute_hash(arg_list)
+        result = self.registry.get_aggregates(user_cred, hrn, request_hash)
         self.display_list(result)
         return 
 
     def registries(self, opts, args):
-        user_cred = self.get_user_cred()
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = None
         if args:
             hrn = args[0]
-        
-        result = self.registry.get_registries(user_cred, hrn)
+        arg_list = [user_cred, hrn]  
+        request_hash = self.key.compute_hash(arg_list)
+        result = self.registry.get_registries(user_cred, hrn, request_hash)
         self.display_list(result)
         return
  
@@ -594,32 +596,40 @@ class Sfi:
     
     # show rspec for named slice
     def resources(self,opts, args):
-       user_cred = self.get_user_cred()
-       server = self.slicemgr
-       if opts.aggregate:
-            aggregates = self.registry.get_aggregates(user_cred, opts.aggregate)
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        server = self.slicemgr
+        if opts.aggregate:
+            agg_hrn = opts.aggregate
+            arg_list = [user_cred, arg_hrn]
+            request_hash = self.key.compute_hash(arg_list)
+            aggregates = self.registry.get_aggregates(user_cred, agg_hrn, request_hash)
             if not aggregates:
-                raise Exception, "No such aggregate %s" % opts.aggregate
+                raise Exception, "No such aggregate %s" % agg_hrn
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])     
-            server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
-       if args:
-            slice_cred = self.get_slice_cred(args[0])
-            result = server.get_resources(slice_cred, args[0])
-       else:
-            result = server.get_resources(user_cred)
-       format = opts.format
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
+        if args:
+            cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
+            hrn = args[0]
+        else:
+            cred = user_cred
+            hrn = None
+
+        arg_list = [cred, hrn]
+        request_hash = self.key.compute_hash(arg_list)  
+        result = server.get_resources(cred, hrn, request_hash)
+        format = opts.format
        
-       self.display_rspec(result, format)
-       if (opts.file is not None):
-          self.save_rspec_to_file(result, opts.file)
-       return
+        self.display_rspec(result, format)
+        if (opts.file is not None):
+            self.save_rspec_to_file(result, opts.file)
+        return
     
     # created named slice with given rspec
     def create(self,opts, args):
        slice_hrn = args[0]
        user_cred = self.get_user_cred()
-       slice_cred = self.get_slice_cred(slice_hrn)
+       slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
        rspec_file = self.get_rspec_file(args[1])
        rspec=open(rspec_file).read()
        server = self.slicemgr
@@ -630,32 +640,41 @@ class Sfi:
            aggregate = aggregates[0]
            url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
            server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
-       return server.create_slice(slice_cred, slice_hrn, rspec)
+       arg_list = [slice_cred, slice_hrn, rspec]
+       request_hash = self.key.compute_hash(arg_list) 
+       return server.create_slice(slice_cred, slice_hrn, rspec, request_hash)
     
     # delete named slice
     def delete(self,opts, args):
-       slice_hrn = args[0]
-       slice_cred = self.get_slice_cred(slice_hrn)
-       
-       return self.slicemgr.delete_slice(slice_cred, slice_hrn)
+        slice_hrn = args[0]
+        slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
+        arg_list = [slice_cred, slice_hrn]
+        request_hash = self.key.compute_hash(arg_list) 
+        return self.slicemgr.delete_slice(slice_cred, slice_hrn, request_hash)
     
     # start named slice
     def start(self,opts, args):
-       slice_hrn = args[0]
-       slice_cred = self.get_slice_cred(args[0])
-       return self.slicemgr.start_slice(slice_cred, slice_hrn)
+        slice_hrn = args[0]
+        slice_cred = self.get_slice_cred(args[0])
+        arg_list = [slice_cred, slice_hrn]
+        request_hash = self.key.compute_hash(arg_list)
+        return self.slicemgr.start_slice(slice_cred, slice_hrn, request_hash)
     
     # stop named slice
     def stop(self,opts, args):
-       slice_hrn = args[0]
-       slice_cred = self.get_slice_cred(args[0])
-       return self.slicemgr.stop_slice(slice_cred, slice_hrn)
+        slice_hrn = args[0]
+        slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
+        arg_list = [slice_cred, slice_hrn]
+        request_hash = self.key.compute_hash(arg_list)
+        return self.slicemgr.stop_slice(slice_cred, slice_hrn, request_hash)
     
     # reset named slice
     def reset(self,opts, args):
-       slice_hrn = args[0]
-       slice_cred = self.get_slice_cred(args[0])
-       return self.slicemgr.reset_slice(slice_cred, slice_hrn)
+        slice_hrn = args[0]
+        slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
+        arg_list = [slice_cred, slice_hrn]
+        request_hash = self.key.compute_hash(arg_list)
+        return self.slicemgr.reset_slice(slice_cred, slice_hrn, request_hash)
     
     #
     #

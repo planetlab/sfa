@@ -27,14 +27,21 @@ class get_resources(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Mixed(Parameter(str, "Human readable name (hrn)"),
-              Parameter(None, "hrn not specified"))
+              Parameter(None, "hrn not specified")),
+        Parameter(str, "Request hash")
         ]
 
     returns = Parameter(str, "String representatin of an rspec")
     
-    def call(self, cred, hrn=None, caller_cred=None):
+    def call(self, cred, hrn=None, request_hash = None, caller_cred=None):
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
 
+        # This cred will be an authority cred, not a user, so we cant use it to 
+        # authenticate the caller's request_hash. Let just get the caller's gid
+        # from the cred and authenticate using that 
+        client_gid = Credential(string=cred).get_gid_caller()
+        client_gid_str = client_gid.save_to_string(save_parents=True)
+        self.api.auth.authenticateGid(client_gid_str, [cred,hrn], request_hash)
         self.api.auth.check(cred, 'listnodes')
         if caller_cred==None:
             caller_cred=cred
