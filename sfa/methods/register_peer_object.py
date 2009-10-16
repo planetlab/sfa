@@ -32,11 +32,13 @@ class register_peer_object(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(dict, "Record dictionary containing record fields")
+        Parameter(str, "Request hash")
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record_dict, caller_cred=None):
+    def call(self, cred, record_dict, request_hash, caller_cred=None):
+        self.api.auth.authenticateCred(cred, [cred], request_hash)
         self.api.auth.check(cred, "register")
         if caller_cred==None:
 	        caller_cred=cred

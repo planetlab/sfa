@@ -27,16 +27,17 @@ class remove_peer_object(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(dict, "Record dictionary")
+        Parameter(str, "Request hash"),
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record, caller_cred=None):
+    def call(self, cred, record, request_hash, caller_cred=None):
         if caller_cred==None:
             caller_cred=cred
         #log the call
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), record['hrn'], self.name))
-        
+        self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, "remove")
 
         # Only allow the local interface or record owner to delete peer_records 
