@@ -589,10 +589,12 @@ class Sfi:
 
     # list instantiated slices
     def slices(self,opts, args):
-       user_cred = self.get_user_cred()
-       results = self.slicemgr.get_slices(user_cred)
-       self.display_list(results)
-       return
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        arg_list = [user_cred]
+        request_hash = self.key.compute_hash(arg_list)
+        results = self.slicemgr.get_slices(user_cred, request_hash)
+        self.display_list(results)
+        return
     
     # show rspec for named slice
     def resources(self,opts, args):
