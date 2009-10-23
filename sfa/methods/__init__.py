@@ -8,6 +8,7 @@ get_credential
 get_gid
 get_registries
 get_resources
+get_self_credential
 get_slices
 get_ticket
 list
