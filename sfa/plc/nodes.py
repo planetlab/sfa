@@ -114,12 +114,11 @@ class Nodes(SimpleStorage):
         for aggregate in aggregates:
             try:
                 caller_cred = self.caller_cred
-                cred_str = credential.save_to_string(save_parents=True)
-                arg_list = [cred_str, hrn]
+                arg_list = [credential, hrn]
                 request_hash = self.api.key.compute_hash(arg_list)
                 
                 # get the rspec from the aggregate
-                agg_rspec = aggregates[aggregate].get_resources(cred_str, hrn, request_hash, caller_cred)
+                agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, caller_cred)
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
                 networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
