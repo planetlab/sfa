@@ -50,7 +50,8 @@ def cleanup_string(str):
 
 class sfaImport:
 
-    def __init__(self):
+    def __init__(self, logger=None):
+        self.logger = logger
         self.AuthHierarchy = Hierarchy()
         self.config = Config()
         self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))
@@ -75,6 +76,7 @@ class sfaImport:
         
         # if auth records for this hrn dont exist, create it
         if not AuthHierarchy.auth_exists(hrn):
+            trace("Import: creating top level authorites", self.logger)
             AuthHierarchy.create_auth(hrn)
         
 
@@ -95,7 +97,7 @@ class sfaImport:
         if not auth_record:
             auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
             auth_record['authority'] = get_authority(auth_record['hrn'])
-            trace("  inserting authority record for " + hrn)
+            trace("Import: inserting authority record for " + hrn, self.logger)
             table.insert(auth_record)
 
 
@@ -107,7 +109,7 @@ class sfaImport:
         if len(hrn) > 64:
             hrn = hrn[:64]
 
-        trace("Import: importing person " + hrn)
+        trace("Import: importing person " + hrn, self.logger)
         key_ids = []
         if 'key_ids' in person and person['key_ids']:
             key_ids = person["key_ids"]
@@ -120,7 +122,7 @@ class sfaImport:
                 pkey = Keypair(create=True)
         else:
             # the user has no keys
-            trace("   person " + hrn + " does not have a PL public key")
+            trace("   person " + hrn + " does not have a PL public key", self.logger)
             # if a key is unavailable, then we still need to put something in the
             # user's GID. So make one up.
             pkey = Keypair(create=True)
@@ -134,7 +136,7 @@ class sfaImport:
         if not existing_records:
             table.insert(person_record)
         else:
-            trace("Import: %s exists, updating " % hrn)
+            trace("Import: %s exists, updating " % hrn, self.logger)
             existing_record = existing_records[0]
             person_record['record_id'] = existing_record['record_id']
             table.update(person_record)
@@ -145,11 +147,11 @@ class sfaImport:
         slicename = cleanup_string(slicename)
 
         if not slicename:
-            error("Import_Slice: failed to parse slice name " + slice['name'])
+            error("Import_Slice: failed to parse slice name " + slice['name'], self.logger)
             return
 
         hrn = parent_hrn + "." + slicename
-        trace("Import: importing slice " + hrn)
+        trace("Import: importing slice " + hrn, self.logger)
 
         pkey = Keypair(create=True)
         slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
@@ -160,7 +162,7 @@ class sfaImport:
         if not existing_records:
             table.insert(slice_record)
         else:
-            trace("Import: %s exists, updating " % hrn)
+            trace("Import: %s exists, updating " % hrn, self.logger)
             existing_record = existing_records[0]
             slice_record['record_id'] = existing_record['record_id']
             table.update(slice_record)
@@ -171,11 +173,11 @@ class sfaImport:
         nodename = cleanup_string(nodename)
         
         if not nodename:
-            error("Import_node: failed to parse node name " + node['hostname'])
+            error("Import_node: failed to parse node name " + node['hostname'], self.logger)
             return
 
         hrn = parent_hrn + "." + nodename
-        trace("Import: importing node " + hrn)
+        trace("Import: importing node " + hrn, self.logger)
         # ASN.1 will have problems with hrn's longer than 64 characters
         if len(hrn) > 64:
             hrn = hrn[:64]
@@ -190,7 +192,7 @@ class sfaImport:
         if not existing_records:
             table.insert(node_record)
         else:
-            trace("Import: %s exists, updating " % hrn)
+            trace("Import: %s exists, updating " % hrn, self.logger)
             existing_record = existing_records[0]
             node_record['record_id'] = existing_record['record_id']
             table.update(node_record)
@@ -216,7 +218,7 @@ class sfaImport:
                 #sitename = sitename.replace("nlr", "")
                 hrn = ".".join([parent_hrn, "internet2", sitename])
 
-        trace("Import_Site: importing site " + hrn)
+        trace("Import: importing site " + hrn, self.logger)
 
         # create the authority
         if not AuthHierarchy.auth_exists(hrn):
@@ -231,7 +233,7 @@ class sfaImport:
         if not existing_records:
             table.insert(auth_record)
         else:
-            trace("Import: %s exists, updating " % hrn)
+            trace("Import: %s exists, updating " % hrn, self.logger)
             existing_record = existing_records[0]
             auth_record['record_id'] = existing_record['record_id']
             table.update(auth_record)
@@ -244,4 +246,5 @@ class sfaImport:
         table = GeniTable()
         record_list = table.find({'type': type, 'hrn': hrn})
         for record in record_list:
+            trace("Import: Removing record %s %s" % (type, hrn), self.logger)
             table.remove(record)        

@@ -20,12 +20,12 @@
 import getopt
 import sys
 import tempfile
-
+import logging.handlers
+import logging
 from sfa.util.record import *
 from sfa.util.genitable import GeniTable
 from sfa.util.misc import *
 from sfa.util.config import Config
-from sfa.util.report import trace, error
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
@@ -33,8 +33,7 @@ from sfa.plc.api import *
 from sfa.util.geniclient import *
 from sfa.trust.gid import create_uuid
 from sfa.plc.sfaImport import *
-
-
+from sfa.util.report import trace, error
 
 def process_options():
    global hrn
@@ -62,6 +61,15 @@ def save_keys(filename, keys):
     f.close()
 
 def main():
+    # setup the logger
+    LOGFILE='/var/log/sfa_import_plc.log'
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(message)s',
+                        filename=LOGFILE)
+    rotate_handler = logging.handlers.RotatingFileHandler(LOGFILE, maxBytes=1000000, backupCount=5) 
+    logger = logging.getLogger()
+    logger.addHandler(rotate_handler)
+    
     process_options()
     config = Config()
     if not config.SFA_REGISTRY_ENABLED:
@@ -69,7 +77,7 @@ def main():
     root_auth = config.SFA_REGISTRY_ROOT_AUTH
     level1_auth = config.SFA_REGISTRY_LEVEL1_AUTH
     keys_filename = config.config_path + os.sep + 'person_keys.py' 
-    sfaImporter = sfaImport()
+    sfaImporter = sfaImport(logger)
     shell = sfaImporter.shell
     plc_auth = sfaImporter.plc_auth 
     AuthHierarchy = sfaImporter.AuthHierarchy
@@ -81,7 +89,6 @@ def main():
     if not level1_auth or level1_auth in ['']:
         level1_auth = None
     
-    print "Import: creating top level authorities"
     if not level1_auth:
         sfaImporter.create_top_level_auth_records(root_auth)
         import_auth = root_auth
@@ -91,7 +98,7 @@ def main():
         sfaImporter.create_top_level_auth_records(level1_auth)
         import_auth = level1_auth
 
-    print "Import: adding", import_auth, "to trusted list"
+    trace("Import: adding" + import_auth + "to trusted list", logger)
     authority = AuthHierarchy.get_auth_info(import_auth)
     TrustedRoots.add_gid(authority.get_gid_object())
 
@@ -259,12 +266,11 @@ def main():
             continue 
         
         if not found:
-            trace("Import: Removing %s %s" % (type,  record_hrn))
             record_object = existing_records[(record_hrn, type)]
             sfaImporter.delete_record(record_hrn, type) 
                                    
     # save pub keys
-    trace('saving current pub keys')
+    trace('Import: saving current pub keys', logger)
     save_keys(keys_filename, person_keys)                
         
 if __name__ == "__main__":
