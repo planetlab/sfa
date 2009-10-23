@@ -48,7 +48,7 @@ class Auth:
        
         # validate the client cert if it exists
         if self.peer_cert:
-            self.verifyPeerCert()                   
+            self.verifyPeerCert(self.peer_cert, self.client_gid)                   
 
         # make sure the client is allowed to perform the operation
         if operation:
@@ -64,11 +64,19 @@ class Auth:
 
         return True
 
-    def verifyPeerCert(self):
+    def verifyPeerCert(self, cert, gid):
         # make sure the client_gid matches client's certificate
-        peer_cert = self.peer_cert
-        if not peer_cert.is_pubkey(self.client_gid.get_pubkey()):
-            raise ConnectionKeyGIDMismatch(self.client_gid.get_subject())            
+        if not cert:
+            peer_cert = self.peer_cert
+        else:
+            peer_cert = cert
+
+        if not gid:
+            peer_gid = self.client_gid
+        else:
+            peer_gid = gid
+        if not peer_cert.is_pubkey(peer_gid.get_pubkey()):
+            raise ConnectionKeyGIDMismatch(peer_gid.get_subject())            
 
     def verifyGidRequestHash(self, gid, hash, arglist):
         key = gid.get_pubkey()
