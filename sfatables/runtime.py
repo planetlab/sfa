@@ -26,7 +26,8 @@ class SFATablesRules:
         return
 
     def apply(self, rspec):
-        intermediate_rspec = rspec
+        doc = libxml2.parseDoc(rspec)
+        intermediate_rspec = doc
         for rule in self.sorted_rule_list:
             intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
             if (rule.terminal):

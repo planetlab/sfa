@@ -13,7 +13,7 @@ class XMLRule:
     processors = {'match':None,'target':None}
     context = {'match':None,'target':None}
 
-    def apply_processor(self, type, rspec, output_xpath_filter=None):
+    def apply_processor(self, type, doc, output_xpath_filter=None):
         processor = self.processors[type]
 
         # XXX TO CLEAN UP
@@ -22,7 +22,6 @@ class XMLRule:
 
         styledoc = libxml2.parseFile(filepath)
         style = libxslt.parseStylesheetDoc(styledoc)
-        doc = libxml2.parseDoc(rspec)
         result = style.applyStylesheet(doc, None)
         if (output_xpath_filter):
             p = result.xpathNewContext()
@@ -30,38 +29,38 @@ class XMLRule:
             if (xpath_result == []):
                 raise Exception("Could not apply processor %s."%processor)
 
-            stylesheet_result = xpath_result[0].content
+            stylesheet_result = xpath_result
             p.xpathFreeContext()
         else:
-            stylesheet_result = style.saveResultToString(result)
+            stylesheet_result = result #style.saveResultToString(result)
 
         style.freeStylesheet()
-        doc.freeDoc()
-        result.freeDoc()
+        #doc.freeDoc()
+        #result.freeDoc()
 
         return stylesheet_result
 
-    def wrap_up(self, rspec):
+    def wrap_up(self, doc):
         filepath = os.path.join(sfatables_config, 'processors', self.final_processor)
 
         if not os.path.exists(filepath):
             # TODO: final_processor is not there yet
-            return rspec
+            return doc#rspec
 
         styledoc = libxml2.parseFile(filepath)
         style = libxslt.parseStylesheetDoc(styledoc)
-        doc = libxml2.parseDoc(rspec)
+        #doc = libxml2.parseDoc(rspec)
         result = style.applyStylesheet(doc, None)
-        stylesheet_result = style.saveResultToString(result)
+        stylesheet_result = result #style.saveResultToString(result)
         style.freeStylesheet()
-        doc.freeDoc()
-        result.freeDoc()
+        #doc.freeDoc()
+        #result.freeDoc()
 
         return stylesheet_result
 
     def match(self, rspec):
         match_result = self.apply_processor('match',rspec,"//result/@verdict") 
-        return (match_result=='True')
+        return (match_result[0].content=='True')
 
     def target(self, rspec):
         target_result = self.apply_processor('target',rspec,None)

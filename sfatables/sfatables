@@ -36,7 +36,6 @@ def load_xml_extensions(module, ext_dir):
         # get the filename and get rid of the ".xml" extension
         ext_name = os.path.extsep.join(os.path.splitext(os.path.basename(ext))[:-1])
         ext_dict[ext_name]=module
-        print "Loaded:", ext_name, ext
 
     return ext_dict
 
