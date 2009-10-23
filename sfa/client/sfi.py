@@ -210,9 +210,12 @@ class Sfi:
           return slice_cred
        else:
           # bootstrap slice credential from user credential
-          user_cred = self.get_user_cred()
-          slice_cred = self.registry.get_credential(user_cred, "slice", name)
+          user_cred = self.get_user_cred().save_to_string(save_parents=True)
+          arg_list = [user_cred, "slice", name]
+          request_hash = self.key.compute_hash(arg_list)  
+          slice_cred_str = self.registry.get_credential(user_cred, "slice", name, request_hash)
           if slice_cred:
+             slice_cred = Credential(string=slice_cred_str)
              slice_cred.save_to_file(file, save_parents=True)
              if self.options.verbose:
                 print "Writing slice credential to", file
