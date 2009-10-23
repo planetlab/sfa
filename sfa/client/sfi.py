@@ -159,23 +159,24 @@ class Sfi:
             return gid       
  
     def get_user_cred(self):
-       file = os.path.join(self.options.sfi_dir, self.get_leaf(self.user) + ".cred")
-       if (os.path.isfile(file)):
-          user_cred = Credential(filename=file)
-          return user_cred
-       else:
-          # bootstrap user credential
-          request_hash = self.key.compute_hash([None, "user", self.user])
-          user_cred = self.registry.get_credential(None, "user", self.user, request_hash)
-          if user_cred:
-             cred = Credential(string=user_cred)
-             cred.save_to_file(file, save_parents=True)
-             if self.options.verbose:
-                print "Writing user credential to", file
-             return cred
-          else:
-             print "Failed to get user credential"
-             sys.exit(-1)
+        file = os.path.join(self.options.sfi_dir, self.get_leaf(self.user) + ".cred")
+        if (os.path.isfile(file)):
+            user_cred = Credential(filename=file)
+            return user_cred
+        else:
+            # bootstrap user credential
+            cert_string = self.cert.save_to_string(save_parents=True)
+            request_hash = self.key.compute_hash([cert_string, "user", self.user])
+            user_cred = self.registry.get_self_credential(cert_string, "user", self.user, request_hash)
+            if user_cred:
+               cred = Credential(string=user_cred)
+               cred.save_to_file(file, save_parents=True)
+               if self.options.verbose:
+                    print "Writing user credential to", file
+               return cred
+            else:
+               print "Failed to get user credential"
+               sys.exit(-1)
     
     def get_auth_cred(self):
     
