@@ -8,6 +8,7 @@ from sfa.util.genitable import GeniTable
 from sfa.util.geniclient import GeniClient
 from sfa.plc.api import GeniAPI
 from sfa.util.config import Config
+from sfa.trust.certificate import Keypair
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.report import trace, error
 from sfa.server.registry import Registries
@@ -25,6 +26,7 @@ def main():
     sfa_key_path = sfa_hierarchy.basedir
     key_file = os.path.join(sfa_key_path, "server.key")
     cert_file = os.path.join(sfa_key_path, "server.cert")
+    key = Keypair(filename=key_file) 
 
     # get a connection to our local sfa registry
     # and a valid credential
@@ -45,11 +47,16 @@ def main():
         peer_auth = peer_record['peer_authority']
         if peer_auth in registries:
             try:
-                records = registries[peer_auth].resolve(credential, peer_record['hrn'])
+                peer_record_hrn = peer_record['hrn']
+                arg_list = [credential, peer_record_hrn]
+                request_hash = key.compute_hash(arg_list)
+                records = registries[peer_auth].resolve(credential, peer_record_hrn, request_hash)
             except ServerException:
                 # an exception will be thrown if the record doenst exist
                 # if so remove the record from the local registry
-                registries[sfa_api.hrn].remove_peer_object(credential, peer_record)
+                arg_list = [credential]
+                request_hash = key.compute_hash(arg_list) 
+                registries[sfa_api.hrn].remove_peer_object(credential, peer_record, request_hash)
             except:
 		traceback.print_exc()
 if __name__ == '__main__':
