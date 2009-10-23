@@ -60,7 +60,7 @@ class get_credential(Method):
 
         rights = self.api.auth.determine_user_rights(self.api.auth.client_cred, record)
         if rights.is_empty():
-            raise PermissionError(self.api.auth.client_cred.get_gid_object().get_hrn() + " has no rights to " + record.get_name())
+            raise PermissionError(self.api.auth.client_cred.get_gid_object().get_hrn() + " has no rights to " + record['name'])
 
         # TODO: Check permission that self.client_cred can access the object
 
