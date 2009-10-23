@@ -194,8 +194,10 @@ class GeniAPI:
             arg_list = [self_cred,type,self.hrn]
             request_hash=self.key.compute_hash(arg_list)
             cred = registry.get_credential(self_cred, type, self.hrn, request_hash)
-            cred.save_to_file(cred_filename, save_parents=True)
-            return cred.save_to_string(save_parents=True)
+            
+            # save cred to file
+            Credential(string=cred).save_to_file(cred_filename, save_parents=True)
+            return cred
 
     def getCredentialFromLocalRegistry(self):
         """
