@@ -170,7 +170,6 @@ class GeniAPI:
         else:
             return self.getCredentialFromRegistry()
     
-
     def getCredentialFromRegistry(self):
         """ 
         Get our credential from a remote registry using a geniclient connection
@@ -181,7 +180,7 @@ class GeniAPI:
         cred_filename = path + os.sep + filename
         try:
             credential = Credential(filename = cred_filename)
-            return credential
+            return credential.save_to_string(save_parents=True)
         except IOError:
             from sfa.server.registry import Registries
             registries = Registries(self)
