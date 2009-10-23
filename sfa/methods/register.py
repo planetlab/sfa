@@ -78,12 +78,6 @@ class register(Method):
         existing_records = table.find({'type': type, 'hrn': hrn})
         if existing_records:
             raise ExistingRecord(hrn)
-        else:
-            # We will update the pointer later
-            record['pointer'] = -1 
-            record.set_pointer(-1)
-            record_id = table.insert(record)
-            record['record_id'] = record_id
  
         if type in ["authority"]:
             # update the tree
@@ -106,6 +100,7 @@ class register(Method):
                 pointer = sites[0]['site_id']
 
             record.set_pointer(pointer)
+            record['pointer'] = pointer
 
         elif (type == "slice"):
             pl_record = self.api.geni_fields_to_pl_fields(type, hrn, record)
@@ -115,6 +110,7 @@ class register(Method):
             else:
                 pointer = slices[0]['slice_id']
             record.set_pointer(pointer)
+            record['pointer'] = pointer
 
         elif  (type == "user"):
             persons = self.api.plshell.GetPersons(self.api.plauth, [record['email']])
@@ -134,6 +130,7 @@ class register(Method):
             # What roles should this user have?
             self.api.plshell.AddRoleToPerson(self.api.plauth, 'user', pointer) 
             record.set_pointer(pointer)
+            record['pointer'] = pointer
             # Add the user's key
             if pub_key:
                 self.api.plshell.AddPersonKey(self.api.plauth, pointer, {'key_type' : 'ssh', 'key' : pub_key})
@@ -146,12 +143,14 @@ class register(Method):
                 pointer = self.api.plshell.AddNode(self.api.plauth, login_base, pl_record)
             else:
                 pointer = nodes[0]['node_id']
+            record['pointer'] = pointer
             record.set_pointer(pointer)
 
         else:
             raise UnknownGeniType(type)
 
-        table.update(record)
+        record_id = table.insert(record)
+        record['record_id'] = record_id
 
         # update membership for researchers, pis, owners, operators
         self.api.update_membership(None, record)
