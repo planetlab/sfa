@@ -32,12 +32,13 @@ class register(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(dict, "Record dictionary containing record fields"),
-        Parameter(str, "Request hash")
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(int, "String representation of gid object")
     
-    def call(self, cred, record_dict, request_hash, caller_cred=None):
+    def call(self, cred, record_dict, request_hash=None, caller_cred=None):
         # This cred will be an authority cred, not a user, so we cant use it to 
         # authenticate the caller's request_hash. Let just get the caller's gid
         # from the cred and authenticate using that 

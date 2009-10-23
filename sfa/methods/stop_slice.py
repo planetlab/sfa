@@ -22,12 +22,13 @@ class stop_slice(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name of slice to instantiate"),
-        Parameter(str, "Request hash")
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, request_hash):
+    def call(self, cred, hrn, request_hash=None):
         # This cred will be an slice cred, not a user, so we cant use it to
         # authenticate the caller's request_hash. Let just get the caller's gid
         # from the cred and authenticate using that

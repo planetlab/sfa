@@ -30,12 +30,13 @@ class create_slice(Method):
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name of slice to instantiate"),
         Parameter(str, "Resource specification"),
-        Parameter(str, "Request hash")
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, requested_rspec, request_hash, caller_cred=None):
+    def call(self, cred, hrn, requested_rspec, request_hash=None, caller_cred=None):
         if caller_cred==None:
             caller_cred=cred
         

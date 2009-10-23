@@ -24,7 +24,8 @@ class get_aggregates(Method):
         
         Mixed(Parameter(str, "Human readable name (hrn)"),
               Parameter(None, "hrn not specified")),
-        Parameter(str, "Request hash")  
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = [Parameter(dict, "Aggregate interface information")]

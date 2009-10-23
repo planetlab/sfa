@@ -26,12 +26,13 @@ class resolve(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name (hrn)"),
-        Parameter(str, "Request hash")
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, request_hash, caller_cred=None):
+    def call(self, cred, hrn, request_hash=None, caller_cred=None):
         
         self.api.auth.authenticateCred(cred, [cred, hrn], request_hash) 
         self.api.auth.check(cred, 'resolve')

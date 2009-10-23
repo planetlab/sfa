@@ -24,7 +24,8 @@ class get_registries(Method):
         
         Mixed(Parameter(str, "Human readable name (hrn)"),
               Parameter(None, "hrn not specified")),
-        Parameter(str, "Request hash")  
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = [Parameter(dict, "Registry interface information")]
@@ -46,4 +47,3 @@ class get_registries(Method):
             interfaces = [interface for interface in registries.interfaces if interface['hrn'] in hrn_list]
 
         return interfaces
-        return registries.interfaces

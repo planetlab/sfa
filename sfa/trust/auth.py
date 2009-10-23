@@ -101,16 +101,20 @@ class Auth:
             if object_gid:
                 object_gid.verify_chain(self.trusted_cert_list)
 
-    def authenticateGid(self, gidStr, argList, requestHash):
+    def authenticateGid(self, gidStr, argList, requestHash=None):
         gid = GID(string = gidStr)
         self.validateGid(gid)
-        self.verifyGidRequestHash(gid, requestHash, argList)
+        # request_hash is optional
+        if requestHash:
+            self.verifyGidRequestHash(gid, requestHash, argList)
         return gid
 
-    def authenticateCred(self, credStr, argList, requestHash):
+    def authenticateCred(self, credStr, argList, requestHash=None):
         cred = Credential(string = credStr)
         self.validateCred(cred)
-        self.verifyCredRequestHash(cred, requestHash, argList)
+        # request hash is optional
+        if requestHash:
+            self.verifyCredRequestHash(cred, requestHash, argList)
         return cred
 
     def authenticateCert(self, certStr, requestHash):

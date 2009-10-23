@@ -28,7 +28,8 @@ class get_resources(Method):
         Parameter(str, "Credential string"),
         Mixed(Parameter(str, "Human readable name (hrn)"),
               Parameter(None, "hrn not specified")),
-        Parameter(str, "Request hash")
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(str, "String representatin of an rspec")

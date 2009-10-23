@@ -26,13 +26,14 @@ class remove_peer_object(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(dict, "Record dictionary")
-        Parameter(str, "Request hash"),
+        Parameter(dict, "Record dictionary"),
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record, request_hash, caller_cred=None):
+    def call(self, cred, record, request_hash=None, caller_cred=None):
         if caller_cred==None:
             caller_cred=cred
         #log the call

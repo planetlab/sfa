@@ -20,12 +20,14 @@ class get_slices(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Request hash")
+        Parameter(str, "Request hash"),
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = [Parameter(str, "Human readable slice name (hrn)")]
     
-    def call(self, cred, request_hash):
+    def call(self, cred, request_hash=None):
         self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, 'listslices')
         slices = Slices(self.api)

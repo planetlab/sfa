@@ -27,12 +27,13 @@ class get_self_credential(Method):
     accepts = [
         Parameter(str, "certificate"),
         Parameter(str, "Human readable name (hrn)"),
-        Parameter(str, "Request hash")
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(str, "String representation of a credential object")
 
-    def call(self, cert, type, hrn, request_hash):
+    def call(self, cert, type, hrn, request_hash=None):
         """
         get_self_credential a degenerate version of get_credential used by a client
         to get his initial credential when de doesnt have one. This is the same as
@@ -72,9 +73,10 @@ class get_self_credential(Method):
             raise PermissionError(gid.get_hrn() + " has no rights to " + record.get_name())
        
         # authenticate the gid
-        gid = record.get_gid_object()
-        gid_str = gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(gid_str, [cert, type, hrn], request_hash)
+        if request_hash:
+            gid = record.get_gid_object()
+            gid_str = gid.save_to_string(save_parents=True)
+            self.api.auth.authenticateGid(gid_str, [cert, type, hrn], request_hash)
         
         # authenticate the certificate
         certificate = Certificate(string=cert)

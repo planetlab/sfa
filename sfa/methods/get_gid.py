@@ -26,13 +26,14 @@ class get_gid(Method):
     
     accepts = [
         Parameter(str, "Certificate string"),
-        Parameter(str, "Human readable name (hrn)"),  
-        Parameter(str, "Request hash")  
+        Parameter(str, "Human readable name (hrn)"), 
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified")) 
         ]
 
     returns = [Parameter(dict, "Aggregate interface information")]
     
-    def call(self, cert, hrn, type, requestHash):
+    def call(self, cert, hrn, type, request_hash=None):
       
         self.api.auth.verify_object_belongs_to_me(hrn)
         certificate = Certificate(string=cert) 
@@ -48,6 +49,6 @@ class get_gid(Method):
             raise ConnectionKeyGIDMismatch(gid.get_subject())
         
         # authenticate the gid
-        self.api.auth.authenticateGid(gidStr, [cert, hrn, type], requestHash)
+        self.api.auth.authenticateGid(gidStr, [cert, hrn, type], request_hash)
         
         return gidStr 

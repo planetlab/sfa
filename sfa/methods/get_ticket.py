@@ -29,12 +29,15 @@ class get_ticket(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name of slice to retrive a ticket for (hrn)"),
-        Parameter(str, "Resource specification (rspec)")
+        Parameter(str, "Resource specification (rspec)"),
+        Mixed(Parameter(str, "Request hash"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(str, "String represeneation of a ticket object")
     
-    def call(self, cred, hrn, rspec):
+    def call(self, cred, hrn, rspec, request_hash=None):
+        self.api.auth.authenticateCred(cred, [cred, hrn, rspec], request_hash)
         self.api.auth.check(cred, "getticket")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(name)
