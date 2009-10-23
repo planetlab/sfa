@@ -151,10 +151,13 @@ class Slices(SimpleStorage):
 
     def delete_slice_smgr(self, hrn):
         credential = self.api.getCredential()
+        caller_cred = self.caller_cred
         aggregates = Aggregates(self.api)
+        arg_list = [credential, hrn]
+        request_hash = self.api.key.compute_hash(arg_list)
         for aggregate in aggregates:
             try:
-                aggregates[aggregate].delete_slice(credential, hrn, caller_cred=self.caller_cred)
+                aggregates[aggregate].delete_slice(credential, hrn, request_hash, caller_cred)
             except:
                 print >> log, "Error calling list nodes at aggregate %s" % aggregate
                 traceback.print_exc(log)
@@ -180,11 +183,13 @@ class Slices(SimpleStorage):
 
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
         authority = get_authority(slice_hrn)
-        site_records = registry.resolve(credential, authority)
+        arg_list = [credential, authority]
+        request_hash = self.api.key.compute_hash(arg_list)
+        site_records = registry.resolve(credential, authority, request_hash)
         site = {}
         for site_record in site_records:
             if site_record['type'] == 'authority':
-                site = site_record.as_dict()
+                site = site_record
         if not site:
             raise RecordNotFound(authority)
         remote_site_id = site.pop('site_id')    
@@ -197,8 +202,10 @@ class Slices(SimpleStorage):
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)   
             # mark this site as an sfa peer record
             if sfa_peer:
-                peer_dict = {'type': 'authority', 'hrn': authority, 'peer_authority': sfa_peer, 'pointer': site_id} 
-                registry.register_peer_object(credential, peer_dict)
+                peer_dict = {'type': 'authority', 'hrn': authority, 'peer_authority': sfa_peer, 'pointer': site_id}
+                arg_list = [credential]
+                request_hash = self.api.key.compute_hash(arg_list) 
+                registry.register_peer_object(credential, peer_dict, request_hash)
                 pass
         else:
             site_id = sites[0]['site_id']
@@ -211,7 +218,9 @@ class Slices(SimpleStorage):
         slice = {}
         slice_record = None
         authority = get_authority(slice_hrn)
-        slice_records = registry.resolve(credential, slice_hrn)
+        arg_list = [credential, slice_hrn]
+        request_hash = self.api.key.compute_hash(arg_list)
+        slice_records = registry.resolve(credential, slice_hrn, request_hash)
         for record in slice_records:
             if record['type'] in ['slice']:
                 slice_record = record
@@ -235,8 +244,10 @@ class Slices(SimpleStorage):
 
             # mark this slice as an sfa peer record
             if sfa_peer:
-                peer_dict = {'type': 'slice', 'hrn': slice_hrn, 'peer_authority': sfa_peer, 'pointer': slice_id} 
-                registry.register_peer_object(credential, peer_dict)
+                peer_dict = {'type': 'slice', 'hrn': slice_hrn, 'peer_authority': sfa_peer, 'pointer': slice_id}
+                arg_list = [credential]
+                request_hash = self.api.key.compute_hash(arg_list) 
+                registry.register_peer_object(credential, peer_dict, request_hash)
                 pass
 
             #this belongs to a peer
@@ -259,14 +270,16 @@ class Slices(SimpleStorage):
         slicename = hrn_to_pl_slicename(slice_record['hrn'])
         researchers = slice_record.get('researcher', [])
         for researcher in researchers:
+            arg_list = [credential, researcher]
+            request_hash = self.api.key.compute_hash(arg_list) 
             person_record = {}
-            person_records = registry.resolve(credential, researcher)
+            person_records = registry.resolve(credential, researcher, request_hash)
             for record in person_records:
                 if record['type'] in ['user']:
                     person_record = record
             if not person_record:
                 pass
-            person_dict = person_record.as_dict()
+            person_dict = person_record
             if peer:
                 peer_id = self.api.plshell.GetPeers(self.api.plauth, {'shortname': peer}, ['peer_id'])[0]['peer_id']
                 persons = self.api.plshell.GetPersons(self.api.plauth, {'email': [person_dict['email']], 'peer_id': peer_id}, ['person_id', 'key_ids'])
@@ -280,8 +293,10 @@ class Slices(SimpleStorage):
                 
                 # mark this person as an sfa peer record
                 if sfa_peer:
-                    peer_dict = {'type': 'user', 'hrn': researcher, 'peer_authority': sfa_peer, 'pointer': person_id} 
-                    registry.register_peer_object(credential, peer_dict)
+                    peer_dict = {'type': 'user', 'hrn': researcher, 'peer_authority': sfa_peer, 'pointer': person_id}
+                    arg_list = [credential]
+                    request_hash = self.api.key.compute_hash(arg_list) 
+                    registry.register_peer_object(credential, peer_dict, request_hash)
                     pass
 
                 if peer:
@@ -394,23 +409,32 @@ class Slices(SimpleStorage):
             tempspec.parseDict(resourceDict)
             rspecs[net_hrn] = tempspec.toxml()
 
-        # send each rspec to the appropriate aggregate/sm 
+        # send each rspec to the appropriate aggregate/sm
+        caller_cred = self.caller_cred 
         for net_hrn in rspecs:
             try:
                 # if we are directly connected to the aggregate then we can just send them the rspec
-                # if not, then we may be connected to an sm thats connected to the aggregate  
+                # if not, then we may be connected to an sm thats connected to the aggregate
                 if net_hrn in aggregates:
                     # send the whloe rspec to the local aggregate
                     if net_hrn in [self.api.hrn]:
-                        aggregates[net_hrn].create_slice(credential, hrn, rspec, caller_cred=self.caller_cred)
+                        arg_list = [credential,hrn,rspec]
+                        request_hash = self.api.key.compute_hash(arg_list)
+                        aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, caller_cred)
                     else:
-                        aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], caller_cred=self.caller_cred)
+                        arg_list = [credential,hrn,rspecs[net_hrn]]
+                        request_hash = self.api.key.compute_hash(arg_list)
+                        aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
                 else:
-                    # lets forward this rspec to a sm that knows about the network    
+                    # lets forward this rspec to a sm that knows about the network
+                    arg_list = [credential, net_hrn]
+                    request_hash = self.api.compute_hash(arg_list)    
                     for aggregate in aggregates:
-                        network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
+                        network_found = aggregates[aggregate].get_aggregates(credential, net_hrn, request_hash)
                         if network_networks:
-                            aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], caller_cred=self.caller_cred)
+                            arg_list = [credential, hrn, rspecs[net_hrn]]
+                            request_hash = self.api.key.compute_hash(arg_list) 
+                            aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
                      
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % locals()
@@ -463,6 +487,8 @@ class Slices(SimpleStorage):
     def stop_slice_smgr(self, hrn):
         credential = self.api.getCredential()
         aggregates = Aggregates(self.api)
+        arg_list = [credential, hrn]
+        request_hash = self.api.key.compute_hash(arg_list)
         for aggregate in aggregates:
-            aggregates[aggregate].stop_slice(credential, hrn)  
+            aggregates[aggregate].stop_slice(credential, hrn, request_hash)  
 
