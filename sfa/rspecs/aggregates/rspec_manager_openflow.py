@@ -2,21 +2,17 @@ from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.rspec import Rspec
 from sfa.server.registry import Registries
+from sfa.util.config import Config
 from sfa.plc.nodes import *
 import sys
 
-# Probably the following is not essential
+#The following is not essential
 #from soaplib.wsgi_soap import SimpleWSGISoapApp
 #from soaplib.serializers.primitive import *
 #from soaplib.serializers.clazz import *
 
 import socket
 import struct
-
-SOAP_INTERFACE_PORT = 7889
-AGGREGATE_MANAGER_PORT = 2603
-AGGREGATE_MANAGER_IP = 'localhost'
-#AGGREGATE_MANAGER_IP = 'openflowvisor.stanford.edu'
 
 # Message IDs for all the GENI light calls
 # This will be used by the aggrMgr controller
@@ -52,7 +48,7 @@ def extract(sock):
             break
         msg += chunk
 
-    print 'done extracting response from aggrMgr'
+    print 'Done extracting %d bytes of response from aggrMgr' % len(msg)
     return msg
    
 def connect(server, port):
@@ -60,18 +56,21 @@ def connect(server, port):
     sock = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
     sock.connect ( ( server, port) )
     sock.settimeout(1)
-    print 'connected to aggregate manager module'
+    if DEBUG: print 'Connected!'
     return sock
     
 def connect_aggrMgr():
-    return connect(AGGREGATE_MANAGER_IP, AGGREGATE_MANAGER_PORT)
+    (aggr_mgr_ip, aggr_mgr_port) = Config().get_openflow_aggrMgr_info()
+    if DEBUG: print """Connecting to port %d of %s""" % (aggr_mgr_port, aggr_mgr_ip)
+    return connect(aggr_mgr_ip, aggr_mgr_port)
 
 def generate_slide_id(cred, hrn):
     if cred == None:
         cred = ""
     if hrn == None:
         hrn = ""
-    return cred + '_' + hrn
+    #return cred + '_' + hrn
+    return str(hrn)
 
 def msg_aggrMgr(cred, hrn, msg_id):
     slice_id = generate_slide_id(cred, hrn)
@@ -84,7 +83,7 @@ def msg_aggrMgr(cred, hrn, msg_id):
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
         return 1
-    except socketerror, message:
+    except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
@@ -110,22 +109,25 @@ def create_slice(cred, hrn, rspec):
     if DEBUG: print "Received create_slice call"
     slice_id = generate_slide_id(cred, hrn)
 
-    msg = struct.pack('> B%ds%ds' % len(slice_id), SFA_CREATE_SLICE, slice_id, rspec)
+    msg = struct.pack('> B%ds%ds' % (len(slice_id)+1, len(rspec)), SFA_CREATE_SLICE, slice_id, rspec)
     buf = struct.pack('> H', len(msg)+2) + msg
 
     try:
         aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
+        if DEBUG: print "Sent %d bytes and closing connection" % len(buf)
         aggrMgr_sock.close()
+
+        if DEBUG: print "----------------"
         return 1
-    except socketerror, message:
+    except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
     return 0
 
-def get_resources(cred, hrn=None):
-    if DEBUG: print "Received get_resources call"
+def get_rspec(cred, hrn=None):
+    if DEBUG: print "Received get_rspec call"
     slice_id = generate_slide_id(cred, hrn)
 
     msg = struct.pack('> B%ds' % len(slice_id), SFA_GET_RESOURCES, slice_id)
@@ -137,8 +139,9 @@ def get_resources(cred, hrn=None):
         resource_list = extract(aggrMgr_sock);
         aggrMgr_sock.close()
 
+        if DEBUG: print "----------------"
         return resource_list 
-    except socketerror, message:
+    except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
