@@ -33,7 +33,6 @@ def convert_public_key(key):
 
     # we can only convert rsa keys 
     if "ssh-dss" in key:
-        print "XXX: DSA key encountered, ignoring"
         return None
     
     (ssh_f, ssh_fn) = tempfile.mkstemp()
@@ -43,19 +42,17 @@ def convert_public_key(key):
 
     cmd = keyconvert_path + " " + ssh_fn + " " + ssl_fn
     os.system(cmd)
-
+    
     # this check leaves the temporary file containing the public key so
     # that it can be expected to see why it failed.
     # TODO: for production, cleanup the temporary files
     if not os.path.exists(ssl_fn):
-        report.trace("  failed to convert key from " + ssh_fn + " to " + ssl_fn)
         return None
-
+    
     k = Keypair()
     try:
         k.load_pubkey_from_file(ssl_fn)
     except:
-        print "XXX: Error while converting key: ", key
         traceback.print_exc()
         k = None
 
