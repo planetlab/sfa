@@ -3,16 +3,7 @@ import libxslt
 from sfatables.globals import *
 
 class XMLRule:
-    rule_number = None
-    chain = None
-    xmldoc = None
-    terminal = 0
-    final_processor = '__sfatables_wrap_up__.xsl'
-
-    arguments = {'match':None,'target':None}
-    processors = {'match':None,'target':None}
-    context = {'match':None,'target':None}
-
+    
     def apply_processor(self, type, doc, output_xpath_filter=None):
         processor = self.processors[type]
 
@@ -116,6 +107,16 @@ class XMLRule:
         return rspec
 
     def __init__(self, chain=None, rule_number=None):
+        self.rule_number = None
+        self.chain = None
+        self.xmldoc = None
+        self.terminal = 0
+        self.final_processor = '__sfatables_wrap_up__.xsl'
+
+        self.arguments = {'match':None,'target':None}
+        self.processors = {'match':None,'target':None}
+        self.context = {'match':None,'target':None}
+
         if (chain and rule_number):
             self.load_xml_extension('match', chain, rule_number)
             self.load_xml_extension('target',chain, rule_number)

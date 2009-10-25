@@ -7,13 +7,14 @@ from sfatables.pretty import Pretty
 from sfatables.command import Command
 
 class List(Command):
-    options = [('-L','--list')]
-    help = 'List a chain'
-    key='list_rule'
-    matches = False
-    targets = False
-
+    
     def __init__(self):
+        self.options = [('-L','--list')]
+        self.help = 'List a chain'
+        self.key='list_rule'
+        self.matches = False
+        self.targets = False
+
         return
 
     def get_info(self, type, xmlextension_path):
