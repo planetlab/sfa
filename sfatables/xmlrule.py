@@ -57,7 +57,7 @@ class XMLRule:
 
     def add_rule_context_to_rspec(self, doc):
         p = doc.xpathNewContext()
-        context = p.xpathEval("//rspec")
+        context = p.xpathEval("//Rspec")
         if (not context):
             raise Exception('Request is not an rspec')
         else:
