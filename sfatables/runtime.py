@@ -65,29 +65,7 @@ class SFATablesRules:
         p.xpathFreeContext()
         return doc
 
-    def add_rule_context_to_rspec(self,arguments, doc):
-        p = doc.xpathNewContext()
-        context = p.xpathEval("//rspec")
-        if (not context):
-            raise Exception('Request is not an rspec')
-        else:
-            # Add the request context
-            ruleNode = libxml2.newNode('rule-context')
-            ac = self.active_context
-            for k in ac:
-                argumentNode = libxml2.newNode('argument')
-                nameNode = libxml2.newNode('name')
-                nameNode.addContent(k)
-                valueNode = libxml2.newNode('value')
-                valueNode.addContent(ac[k])
-                argumentNode.addChild(nameNode)
-                argumentNode.addChild(valueNode)
-                ruleNode.addChild(argumentNode)
-                context[0].addChild(ruleNode)
-        p.xpathFreeContext()
-
-        return doc
-
+    
     def apply(self, rspec):
         doc = libxml2.parseDoc(rspec)
         doc = self.add_request_context_to_rspec(doc)
@@ -95,8 +73,6 @@ class SFATablesRules:
         intermediate_rspec = doc
 
         for rule in self.sorted_rule_list:
-            import pdb
-            pdb.set_trace()
             intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
             intermediate_rspec = XMLRule().wrap_up(intermediate_rspec) 
             if (rule.terminal):

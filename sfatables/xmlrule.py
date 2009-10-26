@@ -55,18 +55,36 @@ class XMLRule:
         target_result = self.apply_processor('target',rspec,None)
         return target_result
 
+    def add_rule_context_to_rspec(self, doc):
+        p = doc.xpathNewContext()
+        context = p.xpathEval("//rspec")
+        if (not context):
+            raise Exception('Request is not an rspec')
+        else:
+            # Add the request context
+            matchNode = libxml2.newNode('match-context')
+            matchNode.addChild(self.arguments['match'])
+            targetNode = libxml2.newNode('target-context')
+            targetNode.addChild(self.arguments['target'])
+            context[0].addChild(matchNode)
+            context[0].addChild(targetNode)
+        p.xpathFreeContext()
+
+        return doc
+
     def apply_interpreted(self, rspec):
+        self.add_rule_context_to_rspec(rspec)
         # Interpreted
         #
         # output =
         #    if (match(match_args, rspec)
         #       then target(target_args, rspec)
         #       else rspec
-
+        
         if (self.match(rspec)):
-            return self.target(rspec)
+            return self.wrap_up(self.target(rspec))
         else:
-            return rspec
+            return self.wrap_up(rspec)
 
 
     def apply_compiled(rspec):
