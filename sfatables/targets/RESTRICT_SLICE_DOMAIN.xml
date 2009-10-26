@@ -8,7 +8,7 @@
             <operand>SUFFIX</operand>
         </argument>
         <argument>
-            <name>blacklist-dns-suffix/name>
+            <name>blacklist-dns-suffix</name>
             <help>Suffix of nodes to blacklist for this match.</help>
             <operand>SUFFIX</operand>
         </argument>
