@@ -10,5 +10,6 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="rule-context"/>
+    <xsl:template match="match-context"/>
+    <xsl:template match="target-context"/>
 </xsl:stylesheet>
