@@ -28,7 +28,6 @@ class List(Command):
         value_nodes = p.xpathEval("//rule/argument[value!='']/value")
         element_nodes = p.xpathEval("//argument[value!='']/parent::rule/@element")
 
-        print element_nodes, type, xmlextension_path
         if (len(element_nodes)>1):
             raise Exception("Invalid rule %s contains multiple elements."%xmlextension_path)
 
