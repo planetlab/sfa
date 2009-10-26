@@ -10,7 +10,6 @@ from sfatables.globals import *
 class Xmlextension:
     def __init__(self, file_path):
 
-        print file_path
         self.context = ""
         self.processor = ""
         self.operand = "VALUE"
