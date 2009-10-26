@@ -67,17 +67,21 @@ class SFATablesRules:
 
     
     def apply(self, rspec):
-        doc = libxml2.parseDoc(rspec)
-        doc = self.add_request_context_to_rspec(doc)
+        if (self.sorted_rule_list):
+            doc = libxml2.parseDoc(rspec)
+            doc = self.add_request_context_to_rspec(doc)
 
-        intermediate_rspec = doc
+            intermediate_rspec = doc
 
-        for rule in self.sorted_rule_list:
-            intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
-            if (rule.terminal):
-                break
+            for rule in self.sorted_rule_list:
+                intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
+                if (rule.terminal):
+                    break
 
-        final_rspec = self.wrap_up(intermediate_rspec) 
+            final_rspec = self.wrap_up(intermediate_rspec) 
+        else:
+            final_rspec = rspec
+
         return final_rspec
 
 def main():
