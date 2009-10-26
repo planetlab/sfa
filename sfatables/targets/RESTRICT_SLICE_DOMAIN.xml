@@ -3,12 +3,12 @@
         <!-- The context is empty, since this target does not require any input from SFA -->
         <context select=""/>
         <argument>
-            <name>whitelist</name>
+            <name>whitelist-dns-suffix</name>
             <help>Suffix of nodes to whitelist for this match.</help>
             <operand>SUFFIX</operand>
         </argument>
         <argument>
-            <name>blacklist</name>
+            <name>blacklist-dns-suffix/name>
             <help>Suffix of nodes to blacklist for this match.</help>
             <operand>SUFFIX</operand>
         </argument>
