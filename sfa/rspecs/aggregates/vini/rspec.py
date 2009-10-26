@@ -1,12 +1,12 @@
-from sfa.util.rspec import Rspec
+from sfa.util.rspec import RSpec
 from sfa.rspecs.aggregates.vini.utils import *
 import sys
 
 SFA_VINI_DEFAULT_RSPEC = '/etc/sfa/vini.rspec'
 
-class ViniRspec(Rspec):
+class ViniRSpec(RSpec):
     def __init__(self, xml = None, xsd = None, NSURL = None):
-        Rspec.__init__(self, xml, xsd, NSURL)
+        RSpec.__init__(self, xml, xsd, NSURL)
         if not xml:
             self.parseFile(SFA_VINI_DEFAULT_RSPEC)
         

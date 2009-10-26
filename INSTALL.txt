@@ -118,7 +118,7 @@ At this stage you should be able to run sfi command. Some sample outputs are:
 
  (e) # sfi.py resources
 <?xml version="1.0" ?>
-<Rspec duration="3600" start_time="1246736949"><networks><NetSpec duration="3600" name="plc" start_time="1246736950"><nodes><NodeSpec cpu_min="" cpu_pct="" cpu_share="" disk_max="" duration="" init_params="" name="pif.inria.fr" start_time="" type=""><net_if><IfSpec addr="138.96.250.224" init_params="" ip_spoof="" max_kbyte="" max_rate="" min_rate="" name="True" type="ipv4"/></net_if></NodeSpec></nodes></NetSpec></networks></Rspec>
+<RSpec duration="3600" start_time="1246736949"><networks><NetSpec duration="3600" name="plc" start_time="1246736950"><nodes><NodeSpec cpu_min="" cpu_pct="" cpu_share="" disk_max="" duration="" init_params="" name="pif.inria.fr" start_time="" type=""><net_if><IfSpec addr="138.96.250.224" init_params="" ip_spoof="" max_kbyte="" max_rate="" min_rate="" name="True" type="ipv4"/></net_if></NodeSpec></nodes></NetSpec></networks></RSpec>
 ------
 
 6) Federation configuration:

@@ -6,7 +6,7 @@ from optparse import OptionParser
 from pprint import pprint
 from types import StringTypes
 
-from sfa.util.rspec import Rspec
+from sfa.util.rspec import RSpec
 
 def create_parser():
     command = sys.argv[0]
@@ -57,10 +57,10 @@ def main():
     parser = create_parser(); 
     (options, args) = parser.parse_args()
     if not options.infile:
-        print "Rspec file not specified"
+        print "RSpec file not specified"
         return 
         
-    rspec = Rspec()
+    rspec = RSpec()
     try:
         rspec.parseFile(options.infile)
     except:

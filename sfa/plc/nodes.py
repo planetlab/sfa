@@ -49,7 +49,7 @@ class Nodes(SimpleStorage):
                 self.refresh_nodes_smgr()
 
     def refresh_nodes_aggregate(self):
-        rspec = Rspec()
+        rspec = RSpec()
         rspec.parseString(self.get_rspec())
         
         # filter nodes according to policy
@@ -109,7 +109,7 @@ class Nodes(SimpleStorage):
         aggregates = Aggregates(self.api)
         rspecs = {}
         networks = []
-        rspec = Rspec()
+        rspec = RSpec()
         credential = self.api.getCredential() 
         for aggregate in aggregates:
             try:
@@ -129,7 +129,7 @@ class Nodes(SimpleStorage):
                 print >> log, "%s" % (traceback.format_exc())
         # create the rspec dict
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
-        resourceDict = {'Rspec': resources}
+        resourceDict = {'RSpec': resources}
         # convert rspec dict to xml
         rspec.parseDict(resourceDict)
         return rspec
@@ -257,9 +257,9 @@ class Nodes(SimpleStorage):
         resources = {'networks': networks, 'start_time': start_time, 'duration': duration}
 
         # convert the plc dict to an rspec dict
-        resourceDict = RspecDict(resources)
+        resourceDict = RSpecDict(resources)
         # convert the rspec dict to xml
-        rspec = Rspec()
+        rspec = RSpec()
         rspec.parseDict(resourceDict)
         return rspec.toxml()
         

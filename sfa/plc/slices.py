@@ -345,7 +345,7 @@ class Slices(SimpleStorage):
         peer = self.get_peer(hrn)
         sfa_peer = self.get_sfa_peer(hrn)
 
-        spec = Rspec(rspec)
+        spec = RSpec(rspec)
         # Get the slice record from sfa
         slicename = hrn_to_pl_slicename(hrn) 
         slice = {}
@@ -385,12 +385,12 @@ class Slices(SimpleStorage):
         return 1
 
     def create_slice_smgr(self, hrn, rspec):
-        spec = Rspec()
-        tempspec = Rspec()
+        spec = RSpec()
+        tempspec = RSpec()
         spec.parseString(rspec)
         slicename = hrn_to_pl_slicename(hrn)
         specDict = spec.toDict()
-        if specDict.has_key('Rspec'): specDict = specDict['Rspec']
+        if specDict.has_key('RSpec'): specDict = specDict['RSpec']
         if specDict.has_key('start_time'): start_time = specDict['start_time']
         else: start_time = 0
         if specDict.has_key('end_time'): end_time = specDict['end_time']
@@ -405,7 +405,7 @@ class Slices(SimpleStorage):
         for netspec in netspecs:
             net_hrn = netspec['name']
             resources = {'start_time': start_time, 'end_time': end_time, 'networks': netspec}
-            resourceDict = {'Rspec': resources}
+            resourceDict = {'RSpec': resources}
             tempspec.parseDict(resourceDict)
             rspecs[net_hrn] = tempspec.toxml()
 

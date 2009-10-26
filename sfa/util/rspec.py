@@ -8,7 +8,7 @@ import httplib
 from xml.dom import minidom
 from types import StringTypes, ListType
 
-class Rspec:
+class RSpec:
 
     def __init__(self, xml = None, xsd = None, NSURL = None):
         '''
@@ -363,7 +363,7 @@ class Rspec:
     
 
 
-class RecordSpec(Rspec):
+class RecordSpec(RSpec):
 
     root_tag = 'record'
     def parseDict(self, rdict, include_doc = False):
@@ -376,7 +376,7 @@ class RecordSpec(Rspec):
         record_dict = rdict
         if not len(rdict.keys()) == 1:
             record_dict = {self.root_tag : rdict}
-        return Rspec.dict2dom(self, record_dict, include_doc)
+        return RSpec.dict2dom(self, record_dict, include_doc)
 
         
 # vim:ts=4:expandtab

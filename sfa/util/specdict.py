@@ -120,7 +120,7 @@ class NetSpecDict(SpecDict):
                   'nodes': 'nodes',
                   'links': 'links'}
 
-class RspecDict(SpecDict):
+class RSpecDict(SpecDict):
     type = 'RSpec'
     fields = {'start_time': '',
               'duration': '',

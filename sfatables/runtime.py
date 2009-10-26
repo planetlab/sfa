@@ -55,7 +55,7 @@ class SFATablesRules:
                 
     def add_request_context_to_rspec(self, doc):
         p = doc.xpathNewContext()
-        context = p.xpathEval("//Rspec")
+        context = p.xpathEval("//RSpec")
         if (not context):
             raise Exception('Request is not an rspec')
         else:

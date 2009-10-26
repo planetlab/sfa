@@ -481,7 +481,7 @@ class Topology:
                 return link
         return None
     
-    def nodeTopoFromRspec(self, rspec):
+    def nodeTopoFromRSpec(self, rspec):
         if self.nodelinks:
             raise Error("virtual topology already present")
             

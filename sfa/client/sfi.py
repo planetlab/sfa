@@ -13,7 +13,7 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.util.geniclient import GeniClient
 from sfa.util.record import *
-from sfa.util.rspec import Rspec
+from sfa.util.rspec import RSpec
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
@@ -691,7 +691,7 @@ class Sfi:
     
     def display_rspec(self,rspec, format = 'rspec'):
         if format in ['dns']:
-            spec = Rspec()
+            spec = RSpec()
             spec.parseString(rspec)
             hostnames = []
             nodespecs = spec.getDictsByTagName('NodeSpec')
@@ -703,7 +703,7 @@ class Sfi:
                         hostnames.append(nodespec['name'])
             result = hostnames
         elif format in ['ip']:
-            spec = Rspec()
+            spec = RSpec()
             spec.parseString(rspec)
             ips = []
             ifspecs = spec.getDictsByTagName('IfSpec')

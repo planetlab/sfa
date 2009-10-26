@@ -1,6 +1,6 @@
 from sfa.util.faults import *
 from sfa.util.misc import *
-from sfa.util.rspec import Rspec
+from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.plc.nodes import *
 from sfa.rspecs.aggregates.vini.utils import *
@@ -166,10 +166,10 @@ def create_slice(api, hrn, xml):
     else:
         raise PermissionError("%s not in VINI whitelist" % hrn)
         
-    rspec = Rspec(xml)
+    rspec = RSpec(xml)
     topo = Topology(api)
     
-    topo.nodeTopoFromRspec(rspec)
+    topo.nodeTopoFromRSpec(rspec)
 
     # Check request against current allocations
     topo.verifyNodeTopo(hrn, topo, maxbw)
@@ -197,7 +197,7 @@ def fetch_context(slice_hrn, user_hrn, contexts):
     return base_context
 
 def main():
-    r = Rspec()
+    r = RSpec()
     r.parseFile(sys.argv[1])
     rspec = r.toDict()
     create_slice(None,'plc',rspec)

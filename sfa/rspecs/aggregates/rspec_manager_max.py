@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from sfa.util.rspec import Rspec
+from sfa.util.rspec import RSpec
 import sys
 import pdb
 from sfa.util.misc import *
@@ -27,7 +27,7 @@ class GeniOutOfResource(GeniFault):
         faultString = "Interface " + interface + " not available"
         GeniFault.__init__(self, 100, faultString, '')
 
-class GeniNoPairRspec(GeniFault):
+class GeniNoPairRSpec(GeniFault):
     def __init__(self, interface, interface2):
         faultString = "Interface " + interface + " should be paired with " + interface2
         GeniFault.__init__(self, 100, faultString, '')
@@ -36,7 +36,7 @@ class GeniNoPairRspec(GeniFault):
 # i -> node,i_peer
 
 def get_interface_map():
-    r = Rspec()
+    r = RSpec()
     r.parseFile(SFA_MAX_DEFAULT_RSPEC)
     rspec = r.toDict()
     capacity = rspec['rspec']['capacity']
@@ -267,7 +267,7 @@ def create_slice(api, hrn, rspec_xml):
 
     # Check if everything in rspec is either allocated by hrn
     # or not allocated at all.
-    r = Rspec()
+    r = RSpec()
     r.parseString(rspec_xml)
     rspec = r.toDict()
 
@@ -290,7 +290,7 @@ def create_slice(api, hrn, rspec_xml):
         if (a not in current_hrn_interfaces and a in current_interfaces):
             raise GeniOutOfResource(a)
         if (topology[a][1] not in requested_interfaces):
-            raise GeniNoPairRspec(a,topology[a][1])
+            raise GeniNoPairRSpec(a,topology[a][1])
     # Request OK
 
     # Allocations to delete
@@ -316,13 +316,13 @@ def rspec_to_allocations(rspec):
         for l in ifspecs:
             ifs.extend([(l['name'].replace('tns:',''),l['ip'])])
     except KeyError:
-        # Bad Rspec
+        # Bad RSpec
         pass
     return ifs
 
 def main():
     t = get_interface_map()
-    r = Rspec()
+    r = RSpec()
     rspec_xml = open(sys.argv[1]).read()
     #get_rspec(None,'foo')
     create_slice(None, "plc.princeton.sap0", rspec_xml)
