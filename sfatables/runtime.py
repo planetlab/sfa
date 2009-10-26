@@ -27,7 +27,29 @@ class SFATablesRules:
         self.active_context = request_context
         return
 
-    def add_request_context_to_rspec(self,doc):
+    def create_xml_node(self, name, context_dict):
+        node = libxml2.newNode(name)
+        for k in context_dict.keys():
+            if (type(context_dict[k])==dict):
+                childNode = self.create_xml_node(k, context_dict[k])
+                node.addChild(childNode)
+            else:
+                node.addContent(context_dict[k])
+        return node
+                
+    def add_request_context_to_rspec(self, doc):
+        p = doc.xpathNewContext()
+        context = p.xpathEval("//rspec")
+        if (not context):
+            raise Exception('Request is not an rspec')
+        else:
+            # Add the request context
+            requestNode = self.create_xml_node('request-context',self.active_context)
+            context[0].addChild(requestNode)
+        p.xpathFreeContext()
+        return doc
+
+    def add_rule_context_to_rspec(self,arguments, doc):
         p = doc.xpathNewContext()
         context = p.xpathEval("//rspec")
         if (not context):
@@ -50,8 +72,6 @@ class SFATablesRules:
 
         return doc
 
-
-
     def apply(self, rspec):
         doc = libxml2.parseDoc(rspec)
         doc = self.add_request_context_to_rspec(doc)
@@ -68,6 +88,7 @@ class SFATablesRules:
 
 def main():
     incoming = SFATablesRules('INCOMING')
+    incoming.set_context({'sfa':{'user':{'hrn':'plc.princeton.sapanb'}}})
 
     outgoing = SFATablesRules('OUTGOING')
     print "%d rules loaded for INCOMING chain"%len(incoming.sorted_rule_list)

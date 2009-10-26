@@ -3,7 +3,6 @@ import libxslt
 from sfatables.globals import *
 
 class XMLRule:
-    
     def apply_processor(self, type, doc, output_xpath_filter=None):
         processor = self.processors[type]
 
@@ -11,6 +10,7 @@ class XMLRule:
         filepath = os.path.join(sfatables_config, 'processors', processor)
         # XXX
 
+        print filepath
         styledoc = libxml2.parseFile(filepath)
         style = libxslt.parseStylesheetDoc(styledoc)
         result = style.applyStylesheet(doc, None)
