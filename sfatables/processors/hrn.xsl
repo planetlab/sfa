@@ -9,7 +9,7 @@
             <xsl:apply-templates select="@* | node()"/>
     </xsl:template>
 
-    <xsl:template match="user">
+    <xsl:template match="//match-context//user">
                     <xsl:choose>
                     <xsl:when test="starts-with($context-hrn, hrn)">
                         <result verdict="True"/> <!--Match -->
