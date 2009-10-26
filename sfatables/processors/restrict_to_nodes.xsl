@@ -9,8 +9,8 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:variable name="whitelist_prefix" select="//rspec//sfatables-rule/argument[name='whitelist']/value"/>
-    <xsl:variable name="blacklist_prefix" select="//rspec//sfatables-rule/argument[name='blacklist']/value"/>
+    <xsl:variable name="whitelist_prefix" select="//rspec//rule-context/argument[name='whitelist']/value"/>
+    <xsl:variable name="blacklist_prefix" select="//rspec//rule-context/argument[name='blacklist']/value"/>
 
     <!-- Drop nodes that are not in the whitelist -->
     <xsl:template match="node">
@@ -23,3 +23,4 @@
     </xsl:template>
 
 </xsl:stylesheet>
+et>

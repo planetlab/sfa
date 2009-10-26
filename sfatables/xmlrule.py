@@ -42,11 +42,13 @@ class XMLRule:
         style = libxslt.parseStylesheetDoc(styledoc)
         #doc = libxml2.parseDoc(rspec)
         result = style.applyStylesheet(doc, None)
-        stylesheet_result = result #style.saveResultToString(result)
+        stylesheet_result = style.saveResultToString(result)
         style.freeStylesheet()
-        #doc.freeDoc()
-        #result.freeDoc()
+        doc.freeDoc()
+        result.freeDoc()
 
+        import pdb
+        pdb.set_trace()
         return stylesheet_result
 
     def match(self, rspec):

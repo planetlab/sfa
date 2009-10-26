@@ -5,6 +5,13 @@
         <sfa><user><hrn>plc.princeton.sapanb</hrn></user></sfa>
     </request-context>
 
+    <rule-context>
+        <argument>
+        <name>blacklist</name>
+        <value>plc.tp</value>
+        </argument>
+    </rule-context>
+
      <request>
         <nodespec>
             <node name="plc.princeton.planetlab-01"/>
@@ -15,3 +22,4 @@
         </nodespec>
     </request>
 </rspec>
+ec>

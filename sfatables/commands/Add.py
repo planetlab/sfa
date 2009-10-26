@@ -4,12 +4,11 @@ from sfatables.command import Command
 from sfatables.globals import *
 
 class Add(Command):
-    options = [('-A','--add')]
-    help = 'Add a rule to a chain'
-    matches = True
-    targets = True
-
     def __init__(self):
+        self.options = [('-A','--add')]
+        self.help = 'Add a rule to a chain'
+        self.matches = True
+        self.targets = True
         return
 
     def getnextfilename(self,type,chain):
