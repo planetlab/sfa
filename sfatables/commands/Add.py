@@ -41,7 +41,7 @@ class Add(Command):
             option_name = option['name']
             option_value = getattr(options,option_name)
 
-            if (hasattr(options,option_name) and options.option_name):
+            if (hasattr(options,option_name) and getattr(options,option_name)):
                 context = p.xpathEval("//rule[@element='%s' or @element='*']/argument[name='%s']"%(element, option_name))
                 if (not context):
                     raise Exception('Unknown option %s for match %s and element %s'%(option,option['name'], element))
