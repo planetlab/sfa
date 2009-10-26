@@ -240,11 +240,10 @@ class Auth:
         elif type == "authority":
             pis = record.get("pi", [])
             operators = record.get("operator", [])
-            rl.add("authority,sa,ma")
             if (cred_object_hrn in pis):
-                rl.add("sa")
+                rl.add("authority,sa")
             if (cred_object_hrn in operators):
-                rl.add("ma")
+                rl.add("authority,ma")
 
         elif type == "user":
             rl.add("refresh")
