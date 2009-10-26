@@ -13,7 +13,7 @@ from sfatables.xmlrule import *
 
 class SFATablesRules:
     def __init__(self, chain_name):
-        self.active_context = None
+        self.active_context = {}
         self.contexts = None # placeholder for rspec_manger
         self.sorted_rule_list = []
         chain_dir_path = os.path.join(sfatables_config,chain_name)
@@ -27,8 +27,35 @@ class SFATablesRules:
         self.active_context = request_context
         return
 
+    def add_request_context_to_rspec(self,doc):
+        p = doc.xpathNewContext()
+        context = p.xpathEval("//rspec")
+        if (not context):
+            raise Exception('Request is not an rspec')
+        else:
+            # Add the request context
+            ruleNode = libxml2.newNode('rule-context')
+            ac = self.active_context
+            for k in ac:
+                argumentNode = libxml2.newNode('argument')
+                nameNode = libxml2.newNode('name')
+                nameNode.addContent(k)
+                valueNode = libxml2.newNode('value')
+                valueNode.addContent(ac[k])
+                argumentNode.addChild(nameNode)
+                argumentNode.addChild(valueNode)
+                ruleNode.addChild(argumentNode)
+                context[0].addChild(ruleNode)
+        p.xpathFreeContext()
+
+        return doc
+
+
+
     def apply(self, rspec):
         doc = libxml2.parseDoc(rspec)
+        doc = self.add_request_context_to_rspec(doc)
+
         intermediate_rspec = doc
 
         for rule in self.sorted_rule_list:
