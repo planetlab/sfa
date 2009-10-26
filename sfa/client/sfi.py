@@ -16,7 +16,6 @@ from sfa.util.record import *
 from sfa.util.rspec import Rspec
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
-import sfa.util.soapprotocol as soapprotocol
 from sfa.util.config import Config
 
 class Sfi:
