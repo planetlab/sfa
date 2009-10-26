@@ -35,20 +35,16 @@ class XMLRule:
         filepath = os.path.join(sfatables_config, 'processors', self.final_processor)
 
         if not os.path.exists(filepath):
-            # TODO: final_processor is not there yet
-            return doc#rspec
+            raise Exception('Could not find final rule filter')
 
         styledoc = libxml2.parseFile(filepath)
         style = libxslt.parseStylesheetDoc(styledoc)
-        #doc = libxml2.parseDoc(rspec)
         result = style.applyStylesheet(doc, None)
-        stylesheet_result = style.saveResultToString(result)
+        stylesheet_result = result#style.saveResultToString(result)
         style.freeStylesheet()
-        doc.freeDoc()
-        result.freeDoc()
+        #doc.freeDoc()
+        #result.freeDoc()
 
-        import pdb
-        pdb.set_trace()
         return stylesheet_result
 
     def match(self, rspec):
@@ -113,7 +109,7 @@ class XMLRule:
         self.chain = None
         self.xmldoc = None
         self.terminal = 0
-        self.final_processor = '__sfatables_wrap_up__.xsl'
+        self.final_processor = '__sfatables_rule_wrap_up__.xsl'
 
         self.arguments = {'match':None,'target':None}
         self.processors = {'match':None,'target':None}

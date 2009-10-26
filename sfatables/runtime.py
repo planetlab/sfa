@@ -16,12 +16,28 @@ class SFATablesRules:
         self.active_context = {}
         self.contexts = None # placeholder for rspec_manger
         self.sorted_rule_list = []
+        self.final_processor = '__sfatables_wrap_up__.xsl'
         chain_dir_path = os.path.join(sfatables_config,chain_name)
         rule_list = List().get_rule_list(chain_dir_path)
         for rule_number in rule_list:
             self.sorted_rule_list = self.sorted_rule_list + [XMLRule(chain_name, rule_number)]
         return
 
+    def wrap_up(self, doc):
+        filepath = os.path.join(sfatables_config, 'processors', self.final_processor)
+
+        if not os.path.exists(filepath):
+            raise Exception('Could not find final rule filter')
+
+        styledoc = libxml2.parseFile(filepath)
+        style = libxslt.parseStylesheetDoc(styledoc)
+        result = style.applyStylesheet(doc, None)
+        stylesheet_result = style.saveResultToString(result)
+        style.freeStylesheet()
+        doc.freeDoc()
+        result.freeDoc()
+
+        return stylesheet_result
 
     def set_context(self, request_context):
         self.active_context = request_context
@@ -79,11 +95,14 @@ class SFATablesRules:
         intermediate_rspec = doc
 
         for rule in self.sorted_rule_list:
+            import pdb
+            pdb.set_trace()
             intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
+            intermediate_rspec = XMLRule().wrap_up(intermediate_rspec) 
             if (rule.terminal):
                 break
 
-        final_rspec = XMLRule().wrap_up(intermediate_rspec) 
+        final_rspec = self.wrap_up(intermediate_rspec) 
         return final_rspec
 
 def main():
