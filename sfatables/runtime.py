@@ -74,7 +74,6 @@ class SFATablesRules:
 
         for rule in self.sorted_rule_list:
             intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
-            intermediate_rspec = XMLRule().wrap_up(intermediate_rspec) 
             if (rule.terminal):
                 break
 

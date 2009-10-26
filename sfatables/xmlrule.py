@@ -63,9 +63,13 @@ class XMLRule:
         else:
             # Add the request context
             matchNode = libxml2.newNode('match-context')
-            matchNode.addChild(self.arguments['match'])
+            for match_argument in self.arguments['match']:
+                matchNode.addChild(match_argument)
+
             targetNode = libxml2.newNode('target-context')
-            targetNode.addChild(self.arguments['target'])
+            for target_argument in self.arguments['target']:
+                targetNode.addChild(target_argument)
+
             context[0].addChild(matchNode)
             context[0].addChild(targetNode)
         p.xpathFreeContext()
@@ -73,7 +77,9 @@ class XMLRule:
         return doc
 
     def apply_interpreted(self, rspec):
-        self.add_rule_context_to_rspec(rspec)
+        import pdb
+        pdb.set_trace()
+        rspec = self.add_rule_context_to_rspec(rspec)
         # Interpreted
         #
         # output =
@@ -107,20 +113,12 @@ class XMLRule:
             self.terminal = 1
         
         self.processors[type] = processor[0].content
-        self.arguments[type] = p.xpathEval('//rule')
+        self.arguments[type] = p.xpathEval('//rule//argument[value!=""]')
 
+        import pdb
+        pdb.set_trace()
         p.xpathFreeContext()
 
-
-    def wrap_rspec (self, type, rspec):
-        argument = self.arguments[type]
-        p = rspec.xmldoc.xpathNewContext()
-        root_node = p.xpathEval('/RSpec')
-        if (not root_node or not root_node):
-            raise Exception('An evil aggregate manager sent me a malformed RSpec. Please see the stack trace to identify it.')
-
-        root_node.addChild(arguments[type])
-        return rspec
 
     def __init__(self, chain=None, rule_number=None):
         self.rule_number = None

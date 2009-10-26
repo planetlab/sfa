@@ -1,13 +1,7 @@
 <!-- run "runtime.py sfarspec" to apply current rule set to this file -->
 
 <rspec>
-    <rule-context>
-        <argument>
-        <name>blacklist</name>
-        <value>plc.tp</value>
-        </argument>
-    </rule-context>
-
+    <request-context><sfa><user><hrn>plc.princeton.sapanb</hrn></user></sfa></request-context>
      <request>
         <nodespec>
             <node name="plc.princeton.planetlab-01"/>
