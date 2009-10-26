@@ -77,8 +77,6 @@ class XMLRule:
         return doc
 
     def apply_interpreted(self, rspec):
-        import pdb
-        pdb.set_trace()
         rspec = self.add_rule_context_to_rspec(rspec)
         # Interpreted
         #
@@ -115,8 +113,6 @@ class XMLRule:
         self.processors[type] = processor[0].content
         self.arguments[type] = p.xpathEval('//rule//argument[value!=""]')
 
-        import pdb
-        pdb.set_trace()
         p.xpathFreeContext()
 
 

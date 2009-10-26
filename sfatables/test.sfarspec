@@ -1,7 +1,6 @@
 <!-- run "runtime.py sfarspec" to apply current rule set to this file -->
 
 <rspec>
-    <request-context><sfa><user><hrn>plc.princeton.sapanb</hrn></user></sfa></request-context>
      <request>
         <nodespec>
             <node name="plc.princeton.planetlab-01"/>
