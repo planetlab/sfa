@@ -74,8 +74,8 @@ class SFATablesRules:
             intermediate_rspec = doc
 
             for rule in self.sorted_rule_list:
-                intermediate_rspec  = rule.apply_interpreted(intermediate_rspec)
-                if (rule.terminal):
+                (matched,intermediate_rspec) = rule.apply_interpreted(intermediate_rspec)
+                if (rule.terminal and matched):
                     break
 
             final_rspec = self.wrap_up(intermediate_rspec) 

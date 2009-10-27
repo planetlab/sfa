@@ -85,9 +85,9 @@ class XMLRule:
         #       else rspec
         
         if (self.match(rspec)):
-            return self.wrap_up(self.target(rspec))
+            return (True,self.wrap_up(self.target(rspec))
         else:
-            return self.wrap_up(rspec)
+            return (False,self.wrap_up(rspec))
 
 
     def apply_compiled(rspec):

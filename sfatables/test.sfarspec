@@ -1,6 +1,6 @@
 <!-- run "runtime.py sfarspec" to apply current rule set to this file -->
 
-<rspec>
+<RSpec>
      <request>
         <nodespec>
             <node name="plc.princeton.planetlab-01"/>
@@ -10,4 +10,4 @@
             <node name="plc.tp.planetlab3"/>
         </nodespec>
     </request>
-</rspec>
+</RSpec>
