@@ -85,7 +85,7 @@ class XMLRule:
         #       else rspec
         
         if (self.match(rspec)):
-            return (True,self.wrap_up(self.target(rspec))
+            return (True,self.wrap_up(self.target(rspec)))
         else:
             return (False,self.wrap_up(rspec))
 
