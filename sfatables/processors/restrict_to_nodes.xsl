@@ -9,11 +9,12 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:variable name="whitelist_prefix" select="//rspec//target-context/argument[name='whitelist']/value"/>
-    <xsl:variable name="blacklist_prefix" select="//rspec//target-context/argument[name='blacklist']/value"/>
+    <xsl:variable name="whitelist_prefix" select="//RSpec//target-context/argument[name='whitelist']/value"/>
+    <xsl:variable name="blacklist_prefix" select="//RSpec//target-context/argument[name='blacklist']/value"/>
 
     <!-- Drop nodes that are not in the whitelist -->
     <xsl:template match="node">
+        <xsl:value-of select="$blacklist_prefix"/>
             <xsl:choose>
                 <xsl:when test="starts-with(@name,$whitelist_prefix) and not($blacklist_prefix and starts-with(@name,$blacklist_prefix))">
                     <xsl:copy-of select="."/>

@@ -50,7 +50,9 @@ class SFATablesRules:
                 childNode = self.create_xml_node(k, context_dict[k])
                 node.addChild(childNode)
             else:
-                node.addContent(context_dict[k])
+                childNode = libxml2.newNode(k)
+                childNode.addContent(context_dict[k])
+                node.addChild(childNode)
         return node
                 
     def add_request_context_to_rspec(self, doc):
@@ -86,7 +88,7 @@ class SFATablesRules:
 
 def main():
     incoming = SFATablesRules('INCOMING')
-    incoming.set_context({'sfa':{'user':{'hrn':'ple.princeton.sapanb'}}})
+    incoming.set_context({'sfa':{'user':{'hrn':'plc.princeton.sapanb'}}})
 
     outgoing = SFATablesRules('OUTGOING')
     print "%d rules loaded for INCOMING chain"%len(incoming.sorted_rule_list)

@@ -9,8 +9,8 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:variable name="whitelist_suffix" select="//rspec//target-context/argument[name='whitelist-dns-suffix']/value"/>
-    <xsl:variable name="blacklist_suffix" select="//rspec//target-context/argument[name='blacklist-dns-suffix']/value"/>
+    <xsl:variable name="whitelist_suffix" select="//RSpec//target-context/argument[name='whitelist-dns-suffix']/value"/>
+    <xsl:variable name="blacklist_suffix" select="//RSpec//target-context/argument[name='blacklist-dns-suffix']/value"/>
 
     <!-- Drop nodes that are not in the whitelist. This is the legacy version that works on the current
     rspec. The current rspec refers to dns names, not sfa names for nodes.-->
