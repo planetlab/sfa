@@ -85,10 +85,8 @@ class XMLRule:
         #       else rspec
         
         if (self.match(rspec)):
-            print "Matched!"
             return (True,self.wrap_up(self.target(rspec)))
         else:
-            print "Not Matched!"
             return (False,self.wrap_up(rspec))
 
 
