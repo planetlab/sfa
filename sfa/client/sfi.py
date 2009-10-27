@@ -213,7 +213,7 @@ class Sfi:
           arg_list = [user_cred, "slice", name]
           request_hash = self.key.compute_hash(arg_list)  
           slice_cred_str = self.registry.get_credential(user_cred, "slice", name, request_hash)
-          if slice_cred:
+          if slice_cred_str:
              slice_cred = Credential(string=slice_cred_str)
              slice_cred.save_to_file(file, save_parents=True)
              if self.options.verbose:
