@@ -14,7 +14,6 @@
 
     <!-- Drop nodes that are not in the whitelist -->
     <xsl:template match="node">
-        <xsl:value-of select="$blacklist_prefix"/>
             <xsl:choose>
                 <xsl:when test="starts-with(@name,$whitelist_prefix) and not($blacklist_prefix and starts-with(@name,$blacklist_prefix))">
                     <xsl:copy-of select="."/>
