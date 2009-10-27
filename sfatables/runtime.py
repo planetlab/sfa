@@ -86,7 +86,7 @@ class SFATablesRules:
 
 def main():
     incoming = SFATablesRules('INCOMING')
-    incoming.set_context({'sfa':{'user':{'hrn':'plc.princeton.sapanb'}}})
+    incoming.set_context({'sfa':{'user':{'hrn':'ple.princeton.sapanb'}}})
 
     outgoing = SFATablesRules('OUTGOING')
     print "%d rules loaded for INCOMING chain"%len(incoming.sorted_rule_list)
