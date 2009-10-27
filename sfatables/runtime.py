@@ -86,16 +86,20 @@ class SFATablesRules:
 
         return final_rspec
 
+    def print_rules(self):
+        for rule in self.sorted_rule_list:
+            print rule.processors
+
 def main():
     incoming = SFATablesRules('INCOMING')
     incoming.set_context({'sfa':{'user':{'hrn':'plc.princeton.sapanb'}}})
 
     outgoing = SFATablesRules('OUTGOING')
     print "%d rules loaded for INCOMING chain"%len(incoming.sorted_rule_list)
-    print incoming.sorted_rule_list[0].processors
+    incoming.print_rules()
 
     print "%d rules loaded for OUTGOING chain"%len(outgoing.sorted_rule_list)
-    print outgoing.sorted_rule_list[0].processors
+    outgoing.print_rules()
 
     rspec = open(sys.argv[1]).read()
     newrspec = incoming.apply(rspec)
