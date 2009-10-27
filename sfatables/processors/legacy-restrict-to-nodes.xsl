@@ -16,7 +16,7 @@
     rspec. The current rspec refers to dns names, not sfa names for nodes.-->
     <xsl:template match="NodeSpec">
             <xsl:choose>
-                <xsl:when test="ends-with(@name,$whitelist_suffix) and not($blacklist_suffix and ends-with(@name,$blacklist_suffix))">
+                <xsl:when test="(not($whitelist_suffix) or contains(@name,$whitelist_suffix)) and (not($blacklist_suffix) or not(contains(@name,$blacklist_suffix)))">
                     <xsl:copy-of select="."/>
                 </xsl:when>
                 <xsl:otherwise/>
