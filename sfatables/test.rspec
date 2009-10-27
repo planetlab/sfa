@@ -2,7 +2,7 @@
 
 <RSpec>
      <request>
-        <nodespec>
+        <nodespec name="foobar">
             <node name="plc.princeton.planetlab-01"/>
             <node name="plc.princeton.planetlab-02"/>
             <node name="plc.princeton.planetlab-03"/>

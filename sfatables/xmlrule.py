@@ -84,6 +84,7 @@ class XMLRule:
         #       then target(target_args, rspec)
         #       else rspec
         
+        import pdb
         if (self.match(rspec)):
             return (True,self.wrap_up(self.target(rspec)))
         else:
