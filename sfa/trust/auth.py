@@ -238,6 +238,7 @@ class Auth:
                 rl.add("info")
 
         elif type == "authority":
+            rl.add("authority")
             pis = record.get("pi", [])
             operators = record.get("operator", [])
             if (cred_object_hrn in pis):
