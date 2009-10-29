@@ -303,9 +303,9 @@ class Sfi:
                 if self.options.verbose:
                     print "Writing authority credential to", file
                 return cred
-             else:
-                 print "Failed to get authority credential"
-                 sys.exit(-1)
+            else:
+                print "Failed to get authority credential"
+                sys.exit(-1)
     
     def get_slice_cred(self,name):
         file = os.path.join(self.options.sfi_dir, "slice_" + self.get_leaf(name) + ".cred")
