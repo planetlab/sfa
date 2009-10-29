@@ -203,34 +203,21 @@ class Auth:
     
         raise PermissionError(name)
 
-    def determine_user_rights(self, src_cred, record):
+    def determine_user_rights(self, caller_hrn, record):
         """
         Given a user credential and a record, determine what set of rights the
         user should have to that record.
-
-        Src_cred can be None when obtaining a user credential, but should be
-        set to a valid user credential when obtaining a slice or authority
-        credential.
-
+        
         This is intended to replace determine_rights() and
         verify_cancreate_credential()
         """
 
-        type = record['type']
-        if src_cred:
-            cred_object_hrn = src_cred.get_gid_object().get_hrn()
-        else:
-            # supplying src_cred==None is only valid when obtaining user
-            # credentials.
-            #assert(type == "user")
-            
-            cred_object_hrn = None
-
         rl = RightList()
+        type = record['type']
 
         if type=="slice":
             researchers = record.get("researcher", [])
-            if (cred_object_hrn in researchers):
+            if (caller_hrn in researchers):
                 rl.add("refresh")
                 rl.add("embed")
                 rl.add("bind")
@@ -240,11 +227,11 @@ class Auth:
         elif type == "authority":
             pis = record.get("pi", [])
             operators = record.get("operator", [])
-            if (cred_object_hrn == config.SFA_INTERFACE_HRN):
+            if (caller_hrn == config.SFA_INTERFACE_HRN):
                 rl.add("authority")
-            if (cred_object_hrn in pis):
+            if (caller_hrn in pis):
                 rl.add("authority,sa")
-            if (cred_object_hrn in operators):
+            if (caller_hrn in operators):
                 rl.add("authority,ma")
 
         elif type == "user":
