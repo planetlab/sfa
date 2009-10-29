@@ -25,7 +25,103 @@ class Sfi:
     user = None
     authority = None
     options = None
-    
+   
+    def create_cmd_parser(self,command, additional_cmdargs = None):
+        cmdargs = {"gid": "",
+                  "list": "name",
+                  "show": "name",
+                  "remove": "name",
+                  "add": "record",
+                  "update": "record",
+                  "aggregates": "[name]",
+                  "registries": "[name]",
+                  "slices": "",
+                  "resources": "[name]",
+                  "create": "name rspec",
+                  "delete": "name",
+                  "reset": "name",
+                  "start": "name",
+                  "stop": "name",
+                  "delegate": "name"
+                 }
+
+        if additional_cmdargs:
+            cmdargs.update(additional_cmdargs)
+
+        if command not in cmdargs:
+            print "Invalid command\n"
+            print "Commands: ",
+            for key in cmdargs.keys():
+                print key+",",
+            print ""
+            sys.exit(2)
+
+        parser = OptionParser(usage="sfi [sfi_options] %s [options] %s" \
+                                     % (command, cmdargs[command]))
+
+        if command in ("resources"):
+            parser.add_option("-f", "--format", dest="format",type="choice",
+                             help="display format ([xml]|dns|ip)",default="xml",
+                             choices=("xml","dns","ip"))
+            parser.add_option("-a", "--aggregate", dest="aggregate",
+                             default=None, help="aggregate hrn")
+
+        if command in ("create"):
+            parser.add_option("-a", "--aggregate", dest="aggregate",default=None,
+                             help="aggregate hrn")
+
+        if command in ("list", "show", "remove"):
+            parser.add_option("-t", "--type", dest="type",type="choice",
+                            help="type filter ([all]|user|slice|sa|ma|node|aggregate)",
+                            choices=("all","user","slice","sa","ma","node","aggregate"),
+                            default="all")
+
+        if command in ("resources", "show", "list"):
+           parser.add_option("-o", "--output", dest="file",
+                            help="output XML to file", metavar="FILE", default=None)
+        
+        if command in ("show", "list"):
+           parser.add_option("-f", "--format", dest="format", type="choice",
+                             help="display format ([text]|xml)",default="text",
+                             choices=("text","xml"))
+
+        if command in ("delegate"):
+           parser.add_option("-u", "--user",
+                            action="store_true", dest="delegate_user", default=False,
+                            help="delegate user credential")
+           parser.add_option("-s", "--slice", dest="delegate_slice",
+                            help="delegate slice credential", metavar="HRN", default=None)
+        return parser
+
+        
+    def create_parser(self):
+
+        # Generate command line parser
+        parser = OptionParser(usage="sfi [options] command [command_options] [command_args]",
+                             description="Commands: gid,list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset")
+        parser.add_option("-r", "--registry", dest="registry",
+                         help="root registry", metavar="URL", default=None)
+        parser.add_option("-s", "--slicemgr", dest="sm",
+                         help="slice manager", metavar="URL", default=None)
+        default_sfi_dir=os.path.expanduser("~/.sfi/")
+        parser.add_option("-d", "--dir", dest="sfi_dir",
+                         help="config & working directory - default is " + default_sfi_dir,
+                         metavar="PATH", default = default_sfi_dir)
+        parser.add_option("-u", "--user", dest="user",
+                         help="user name", metavar="HRN", default=None)
+        parser.add_option("-a", "--auth", dest="auth",
+                         help="authority name", metavar="HRN", default=None)
+        parser.add_option("-v", "--verbose",
+                         action="store_true", dest="verbose", default=False,
+                         help="verbose mode")
+        parser.add_option("-p", "--protocol",
+                         dest="protocol", default="xmlrpc",
+                         help="RPC protocol (xmlrpc or soap)")
+        parser.disable_interspersed_args()
+
+        return parser
+        
+ 
     #
     # Establish Connection to SliceMgr and Registry Servers
     #
@@ -295,164 +391,68 @@ class Sfi:
            os.remove(outfn)
     
        return key_string
-    #
-    # Generate sub-command parser
-    #
-    def create_cmd_parser(self,command, additional_cmdargs = None):
-       cmdargs = {"gid": "",
-                  "list": "name",
-                  "show": "name",
-                  "remove": "name",
-                  "add": "record",
-                  "update": "record",
-                  "aggregates": "[name]",
-                  "registries": "[name]",   
-                  "slices": "",
-                  "resources": "[name]",
-                  "create": "name rspec",
-                  "delete": "name",
-                  "reset": "name",
-                  "start": "name",
-                  "stop": "name",
-                  "delegate": "name"
-                 }
-    
-       if additional_cmdargs:
-          cmdargs.update(additional_cmdargs)
-    
-       if command not in cmdargs:
-          print "Invalid command\n"
-          print "Commands: ",
-          for key in cmdargs.keys():
-              print key+",",
-          print ""
-          sys.exit(2)
-    
-       parser = OptionParser(usage="sfi [sfi_options] %s [options] %s" \
-          % (command, cmdargs[command]))
-
-       if command in ("resources"):
-           parser.add_option("-f", "--format", dest="format",type="choice",
-                             help="display format ([xml]|dns|ip)",default="xml",
-                             choices=("xml","dns","ip"))
-           parser.add_option("-a", "--aggregate", dest="aggregate",
-                             default=None, help="aggregate hrn")  
-    
-       if command in ("create"):
-           parser.add_option("-a", "--aggregate", dest="aggregate",default=None,
-                             help="aggregate hrn") 
- 
-       if command in ("list", "show", "remove"):
-          parser.add_option("-t", "--type", dest="type",type="choice",
-                            help="type filter ([all]|user|slice|sa|ma|node|aggregate)",
-                            choices=("all","user","slice","sa","ma","node","aggregate"),
-                            default="all")
-
-       if command in ("resources", "show", "list"):
-          parser.add_option("-o", "--output", dest="file",
-                            help="output XML to file", metavar="FILE", default=None)
-
-       if command in ("show", "list"):
-           parser.add_option("-f", "--format", dest="format", type="choice", 
-                             help="display format ([text]|xml)",default="text", 
-                             choices=("text","xml")) 
-
-       if command in ("delegate"):
-          parser.add_option("-u", "--user",
-                            action="store_true", dest="delegate_user", default=False,
-                            help="delegate user credential")
-          parser.add_option("-s", "--slice", dest="delegate_slice",
-                            help="delegate slice credential", metavar="HRN", default=None)
-       return parser
-    
-    def create_parser(self):
-
-       # Generate command line parser
-       parser = OptionParser(usage="sfi [options] command [command_options] [command_args]",
-                             description="Commands: gid,list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset")
-       parser.add_option("-r", "--registry", dest="registry",
-                         help="root registry", metavar="URL", default=None)
-       parser.add_option("-s", "--slicemgr", dest="sm",
-                         help="slice manager", metavar="URL", default=None)
-       default_sfi_dir=os.path.expanduser("~/.sfi/")
-       parser.add_option("-d", "--dir", dest="sfi_dir",
-                         help="config & working directory - default is " + default_sfi_dir,
-                         metavar="PATH", default = default_sfi_dir)
-       parser.add_option("-u", "--user", dest="user",
-                         help="user name", metavar="HRN", default=None)
-       parser.add_option("-a", "--auth", dest="auth",
-                         help="authority name", metavar="HRN", default=None)
-       parser.add_option("-v", "--verbose",
-                         action="store_true", dest="verbose", default=False,
-                         help="verbose mode")
-       parser.add_option("-p", "--protocol",
-                         dest="protocol", default="xmlrpc",
-                         help="RPC protocol (xmlrpc or soap)")
-       parser.disable_interspersed_args()
-    
-       return parser
-    
-    def dispatch(self,command, cmd_opts, cmd_args):
-       getattr(self,command)(cmd_opts, cmd_args)
     
     #
     # Following functions implement the commands
     #
     # Registry-related commands
     #
-   
+  
+    def dispatch(self,command, cmd_opts, cmd_args):
+        getattr(self,command)(cmd_opts, cmd_args)
+ 
     def gid(self, opts, args):
-       gid = self.get_gid()
-       print "GID: %s" % (gid.save_to_string(save_parents=True))
-       return   
+        gid = self.get_gid()
+        print "GID: %s" % (gid.save_to_string(save_parents=True))
+        return   
  
     # list entires in named authority registry
     def list(self,opts, args):
-       user_cred = self.get_user_cred().save_to_string(save_parents=True)
-       hrn = args[0]
-       request_hash = self.key.compute_hash([user_cred, hrn])    
-       try:
-          list = self.registry.list(user_cred, hrn, request_hash)
-       except IndexError:
-          raise Exception, "Not enough parameters for the 'list' command"
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        hrn = args[0]
+        request_hash = self.key.compute_hash([user_cred, hrn])    
+        try:
+            list = self.registry.list(user_cred, hrn, request_hash)
+        except IndexError:
+            raise Exception, "Not enough parameters for the 'list' command"
           
-       # filter on person, slice, site, node, etc.  
-       # THis really should be in the self.filter_records funct def comment...
-       list = self.filter_records(opts.type, list)
-       for record in list:
-           print "%s (%s)" % (record['hrn'], record['type'])     
-       if opts.file:
-           self.save_records_to_file(opts.file, list)
-       return
+        # filter on person, slice, site, node, etc.  
+        # THis really should be in the self.filter_records funct def comment...
+        list = self.filter_records(opts.type, list)
+        for record in list:
+            print "%s (%s)" % (record['hrn'], record['type'])     
+        if opts.file:
+            self.save_records_to_file(opts.file, list)
+        return
     
     # show named registry record
     def show(self,opts, args):
-       user_cred = self.get_user_cred().save_to_string(save_parents=True)
-       hrn = args[0]
-       request_hash = self.key.compute_hash([user_cred, hrn])    
-       records = self.registry.resolve(user_cred, hrn, request_hash)
-       records = self.filter_records(opts.type, records)
-       if not records:
-          print "No record of type", opts.type
-       for record in records:
-           if record['type'] in ['user']:
-               record = UserRecord(dict = record)
-           elif record['type'] in ['slice']:
-               record = SliceRecord(dict = record)
-           elif record['type'] in ['node']:
-               record = NodeRecord(dict = record)
-           elif record['type'] in ['authority', 'ma', 'sa']:
-               record = AuthorityRecord(dict = record)
-           else:
-               record = GeniRecord(dict = record)
-           if (opts.format=="text"): 
-               record.dump()  
-           else: 
-               print record.save_to_string() 
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        hrn = args[0]
+        request_hash = self.key.compute_hash([user_cred, hrn])    
+        records = self.registry.resolve(user_cred, hrn, request_hash)
+        records = self.filter_records(opts.type, records)
+        if not records:
+            print "No record of type", opts.type
+        for record in records:
+            if record['type'] in ['user']:
+                record = UserRecord(dict = record)
+            elif record['type'] in ['slice']:
+                record = SliceRecord(dict = record)
+            elif record['type'] in ['node']:
+                record = NodeRecord(dict = record)
+            elif record['type'] in ['authority', 'ma', 'sa']:
+                record = AuthorityRecord(dict = record)
+            else:
+                record = GeniRecord(dict = record)
+            if (opts.format=="text"): 
+                record.dump()  
+            else: 
+                print record.save_to_string() 
        
-       if opts.file:
-           self.save_records_to_file(opts.file, records)
-       return
+        if opts.file:
+            self.save_records_to_file(opts.file, records)
+        return
     
     def delegate(self,opts, args):
        user_cred = self.get_user_cred()
