@@ -118,7 +118,7 @@ class Sfi:
         parser.add_option("-p", "--protocol",
                          dest="protocol", default="xmlrpc",
                          help="RPC protocol (xmlrpc or soap)")
-        parser.add_option("-h", "--hashrequest",
+        parser.add_option("-k", "--hashrequest",
                          action="store_true", dest="hashrequest", default=False,
                          help="Create a hash of the request that will be authenticated on the server")
         parser.disable_interspersed_args()
