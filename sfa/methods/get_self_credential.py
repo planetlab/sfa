@@ -67,21 +67,20 @@ class get_self_credential(Method):
             raise RecordNotFound(hrn)
         record = records[0]
         
+        # authenticate the gid
+        gid = record.get_gid_object()
+        gid_str = gid.save_to_string(save_parents=True)
+        self.api.auth.authenticateGid(gid_str, [cert, type, hrn], request_hash)
+        
+        # authenticate the certificate against the gid in the db
+        certificate = Certificate(string=cert)
+        if not certificate.is_pubkey(gid.get_pubkey()):
+            raise ConnectionKeyGIDMismatch(gid.get_subject())
+
         # get the right of this record    
         rights = self.api.auth.determine_user_rights(None, record)
         if rights.is_empty():
             raise PermissionError(gid.get_hrn() + " has no rights to " + record.get_name())
-       
-        # authenticate the gid
-        if request_hash:
-            gid = record.get_gid_object()
-            gid_str = gid.save_to_string(save_parents=True)
-            self.api.auth.authenticateGid(gid_str, [cert, type, hrn], request_hash)
-        
-        # authenticate the certificate
-        certificate = Certificate(string=cert)
-        if not certificate.is_pubkey(gid.get_pubkey()):
-            raise ConnectionKeyGIDMismatch(gid.get_subject())
 
         # create the credential
         gid = record.get_gid_object()
