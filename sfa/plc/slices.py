@@ -280,9 +280,14 @@ class Slices(SimpleStorage):
             if not person_record:
                 pass
             person_dict = person_record
+            local_person=False
             if peer:
                 peer_id = self.api.plshell.GetPeers(self.api.plauth, {'shortname': peer}, ['peer_id'])[0]['peer_id']
                 persons = self.api.plshell.GetPersons(self.api.plauth, {'email': [person_dict['email']], 'peer_id': peer_id}, ['person_id', 'key_ids'])
+		if not persons:
+		    persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
+		    if persons:
+                       local_person=True
 
             else:
                 persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])   
@@ -315,13 +320,14 @@ class Slices(SimpleStorage):
 
             self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)
             self.api.plshell.AddPersonToSite(self.api.plauth, person_dict['email'], site_id)
-            if peer:
+            if peer and not local_person:
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
+            if peer:
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
             
-            self.verify_keys(registry, credential, person_dict, key_ids, person_id, peer)
+            self.verify_keys(registry, credential, person_dict, key_ids, person_id, peer, local_person)
 
-    def verify_keys(self, registry, credential, person_dict, key_ids, person_id,  peer):
+    def verify_keys(self, registry, credential, person_dict, key_ids, person_id,  peer, local_person):
         keylist = self.api.plshell.GetKeys(self.api.plauth, key_ids, ['key'])
         keys = [key['key'] for key in keylist]
         
@@ -333,8 +339,9 @@ class Slices(SimpleStorage):
                 if peer:
                     self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'person', person_id, peer)
                 key_id = self.api.plshell.AddPersonKey(self.api.plauth, person_dict['email'], key)
-                if peer:
+                if peer and not local_person:
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
+                if peer:
                     try: self.api.plshell.BindObjectToPeer(self.api.plauth, 'key', key_id, peer, key_ids.pop(0))
 
                     except: pass   
