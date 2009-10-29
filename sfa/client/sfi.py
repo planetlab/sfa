@@ -249,7 +249,9 @@ class Sfi:
             return gid
         else:
             cert_str = self.cert.save_to_string(save_parents=True)
-            request_hash = self.key.compute_hash([cert_str, self.user, "user"])
+            request_hash=None
+            if self.hashrequest:
+                request_hash = self.key.compute_hash([cert_str, self.user, "user"])
             gid_str = self.registry.get_gid(cert_str, self.user, "user", request_hash)
             gid = GID(string=gid_str)
             if self.options.verbose:
@@ -265,7 +267,9 @@ class Sfi:
         else:
             # bootstrap user credential
             cert_string = self.cert.save_to_string(save_parents=True)
-            request_hash = self.key.compute_hash([cert_string, "user", self.user])
+            request_hash=None
+            if self.hashrequest:
+                request_hash = self.key.compute_hash([cert_string, "user", self.user])
             user_cred = self.registry.get_self_credential(cert_string, "user", self.user, request_hash)
             if user_cred:
                cred = Credential(string=user_cred)
@@ -278,50 +282,53 @@ class Sfi:
                sys.exit(-1)
     
     def get_auth_cred(self):
+        if not self.authority:
+            print "no authority specified. Use -a or set SF_AUTH"
+            sys.exit(-1)
     
-       if not self.authority:
-          print "no authority specified. Use -a or set SF_AUTH"
-          sys.exit(-1)
-    
-       file = os.path.join(self.options.sfi_dir, self.get_leaf("authority") +".cred")
-       if (os.path.isfile(file)):
-          auth_cred = Credential(filename=file)
-          return auth_cred
-       else:
-          # bootstrap authority credential from user credential
-          user_cred = self.get_user_cred().save_to_string(save_parents=True)
-          request_hash = self.key.compute_hash([user_cred, "authority", self.authority])
-          auth_cred = self.registry.get_credential(user_cred, "authority", self.authority, request_hash)
-          if auth_cred:
-             cred = Credential(string=auth_cred)
-             cred.save_to_file(file, save_parents=True)
-             if self.options.verbose:
-                print "Writing authority credential to", file
-             return cred
-          else:
-             print "Failed to get authority credential"
-             sys.exit(-1)
+        file = os.path.join(self.options.sfi_dir, self.get_leaf("authority") +".cred")
+        if (os.path.isfile(file)):
+            auth_cred = Credential(filename=file)
+            return auth_cred
+        else:
+            # bootstrap authority credential from user credential
+            user_cred = self.get_user_cred().save_to_string(save_parents=True)
+            request_hash = None
+            if self.hashrequest:
+                request_hash = self.key.compute_hash([user_cred, "authority", self.authority])
+            auth_cred = self.registry.get_credential(user_cred, "authority", self.authority, request_hash)
+            if auth_cred:
+                cred = Credential(string=auth_cred)
+                cred.save_to_file(file, save_parents=True)
+                if self.options.verbose:
+                    print "Writing authority credential to", file
+                return cred
+             else:
+                 print "Failed to get authority credential"
+                 sys.exit(-1)
     
     def get_slice_cred(self,name):
-       file = os.path.join(self.options.sfi_dir, "slice_" + self.get_leaf(name) + ".cred")
-       if (os.path.isfile(file)):
-          slice_cred = Credential(filename=file)
-          return slice_cred
-       else:
-          # bootstrap slice credential from user credential
-          user_cred = self.get_user_cred().save_to_string(save_parents=True)
-          arg_list = [user_cred, "slice", name]
-          request_hash = self.key.compute_hash(arg_list)  
-          slice_cred_str = self.registry.get_credential(user_cred, "slice", name, request_hash)
-          if slice_cred_str:
-             slice_cred = Credential(string=slice_cred_str)
-             slice_cred.save_to_file(file, save_parents=True)
-             if self.options.verbose:
-                print "Writing slice credential to", file
-             return slice_cred
-          else:
-             print "Failed to get slice credential"
-             sys.exit(-1)
+        file = os.path.join(self.options.sfi_dir, "slice_" + self.get_leaf(name) + ".cred")
+        if (os.path.isfile(file)):
+            slice_cred = Credential(filename=file)
+            return slice_cred
+        else:
+            # bootstrap slice credential from user credential
+            user_cred = self.get_user_cred().save_to_string(save_parents=True)
+            arg_list = [user_cred, "slice", name]
+            request_hash=None
+            if self.hashrequest:
+                request_hash = self.key.compute_hash(arg_list)  
+            slice_cred_str = self.registry.get_credential(user_cred, "slice", name, request_hash)
+            if slice_cred_str:
+                slice_cred = Credential(string=slice_cred_str)
+                slice_cred.save_to_file(file, save_parents=True)
+                if self.options.verbose:
+                    print "Writing slice credential to", file
+                return slice_cred
+            else:
+                print "Failed to get slice credential"
+                sys.exit(-1)
     
     def delegate_cred(self,cred, hrn, type = 'authority'):
         # the gid and hrn of the object we are delegating
@@ -414,7 +421,9 @@ class Sfi:
     def list(self,opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = args[0]
-        request_hash = self.key.compute_hash([user_cred, hrn])    
+        request_hash=None
+        if self.hashrequest:
+            request_hash = self.key.compute_hash([user_cred, hrn])    
         try:
             list = self.registry.list(user_cred, hrn, request_hash)
         except IndexError:
@@ -433,7 +442,9 @@ class Sfi:
     def show(self,opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = args[0]
-        request_hash = self.key.compute_hash([user_cred, hrn])    
+        request_hash=None
+        if self.hashrequest:
+            request_hash = self.key.compute_hash([user_cred, hrn])    
         records = self.registry.resolve(user_cred, hrn, request_hash)
         records = self.filter_records(opts.type, records)
         if not records:
@@ -516,55 +527,61 @@ class Sfi:
     # removed named registry record
     #   - have to first retrieve the record to be removed
     def remove(self,opts, args):
-       auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
-       hrn = args[0]
-       type = opts.type 
-       if type in ['all']:
-           type = '*'
-       arg_list = [auth_cred, type, hrn]
-       request_hash = self.key.compute_hash(arg_list)                   
-       return self.registry.remove(auth_cred, type, hrn, request_hash)
+        auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
+        hrn = args[0]
+        type = opts.type 
+        if type in ['all']:
+            type = '*'
+        request_hash=None
+        if self.hashrequest: 
+            arg_list = [auth_cred, type, hrn]
+            request_hash = self.key.compute_hash(arg_list)                   
+        return self.registry.remove(auth_cred, type, hrn, request_hash)
     
     # add named registry record
     def add(self,opts, args):
-       auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
-       record_filepath = args[0]
-       rec_file = self.get_record_file(record_filepath)
-       record = self.load_record_from_file(rec_file).as_dict()
-       arg_list = [auth_cred]
-       request_hash = self.key.compute_hash(arg_list)
-       return self.registry.register(auth_cred, record, request_hash)
+        auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
+        record_filepath = args[0]
+        rec_file = self.get_record_file(record_filepath)
+        record = self.load_record_from_file(rec_file).as_dict()
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [auth_cred]
+            request_hash = self.key.compute_hash(arg_list)
+        return self.registry.register(auth_cred, record, request_hash)
     
     # update named registry entry
     def update(self,opts, args):
-       user_cred = self.get_user_cred()
-       rec_file = self.get_record_file(args[0])
-       record = self.load_record_from_file(rec_file)
-       if record['type'] == "user":
-           if record.get_name() == user_cred.get_gid_object().get_hrn():
-              cred = user_cred.save_to_string(save_parents=True)
-           else:
-              cred = self.get_auth_cred().save_to_string(save_parents=True)
-       elif record['type'] in ["slice"]:
-           try:
-               cred = self.get_slice_cred(record.get_name()).save_to_string(save_parents=True)
-           except ServerException, e:
+        user_cred = self.get_user_cred()
+        rec_file = self.get_record_file(args[0])
+        record = self.load_record_from_file(rec_file)
+        if record['type'] == "user":
+            if record.get_name() == user_cred.get_gid_object().get_hrn():
+                cred = user_cred.save_to_string(save_parents=True)
+            else:
+                cred = self.get_auth_cred().save_to_string(save_parents=True)
+        elif record['type'] in ["slice"]:
+            try:
+                cred = self.get_slice_cred(record.get_name()).save_to_string(save_parents=True)
+            except ServerException, e:
                # XXX smbaker -- once we have better error return codes, update this
                # to do something better than a string compare
                if "Permission error" in e.args[0]:
                    cred = self.get_auth_cred().save_to_string(save_parents=True)
                else:
                    raise
-       elif record.get_type() in ["authority"]:
-           cred = self.get_auth_cred().save_to_string(save_parents=True)
-       elif record.get_type() == 'node':
-           cred = self.get_auth_cred().save_to_string(save_parents=True)
-       else:
-           raise "unknown record type" + record.get_type()
-       record = record.as_dict()
-       arg_list = [cred]  
-       request_hash = self.key.compute_hash(arg_list)
-       return self.registry.update(cred, record, request_hash)
+        elif record.get_type() in ["authority"]:
+            cred = self.get_auth_cred().save_to_string(save_parents=True)
+        elif record.get_type() == 'node':
+            cred = self.get_auth_cred().save_to_string(save_parents=True)
+        else:
+            raise "unknown record type" + record.get_type()
+        record = record.as_dict()
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [cred]  
+            request_hash = self.key.compute_hash(arg_list)
+        return self.registry.update(cred, record, request_hash)
    
     
     def aggregates(self, opts, args):
@@ -572,8 +589,10 @@ class Sfi:
         hrn = None
         if args: 
             hrn = args[0]
-        arg_list = [user_cred, hrn]  
-        request_hash = self.key.compute_hash(arg_list)
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [user_cred, hrn]  
+            request_hash = self.key.compute_hash(arg_list)
         result = self.registry.get_aggregates(user_cred, hrn, request_hash)
         self.display_list(result)
         return 
@@ -583,8 +602,10 @@ class Sfi:
         hrn = None
         if args:
             hrn = args[0]
-        arg_list = [user_cred, hrn]  
-        request_hash = self.key.compute_hash(arg_list)
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [user_cred, hrn]  
+            request_hash = self.key.compute_hash(arg_list)
         result = self.registry.get_registries(user_cred, hrn, request_hash)
         self.display_list(result)
         return
@@ -598,8 +619,10 @@ class Sfi:
     # list instantiated slices
     def slices(self,opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        arg_list = [user_cred]
-        request_hash = self.key.compute_hash(arg_list)
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [user_cred]
+            request_hash = self.key.compute_hash(arg_list)
         results = self.slicemgr.get_slices(user_cred, request_hash)
         self.display_list(results)
         return
@@ -625,8 +648,10 @@ class Sfi:
             cred = user_cred
             hrn = None
 
-        arg_list = [cred, hrn]
-        request_hash = self.key.compute_hash(arg_list)  
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [cred, hrn]
+            request_hash = self.key.compute_hash(arg_list)  
         result = server.get_resources(cred, hrn, request_hash)
         format = opts.format
        
@@ -637,53 +662,63 @@ class Sfi:
     
     # created named slice with given rspec
     def create(self,opts, args):
-       slice_hrn = args[0]
-       user_cred = self.get_user_cred()
-       slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
-       rspec_file = self.get_rspec_file(args[1])
-       rspec=open(rspec_file).read()
-       server = self.slicemgr
-       if opts.aggregate:
-           aggregates = self.registry.get_aggregates(user_cred, opts.aggregate)
-           if not aggregates:
-               raise Exception, "No such aggregate %s" % opts.aggregate
-           aggregate = aggregates[0]
-           url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
-           server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
-       arg_list = [slice_cred, slice_hrn, rspec]
-       request_hash = self.key.compute_hash(arg_list) 
-       return server.create_slice(slice_cred, slice_hrn, rspec, request_hash)
+        slice_hrn = args[0]
+        user_cred = self.get_user_cred()
+        slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
+        rspec_file = self.get_rspec_file(args[1])
+        rspec=open(rspec_file).read()
+        server = self.slicemgr
+        if opts.aggregate:
+            aggregates = self.registry.get_aggregates(user_cred, opts.aggregate)
+            if not aggregates:
+                raise Exception, "No such aggregate %s" % opts.aggregate
+            aggregate = aggregates[0]
+            url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
+            server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [slice_cred, slice_hrn, rspec]
+            request_hash = self.key.compute_hash(arg_list) 
+        return server.create_slice(slice_cred, slice_hrn, rspec, request_hash)
     
     # delete named slice
     def delete(self,opts, args):
         slice_hrn = args[0]
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
-        arg_list = [slice_cred, slice_hrn]
-        request_hash = self.key.compute_hash(arg_list) 
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [slice_cred, slice_hrn]
+            request_hash = self.key.compute_hash(arg_list) 
         return self.slicemgr.delete_slice(slice_cred, slice_hrn, request_hash)
     
     # start named slice
     def start(self,opts, args):
         slice_hrn = args[0]
         slice_cred = self.get_slice_cred(args[0])
-        arg_list = [slice_cred, slice_hrn]
-        request_hash = self.key.compute_hash(arg_list)
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [slice_cred, slice_hrn]
+            request_hash = self.key.compute_hash(arg_list)
         return self.slicemgr.start_slice(slice_cred, slice_hrn, request_hash)
     
     # stop named slice
     def stop(self,opts, args):
         slice_hrn = args[0]
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        arg_list = [slice_cred, slice_hrn]
-        request_hash = self.key.compute_hash(arg_list)
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [slice_cred, slice_hrn]
+            request_hash = self.key.compute_hash(arg_list)
         return self.slicemgr.stop_slice(slice_cred, slice_hrn, request_hash)
     
     # reset named slice
     def reset(self,opts, args):
         slice_hrn = args[0]
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        arg_list = [slice_cred, slice_hrn]
-        request_hash = self.key.compute_hash(arg_list)
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [slice_cred, slice_hrn]
+            request_hash = self.key.compute_hash(arg_list)
         return self.slicemgr.reset_slice(slice_cred, slice_hrn, request_hash)
     
     #
