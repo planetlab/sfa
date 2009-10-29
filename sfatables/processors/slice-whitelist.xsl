@@ -20,7 +20,7 @@
     <xsl:variable name="whitelist" select="exsl:node-set($whitelist_data)/hrn"/>
 
     <!-- Read the value of the current slice's hrn -->
-    <xsl:variable name="current_slice_hrn" select="//request-context/slice/hrn"/>
+    <xsl:variable name="current_slice_hrn" select="//request-context/sfa/slice/hrn"/>
 
     <!-- Define a function that checks if one of a list of prefixes (lst) matches $current_slice_hrn". It's a stupid idea to call a function a 'template' but whatever...  -->
     <xsl:template name="recurse_list">

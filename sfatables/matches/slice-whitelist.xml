@@ -1,4 +1,7 @@
 <match name="slice-whitelist">
-    <context select="//request-context/slice@hrn"/>
-    <processor filename="slice-whitelist.xsl"/>
+    <!-- Empty context. We _always_ get the hrn of the current user -->
+    <rule element='*'>
+      <context select="//sfa/current/slice@hrn"/>
+      <processor filename="slice-whitelist.xsl"/>
+    </rule>
 </match>
