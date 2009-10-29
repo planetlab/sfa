@@ -25,6 +25,7 @@ class Sfi:
     user = None
     authority = None
     options = None
+    hashrequest = False
    
     def create_cmd_parser(self,command, additional_cmdargs = None):
         cmdargs = {"gid": "",
@@ -117,6 +118,9 @@ class Sfi:
         parser.add_option("-p", "--protocol",
                          dest="protocol", default="xmlrpc",
                          help="RPC protocol (xmlrpc or soap)")
+        parser.add_option("-h", "--hashrequest",
+                         action="store_true", dest="hashrequest", default=False,
+                         help="Create a hash of the request that will be authenticated on the server")
         parser.disable_interspersed_args()
 
         return parser
@@ -787,39 +791,40 @@ class Sfi:
     # Main: parse arguments and dispatch to command
     #
     def main(self):
-       parser = self.create_parser()
-       (options, args) = parser.parse_args()
-       self.options = options
-    
-       if len(args) <= 0:
+        parser = self.create_parser()
+        (options, args) = parser.parse_args()
+        self.options = options
+   
+        if options.hashrequest:
+            self.hashrequest=True
+ 
+        if len(args) <= 0:
             print "No command given. Use -h for help."
             return -1
     
-       command = args[0]
-       (cmd_opts, cmd_args) = self.create_cmd_parser(command).parse_args(args[1:])
-       if self.options.verbose :
-          print "Registry %s, sm %s, dir %s, user %s, auth %s" % (options.registry,
-                                                                   options.sm,
-                                                                   options.sfi_dir,
-                                                                   options.user,
+        command = args[0]
+        (cmd_opts, cmd_args) = self.create_cmd_parser(command).parse_args(args[1:])
+        if self.options.verbose :
+            print "Registry %s, sm %s, dir %s, user %s, auth %s" % (options.registry, options.sm,
+                                                                   options.sfi_dir, options.user,
                                                                    options.auth)
-          print "Command %s" %command
-          if command in ("resources"):
-             print "resources cmd_opts %s" %cmd_opts.format
-          elif command in ("list","show","remove"):
-             print "cmd_opts.type %s" %cmd_opts.type
-          print "cmd_args %s" %cmd_args
+            print "Command %s" %command
+            if command in ("resources"):
+                print "resources cmd_opts %s" %cmd_opts.format
+            elif command in ("list","show","remove"):
+                print "cmd_opts.type %s" %cmd_opts.type
+            print "cmd_args %s" %cmd_args
     
-       self.set_servers()
+        self.set_servers()
     
-       try:
-          self.dispatch(command, cmd_opts, cmd_args)
-       except KeyError:
-          raise 
-          print "Command not found:", command
-          sys.exit(1)
+        try:
+            self.dispatch(command, cmd_opts, cmd_args)
+        except KeyError:
+            raise 
+            print "Command not found:", command
+            sys.exit(1)
     
-       return
+        return
     
 if __name__=="__main__":
    Sfi().main()
