@@ -77,10 +77,11 @@ class get_self_credential(Method):
         if not certificate.is_pubkey(gid.get_pubkey()):
             raise ConnectionKeyGIDMismatch(gid.get_subject())
 
-        # get the right of this record    
-        rights = self.api.auth.determine_user_rights(None, record)
+        # get the right of this record
+        caller_hrn = certificate.get_subject()    
+        rights = self.api.auth.determine_user_rights(caller_hrn, record)
         if rights.is_empty():
-            raise PermissionError(gid.get_hrn() + " has no rights to " + record.get_name())
+            raise PermissionError(caller_hrn + " has no rights to " + record.get_name())
 
         # create the credential
         gid = record.get_gid_object()
