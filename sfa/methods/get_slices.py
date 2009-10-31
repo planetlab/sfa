@@ -20,7 +20,6 @@ class get_slices(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Request hash"),
         Mixed(Parameter(str, "Request hash"),
               Parameter(None, "Request hash not specified"))
         ]
