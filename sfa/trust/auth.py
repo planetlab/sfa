@@ -225,10 +225,10 @@ class Auth:
                 rl.add("info")
 
         elif type == "authority":
-            pis = record.get("pi", [])
+            pis = record.get("PI", [])
             operators = record.get("operator", [])
-            if (caller_hrn == config.SFA_INTERFACE_HRN):
-                rl.add("authority")
+            if (caller_hrn == self.config.SFA_INTERFACE_HRN):
+                rl.add("authority,sa,ma",)
             if (caller_hrn in pis):
                 rl.add("authority,sa")
             if (caller_hrn in operators):
