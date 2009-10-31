@@ -56,7 +56,7 @@ class get_credential(Method):
         # (researchers, pis, etc) be filled in
         self.api.fill_record_info(record)
 
-        caller_hrn = self.api.auth.cleint_cred.get_gid_caller().get_hrn()
+        caller_hrn = self.api.auth.client_cred.get_gid_caller().get_hrn()
         rights = self.api.auth.determine_user_rights(caller_hrn, record)
         if rights.is_empty():
             raise PermissionError(self.api.auth.client_cred.get_gid_object().get_hrn() + " has no rights to " + record['name'])
