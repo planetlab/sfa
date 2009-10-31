@@ -185,10 +185,11 @@ class GeniAPI:
             from sfa.server.registry import Registries
             registries = Registries(self)
             registry = registries[self.hrn]
+	    cert_string=self.cert.save_to_string(save_parents=True)
             # get self credential
-            arg_list = [None,type,self.hrn]
+            arg_list = [cert_string,type,self.hrn]
             request_hash=self.key.compute_hash(arg_list)
-            self_cred = registry.get_credential(None, type, self.hrn, request_hash)
+            self_cred = registry.get_self_credential(cert_string, type, self.hrn, request_hash)
             # get credential
             arg_list = [self_cred,type,self.hrn]
             request_hash=self.key.compute_hash(arg_list)
