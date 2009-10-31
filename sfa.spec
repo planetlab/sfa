@@ -33,6 +33,7 @@ Requires: python
 Requires: pyOpenSSL >= 0.7
 Requires: m2crypto
 Requires: libxslt-python
+Requires: python-ZSI
 
 # python 2.5 has uuid module added, for python 2.4 we still need it
 %define has_uuid %(`python -c "import uuid" 2> /dev/null; echo $?`)
