@@ -59,9 +59,10 @@ class resolve(Method):
         # forward the request
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
+	    request_hash=None
             try:
-                records = registries[registry_hrn].resolve(credential, hrn, caller_cred=caller_cred)
-                good_records = [record.as_dict() for record in records]
+                records = registries[registry_hrn].resolve(credential, hrn, request_hash, caller_cred)
+                good_records = [GeniRecord(dict=record).as_dict() for record in records]
                 if good_records:
                     return good_records
             except:
