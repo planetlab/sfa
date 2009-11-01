@@ -56,9 +56,10 @@ class list(Method):
         # forward the request
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
+	    request_hash=None
             try:
-                record_list = registries[registry_hrn].list(credential, hrn, caller_cred=caller_cred)
-                records = [record.as_dict() for record in record_list]
+                record_list = registries[registry_hrn].list(credential, hrn, request_hash, caller_cred)
+                records = [GeniRecord(dict=record).as_dict() for record in record_list]
                 if records:
                     return records
             except:
