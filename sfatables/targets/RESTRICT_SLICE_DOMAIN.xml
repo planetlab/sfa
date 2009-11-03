@@ -29,4 +29,35 @@
         </argument>
         <processor filename="restrict_to_nodes.xsl"/>
     </rule>
+    <rule element="flowspec">
+        <context select=""/>
+        <argument>
+            <name>whitelist-switch</name>
+            <help>Switch id to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+
+        <argument>
+            <name>whitelist-tpsrc</name>
+            <help>Source port to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>whitelist-tpdst</name>
+            <help>Destination port to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>whitelist-ipdst</name>
+            <help>Destination IP to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>whitelist-ipsrc</name>
+            <help>Source IP to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+
+        <processor filename="restrict_flowspec.xsl"/>
+    </rule>
 </target>
