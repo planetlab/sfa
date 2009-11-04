@@ -59,14 +59,17 @@ class resolve(Method):
         # forward the request
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
-	    request_hash=None
             try:
+                records = registries[registry_hrn].resolve(credential, hrn, caller_cred)
+                good_records = [GeniRecord(dict=record).as_dict() for record in records]
+            except:
+                arg_list = [credential, hrn]
+                request_hash=self.api.key.compute_hash(arg_list)                
                 records = registries[registry_hrn].resolve(credential, hrn, request_hash, caller_cred)
                 good_records = [GeniRecord(dict=record).as_dict() for record in records]
-                if good_records:
-                    return good_records
-            except:
-                traceback.print_exc()
+                
+        if good_records:
+            return good_records
 
         # if we still havnt found the record yet, try the local registry
         table = GeniTable()

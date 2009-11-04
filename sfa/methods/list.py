@@ -56,14 +56,17 @@ class list(Method):
         # forward the request
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
-	    request_hash=None
             try:
-                record_list = registries[registry_hrn].list(credential, hrn, request_hash, caller_cred)
+                record_list = registries[registry_hrn].list(credential, hrn, caller_cred)
                 records = [GeniRecord(dict=record).as_dict() for record in record_list]
-                if records:
-                    return records
             except:
-                pass
+                arg_list = [credential, hrn]
+                request_hash = self.api.compute_hash(arg_list)
+                record_list = registries[registry_hrn].list(credential, hrn, request_hash, caller_cred)
+                records = [GeniRecord(dict=record).as_dict() for record in record_list] 
+                
+        if records:
+            return records
 
         # if we still havnt found the record yet, try the local registry
         if not self.api.auth.hierarchy.auth_exists(hrn):
