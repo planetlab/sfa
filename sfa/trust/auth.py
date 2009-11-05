@@ -12,7 +12,6 @@ from sfa.trust.trustedroot import TrustedRootList
 from sfa.trust.rights import RightList
 from sfa.util.faults import *
 from sfa.trust.hierarchy import Hierarchy
-from sfa.util.genitable import GeniTable
 from sfa.util.config import *
 from sfa.util.misc import *
 from sfa.trust.gid import GID
