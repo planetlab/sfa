@@ -89,13 +89,15 @@ def main():
     key_file = os.path.join(path, "server.key")
     cert_file = os.path.join(path, "server.cert")
     
+    # XX TODO: Subject should be the interfaces's hrn
+    subject = "registry" 
     if (options.daemon):  daemon()
 
     if (os.path.exists(key_file)) and (not os.path.exists(cert_file)):
         # If private key exists and cert doesnt, recreate cert
         key = Keypair(filename=key_file)
-        cert = Certificate(subject="registry")
-        cert.set_issuer(key=key, subject="registry")
+        cert = Certificate(subject=subject)
+        cert.set_issuer(key=key, subject=subject)
         cert.set_pubkey(key)
         cert.sign()
         cert.save_to_file(cert_file)
@@ -104,8 +106,8 @@ def main():
         # if no key is specified, then make one up
         key = Keypair(create=True)
         key.save_to_file(key_file)
-        cert = Certificate(subject="registry")
-        cert.set_issuer(key=key, subject="registry")
+        cert = Certificate(subject=subject)
+        cert.set_issuer(key=key, subject=subject)
         cert.set_pubkey(key)
         cert.sign()
         cert.save_to_file(cert_file)
