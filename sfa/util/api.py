@@ -120,13 +120,6 @@ class BaseAPI:
         self.cert = Certificate(filename=self.cert_file)
         self.credential = None
         
-        # Initialize the PLC shell only if SFA wraps a myPLC
-        rspec_type = self.config.get_aggregate_rspec_type()
-        if (rspec_type == 'pl' or rspec_type == 'vini'):
-            self.plshell = self.getPLCShell()
-            self.plshell_version = self.getPLCShellVersion()
-
-        self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
 
