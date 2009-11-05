@@ -21,6 +21,8 @@ from sfa.server.registry import Registries
 
 class Slices(SimpleStorage):
 
+    rspec_to_slice_tag = {'max_rate':'net_max_rate'}
+
     def __init__(self, api, ttl = .5, caller_cred=None):
         self.api = api
         self.ttl = ttl
@@ -412,21 +414,51 @@ class Slices(SimpleStorage):
 
         # get netspec details
         nodespecs = spec.getDictsByTagName('NodeSpec')
-        nodes = []
+
+        # dict in which to store slice attributes to set for the nodes
+        nodes = {}
         for nodespec in nodespecs:
             if isinstance(nodespec['name'], list):
-                nodes.extend(nodespec['name'])
+                for nodename in nodespec['name']:
+                    nodes[nodename] = {}
+                    for k in nodespec.keys():
+                        rspec_attribute_value = nodespec[k]
+                        if (self.rspec_to_slice_tag.has_key(k)):
+                            slice_tag_name = rspec_to_slice_tag[k]
+                            nodes[nodename][slice_tag_name] = rspec_attribute_value
             elif isinstance(nodespec['name'], StringTypes):
-                nodes.append(nodespec['name'])
+                nodename = nodespec['name']
+                nodes[nodename] = {}
+                for k in nodespec.keys():
+                    rspec_attribute_value = nodespec[k]
+                    if (self.rspec_to_slice_tag.has_key(k)):
+                        slice_tag_name = rspec_to_slice_tag[k]
+                        nodes[nodename][slice_tag_name] = rspec_attribute_value
 
+                for k in nodespec.keys():
+                    rspec_attribute_value = nodespec[k]
+                    if (self.rspec_to_slice_tag.has_key(k)):
+                        slice_tag_name = rspec_to_slice_tag[k]
+                        nodes[nodename][slice_tag_name] = rspec_attribute_value
+
+        node_names = nodes.keys()
         # remove nodes not in rspec
-        deleted_nodes = list(set(hostnames).difference(nodes))
+        deleted_nodes = list(set(hostnames).difference(node_names))
         # add nodes from rspec
-        added_nodes = list(set(nodes).difference(hostnames))
+        added_nodes = list(set(node_names).difference(hostnames))
 
         if peer:
             self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', slice['slice_id'], peer)
+
         self.api.plshell.AddSliceToNodes(self.api.plauth, slicename, added_nodes) 
+
+        # Add recognized slice tags
+        for node_name in node_names:
+            node = nodes[node_name]
+            for slice_tag in node.keys():
+                value = node[slice_tag]
+                self.api.plshell.AddSliceTag(self.api.plauth, slicename, slice_tag, value, node_name)
+
         self.api.plshell.DeleteSliceFromNodes(self.api.plauth, slicename, deleted_nodes)
         if peer:
             self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
