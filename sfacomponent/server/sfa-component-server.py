@@ -11,8 +11,8 @@
 #   (requirements coming soon)
 ##
 
-# TCP ports for the three servers
-component_port=12348
+# TCP ports for the component server
+component_port=12346
 
 import os, os.path
 from optparse import OptionParser
