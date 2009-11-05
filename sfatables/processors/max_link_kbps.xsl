@@ -11,12 +11,12 @@
     <!-- End of magic sauce -->
 
     <!-- Read in the value of the argument. See 'example_vini_rspec.xml' for an example of such an argument -->
-    <xsl:variable name="max-link-bandwidth" select="//RSpec//target-context/argument[name='max-link-bandwidth']/value"/>
+    <xsl:variable name="max-link-kbps" select="//RSpec//target-context/argument[name='max-link-kbps']/value"/>
 
     <!-- Drop Linkspecs for which bw > max-link-bandwidth -->
     <xsl:template match="LinkSpec">
             <xsl:choose>
-                <xsl:when test="bw &lt; $max-link-bandwidth">
+                <xsl:when test="not (kbps &gt; $max-link-kbps)">
                     <xsl:copy-of select="."/>
                 </xsl:when>
                 <xsl:otherwise/>

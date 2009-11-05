@@ -1,0 +1,12 @@
+
+<!-- run "runtime.py vini.rspec" to apply current rule set to this file -->
+
+<RSpec>
+  <Request>
+    <LinkSpec name="foobar">
+      <endpoint>i2atla1</endpoint>
+      <endpoint>i2chic1</endpoint>
+      <kbps>1001</kbps>
+    </LinkSpec>
+  </Request>
+</RSpec>

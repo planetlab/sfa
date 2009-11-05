@@ -3,10 +3,10 @@
     <rule element="link">
     <context select=""/>
         <argument>
-            <name>max-link-bandwidth</name>
-            <help>Maximum link bandwidth.</help>
-            <operand>bps</operand>
+            <name>max-link-kbps</name>
+            <help>Maximum link bandwidth in kilobytes per second.</help>
+            <operand>kbps</operand>
         </argument>
-    <processor filename="max_link_bandwidth.xsl"/>
+    <processor filename="max_link_kbps.xsl"/>
     </rule>
 </target>
