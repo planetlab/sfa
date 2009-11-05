@@ -71,7 +71,7 @@ def main():
     global slicemgr_port
 
     # Generate command line parser
-    parser = OptionParser(usage="plc [options]")
+    parser = OptionParser(usage="sfa-server [options]")
     parser.add_option("-r", "--registry", dest="registry", action="store_true",
          help="run registry server", default=False)
     parser.add_option("-s", "--slicemgr", dest="sm", action="store_true",
