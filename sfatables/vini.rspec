@@ -8,5 +8,9 @@
       <endpoint>i2chic1</endpoint>
       <kbps>1001</kbps>
     </LinkSpec>
+    <LinkSpec name="baz">
+      <endpoint>i2hous1</endpoint>
+      <endpoint>i2newy1</endpoint>
+    </LinkSpec>
   </Request>
 </RSpec>
