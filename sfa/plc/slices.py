@@ -457,6 +457,9 @@ class Slices(SimpleStorage):
             node = nodes[node_name]
             for slice_tag in node.keys():
                 value = node[slice_tag]
+                if (isinstance(value, list)):
+                    value = value[0]
+
                 self.api.plshell.AddSliceTag(self.api.plauth, slicename, slice_tag, value, node_name)
 
         self.api.plshell.DeleteSliceFromNodes(self.api.plauth, slicename, deleted_nodes)
