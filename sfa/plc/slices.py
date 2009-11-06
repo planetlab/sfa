@@ -424,7 +424,7 @@ class Slices(SimpleStorage):
                     for k in nodespec.keys():
                         rspec_attribute_value = nodespec[k]
                         if (self.rspec_to_slice_tag.has_key(k)):
-                            slice_tag_name = rspec_to_slice_tag[k]
+                            slice_tag_name = self.rspec_to_slice_tag[k]
                             nodes[nodename][slice_tag_name] = rspec_attribute_value
             elif isinstance(nodespec['name'], StringTypes):
                 nodename = nodespec['name']
@@ -432,13 +432,13 @@ class Slices(SimpleStorage):
                 for k in nodespec.keys():
                     rspec_attribute_value = nodespec[k]
                     if (self.rspec_to_slice_tag.has_key(k)):
-                        slice_tag_name = rspec_to_slice_tag[k]
+                        slice_tag_name = self.rspec_to_slice_tag[k]
                         nodes[nodename][slice_tag_name] = rspec_attribute_value
 
                 for k in nodespec.keys():
                     rspec_attribute_value = nodespec[k]
                     if (self.rspec_to_slice_tag.has_key(k)):
-                        slice_tag_name = rspec_to_slice_tag[k]
+                        slice_tag_name = self.rspec_to_slice_tag[k]
                         nodes[nodename][slice_tag_name] = rspec_attribute_value
 
         node_names = nodes.keys()
