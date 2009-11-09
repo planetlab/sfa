@@ -29,7 +29,7 @@
   <!-- Fill in missing kbps values --> 
   <xsl:template match="NodeSpec[not(max_rate)]">
       <xsl:copy>
-          <xsl:copy-of select="."/>
+          <xsl:copy-of select="@*"/>
           <max_rate><xsl:value-of select="$max-node-kbps"/></max_rate>
       </xsl:copy>
   </xsl:template>
