@@ -54,7 +54,7 @@ class create_slice(Method):
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
         rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
         #Filter the incoming rspec using sfatables
-        incoming_rules = SFATablesRules('OUTGOING')
+        incoming_rules = SFATablesRules('INCOMING')
             
         #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
 
