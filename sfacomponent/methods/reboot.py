@@ -1,5 +1,5 @@
 ### $Id: reboot.py 15428 2009-10-23 15:28:03Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/reboot.py $
+### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfacomponent/methods/reboot.py $
 import os
 from sfa.util.faults import *
 from sfa.util.misc import *

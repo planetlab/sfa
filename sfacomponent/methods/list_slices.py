@@ -1,5 +1,5 @@
-### $Id: start_slice.py 15428 2009-10-23 15:28:03Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/start_slice.py $
+### $Id: list_slices.py 15428 2009-10-23 15:28:03Z tmack $
+### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfacomponent/methods/list_slices.py $
 
 from sfa.util.faults import *
 from sfa.util.misc import *
