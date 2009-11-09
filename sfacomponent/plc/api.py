@@ -8,6 +8,7 @@
 import sys
 import os
 import traceback
+import xmlrpclib.ServerProxy
 from sfa.util.api import *
 
 
@@ -25,4 +26,16 @@ class ComponentAPI(BaseAPI):
         if config is None:
             return
 
+        self.nodemanager = self.getNodeManagerShell()
 
+
+
+    def getNodeManagerShell(self):
+        # do we need an auth ?
+        auth = {}
+        try:
+            nodemanager = xmlrpclib.ServerProxy('http://127.0.0.1:812')   
+        except:
+            raise
+
+        return nodemanager
