@@ -34,6 +34,7 @@ class stop_slice(Method):
         client_gid_str = client_gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'stopslice')
-        self.api.nodemanager.Stop(hrn)
+        slicename = hrn_to_pl_slicename(hrn) 
+        self.api.nodemanager.Stop(slicename)
         
         return 1 
