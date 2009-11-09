@@ -8,18 +8,6 @@
 import sys
 import os
 import traceback
-import string
-import xmlrpclib
-
-from sfa.trust.auth import Auth
-from sfa.util.config import *
-from sfa.util.faults import *
-from sfa.util.debug import *
-from sfa.trust.rights import *
-from sfa.trust.credential import *
-from sfa.trust.certificate import *
-from sfa.util.misc import *
-from sfa.util.sfalogging import *
 from sfa.util.api import *
 
 
