@@ -8,7 +8,7 @@ from sfa.util.parameter import Parameter, Mixed
 
 class reset_slice(Method):
     """
-    Start the specified slice      
+    Reset the specified slice      
 
     @param cred credential string specifying the rights of the caller
     @param hrn human readable name of slice to instantiate
