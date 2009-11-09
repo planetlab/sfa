@@ -33,7 +33,7 @@ class reset_slice(Method):
         client_gid = Credential(string=cred).get_gid_caller()
         client_gid_str = client_gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
-        self.api.auth.check(cred, 'startslice')
+        self.api.auth.check(cred, 'resetslice')
 
         if not self.api.sliver_exists(hrn):
             raise SliverDoesNotExist(hrn)
