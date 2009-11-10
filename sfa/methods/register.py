@@ -118,7 +118,7 @@ class register(Method):
             if not persons:
                 pointer = self.api.plshell.AddPerson(self.api.plauth, dict(record))
             else:
-                pointer = persons[0]['person_id']
+                raise ExistingRecord(record['email'])
  
             if 'enabled' in record and record['enabled']:
                 self.api.plshell.UpdatePerson(self.api.plauth, pointer, {'enabled': record['enabled']})
