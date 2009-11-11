@@ -175,7 +175,7 @@ class GeniAPI:
         Get our credential from a remote registry using a geniclient connection
         """
         type = 'authority'
-        path = self.config.SFA_BASE_DIR
+        path = self.config.SFA_DATA_DIR
         filename = ".".join([self.interface, self.hrn, type, "cred"])
         cred_filename = path + os.sep + filename
         try:
@@ -245,7 +245,7 @@ class GeniAPI:
         # see if this file exists
         # XX This is really the aggregate's credential. Using this is easier than getting
         # the registry's credential from iteslf (ssl errors).   
-        ma_cred_filename = self.config.SFA_BASE_DIR + os.sep + self.interface + self.hrn + ".ma.cred"
+        ma_cred_filename = self.config.SFA_DATA_DIR + os.sep + self.interface + self.hrn + ".ma.cred"
         try:
             self.credential = Credential(filename = ma_cred_filename)
         except IOError:
