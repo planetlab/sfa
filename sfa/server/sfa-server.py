@@ -35,6 +35,7 @@ aggregate_port=12346
 slicemgr_port=12347
 
 import os, os.path
+import sys
 from optparse import OptionParser
 
 from sfa.trust.trustedroot import TrustedRootList
@@ -43,10 +44,9 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.server.registry import Registry
 from sfa.server.aggregate import Aggregate
 from sfa.server.slicemgr import SliceMgr
-
 from sfa.trust.hierarchy import Hierarchy
-
 from sfa.util.config import Config
+from sfa.util.report import trace
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():
@@ -84,55 +84,69 @@ def main():
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
 
+    config = Config()
     hierarchy = Hierarchy()
-    path = hierarchy.basedir
-    key_file = os.path.join(path, "server.key")
-    cert_file = os.path.join(path, "server.cert")
-    
+    trusted_roots = TrustedRootList(config.get_trustedroots_dir())
+    server_key_file = os.path.join(hierarchy.basedir, "server.key")
+    server_cert_file = os.path.join(hierarhy.basedir, "server.cert")
     # XX TODO: Subject should be the interfaces's hrn
     subject = "registry" 
     if (options.daemon):  daemon()
+    
+    # check if the server's private key exists. If it doesnt,
+    # get the right one from the authorities directory. If it cant be
+    # found in the authorities directory, generate a random one
+    if not os.path.exists(server_key_file):
+        hrn = config.SFA_INTERFACE_HRN.lower()
+        key_file = os.sep.join([hierarchy.basedir, hrn, hrn+".pkey")
+        if not os.path.exists(key_file):
+            # if it doesnt exist then this is probably a fresh interface
+            # with no records. Generate a random keypair for now
+            trace("server's public key not found in %s" % key_file)
+            trace("generating a random server key pair")
+            key = Keypair(create=True)
+            key.save_to_file(server_key_file)
+            cert = Certificate(subject=subject)
+            cert.set_issuer(key=key, subject=subject)
+            cert.set_pubkey(key)
+            cert.sign()
+            cert.save_to_file(server_cert_file)
 
-    if (os.path.exists(key_file)) and (not os.path.exists(cert_file)):
-        # If private key exists and cert doesnt, recreate cert
-        key = Keypair(filename=key_file)
+        else:
+            # the pkey was found in the authorites directory. lets 
+            # copy it to where the server key should be and generate
+            # the cert
+            key = Keypair(filename=key_file)
+            key.save_to_file(server_key_file)
+            cert = Certificate(subject=subject)
+            cert.set_issuer(key=key, subject=subject)
+            cert.set_pubkey(key)
+            cert.sign()
+            cert.save_to_file(server_cert_file)
+             
+
+    # If private key exists and cert doesnt, recreate cert
+    if (os.path.exists(server_key_file)) and (not os.path.exists(server_cert_file)):
+        key = Keypair(filename=server_key_file)
         cert = Certificate(subject=subject)
         cert.set_issuer(key=key, subject=subject)
         cert.set_pubkey(key)
         cert.sign()
-        cert.save_to_file(cert_file)
-
-    elif (not os.path.exists(key_file)) or (not os.path.exists(cert_file)):
-        # if no key is specified, then make one up
-        key = Keypair(create=True)
-        key.save_to_file(key_file)
-        cert = Certificate(subject=subject)
-        cert.set_issuer(key=key, subject=subject)
-        cert.set_pubkey(key)
-        cert.sign()
-        cert.save_to_file(cert_file)
-
-    AuthHierarchy = Hierarchy()
-
-    TrustedRoots = TrustedRootList(Config().get_trustedroots_dir())
+        cert.save_to_file(server_cert_file)
 
     # start registry server
     if (options.registry):
-        r = Registry("", registry_port, key_file, cert_file)
-        #r.trusted_cert_list = TrustedRoots.get_list()
-        #r.hierarchy = AuthHierarchy
+        r = Registry("", registry_port, server_key_file, server_cert_file)
         r.start()
 
     # start aggregate manager
     if (options.am):
-        a = Aggregate("", aggregate_port, key_file, cert_file)
-        #a.trusted_cert_list = TrustedRoots.get_list()
+        a = Aggregate("", aggregate_port, server_key_file, server_cert_file)
         a.start()
 
     # start slice manager
     if (options.sm):
-        s = SliceMgr("", slicemgr_port, key_file, cert_file)
-        #s.trusted_cert_list = TrustedRoots.get_list()
+        s = SliceMgr("", slicemgr_port, server_key_file, server_cert_file)
         s.start()
 
 if __name__ == "__main__":
