@@ -48,6 +48,10 @@ class Config:
             if not hasattr(self, 'SFA_CONFIG_DIR'):
                 # default to /var/lib/sfa not specified in config
                 self.SFA_CONFIG_DIR="/etc/sfa"
+
+            # create the data directory if it doesnt exist
+            if not os.path.isdir(self.SFA_DATA_DIR):
+                os.mkdir(self.SFA_DATA_DIR)
              
         except IOError, e:
             raise IOError, "Could not find the configuration file: %s" % config_file
