@@ -5,7 +5,12 @@
         <argument>
             <name>max-node-kbps</name>
             <help>Maximum node bandwidth in kilobytes per second.</help>
-            <operand>kbps2</operand>
+            <operand>kbps</operand>
+        </argument>
+        <argument>
+            <name>on-node</name>
+            <help>Node to impose the limit on. Empty => all nodes.</help>
+            <operand>kbps</operand>
         </argument>
     <processor filename="max_node_kbps.xsl"/>
     </rule>
