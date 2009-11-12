@@ -560,12 +560,12 @@ class Topology:
     """
     def toxml(self, hrn = None):
         xml = """<?xml version="1.0"?>
-<RSpec xmlns="http://www.planet-lab.org/sfa/rspec/" name="vini">
+<RSpec name="vini">
     <Capacity>
         <NetSpec name="physical_topology">"""
 
         for site in self.getSites():
-            if not (site.public and site.enabled):
+            if not (site.public and site.enabled and site.node_ids):
                 continue
             
             xml += """
