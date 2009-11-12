@@ -494,7 +494,7 @@ class Topology:
         for l in linkspecs:
             n1 = nodedict[l['endpoint'][0]]
             n2 = nodedict[l['endpoint'][1]]
-            bps = l['kbps'][0] * 1000
+            bps = int(l['kbps'][0]) * 1000
             self.nodelinks.append(Link(n1, n2, bps))
  
     def nodeTopoFromSliceTags(self, slice):
