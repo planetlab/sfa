@@ -28,10 +28,10 @@
       
   <!-- Fill in missing kbps values --> 
   <xsl:template match="LinkSpec[not(kbps)]">
-      <xsl:copy>
-      <xsl:copy-of select="."/>
+    <xsl:copy>
+      <xsl:copy-of select="@* | *"/>
       <kbps><xsl:value-of select="$max-link-kbps"/></kbps>
-  </xsl:copy>
+    </xsl:copy>
   </xsl:template>
   
   <xsl:template match="sfatables-input"/>
