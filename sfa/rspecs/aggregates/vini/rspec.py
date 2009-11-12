@@ -25,7 +25,7 @@ class ViniRSpec(RSpec):
                 ndict = {}
                 ndict['hostname'] = [node.hostname]
                 ndict['name'] = node.tag
-                ndict['bw'] = [format_tc_rate(node.bps)] 
+                ndict['kbps'] = [int(node.bps/1000)] 
                 nodespecs.append(ndict)
             sdict['NodeSpec'] = nodespecs
             sdict['name'] = site.name
@@ -35,7 +35,7 @@ class ViniRSpec(RSpec):
                 if sl.end1 == site:
                     sldict = {}
                     sldict['endpoint'] = [sl.end1.name, sl.end2.name]
-                    sldict['bw'] = [format_tc_rate(sl.bps)]
+                    sldict['kbps'] = [int(sl.bps/1000)]
                     sitelinkspecs.append(sldict)
                     
         d['RSpec']['Capacity'][0]['NetSpec'][0]['SiteSpec'] = sitespecs
@@ -48,7 +48,7 @@ class ViniRSpec(RSpec):
         for link in topo.nodelinks:
             edict = {}
             edict['endpoint'] = [link.end1.tag, link.end2.tag]
-            edict['bw'] = [format_tc_rate(link.bps)]
+            edict['kbps'] = [int(link.bps/1000)]
             linkspecs.append(edict)
 
         d = self.toDict()

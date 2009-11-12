@@ -7,62 +7,62 @@ default_topo_xml = """
             <LinkSpec>
                 <endpoint>i2atla1</endpoint>
                 <endpoint>i2chic1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2atla1</endpoint>
                 <endpoint>i2hous1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2atla1</endpoint>
                 <endpoint>i2wash1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2chic1</endpoint>
                 <endpoint>i2kans1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2chic1</endpoint>
                 <endpoint>i2wash1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2hous1</endpoint>
                 <endpoint>i2kans1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2hous1</endpoint>
                 <endpoint>i2losa1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2kans1</endpoint>
                 <endpoint>i2salt1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2losa1</endpoint>
                 <endpoint>i2salt1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2losa1</endpoint>
                 <endpoint>i2seat1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2newy1</endpoint>
                 <endpoint>i2wash1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>
             <LinkSpec>
                 <endpoint>i2salt1</endpoint>
                 <endpoint>i2seat1</endpoint>
-                <bw>1Mbit</bw>
+                <kbps>1000</kbps>
             </LinkSpec>"""
       
 # Taken from bwlimit.py
@@ -494,7 +494,7 @@ class Topology:
         for l in linkspecs:
             n1 = nodedict[l['endpoint'][0]]
             n2 = nodedict[l['endpoint'][1]]
-            bps = get_tc_rate(l['bw'][0])
+            bps = l['kbps'][0] * 1000
             self.nodelinks.append(Link(n1, n2, bps))
  
     def nodeTopoFromSliceTags(self, slice):
@@ -578,8 +578,8 @@ class Topology:
                 xml += """
                 <NodeSpec name="%s">
                     <hostname>%s</hostname>
-                    <bw>%s</bw>
-                </NodeSpec>""" % (node.tag, node.hostname, format_tc_rate(node.bps))
+                    <kbps>%s</kbps>
+                </NodeSpec>""" % (node.tag, node.hostname, int(node.bps/1000))
             xml += """
             </SiteSpec>"""
             
@@ -588,8 +588,8 @@ class Topology:
             <SiteLinkSpec>
                 <endpoint>%s</endpoint>
                 <endpoint>%s</endpoint> 
-                <bw>%s</bw>
-            </SiteLinkSpec>""" % (link.end1.name, link.end2.name, format_tc_rate(link.bps))
+                <kbps>%s</kbps>
+            </SiteLinkSpec>""" % (link.end1.name, link.end2.name, int(link.bps/1000))
             
         
         if hrn:
@@ -608,8 +608,8 @@ class Topology:
             <LinkSpec>
                 <endpoint>%s</endpoint>
                 <endpoint>%s</endpoint> 
-                <bw>%s</bw>
-            </LinkSpec>""" % (link.end1.tag, link.end2.tag, format_tc_rate(link.bps))
+                <kbps>%s</kbps>
+            </LinkSpec>""" % (link.end1.tag, link.end2.tag, int(link.bps/1000))
         else:
             xml += default_topo_xml
             
