@@ -98,7 +98,7 @@ def main():
     # found in the authorities directory, generate a random one
     if not os.path.exists(server_key_file):
         hrn = config.SFA_INTERFACE_HRN.lower()
-        key_file = os.sep.join([hierarchy.basedir, hrn, hrn+".pkey")
+        key_file = os.sep.join([hierarchy.basedir, hrn, hrn+".pkey"])
         if not os.path.exists(key_file):
             # if it doesnt exist then this is probably a fresh interface
             # with no records. Generate a random keypair for now
