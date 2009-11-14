@@ -175,6 +175,7 @@ class Nodes(SimpleStorage):
         Get resource information from PLC
         """
 
+        slicename = None
         # Get the required nodes
         if not hrn:
             nodes = self.api.plshell.GetNodes(self.api.plauth, {'peer_id': None})
@@ -192,7 +193,10 @@ class Nodes(SimpleStorage):
 
         # Filter out whitelisted nodes
         public_nodes = lambda n: n.has_key('slice_ids_whitelist') and not n['slice_ids_whitelist']
-        nodes = filter(public_nodes, nodes)
+            
+        # ...only if they are not already assigned to this slice.
+        if (slicename):        
+            nodes = filter(public_nodes, nodes)
 
         # Get all network interfaces
         interface_ids = []
