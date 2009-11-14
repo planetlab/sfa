@@ -195,7 +195,7 @@ class Nodes(SimpleStorage):
         public_nodes = lambda n: n.has_key('slice_ids_whitelist') and not n['slice_ids_whitelist']
             
         # ...only if they are not already assigned to this slice.
-        if (slicename):        
+        if (not slicename):        
             nodes = filter(public_nodes, nodes)
 
         # Get all network interfaces
