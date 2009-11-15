@@ -174,7 +174,8 @@ class Slices(SimpleStorage):
             success = False
             # request hash is optional so lets try the call without it
             try:
-                aggregates[aggregate].delete_slice(credential, hrn, caller_cred)
+		request_hash=None	
+                aggregates[aggregate].delete_slice(credential, hrn, request_hash, caller_cred)
                 success = True
             except:
                 print >> log, "%s" % (traceback.format_exc())
@@ -503,14 +504,16 @@ class Slices(SimpleStorage):
                     # send the whloe rspec to the local aggregate
                     if net_hrn in [self.api.hrn]:
                         try:
-                            aggregates[net_hrn].create_slice(credential, hrn, rspec, caller_cred)
+			    request_hash = None
+                            aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, caller_cred)
                         except:
                             arg_list = [credential,hrn,rspec]
                             request_hash = self.api.key.compute_hash(arg_list)
                             aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, caller_cred)
                     else:
                         try:
-                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], caller_cred)
+			    request_hash = None
+                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
                         except:
                             arg_list = [credential,hrn,rspecs[net_hrn]]
                             request_hash = self.api.key.compute_hash(arg_list)
@@ -526,7 +529,8 @@ class Slices(SimpleStorage):
                             network_found = aggregates[aggregate].get_aggregates(credential, net_hrn, request_hash)
                         if network_networks:
                             try:
-                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], caller_cred)
+				request_hash = None
+                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
                             except:
                                 arg_list = [credential, hrn, rspecs[net_hrn]]
                                 request_hash = self.api.key.compute_hash(arg_list) 
