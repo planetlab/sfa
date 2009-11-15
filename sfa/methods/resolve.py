@@ -60,7 +60,8 @@ class resolve(Method):
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
             try:
-                records = registries[registry_hrn].resolve(credential, hrn, caller_cred)
+		request_hash=None
+                records = registries[registry_hrn].resolve(credential, hrn, request_hash, caller_cred)
                 good_records = [GeniRecord(dict=record).as_dict() for record in records]
             except:
                 arg_list = [credential, hrn]
