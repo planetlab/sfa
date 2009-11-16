@@ -7,7 +7,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 5
+%define taglevel 6
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -124,6 +124,14 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Mon Nov 16 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-6
+- This tag includes:
+- - Sfatables
+- - Preliminary version of hash based authentication
+- - Initial code for Component Manager
+- - Authority structure is moved to /var/lib/sfa/
+- - some bug-fixes
+
 * Fri Oct 09 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-5
 - Create_slice and get_resources methods are connected to sfatables.
 - Other features include compatibility with RP, handling remote objects created as part of federation, preliminary version of sfatables, call tracability and logging.
