@@ -62,43 +62,25 @@ def daemon():
     os.dup2(crashlog, 1)
     os.dup2(crashlog, 2)
 
-def main():
-    # xxx get rid of globals - name consistently CamelCase or under_score
-    global AuthHierarchy
-    global TrustedRoots
-    global registry_port
-    global aggregate_port
-    global slicemgr_port
+def init_server_key(server_key_file, server_cert_file, config, hierarchy):
 
-    # Generate command line parser
-    parser = OptionParser(usage="sfa-server [options]")
-    parser.add_option("-r", "--registry", dest="registry", action="store_true",
-         help="run registry server", default=False)
-    parser.add_option("-s", "--slicemgr", dest="sm", action="store_true",
-         help="run slice manager", default=False)
-    parser.add_option("-a", "--aggregate", dest="am", action="store_true",
-         help="run aggregate manager", default=False)
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", 
-         help="verbose mode", default=False)
-    parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
-         help="Run as daemon.", default=False)
-    (options, args) = parser.parse_args()
-
-    config = Config()
-    hierarchy = Hierarchy()
-    trusted_roots = TrustedRootList(config.get_trustedroots_dir())
-    server_key_file = os.path.join(hierarchy.basedir, "server.key")
-    server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
-    # XX TODO: Subject should be the interfaces's hrn
-    subject = "registry" 
-    if (options.daemon):  daemon()
-    
+    subject = config.SFA_INTERFACE_HRN
     # check if the server's private key exists. If it doesnt,
     # get the right one from the authorities directory. If it cant be
     # found in the authorities directory, generate a random one
     if not os.path.exists(server_key_file):
         hrn = config.SFA_INTERFACE_HRN.lower()
-        key_file = os.sep.join([hierarchy.basedir, hrn, hrn+".pkey"])
+        hrn_parts = hrn.split(".")
+        rel_key_path = hrn
+        pkey_filename = hrn+".pkey"
+
+        # sub authority's have "." in their hrn. This must
+        # be converted to os.path separator
+        if len(hrn_parts) > 0:
+            rel_key_path = hrn.replace(".", os.sep)
+            pkey_filename= hrn_parts[-1]+".pkey"
+
+        key_file = os.sep.join([hierarchy.basedir, rel_key_path, pkey_filename])
         if not os.path.exists(key_file):
             # if it doesnt exist then this is probably a fresh interface
             # with no records. Generate a random keypair for now
@@ -123,7 +105,7 @@ def main():
             cert.set_pubkey(key)
             cert.sign()
             cert.save_to_file(server_cert_file)
-             
+
 
     # If private key exists and cert doesnt, recreate cert
     if (os.path.exists(server_key_file)) and (not os.path.exists(server_cert_file)):
@@ -134,6 +116,38 @@ def main():
         cert.sign()
         cert.save_to_file(server_cert_file)
 
+def main():
+    # xxx get rid of globals - name consistently CamelCase or under_score
+    global AuthHierarchy
+    global TrustedRoots
+    global registry_port
+    global aggregate_port
+    global slicemgr_port
+
+    # Generate command line parser
+    parser = OptionParser(usage="sfa-server [options]")
+    parser.add_option("-r", "--registry", dest="registry", action="store_true",
+         help="run registry server", default=False)
+    parser.add_option("-s", "--slicemgr", dest="sm", action="store_true",
+         help="run slice manager", default=False)
+    parser.add_option("-a", "--aggregate", dest="am", action="store_true",
+         help="run aggregate manager", default=False)
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", 
+         help="verbose mode", default=False)
+    parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
+         help="Run as daemon.", default=False)
+    (options, args) = parser.parse_args()
+
+    if (options.daemon):  daemon()
+
+    config = Config()
+    hierarchy = Hierarchy()
+    trusted_roots = TrustedRootList(config.get_trustedroots_dir())
+    server_key_file = os.path.join(hierarchy.basedir, "server.key")
+    server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
+
+    init_server_key(server_key_file, server_cert_file, config, hierarchy)
+    
     # start registry server
     if (options.registry):
         r = Registry("", registry_port, server_key_file, server_cert_file)
