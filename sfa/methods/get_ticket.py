@@ -6,6 +6,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.sfaticket import SfaTicket
+from sfa.util.slices import 
 
 class get_ticket(Method):
     """
@@ -36,8 +37,8 @@ class get_ticket(Method):
 
     returns = Parameter(str, "String represeneation of a ticket object")
     
-    def call(self, cred, hrn, rspec, request_hash=None):
-        self.api.auth.authenticateCred(cred, [cred, hrn, rspec], request_hash)
+    def call(self, cred, hrn, request_hash=None):
+        self.api.auth.authenticateCred(cred, [cred, hrn], request_hash)
         self.api.auth.check(cred, "getticket")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(name)
@@ -60,11 +61,16 @@ class get_ticket(Method):
         new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_ticket.set_pubkey(object_gid.get_pubkey())
 
-        self.api.fill_record_info(record)
+        # get sliver info    
+        slivers = Slices(self.api).get_slivers(hrn)
+        if not slivers:
+            raise SliverDoesNotExist(hrn)
+        sliver = slivers[0]
 
-        (attributes, rspec) = self.api.record_to_slice_info(record)
-
-        new_ticket.set_attributes(attributes)
+        # get rspec info
+        rspec = None      
+        
+        new_ticket.set_attributes(sliver)
         new_ticket.set_rspec(rspec)
 
         new_ticket.set_parent(self.api.auth.hierarchy.get_auth_ticket(auth_hrn))
