@@ -36,7 +36,101 @@ class Slices(SimpleStorage):
         self.load()
         self.caller_cred=caller_cred
 
+    def get_slivers(self, hrn):
+         
+        slice_name = hrn_to_pl_slicename(hrn)
+        # XX Should we just call PLCAPI.GetSliceTicket(slice_name) instead
+        # of doing all of this?
+        #return self.api.GetSliceTicket(self.auth, slice_name) 
+        
+        # from PLCAPI.GetSlivers.get_slivers()
+        slice_fields = ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_tag_ids'])
+        slices = self.api.GetSlices(self.auth, slice_name, slice_fields)
+        # Build up list of users and slice attributes
+        person_ids = set()
+        all_slice_tag_ids = set()
+        for slice in slices:
+            person_ids.update(slice['person_ids'])
+            slice_tag_ids.update(slice['slice_tag_ids'])
+        
+        # Get user information
+        all_persons = Persons(api, {'person_id':person_ids,'enabled':True}, ['person_id', 'enabled', 'key_ids']).dict()        
 
+        # Build up list of keys
+        key_ids = set()
+        for person in all_persons.values():
+            key_ids.update(person['key_ids'])
+
+        # Get user account keys
+        all_keys = Keys(api, key_ids, ['key_id', 'key', 'key_type']).dict()
+
+        # Get slice attributes
+        all_slice_tags = SliceTags(api, slice_tag_ids).dict()
+           
+        slivers = []
+        for slice in slices:
+            keys = []
+            for person_id in slice['person_ids']:
+                if person_id in all_persons:
+                    person = all_persons[person_id]
+                    if not person['enabled']:
+                        continue
+                    for key_id in person['key_ids']:
+                        if key_id in all_keys:
+                            key = all_keys[key_id]
+                            keys += [{'key_type': key['key_type'],
+                                    'key': key['key']}]
+            attributes = []
+            # All (per-node and global) attributes for this slice
+            slice_tags = []
+            for slice_tag_id in slice['slice_tag_ids']:
+                if slice_tag_id in all_slice_tags:
+                    slice_tags.append(all_slice_tags[slice_tag_id]) 
+            # Per-node sliver attributes take precedence over global
+            # slice attributes, so set them first.
+            # Then comes nodegroup slice attributes
+            # Followed by global slice attributes
+            sliver_attributes = []
+
+            if node is not None:
+                for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_tags):
+                    sliver_attributes.append(sliver_attribute['tagname'])
+                    attributes.append({'tagname': sliver_attribute['tagname'],
+                                    'value': sliver_attribute['value']})
+
+            # set nodegroup slice attributes
+            for slice_tag in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_tags):
+                # Do not set any nodegroup slice attributes for
+                # which there is at least one sliver attribute
+                # already set.
+                if slice_tag not in slice_tags:
+                attributes.append({'tagname': slice_tag['tagname'],
+                        'value': slice_tag['value']})
+
+            for slice_tag in filter(lambda a: a['node_id'] is None, slice_tags):
+                # Do not set any global slice attributes for
+                # which there is at least one sliver attribute
+                # already set.
+                if slice_tag['tagname'] not in sliver_attributes:
+                    attributes.append({'tagname': slice_tag['tagname'],
+                                   'value': slice_tag['value']})
+
+            # XXX Sanity check; though technically this should be a system invariant
+            # checked with an assertion
+            if slice['expires'] > MAXINT:  slice['expires']= MAXINT
+            
+            slivers.append({
+                'hrn': hrn,
+                'name': slice['name'],
+                'slice_id': slice['slice_id'],
+                'instantiation': slice['instantiation'],
+                'expires': slice['expires'],
+                'keys': keys,
+                'attributes': attributes
+            })
+
+        return slivers
+ 
     def get_peer(self, hrn):
         # Becaues of myplc federation,  we first need to determine if this
         # slice belongs to out local plc or a myplc peer. We will assume it 
