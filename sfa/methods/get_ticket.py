@@ -5,6 +5,7 @@ from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
+from sfa.util.genitable import GeniTable
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.slices import 
 
@@ -41,19 +42,13 @@ class get_ticket(Method):
         self.api.auth.authenticateCred(cred, [cred, hrn], request_hash)
         self.api.auth.check(cred, "getticket")
         self.api.auth.verify_object_belongs_to_me(hrn)
-        self.api.auth.verify_object_permission(name)
+        self.api.auth.verify_object_permission(hrn)
 
-        # XXX much of this code looks like get_credential... are they so similar
-        # that they should be combined?
-
-        auth_hrn = self.api.auth.get_authority(hrn)
-        if not auth_hrn:
-            auth_hrn = hrn
-        auth_info = self.api.auth.get_auth_info(auth_hrn)
-        record = None
-        table = self.api.auth.get_auth_table(auth_hrn)
-        record = table.resolve('slice', hrn)
-
+        table = GeniTable()
+        records = table.findObjects({'hrn': hrn, 'type': 'slice'})
+        if not records:
+            raise RecordNotFound(hrn)
+        record = records
         object_gid = record.get_gid_object()
         new_ticket = SfaTicket(subject = object_gid.get_subject())
         new_ticket.set_gid_caller(self.client_gid)
@@ -66,8 +61,13 @@ class get_ticket(Method):
         if not slivers:
             raise SliverDoesNotExist(hrn)
         sliver = slivers[0]
-
+            
+        # get initscripts
+        initscripts = None
+        sliver['initscripts'] = initscripts
+        
         # get rspec info
+        # conver plc slice tags to rspec attributes
         rspec = None      
         
         new_ticket.set_attributes(sliver)
