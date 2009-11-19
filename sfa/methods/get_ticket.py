@@ -8,6 +8,7 @@ from sfa.trust.auth import Auth
 from sfa.util.genitable import GeniTable
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.slices import 
+from sfatables.runtime import SFATablesRules
 
 class get_ticket(Method):
     """
@@ -26,7 +27,7 @@ class get_ticket(Method):
     @return the string representation of a ticket object
     """
 
-    interfaces = ['registry']
+    interfaces = ['registry', 'aggregate', 'slicemgr']
     
     accepts = [
         Parameter(str, "Credential string"),
@@ -44,6 +45,7 @@ class get_ticket(Method):
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(hrn)
 
+        # find record info
         table = GeniTable()
         records = table.findObjects({'hrn': hrn, 'type': 'slice'})
         if not records:
@@ -55,6 +57,19 @@ class get_ticket(Method):
         new_ticket.set_gid_object(object_gid)
         new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_ticket.set_pubkey(object_gid.get_pubkey())
+
+        # determine aggregate tyep 
+        sfa_aggregate_type = Config().get_aggregate_rspec_type()
+        rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
+
+        # Fukter the incoming rspec using sfatables
+        incoming_rules = SFATablesRules('INCOMING')
+        #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+        contexts = incoming_rules.contexts
+        caller_hrn = Credential(string=caller_cred).get_gid_caller().get_hrn())
+        request_context = rspec_manager.fetch_context(hrn, caller_hrn, contexts)
+        incoming_rules.set_context(request_context)
+        rspec = incoming_rules.apply(requested_rspec)
 
         # get sliver info    
         slivers = Slices(self.api).get_slivers(hrn)
