@@ -7,7 +7,7 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.genitable import GeniTable
 from sfa.util.sfaticket import SfaTicket
-from sfa.util.slices import 
+from sfa.util.slices import Slices
 from sfatables.runtime import SFATablesRules
 
 class get_ticket(Method):
