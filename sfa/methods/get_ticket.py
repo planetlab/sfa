@@ -38,8 +38,8 @@ class get_ticket(Method):
 
     returns = Parameter(str, "String represeneation of a ticket object")
     
-    def call(self, cred, hrn, request_hash=None):
-        self.api.auth.authenticateCred(cred, [cred, hrn], request_hash)
+    def call(self, cred, hrn, rspec, request_hash=None):
+        self.api.auth.authenticateCred(cred, [cred, hrn, rspec], request_hash)
         self.api.auth.check(cred, "getticket")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(hrn)
@@ -65,10 +65,6 @@ class get_ticket(Method):
         # get initscripts
         initscripts = None
         sliver['initscripts'] = initscripts
-        
-        # get rspec info
-        # conver plc slice tags to rspec attributes
-        rspec = None      
         
         new_ticket.set_attributes(sliver)
         new_ticket.set_rspec(rspec)
