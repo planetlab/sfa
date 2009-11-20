@@ -824,11 +824,19 @@ class Sfi:
         ticket.save_to_file(filename=file, save_parents=True)
 
     def redeem_ticket(self, opts, args):
-        ticket, rspec = args[0], args[1]
+        ticket_file, rspec_file = args[0], args[1]
+        
+        # get slice hrn from the ticket
+        ticket = SfaTicket(filename=ticket_file)
+        ticket.decode()
+        slice_hrn = ticket.attributes['hrn']
+        user_cred = self.get_user_cred()
+        slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
+        
         # get a list node hostnames from the nodespecs in the rspec 
-        resource_spec = RSpec()
-        resource_spec.parseFile(rspec)
-        nodespecs = resource_spec.getDictsByTagName('NodeSpec')
+        rspec = RSpec()
+        rspec.parseFile(rspec_file)
+        nodespecs = rspec.getDictsByTagName('NodeSpec')
         hostnames = [nodespec['name'] for nodespec in nodespecs]
         
         # create an xmlrpc connection to the component manager at each of these
@@ -840,7 +848,7 @@ class Sfi:
                 url = "https://%(hostname)s:%(cm_port)s" % locals() 
                 print "Calling get_ticket at %(url)s " % locals(),  
                 cm = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
-                cm.redeem_ticket(ticket)
+                cm.redeem_ticket(slice_cred, ticket.save_to_string(save_parents=True))
                 print "Success"
             except socket.gaierror:
                 print "Failed:",
