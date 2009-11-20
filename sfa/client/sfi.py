@@ -6,6 +6,7 @@ import sys
 import os, os.path
 import tempfile
 import traceback
+import socket
 from types import StringTypes, ListType
 from optparse import OptionParser
 from sfa.trust.certificate import Keypair, Certificate
@@ -722,21 +723,6 @@ class Sfi:
         display_list(result)
         return
 
-    def components(self, opts, args):
-        """
-        return a list of details about known components
-        """ 
-        user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        hrn = None
-        if args:
-            hrn = args[0]
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [user_cred, hrn]
-            request_hash = self.key.compute_hash(arg_list)
-        result = self.sm.components(user_cred, hrn, request_hash)
-        display_list(result)
-        return
  
     #
     # Slice-related commands
@@ -836,15 +822,32 @@ class Sfi:
         print "writing ticket to ", file        
         ticket = SfaTicket(string=ticket_string)
         ticket.save_to_file(filename=file, save_parents=True)
-        print ticket_string  
 
     def redeem_ticket(self, opts, args):
         ticket, rspec = args[0], args[1]
         # get a list node hostnames from the nodespecs in the rspec 
-        resource_spec = RSpec(rspec)
-        nodepecs = resource_spec.getDictsByTagName('NodeSpec')
-        from pprint import pprint
-        pprint(nodespecs) 
+        resource_spec = RSpec()
+        resource_spec.parseFile(rspec)
+        nodespecs = resource_spec.getDictsByTagName('NodeSpec')
+        hostnames = [nodespec['name'] for nodespec in nodespecs]
+        
+        # create an xmlrpc connection to the component manager at each of these
+        # components and gall redeem_ticket
+        connections = {}
+        for hostname in hostnames:
+            try:
+                cm_port = "12346" 
+                url = "https://%(hostname)s:%(cm_port)s" % locals() 
+                print "Calling get_ticket at %(url)s " % locals(),  
+                cm = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
+                cm.redeem_ticket(ticket)
+                print "Success"
+            except socket.gaierror:
+                print "Failed:",
+                print "Componet Manager not accepting requests" 
+            except Exception, e:
+                print "Failed:", e.message
+             
         return
  
     # delete named slice
