@@ -824,18 +824,19 @@ class Sfi:
         ticket.save_to_file(filename=file, save_parents=True)
 
     def redeem_ticket(self, opts, args):
-        ticket_file, rspec_file = args[0], args[1]
+        ticket_file = args[0]
         
         # get slice hrn from the ticket
+        # use this to get the right slice credential 
         ticket = SfaTicket(filename=ticket_file)
         ticket.decode()
-        slice_hrn = ticket.attributes['hrn']
+        slice_hrn = ticket.attributes['slivers'][0]['hrn']
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         
         # get a list node hostnames from the nodespecs in the rspec 
         rspec = RSpec()
-        rspec.parseFile(rspec_file)
+        rspec.parseString(ticket.rspec)
         nodespecs = rspec.getDictsByTagName('NodeSpec')
         hostnames = [nodespec['name'] for nodespec in nodespecs]
         
