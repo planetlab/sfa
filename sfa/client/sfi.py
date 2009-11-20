@@ -8,7 +8,6 @@ import tempfile
 import traceback
 from types import StringTypes, ListType
 from optparse import OptionParser
-
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.util.geniclient import GeniClient
@@ -142,7 +141,7 @@ class Sfi:
                   "resources": "[name]",
                   "create": "name rspec",
                   "get_ticket": "name rspec",
-                  "redeem_ticket": "ticket rspec"  
+                  "redeem_ticket": "ticket rspec",  
                   "delete": "name",
                   "reset": "name",
                   "start": "name",
@@ -840,6 +839,12 @@ class Sfi:
         print ticket_string  
 
     def redeem_ticket(self, opts, args):
+        ticket, rspec = args[0], args[1]
+        # get a list node hostnames from the nodespecs in the rspec 
+        resource_spec = RSpec(rspec)
+        nodepecs = resource_spec.getDictsByTagName('NodeSpec')
+        from pprint import pprint
+        pprint(nodespecs) 
         return
  
     # delete named slice
