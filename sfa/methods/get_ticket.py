@@ -83,9 +83,13 @@ class get_ticket(Method):
             
         # get initscripts
         initscripts = None
-        sliver['initscripts'] = initscripts
-        
-        new_ticket.set_attributes(sliver)
+        data = {
+            'timestamp': int(time.time()),
+            'initscripts': initscripts,
+            'slivers': sliver 
+        }
+
+        new_ticket.set_attributes(attributes)
         new_ticket.set_rspec(rspec)
 
         new_ticket.set_parent(self.api.auth.hierarchy.get_auth_ticket(auth_hrn))
