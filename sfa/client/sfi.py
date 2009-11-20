@@ -138,11 +138,11 @@ class Sfi:
                   "update": "record",
                   "aggregates": "[name]",
                   "registries": "[name]",
-                  "components": "[name]",  
                   "slices": "",
                   "resources": "[name]",
                   "create": "name rspec",
                   "get_ticket": "name rspec",
+                  "redeem_ticket": "ticket rspec"  
                   "delete": "name",
                   "reset": "name",
                   "start": "name",
@@ -838,6 +838,9 @@ class Sfi:
         ticket = SfaTicket(string=ticket_string)
         ticket.save_to_file(filename=file, save_parents=True)
         print ticket_string  
+
+    def redeem_ticket(self, opts, args):
+        return
  
     # delete named slice
     def delete(self,opts, args):
