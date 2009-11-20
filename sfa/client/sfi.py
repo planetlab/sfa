@@ -138,6 +138,7 @@ class Sfi:
                   "update": "record",
                   "aggregates": "[name]",
                   "registries": "[name]",
+                  "components": "[name]",  
                   "slices": "",
                   "resources": "[name]",
                   "create": "name rspec",
@@ -691,6 +692,9 @@ class Sfi:
    
     
     def aggregates(self, opts, args):
+        """
+        return a list of details about known aggregates
+        """
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = None
         if args: 
@@ -704,6 +708,9 @@ class Sfi:
         return 
 
     def registries(self, opts, args):
+        """
+        return a list of details about known registries
+        """
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = None
         if args:
@@ -713,6 +720,22 @@ class Sfi:
             arg_list = [user_cred, hrn]  
             request_hash = self.key.compute_hash(arg_list)
         result = self.registry.get_registries(user_cred, hrn, request_hash)
+        display_list(result)
+        return
+
+    def components(self, opts, args):
+        """
+        return a list of details about known components
+        """ 
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        hrn = None
+        if args:
+            hrn = args[0]
+        request_hash=None
+        if self.hashrequest:
+            arg_list = [user_cred, hrn]
+            request_hash = self.key.compute_hash(arg_list)
+        result = self.sm.components(user_cred, hrn, request_hash)
         display_list(result)
         return
  
