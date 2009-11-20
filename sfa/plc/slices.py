@@ -19,6 +19,8 @@ from sfa.util.debug import log
 from sfa.server.aggregate import Aggregates
 from sfa.server.registry import Registries
 
+MAXINT =  2L**31-1
+
 class Slices(SimpleStorage):
 
     rspec_to_slice_tag = {'max_rate':'net_max_rate'}
@@ -36,7 +38,7 @@ class Slices(SimpleStorage):
         self.load()
         self.caller_cred=caller_cred
 
-    def get_slivers(self, hrn):
+    def get_slivers(self, hrn, node=None):
          
         slice_name = hrn_to_pl_slicename(hrn)
         # XX Should we just call PLCAPI.GetSliceTicket(slice_name) instead
@@ -44,28 +46,37 @@ class Slices(SimpleStorage):
         #return self.api.GetSliceTicket(self.auth, slice_name) 
         
         # from PLCAPI.GetSlivers.get_slivers()
-        slice_fields = ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_tag_ids'])
-        slices = self.api.GetSlices(self.auth, slice_name, slice_fields)
+        slice_fields = ['slice_id', 'name', 'instantiation', 'expires', 'person_ids', 'slice_tag_ids']
+        slices = self.api.plshell.GetSlices(self.api.plauth, slice_name, slice_fields)
         # Build up list of users and slice attributes
         person_ids = set()
         all_slice_tag_ids = set()
         for slice in slices:
             person_ids.update(slice['person_ids'])
-            slice_tag_ids.update(slice['slice_tag_ids'])
-        
+            all_slice_tag_ids.update(slice['slice_tag_ids'])
+        person_ids = list(person_ids)
+        all_slice_tag_ids = list(all_slice_tag_ids)
         # Get user information
-        all_persons = Persons(api, {'person_id':person_ids,'enabled':True}, ['person_id', 'enabled', 'key_ids']).dict()        
+        all_persons_list = self.api.plshell.GetPersons(self.api.plauth, {'person_id':person_ids,'enabled':True}, ['person_id', 'enabled', 'key_ids'])
+        all_persons = {}
+        for person in all_persons_list:
+            all_persons[person['person_id']] = person        
 
         # Build up list of keys
         key_ids = set()
         for person in all_persons.values():
             key_ids.update(person['key_ids'])
-
+        key_ids = list(key_ids)
         # Get user account keys
-        all_keys = Keys(api, key_ids, ['key_id', 'key', 'key_type']).dict()
-
+        all_keys_list = self.api.plshell.GetKeys(self.api.plauth, key_ids, ['key_id', 'key', 'key_type'])
+        all_keys = {}
+        for key in all_keys_list:
+            all_keys[key['key_id']] = key
         # Get slice attributes
-        all_slice_tags = SliceTags(api, slice_tag_ids).dict()
+        all_slice_tags_list = self.api.plshell.GetSliceTags(self.api.plauth, all_slice_tag_ids)
+        all_slice_tags = {}
+        for slice_tag in all_slice_tags_list:
+            all_slice_tags[slice_tag['slice_tag_id']] = slice_tag
            
         slivers = []
         for slice in slices:
@@ -104,7 +115,7 @@ class Slices(SimpleStorage):
                 # which there is at least one sliver attribute
                 # already set.
                 if slice_tag not in slice_tags:
-                attributes.append({'tagname': slice_tag['tagname'],
+                    attributes.append({'tagname': slice_tag['tagname'],
                         'value': slice_tag['value']})
 
             for slice_tag in filter(lambda a: a['node_id'] is None, slice_tags):
