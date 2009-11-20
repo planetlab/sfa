@@ -5,9 +5,11 @@ from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
+from sfa.util.config import Config
+from sfa.trust.credential import Credential
 from sfa.util.genitable import GeniTable
 from sfa.util.sfaticket import SfaTicket
-from sfa.util.slices import Slices
+from sfa.plc.slices import Slices
 from sfatables.runtime import SFATablesRules
 
 class get_ticket(Method):
@@ -47,13 +49,15 @@ class get_ticket(Method):
 
         # find record info
         table = GeniTable()
-        records = table.findObjects({'hrn': hrn, 'type': 'slice'})
+        records = table.findObjects({'hrn': hrn, 'type': 'slice', 'peer_authority': None})
         if not records:
             raise RecordNotFound(hrn)
-        record = records
+        record = records[0]
+        auth_hrn = record['authority']
+        auth_info = self.api.auth.get_auth_info(auth_hrn)
         object_gid = record.get_gid_object()
         new_ticket = SfaTicket(subject = object_gid.get_subject())
-        new_ticket.set_gid_caller(self.client_gid)
+        new_ticket.set_gid_caller(self.api.auth.client_gid)
         new_ticket.set_gid_object(object_gid)
         new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_ticket.set_pubkey(object_gid.get_pubkey())
@@ -66,10 +70,10 @@ class get_ticket(Method):
         incoming_rules = SFATablesRules('INCOMING')
         #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
         contexts = incoming_rules.contexts
-        caller_hrn = Credential(string=caller_cred).get_gid_caller().get_hrn())
+        caller_hrn = Credential(string=cred).get_gid_caller().get_hrn()
         request_context = rspec_manager.fetch_context(hrn, caller_hrn, contexts)
         incoming_rules.set_context(request_context)
-        rspec = incoming_rules.apply(requested_rspec)
+        rspec = incoming_rules.apply(rspec)
 
         # get sliver info    
         slivers = Slices(self.api).get_slivers(hrn)
