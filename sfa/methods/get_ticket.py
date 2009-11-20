@@ -79,14 +79,13 @@ class get_ticket(Method):
         slivers = Slices(self.api).get_slivers(hrn)
         if not slivers:
             raise SliverDoesNotExist(hrn)
-        sliver = slivers[0]
             
         # get initscripts
         initscripts = None
         data = {
             'timestamp': int(time.time()),
             'initscripts': initscripts,
-            'slivers': [sliver] 
+            'slivers': slivers 
         }
 
         new_ticket.set_attributes(data)
