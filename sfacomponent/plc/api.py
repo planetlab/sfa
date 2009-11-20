@@ -39,3 +39,11 @@ class ComponentAPI(BaseAPI):
             raise
 
         return nodemanager
+
+    def sliver_exists(self):
+        sliver_dict = self.nodemanager.GetXIDs()
+        if slicename in sliver_dict.keys():
+            return True
+        else:
+            return False
+
