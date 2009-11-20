@@ -29,8 +29,6 @@ class get_slices(Method):
     returns = [Parameter(str, "Human readable slice name (hrn)")]
     
     def call(self, cred, request_hash=None, caller_cred=None):
-	import pdb
-	pdb.set_trace()
         self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, 'listslices')
 	if caller_cred==None:
