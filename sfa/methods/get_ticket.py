@@ -89,7 +89,7 @@ class get_ticket(Method):
             'slivers': sliver 
         }
 
-        new_ticket.set_attributes(attributes)
+        new_ticket.set_attributes(data)
         new_ticket.set_rspec(rspec)
 
         new_ticket.set_parent(self.api.auth.hierarchy.get_auth_ticket(auth_hrn))
