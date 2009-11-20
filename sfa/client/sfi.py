@@ -142,7 +142,7 @@ class Sfi:
                   "resources": "[name]",
                   "create": "name rspec",
                   "get_ticket": "name rspec",
-                  "redeem_ticket": "ticket rspec",  
+                  "redeem_ticket": "ticket",  
                   "delete": "name",
                   "reset": "name",
                   "start": "name",
