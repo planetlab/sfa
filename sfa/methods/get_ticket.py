@@ -86,7 +86,7 @@ class get_ticket(Method):
         data = {
             'timestamp': int(time.time()),
             'initscripts': initscripts,
-            'slivers': sliver 
+            'slivers': [sliver] 
         }
 
         new_ticket.set_attributes(data)
