@@ -36,6 +36,6 @@ class get_slices(Method):
 	
 	#log the call
 	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
-        slices = Slices(self.api)
+        slices = Slices(self.api, caller_cred=caller_cred)
         slices.refresh()
         return slices['hrn']
