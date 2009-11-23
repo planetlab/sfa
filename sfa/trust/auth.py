@@ -238,6 +238,9 @@ class Auth:
             rl.add("resolve")
             rl.add("info")
 
+        elif type == "component":
+            r1.add("operator")
+
         return rl
 
     def verify_cancreate_credential(self, src_cred, record):
