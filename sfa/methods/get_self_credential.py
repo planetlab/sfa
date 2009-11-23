@@ -79,8 +79,8 @@ class get_self_credential(Method):
 
         # get the right of this record
         #caller_hrn = certificate.get_subject()    
-	# server.cert has subject 'registry'
-	caller_hrn=hrn
+        # server.cert has subject 'registry'
+        caller_hrn=hrn
         rights = self.api.auth.determine_user_rights(caller_hrn, record)
         if rights.is_empty():
             raise PermissionError(caller_hrn + " has no rights to " + record.get_name())

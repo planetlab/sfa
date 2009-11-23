@@ -15,6 +15,7 @@ get_trusted_certs
 list
 register
 register_peer_object
+request_key
 remove
 reset_slices
 resolve
