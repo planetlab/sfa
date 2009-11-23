@@ -11,6 +11,7 @@ get_resources
 get_self_credential
 get_slices
 get_ticket
+get_trusted_certs
 list
 register
 register_peer_object
