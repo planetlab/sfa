@@ -112,6 +112,7 @@ class Nodes(SimpleStorage):
         rspec = RSpec()
         credential = self.api.getCredential() 
         for aggregate in aggregates:
+          if aggregate not in [self.api.auth.client_cred.get_gid_caller().get_hrn()]:
             try:
                 caller_cred = self.caller_cred
                 # get the rspec from the aggregate
