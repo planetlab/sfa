@@ -62,7 +62,7 @@ class list(Method):
                 records = [GeniRecord(dict=record).as_dict() for record in record_list]
             except:
                 arg_list = [credential, hrn]
-                request_hash = self.api.compute_hash(arg_list)
+                request_hash = self.api.key.compute_hash(arg_list)
                 record_list = registries[registry_hrn].list(credential, hrn, request_hash, caller_cred)
                 records = [GeniRecord(dict=record).as_dict() for record in record_list] 
                 
