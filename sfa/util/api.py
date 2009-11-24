@@ -104,6 +104,7 @@ class BaseAPI:
         
         # flat list of method names
         methods_module = __import__(methods)
+        self.methods_module = methods_module
         self.methods = methods_module.methods.all
 
         # Better just be documenting the API
@@ -135,7 +136,7 @@ class BaseAPI:
         # Get new instance of method
         try:
             classname = method.split(".")[-1]
-            module = __import__("sfa.methods." + method, globals(), locals(), [classname])
+            module = __import__(self.methods_module + "." + method, globals(), locals(), [classname])
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except ImportError, AttributeError:
