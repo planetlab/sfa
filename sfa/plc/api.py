@@ -21,90 +21,19 @@ from sfa.trust.certificate import *
 from sfa.util.misc import *
 from sfa.util.sfalogging import *
 from sfa.util.genitable import *
+from sfa.util.api import *
 
-# See "2.2 Characters" in the XML specification:
-#
-# #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD]
-# avoiding
-# [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
-
-invalid_xml_ascii = map(chr, range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F))
-xml_escape_table = string.maketrans("".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
-
-def xmlrpclib_escape(s, replace = string.replace):
-    """
-    xmlrpclib does not handle invalid 7-bit control characters. This
-    function augments xmlrpclib.escape, which by default only replaces
-    '&', '<', and '>' with entities.
-    """
-
-    # This is the standard xmlrpclib.escape function
-    s = replace(s, "&", "&amp;")
-    s = replace(s, "<", "&lt;")
-    s = replace(s, ">", "&gt;",)
-
-    # Replace invalid 7-bit control characters with '?'
-    return s.translate(xml_escape_table)
-
-def xmlrpclib_dump(self, value, write):
-    """
-    xmlrpclib cannot marshal instances of subclasses of built-in
-    types. This function overrides xmlrpclib.Marshaller.__dump so that
-    any value that is an instance of one of its acceptable types is
-    marshalled as that type.
-
-    xmlrpclib also cannot handle invalid 7-bit control characters. See
-    above.
-    """
-
-    # Use our escape function
-    args = [self, value, write]
-    if isinstance(value, (str, unicode)):
-        args.append(xmlrpclib_escape)
-
-    try:
-        # Try for an exact match first
-        f = self.dispatch[type(value)]
-    except KeyError:
-        raise
-        # Try for an isinstance() match
-        for Type, f in self.dispatch.iteritems():
-            if isinstance(value, Type):
-                f(*args)
-                return
-        raise TypeError, "cannot marshal %s objects" % type(value)
-    else:
-        f(*args)
-
-# You can't hide from me!
-xmlrpclib.Marshaller._Marshaller__dump = xmlrpclib_dump
-
-# SOAP support is optional
-try:
-    import SOAPpy
-    from SOAPpy.Parser import parseSOAPRPC
-    from SOAPpy.Types import faultType
-    from SOAPpy.NS import NS
-    from SOAPpy.SOAPBuilder import buildSOAP
-except ImportError:
-    SOAPpy = None
-
-
-def import_deep(name):
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
-
-class GeniAPI:
+class GeniAPI(BaseAPI):
 
     # flat list of method names
     import sfa.methods
     methods = sfa.methods.all
     
-    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", 
+    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods', 
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
+        BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert,
+                         interface=interface, key_file=key_file, cert_file=cert_file):
+ 
         self.encoding = encoding
 
         # Better just be documenting the API
@@ -484,74 +413,35 @@ class GeniAPI:
             pass
 
 
-    def callable(self, method):
-        """
-        Return a new instance of the specified method.
-        """
-        # Look up method
-        if method not in self.methods:
-            raise GeniInvalidAPIMethod, method
-        
-        # Get new instance of method
+
+class ComponentAPI(BaseAPI):
+
+    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods',
+                 peer_cert = None, interface = None, key_file = None, cert_file = None):
+
+        BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert,
+                         interface=interface, key_file=key_file, cert_file=cert_file)
+        self.encoding = encoding
+
+        # Better just be documenting the API
+        if config is None:
+            return
+
+        self.nodemanager = self.getNodeManagerShell()
+
+    def getNodeManagerShell(self):
+        # do we need an auth ?
+        auth = {}
         try:
-            classname = method.split(".")[-1]
-            module = __import__("sfa.methods." + method, globals(), locals(), [classname])
-            callablemethod = getattr(module, classname)(self)
-            return getattr(module, classname)(self)
-        except ImportError, AttributeError:
+            nodemanager = xmlrpclib.ServerProxy('http://127.0.0.1:812')
+        except:
             raise
-            raise GeniInvalidAPIMethod, method
 
-    def call(self, source, method, *args):
-        """
-        Call the named method from the specified source with the
-        specified arguments.
-        """
-        function = self.callable(method)
-        function.source = source
-        return function(*args)
+        return nodemanager
 
-    def handle(self, source, data):
-        """
-        Handle an XML-RPC or SOAP request from the specified source.
-        """
-        # Parse request into method name and arguments
-        try:
-            interface = xmlrpclib
-            (args, method) = xmlrpclib.loads(data)
-            methodresponse = True
-        except Exception, e:
-            if SOAPpy is not None:
-                interface = SOAPpy
-                (r, header, body, attrs) = parseSOAPRPC(data, header = 1, body = 1, attrs = 1)
-                method = r._name
-                args = r._aslist()
-                # XXX Support named arguments
-            else:
-                raise e
-
-        try:
-            result = self.call(source, method, *args)
-        except Exception, fault:
-            traceback.print_exc(file = log)
-            # Handle expected faults
-            if interface == xmlrpclib:
-                result = fault
-                methodresponse = None
-            elif interface == SOAPpy:
-                result = faultParameter(NS.ENV_T + ":Server", "Method Failed", method)
-                result._setDetail("Fault %d: %s" % (fault.faultCode, fault.faultString))
-            else:
-                raise
-
-        # Return result
-        if interface == xmlrpclib:
-            if not isinstance(result, GeniFault):
-                result = (result,)
-
-            data = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
-        elif interface == SOAPpy:
-            data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
-
-        return data
-
+    def sliver_exists(self):
+        sliver_dict = self.nodemanager.GetXIDs()
+        if slicename in sliver_dict.keys():
+            return True
+        else:
+            return False
