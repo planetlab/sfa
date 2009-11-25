@@ -32,7 +32,7 @@ class GeniAPI(BaseAPI):
     def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods', 
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
         BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert,
-                         interface=interface, key_file=key_file, cert_file=cert_file):
+                         interface=interface, key_file=key_file, cert_file=cert_file)
  
         self.encoding = encoding
 
