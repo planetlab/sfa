@@ -136,7 +136,7 @@ class BaseAPI:
         # Get new instance of method
         try:
             classname = method.split(".")[-1]
-            module = __import__(self.methods_module + "." + method, globals(), locals(), [classname])
+            module = __import__(self.methods_module.methods.__name__ + "." + method, globals(), locals(), [classname])
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except ImportError, AttributeError:
