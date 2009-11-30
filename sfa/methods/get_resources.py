@@ -67,7 +67,12 @@ class get_resources(Method):
             rspec = rspec_manager.get_rspec(self.api, hrn)
 
         # Filter the outgoing rspec using sfatables
-        outgoing_rules = SFATablesRules('OUTGOING')
+	import pdb
+	pdb.set_trace()
+	if self.api.interface=='slicemgr':
+           outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
+	else:
+           outgoing_rules = SFATablesRules('OUTGOING')
 	if outgoing_rules.sorted_rule_list:
            request_context = rspec_manager.fetch_context(
                hrn,
