@@ -136,8 +136,10 @@ class GeniTable(list):
         else:
             return pgdb._quote(value)
 
-    def find(self, record_filter = None):
-        sql = "SELECT * FROM %s WHERE True " % self.tablename
+    def find(self, record_filter = None, columns=None):
+        if not columns:
+            columns = "*"
+        sql = "SELECT %s FROM %s WHERE True " % (columns, self.tablename)
         
         if isinstance(record_filter, (list, tuple, set)):
             ints = filter(lambda x: isinstance(x, (int, long)), record_filter)
