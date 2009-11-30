@@ -6,6 +6,7 @@ delete_slice
 get_aggregates
 get_credential
 get_gid
+get_gids
 get_registries
 get_resources
 get_self_credential
