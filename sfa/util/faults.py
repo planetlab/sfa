@@ -238,3 +238,11 @@ class BadRequestHash(xmlrpclib.Fault):
    def __init__(self, hash = None):
         faultString = "bad request hash: " + str(hash)
         xmlrpclib.Fault.__init__(self, 902, faultString)
+
+class MissingTrustedRoots(GeniFault):
+    def __init__(self, value, extra = None):
+        self.value = value
+        faultString = "Trusted root directory does not exist: %(value)s" % locals()
+        GeniFault.__init__(self, 102, faultString, extra) 
+    def __str__(self):
+        return repr(self.value)

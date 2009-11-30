@@ -60,6 +60,8 @@ class Auth:
                 self.client_gid.verify_chain(self.trusted_cert_list)
             if self.object_gid:
                 self.object_gid.verify_chain(self.trusted_cert_list)
+	else:
+           raise MissingTrustedRoots(None)
 
         return True
 
