@@ -68,12 +68,13 @@ class get_resources(Method):
 
         # Filter the outgoing rspec using sfatables
         outgoing_rules = SFATablesRules('OUTGOING')
-
-        request_context = rspec_manager.fetch_context(
-            hrn,
-            Credential(string=caller_cred).get_gid_caller().get_hrn(),
-            outgoing_rules.contexts)
-        outgoing_rules.set_context(request_context)
-        filtered_rspec = outgoing_rules.apply(rspec)
-
-        return filtered_rspec
+	if outgoing_rules.sorted_rule_list:
+           request_context = rspec_manager.fetch_context(
+               hrn,
+               Credential(string=caller_cred).get_gid_caller().get_hrn(),
+               outgoing_rules.contexts)
+           outgoing_rules.set_context(request_context)
+           filtered_rspec = outgoing_rules.apply(rspec)
+           return filtered_rspec
+	else:
+	   return rspec
