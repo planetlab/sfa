@@ -61,7 +61,7 @@ class Auth:
             if self.object_gid:
                 self.object_gid.verify_chain(self.trusted_cert_list)
 	else:
-           raise MissingTrustedRoots(None)
+           raise MissingTrustedRoots(self.config.get_trustedroots_dir())
 
         return True
 
