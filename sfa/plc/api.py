@@ -430,14 +430,11 @@ class ComponentAPI(BaseAPI):
         self.nodemanager = self.getNodeManagerShell()
 
     def getNodeManagerShell(self):
-        # do we need an auth ?
-        auth = {}
-        try:
-            nodemanager = xmlrpclib.ServerProxy('http://127.0.0.1:812')
-        except:
-            raise
+        # just import the nm api source
+        sys.path.append('/usr/share/NodeManager')
+        import api_calls
+        return api_calls
 
-        return nodemanager
 
     def sliver_exists(self):
         sliver_dict = self.nodemanager.GetXIDs()
