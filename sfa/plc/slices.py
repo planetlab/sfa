@@ -610,7 +610,7 @@ class Slices(SimpleStorage):
                     # send the whloe rspec to the local aggregate
                     if net_hrn in [self.api.hrn]:
                         try:
-			    request_hash = None
+                            request_hash = None
                             aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, caller_cred)
                         except:
                             arg_list = [credential,hrn,rspec]
@@ -618,7 +618,7 @@ class Slices(SimpleStorage):
                             aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, caller_cred)
                     else:
                         try:
-			    request_hash = None
+                            request_hash = None
                             aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
                         except:
                             arg_list = [credential,hrn,rspecs[net_hrn]]
