@@ -10,8 +10,7 @@ import os
 import time
 import sys
 
-from sfa.util.geniserver import GeniServer
-from sfacomponent.plc.api import ComponentAPI
+from sfa.util.componentserver import ComponentServer
  
 # GeniLight client support is optional
 try:
@@ -32,7 +31,5 @@ class Component(GeniServer):
     # @param cert_file certificate filename containing public key (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file):
-        GeniServer.__init__(self, ip, port, key_file, cert_file)
-        # re-initialize the servers api as Component api  
-        self.server.api = ComponentAPI(interface='component', key_file=key_file, cert_file=cert_file)  
+        ComponentServer.__init__(self, ip, port, key_file, cert_file)
         self.server.interface = 'component'

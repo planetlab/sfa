@@ -141,6 +141,7 @@ class Sfi:
                   "slices": "",
                   "resources": "[name]",
                   "create": "name rspec",
+                  "get_trusted_certs": "cred",
                   "get_ticket": "name rspec",
                   "redeem_ticket": "ticket",  
                   "delete": "name",
@@ -689,8 +690,17 @@ class Sfi:
             arg_list = [cred]  
             request_hash = self.key.compute_hash(arg_list)
         return self.registry.update(cred, record, request_hash)
-   
-    
+  
+    def get_trusted_certs(self, opts, args):
+        """
+        return the trusted certs at this interface 
+        """ 
+        trusted_certs = self.registry.get_trusted_certs()
+        for trusted_cert in trusted_certs:
+            cert = Certificate(string=trusted_cert)
+            print cert.get_subject()
+        return 
+
     def aggregates(self, opts, args):
         """
         return a list of details about known aggregates
