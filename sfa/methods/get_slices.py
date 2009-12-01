@@ -36,6 +36,23 @@ class get_slices(Method):
 	
         #log the call
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
-        slices = Slices(self.api, caller_cred=caller_cred)
-        slices.refresh()
-        return slices['hrn']
+
+        slices = []
+        # send the call to the right manager 
+        if self.api.interface in ['component']:
+            mgr_type = self.api.config.SFA_CM_TYPE
+            manager_module = manger_base + ".component_manager_%s" % mgr_type
+            manager = __import__(manager_module, manager_base)
+            slices = manager.get_slices(self.api)
+        elif self.api.interface in ['aggregate']:
+            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manger_base + ".agregate_manager_%s" % mgr_type
+            manager = __import__(manager_module, manager_base)
+            slices = manager.get_slices(self.api)
+        elif self.api.interface in ['slicemngr']:
+            mgr_type = self.api.config.SFA_SM_TYPE
+            manager_module = manger_base + ".slice_manager_%s" % mgr_type
+            manager = __import__(manager_module, manager_base)
+            slices = manager.get_slices(self.api)
+
+        return slices
