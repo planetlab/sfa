@@ -79,6 +79,6 @@ class create_slice(Method):
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manger_base+= ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)
-            manager.create_slice(self.api, hrn, rspec)
+            manager.create_slice(self.api, hrn, rspec, caller_cred)
 
         return 1 
