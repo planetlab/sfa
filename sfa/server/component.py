@@ -21,7 +21,7 @@ except ImportError:
 ##
 # Component is a GeniServer that serves component operations.
 
-class Component(GeniServer):
+class Component(ComponentServer):
     ##
     # Create a new registry object.
     #
