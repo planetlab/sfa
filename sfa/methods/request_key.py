@@ -55,7 +55,7 @@ class request_key(Method):
         (fd, filename) = tempfile.mkstemp() 
         pkey.save_to_file(filename)
         host = node['hostname']
-        dest="/etc/sfa/%s.key" % record['hrn']
+        dest="/etc/sfa/nodekey.key" 
         identity = "/etc/planetlab/root_ssh_key.pub"
         os.system("scp -i %(identity)s %(filename)s root@%(host)s:%(dest)s" % locals()
         os.remove(filename)
