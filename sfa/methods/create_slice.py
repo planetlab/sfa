@@ -73,12 +73,12 @@ class create_slice(Method):
         if self.api.interface in ['aggregate']:
             mgr_type = self.api.config.SFA_AGGREGATE_TYPE
             manager_module = manager_base + ".agregate_manager_%s" % mgr_type
-            manager = __import__(manager_module, manager_base)
+            manager = __import__(manager_module, fromlist=manager_base)
             manager.create_slice(self.api, hrn, rspec)
         elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
-            manager = __import__(manager_module, manager_base)
+            manager = __import__(manager_module, fromlist=manager_base)
             manager.create_slice(self.api, hrn, rspec, caller_cred)
 
         return 1 
