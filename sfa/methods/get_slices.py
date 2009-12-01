@@ -45,7 +45,7 @@ class get_slices(Method):
             slices = manager.get_slices(self.api)
         elif self.api.interface in ['aggregate']:
             mgr_type = self.api.config.SFA_AGGREGATE_TYPE
-            manager_module = manager_base + ".agregate_manager_%s" % mgr_type
+            manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=manager_base)
             slices = manager.get_slices(self.api)
         elif self.api.interface in ['slicemgr']:
