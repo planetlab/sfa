@@ -33,6 +33,7 @@
 registry_port=12345
 aggregate_port=12346
 slicemgr_port=12347
+component_port=12348
 
 import os, os.path
 import sys
@@ -44,6 +45,7 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.server.registry import Registry
 from sfa.server.aggregate import Aggregate
 from sfa.server.slicemgr import SliceMgr
+from sfa.server.component import Component
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import Config
 from sfa.util.report import trace
@@ -132,6 +134,8 @@ def main():
          help="run slice manager", default=False)
     parser.add_option("-a", "--aggregate", dest="am", action="store_true",
          help="run aggregate manager", default=False)
+    parser.add_option("-c", "--component", dest="component", action="store_true",
+         help="run component server", default=False)
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", 
          help="verbose mode", default=False)
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
@@ -162,6 +166,10 @@ def main():
     if (options.sm):
         s = SliceMgr("", slicemgr_port, server_key_file, server_cert_file)
         s.start()
+
+    if (options.cm):
+        c = Component("", component_port, server_key_file, server_cert_file)
+        c.start()
 
 if __name__ == "__main__":
     main()
