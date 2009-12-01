@@ -7,6 +7,7 @@ get_aggregates
 get_credential
 get_gid
 get_gids
+get_key
 get_registries
 get_resources
 get_self_credential
@@ -18,7 +19,6 @@ reboot
 redeem_ticket
 register
 register_peer_object
-request_key
 remove
 reset_slice
 resolve
