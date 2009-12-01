@@ -103,9 +103,9 @@ class BaseAPI:
         self.encoding = encoding
         
         # flat list of method names
-        methods_module = __import__(methods)
-        self.methods_module = methods_module
-        self.methods = methods_module.methods.all
+         
+        self.methods_module = methods_module = __import__(methods, fromlist=[methods])
+        self.methods = methods_module.all
 
         # Better just be documenting the API
         if config is None:
@@ -136,7 +136,7 @@ class BaseAPI:
         # Get new instance of method
         try:
             classname = method.split(".")[-1]
-            module = __import__(self.methods_module.methods.__name__ + "." + method, globals(), locals(), [classname])
+            module = __import__(self.methods_module.__name__ + "." + method, globals(), locals(), [classname])
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except ImportError, AttributeError:
