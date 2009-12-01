@@ -38,7 +38,7 @@ def delete_slice(api, hrn, caller_cred=None):
         if not success:
             try:
                 arg_list = [credential, hrn]
-                request_hash = self.api.key.compute_hash(arg_list)
+                request_hash = api.key.compute_hash(arg_list)
                 aggregates[aggregate].delete_slice(credential, hrn, request_hash, caller_cred)
                 success = True
             except:
@@ -72,7 +72,6 @@ def create_slice(api, hrn, rspec, caller_cred=None):
         rspecs[net_hrn] = tempspec.toxml()
 
     # send each rspec to the appropriate aggregate/sm
-    caller_cred = self.caller_cred
     for net_hrn in rspecs:
         try:
             # if we are directly connected to the aggregate then we can just 
