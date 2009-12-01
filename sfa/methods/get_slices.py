@@ -39,6 +39,7 @@ class get_slices(Method):
 
         slices = []
         # send the call to the right manager 
+        manager_base = 'sfa.managers'
         if self.api.interface in ['component']:
             mgr_type = self.api.config.SFA_CM_TYPE
             manager_module = manger_base + ".component_manager_%s" % mgr_type
