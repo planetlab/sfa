@@ -17,7 +17,7 @@ class get_slices(Method):
     @return list of human readable slice names (hrn).  
     """
 
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate', 'slicemgr', 'component']
     
     accepts = [
         Parameter(str, "Credential string"),
@@ -31,11 +31,11 @@ class get_slices(Method):
     def call(self, cred, request_hash=None, caller_cred=None):
         self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, 'listslices')
-	if caller_cred==None:
-	   caller_cred=cred
+        if caller_cred==None:
+            caller_cred=cred
 	
-	#log the call
-	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
+        #log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
         slices = Slices(self.api, caller_cred=caller_cred)
         slices.refresh()
         return slices['hrn']
