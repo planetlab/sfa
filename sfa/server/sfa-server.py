@@ -134,7 +134,7 @@ def main():
          help="run slice manager", default=False)
     parser.add_option("-a", "--aggregate", dest="am", action="store_true",
          help="run aggregate manager", default=False)
-    parser.add_option("-c", "--component", dest="component", action="store_true",
+    parser.add_option("-c", "--component", dest="cm", action="store_true",
          help="run component server", default=False)
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", 
          help="verbose mode", default=False)

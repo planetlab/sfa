@@ -30,6 +30,6 @@ class reboot(Method):
         # send the call to the right manager
         manager_base = 'sfa.managers'
         mgr_type = self.api.config.SFA_CM_TYPE
-        manager_module = manger_base+= ".component_manager_%s" % mgr_type
+        manager_module = manger_base + ".component_manager_%s" % mgr_type
         manager = __import__(manager_module, manager_base)
         manager.reboot()
