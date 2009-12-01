@@ -36,7 +36,23 @@ class start_slice(Method):
         client_gid_str = client_gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'startslice')
-        slices = Slices(self.api)
-        slices.start_slice(hrn)
-        
+       
+        # send the call to the right manager
+        manager_base = 'sfa.managers'
+        if self.api.interface in ['component']:
+            mgr_type = self.api.config.SFA_CM_TYPE
+            manager_module = manger_base+= ".component_manager_%s" % mgr_type
+            manager = __import__(manager_module, manager_base)
+            manager.start_slice(self.api, hrn)
+        elif self.api.interface in ['aggregate']:
+            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manger_base+= ".agregate_manager_%s" % mgr_type
+            manager = __import__(manager_module, manager_base)
+            manager.start_slice(self.api, hrn)
+        elif self.api.interface in ['slicemngr']:
+            mgr_type = self.api.config.SFA_SM_TYPE
+            manager_module = manger_base+= ".slice_manager_%s" % mgr_type
+            manager = __import__(manager_module, manager_base)
+            manager.start_slice(self.api, hrn)
+ 
         return 1 
