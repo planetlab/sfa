@@ -71,6 +71,8 @@ def create_slice(api, hrn, rspec, caller_cred=None):
         tempspec.parseDict(resourceDict)
         rspecs[net_hrn] = tempspec.toxml()
 
+    print "rspecs:", rspecs.keys()
+    print "aggregates:", aggregates.keys() 
     # send each rspec to the appropriate aggregate/sm
     for net_hrn in rspecs:
         try:
@@ -102,7 +104,7 @@ def create_slice(api, hrn, rspec, caller_cred=None):
             else:
                 # lets forward this rspec to a sm that knows about the network
                 arg_list = [credential, net_hrn]
-                request_hash = api.compute_hash(arg_list)
+                request_hash = api.key.compute_hash(arg_list)
                 for aggregate in aggregates:
                     try:
                         network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
@@ -123,7 +125,7 @@ def create_slice(api, hrn, rspec, caller_cred=None):
             print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % \
                            locals()
             traceback.print_exc()
-        return 1
+    return 1
 
 def start_slice(api, hrn, caller_cred=None):
     slicename = hrn_to_pl_slicename(hrn)
