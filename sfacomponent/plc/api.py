@@ -8,7 +8,7 @@
 import sys
 import os
 import traceback
-import xmlrpclib.ServerProxy
+from xmlrpclib import ServerProxy
 from sfa.util.api import *
 
 
@@ -19,7 +19,7 @@ class ComponentAPI(BaseAPI):
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
 
         BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert, 
-                         interface, key_file, cert_file) 
+                         interface=interface, key_file=key_file, cert_file=cert_file) 
         self.encoding = encoding
 
         # Better just be documenting the API
