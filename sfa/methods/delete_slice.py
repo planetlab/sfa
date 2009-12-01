@@ -19,7 +19,7 @@ class delete_slice(Method):
     @return 1 if successful, faults otherwise  
     """
 
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate', 'slicemgr', 'component']
     
     accepts = [
         Parameter(str, "Credential string"),
