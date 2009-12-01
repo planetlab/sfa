@@ -158,11 +158,8 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             # check to see if a subclass implements _dispatch and dispatch
             # using that method if present.
             #response = self.server._marshaled_dispatch(request, getattr(self, '_dispatch', None))
-            # XX TODO: Need to get the real remote address
             remote_addr = (remote_ip, remote_port) = self.connection.getpeername()
             self.api.remote_addr = remote_addr
-            #remote_addr = (self.rfile.connection.remote_ip, remote_port)
-            #self.api.remote_addr = remote_addr
             response = self.api.handle(remote_addr, request)
 
         
