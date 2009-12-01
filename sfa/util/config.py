@@ -49,6 +49,20 @@ class Config:
                 # default to /var/lib/sfa not specified in config
                 self.SFA_CONFIG_DIR="/etc/sfa"
 
+            # define interface types
+            # this will determine which manager to use
+            if not hasattr(self, 'SFA_REGISTRY_TYPE'):
+                self.SFA_REGISTRY_TYPE='pl'
+
+            if not hasattr(self, 'SFA_AGGREGATE_TYPE'):
+                self.SFA_AGGREGATE_TYPE='pl'
+
+            if not hasattr(self, 'SFA_SM_TYPE'):
+                self.SFA_SM_TYPE='pl'
+
+            if not hasattr(self, 'SFA_COMPONENT_TYPE'):
+                self.SFA_COMPONENT_TYPE='pl'
+
             # create the data directory if it doesnt exist
             if not os.path.isdir(self.SFA_DATA_DIR):
                 os.mkdir(self.SFA_DATA_DIR)
