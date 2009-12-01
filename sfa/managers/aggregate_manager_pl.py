@@ -16,7 +16,7 @@ from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.debug import log
 from sfa.server.registry import Registries
-from sfa.util import peers
+import sfa.plc.peers as peers
 
 def delete_slice(api, hrn):
     slicename = hrn_to_pl_slicename(hrn)
