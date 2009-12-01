@@ -125,7 +125,7 @@ def create_slice(api, hrn, rspec, caller_cred=None):
             traceback.print_exc()
         return 1
 
-def start_slice(api, hrn):
+def start_slice(api, hrn, caller_cred=None):
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -137,7 +137,7 @@ def start_slice(api, hrn):
 
     return 1
  
-def stop_slice(api, hrn):
+def stop_slice(api, hrn, caller_cred):
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -148,7 +148,7 @@ def stop_slice(api, hrn):
     api.plshell.UpdateSliceTag(api.plauth, attribute_id, "0")
     return 1
 
-def reset_slice(api, hrn):
+def reset_slice(api, hrn, caller_cred):
     # XX not implemented at this interface
     return 1
 
