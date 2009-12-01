@@ -60,7 +60,7 @@ class Config:
             if not hasattr(self, 'SFA_SM_TYPE'):
                 self.SFA_SM_TYPE='pl'
 
-            if not hasattr(self, 'SFA_COMPONENT_TYPE'):
+            if not hasattr(self, 'SFA_CM_TYPE'):
                 self.SFA_COMPONENT_TYPE='pl'
 
             # create the data directory if it doesnt exist
