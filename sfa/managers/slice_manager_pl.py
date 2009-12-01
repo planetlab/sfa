@@ -17,7 +17,8 @@ from sfa.util.prefixTree import prefixTree
 from sfa.util.rspec import *
 from sfa.util.debug import log
 from sfa.server.registry import Registries
-import sfa.plc.peers
+from sfa.server.aggregate import Aggregates
+import sfa.plc.peers as peers
 
 def delete_slice(api, hrn, caller_cred=None):
     credential = api.getCredential()
