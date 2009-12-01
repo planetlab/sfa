@@ -17,7 +17,7 @@ class stop_slice(Method):
     @return 1 is successful, faults otherwise  
     """
 
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate', 'slicemgr', 'component']
     
     accepts = [
         Parameter(str, "Credential string"),
