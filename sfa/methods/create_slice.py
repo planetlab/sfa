@@ -63,12 +63,27 @@ class create_slice(Method):
         incoming_rules.set_context(request_context)
         rspec = incoming_rules.apply(requested_rspec)
 
-        if (sfa_aggregate_type == 'pl'):
-            slices = Slices(self.api, caller_cred=caller_cred)
-            slices.create_slice(hrn, rspec)    
-        else:
-            # To clean up after July 21 - SB    
+        # send the call to the right manager
+        if sfa_aggregate_type not in ['pl']:
+            # To clean up after July 21 - SB
             rspec = rspec_manager.create_slice(self.api, hrn, rspec)
+            return 1
 
-        
+        manager_base = 'sfa.managers'
+        if self.api.interface in ['component']:
+            man_type = self.api.config.SFA_CM_TYPE
+            manager_module = manger_base+= ".component_manager_%s" % man_type
+            manager = __import__(manager_module, manager_base)
+            manager.create_slice(self.api, hrn)
+        elif self.api.interface in ['aggregate']:
+            man_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manger_base+= ".agregate_manager_%s" % man_type
+            manager = __import__(manager_module, manager_base)
+            manager.create_slice(self.api, hrn)
+        elif self.api.interface in ['slicemngr']:
+            man_type = self.api.config.SFA_SM_TYPE
+            manager_module = manger_base+= ".slice_manager_%s" % man_type
+            manager = __import__(manager_module, manager_base)
+            manager.create_slice(self.api, hrn)
+
         return 1 

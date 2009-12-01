@@ -8,8 +8,6 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.trust.credential import Credential
 
-from sfa.plc.slices import Slices
-
 class delete_slice(Method):
     """
     Remove the slice from all nodes.      
@@ -44,6 +42,24 @@ class delete_slice(Method):
         client_gid_str = client_gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'deleteslice')
-        slices = Slices(self.api, caller_cred=caller_cred)
-        slices.delete_slice(hrn)
+
+        
+        # send the call to the right manager
+        manager_base = 'sfa.managers'
+        if self.api.interface in ['component']:
+            man_type = self.api.config.SFA_CM_TYPE
+            manager_module = manger_base+= ".component_manager_%s" % man_type
+            manager = __import__(manager_module, manager_base)
+            manager.delete_slice(self.api, hrn)
+        elif self.api.interface in ['aggregate']:
+            man_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manger_base+= ".agregate_manager_%s" % man_type
+            manager = __import__(manager_module, manager_base)
+            manager.delete_slice(self.api, hrn)
+        elif self.api.interface in ['slicemngr']:        
+            man_type = self.api.config.SFA_SM_TYPE
+            manager_module = manger_base+= ".slice_manager_%s" % man_type
+            manager = __import__(manager_module, manager_base)
+            manager.delete_slice(self.api, hrn)
+
         return 1
