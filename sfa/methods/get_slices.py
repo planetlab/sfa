@@ -28,7 +28,7 @@ class get_slices(Method):
 
     returns = [Parameter(str, "Human readable slice name (hrn)")]
     
-    def call(self, cred, request_hash=None, caller_cred=None):
+    def call(self, cred, request_hash=None):
         self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, 'listslices')
         if caller_cred==None:
@@ -38,6 +38,7 @@ class get_slices(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
 
         slices = []
+        return [1]   
         # send the call to the right manager 
         manager_base = 'sfa.managers'
         if self.api.interface in ['component']:
