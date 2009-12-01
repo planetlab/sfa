@@ -71,18 +71,18 @@ class create_slice(Method):
 
         manager_base = 'sfa.managers'
         if self.api.interface in ['component']:
-            man_type = self.api.config.SFA_CM_TYPE
-            manager_module = manger_base+= ".component_manager_%s" % man_type
+            mgr_type = self.api.config.SFA_CM_TYPE
+            manager_module = manger_base+= ".component_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)
             manager.create_slice(self.api, hrn)
         elif self.api.interface in ['aggregate']:
-            man_type = self.api.config.SFA_AGGREGATE_TYPE
-            manager_module = manger_base+= ".agregate_manager_%s" % man_type
+            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manger_base+= ".agregate_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)
             manager.create_slice(self.api, hrn)
         elif self.api.interface in ['slicemngr']:
-            man_type = self.api.config.SFA_SM_TYPE
-            manager_module = manger_base+= ".slice_manager_%s" % man_type
+            mgr_type = self.api.config.SFA_SM_TYPE
+            manager_module = manger_base+= ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)
             manager.create_slice(self.api, hrn)
 
