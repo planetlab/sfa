@@ -14,7 +14,7 @@
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
 
-privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "getcredential"],
+privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "getcredential", "*"],
                    "refresh": ["remove", "update"],
                    "resolve": ["resolve", "list", "getcredential"],
                    "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", 
@@ -22,9 +22,9 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                           "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy"],
                    "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", "getsliceresources"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
-                   "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids", "getkey"],
+                   "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids"],
                    "info": ["listslices", "listnodes", "getpolicy"],
-                   "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "getkey"],
+                   "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
                    "operator": ["gettrustedcerts", ""]}
 
 

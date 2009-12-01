@@ -214,8 +214,8 @@ class Slices(SimpleStorage):
             success = False
             # request hash is optional so lets try the call without it 
             try:
-		request_hash=None
-                slices = aggregates[aggregate].get_slices(credential, request_hash, self.caller_cred)
+                request_hash=None
+                slices = aggregates[aggregate].get_slices(credential, request_hash)
                 slice_hrns.extend(slices)
                 success = True
             except:
@@ -227,7 +227,7 @@ class Slices(SimpleStorage):
                 arg_list = [credential]
                 request_hash = self.api.key.compute_hash(arg_list)
                 try:
-                    slices = aggregates[aggregate].get_slices(credential, request_hash, self.caller_cred)
+                    slices = aggregates[aggregate].get_slices(credential, request_hash)
                     slice_hrns.extend(slices)
                     success = True
                 except:

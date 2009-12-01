@@ -31,14 +31,11 @@ class get_slices(Method):
     def call(self, cred, request_hash=None):
         self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, 'listslices')
-        if caller_cred==None:
-            caller_cred=cred
 	
         #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=cred).get_gid_caller().get_hrn(), None, self.name))
 
         slices = []
-        return [1]   
         # send the call to the right manager 
         manager_base = 'sfa.managers'
         if self.api.interface in ['component']:
@@ -51,7 +48,7 @@ class get_slices(Method):
             manager_module = manger_base + ".agregate_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)
             slices = manager.get_slices(self.api)
-        elif self.api.interface in ['slicemngr']:
+        elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manger_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)

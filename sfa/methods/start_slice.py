@@ -49,7 +49,7 @@ class start_slice(Method):
             manager_module = manger_base + ".agregate_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)
             manager.start_slice(self.api, hrn)
-        elif self.api.interface in ['slicemngr']:
+        elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manger_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, manager_base)
