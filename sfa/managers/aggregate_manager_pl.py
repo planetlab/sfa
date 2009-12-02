@@ -26,7 +26,7 @@ def delete_slice(api, hrn):
     slice = slices[0]
 
     # determine if this is a peer slice
-    peer = peers.get_peer(hrn)
+    peer = peers.get_peer(api, hrn)
     if peer:
         api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
     api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
