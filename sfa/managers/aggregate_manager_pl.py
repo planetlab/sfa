@@ -76,10 +76,9 @@ def get_slices(api):
     slices.refresh()
     return slices['hrn']
      
-  
-
  
 def get_rspec(api, hrn=None):
+    from sfa.plc.nodes import Nodes
     nodes = Nodes(api)
     if hrn:
         rspec = nodes.get_rspec(hrn)
