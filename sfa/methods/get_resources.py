@@ -51,26 +51,24 @@ class get_resources(Method):
         #log the call
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
 
-        # This code needs to be cleaned up so that 'pl' is treated as just another RSpec manager.
-        # The change ought to be straightforward as soon as we define PL's new RSpec.
 
-        rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type,
-                                   fromlist = ["sfa.rspecs.aggregates"])
-        if (sfa_aggregate_type == 'pl'):
-            nodes = Nodes(self.api, caller_cred=caller_cred)
-            if hrn:
-                rspec = nodes.get_rspec(hrn)
-            else:
-                nodes.refresh()
-                rspec = nodes['rspec']
-        else:
-            rspec = rspec_manager.get_rspec(self.api, hrn)
 
-        # Filter the outgoing rspec using sfatables
-        if self.api.interface=='slicemgr':
-           outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
-        else:
-           outgoing_rules = SFATablesRules('OUTGOING')
+        # send the call to the right manager
+        manager_base = 'sfa.managers'
+        if self.api.interface in ['aggregate']:
+            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+            manager = __import__(manager_module, fromlist=[manager_base])
+            rspec = manager.get_rspec(self.api, hrn)
+            outgoing_rules = SFATablesRules('OUTGOING')
+        elif self.api.interface in ['slicemgr']:
+            mgr_type = self.api.config.SFA_SM_TYPE
+            manager_module = manager_base + ".slice_manager_%s" % mgr_type
+            manager = __import__(manager_module, fromlist=[manager_base])
+            rspec = manager.get_rspec(self.api, hrn)
+            outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
+
+        filtered_rspec = rspec
         if outgoing_rules.sorted_rule_list:
            request_context = rspec_manager.fetch_context(
                hrn,
@@ -78,6 +76,5 @@ class get_resources(Method):
                outgoing_rules.contexts)
            outgoing_rules.set_context(request_context)
            filtered_rspec = outgoing_rules.apply(rspec)
-           return filtered_rspec
-        else:
-	       return rspec
+
+        return filtered_rspec
