@@ -70,7 +70,7 @@ class get_resources(Method):
 
         filtered_rspec = rspec
         if outgoing_rules.sorted_rule_list:
-           request_context = rspec_manager.fetch_context(
+           request_context = manager.fetch_context(
                hrn,
                Credential(string=caller_cred).get_gid_caller().get_hrn(),
                outgoing_rules.contexts)
