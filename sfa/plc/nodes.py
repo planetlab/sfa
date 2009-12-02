@@ -117,7 +117,7 @@ class Nodes(SimpleStorage):
                 caller_cred = self.caller_cred
                 # get the rspec from the aggregate
                 try:
-		    request_hash=None
+            	    request_hash=None
                     agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, caller_cred)
                 except:
                     arg_list = [credential, hrn]
