@@ -601,7 +601,7 @@ class Slices(SimpleStorage):
             rspecs[net_hrn] = tempspec.toxml()
 
         # send each rspec to the appropriate aggregate/sm
-        caller_cred = self.caller_cred 
+        caller_cred = self.caller_cred
         for net_hrn in rspecs:
             try:
                 # if we are directly connected to the aggregate then we can just send them the rspec
