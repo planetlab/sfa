@@ -76,4 +76,13 @@ def get_slices(api):
     slices.refresh()
     return slices['hrn']
      
-    
+   
+def get_rspec(api, hrn=None):
+    nodes = Nodes(api)
+    if hrn:
+        rspec = nodes.get_rspec(hrn)
+    else:
+        nodes.refresh()
+        rspec = nodes['rspec'] 
+
+    return rspec
