@@ -32,7 +32,7 @@ def delete_slice(api, hrn, caller_cred=None):
             success = True
         except:
             print >> log, "%s" % (traceback.format_exc())
-            print >> log, "Error calling list nodes at aggregate %s" % aggregate
+            print >> log, "Error calling delete slice at aggregate %s" % aggregate
 
         # try sending the request hash if the previous call failed
         if not success:
