@@ -67,11 +67,11 @@ class get_resources(Method):
             rspec = rspec_manager.get_rspec(self.api, hrn)
 
         # Filter the outgoing rspec using sfatables
-	if self.api.interface=='slicemgr':
+        if self.api.interface=='slicemgr':
            outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
-	else:
+        else:
            outgoing_rules = SFATablesRules('OUTGOING')
-	if outgoing_rules.sorted_rule_list:
+        if outgoing_rules.sorted_rule_list:
            request_context = rspec_manager.fetch_context(
                hrn,
                Credential(string=caller_cred).get_gid_caller().get_hrn(),
@@ -79,5 +79,5 @@ class get_resources(Method):
            outgoing_rules.set_context(request_context)
            filtered_rspec = outgoing_rules.apply(rspec)
            return filtered_rspec
-	else:
-	   return rspec
+        else:
+	       return rspec
