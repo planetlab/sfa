@@ -20,7 +20,7 @@ import sfa.plc.peers as peers
 
 def delete_slice(api, hrn):
     slicename = hrn_to_pl_slicename(hrn)
-    slices = api.plshell.GetSlices(self.api.plauth, {'name': slicename})
+    slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
     if not slices:
         return 1
     slice = slices[0]
