@@ -1,4 +1,5 @@
 from sfa.util.misc import *
+from types import StringTypes
 
 def get_peer(api, hrn):
     # Becaues of myplc federation,  we first need to determine if this
