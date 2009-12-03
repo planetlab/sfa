@@ -208,6 +208,8 @@ class GeniAPI(BaseAPI):
                pl_record["url"] = record["url"]
 	    if "description" in record:
 	        pl_record["description"] = record["description"]
+	    if "expires" in record:
+	        pl_record["expires"] = int(record["expires"])
 
         elif type == "node":
             if not "hostname" in pl_record:
