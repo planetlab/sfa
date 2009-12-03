@@ -13,9 +13,10 @@ from sfa.util.specdict import *
 from sfa.util.faults import *
 from sfa.util.record import GeniRecord
 from sfa.util.policy import Policy
-from sfa.util.prefixTree import prefixTree
-from sfa.util.debug import log
+from sfa.util.record import *
+from sfa.util.sfaticket import SfaTicket
 from sfa.server.registry import Registries
+from sfa.util.debug import log
 import sfa.plc.peers as peers
 
 def delete_slice(api, hrn):
@@ -40,6 +41,52 @@ def create_slice(api, hrn, rspec):
     from sfa.plc.slices import Slices
     slices = Slices(api)
     slices.create_slice(hrn, rspec)
+
+def get_ticket(api, slice_hrn, rspec):
+    # the the slice record
+    registries = Registries(api)
+    registry = registries[api.hrn]
+    credential = self.api.getCredential()
+    records = registry.resolve(credential, slice_hrn)
+    
+    # make sure we get a local slice record
+    record = None  
+    for tmp_record in records:
+        if record['type'] == 'slice' and \
+           not record['peer_authority']:
+            record = SliceRecord(dict=tmp_record)
+    if not record:
+        raise RecordNotFound(slice_hrn)
+
+    # get sliver info
+    slivers = Slices(api).get_slivers(slice_hrn)
+    if not slivers:
+        raise SliverDoesNotExist(slice_hrn)
+    
+    # get initscripts
+    initscripts = None
+    data = {
+        'timestamp': int(time.time()),
+        'initscripts': initscripts,
+        'slivers': slivers
+    }
+    
+    # create the ticket
+    auth_hrn = record['authority'] 
+    auth_info = api.auth.get_auth_info(auth_hrn)
+    object_gid = record.get_gid_object()
+    new_ticket = SfaTicket(subject = object_gid.get_subject())
+    new_ticket.set_gid_caller(api.auth.client_gid)
+    new_ticket.set_gid_object(object_gid)
+    new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
+    new_ticket.set_pubkey(object_gid.get_pubkey())
+    new_ticket.set_attributes(data)
+    new_ticket.set_rspec(rspec)
+    new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
+    new_ticket.encode()
+    new_ticket.sign()
+
+    return new_ticket.save_to_string(save_parents=True)
 
 def start_slice(api, hrn):
     slicename = hrn_to_pl_slicename(hrn)
