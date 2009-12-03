@@ -757,7 +757,7 @@ class Sfi:
         server = self.slicemgr
         if opts.aggregate:
             agg_hrn = opts.aggregate
-            arg_list = [user_cred, arg_hrn]
+            arg_list = [user_cred, agg_hrn]
             request_hash = self.key.compute_hash(arg_list)
             aggregates = self.registry.get_aggregates(user_cred, agg_hrn, request_hash)
             if not aggregates:
