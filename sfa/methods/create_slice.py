@@ -55,13 +55,16 @@ class create_slice(Method):
         rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
         #Filter the incoming rspec using sfatables
         incoming_rules = SFATablesRules('INCOMING')
-            
-        #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+	if incoming_rules.sorted_rule_list:
+           #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
 
-        contexts = incoming_rules.contexts
-        request_context = rspec_manager.fetch_context(hrn, Credential(string=caller_cred).get_gid_caller().get_hrn(), contexts)
-        incoming_rules.set_context(request_context)
-        rspec = incoming_rules.apply(requested_rspec)
+           contexts = incoming_rules.contexts
+           request_context = rspec_manager.fetch_context(hrn, Credential(string=caller_cred).get_gid_caller().get_hrn(), contexts)
+           incoming_rules.set_context(request_context)
+           rspec = incoming_rules.apply(requested_rspec)
+
+	else:	
+	   rspec = requested_rspec
 
         # send the call to the right manager
         if sfa_aggregate_type not in ['pl']:
