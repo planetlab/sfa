@@ -1,0 +1,29 @@
+-GetTicket
+* sm, am only
+* sm calls getticket on am and merges resulting tickets into 1 ticket
+
+-  sfa-clean-peer-records 
+* modify resolve to support a list of hrns
+* resolve a list of peer hrns instead of each hrn individally
+
+-  sfi remove, if removing a site, remove any record that site is an an authority for
+
+-  routing sm calls
+* sfi -a option should send request to sm with an extra argument to 
+  specify which am to contact instead of connecting directly to the am 
+  (am may not trust client directly)
+
+- make registry more generic
+* support interface managers
+* support generic registry records (dont depend on postgres! object db?)
+
+- checking support for conventional ssl (creating a shared keypair for the request)        
+
+-  Initscripts on sfa / geniwrapper
+
+-  Geni identification on nodes
+* nodes pk stored in /etc/sfa/nodekey
+* slice's gid and nodes gid stored in all slices (/etc/sfa/slicegid, /etc/sfa/nodegid)
+-  Fully integrate SOAP (need to throw either soap or xmlrpc exceptions depending on the client)
+
+- unit tests
