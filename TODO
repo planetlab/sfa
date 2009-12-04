@@ -26,4 +26,8 @@
 * slice's gid and nodes gid stored in all slices (/etc/sfa/slicegid, /etc/sfa/nodegid)
 -  Fully integrate SOAP (need to throw either soap or xmlrpc exceptions depending on the client)
 
+- error messages
+* error messages should be easier to understand
+* (failing to connect to plcapi shoudl return a helpful message, not a generic internal server error) 
+
 - unit tests
