@@ -22,7 +22,9 @@ class get_signed_ticket(Method):
     initscripts.
     
     @param cred credential string
-    @param ticket string representation of a ticket object
+    @param hrn human readable name (hrn) of slice 
+    @param rspec resource specification string
+    @param data extra data
     
     @return the string representation of a signed ticket object
     """
@@ -31,7 +33,9 @@ class get_signed_ticket(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "String representation of a ticket object"),
+        Parameter(str, "human readable name (hrn) of slice"),
+        Parameter(str, "resource specification string"),
+        Parameter(dict, "extra data"),
         Mixed(Parameter(str, "Request hash"),
               Parameter(None, "Request hash not specified"))
         ]
