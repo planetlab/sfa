@@ -36,7 +36,7 @@ class request_key(Method):
         table = GeniTable()
         records = table.find({'type': 'node', 'pointer': node['node_id']})
         if not records:
-            raise raise RecordNotFound("pointer:" + str(node['node_id']))  
+            raise RecordNotFound("pointer:" + str(node['node_id']))  
         record = records[0]
         
         # generate a new keypair and gid
