@@ -2,13 +2,14 @@
 ### $URL:  $
 import os
 import tempfile
+import commands
 from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 
-class request_key(Method):
+class get_key(Method):
     """
     Generate a new keypair and gid for requesting caller (component).     
     @return 1 If successful  
@@ -57,7 +58,10 @@ class request_key(Method):
         host = node['hostname']
         dest="/etc/sfa/nodekey.key" 
         identity = "/etc/planetlab/root_ssh_key.pub"
-        os.system("scp -i %(identity)s %(filename)s root@%(host)s:%(dest)s" % locals()
-        os.remove(filename)
+        scp_command = "scp -i %(identity)s %(filename)s root@%(host)s:%(dest)s" % locals()
+        (status, output) = commands(scp_command)
+        if status:
+            raise Exception, output
+        os.unlink(filename)
 
         return 1 
