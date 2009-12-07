@@ -13,6 +13,7 @@ get_resources
 get_self_credential
 get_slices
 get_ticket
+get_signed_ticket
 get_trusted_certs
 list
 reboot
