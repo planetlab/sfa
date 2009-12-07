@@ -25,7 +25,7 @@ class get_key(Method):
         # verify that the callers's ip address exist in the db and is an inteface
         # for a node in the db
         (ip, port) = self.api.remote_addr
-        interfaces = self.api.plshell(self.api.plauth, {'ip': ip}, ['node_id'])
+        interfaces = self.api.plshell.GetInterfaces(self.api.plauth, {'ip': ip}, ['node_id'])
         if not interfaces:
             raise NonExistingRecord("no such ip %(ip)s" % locals())
         nodes = self.api.plshell(self.api.plauth, [interfaces[0]['node_id']], ['node_id', 'hostname'])
