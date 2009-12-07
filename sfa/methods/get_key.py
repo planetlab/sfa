@@ -9,6 +9,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.genitable import *
+from sfa.trust.certificate import Keypair
 
 class get_key(Method):
     """
@@ -36,7 +37,7 @@ class get_key(Method):
        
         # look up the sfa record
         table = GeniTable()
-        records = table.find({'type': 'node', 'pointer': node['node_id']})
+        records = table.findObjects({'type': 'node', 'pointer': node['node_id']})
         if not records:
             raise RecordNotFound("pointer:" + str(node['node_id']))  
         record = records[0]
@@ -58,9 +59,9 @@ class get_key(Method):
         pkey.save_to_file(filename)
         host = node['hostname']
         dest="/etc/sfa/nodekey.key" 
-        identity = "/etc/planetlab/root_ssh_key.pub"
-        scp_command = "scp -i %(identity)s %(filename)s root@%(host)s:%(dest)s" % locals()
-        (status, output) = commands(scp_command)
+        identity = "/etc/planetlab/root_ssh_key.rsa"
+        scp_command = "/usr/bin/scp -i %(identity)s %(filename)s root@%(host)s:%(dest)s" % locals()
+        (status, output) = commands.getstatusoutput(scp_command)
         if status:
             raise Exception, output
         os.unlink(filename)
