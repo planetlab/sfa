@@ -28,7 +28,7 @@ class get_key(Method):
         interfaces = self.api.plshell.GetInterfaces(self.api.plauth, {'ip': ip}, ['node_id'])
         if not interfaces:
             raise NonExistingRecord("no such ip %(ip)s" % locals())
-        nodes = self.api.plshell(self.api.plauth, [interfaces[0]['node_id']], ['node_id', 'hostname'])
+        nodes = self.api.plshell.GetNodes(self.api.plauth, [interfaces[0]['node_id']], ['node_id', 'hostname'])
         if not nodes:
             raise NonExistingRecord("no such node using ip %(ip)s" % locals())
         node = nodes[0]
