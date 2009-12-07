@@ -7,11 +7,12 @@ from sfa.util.xmlrpcprotocol import *
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 
+CONFIG_DIR='/etc/sfa'
+TRUSTED_CERTS_DIR = '/etc/sfa/trusted_roots'
+DATA_DIR = '/var/lib/sfa'
+
 def create_default_dirs():
-    config_dir = '/etc/sfa'
-    trusted_certs_dir = '/etc/sfa/trusted_certs'
-    data_dir = '/var/lib/sfa'
-    all_dirs = [config_dir, trusted_certs_dir, data_dir]
+    all_dirs = [CONFIG_DIR, TRUSTED_CERTS_DIR, DATA_DIR]
     for dir in all_dirs:
         if not os.path.exists(dir):
             os.mkdir(dir)
