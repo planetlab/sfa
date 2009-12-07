@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import os
+import tempfile
 from optparse import OptionParser
 from sfa.util.config import Config
 from sfa.util.xmlrpcprotocol import *
