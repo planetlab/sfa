@@ -29,7 +29,7 @@ class get_ticket(Method):
     @return the string representation of a ticket object
     """
 
-    interfaces = ['registry', 'aggregate', 'slicemgr']
+    interfaces = ['aggregate', 'slicemgr']
     
     accepts = [
         Parameter(str, "Credential string"),
@@ -46,27 +46,14 @@ class get_ticket(Method):
         self.api.auth.check(cred, "getticket")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(hrn)
+   
+        # set the right outgoing rules
+        if self.api.interface in ['aggregate']:
+            outgoing_rules = SFATablesRules('OUTGOING')
+        elif self.api.interface in ['slicemgr']:
+            outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
 
-        # find record info
-        table = GeniTable()
-        records = table.findObjects({'hrn': hrn, 'type': 'slice', 'peer_authority': None})
-        if not records:
-            raise RecordNotFound(hrn)
-        record = records[0]
-        auth_hrn = record['authority']
-        auth_info = self.api.auth.get_auth_info(auth_hrn)
-        object_gid = record.get_gid_object()
-        new_ticket = SfaTicket(subject = object_gid.get_subject())
-        new_ticket.set_gid_caller(self.api.auth.client_gid)
-        new_ticket.set_gid_object(object_gid)
-        new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
-        new_ticket.set_pubkey(object_gid.get_pubkey())
-
-        # determine aggregate tyep 
-        sfa_aggregate_type = Config().get_aggregate_rspec_type()
-        rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
-
-        # Fukter the incoming rspec using sfatables
+        # Filter the incoming rspec using sfatables
         incoming_rules = SFATablesRules('INCOMING')
         #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
         contexts = incoming_rules.contexts
@@ -74,27 +61,19 @@ class get_ticket(Method):
         request_context = rspec_manager.fetch_context(hrn, caller_hrn, contexts)
         incoming_rules.set_context(request_context)
         rspec = incoming_rules.apply(rspec)
-
-        # get sliver info    
-        slivers = Slices(self.api).get_slivers(hrn)
-        if not slivers:
-            raise SliverDoesNotExist(hrn)
-            
-        # get initscripts
-        initscripts = None
-        data = {
-            'timestamp': int(time.time()),
-            'initscripts': initscripts,
-            'slivers': slivers 
-        }
-
-        new_ticket.set_attributes(data)
-        new_ticket.set_rspec(rspec)
-
-        new_ticket.set_parent(self.api.auth.hierarchy.get_auth_ticket(auth_hrn))
-
-        new_ticket.encode()
-        new_ticket.sign()
-
-        return new_ticket.save_to_string(save_parents=True)
+ 
+        # send the call to the right manager
+        manager_base = 'sfa.managers'
+        if self.api.interface in ['aggregate']:
+            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+            manager = __import__(manager_module, fromlist=[manager_base])
+            ticket = manager.get_ticket(self.api, hrn, rspec)
+        elif self.api.interface in ['slicemgr']:
+            mgr_type = self.api.config.SFA_SM_TYPE
+            manager_module = manager_base + ".slice_manager_%s" % mgr_type
+            manager = __import__(manager_module, fromlist=[manager_base])
+            ticket = manager.get_rspec(self.api, hrn, rspec)
+        
+        return ticket
         
