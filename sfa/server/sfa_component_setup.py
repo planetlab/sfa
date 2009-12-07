@@ -89,7 +89,7 @@ def main():
 
     create_default_dirs()
     if options.key:
-        get_key(options)
+        get_node_key(options)
     if options.certs:
         get_certs(options)
     if options.gids:
