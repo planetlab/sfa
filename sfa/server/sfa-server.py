@@ -33,7 +33,7 @@
 registry_port=12345
 aggregate_port=12346
 slicemgr_port=12347
-component_port=12348
+component_port=12346
 
 import os, os.path
 import sys
