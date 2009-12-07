@@ -51,6 +51,7 @@ def get_node_key(options):
         print "Contacting registry at: %(url)s" % locals() 
      
     registry = xmlrpcprotocol.get_server(url, keyfile, certfile)
+    registry.get_key()
                 
 def get_credential(options):
     if options.verbose:
