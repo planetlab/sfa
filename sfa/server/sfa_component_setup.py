@@ -28,7 +28,7 @@ def get_node_key(options):
     certfile = tempfile.mktemp()
     key = Keypair(create=True)
     key.save_to_file(keyfile)
-    cert = Certificate(subject=component)
+    cert = Certificate(subject=subject)
     cert.set_issuer(key=key, subject=subject)
     cert.set_pubkey(key)
     cert.sign()
