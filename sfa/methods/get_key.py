@@ -61,8 +61,8 @@ class get_key(Method):
         pkey.save_to_file(key_filename)
         gid_str = gid.save_to_file(save_parents=True)
         host = node['hostname']
-        key_dest="/etc/sfa/nodekey.key"
-        gid_dest="/etc/sfa/nodegid.gid" 
+        key_dest="/etc/sfa/node.key"
+        gid_dest="/etc/sfa/node.gid" 
         scp = "/usr/bin/scp" 
         identity = "/etc/planetlab/root_ssh_key.rsa"
         scp_options=" -i %(identity)s %(filename)s " % locals()
