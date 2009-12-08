@@ -54,18 +54,32 @@ class get_key(Method):
         table.update(record)
   
         # attempt the scp the key
+        # and gid onto the node
         # this will only work for planetlab based compoenents
-        (fd, filename) = tempfile.mkstemp() 
-        pkey.save_to_file(filename)
+        (kfd, key_filename) = tempfile.mkstemp() 
+        (gfd, gid_filename) = tempfile.mkstemp() 
+        pkey.save_to_file(key_filename)
+        gid_str = gid.save_to_file(save_parents=True)
         host = node['hostname']
-        dest="/etc/sfa/nodekey.key" 
+        key_dest="/etc/sfa/nodekey.key"
+        gid_dest="/etc/sfa/nodegid.gid" 
+        scp = "/usr/bin/scp" 
         identity = "/etc/planetlab/root_ssh_key.rsa"
         scp_options=" -i %(identity)s %(filename)s " % locals()
         scp_options+="-o StrictHostKeyChecking=no " % locals()
-        scp_command = "/usr/bin/scp %(scp_options)s root@%(host)s:%(dest)s" % locals()
-        (status, output) = commands.getstatusoutput(scp_command)
-        if status:
-            raise Exception, output
-        os.unlink(filename)
+        scp_key_command="%(scp)s %(scp_options)s root@%(host)s:%(key_dest)s" %\
+                         locals()
+        scp_gid_command="%(scp)s %(scp_options)s root@%(host)s:%(gid_dest)s" %\
+                         locals()    
+
+        all_commands = [scp_key_command, scp_gid_command]
+        
+        for command in all_commands:
+            (status, output) = commands.getstatusoutput(command)
+            if status:
+                raise Exception, output
+
+        for filename in [key_filename, gid_filename]:
+            os.unlink(filename)
 
         return 1 
