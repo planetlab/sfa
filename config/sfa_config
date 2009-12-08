@@ -102,7 +102,7 @@ SFA_SM_HOST="localhost"
 #
 # Port
 # Geni slice manager server port
-SFA_SM_PORT=12348
+SFA_SM_PORT=12346
 
 
 
