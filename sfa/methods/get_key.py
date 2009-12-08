@@ -60,7 +60,9 @@ class get_key(Method):
         host = node['hostname']
         dest="/etc/sfa/nodekey.key" 
         identity = "/etc/planetlab/root_ssh_key.rsa"
-        scp_command = "/usr/bin/scp -i %(identity)s %(filename)s root@%(host)s:%(dest)s" % locals()
+        scp_options=" -i %(identity)s %(filename)s " % locals()
+        scp_options+="-o StrictHostKeyChecking=no " % locals()
+        scp_command = "/usr/bin/scp %(scp_options)s root@%(host)s:%(dest)s" % locals()
         (status, output) = commands.getstatusoutput(scp_command)
         if status:
             raise Exception, output
