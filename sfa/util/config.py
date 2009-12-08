@@ -44,6 +44,7 @@ class Config:
             if not hasattr(self, 'SFA_DATA_DIR'):
                 # default to /var/lib/sfa not specified in config
                 self.SFA_DATA_DIR="/var/lib/sfa"
+                self.data_path = self.SFA_DATA_DIR
             # path to config data
             if not hasattr(self, 'SFA_CONFIG_DIR'):
                 # default to /var/lib/sfa not specified in config
