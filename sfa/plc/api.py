@@ -139,7 +139,7 @@ class GeniAPI(BaseAPI):
         if not auth_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
-        from sfa.util.genitable import *
+        from sfa.util.genitable import GeniTable
         table = GeniTable()
         records = table.findObjects(hrn)
         if not records:
@@ -313,7 +313,7 @@ class GeniAPI(BaseAPI):
     def fill_record_geni_info(self, record):
         geni_info = {}
         type = record['type']
-        from sfa.util.genitable import *
+        from sfa.util.genitable import GeniTable
         table = GeniTable()
         if (type == "slice"):
             person_ids = record.get("person_ids", [])
@@ -381,7 +381,7 @@ class GeniAPI(BaseAPI):
         # build a list of the new person ids, by looking up each person to get
         # their pointer
         newIdList = []
-        from sfa.util.genitable import *
+        from sfa.util.genitable import GeniTable
         table = GeniTable()
         records = table.find({'type': 'user', 'hrn': newList})
         for rec in records:
