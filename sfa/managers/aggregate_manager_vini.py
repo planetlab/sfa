@@ -20,8 +20,8 @@ def create_slice_vini_aggregate(api, hrn, nodes):
     credential = api.getCredential()
     records = registry.resolve(credential, hrn)
     for record in records:
-        if record.get_type() in ['slice']:
-            slice = record.as_dict()
+        if record['type'] in ['slice']:
+            slice = record
     if not slice:
         raise RecordNotFound(hrn)   
 
@@ -39,8 +39,7 @@ def create_slice_vini_aggregate(api, hrn, nodes):
             site_record = {}
             if not site_records:
                 raise RecordNotFound(authority)
-            site_record = site_records[0]
-            site = site_record.as_dict()
+            site = site_records[0]
                 
             # add the site
             site.pop('site_id')
@@ -66,11 +65,11 @@ def create_slice_vini_aggregate(api, hrn, nodes):
         person_record = {}
         person_records = registry.resolve(credential, researcher)
         for record in person_records:
-            if record.get_type() in ['user']:
+            if record['type'] in ['user']:
                 person_record = record
         if not person_record:
             pass
-        person_dict = person_record.as_dict()
+        person_dict = person_record
         persons = api.plshell.GetPersons(api.plauth, [person_dict['email']],
                                          ['person_id', 'key_ids'])
 
