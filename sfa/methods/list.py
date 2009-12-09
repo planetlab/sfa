@@ -30,14 +30,14 @@ class list(Method):
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, request_hash=None, caller_cred=None):
+    def call(self, cred, hrn, request_hash=None, origin_hrn=None):
         self.api.auth.authenticateCred(cred, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'list')
-        if caller_cred==None:
-            caller_cred=cred
+        if origin_hrn==None:
+            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
 
         #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
         records = []
 
         # load all know registry names into a prefix tree and attempt to find
@@ -63,7 +63,7 @@ class list(Method):
             except:
                 arg_list = [credential, hrn]
                 request_hash = self.api.key.compute_hash(arg_list)
-                record_list = registries[registry_hrn].list(credential, hrn, request_hash, caller_cred)
+                record_list = registries[registry_hrn].list(credential, hrn, request_hash, origin_hrn)
                 records = [GeniRecord(dict=record).as_dict() for record in record_list] 
                 
         if records:
