@@ -220,7 +220,7 @@ def dispatch(options, args):
     if options.certs:
         if options.verbose:
             print "Getting the component's trusted certs"
-        get_certs(verbose=options.verbose)
+        get_trusted_certs(verbose=options.verbose)
     if options.gids:        
         if options.verbose:
             print "Geting the component's GIDs"
