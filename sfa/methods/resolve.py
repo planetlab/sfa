@@ -32,15 +32,15 @@ class resolve(Method):
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, request_hash=None, caller_cred=None):
+    def call(self, cred, hrn, request_hash=None, origin_hrn=None):
         
         self.api.auth.authenticateCred(cred, [cred, hrn], request_hash) 
         self.api.auth.check(cred, 'resolve')
-        if caller_cred==None:
-            caller_cred=cred
+        if origin_hrn==None:
+            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
 
         #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
         good_records = [] 
 
         # load all know registry names into a prefix tree and attempt to find
@@ -61,7 +61,7 @@ class resolve(Method):
             credential = self.api.getCredential()
             try:
 		request_hash=None
-                records = registries[registry_hrn].resolve(credential, hrn, request_hash, caller_cred)
+                records = registries[registry_hrn].resolve(credential, hrn, request_hash, origin_hrn)
                 good_records = [GeniRecord(dict=record).as_dict() for record in records]
             except:
                 arg_list = [credential, hrn]
