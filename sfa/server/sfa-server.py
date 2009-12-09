@@ -94,7 +94,7 @@ def init_server_key(server_key_file, server_cert_file, config, hierarchy):
             cert.set_issuer(key=key, subject=subject)
             cert.set_pubkey(key)
             cert.sign()
-            cert.save_to_file(server_cert_file)
+            cert.save_to_file(server_cert_file, save_parents=True)
 
         else:
             # the pkey was found in the authorites directory. lets 
@@ -106,7 +106,7 @@ def init_server_key(server_key_file, server_cert_file, config, hierarchy):
             cert.set_issuer(key=key, subject=subject)
             cert.set_pubkey(key)
             cert.sign()
-            cert.save_to_file(server_cert_file)
+            cert.save_to_file(server_cert_file, save_parents=True)
 
 
     # If private key exists and cert doesnt, recreate cert
