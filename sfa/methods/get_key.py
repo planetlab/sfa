@@ -64,7 +64,7 @@ class get_key(Method):
         key_dest="/etc/sfa/node.key"
         gid_dest="/etc/sfa/node.gid" 
         scp = "/usr/bin/scp" 
-        identity = "/etc/planetlab/root_ssh_key.rsa"
+        identity = "/etc/sfa/root_ssh_key"
         scp_options=" -i %(identity)s %(filename)s " % locals()
         scp_options+="-o StrictHostKeyChecking=no " % locals()
         scp_key_command="%(scp)s %(scp_options)s root@%(host)s:%(key_dest)s" %\
