@@ -9,6 +9,7 @@ import sfa.util.misc as misc
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.gid import GID
+from sfa.trust.hierarchy import Hierarchy
 
 def get_server(url=None, port=None, keyfile=None, certfile=None,verbose=False):
     """
@@ -59,7 +60,7 @@ def get_node_key(registry=None, verbose=False):
     cert.sign()
     cert.save_to_file(certfile)
     
-    registry = get_server(service_url = options.registry, keyfile=keyfile, certfile=certfile)    
+    registry = get_server(url = registry, keyfile=keyfile, certfile=certfile)    
     registry.get_key()
 
 def create_server_keypair(keyfile=None, certfile=None, hrn="component", verbose=False):
@@ -74,7 +75,7 @@ def create_server_keypair(keyfile=None, certfile=None, hrn="component", verbose=
     cert.sign()
     cert.save_to_file(certfile, save_parents=True)       
         
-def get_credential(registry=registry, verbose=False):
+def get_credential(registry=None, verbose=False):
     config = Config()
     hierarchy = Hierarchy()
     key_dir= hierarchy.basedir
@@ -213,17 +214,17 @@ def dispatch(options, args):
 
     create_default_dirs()
     if options.key:
-        if verbose:
+        if options.verbose:
             print "Getting the component's pkey"
-        get_node_key(options.registry, options.verbose)
+        get_node_key(registry=options.registry, verbose=options.verbose)
     if options.certs:
         if options.verbose:
             print "Getting the component's trusted certs"
-        get_certs(options.verbose)
+        get_certs(verbose=options.verbose)
     if options.gids:        
         if options.verbose:
             print "Geting the component's GIDs"
-        get_gids(options.verbose)
+        get_gids(verbose=options.verbose)
 
 def main():
     args = sys.argv
