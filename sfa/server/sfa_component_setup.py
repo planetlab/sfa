@@ -120,7 +120,8 @@ def get_trusted_certs(registry=None, verbose=False):
     """
     # define useful variables
     config = Config()
-    data_dir = config.data_path
+    data_dir = config.SFA_DATA_DIR
+    config_dir = config.SFA_CONFIG_DIR
     trusted_certs_dir = config.get_trustedroots_dir()
     keyfile = data_dir + os.sep + "server.key"
     certfile = data_dir + os.sep + "server.cert"

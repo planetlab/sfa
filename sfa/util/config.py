@@ -40,6 +40,7 @@ class Config:
             self.config_file = config_file
             # path to configuration data
             self.config_path = os.path.dirname(config_file)
+            
             # path to server data
             if not hasattr(self, 'SFA_DATA_DIR'):
                 # default to /var/lib/sfa not specified in config
