@@ -55,21 +55,21 @@ class get_key(Method):
   
         # attempt the scp the key
         # and gid onto the node
-        # this will only work for planetlab based compoenents
+        # this will only work for planetlab based components
         (kfd, key_filename) = tempfile.mkstemp() 
         (gfd, gid_filename) = tempfile.mkstemp() 
         pkey.save_to_file(key_filename)
-        gid_str = gid.save_to_file(save_parents=True)
+        gid_object.save_to_file(gid_filename, save_parents=True)
         host = node['hostname']
         key_dest="/etc/sfa/node.key"
         gid_dest="/etc/sfa/node.gid" 
         scp = "/usr/bin/scp" 
         identity = "/etc/sfa/root_ssh_key"
-        scp_options=" -i %(identity)s %(filename)s " % locals()
+        scp_options=" -i %(identity)s " % locals()
         scp_options+="-o StrictHostKeyChecking=no " % locals()
-        scp_key_command="%(scp)s %(scp_options)s root@%(host)s:%(key_dest)s" %\
+        scp_key_command="%(scp)s %(scp_options)s %(key_filename)s root@%(host)s:%(key_dest)s" %\
                          locals()
-        scp_gid_command="%(scp)s %(scp_options)s root@%(host)s:%(gid_dest)s" %\
+        scp_gid_command="%(scp)s %(scp_options)s %(gid_filename)s root@%(host)s:%(gid_dest)s" %\
                          locals()    
 
         all_commands = [scp_key_command, scp_gid_command]
