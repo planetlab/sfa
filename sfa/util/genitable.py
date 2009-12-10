@@ -139,6 +139,8 @@ class GeniTable(list):
     def find(self, record_filter = None, columns=None):
         if not columns:
             columns = "*"
+        else:
+            columns = ",".join(columns)
         sql = "SELECT %s FROM %s WHERE True " % (columns, self.tablename)
         
         if isinstance(record_filter, (list, tuple, set)):
@@ -161,9 +163,9 @@ class GeniTable(list):
             results = [results]
         return results
 
-    def findObjects(self, record_filter = None):
+    def findObjects(self, record_filter = None, columns=None):
         
-        results = self.find(record_filter) 
+        results = self.find(record_filter, columns) 
         result_rec_list = []
         for result in results:
             if result['type'] in ['authority']:
