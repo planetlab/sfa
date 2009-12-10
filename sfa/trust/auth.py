@@ -241,7 +241,7 @@ class Auth:
             rl.add("info")
 
         elif type == "node":
-            r1.add("operator")
+            rl.add("operator")
 
         return rl
 
