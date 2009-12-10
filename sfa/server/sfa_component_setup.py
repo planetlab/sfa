@@ -152,6 +152,8 @@ def get_trusted_certs(registry=None, verbose=False):
     all_gids_names = os.listdir(trusted_certs_dir)
     for gid_name in all_gids_names:
         if gid_name not in trusted_gid_names:
+            if verbose:
+                print "Removing old gid ", gid_name
             os.unlink(trusted_certs_dir + os.sep + gid_name)                     
 
 def get_gids(registry=None, verbose=False):
