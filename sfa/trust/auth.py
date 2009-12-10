@@ -240,7 +240,7 @@ class Auth:
             rl.add("resolve")
             rl.add("info")
 
-        elif type == "component":
+        elif type == "node":
             r1.add("operator")
 
         return rl
