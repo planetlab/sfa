@@ -111,7 +111,7 @@ def get_credential(registry=None, verbose=False):
         cert = Certificate(filename=certfile)
         cert_str = cert.save_to_string(save_parents=True)
         cred = registry.get_self_credential(cert_str, 'node', hrn)    
-        Credential(string=cred).save_to_file(credfile)
+        Credential(string=cred).save_to_file(credfile, save_parents=True)
     
     return cred
 
