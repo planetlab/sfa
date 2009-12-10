@@ -164,6 +164,7 @@ def get_gids(registry=None, verbose=False):
     # define useful variables
     config = Config()
     data_dir = config.data_path
+    config_dir = config.SFA_CONFIG_DIR
     trusted_certs_dir = config.get_trustedroots_dir()
     keyfile = data_dir + os.sep + "server.key"
     certfile = data_dir + os.sep + "server.cert"
@@ -182,7 +183,7 @@ def get_gids(registry=None, verbose=False):
     # get a list of slices on this node
     from sfa.plc.api import ComponentAPI
     api = ComponentAPI()
-    slicenames = api.nodemanger.GetXIDs().keys()   
+    slicenames = api.nodemanager.GetXIDs().keys()   
     slicename_to_hrn = lambda name: ".".join([interface_hrn, name.replace('_', '.')])
     hrns = map(slicename_to_hrn, slicenames)
 
