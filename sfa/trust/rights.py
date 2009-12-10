@@ -25,7 +25,7 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                    "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids"],
                    "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
-                   "operator": ["gettrustedcerts", ""]}
+                   "operator": ["gettrustedcerts", "getgids"]}
 
 
 ##
