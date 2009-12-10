@@ -108,6 +108,7 @@ def get_credential(registry=None, verbose=False):
 
         # get credential from registry 
         registry = get_server(url=registry, keyfile=keyfile, certfile=certfile)
+        cert = Certificate(filename=certfile)
         cert_str = cert.save_to_string(save_parents=True)
         cred = registry.get_self_credential(cert_str, 'node', hrn)    
         Credential(string=cred).save_to_file(credfile)
