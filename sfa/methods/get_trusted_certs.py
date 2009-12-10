@@ -29,7 +29,7 @@ class get_trusted_certs(Method):
         # authenticate the cred
         client_gid = Credential(string=cred).get_gid_caller()
         client_gid_str = client_gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash) 
+        self.api.auth.authenticateGid(client_gid_str, [cred], request_hash) 
         self.api.auth.check(cred, 'gettrustedcerts')
 
         trusted_cert_strings = [gid.save_to_string(save_parents=True) for \
