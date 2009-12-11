@@ -204,12 +204,12 @@ def get_gids(registry=None, verbose=False):
         # save the slice gid in /etc/sfa/ in the vservers filesystem
         vserver_path = "/vserver/%(slicename)s" % locals()
         gid = record['gid']
-        slice_gid_filename = os.sep.join([vserver_path, config_dir, "slice.gid"])
+        slice_gid_filename = os.sep.join([vserver_path, "etc", "slice.gid"])
         if verbose:
             print "Saving GID for %(slicename)s as %(slice_gid_filename)s" % locals()
         GID(string=gid).save_to_file(slice_gid_filename, save_parents=True)
         # save the node gid in /etc/sfa
-        node_gid_filename = os.sep.join([vserver_path, config_dir, "node.gid"])
+        node_gid_filename = os.sep.join([vserver_path, "etc", "node.gid"])
         if verbose:
             print "Saving node GID for %(slicename)s as %(slice_gid_filename)s" % locals()
         node_gid.save_to_file(node_gid_filename, save_parents=True) 
