@@ -202,7 +202,7 @@ def get_gids(registry=None, verbose=False):
             continue
        
         # save the slice gid in /etc/sfa/ in the vservers filesystem
-        vserver_path = "/vserver/%(slicename)s" % locals()
+        vserver_path = "/vservers/%(slicename)s" % locals()
         gid = record['gid']
         slice_gid_filename = os.sep.join([vserver_path, "etc", "slice.gid"])
         if verbose:
