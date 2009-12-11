@@ -211,7 +211,7 @@ def get_gids(registry=None, verbose=False):
         # save the node gid in /etc/sfa
         node_gid_filename = os.sep.join([vserver_path, "etc", "node.gid"])
         if verbose:
-            print "Saving node GID for %(slicename)s as %(slice_gid_filename)s" % locals()
+            print "Saving node GID for %(slicename)s as %(node_gid_filename)s" % locals()
         node_gid.save_to_file(node_gid_filename, save_parents=True) 
                 
 
