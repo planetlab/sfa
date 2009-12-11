@@ -40,6 +40,8 @@ class get_gids(Method):
         self.api.auth.authenticateCred(cred, [cred, hrns], request_hash)
         self.api.auth.check(cred, 'getgids')
         table = GeniTable()
-        records = table.find({'hrn': [hrns]}, columns=['hrn','type','gid'])
+        if not isinstance(hrns, list):
+            hrns = [hrns]
+        records = table.find({'hrn': hrns}, columns=['hrn','type','gid'])
         
         return records 

@@ -135,7 +135,7 @@ class GeniTable(list):
         # The pgdb._quote function is good enough for general SQL
         # quoting, except for array types.
         if isinstance(value, (list, tuple, set)):
-            return "ARRAY[%s]" % ", ".join(map, self.quote, value)
+            return "ARRAY[%s]" % ", ".join(map, self.quote_string, value)
         else:
             return pgdb._quote(value)
 
