@@ -124,6 +124,9 @@ class GeniTable(list):
         self.db.do(query_str, db_fields)
         self.db.commit()
 
+    def quote_string(self, value):
+        return str(self.quote(value))
+
     def quote(self, value):
         """
         Returns quoted version of the specified value.
