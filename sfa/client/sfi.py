@@ -547,7 +547,7 @@ class Sfi:
         if opts.file:
             file = opts.file
             if not file.startswith(os.sep):
-                file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".gid")
+                file = os.path.join(self.options.sfi_dir, file)
             save_records_to_file(file, list)
         return
     
