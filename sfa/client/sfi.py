@@ -320,7 +320,8 @@ class Sfi:
     
     
     def get_key_file(self):
-       file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".pkey")
+       file=os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".pkey")
+       #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".pkey")
        if (os.path.isfile(file)):
           return file
        else:
@@ -330,7 +331,8 @@ class Sfi:
     
     def get_cert_file(self,key_file):
     
-       file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cert")
+       #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cert")
+       file=os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cert")
        if (os.path.isfile(file)):
           return file
        else:
@@ -345,7 +347,8 @@ class Sfi:
           return file
    
     def get_gid(self):
-        file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".gid")
+        #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".gid")
+        file=os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".gid")
         if (os.path.isfile(file)):
             gid = GID(filename=file)
             return gid
@@ -362,7 +365,8 @@ class Sfi:
             return gid       
  
     def get_user_cred(self):
-        file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cred")
+        #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cred")
+        file=os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cred")
         if (os.path.isfile(file)):
             user_cred = Credential(filename=file)
             return user_cred
@@ -372,6 +376,10 @@ class Sfi:
             request_hash=None
             if self.hashrequest:
                 request_hash = self.key.compute_hash([cert_string, "user", self.user])
+	    user_name=self.user.replace(self.authority+".", '')
+	    if user_name.count(".") > 0:
+	       user_name = user_name.replace(".", '_')
+	       self.user=self.authority + "." + user_name
             user_cred = self.registry.get_self_credential(cert_string, "user", self.user, request_hash)
             if user_cred:
                cred = Credential(string=user_cred)
