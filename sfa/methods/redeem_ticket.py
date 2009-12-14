@@ -34,15 +34,9 @@ class redeem_ticket(Method):
         client_gid_str = client_gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'redeemticket')
-        
-        ticket = SfaTicket(string=ticket)
-        # XX we should verify the ticket, but we need the privste keys to do that
-        # maybe we should just pass the ticket to the authoriative registry to it 
-        # verify the ticket for us
-        #ticket.verify(pkey)
-        # or 
-        #self.api.registry.verify_ticket(ticket.save_to_string(save_parents=True))
+        self.api.auth.check_ticket(ticket)
 
+        ticket = SfaTicket(string=ticket)
         ticket.decode()
         hrn = ticket.attributes['slivers'][0]['hrn']
         slicename = hrn_to_pl_slicename(hrn)
