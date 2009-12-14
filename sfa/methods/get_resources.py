@@ -35,7 +35,7 @@ class get_resources(Method):
 
     returns = Parameter(str, "String representatin of an rspec")
     
-    def call(self, cred, hrn=None, request_hash = None, caller_cred=None):
+    def call(self, cred, hrn=None, request_hash = None, origin_hrn=None):
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
 
         # This cred will be an authority cred, not a user, so we cant use it to 
@@ -45,11 +45,11 @@ class get_resources(Method):
         client_gid_str = client_gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(client_gid_str, [cred,hrn], request_hash)
         self.api.auth.check(cred, 'listnodes')
-        if caller_cred==None:
-            caller_cred=cred
+        if origin_hrn==None:
+            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
 
         #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
 
 
@@ -59,21 +59,18 @@ class get_resources(Method):
             mgr_type = self.api.config.SFA_AGGREGATE_TYPE
             manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            rspec = manager.get_rspec(self.api, hrn, caller_cred)
+            rspec = manager.get_rspec(self.api, hrn, origin_hrn)
             outgoing_rules = SFATablesRules('OUTGOING')
         elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            rspec = manager.get_rspec(self.api, hrn, caller_cred)
+            rspec = manager.get_rspec(self.api, hrn, origin_hrn)
             outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
 
         filtered_rspec = rspec
         if outgoing_rules.sorted_rule_list:
-           request_context = manager.fetch_context(
-               hrn,
-               Credential(string=caller_cred).get_gid_caller().get_hrn(),
-               outgoing_rules.contexts)
+           request_context = manager.fetch_context(hrn, origin_hrn, outgoing_rules.contexts)
            outgoing_rules.set_context(request_context)
            filtered_rspec = outgoing_rules.apply(rspec)
 

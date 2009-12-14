@@ -25,7 +25,7 @@ class Slices(SimpleStorage):
 
     rspec_to_slice_tag = {'max_rate':'net_max_rate'}
 
-    def __init__(self, api, ttl = .5, caller_cred=None):
+    def __init__(self, api, ttl = .5, origin_hrn=None):
         self.api = api
         self.ttl = ttl
         self.threshold = None
@@ -36,7 +36,7 @@ class Slices(SimpleStorage):
         SimpleStorage.__init__(self, self.slices_file)
         self.policy = Policy(self.api)    
         self.load()
-        self.caller_cred=caller_cred
+        self.origin_hrn=origin_hrn
 
     def get_slivers(self, hrn, node=None):
          
@@ -274,14 +274,14 @@ class Slices(SimpleStorage):
 
     def delete_slice_smgr(self, hrn):
         credential = self.api.getCredential()
-        caller_cred = self.caller_cred
+        origin_hrn = self.origin_hrn
         aggregates = Aggregates(self.api)
         for aggregate in aggregates:
             success = False
             # request hash is optional so lets try the call without it
             try:
 		request_hash=None	
-                aggregates[aggregate].delete_slice(credential, hrn, request_hash, caller_cred)
+                aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
                 success = True
             except:
                 print >> log, "%s" % (traceback.format_exc())
@@ -292,7 +292,7 @@ class Slices(SimpleStorage):
                 try:
                     arg_list = [credential, hrn]
                     request_hash = self.api.key.compute_hash(arg_list)
-                    aggregates[aggregate].delete_slice(credential, hrn, request_hash, caller_cred)
+                    aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
                     success = True
                 except:
                     print >> log, "%s" % (traceback.format_exc())
@@ -601,7 +601,7 @@ class Slices(SimpleStorage):
             rspecs[net_hrn] = tempspec.toxml()
 
         # send each rspec to the appropriate aggregate/sm
-        caller_cred = self.caller_cred
+        origin_hrn = self.origin_hrn
         for net_hrn in rspecs:
             try:
                 # if we are directly connected to the aggregate then we can just send them the rspec
@@ -611,19 +611,19 @@ class Slices(SimpleStorage):
                     if net_hrn in [self.api.hrn]:
                         try:
                             request_hash = None
-                            aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, caller_cred)
+                            aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, origin_hrn)
                         except:
                             arg_list = [credential,hrn,rspec]
                             request_hash = self.api.key.compute_hash(arg_list)
-                            aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, caller_cred)
+                            aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, origin_hrn)
                     else:
                         try:
                             request_hash = None
-                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
+                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
                         except:
                             arg_list = [credential,hrn,rspecs[net_hrn]]
                             request_hash = self.api.key.compute_hash(arg_list)
-                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
+                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
                 else:
                     # lets forward this rspec to a sm that knows about the network
                     arg_list = [credential, net_hrn]
@@ -636,11 +636,11 @@ class Slices(SimpleStorage):
                         if network_networks:
                             try:
 				request_hash = None
-                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
+                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
                             except:
                                 arg_list = [credential, hrn, rspecs[net_hrn]]
                                 request_hash = self.api.key.compute_hash(arg_list) 
-                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, caller_cred)
+                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
                      
             except:
                 print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % locals()

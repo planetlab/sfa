@@ -36,9 +36,9 @@ class create_slice(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, requested_rspec, request_hash=None, caller_cred=None):
-        if caller_cred==None:
-            caller_cred=cred
+    def call(self, cred, hrn, requested_rspec, request_hash=None, origin_hrn=None):
+        if origin_hrn==None:
+            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
         
         # This cred will be an slice cred, not a user, so we cant use it to
         # authenticate the caller's request_hash. Let just get the caller's gid
@@ -49,7 +49,7 @@ class create_slice(Method):
         self.api.auth.check(cred, 'createslice')
 
         #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), hrn, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
         rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
@@ -62,7 +62,7 @@ class create_slice(Method):
            #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
 
            contexts = incoming_rules.contexts
-           request_context = rspec_manager.fetch_context(hrn, Credential(string=caller_cred).get_gid_caller().get_hrn(), contexts)
+           request_context = rspec_manager.fetch_context(hrn, origin_hrn, contexts)
            incoming_rules.set_context(request_context)
            rspec = incoming_rules.apply(requested_rspec)
 	else:	
@@ -84,6 +84,6 @@ class create_slice(Method):
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.create_slice(self.api, hrn, rspec, caller_cred)
+            manager.create_slice(self.api, hrn, rspec, origin_hrn)
 
         return 1 

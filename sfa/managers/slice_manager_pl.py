@@ -20,7 +20,7 @@ from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
 import sfa.plc.peers as peers
 
-def delete_slice(api, hrn, caller_cred=None):
+def delete_slice(api, hrn, origin_hrn=None):
     credential = api.getCredential()
     aggregates = Aggregates(api)
     for aggregate in aggregates:
@@ -28,7 +28,7 @@ def delete_slice(api, hrn, caller_cred=None):
         # request hash is optional so lets try the call without it
         try:
             request_hash=None
-            aggregates[aggregate].delete_slice(credential, hrn, request_hash, caller_cred)
+            aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
             success = True
         except:
             print >> log, "%s" % (traceback.format_exc())
@@ -39,14 +39,14 @@ def delete_slice(api, hrn, caller_cred=None):
             try:
                 arg_list = [credential, hrn]
                 request_hash = api.key.compute_hash(arg_list)
-                aggregates[aggregate].delete_slice(credential, hrn, request_hash, caller_cred)
+                aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
                 success = True
             except:
                 print >> log, "%s" % (traceback.format_exc())
                 print >> log, "Error calling list nodes at aggregate %s" % aggregate
     return 1
 
-def create_slice(api, hrn, rspec, caller_cred=None):
+def create_slice(api, hrn, rspec, origin_hrn=None):
     spec = RSpec()
     tempspec = RSpec()
     spec.parseString(rspec)
@@ -85,22 +85,22 @@ def create_slice(api, hrn, rspec, caller_cred=None):
                     try:
                         request_hash = None
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                        rspec, request_hash, caller_cred)
+                                        rspec, request_hash, origin_hrn)
                     except:
                         arg_list = [credential,hrn,rspec]
                         request_hash = api.key.compute_hash(arg_list)
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                        rspec, request_hash, caller_cred)
+                                        rspec, request_hash, origin_hrn)
                 else:
                     try:
                         request_hash = None
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                rspecs[net_hrn], request_hash, caller_cred)
+                                rspecs[net_hrn], request_hash, origin_hrn)
                     except:
                         arg_list = [credential,hrn,rspecs[net_hrn]]
                         request_hash = api.key.compute_hash(arg_list)
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                rspecs[net_hrn], request_hash, caller_cred)
+                                rspecs[net_hrn], request_hash, origin_hrn)
             else:
                 # lets forward this rspec to a sm that knows about the network
                 arg_list = [credential, net_hrn]
@@ -114,12 +114,12 @@ def create_slice(api, hrn, rspec, caller_cred=None):
                         try:
                             request_hash = None
                             aggregates[aggregate].create_slice(credential, hrn, \
-                                    rspecs[net_hrn], request_hash, caller_cred)
+                                    rspecs[net_hrn], request_hash, origin_hrn)
                         except:
                             arg_list = [credential, hrn, rspecs[net_hrn]]
                             request_hash = api.key.compute_hash(arg_list)
                             aggregates[aggregate].create_slice(credential, hrn, \
-                                    rspecs[net_hrn], request_hash, caller_cred)
+                                    rspecs[net_hrn], request_hash, origin_hrn)
 
         except:
             print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % \
@@ -127,7 +127,7 @@ def create_slice(api, hrn, rspec, caller_cred=None):
             traceback.print_exc()
     return 1
 
-def start_slice(api, hrn, caller_cred=None):
+def start_slice(api, hrn, origin_hrn=None):
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -139,7 +139,7 @@ def start_slice(api, hrn, caller_cred=None):
 
     return 1
  
-def stop_slice(api, hrn, caller_cred):
+def stop_slice(api, hrn, origin_hrn):
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -150,7 +150,7 @@ def stop_slice(api, hrn, caller_cred):
     api.plshell.UpdateSliceTag(api.plauth, attribute_id, "0")
     return 1
 
-def reset_slice(api, hrn, caller_cred):
+def reset_slice(api, hrn, origin_hrn):
     # XX not implemented at this interface
     return 1
 
@@ -162,9 +162,9 @@ def get_slices(api):
     slices.refresh()
     return slices['hrn']
      
-def get_rspec(api, hrn=None, caller_cred=None):
+def get_rspec(api, hrn=None, origin_hrn=None):
     from sfa.plc.nodes import Nodes
-    nodes = Nodes(api, caller_cred=caller_cred)
+    nodes = Nodes(api, origin_hrn=origin_hrn)
     if hrn:
         rspec = nodes.get_rspec(hrn)
     else:

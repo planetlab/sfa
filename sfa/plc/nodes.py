@@ -20,7 +20,7 @@ from sfa.server.aggregate import Aggregates
 
 class Nodes(SimpleStorage):
 
-    def __init__(self, api, ttl = 1, caller_cred=None):
+    def __init__(self, api, ttl = 1, origin_hrn=None):
         self.api = api
         self.ttl = ttl
         self.threshold = None
@@ -31,7 +31,7 @@ class Nodes(SimpleStorage):
         SimpleStorage.__init__(self, self.nodes_file)
         self.policy = Policy(api)
         self.load()
-        self.caller_cred=caller_cred
+        self.origin_hrn=origin_hrn
 
 
     def refresh(self):
@@ -114,15 +114,15 @@ class Nodes(SimpleStorage):
         for aggregate in aggregates:
           if aggregate not in [self.api.auth.client_cred.get_gid_caller().get_hrn()]:
             try:
-                caller_cred = self.caller_cred
+                origin_hrn = self.origin_hrn
                 # get the rspec from the aggregate
                 try:
             	    request_hash=None
-                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, caller_cred)
+                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, origin_hrn)
                 except:
                     arg_list = [credential, hrn]
                     request_hash = self.api.key.compute_hash(arg_list)
-                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, caller_cred)
+                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, origin_hrn)
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
                 networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
