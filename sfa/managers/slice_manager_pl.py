@@ -15,6 +15,7 @@ from sfa.util.record import GeniRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.rspec import *
+from sfa.util.sfaticket import *
 from sfa.util.debug import log
 from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
@@ -71,8 +72,8 @@ def create_slice(api, hrn, rspec, origin_hrn=None):
         tempspec.parseDict(resourceDict)
         rspecs[net_hrn] = tempspec.toxml()
 
-    print "rspecs:", rspecs.keys()
-    print "aggregates:", aggregates.keys() 
+    #print "rspecs:", rspecs.keys()
+    #print "aggregates:", aggregates.keys() 
     # send each rspec to the appropriate aggregate/sm
     for net_hrn in rspecs:
         try:
@@ -110,7 +111,7 @@ def create_slice(api, hrn, rspec, origin_hrn=None):
                         network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
                     except:
                         network_found = aggregates[aggregate].get_aggregates(credential, net_hrn, request_hash)
-                    if network_networks:
+                    if network_found:
                         try:
                             request_hash = None
                             aggregates[aggregate].create_slice(credential, hrn, \
@@ -126,6 +127,98 @@ def create_slice(api, hrn, rspec, origin_hrn=None):
                            locals()
             traceback.print_exc()
     return 1
+
+def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
+    
+    # get the netspecs contained within the clients rspec
+    client_rspec = RSpec(xml=rspec)
+    netspecs = client_rspec.getDictsByTagName('NetSpec')
+    
+    # create an rspec for each individual rspec 
+    rspecs = {}
+    temp_rspec = RSpec()
+    for netspec in netspecs:
+        net_hrn = netspec['name']
+        resources = {'start_time': 0, 'end_time': 0 , 
+                     'network': netspec}
+        resourceDict = {'RSpec': resources}
+        temp_rspec.parseDict(resourceDict)
+        rspecs[net_hrn] = temp_rspec.toxml() 
+    
+    # send the rspec to the appropiate aggregate/sm
+    aggregates = Aggregates(api)
+    credential = api.getCredential()
+    tickets = {}
+    for net_hrn in rspecs:    
+        try:
+            # if we are directly connected to the aggregate then we can just
+            # send them the request. if not, then we may be connected to an sm
+            # thats connected to the aggregate
+            if net_hrn in aggregates:
+                try:
+                    ticket = aggregates[net_hrn].get_ticket(credential, hrn, \
+                                rspecs[net_hrn], None, origin_hrn)
+                    tickets[net_hrn] = ticket
+                except:
+                    arg_list = [credential,hrn,rspecs[net_hrn]]
+                    request_hash = api.key.compute_hash(arg_list)
+                    ticket = aggregates[net_hrn].get_ticket(credential, hrn, \
+                                rspecs[net_hrn], request_hash, origin_hrn)
+                    tickets[net_hrn] = ticket 
+            else:
+                # lets forward this rspec to a sm that knows about the network
+                arg_list = [credential, net_hrn]
+                request_hash = api.key.compute_hash(arg_list)
+                for agg in aggregates:
+                    try:
+                        network_found = aggregates[agg].get_aggregates(credential, \
+                                                        net_hrn)
+                    except:
+                        network_found = aggregates[agg].get_aggregates(credential, \
+                                                        net_hrn, request_hash)
+                    if network_found:
+                        try:
+                            ticket = aggregates[aggregate].get_ticket(credential, \
+                                        hrn, rspecs[net_hrn], None, origin_hrn)
+                            tickets[aggregate] = ticket
+                        except:
+                            arg_list = [credential, hrn, rspecs[net_hrn]]
+                            request_hash = api.key.compute_hash(arg_list)
+                            aggregates[aggregate].get_ticket(credential, hrn, \
+                                    rspecs[net_hrn], request_hash, origin_hrn)
+                            tickets[aggregate] = ticket
+        except:
+            print >> log, "Error getting ticket for %(hrn)s at aggregate %(net_hrn)s" % \
+                           locals()
+            
+    # create a new ticket
+    new_ticket = SfaTicket(subject = slice_hrn)
+    new_ticket.set_gid_caller(api.auth.client_gid)
+   
+    tmp_rspec = RSpec()
+    tmp_networks = []
+    valid_data = {} 
+    # merge data from aggregate ticket into new ticket 
+    for agg_ticket in tickets.values():
+        agg_ticket = SfaTicket(string=agg_ticket)
+        object_gid = agg_ticket.get_gid_object()
+        new_ticket.set_gid_object(object_gid)
+        new_ticket.set_issuer(key=api.key, subject=api.hrn)
+        new_ticket.set_pubkey(object_gid.get_pubkey())
+        
+        
+        #new_ticket.set_attributes(data)
+        tmp_rspec.parseString(agg_ticket.get_rspec)
+        newtworks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
+    
+    #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
+    resources = {'networks': networks, 'start_time': 0, 'duration': 0}
+    resourceDict = {'RSpec': resources}
+    tmp_rspec.parseDict(resourceDict)
+    new_ticket.set_rspec(tmp_rspec.toxml())
+        
+    new_ticket.encode()
+    new_ticket.sign()          
 
 def start_slice(api, hrn, origin_hrn=None):
     slicename = hrn_to_pl_slicename(hrn)
