@@ -48,10 +48,17 @@ class get_ticket(Method):
         self.api.auth.verify_object_permission(hrn)
    
         # set the right outgoing rules
+        manager_base = 'sfa.managers'
         if self.api.interface in ['aggregate']:
             outgoing_rules = SFATablesRules('OUTGOING')
+            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+            manager = __import__(manager_module, fromlist=[manager_base])
         elif self.api.interface in ['slicemgr']:
             outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
+            mgr_type = self.api.config.SFA_SM_TYPE
+            manager_module = manager_base + ".slice_manager_%s" % mgr_type
+            manager = __import__(manager_module, fromlist=[manager_base])
 
         # Filter the incoming rspec using sfatables
         incoming_rules = SFATablesRules('INCOMING')
@@ -61,19 +68,16 @@ class get_ticket(Method):
         request_context = rspec_manager.fetch_context(hrn, caller_hrn, contexts)
         incoming_rules.set_context(request_context)
         rspec = incoming_rules.apply(rspec)
+
+        # remove nodes that are not available at this interface from the rspec
+        valid_rspec = RSpec(xml=manager.get_rspec(self.api))
+        valid_nodes = valid_rspec.getDictsByTagName('NodeSpec')
+        vaild_hostnames = [node['name'] for node in valid_nodes]
+        rspec_object = RSpec(xml=rspec)
+        rspec_object.filter(tagname='NodeSpec', attribute='name', whitelist=valid_hostnames)
+        rspec = rspec_object.toxml() 
  
-        # send the call to the right manager
-        manager_base = 'sfa.managers'
-        if self.api.interface in ['aggregate']:
-            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
-            manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
-            manager = __import__(manager_module, fromlist=[manager_base])
-            ticket = manager.get_ticket(self.api, hrn, rspec)
-        elif self.api.interface in ['slicemgr']:
-            mgr_type = self.api.config.SFA_SM_TYPE
-            manager_module = manager_base + ".slice_manager_%s" % mgr_type
-            manager = __import__(manager_module, fromlist=[manager_base])
-            ticket = manager.get_rspec(self.api, hrn, rspec)
+        ticket = manager.get_ticket(self.api, hrn, rspec)
         
         return ticket
         
