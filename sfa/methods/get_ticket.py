@@ -76,7 +76,6 @@ class get_ticket(Method):
         rspec_object = RSpec(xml=rspec)
         rspec_object.filter(tagname='NodeSpec', attribute='name', whitelist=valid_hostnames)
         rspec = rspec_object.toxml() 
- 
         ticket = manager.get_ticket(self.api, hrn, rspec)
         
         return ticket
