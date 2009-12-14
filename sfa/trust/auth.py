@@ -15,6 +15,7 @@ from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
 from sfa.util.misc import *
 from sfa.trust.gid import GID
+from sfa.util.sfaticket import *
 
 class Auth:
     """
@@ -60,10 +61,22 @@ class Auth:
                 self.client_gid.verify_chain(self.trusted_cert_list)
             if self.object_gid:
                 self.object_gid.verify_chain(self.trusted_cert_list)
-	else:
+        else:
            raise MissingTrustedRoots(self.config.get_trustedroots_dir())
 
         return True
+
+    def check_ticket(self, ticket):
+        """
+        Check if the tickt was signed by a trusted cert
+        """
+        if self.trusted_cert_list:
+            client_ticket = SfaTicket(string=ticket)
+            client_ticket.verify_chain(self.trusted_cert_list)
+        else:
+           raise MissingTrustedRoots(self.config.get_trustedroots_dir())
+
+        return True 
 
     def verifyPeerCert(self, cert, gid):
         # make sure the client_gid matches client's certificate
