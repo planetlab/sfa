@@ -332,6 +332,28 @@ class RSpec:
                 self.filter(tagname, attribute, blacklist, whitelist, child) 
 
 
+    def merge(self, rspecs, tagname, dom=None):
+        """
+        Merge this rspec with the requested rspec based on the specified 
+        starting tag name. The start tag (and all of its children) will be merged  
+        """
+        tempdict = {}
+        if not dom:
+            dom = self.rootNode
+
+        whitelist = []
+        blacklist = []
+            
+        if dom.localName in [tagname] and dom.attributes.has_key(attribute):
+            if whitelist and dom.attributes.get(attribute).value not in whitelist:
+                dom.parentNode.removeChild(dom)
+            if blacklist and dom.attributes.get(attribute).value in blacklist:
+                dom.parentNode.removeChild(dom)
+
+        if dom.hasChildNodes():
+            for child in dom.childNodes:
+                self.filter(tagname, attribute, blacklist, whitelist, child) 
+
     def validateDicts(self):
         types = {
             'EInt' : int,
