@@ -70,22 +70,20 @@ def get_ticket(api, slice_hrn, rspec):
         'initscripts': initscripts,
         'slivers': slivers
     }
-    
+
     # create the ticket
-    auth_hrn = record['authority'] 
-    auth_info = api.auth.get_auth_info(auth_hrn)
     object_gid = record.get_gid_object()
     new_ticket = SfaTicket(subject = object_gid.get_subject())
     new_ticket.set_gid_caller(api.auth.client_gid)
     new_ticket.set_gid_object(object_gid)
-    new_ticket.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
+    new_ticket.set_issuer(key=api.key, subject=api.hrn)
     new_ticket.set_pubkey(object_gid.get_pubkey())
     new_ticket.set_attributes(data)
     new_ticket.set_rspec(rspec)
-    new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
+    #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
     new_ticket.encode()
     new_ticket.sign()
-
+    
     return new_ticket.save_to_string(save_parents=True)
 
 def start_slice(api, hrn):
