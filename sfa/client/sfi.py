@@ -176,6 +176,10 @@ class Sfi:
             parser.add_option("-a", "--aggregate", dest="aggregate",default=None,
                              help="aggregate hrn")
 
+        if command in ("start", "stop", "reset", "delete"):
+            parser.add_option("-c", "--component", dest="component",default=None,
+                             help="component hrn")
+            
         if command in ("list", "show", "remove"):
             parser.add_option("-t", "--type", dest="type",type="choice",
                             help="type filter ([all]|user|slice|sa|ma|node|aggregate)",
@@ -512,6 +516,19 @@ class Sfi:
            os.remove(outfn)
     
        return key_string
+
+    def get_component_server_from_hrn(hrn):
+        # direct connection to the nodes component manager interface
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        request_hash = self.key.compute_hash([user_cred, hrn])
+        records = self.registry.resolve(user_cred, hrn, request_hash)
+        records = filter_records('node', records)
+        if not records:
+            print "No such component:", opts.component
+        record = records[0]
+        cm_port = "12346"
+        url = "https://%s:%s" % (record['hostname'], cm_port)
+        return xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
     
     #
     # Following functions implement the commands
@@ -880,42 +897,61 @@ class Sfi:
     # delete named slice
     def delete(self,opts, args):
         slice_hrn = args[0]
+        server = self.slicemgr
+        # direct connection to the nodes component manager interface
+        if opts.component:
+            server = self.get_component_server_from_hrn(opts.component)
+ 
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         request_hash=None
         if self.hashrequest:
             arg_list = [slice_cred, slice_hrn]
             request_hash = self.key.compute_hash(arg_list) 
-        return self.slicemgr.delete_slice(slice_cred, slice_hrn, request_hash)
+        return server.delete_slice(slice_cred, slice_hrn, request_hash)
     
     # start named slice
     def start(self,opts, args):
         slice_hrn = args[0]
+        server = self.slicemgr
+        # direct connection to the nodes component manager interface
+        if opts.component:
+            server = self.get_component_server_from_hrn(opts.component)
+ 
         slice_cred = self.get_slice_cred(args[0])
         request_hash=None
         if self.hashrequest:
             arg_list = [slice_cred, slice_hrn]
             request_hash = self.key.compute_hash(arg_list)
-        return self.slicemgr.start_slice(slice_cred, slice_hrn, request_hash)
+        return server.start_slice(slice_cred, slice_hrn, request_hash)
     
     # stop named slice
     def stop(self,opts, args):
         slice_hrn = args[0]
+        server = self.slicemgr
+        # direct connection to the nodes component manager interface
+        if opts.component:
+            server = self.get_component_server_from_hrn(opts.component)
+
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         request_hash=None
         if self.hashrequest:
             arg_list = [slice_cred, slice_hrn]
             request_hash = self.key.compute_hash(arg_list)
-        return self.slicemgr.stop_slice(slice_cred, slice_hrn, request_hash)
+        return server.stop_slice(slice_cred, slice_hrn, request_hash)
     
     # reset named slice
     def reset(self,opts, args):
         slice_hrn = args[0]
+        server = self.slicemgr
+        # direct connection to the nodes component manager interface
+        if opts.component:
+            server = self.get_component_server_from_hrn(opts.component)
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         request_hash=None
         if self.hashrequest:
             arg_list = [slice_cred, slice_hrn]
             request_hash = self.key.compute_hash(arg_list)
-        return self.slicemgr.reset_slice(slice_cred, slice_hrn, request_hash)
+        return server.reset_slice(slice_cred, slice_hrn, request_hash)
     
     #
     # Main: parse arguments and dispatch to command
