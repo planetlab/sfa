@@ -142,8 +142,9 @@ def get_trusted_certs(registry=None, verbose=False):
     for gid_str in trusted_certs:
         gid = GID(string=gid_str)
         gid.decode()
-        trusted_gid_names.append(gid.get_hrn())
-        gid_filename = trusted_certs_dir + os.sep + gid.get_hrn() + ".gid"
+        relative_filename = gid.get_hrn + ".gid"
+        trusted_gid_names.append(relative_filename)
+        gid_filename = trusted_certs_dir + os.sep + relative_filename
         if verbose:
             print "Writing GID for %s as %s" % (gid.get_hrn(), gid_filename) 
         gid.save_to_file(gid_filename, save_parents=True)
