@@ -58,7 +58,7 @@ class list(Method):
             credential = self.api.getCredential()
             try:
 		request_hash=None
-                record_list = registries[registry_hrn].list(credential, hrn, request_hash, caller_cred)
+                record_list = registries[registry_hrn].list(credential, hrn, request_hash, origin_hrn)
                 records = [GeniRecord(dict=record).as_dict() for record in record_list]
             except:
                 arg_list = [credential, hrn]

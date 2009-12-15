@@ -66,7 +66,7 @@ class resolve(Method):
             except:
                 arg_list = [credential, hrn]
                 request_hash=self.api.key.compute_hash(arg_list)                
-                records = registries[registry_hrn].resolve(credential, hrn, request_hash, caller_cred)
+                records = registries[registry_hrn].resolve(credential, hrn, request_hash, origin_hrn)
                 good_records = [GeniRecord(dict=record).as_dict() for record in records]
                 
         if good_records:
