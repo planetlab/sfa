@@ -1,21 +1,26 @@
 import os
 import xmlrpclib
 from sfa.util.faults import *
+from sfa.util.misc import *
 from sfa.util.sfaticket import SfaTicket
 
 def start_slice(api, slicename):
-    api.nodemanger.Start(slicename)
+    record = {'name': hrn_to_pl_slicename(slicename)}
+    api.nodemanger.Start(record)
 
 def stop_slice(api, slicename):
-    api.nodemanager.Stop(slicename)
+    record = {'name': hrn_to_pl_slicename(slicename)}
+    api.nodemanager.Stop(record)
 
 def delete_slice(api, slicename):
-    api.nodemanager.Destroy(slicename)
+    record = {'name': hrn_to_pl_slicename(slicename)}
+    api.nodemanager.Destroy(record)
 
 def reset_slice(api, slicename):
+    record = {'name': hrn_to_pl_slicename(slicename)}
     if not api.sliver_exists(slicename):
         raise SliverDoesNotExist(slicename)
-    api.nodemanager.ReCreate(slicename)
+    api.nodemanager.ReCreate(record)
  
 def get_slices(api):
     slicenames = api.nodemanager.GetXiDs().keys()
