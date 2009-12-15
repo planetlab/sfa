@@ -517,7 +517,7 @@ class Sfi:
     
        return key_string
 
-    def get_component_server_from_hrn(hrn):
+    def get_component_server_from_hrn(self, hrn):
         # direct connection to the nodes component manager interface
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         request_hash = self.key.compute_hash([user_cred, hrn])
