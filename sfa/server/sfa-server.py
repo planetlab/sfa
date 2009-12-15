@@ -38,14 +38,8 @@ component_port=12346
 import os, os.path
 import sys
 from optparse import OptionParser
-
 from sfa.trust.trustedroot import TrustedRootList
 from sfa.trust.certificate import Keypair, Certificate
-
-from sfa.server.registry import Registry
-from sfa.server.aggregate import Aggregate
-from sfa.server.slicemgr import SliceMgr
-from sfa.server.component import Component
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import Config
 from sfa.util.report import trace
@@ -154,20 +148,24 @@ def main():
     
     # start registry server
     if (options.registry):
+        from sfa.server.registry import Registry
         r = Registry("", registry_port, server_key_file, server_cert_file)
         r.start()
 
     # start aggregate manager
     if (options.am):
+        from sfa.server.aggregate import Aggregate
         a = Aggregate("", aggregate_port, server_key_file, server_cert_file)
         a.start()
 
     # start slice manager
     if (options.sm):
+        from sfa.server.slicemgr import SliceMgr
         s = SliceMgr("", slicemgr_port, server_key_file, server_cert_file)
         s.start()
 
     if (options.cm):
+        from sfa.server.component import Component
         c = Component("", component_port, server_key_file, server_cert_file)
         c.start()
 
