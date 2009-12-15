@@ -23,7 +23,7 @@ def reset_slice(api, slicename):
     api.nodemanager.ReCreate(record)
  
 def get_slices(api):
-    slicenames = api.nodemanager.GetXiDs().keys()
+    slicenames = api.nodemanager.GetXIDs().keys()
     return slicenames
 
 def roboot():
