@@ -11,7 +11,6 @@ import time
 import sys
 
 from sfa.util.geniserver import GeniServer
-from sfa.util.genitable import GeniTable
 from sfa.util.faults import *
 from sfa.util.storage import *
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
