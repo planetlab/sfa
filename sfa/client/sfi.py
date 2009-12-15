@@ -917,7 +917,7 @@ class Sfi:
         if opts.component:
             server = self.get_component_server_from_hrn(opts.component)
  
-        slice_cred = self.get_slice_cred(args[0])
+        slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         request_hash=None
         if self.hashrequest:
             arg_list = [slice_cred, slice_hrn]
