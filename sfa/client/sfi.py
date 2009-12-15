@@ -176,7 +176,7 @@ class Sfi:
             parser.add_option("-a", "--aggregate", dest="aggregate",default=None,
                              help="aggregate hrn")
 
-        if command in ("start", "stop", "reset", "delete"):
+        if command in ("start", "stop", "reset", "delete", "slices"):
             parser.add_option("-c", "--component", dest="component",default=None,
                              help="component hrn")
             
@@ -772,7 +772,12 @@ class Sfi:
         if self.hashrequest:
             arg_list = [user_cred]
             request_hash = self.key.compute_hash(arg_list)
-        results = self.slicemgr.get_slices(user_cred, request_hash)
+
+        server = self.slicemgr
+        # direct connection to the nodes component manager interface
+        if opts.component:
+            server = self.get_component_server_from_hrn(opts.component)
+        results = server.get_slices(user_cred, request_hash)
         display_list(results)
         return
     
