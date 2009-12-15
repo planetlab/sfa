@@ -72,7 +72,7 @@ class get_ticket(Method):
         # remove nodes that are not available at this interface from the rspec
         valid_rspec = RSpec(xml=manager.get_rspec(self.api))
         valid_nodes = valid_rspec.getDictsByTagName('NodeSpec')
-        vaild_hostnames = [node['name'] for node in valid_nodes]
+        valid_hostnames = [node['name'] for node in valid_nodes]
         rspec_object = RSpec(xml=rspec)
         rspec_object.filter(tagname='NodeSpec', attribute='name', whitelist=valid_hostnames)
         rspec = rspec_object.toxml() 
