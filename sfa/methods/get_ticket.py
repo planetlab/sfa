@@ -11,6 +11,7 @@ from sfa.util.genitable import GeniTable
 from sfa.util.sfaticket import SfaTicket
 from sfa.plc.slices import Slices
 from sfatables.runtime import SFATablesRules
+from sfa.util.rspec import *
 
 class get_ticket(Method):
     """
@@ -65,10 +66,9 @@ class get_ticket(Method):
         #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
         contexts = incoming_rules.contexts
         caller_hrn = Credential(string=cred).get_gid_caller().get_hrn()
-        request_context = rspec_manager.fetch_context(hrn, caller_hrn, contexts)
+        request_context = manager.fetch_context(hrn, caller_hrn, contexts)
         incoming_rules.set_context(request_context)
         rspec = incoming_rules.apply(rspec)
-
         # remove nodes that are not available at this interface from the rspec
         valid_rspec = RSpec(xml=manager.get_rspec(self.api))
         valid_nodes = valid_rspec.getDictsByTagName('NodeSpec')
