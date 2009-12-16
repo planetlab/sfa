@@ -143,6 +143,8 @@ class WSDLGen:
             return "none"
         if arg_type == DictType:
             return "xsd:anyType"
+        if arg_type in (ListType, TupleType):
+            return "xsd:arrayType"
         elif arg_type == IntType or arg_type == LongType:
             return "xsd:int"
         elif arg_type == bool:
@@ -324,6 +326,8 @@ def main():
                               help="Generate sm.wsdl")
     parser.add_option("-a", "--aggregate", action="store_true", dest="aggregate",
                               help="Generate am.wsdl")
+    parser.add_option("-c", "--component", action="store_true", dest="component",
+                              help="Generate cm.wsdl")
     parser.add_option("-l", "--lite", action="store_true", dest="lite",
                               help="Generate LITE version of the interface, in which calls exclude credentials")
     (interface_options, args) = parser.parse_args()
