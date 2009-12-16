@@ -1,3 +1,6 @@
+- Component manager
+* install the  slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
+
 -GetTicket
 * sm, am only
 * sm calls getticket on am and merges resulting tickets into 1 ticket
