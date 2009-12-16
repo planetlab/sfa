@@ -29,7 +29,7 @@ class get_gids(Method):
     accepts = [
         Parameter(str, "Certificate string"),
         Mixed(Parameter(str, "Human readable name (hrn)"), 
-              Parameter([str], "List of Human readable names (hrn)")), 
+              Parameter(type([str]), "List of Human readable names (hrn)")), 
         Mixed(Parameter(str, "Request hash"),
               Parameter(None, "Request hash not specified")) 
         ]
