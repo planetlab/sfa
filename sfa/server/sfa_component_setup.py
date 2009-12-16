@@ -185,8 +185,8 @@ def get_gids(registry=None, verbose=False):
     from sfa.plc.api import ComponentAPI
     api = ComponentAPI()
     slicenames = api.nodemanager.GetXIDs().keys()   
-    slicename_to_hrn = lambda name: ".".join([interface_hrn, name.replace('_', '.')])
-    hrns = map(slicename_to_hrn, slicenames)
+    hrns = [misc.slicename_to_hrn(interface_hrn, slicename) for slicename in slicenames]
+        
 
     if verbose:
         print "Getting gids for slices on this node from registry"  
