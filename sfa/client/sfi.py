@@ -3,6 +3,7 @@
 # sfi -- slice-based facility interface
 
 import sys
+sys.path.append('.')
 import os, os.path
 import tempfile
 import traceback

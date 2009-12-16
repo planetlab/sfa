@@ -5,7 +5,9 @@
 DESTDIR="/"
 
 ##########
-all: keyconvert python wsdl
+#all: keyconvert python wsdl
+# turn off wsdl generation until it is fixed
+all: keyconvert python
 
 install: keyconvert-install python-install wsdl-install
 

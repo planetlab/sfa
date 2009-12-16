@@ -12,6 +12,7 @@ $HeadURL$
 """
 
 import sys
+sys.path.append('.')
 import os
 from optparse import OptionParser
 from pprint import pprint
