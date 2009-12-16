@@ -1,7 +1,10 @@
+- Init plugins
+* execute plugable init scritps when starting the interfaces
+
 - Component manager
 * install the  slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
 
--GetTicket
+- GetTicket
 * sm, am only
 * sm calls getticket on am and merges resulting tickets into 1 ticket
 
@@ -24,9 +27,6 @@
 
 -  Initscripts on sfa / geniwrapper
 
--  Geni identification on nodes
-* nodes pk stored in /etc/sfa/nodekey
-* slice's gid and nodes gid stored in all slices (/etc/sfa/slicegid, /etc/sfa/nodegid)
 -  Fully integrate SOAP (need to throw either soap or xmlrpc exceptions depending on the client)
 
 - error messages
