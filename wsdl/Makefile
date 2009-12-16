@@ -5,7 +5,7 @@ WSDLS = sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl
 all: $(WSDLS)
 
 # temporary: turn off wsdl generation as it is failing
-TEMPORARY_OFF = yes
+#TEMPORARY_OFF = yes
 
 ifdef TEMPORARY_OFF
 registry.wsdl slice-manager.wsdl aggregate.wsdl sfa.wsdl:
