@@ -156,13 +156,13 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
             # thats connected to the aggregate
             if net_hrn in aggregates:
                 try:
-                    ticket = aggregates[net_hrn].get_ticket(credential, hrn, \
+                    ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
                                 rspecs[net_hrn], None, origin_hrn)
                     tickets[net_hrn] = ticket
                 except:
                     arg_list = [credential,hrn,rspecs[net_hrn]]
                     request_hash = api.key.compute_hash(arg_list)
-                    ticket = aggregates[net_hrn].get_ticket(credential, hrn, \
+                    ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
                                 rspecs[net_hrn], request_hash, origin_hrn)
                     tickets[net_hrn] = ticket 
             else:
@@ -179,12 +179,12 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
                     if network_found:
                         try:
                             ticket = aggregates[aggregate].get_ticket(credential, \
-                                        hrn, rspecs[net_hrn], None, origin_hrn)
+                                        slice_hrn, rspecs[net_hrn], None, origin_hrn)
                             tickets[aggregate] = ticket
                         except:
                             arg_list = [credential, hrn, rspecs[net_hrn]]
                             request_hash = api.key.compute_hash(arg_list)
-                            aggregates[aggregate].get_ticket(credential, hrn, \
+                            aggregates[aggregate].get_ticket(credential, slice_hrn, \
                                     rspecs[net_hrn], request_hash, origin_hrn)
                             tickets[aggregate] = ticket
         except:
