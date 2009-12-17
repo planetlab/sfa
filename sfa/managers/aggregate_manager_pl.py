@@ -42,11 +42,11 @@ def create_slice(api, hrn, rspec):
     slices = Slices(api)
     slices.create_slice(hrn, rspec)
 
-def get_ticket(api, slice_hrn, rspec):
+def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     # the the slice record
     registries = Registries(api)
     registry = registries[api.hrn]
-    credential = self.api.getCredential()
+    credential = api.getCredential()
     records = registry.resolve(credential, slice_hrn)
     
     # make sure we get a local slice record
