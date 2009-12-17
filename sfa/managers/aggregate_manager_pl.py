@@ -52,8 +52,8 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     # make sure we get a local slice record
     record = None  
     for tmp_record in records:
-        if record['type'] == 'slice' and \
-           not record['peer_authority']:
+        if tmp_record['type'] == 'slice' and \
+           not tmp_record['peer_authority']:
             record = SliceRecord(dict=tmp_record)
     if not record:
         raise RecordNotFound(slice_hrn)
