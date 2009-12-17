@@ -45,8 +45,6 @@ class get_ticket(Method):
     def call(self, cred, hrn, rspec, request_hash=None, origin_hrn=None):
         self.api.auth.authenticateCred(cred, [cred, hrn, rspec], request_hash)
         self.api.auth.check(cred, "getticket")
-        self.api.auth.verify_object_belongs_to_me(hrn)
-        self.api.auth.verify_object_permission(hrn)
 	
 	if origin_hrn==None:
 	    origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
