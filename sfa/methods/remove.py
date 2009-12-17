@@ -36,11 +36,6 @@ class remove(Method):
     returns = Parameter(int, "1 if successful")
     
     def call(self, cred, type, hrn, request_hash=None, origin_hrn=None):
-
-        if origin_hrn==None:
-            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
-        #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
         # This cred will be an authority cred, not a user, so we cant use it to 
         # authenticate the caller's request_hash. Let just get the caller's gid
         # from the cred and authenticate using that
@@ -49,6 +44,12 @@ class remove(Method):
         self.api.auth.authenticateGid(client_gid_str, [cred, type, hrn], request_hash)
         self.api.auth.check(cred, "remove")
         self.api.auth.verify_object_permission(hrn)
+
+        if origin_hrn==None:
+            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
+
+        #log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
         table = GeniTable()
         filter = {'hrn': hrn}
         if type not in ['all', '*']:
