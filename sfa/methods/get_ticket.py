@@ -42,11 +42,17 @@ class get_ticket(Method):
 
     returns = Parameter(str, "String represeneation of a ticket object")
     
-    def call(self, cred, hrn, rspec, request_hash=None):
+    def call(self, cred, hrn, rspec, request_hash=None, origin_hrn=None):
         self.api.auth.authenticateCred(cred, [cred, hrn, rspec], request_hash)
         self.api.auth.check(cred, "getticket")
         self.api.auth.verify_object_belongs_to_me(hrn)
         self.api.auth.verify_object_permission(hrn)
+	
+	if origin_hrn==None:
+	    origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
+
+	#log the call
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
    
         # set the right outgoing rules
         manager_base = 'sfa.managers'
@@ -70,13 +76,13 @@ class get_ticket(Method):
         incoming_rules.set_context(request_context)
         rspec = incoming_rules.apply(rspec)
         # remove nodes that are not available at this interface from the rspec
-        valid_rspec = RSpec(xml=manager.get_rspec(self.api))
+        valid_rspec = RSpec(xml=manager.get_rspec(self.api, None, origin_hrn))
         valid_nodes = valid_rspec.getDictsByTagName('NodeSpec')
         valid_hostnames = [node['name'] for node in valid_nodes]
         rspec_object = RSpec(xml=rspec)
         rspec_object.filter(tagname='NodeSpec', attribute='name', whitelist=valid_hostnames)
         rspec = rspec_object.toxml() 
-        ticket = manager.get_ticket(self.api, hrn, rspec)
+        ticket = manager.get_ticket(self.api, hrn, rspec, origin_hrn)
         
         return ticket
         
