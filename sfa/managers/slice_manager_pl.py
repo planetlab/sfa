@@ -188,7 +188,7 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
                                     rspecs[net_hrn], request_hash, origin_hrn)
                             tickets[aggregate] = ticket
         except:
-            print >> log, "Error getting ticket for %(hrn)s at aggregate %(net_hrn)s" % \
+            print >> log, "Error getting ticket for %(slice_hrn)s at aggregate %(net_hrn)s" % \
                            locals()
             
     # create a new ticket
