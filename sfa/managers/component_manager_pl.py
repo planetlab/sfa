@@ -4,20 +4,33 @@ from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.sfaticket import SfaTicket
 
+def init_server():
+    from server import sfa_component_setup
+    # get current trusted gids
+    try:
+        sfa_component_setup.get_trusted_certs()
+    except:
+        # our keypair may be old, try refreshing
+        sfa_component_setup.get_node_key()
+        sfa_component_setup.get_credential(force=True)
+        sfa_component_sertup.get_trusted_certs()
+           
+    
+
 def start_slice(api, slicename):
-    record = {'name': hrn_to_pl_slicename(slicename)}
+    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
     api.nodemanger.Start(record)
 
 def stop_slice(api, slicename):
-    record = {'name': hrn_to_pl_slicename(slicename)}
+    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
     api.nodemanager.Stop(record)
 
 def delete_slice(api, slicename):
-    record = {'name': hrn_to_pl_slicename(slicename)}
+    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
     api.nodemanager.Destroy(record)
 
 def reset_slice(api, slicename):
-    record = {'name': hrn_to_pl_slicename(slicename)}
+    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
     if not api.sliver_exists(slicename):
         raise SliverDoesNotExist(slicename)
     api.nodemanager.ReCreate(record)
