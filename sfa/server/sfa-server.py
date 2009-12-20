@@ -112,6 +112,41 @@ def init_server_key(server_key_file, server_cert_file, config, hierarchy):
         cert.sign()
         cert.save_to_file(server_cert_file)
 
+def init_server(options, config):
+    """
+    Execute the init method defined in the manager file 
+    """
+    manager_base = 'sfa.managers'
+    if options.registry:
+        mgr_type = self.api.config.SFA_REGISTRY_TYPE
+        manager_module = manager_base + ".registry_manager_%s" % mgr_type
+        try: manager = __import__(manager_module, fromlist=[manager_base])
+        except: manager = None
+        if manager and hasattr(manager, 'init_server'): 
+            manager.init_server()    
+    if options.am:
+        mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+        manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+        try: manager = __import__(manager_module, fromlist=[manager_base])
+        except: manager = None
+        if manager and hasattr(manager, 'init_server'):
+            manager.init_server()    
+    if options.sm:
+        mgr_type = self.api.config.SFA_SM_TYPE
+        manager_module = manager_base + ".slice_manager_%s" % mgr_type
+        try: manager = __import__(manager_module, fromlist=[manager_base])
+        except: manager = None
+        if manager and hasattr(manager, 'init_server'):
+            manager.init_server()    
+    if options.cm:
+        mgr_type = self.api.config.SFA_CM_TYPE
+        manager_module = manager_base + ".component_manager_%s" % mgr_type
+        try: manager = __import__(manager_module, fromlist=[manager_base])
+        except: manager = None
+        if manager and hasattr(manager, 'init_server'):
+            manager.init_server()    
+            
+
 def main():
     # xxx get rid of globals - name consistently CamelCase or under_score
     global AuthHierarchy
@@ -145,7 +180,8 @@ def main():
     server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
 
     init_server_key(server_key_file, server_cert_file, config, hierarchy)
-    
+    init_server(options, config)   
+ 
     # start registry server
     if (options.registry):
         from sfa.server.registry import Registry
