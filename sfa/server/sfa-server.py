@@ -118,28 +118,28 @@ def init_server(options, config):
     """
     manager_base = 'sfa.managers'
     if options.registry:
-        mgr_type = self.api.config.SFA_REGISTRY_TYPE
+        mgr_type = config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         try: manager = __import__(manager_module, fromlist=[manager_base])
         except: manager = None
         if manager and hasattr(manager, 'init_server'): 
             manager.init_server()    
     if options.am:
-        mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+        mgr_type = config.SFA_AGGREGATE_TYPE
         manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
         try: manager = __import__(manager_module, fromlist=[manager_base])
         except: manager = None
         if manager and hasattr(manager, 'init_server'):
             manager.init_server()    
     if options.sm:
-        mgr_type = self.api.config.SFA_SM_TYPE
+        mgr_type = config.SFA_SM_TYPE
         manager_module = manager_base + ".slice_manager_%s" % mgr_type
         try: manager = __import__(manager_module, fromlist=[manager_base])
         except: manager = None
         if manager and hasattr(manager, 'init_server'):
             manager.init_server()    
     if options.cm:
-        mgr_type = self.api.config.SFA_CM_TYPE
+        mgr_type = config.SFA_CM_TYPE
         manager_module = manager_base + ".component_manager_%s" % mgr_type
         try: manager = __import__(manager_module, fromlist=[manager_base])
         except: manager = None
