@@ -1,5 +1,6 @@
-- Init plugins
-* execute plugable init scritps when starting the interfaces
+- Registry
+* update call shuold attempt to push updates to federated peers if 
+* the peer has a record for an object that is updated locally  
 
 - Component manager
 * install the  slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
