@@ -27,10 +27,10 @@ class RSpec:
         self.dict = {}
         self.schemaDict = {}
         self.NSURL = NSURL 
-        if xml: 
+        if xml:
             if type(xml) == file:
                 self.parseFile(xml)
-            if type(xml) == str:
+            if type(xml) in StringTypes:
                 self.parseString(xml)
             self.dict = self.toDict() 
         if xsd:
