@@ -206,10 +206,9 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
         new_ticket.set_issuer(key=api.key, subject=api.hrn)
         new_ticket.set_pubkey(object_gid.get_pubkey())
         
-        
         #new_ticket.set_attributes(data)
-        tmp_rspec.parseString(agg_ticket.get_rspec)
-        newtworks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
+        tmp_rspec.parseString(agg_ticket.get_rspec())
+        networks.extend([{'NetSpec': tmp_rspec.getDictsByTagName('NetSpec')}])
     
     #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
     resources = {'networks': networks, 'start_time': 0, 'duration': 0}
@@ -219,6 +218,7 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
         
     new_ticket.encode()
     new_ticket.sign()          
+    return new_ticket.save_to_string(save_parents=True)
 
 def start_slice(api, hrn, origin_hrn=None):
     slicename = hrn_to_pl_slicename(hrn)
