@@ -1,6 +1,9 @@
 - Registry
+* refactor to use managers
 * update call should attempt to push updates to federated peers if 
   the peer has a record for an object that is updated locally  
+* api.update_membership() shoudl behave more like resolve when looking up records (attempt to resolve records at federated registeries) instead of only looking in the local registry
+
 
 - Aggregate
 * sfa.plc.slices.verify_site() should check if site['max_slices'] needs to be updated
