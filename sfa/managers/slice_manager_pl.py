@@ -196,7 +196,7 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     new_ticket.set_gid_caller(api.auth.client_gid)
    
     tmp_rspec = RSpec()
-    tmp_networks = []
+    networks = []
     valid_data = {} 
     # merge data from aggregate ticket into new ticket 
     for agg_ticket in tickets.values():
