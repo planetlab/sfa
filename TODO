@@ -1,13 +1,13 @@
 - Registry
-* update call shuold attempt to push updates to federated peers if 
-* the peer has a record for an object that is updated locally  
+* update call should attempt to push updates to federated peers if 
+  the peer has a record for an object that is updated locally  
 
+- Aggregate
+* sfa.plc.slices.verify_site() should check if site['max_slices'] needs to be updated
+* sfa.plc.slices.verify_slice() should check if slice['expires'] needs to be updated
+ 
 - Component manager
 * install the  slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
-
-- GetTicket
-* sm, am only
-* sm calls getticket on am and merges resulting tickets into 1 ticket
 
 -  sfa-clean-peer-records 
 * modify resolve to support a list of hrns
