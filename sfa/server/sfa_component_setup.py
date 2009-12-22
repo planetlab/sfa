@@ -75,7 +75,7 @@ def create_server_keypair(keyfile=None, certfile=None, hrn="component", verbose=
     cert.sign()
     cert.save_to_file(certfile, save_parents=True)       
         
-def get_credential(registry=None, verbose=False):
+def get_credential(registry=None, force=False, verbose=False):
     config = Config()
     hierarchy = Hierarchy()
     key_dir= hierarchy.basedir
@@ -83,7 +83,7 @@ def get_credential(registry=None, verbose=False):
     config_dir = config.config_path
     credfile = data_dir + os.sep + 'node.cred'
     # check for existing credential
-    if os.path.exists(credfile):
+    if not force and os.path.exists(credfile):
         if verbose:
             print "Loading Credential from %(credfile)s " % locals()  
         cred = Credential(filename=credfile).save_to_string(save_parents=True)
