@@ -1,3 +1,10 @@
+- URN vs HRN
+* methods should support urn or hrn arguments
+* create a module that converts urn to hrn so we can continue using
+  hrn behind the scenes  
+* add get_urn() method to GID object 
+* urn is the standard over the wire format
+
 - Registry
 * refactor to use managers
 * update call should attempt to push updates to federated peers if 
