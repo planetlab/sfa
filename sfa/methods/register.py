@@ -104,7 +104,11 @@ class register(Method):
             record['pointer'] = pointer
 
         elif (type == "slice"):
+	    acceptable_fields=['url', 'instantiation', 'name', 'description']
             pl_record = self.api.geni_fields_to_pl_fields(type, hrn, record)
+	    for key in pl_record.keys():
+	        if key not in acceptable_fields:
+		   pl_record.pop(key)
             slices = self.api.plshell.GetSlices(self.api.plauth, [pl_record['name']])
             if not slices: 
                 pointer = self.api.plshell.AddSlice(self.api.plauth, pl_record)
