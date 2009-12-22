@@ -55,18 +55,19 @@ class create_slice(Method):
         rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
         #Filter the incoming rspec using sfatables
         if self.api.interface in ['slicemgr']:
-           incoming_rules = SFATablesRules('FORWARD-INCOMING')
-	elif self.api.interface in ['aggregate']:
-           incoming_rules = SFATablesRules('INCOMING')
-	if incoming_rules.sorted_rule_list:
-           #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+            incoming_rules = SFATablesRules('FORWARD-INCOMING')
+        elif self.api.interface in ['aggregate']:
+            incoming_rules = SFATablesRules('INCOMING')
 
-           contexts = incoming_rules.contexts
-           request_context = rspec_manager.fetch_context(hrn, origin_hrn, contexts)
-           incoming_rules.set_context(request_context)
-           rspec = incoming_rules.apply(requested_rspec)
-	else:	
-	   rspec = requested_rspec
+        if incoming_rules.sorted_rule_list:
+            #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
+
+            contexts = incoming_rules.contexts
+            request_context = rspec_manager.fetch_context(hrn, origin_hrn, contexts)
+            incoming_rules.set_context(request_context)
+            rspec = incoming_rules.apply(requested_rspec)
+        else:	
+            rspec = requested_rspec
 
         # send the call to the right manager
         if sfa_aggregate_type not in ['pl']:
