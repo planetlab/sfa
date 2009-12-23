@@ -373,7 +373,7 @@ class Slices(SimpleStorage):
         slicename = hrn_to_pl_slicename(slice_hrn)
         parts = slicename.split("_")
         login_base = parts[0]
-        slices = self.api.plshell.GetSlices(self.api.plauth, [slicename], ['slice_id', 'node_ids', 'site_id']) 
+        slices = self.api.plshell.GetSlices(self.api.plauth, [slicename]) 
         if not slices:
             slice_fields = {}
             slice_keys = ['name', 'url', 'description']
@@ -404,6 +404,8 @@ class Slices(SimpleStorage):
             slice = slices[0]
             slice_id = slice['slice_id']
             site_id = slice['site_id']
+	    #the slice is alredy on the remote agg. Let us update(e.g. expires field) it with the latest info.
+	    self.sync_slice(slice, slice_record, peer)
 
         slice['peer_slice_id'] = slice_record['pointer']
         self.verify_persons(registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer)
@@ -701,3 +703,11 @@ class Slices(SimpleStorage):
             except:  
                 aggregates[aggregate].stop_slice(credential, hrn, request_hash)
 
+    def sync_slice(self, old_record, new_record, peer):
+	if old_record['expires'] != new_record['expires']:
+           if peer:
+            self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', old_record['slice_id'], peer)
+            self.api.plshell.UpdateSlice(self.api.plauth, old_record['slice_id'], {'expires' : new_record['expires']})
+	if peer:
+            self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', old_record['slice_id'], peer, old_record['peer_slice_id'])
+	return 1
