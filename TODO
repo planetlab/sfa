@@ -10,38 +10,33 @@
 * update call should attempt to push updates to federated peers if 
   the peer has a record for an object that is updated locally  
 * api.update_membership() shoudl behave more like resolve when looking up records (attempt to resolve records at federated registeries) instead of only looking in the local registry
+*  sfi remove, if removing a site, remove any record that site is an an authority for
+* support generic registry records (dont depend on postgres! object db?)
+* modify resolve() so that you can resolve more than 1 hrn at at time (list of hrns) 
 
+-  sfa-clean-peer-records 
+* instead of resolving each peer record one by one, use one reslove call to resolve a list of hrns (requires updated registry.resolve() method)
 
 - Aggregate
 * sfa.plc.slices.verify_site() should check if site['max_slices'] needs to be updated
 * sfa.plc.slices.verify_slice() should check if slice['expires'] needs to be updated
  
 - Component manager
-* install the  slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
+* install the slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
 
--  sfa-clean-peer-records 
-* modify resolve to support a list of hrns
-* resolve a list of peer hrns instead of each hrn individally
-
--  sfi remove, if removing a site, remove any record that site is an an authority for
-
--  routing sm calls
+    
+-  SM call routing
 * sfi -a option should send request to sm with an extra argument to 
   specify which am to contact instead of connecting directly to the am 
   (am may not trust client directly)
 
-- make registry more generic
-* support interface managers
-* support generic registry records (dont depend on postgres! object db?)
-
-- checking support for conventional ssl (creating a shared keypair for the request)        
-
 -  Initscripts on sfa / geniwrapper
+* should sfa have native initscript support or should we piggyback off of myplc?
 
 -  Fully integrate SOAP (need to throw either soap or xmlrpc exceptions depending on the client)
+* started but not finished
 
 - error messages
 * error messages should be easier to understand
 * (failing to connect to plcapi shoudl return a helpful message, not a generic internal server error) 
 
-- unit tests
