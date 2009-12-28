@@ -593,7 +593,7 @@ class Sfi:
                 record = GeniRecord(dict = record)
             if (opts.format=="text"): 
                 record.dump()  
-            else: 
+            else:
                 print record.save_to_string() 
        
         if opts.file:
