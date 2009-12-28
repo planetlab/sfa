@@ -93,6 +93,4 @@ class remove(Method):
 
         table.remove(record)
            
-	# forward the call after replacing the root hrn
-
         return 1
