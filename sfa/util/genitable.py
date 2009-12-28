@@ -92,8 +92,16 @@ class GeniTable(list):
             self.cnx.query(index)
 
     def remove(self, record):
-        query_str = "DELETE FROM %s WHERE record_id = %s" % (self.tablename, record['record_id']) 
+        query_str = "DELETE FROM %s WHERE record_id = %s" % \
+                    (self.tablename, record['record_id']) 
         self.cnx.query(query_str)
+        
+        # if this is a site, remove all records where 'authority' == the 
+        # site's hrn
+        if record['type'] == 'site':
+            sql = " DELETE FROM %s WHERE authority = %s" % \
+                    (self.tablename, record['hrn'])
+            self.cnx.query(sql) 
 
     def insert(self, record):
         db_fields = self.db_fields(record)
