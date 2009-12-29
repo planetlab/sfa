@@ -50,8 +50,8 @@ def get_node_key(registry=None, verbose=False):
     # this call requires no authentication, 
     # so we can generate a random keypair here
     subject="component"
-    keyfile = tempfile.mktemp()
-    certfile = tempfile.mktemp()
+    keyfile = tempfile.mkstemp()
+    certfile = tempfile.mkstemp()
     key = Keypair(create=True)
     key.save_to_file(keyfile)
     cert = Certificate(subject=subject)
