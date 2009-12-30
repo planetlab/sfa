@@ -37,20 +37,20 @@ class create_slice(Method):
     returns = Parameter(int, "1 if successful")
     
     def call(self, cred, hrn, requested_rspec, request_hash=None):
-        
-        # This cred will be an slice cred, not a user, so we cant use it to
-        # authenticate the caller's request_hash. Let just get the caller's gid
-        # from the cred and authenticate using that
         user_cred = Credential(string=cred)
-        client_gid = user_cred.get_gid_caller()
-        client_gid_str = client_gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(client_gid_str, [cred, hrn, requested_rspec], request_hash)
-        self.api.auth.check(cred, 'createslice')
-
+       
         #log the call
         gid_origin_caller = user_cred.get_gid_origin_caller()
         origin_hrn = gid_origin_caller.get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+         
+        # This cred will be an slice cred, not a user, so we cant use it to
+        # authenticate the caller's request_hash. Let just get the caller's gid
+        # from the cred and authenticate using that
+        client_gid = user_cred.get_gid_caller()
+        client_gid_str = client_gid.save_to_string(save_parents=True)
+        self.api.auth.authenticateGid(client_gid_str, [cred, hrn, requested_rspec], request_hash)
+        self.api.auth.check(cred, 'createslice')
 
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
         rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
