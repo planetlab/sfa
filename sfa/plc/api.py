@@ -10,7 +10,6 @@ import os
 import traceback
 import string
 import xmlrpclib
-
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
@@ -19,8 +18,9 @@ from sfa.trust.rights import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.misc import *
-from sfa.util.sfalogging import *
 from sfa.util.api import *
+from sfa.util.nodemanager import NodeManager
+from sfa.util.sfalogging import *
 
 class GeniAPI(BaseAPI):
 
@@ -431,14 +431,7 @@ class ComponentAPI(BaseAPI):
         if config is None:
             return
 
-        self.nodemanager = self.getNodeManagerShell()
-
-    def getNodeManagerShell(self):
-        # just import the nm api source
-        sys.path.append('/usr/share/NodeManager')
-        import api_calls
-        return api_calls
-
+        self.nodemanager = NodeManager()
 
     def sliver_exists(self):
         sliver_dict = self.nodemanager.GetXIDs()
