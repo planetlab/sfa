@@ -18,22 +18,18 @@ def init_server():
     
 
 def start_slice(api, slicename):
-    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
-    api.nodemanger.Start(record)
+    api.nodemanger.Start(slicename)
 
 def stop_slice(api, slicename):
-    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
-    api.nodemanager.Stop(record)
+    api.nodemanager.Stop(slicename)
 
 def delete_slice(api, slicename):
-    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
-    api.nodemanager.Destroy(record)
+    api.nodemanager.Destroy(slicename)
 
 def reset_slice(api, slicename):
-    record = api.nmdb.get(hrn_to_pl_slicename(slicename))
     if not api.sliver_exists(slicename):
         raise SliverDoesNotExist(slicename)
-    api.nodemanager.ReCreate(record)
+    api.nodemanager.ReCreate(slicename)
  
 def get_slices(api):
     slicenames = api.nodemanager.GetXIDs().keys()
