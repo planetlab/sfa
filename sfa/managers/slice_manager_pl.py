@@ -47,7 +47,7 @@ def delete_slice(api, hrn, origin_hrn=None):
                 print >> log, "Error calling list nodes at aggregate %s" % aggregate
     return 1
 
-def create_slice(api, hrn, rspec, origin_hrn=None):
+def create_slice(api, hrn, rspec, gid_origin_caller=None):
     spec = RSpec()
     tempspec = RSpec()
     spec.parseString(rspec)
@@ -62,7 +62,7 @@ def create_slice(api, hrn, rspec, origin_hrn=None):
     rspecs = {}
     aggregates = Aggregates(api)
     credential = api.getCredential()
-
+    credential.set_gid_origin_caller(gid_origin_caller)
     # split the netspecs into individual rspecs
     netspecs = spec.getDictsByTagName('NetSpec')
     for netspec in netspecs:
