@@ -21,8 +21,9 @@ from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
 import sfa.plc.peers as peers
 
-def delete_slice(api, hrn, origin_hrn=None):
+def delete_slice(api, hrn, gid_origin_caller=None):
     credential = api.getCredential()
+    credential.set_gid_origin_caller(gid_origin_caller)
     aggregates = Aggregates(api)
     for aggregate in aggregates:
         success = False
@@ -40,7 +41,7 @@ def delete_slice(api, hrn, origin_hrn=None):
             try:
                 arg_list = [credential, hrn]
                 request_hash = api.key.compute_hash(arg_list)
-                aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
+                aggregates[aggregate].delete_slice(credential, hrn, request_hash)
                 success = True
             except:
                 print >> log, "%s" % (traceback.format_exc())
@@ -86,22 +87,22 @@ def create_slice(api, hrn, rspec, gid_origin_caller=None):
                     try:
                         request_hash = None
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                        rspec, request_hash, origin_hrn)
+                                        rspec, request_hash)
                     except:
                         arg_list = [credential,hrn,rspec]
                         request_hash = api.key.compute_hash(arg_list)
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                        rspec, request_hash, origin_hrn)
+                                        rspec, request_hash)
                 else:
                     try:
                         request_hash = None
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                rspecs[net_hrn], request_hash, origin_hrn)
+                                rspecs[net_hrn], request_hash)
                     except:
                         arg_list = [credential,hrn,rspecs[net_hrn]]
                         request_hash = api.key.compute_hash(arg_list)
                         aggregates[net_hrn].create_slice(credential, hrn, \
-                                rspecs[net_hrn], request_hash, origin_hrn)
+                                rspecs[net_hrn], request_hash)
             else:
                 # lets forward this rspec to a sm that knows about the network
                 arg_list = [credential, net_hrn]
