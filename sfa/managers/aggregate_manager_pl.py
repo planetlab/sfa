@@ -123,9 +123,9 @@ def get_slices(api):
     return slices['hrn']
      
  
-def get_rspec(api, hrn=None, origin_hrn=None):
+def get_rspec(api, hrn=None, origin_gid_caller=None):
     from sfa.plc.nodes import Nodes
-    nodes = Nodes(api, origin_hrn=origin_hrn)
+    nodes = Nodes(api, origin_gid_caller=origin_gid_caller)
     if hrn:
         rspec = nodes.get_rspec(hrn)
     else:

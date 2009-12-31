@@ -20,7 +20,7 @@ from sfa.server.aggregate import Aggregates
 
 class Nodes(SimpleStorage):
 
-    def __init__(self, api, ttl = 1, origin_hrn=None):
+    def __init__(self, api, ttl = 1, origin_gid_caller=None):
         self.api = api
         self.ttl = ttl
         self.threshold = None
@@ -31,7 +31,9 @@ class Nodes(SimpleStorage):
         SimpleStorage.__init__(self, self.nodes_file)
         self.policy = Policy(api)
         self.load()
-        self.origin_hrn=origin_hrn
+        self.origin_hrn = None
+        if origin_gid_caller:
+            self.origin_hrn=origin_gid_caller.get_hrn()
 
 
     def refresh(self):
