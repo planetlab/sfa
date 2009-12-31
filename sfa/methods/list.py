@@ -30,18 +30,17 @@ class list(Method):
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, request_hash=None, origin_hrn=None):
+    def call(self, cred, hrn, request_hash=None):
+        #log the call
+        origin_hrn=Credential(string=cred).get_gid_origin_caller().get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+        
         self.api.auth.authenticateCred(cred, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'list')
-        if origin_hrn==None:
-            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
-
-        #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
-        records = []
-
+            
         # load all know registry names into a prefix tree and attempt to find
         # the longest matching prefix  
+        records = []
         registries = Registries(self.api)
         hrns = registries.keys()
         tree = prefixTree()
