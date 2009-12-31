@@ -31,9 +31,7 @@ class Nodes(SimpleStorage):
         SimpleStorage.__init__(self, self.nodes_file)
         self.policy = Policy(api)
         self.load()
-        self.origin_hrn = None
-        if origin_gid_caller:
-            self.origin_hrn=origin_gid_caller.get_hrn()
+        self.origin_gid_caller = origin_gid_caller
 
 
     def refresh(self):
@@ -112,19 +110,19 @@ class Nodes(SimpleStorage):
         rspecs = {}
         networks = []
         rspec = RSpec()
-        credential = self.api.getCredential() 
+        credential = self.api.getCredential()
+        credential.set_gid_origin_caller(self.gid_origin_caller) 
         for aggregate in aggregates:
           if aggregate not in [self.api.auth.client_cred.get_gid_caller().get_hrn()]:
             try:
-                origin_hrn = self.origin_hrn
                 # get the rspec from the aggregate
                 try:
             	    request_hash=None
-                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, origin_hrn)
+                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash)
                 except:
                     arg_list = [credential, hrn]
                     request_hash = self.api.key.compute_hash(arg_list)
-                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash, origin_hrn)
+                    agg_rspec = aggregates[aggregate].get_resources(credential, hrn, request_hash)
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
                 networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
