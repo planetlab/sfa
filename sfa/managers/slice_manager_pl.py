@@ -129,7 +129,7 @@ def create_slice(api, hrn, rspec, gid_origin_caller=None):
             traceback.print_exc()
     return 1
 
-def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
+def get_ticket(api, slice_hrn, rspec, gid_origin_caller=None):
     
     # get the netspecs contained within the clients rspec
     client_rspec = RSpec(xml=rspec)
@@ -149,6 +149,7 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     # send the rspec to the appropiate aggregate/sm
     aggregates = Aggregates(api)
     credential = api.getCredential()
+    credential.set_gid_origin_caller(gid_origin_caller)
     tickets = {}
     for net_hrn in rspecs:    
         try:
@@ -158,13 +159,13 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
             if net_hrn in aggregates:
                 try:
                     ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
-                                rspecs[net_hrn], None, origin_hrn)
+                                rspecs[net_hrn], None)
                     tickets[net_hrn] = ticket
                 except:
                     arg_list = [credential,hrn,rspecs[net_hrn]]
                     request_hash = api.key.compute_hash(arg_list)
                     ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
-                                rspecs[net_hrn], request_hash, origin_hrn)
+                                rspecs[net_hrn], request_hash)
                     tickets[net_hrn] = ticket 
             else:
                 # lets forward this rspec to a sm that knows about the network
@@ -180,13 +181,13 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
                     if network_found:
                         try:
                             ticket = aggregates[aggregate].get_ticket(credential, \
-                                        slice_hrn, rspecs[net_hrn], None, origin_hrn)
+                                        slice_hrn, rspecs[net_hrn], None)
                             tickets[aggregate] = ticket
                         except:
                             arg_list = [credential, hrn, rspecs[net_hrn]]
                             request_hash = api.key.compute_hash(arg_list)
                             aggregates[aggregate].get_ticket(credential, slice_hrn, \
-                                    rspecs[net_hrn], request_hash, origin_hrn)
+                                    rspecs[net_hrn], request_hash)
                             tickets[aggregate] = ticket
         except:
             print >> log, "Error getting ticket for %(slice_hrn)s at aggregate %(net_hrn)s" % \

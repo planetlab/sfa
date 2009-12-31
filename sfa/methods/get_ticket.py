@@ -42,16 +42,17 @@ class get_ticket(Method):
 
     returns = Parameter(str, "String represeneation of a ticket object")
     
-    def call(self, cred, hrn, rspec, request_hash=None, origin_hrn=None):
+    def call(self, cred, hrn, rspec, request_hash=None):
+        user_cred = Credential(string=cred)
+
+        #log the call
+        gid_origin_caller = user_cred.get_gid_origin_caller()
+        origin_hrn = gid_origin_caller.get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+
         self.api.auth.authenticateCred(cred, [cred, hrn, rspec], request_hash)
         self.api.auth.check(cred, "getticket")
 	
-	if origin_hrn==None:
-	    origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
-
-	#log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
-   
         # set the right outgoing rules
         manager_base = 'sfa.managers'
         if self.api.interface in ['aggregate']:
@@ -80,7 +81,7 @@ class get_ticket(Method):
         rspec_object = RSpec(xml=rspec)
         rspec_object.filter(tagname='NodeSpec', attribute='name', whitelist=valid_hostnames)
         rspec = rspec_object.toxml() 
-        ticket = manager.get_ticket(self.api, hrn, rspec, origin_hrn)
+        ticket = manager.get_ticket(self.api, hrn, rspec, gid_origin_caller)
         
         return ticket
         
