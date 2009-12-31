@@ -41,7 +41,7 @@ def create_slice(api, hrn, rspec):
     # we transition the code to this module
     from sfa.plc.slices import Slices
     slices = Slices(api)
-    slices.create_slice(hrn, rspec)
+    slices.create_slice_aggregate(hrn, rspec)
 
 def get_ticket(api, slice_hrn, rspec, gid_origin_caller=None):
     # the the slice record
