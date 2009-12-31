@@ -359,10 +359,7 @@ class Sfi:
             return gid
         else:
             cert_str = self.cert.save_to_string(save_parents=True)
-            request_hash=None
-            if self.hashrequest:
-                request_hash = self.key.compute_hash([cert_str, self.user, "user"])
-            gid_str = self.registry.get_gid(cert_str, self.user, "user", request_hash)
+            gid_str = self.registry.get_gid(cert_str, self.user, "user")
             gid = GID(string=gid_str)
             if self.options.verbose:
                 print "Writing user gid to", file
@@ -378,13 +375,12 @@ class Sfi:
         else:
             # bootstrap user credential
             cert_string = self.cert.save_to_string(save_parents=True)
-            request_hash=None
-            if self.hashrequest:
-                request_hash = self.key.compute_hash([cert_string, "user", self.user])
-	    user_name=self.user.replace(self.authority+".", '')
-	    if user_name.count(".") > 0:
-	       user_name = user_name.replace(".", '_')
-	       self.user=self.authority + "." + user_name
+            request_hash = self.key.compute_hash([cert_string, "user", self.user])
+            user_name=self.user.replace(self.authority+".", '')
+            if user_name.count(".") > 0:
+                user_name = user_name.replace(".", '_')
+                self.user=self.authority + "." + user_name
+
             user_cred = self.registry.get_self_credential(cert_string, "user", self.user, request_hash)
             if user_cred:
                cred = Credential(string=user_cred)
@@ -408,10 +404,7 @@ class Sfi:
         else:
             # bootstrap authority credential from user credential
             user_cred = self.get_user_cred().save_to_string(save_parents=True)
-            request_hash = None
-            if self.hashrequest:
-                request_hash = self.key.compute_hash([user_cred, "authority", self.authority])
-            auth_cred = self.registry.get_credential(user_cred, "authority", self.authority, request_hash)
+            auth_cred = self.registry.get_credential(user_cred, "authority", self.authority)
             if auth_cred:
                 cred = Credential(string=auth_cred)
                 cred.save_to_file(file, save_parents=True)
@@ -431,10 +424,7 @@ class Sfi:
             # bootstrap slice credential from user credential
             user_cred = self.get_user_cred().save_to_string(save_parents=True)
             arg_list = [user_cred, "slice", name]
-            request_hash=None
-            if self.hashrequest:
-                request_hash = self.key.compute_hash(arg_list)  
-            slice_cred_str = self.registry.get_credential(user_cred, "slice", name, request_hash)
+            slice_cred_str = self.registry.get_credential(user_cred, "slice", name)
             if slice_cred_str:
                 slice_cred = Credential(string=slice_cred_str)
                 slice_cred.save_to_file(file, save_parents=True)
@@ -523,8 +513,7 @@ class Sfi:
     def get_component_server_from_hrn(self, hrn):
         # direct connection to the nodes component manager interface
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        request_hash = self.key.compute_hash([user_cred, hrn])
-        records = self.registry.resolve(user_cred, hrn, request_hash)
+        records = self.registry.resolve(user_cred, hrn)
         records = filter_records('node', records)
         if not records:
             print "No such component:", opts.component
@@ -551,11 +540,8 @@ class Sfi:
     def list(self,opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = args[0]
-        request_hash=None
-        if self.hashrequest:
-            request_hash = self.key.compute_hash([user_cred, hrn])    
         try:
-            list = self.registry.list(user_cred, hrn, request_hash)
+            list = self.registry.list(user_cred, hrn)
         except IndexError:
             raise Exception, "Not enough parameters for the 'list' command"
           
@@ -575,10 +561,7 @@ class Sfi:
     def show(self,opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = args[0]
-        request_hash=None
-        if self.hashrequest:
-            request_hash = self.key.compute_hash([user_cred, hrn])    
-        records = self.registry.resolve(user_cred, hrn, request_hash)
+        records = self.registry.resolve(user_cred, hrn)
         records = filter_records(opts.type, records)
         if not records:
             print "No record of type", opts.type
@@ -668,11 +651,7 @@ class Sfi:
         type = opts.type 
         if type in ['all']:
             type = '*'
-        request_hash=None
-        if self.hashrequest: 
-            arg_list = [auth_cred, type, hrn]
-            request_hash = self.key.compute_hash(arg_list)                   
-        return self.registry.remove(auth_cred, type, hrn, request_hash)
+        return self.registry.remove(auth_cred, type, hrn)
     
     # add named registry record
     def add(self,opts, args):
@@ -680,11 +659,7 @@ class Sfi:
         record_filepath = args[0]
         rec_file = self.get_record_file(record_filepath)
         record = load_record_from_file(rec_file).as_dict()
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [auth_cred]
-            request_hash = self.key.compute_hash(arg_list)
-        return self.registry.register(auth_cred, record, request_hash)
+        return self.registry.register(auth_cred, record)
     
     # update named registry entry
     def update(self,opts, args):
@@ -713,11 +688,7 @@ class Sfi:
         else:
             raise "unknown record type" + record.get_type()
         record = record.as_dict()
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [cred]  
-            request_hash = self.key.compute_hash(arg_list)
-        return self.registry.update(cred, record, request_hash)
+        return self.registry.update(cred, record)
   
     def get_trusted_certs(self, opts, args):
         """
@@ -737,11 +708,7 @@ class Sfi:
         hrn = None
         if args: 
             hrn = args[0]
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [user_cred, hrn]  
-            request_hash = self.key.compute_hash(arg_list)
-        result = self.registry.get_aggregates(user_cred, hrn, request_hash)
+        result = self.registry.get_aggregates(user_cred, hrn)
         display_list(result)
         return 
 
@@ -753,11 +720,7 @@ class Sfi:
         hrn = None
         if args:
             hrn = args[0]
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [user_cred, hrn]  
-            request_hash = self.key.compute_hash(arg_list)
-        result = self.registry.get_registries(user_cred, hrn, request_hash)
+        result = self.registry.get_registries(user_cred, hrn)
         display_list(result)
         return
 
@@ -771,16 +734,11 @@ class Sfi:
     # list instantiated slices
     def slices(self,opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [user_cred]
-            request_hash = self.key.compute_hash(arg_list)
-
         server = self.slicemgr
         # direct connection to the nodes component manager interface
         if opts.component:
             server = self.get_component_server_from_hrn(opts.component)
-        results = server.get_slices(user_cred, request_hash)
+        results = server.get_slices(user_cred)
         display_list(results)
         return
     
@@ -790,9 +748,7 @@ class Sfi:
         server = self.slicemgr
         if opts.aggregate:
             agg_hrn = opts.aggregate
-            arg_list = [user_cred, agg_hrn]
-            request_hash = self.key.compute_hash(arg_list)
-            aggregates = self.registry.get_aggregates(user_cred, agg_hrn, request_hash)
+            aggregates = self.registry.get_aggregates(user_cred, agg_hrn)
             if not aggregates:
                 raise Exception, "No such aggregate %s" % agg_hrn
             aggregate = aggregates[0]
@@ -805,11 +761,7 @@ class Sfi:
             cred = user_cred
             hrn = None
 
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [cred, hrn]
-            request_hash = self.key.compute_hash(arg_list)  
-        result = server.get_resources(cred, hrn, request_hash)
+        result = server.get_resources(cred, hrn)
         format = opts.format
        
         display_rspec(result, format)
@@ -835,11 +787,7 @@ class Sfi:
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
             server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [slice_cred, slice_hrn, rspec]
-            request_hash = self.key.compute_hash(arg_list) 
-        return server.create_slice(slice_cred, slice_hrn, rspec, request_hash)
+        return server.create_slice(slice_cred, slice_hrn, rspec)
 
     # get a ticket for the specified slice
     def get_ticket(self, opts, args):
@@ -856,11 +804,7 @@ class Sfi:
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
             server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [slice_cred, slice_hrn, rspec]
-            request_hash = self.key.compute_hash(arg_list)
-        ticket_string = server.get_ticket(slice_cred, slice_hrn, rspec, request_hash)
+        ticket_string = server.get_ticket(slice_cred, slice_hrn, rspec)
         file = os.path.join(self.options.sfi_dir, get_leaf(slice_hrn) + ".ticket")
         print "writing ticket to ", file        
         ticket = SfaTicket(string=ticket_string)
@@ -911,11 +855,7 @@ class Sfi:
             server = self.get_component_server_from_hrn(opts.component)
  
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [slice_cred, slice_hrn]
-            request_hash = self.key.compute_hash(arg_list) 
-        return server.delete_slice(slice_cred, slice_hrn, request_hash)
+        return server.delete_slice(slice_cred, slice_hrn)
     
     # start named slice
     def start(self,opts, args):
@@ -926,11 +866,7 @@ class Sfi:
             server = self.get_component_server_from_hrn(opts.component)
  
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [slice_cred, slice_hrn]
-            request_hash = self.key.compute_hash(arg_list)
-        return server.start_slice(slice_cred, slice_hrn, request_hash)
+        return server.start_slice(slice_cred, slice_hrn)
     
     # stop named slice
     def stop(self,opts, args):
@@ -941,11 +877,7 @@ class Sfi:
             server = self.get_component_server_from_hrn(opts.component)
 
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [slice_cred, slice_hrn]
-            request_hash = self.key.compute_hash(arg_list)
-        return server.stop_slice(slice_cred, slice_hrn, request_hash)
+        return server.stop_slice(slice_cred, slice_hrn)
     
     # reset named slice
     def reset(self,opts, args):
@@ -955,11 +887,7 @@ class Sfi:
         if opts.component:
             server = self.get_component_server_from_hrn(opts.component)
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        request_hash=None
-        if self.hashrequest:
-            arg_list = [slice_cred, slice_hrn]
-            request_hash = self.key.compute_hash(arg_list)
-        return server.reset_slice(slice_cred, slice_hrn, request_hash)
+        return server.reset_slice(slice_cred, slice_hrn)
     
     #
     # Main: parse arguments and dispatch to command

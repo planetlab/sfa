@@ -30,26 +30,21 @@ class create_slice(Method):
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name of slice to instantiate"),
         Parameter(str, "Resource specification"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Mixed(Parameter(str, "Human readable name of the original caller"),
+              Paramater(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, requested_rspec, request_hash=None):
+    def call(self, cred, hrn, requested_rspec, origin_hrn=None):
         user_cred = Credential(string=cred)
        
         #log the call
-        gid_origin_caller = user_cred.get_gid_origin_caller()
-        origin_hrn = gid_origin_caller.get_hrn()
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
          
-        # This cred will be an slice cred, not a user, so we cant use it to
-        # authenticate the caller's request_hash. Let just get the caller's gid
-        # from the cred and authenticate using that
-        client_gid = user_cred.get_gid_caller()
-        client_gid_str = client_gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(client_gid_str, [cred, hrn, requested_rspec], request_hash)
+        # validate the credential
         self.api.auth.check(cred, 'createslice')
 
         sfa_aggregate_type = Config().get_aggregate_rspec_type()
@@ -86,6 +81,6 @@ class create_slice(Method):
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.create_slice(self.api, hrn, rspec, gid_origin_caller)
+            manager.create_slice(self.api, hrn, rspec, origin_hrn)
 
         return 1 

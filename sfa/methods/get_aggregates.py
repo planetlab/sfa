@@ -21,17 +21,13 @@ class get_aggregates(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        
         Mixed(Parameter(str, "Human readable name (hrn)"),
-              Parameter(None, "hrn not specified")),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+              Parameter(None, "hrn not specified"))
         ]
 
     returns = [Parameter(dict, "Aggregate interface information")]
     
-    def call(self, cred, hrn = None, request_hash=None):
-        self.api.auth.authenticateCred(cred, [cred, hrn], request_hash) 
+    def call(self, cred, hrn = None):
         self.api.auth.check(cred, 'list')
         aggregates = Aggregates(self.api)
         hrn_list = [] 

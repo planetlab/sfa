@@ -115,13 +115,9 @@ class GeniAPI(BaseAPI):
             registry = registries[self.hrn]
             cert_string=self.cert.save_to_string(save_parents=True)
             # get self credential
-            arg_list = [cert_string,type,self.hrn]
-            request_hash=self.key.compute_hash(arg_list)
-            self_cred = registry.get_self_credential(cert_string, type, self.hrn, request_hash)
+            self_cred = registry.get_self_credential(cert_string, type, self.hrn)
             # get credential
-            arg_list = [self_cred,type,self.hrn]
-            request_hash=self.key.compute_hash(arg_list)
-            cred = registry.get_credential(self_cred, type, self.hrn, request_hash)
+            cred = registry.get_credential(self_cred, type, self.hrn)
             
             # save cred to file
             Credential(string=cred).save_to_file(cred_filename, save_parents=True)

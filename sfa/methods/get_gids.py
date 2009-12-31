@@ -29,15 +29,13 @@ class get_gids(Method):
     accepts = [
         Parameter(str, "Certificate string"),
         Mixed(Parameter(str, "Human readable name (hrn)"), 
-              Parameter(type([str]), "List of Human readable names (hrn)")), 
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified")) 
+              Parameter(type([str]), "List of Human readable names (hrn)")) 
         ]
 
     returns = [Parameter(dict, "Dictionary of gids keyed on hrn")]
     
-    def call(self, cred, hrns, request_hash=None):
-        self.api.auth.authenticateCred(cred, [cred, hrns], request_hash)
+    def call(self, cred, hrns):
+        # validate the credential
         self.api.auth.check(cred, 'getgids')
         table = GeniTable()
         if not isinstance(hrns, list):

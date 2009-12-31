@@ -29,16 +29,13 @@ class get_credential(Method):
     accepts = [
         Mixed(Parameter(str, "credential"),
               Parameter(None, "No credential")),  
-        Parameter(str, "Human readable name (hrn)"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Parameter(str, "Human readable name (hrn)")
         ]
 
     returns = Parameter(str, "String representation of a credential object")
 
-    def call(self, cred, type, hrn, request_hash=None):
+    def call(self, cred, type, hrn):
 
-        self.api.auth.authenticateCred(cred, [cred, type, hrn], request_hash)
         self.api.auth.check(cred, 'getcredential')
         self.api.auth.verify_object_belongs_to_me(hrn)
         auth_hrn = self.api.auth.get_authority(hrn)

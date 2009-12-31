@@ -25,7 +25,7 @@ class Slices(SimpleStorage):
 
     rspec_to_slice_tag = {'max_rate':'net_max_rate'}
 
-    def __init__(self, api, ttl = .5, gid_origin_caller=None):
+    def __init__(self, api, ttl = .5, origin_hrn=None):
         self.api = api
         self.ttl = ttl
         self.threshold = None
@@ -36,7 +36,7 @@ class Slices(SimpleStorage):
         SimpleStorage.__init__(self, self.slices_file)
         self.policy = Policy(self.api)    
         self.load()
-        self.gid_origin_caller=gid_origin_caller
+        self.origin_hrn = origin_hrn
 
     def get_slivers(self, hrn, node=None):
          
@@ -214,8 +214,7 @@ class Slices(SimpleStorage):
             success = False
             # request hash is optional so lets try the call without it 
             try:
-                request_hash=None
-                slices = aggregates[aggregate].get_slices(credential, request_hash)
+                slices = aggregates[aggregate].get_slices(credential)
                 slice_hrns.extend(slices)
                 success = True
             except:
@@ -225,9 +224,8 @@ class Slices(SimpleStorage):
             # try sending the request hash if the previous call failed 
             if not success:
                 arg_list = [credential]
-                request_hash = self.api.key.compute_hash(arg_list)
                 try:
-                    slices = aggregates[aggregate].get_slices(credential, request_hash)
+                    slices = aggregates[aggregate].get_slices(credential)
                     slice_hrns.extend(slices)
                     success = True
                 except:
@@ -251,12 +249,7 @@ class Slices(SimpleStorage):
 
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
         authority = get_authority(slice_hrn)
-        try:
-            site_records = registry.resolve(credential, authority)
-        except:
-            arg_list = [credential, authority]
-            request_hash = self.api.key.compute_hash(arg_list)
-            site_records = registry.resolve(credential, authority, request_hash)
+        site_records = registry.resolve(credential, authority)
             
         site = {}
         for site_record in site_records:
@@ -275,12 +268,7 @@ class Slices(SimpleStorage):
             # mark this site as an sfa peer record
             if sfa_peer:
                 peer_dict = {'type': 'authority', 'hrn': authority, 'peer_authority': sfa_peer, 'pointer': site_id}
-                try:
-                    registry.register_peer_object(credential, peer_dict)
-                except:
-                    arg_list = [credential]
-                    request_hash = self.api.key.compute_hash(arg_list) 
-                    registry.register_peer_object(credential, peer_dict, request_hash)
+                registry.register_peer_object(credential, peer_dict)
         else:
             site_id = sites[0]['site_id']
             remote_site_id = sites[0]['peer_site_id']
@@ -292,12 +280,7 @@ class Slices(SimpleStorage):
         slice = {}
         slice_record = None
         authority = get_authority(slice_hrn)
-        try:
-            slice_records = registry.resolve(credential, slice_hrn)
-        except:    
-            arg_list = [credential, slice_hrn]
-            request_hash = self.api.key.compute_hash(arg_list)
-            slice_records = registry.resolve(credential, slice_hrn, request_hash)
+        slice_records = registry.resolve(credential, slice_hrn)
 
         for record in slice_records:
             if record['type'] in ['slice']:
@@ -323,12 +306,7 @@ class Slices(SimpleStorage):
             # mark this slice as an sfa peer record
             if sfa_peer:
                 peer_dict = {'type': 'slice', 'hrn': slice_hrn, 'peer_authority': sfa_peer, 'pointer': slice_id}
-                try:
-                    registry.register_peer_object(credential, peer_dict)
-                except:
-                    arg_list = [credential]
-                    request_hash = self.api.key.compute_hash(arg_list) 
-                    registry.register_peer_object(credential, peer_dict, request_hash)
+                registry.register_peer_object(credential, peer_dict)
 
             #this belongs to a peer
             if peer:
@@ -353,12 +331,7 @@ class Slices(SimpleStorage):
         researchers = slice_record.get('researcher', [])
         for researcher in researchers:
             person_record = {}
-            try:
-                person_records = registry.resolve(credential, researcher)
-            except:
-                arg_list = [credential, researcher]
-                request_hash = self.api.key.compute_hash(arg_list) 
-                person_records = registry.resolve(credential, researcher, request_hash)
+            person_records = registry.resolve(credential, researcher)
             for record in person_records:
                 if record['type'] in ['user']:
                     person_record = record
@@ -384,12 +357,7 @@ class Slices(SimpleStorage):
                 # mark this person as an sfa peer record
                 if sfa_peer:
                     peer_dict = {'type': 'user', 'hrn': researcher, 'peer_authority': sfa_peer, 'pointer': person_id}
-                    try:
-                        registry.register_peer_object(credential, peer_dict)
-                    except:
-                        arg_list = [credential]
-                        request_hash = self.api.key.compute_hash(arg_list) 
-                        registry.register_peer_object(credential, peer_dict, request_hash)
+                    registry.register_peer_object(credential, peer_dict)
 
                 if peer:
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])

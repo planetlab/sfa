@@ -21,34 +21,21 @@ from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
 import sfa.plc.peers as peers
 
-def delete_slice(api, hrn, gid_origin_caller=None):
+def delete_slice(api, hrn, origin_hrn=None):
     credential = api.getCredential()
-    credential.set_gid_origin_caller(gid_origin_caller)
     aggregates = Aggregates(api)
     for aggregate in aggregates:
         success = False
         # request hash is optional so lets try the call without it
         try:
-            request_hash=None
-            aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
+            aggregates[aggregate].delete_slice(credential, hrn, origin_hrn)
             success = True
         except:
             print >> log, "%s" % (traceback.format_exc())
             print >> log, "Error calling delete slice at aggregate %s" % aggregate
-
-        # try sending the request hash if the previous call failed
-        if not success:
-            try:
-                arg_list = [credential, hrn]
-                request_hash = api.key.compute_hash(arg_list)
-                aggregates[aggregate].delete_slice(credential, hrn, request_hash)
-                success = True
-            except:
-                print >> log, "%s" % (traceback.format_exc())
-                print >> log, "Error calling list nodes at aggregate %s" % aggregate
     return 1
 
-def create_slice(api, hrn, rspec, gid_origin_caller=None):
+def create_slice(api, hrn, rspec, origin_hrn=None):
     spec = RSpec()
     tempspec = RSpec()
     spec.parseString(rspec)
@@ -63,7 +50,6 @@ def create_slice(api, hrn, rspec, gid_origin_caller=None):
     rspecs = {}
     aggregates = Aggregates(api)
     credential = api.getCredential()
-    credential.set_gid_origin_caller(gid_origin_caller)
     # split the netspecs into individual rspecs
     netspecs = spec.getDictsByTagName('NetSpec')
     for netspec in netspecs:
@@ -84,44 +70,18 @@ def create_slice(api, hrn, rspec, gid_origin_caller=None):
             if net_hrn in aggregates:
                 # send the whloe rspec to the local aggregate
                 if net_hrn in [api.hrn]:
-                    try:
-                        request_hash = None
-                        aggregates[net_hrn].create_slice(credential, hrn, \
-                                        rspec, request_hash)
-                    except:
-                        arg_list = [credential,hrn,rspec]
-                        request_hash = api.key.compute_hash(arg_list)
-                        aggregates[net_hrn].create_slice(credential, hrn, \
-                                        rspec, request_hash)
+                    aggregates[net_hrn].create_slice(credential, hrn, rspec, \
+                                origin_hrn)
                 else:
-                    try:
-                        request_hash = None
-                        aggregates[net_hrn].create_slice(credential, hrn, \
-                                rspecs[net_hrn], request_hash)
-                    except:
-                        arg_list = [credential,hrn,rspecs[net_hrn]]
-                        request_hash = api.key.compute_hash(arg_list)
-                        aggregates[net_hrn].create_slice(credential, hrn, \
-                                rspecs[net_hrn], request_hash)
+                    aggregates[net_hrn].create_slice(credential, hrn, \
+                                rspecs[net_hrn], origin_hrn)
             else:
                 # lets forward this rspec to a sm that knows about the network
-                arg_list = [credential, net_hrn]
-                request_hash = api.key.compute_hash(arg_list)
                 for aggregate in aggregates:
-                    try:
-                        network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
-                    except:
-                        network_found = aggregates[aggregate].get_aggregates(credential, net_hrn, request_hash)
+                    network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
                     if network_found:
-                        try:
-                            request_hash = None
-                            aggregates[aggregate].create_slice(credential, hrn, \
-                                    rspecs[net_hrn], request_hash, origin_hrn)
-                        except:
-                            arg_list = [credential, hrn, rspecs[net_hrn]]
-                            request_hash = api.key.compute_hash(arg_list)
-                            aggregates[aggregate].create_slice(credential, hrn, \
-                                    rspecs[net_hrn], request_hash, origin_hrn)
+                        aggregates[aggregate].create_slice(credential, hrn, \
+                                    rspecs[net_hrn], origin_hrn)
 
         except:
             print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % \
@@ -129,7 +89,7 @@ def create_slice(api, hrn, rspec, gid_origin_caller=None):
             traceback.print_exc()
     return 1
 
-def get_ticket(api, slice_hrn, rspec, gid_origin_caller=None):
+def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     
     # get the netspecs contained within the clients rspec
     client_rspec = RSpec(xml=rspec)
@@ -149,7 +109,6 @@ def get_ticket(api, slice_hrn, rspec, gid_origin_caller=None):
     # send the rspec to the appropiate aggregate/sm
     aggregates = Aggregates(api)
     credential = api.getCredential()
-    credential.set_gid_origin_caller(gid_origin_caller)
     tickets = {}
     for net_hrn in rspecs:    
         try:
@@ -157,38 +116,17 @@ def get_ticket(api, slice_hrn, rspec, gid_origin_caller=None):
             # send them the request. if not, then we may be connected to an sm
             # thats connected to the aggregate
             if net_hrn in aggregates:
-                try:
-                    ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
-                                rspecs[net_hrn], None)
-                    tickets[net_hrn] = ticket
-                except:
-                    arg_list = [credential,hrn,rspecs[net_hrn]]
-                    request_hash = api.key.compute_hash(arg_list)
-                    ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
-                                rspecs[net_hrn], request_hash)
-                    tickets[net_hrn] = ticket 
+                ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
+                            rspecs[net_hrn], origin_hrn)
+                tickets[net_hrn] = ticket
             else:
                 # lets forward this rspec to a sm that knows about the network
-                arg_list = [credential, net_hrn]
-                request_hash = api.key.compute_hash(arg_list)
                 for agg in aggregates:
-                    try:
-                        network_found = aggregates[agg].get_aggregates(credential, \
-                                                        net_hrn)
-                    except:
-                        network_found = aggregates[agg].get_aggregates(credential, \
-                                                        net_hrn, request_hash)
+                    network_found = aggregates[agg].get_aggregates(credential, net_hrn)
                     if network_found:
-                        try:
-                            ticket = aggregates[aggregate].get_ticket(credential, \
-                                        slice_hrn, rspecs[net_hrn], None)
-                            tickets[aggregate] = ticket
-                        except:
-                            arg_list = [credential, hrn, rspecs[net_hrn]]
-                            request_hash = api.key.compute_hash(arg_list)
-                            aggregates[aggregate].get_ticket(credential, slice_hrn, \
-                                    rspecs[net_hrn], request_hash)
-                            tickets[aggregate] = ticket
+                        ticket = aggregates[aggregate].get_ticket(credential, \
+                                        slice_hrn, rspecs[net_hrn], origin_hrn)
+                        tickets[aggregate] = ticket
         except:
             print >> log, "Error getting ticket for %(slice_hrn)s at aggregate %(net_hrn)s" % \
                            locals()
@@ -257,9 +195,9 @@ def get_slices(api):
     slices.refresh()
     return slices['hrn']
      
-def get_rspec(api, hrn=None, origin_gid_caller=None):
+def get_rspec(api, hrn=None, origin_hrn=None):
     from sfa.plc.nodes import Nodes
-    nodes = Nodes(api, origin_gid_caller=origin_gid_caller)
+    nodes = Nodes(api, origin_hrn=origin_hrn)
     if hrn:
         rspec = nodes.get_rspec(hrn)
     else:

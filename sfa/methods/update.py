@@ -30,25 +30,23 @@ class update(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(dict, "Record dictionary to be updated"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Mixed(Parameter(str, "Human readable name of the original caller"),
+              Paramater(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record_dict, request_hash=None, origin_hrn=None):
-        if origin_hrn==None:
-	        origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
-
+    def call(self, cred, record_dict, origin_hrn=None):
+        user_cred = Credential(string=cred)
+    
 	    #log the call
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, None, self.name))
-        # This cred might be an authority cred, not a user, so we cant use it to 
-        # authenticate the caller's request_hash. Let just get the caller's gid
-        # from the cred and authenticate using that
-        client_gid = Credential(string=cred).get_gid_caller()
-        client_gid_str = client_gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(client_gid_str, [cred], request_hash)
+        
+        # validate the cred
         self.api.auth.check(cred, "update")
+        
         new_record = GeniRecord(dict = record_dict)
         type = new_record['type']
         hrn = new_record['hrn']

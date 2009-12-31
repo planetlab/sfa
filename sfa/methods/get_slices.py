@@ -21,20 +21,20 @@ class get_slices(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Mixed(Parameter(str, "Human readable name of the original caller"),
+              Paramater(None, "Origin hrn not specified"))
         ]
 
     returns = [Parameter(str, "Human readable slice name (hrn)")]
     
-    def call(self, cred, request_hash=None):
+    def call(self, cred, origin_hrn=None):
         user_cred = Credential(string=cred)
         #log the call
-        gid_origin_caller = user_cred.get_gid_origin_caller()
-        origin_hrn = gid_origin_caller.get_hrn()
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn(), None, self.name))
 
-        self.api.auth.authenticateCred(cred, [cred], request_hash) 
+        # validate the cred
         self.api.auth.check(cred, 'listslices')
 
         slices = []

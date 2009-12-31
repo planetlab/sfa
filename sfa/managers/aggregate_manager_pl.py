@@ -43,7 +43,7 @@ def create_slice(api, hrn, rspec):
     slices = Slices(api)
     slices.create_slice_aggregate(hrn, rspec)
 
-def get_ticket(api, slice_hrn, rspec, gid_origin_caller=None):
+def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     # the the slice record
     registries = Registries(api)
     registry = registries[api.hrn]

@@ -48,15 +48,12 @@ def main():
             try:
                 peer_record_hrn = peer_record['hrn']
                 arg_list = [credential, peer_record_hrn]
-                request_hash = key.compute_hash(arg_list)
-                records = registries[peer_auth].resolve(credential, peer_record_hrn, request_hash)
+                records = registries[peer_auth].resolve(credential, peer_record_hrn)
             except ServerException:
                 # an exception will be thrown if the record doenst exist
                 # if so remove the record from the local registry
-                arg_list = [credential]
-                request_hash = key.compute_hash(arg_list) 
-                registries[sfa_api.hrn].remove_peer_object(credential, peer_record, request_hash)
+                registries[sfa_api.hrn].remove_peer_object(credential, peer_record)
             except:
-		traceback.print_exc()
+                traceback.print_exc()
 if __name__ == '__main__':
     main()

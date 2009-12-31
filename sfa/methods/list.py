@@ -24,18 +24,19 @@ class list(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name (hrn)"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Mixed(Parameter(str, "Human readable name of the original caller"),
+              Paramater(None, "Origin hrn not specified"))
         ]
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, request_hash=None):
+    def call(self, cred, hrn, origin_hrn=None):
         #log the call
-        origin_hrn=Credential(string=cred).get_gid_origin_caller().get_hrn()
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
-        
-        self.api.auth.authenticateCred(cred, [cred, hrn], request_hash)
+       
+        # validate the cred 
         self.api.auth.check(cred, 'list')
             
         # load all know registry names into a prefix tree and attempt to find
@@ -55,15 +56,8 @@ class list(Method):
         # forward the request
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
-            try:
-                request_hash=None
-                record_list = registries[registry_hrn].list(credential, hrn, request_hash)
-                records = [GeniRecord(dict=record).as_dict() for record in record_list]
-            except:
-                arg_list = [credential, hrn]
-                request_hash = self.api.key.compute_hash(arg_list)
-                record_list = registries[registry_hrn].list(credential, hrn, request_hash)
-                records = [GeniRecord(dict=record).as_dict() for record in record_list] 
+            record_list = registries[registry_hrn].list(credential, hrn, origin_hrn)
+            records = [GeniRecord(dict=record).as_dict() for record in record_list]
                 
         if records:
             return records

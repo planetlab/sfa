@@ -36,21 +36,21 @@ class get_ticket(Method):
         Parameter(str, "Credential string"),
         Parameter(str, "Human readable name of slice to retrive a ticket for (hrn)"),
         Parameter(str, "Resource specification (rspec)"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Mixed(Parameter(str, "Human readable name of the original caller"),
+              Paramater(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(str, "String represeneation of a ticket object")
     
-    def call(self, cred, hrn, rspec, request_hash=None):
+    def call(self, cred, hrn, rspec, origin_hrn=None):
         user_cred = Credential(string=cred)
 
         #log the call
-        gid_origin_caller = user_cred.get_gid_origin_caller()
-        origin_hrn = gid_origin_caller.get_hrn()
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
-        self.api.auth.authenticateCred(cred, [cred, hrn, rspec], request_hash)
+        # validate the cred
         self.api.auth.check(cred, "getticket")
 	
         # set the right outgoing rules
@@ -81,7 +81,7 @@ class get_ticket(Method):
         rspec_object = RSpec(xml=rspec)
         rspec_object.filter(tagname='NodeSpec', attribute='name', whitelist=valid_hostnames)
         rspec = rspec_object.toxml() 
-        ticket = manager.get_ticket(self.api, hrn, rspec, gid_origin_caller)
+        ticket = manager.get_ticket(self.api, hrn, rspec, origin_hrn)
         
         return ticket
         

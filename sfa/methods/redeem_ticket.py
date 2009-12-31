@@ -19,32 +19,19 @@ class redeem_ticket(Method):
     
     accepts = [
         Parameter(str, "Credential string representation of SFA credential"),
-        Parameter(str, "Ticket  string representation of SFA ticket"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Parameter(str, "Ticket  string representation of SFA ticket")
         ]
 
     returns = [Parameter(int, "1 if successful")]
     
-    def call(self, cred, ticket, request_hash=None):
-        # This cred will be an slice cred, not a user, so we cant use it to
-        # authenticate the caller's request_hash. Let just get the caller's gid
-        # from the cred and authenticate using that
-        client_gid = Credential(string=cred).get_gid_caller()
-        client_gid_str = client_gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
+    def call(self, cred, ticket):
         self.api.auth.check(cred, 'redeemticket')
         self.api.auth.check_ticket(ticket)
 
-        ticket = SfaTicket(string=ticket)
-        ticket.decode()
-        hrn = ticket.attributes['slivers'][0]['hrn']
-        slicename = hrn_to_pl_slicename(hrn)
-        if not self.api.sliver_exists(slicename):
-            raise SliverDoesNotExist(slicename)
-
-        # convert ticket to format nm is used to
-        nm_ticket = xmlrpclib.dumps((ticket.attributes,), methodresponse=True)
-        self.api.nodemanager.AdminTicket(nm_ticket)
-        
+        # send the call to the right manager
+        manager_base = 'sfa.managers'
+        mgr_type = self.api.config.SFA_CM_TYPE
+        manager_module = manager_base + ".component_manager_%s" % mgr_type
+        manager = __import__(manager_module, fromlist=[manager_base])
+        manager.redeem_ticket(self.api, ticket) 
         return 1 

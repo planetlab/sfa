@@ -25,22 +25,20 @@ class resolve(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name (hrn)"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Parameter(str, "Human readable name (hrn)")
         ]
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, request_hash=None):
+    def call(self, cred, hrn, origin_hrn=None):
         user_cred = Credential(string=cred)
 
         #log the call
-        gid_origin_caller = user_cred.get_gid_origin_caller()
-        origin_hrn = gid_origin_caller.get_hrn()
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
  
-        self.api.auth.authenticateCred(cred, [cred, hrn], request_hash) 
+        # validate the cred
         self.api.auth.check(cred, 'resolve')
 
         # load all know registry names into a prefix tree and attempt to find
@@ -60,17 +58,8 @@ class resolve(Method):
         # forward the request
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
-            credential.set_gid_origin_caller(gid_origin_caller)
-            try:
-                request_hash=None
-                records = registries[registry_hrn].resolve(credential, hrn, request_hash)
-                good_records = [GeniRecord(dict=record).as_dict() for record in records]
-            except:
-                arg_list = [credential, hrn]
-                request_hash=self.api.key.compute_hash(arg_list)                
-                records = registries[registry_hrn].resolve(credential, hrn, request_hash)
-                good_records = [GeniRecord(dict=record).as_dict() for record in records]
-                
+            records = registries[registry_hrn].resolve(credential, hrn, origin_hrn)
+            good_records = [GeniRecord(dict=record).as_dict() for record in records]
         if good_records:
             return good_records
 

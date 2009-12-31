@@ -22,10 +22,8 @@ class reboot(Method):
 
     returns = None
     
-    def call(self, cred, request_hash=None):
-        client_gid = Credential(string=cred).get_gid_caller()
-        client_gid_str = client_gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(client_gid_str, [cred], request_hash)
+    def call(self, cred):
+        # validate the cred 
         self.api.auth.check(cred, 'reboot')
         # send the call to the right manager
         manager_base = 'sfa.managers'

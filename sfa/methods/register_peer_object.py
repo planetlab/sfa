@@ -23,7 +23,6 @@ class register_peer_object(Method):
     
     @param cred credential string
     @param record_dict dictionary containing record fields
-    
     @return gid string representation
     """
 
@@ -32,23 +31,22 @@ class register_peer_object(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(dict, "Record dictionary containing record fields"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Mixed(Parameter(str, "Human readable name of the original caller"),
+              Paramater(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record_dict, request_hash=None):
+    def call(self, cred, record_dict, origin_hrn=None):
         user_cred = Credential(string=cred)
 
         #log the call
-        gid_origin_caller = user_cred.get_gid_origin_caller()
-        origin_hrn = gid_origin_caller.get_hrn()
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()    
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, None, self.name))
 
-        self.api.auth.authenticateCred(cred, [cred], request_hash)
+        # validate the cred
         self.api.auth.check(cred, "register")
-        	
 
         # make sure this is a peer record
         if 'peer_authority' not in record_dict or \
@@ -69,7 +67,7 @@ class register_peer_object(Method):
                 if existing_record['pointer'] != record['pointer']:
                     record['record_id'] = existing_record['record_id']
                     table.update(record)
-            return 1
-        record_id = table.insert(record)
+        else:
+            record_id = table.insert(record)
  
         return 1

@@ -28,27 +28,22 @@ class remove(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Parameter(str, "Record type"),
-        Parameter(str, "Human readable name (hrn) of record to be removed"),
-        Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified"))
+        Parameter(str, "Human readable name of slice to instantiate"),
+        Mixed(Parameter(str, "Human readable name of the original caller"),
+              Paramater(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, type, hrn, request_hash=None):
+    def call(self, cred, type, hrn, origin_hrn=None):
         user_cred = Credential(string=cred)
 
         #log the call
-        gid_origin_caller = user_cred.get_gid_origin_caller()
-        origin_hrn = gid_origin_caller.get_hrn()
+        if not origin_hrn:
+            origin_hrn = user_cred.get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
-        # This cred will be an authority cred, not a user, so we cant use it to 
-        # authenticate the caller's request_hash. Let just get the caller's gid
-        # from the cred and authenticate using that
-        client_gid = Credential(string=cred).get_gid_caller()
-        client_gid_str = client_gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(client_gid_str, [cred, type, hrn], request_hash)
+        # validate the cred
         self.api.auth.check(cred, "remove")
         self.api.auth.verify_object_permission(hrn)
         
@@ -63,7 +58,6 @@ class remove(Method):
         type = record['type']
 
         credential = self.api.getCredential()
-        credential.set_gid_origin_caller(gid_origin_caller)
        	registries = Registries(self.api) 
 
         # Try to remove the object from the PLCDB of federated agg.
@@ -71,10 +65,7 @@ class remove(Method):
         if hrn.startswith(self.api.hrn) and type in ['user', 'slice', 'authority']:
             for registry in registries:
                 if registry not in [self.api.hrn]:
-                    try:
-                        request_hash=None
-                        result=registries[registry].remove_peer_object(credential, record, request_hash)
-                    except:
+                    result=registries[registry].remove_peer_object(credential, record, origin_hrn)
                         pass
         if type == "user":
             persons = self.api.plshell.GetPersons(self.api.plauth, record['pointer'])
