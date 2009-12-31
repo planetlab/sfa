@@ -32,19 +32,14 @@ class resolve(Method):
 
     returns = [GeniRecord]
     
-    def call(self, cred, hrn, request_hash=None, origin_hrn=None):
+    def call(self, cred, hrn, request_hash=None):
         
         self.api.auth.authenticateCred(cred, [cred, hrn], request_hash) 
         self.api.auth.check(cred, 'resolve')
-        if origin_hrn==None:
-            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
-
-        #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
-        good_records = [] 
 
         # load all know registry names into a prefix tree and attempt to find
         # the longest matching prefix
+        good_records = [] 
         registries = Registries(self.api)
         hrns = registries.keys()
         tree = prefixTree()
@@ -59,14 +54,15 @@ class resolve(Method):
         # forward the request
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
+            credential.set_gid_origin_caller(gid_origin_caller)
             try:
-		request_hash=None
-                records = registries[registry_hrn].resolve(credential, hrn, request_hash, origin_hrn)
+                request_hash=None
+                records = registries[registry_hrn].resolve(credential, hrn, request_hash)
                 good_records = [GeniRecord(dict=record).as_dict() for record in records]
             except:
                 arg_list = [credential, hrn]
                 request_hash=self.api.key.compute_hash(arg_list)                
-                records = registries[registry_hrn].resolve(credential, hrn, request_hash, origin_hrn)
+                records = registries[registry_hrn].resolve(credential, hrn, request_hash)
                 good_records = [GeniRecord(dict=record).as_dict() for record in records]
                 
         if good_records:
