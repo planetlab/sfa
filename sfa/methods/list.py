@@ -56,13 +56,13 @@ class list(Method):
         if registry_hrn != self.api.hrn:
             credential = self.api.getCredential()
             try:
-		request_hash=None
-                record_list = registries[registry_hrn].list(credential, hrn, request_hash, origin_hrn)
+                request_hash=None
+                record_list = registries[registry_hrn].list(credential, hrn, request_hash)
                 records = [GeniRecord(dict=record).as_dict() for record in record_list]
             except:
                 arg_list = [credential, hrn]
                 request_hash = self.api.key.compute_hash(arg_list)
-                record_list = registries[registry_hrn].list(credential, hrn, request_hash, origin_hrn)
+                record_list = registries[registry_hrn].list(credential, hrn, request_hash)
                 records = [GeniRecord(dict=record).as_dict() for record in record_list] 
                 
         if records:
