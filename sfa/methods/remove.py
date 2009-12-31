@@ -35,7 +35,14 @@ class remove(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, type, hrn, request_hash=None, origin_hrn=None):
+    def call(self, cred, type, hrn, request_hash=None):
+        user_cred = Credential(string=cred)
+
+        #log the call
+        gid_origin_caller = user_cred.get_gid_origin_caller()
+        origin_hrn = gid_origin_caller.get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+
         # This cred will be an authority cred, not a user, so we cant use it to 
         # authenticate the caller's request_hash. Let just get the caller's gid
         # from the cred and authenticate using that
@@ -44,12 +51,7 @@ class remove(Method):
         self.api.auth.authenticateGid(client_gid_str, [cred, type, hrn], request_hash)
         self.api.auth.check(cred, "remove")
         self.api.auth.verify_object_permission(hrn)
-
-        if origin_hrn==None:
-            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
-
-        #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+        
         table = GeniTable()
         filter = {'hrn': hrn}
         if type not in ['all', '*']:
@@ -61,6 +63,7 @@ class remove(Method):
         type = record['type']
 
         credential = self.api.getCredential()
+        credential.set_gid_origin_caller(gid_origin_caller)
        	registries = Registries(self.api) 
 
         # Try to remove the object from the PLCDB of federated agg.
@@ -69,8 +72,8 @@ class remove(Method):
             for registry in registries:
                 if registry not in [self.api.hrn]:
                     try:
-			request_hash=None
-                        result=registries[registry].remove_peer_object(credential, record, request_hash, origin_hrn)
+                        request_hash=None
+                        result=registries[registry].remove_peer_object(credential, record, request_hash)
                     except:
                         pass
         if type == "user":
