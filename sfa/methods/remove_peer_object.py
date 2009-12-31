@@ -33,11 +33,14 @@ class remove_peer_object(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record, request_hash=None, origin_hrn=None):
-        if origin_hrn==None:
-            origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
+    def call(self, cred, record, request_hash=None):
+        user_cred = Credential(string=cred)
+
         #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, record['hrn'], self.name))
+        gid_origin_caller = user_cred.get_gid_origin_caller()
+        origin_hrn = gid_origin_caller.get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+
         self.api.auth.authenticateCred(cred, [cred], request_hash) 
         self.api.auth.check(cred, "remove")
 
