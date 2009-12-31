@@ -222,7 +222,7 @@ def get_ticket(api, slice_hrn, rspec, gid_origin_caller=None):
     new_ticket.sign()          
     return new_ticket.save_to_string(save_parents=True)
 
-def start_slice(api, hrn, origin_hrn=None):
+def start_slice(api, hrn):
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -234,7 +234,7 @@ def start_slice(api, hrn, origin_hrn=None):
 
     return 1
  
-def stop_slice(api, hrn, origin_hrn):
+def stop_slice(api, hrn):
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -245,7 +245,7 @@ def stop_slice(api, hrn, origin_hrn):
     api.plshell.UpdateSliceTag(api.plauth, attribute_id, "0")
     return 1
 
-def reset_slice(api, hrn, origin_hrn):
+def reset_slice(api, hrn):
     # XX not implemented at this interface
     return 1
 
