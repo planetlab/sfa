@@ -92,13 +92,13 @@ class GeniAPI(BaseAPI):
             return '4.2'
             
 
-    def getCredential(self, origin_hrn=None):
+    def getCredential(self):
         if self.interface in ['registry']:
-            return self.getCredentialFromLocalRegistry(origin_hrn)
+            return self.getCredentialFromLocalRegistry()
         else:
-            return self.getCredentialFromRegistry(origin_hrn)
+            return self.getCredentialFromRegistry()
     
-    def getCredentialFromRegistry(self, origin_hrn=None):
+    def getCredentialFromRegistry(self):
         """ 
         Get our credential from a remote registry using a geniclient connection
         """
@@ -119,15 +119,15 @@ class GeniAPI(BaseAPI):
             request_hash=self.key.compute_hash(arg_list)
             self_cred = registry.get_self_credential(cert_string, type, self.hrn, request_hash)
             # get credential
-            arg_list = [self_cred,type,self.hrn,origin_hrn]
+            arg_list = [self_cred,type,self.hrn]
             request_hash=self.key.compute_hash(arg_list)
-            cred = registry.get_credential(self_cred, type, self.hrn, origin_hrn, request_hash)
+            cred = registry.get_credential(self_cred, type, self.hrn, request_hash)
             
             # save cred to file
             Credential(string=cred).save_to_file(cred_filename, save_parents=True)
             return cred
 
-    def getCredentialFromLocalRegistry(self, origin_hrn=None):
+    def getCredentialFromLocalRegistry(self):
         """
         Get our current credential directly from the local registry.
         """
@@ -147,17 +147,6 @@ class GeniAPI(BaseAPI):
         record = records[0]
         type = record['type']
         object_gid = record.get_gid_object()
-        
-        # get the origin caller's gid (this is the caller's gid by default)
-        if origin_hrn:
-            orgin_records = table.find({'hrn': origin_hrn})
-            if not origin_records:
-                raise RecordNotFound(origin_hrn)
-            origin_record = origin_records[0]
-            origin_caller_gid_object = GID(string = record['gid'])
-        else:
-            origin_caller_gid_object = object_gid
-
         new_cred = Credential(subject = object_gid.get_subject())
         new_cred.set_gid_caller(object_gid)
         new_cred.set_gid_object(object_gid)

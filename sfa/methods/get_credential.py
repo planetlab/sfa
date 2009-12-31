@@ -20,7 +20,6 @@ class get_credential(Method):
     @param cred credential object specifying rights of the caller
     @param type type of object (user | slice | sa | ma | node)
     @param hrn human readable name of object
-    @param origin_hrn human readable name of calls origin 
 
     @return the string representation of a credential object  
     """
@@ -32,13 +31,12 @@ class get_credential(Method):
               Parameter(None, "No credential")),  
         Parameter(str, "Human readable name (hrn)"),
         Mixed(Parameter(str, "Request hash"),
-              Parameter(None, "Request hash not specified")),
-        Parameter(str, "Human readable name (hrn)"),
+              Parameter(None, "Request hash not specified"))
         ]
 
     returns = Parameter(str, "String representation of a credential object")
 
-    def call(self, cred, type, hrn, origin_hrn=None, request_hash=None):
+    def call(self, cred, type, hrn, request_hash=None):
 
         self.api.auth.authenticateCred(cred, [cred, type, hrn], request_hash)
         self.api.auth.check(cred, 'getcredential')
@@ -57,17 +55,6 @@ class get_credential(Method):
             raise RecordNotFound(hrn)
         record = records[0]
         
-        # get the origin caller's gid (this is the caller's gid by default)    
-        if origin_hrn:
-            orgin_records = table.find({'hrn': origin_hrn})
-            if not origin_records:
-                raise RecordNotFound(origin_hrn)
-            origin_record = origin_records[0]
-            origin_caller_gid_object = GID(string = record['gid'])
-        else:
-            origin_caller_gid_object = self.api.auth.client_gid
-
-        
         # verify_cancreate_credential requires that the member lists
         # (researchers, pis, etc) be filled in
         self.api.fill_record_info(record)
@@ -79,15 +66,10 @@ class get_credential(Method):
         if rights.is_empty():
             raise PermissionError(object_hrn + " has no rights to " + record['name'])
         
-        # make sure origin caller is either the caller or a child of the caller
-        if not origin_hrn.startswith(caller_hrn):
-            raise PermissionError("origin caller (%s) is not a child of actual caller (%s)" % (origin_hrn, caller_hrn) 
-
         gid = record['gid']
         gid_object = GID(string=gid)
         new_cred = Credential(subject = gid_object.get_subject())
         new_cred.set_gid_caller(self.api.auth.client_gid)
-        new_cred.set_gid_origin_caller(origin_caller_gid_object)
         new_cred.set_gid_object(gid_object)
         new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
         new_cred.set_pubkey(gid_object.get_pubkey())
