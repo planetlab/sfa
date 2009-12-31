@@ -73,15 +73,18 @@ class get_credential(Method):
         self.api.fill_record_info(record)
 
         caller_hrn = self.api.auth.client_cred.get_gid_caller().get_hrn()
+        object_hrn = self.api.auth.client_cred.get_gid_object().get_hrn()
         rights = self.api.auth.determine_user_rights(caller_hrn, record)
+        # make sure caller has rights to this object
         if rights.is_empty():
-            raise PermissionError(self.api.auth.client_cred.get_gid_object().get_hrn() + " has no rights to " + record['name'])
-
-        # TODO: Check permission that self.client_cred can access the object
+            raise PermissionError(object_hrn + " has no rights to " + record['name'])
+        
+        # make sure origin caller is either the caller or a child of the caller
+        if not origin_hrn.startswith(caller_hrn):
+            raise PermissionError("origin caller (%s) is not a child of actual caller (%s)" % (origin_hrn, caller_hrn) 
 
         gid = record['gid']
         gid_object = GID(string=gid)
-
         new_cred = Credential(subject = gid_object.get_subject())
         new_cred.set_gid_caller(self.api.auth.client_gid)
         new_cred.set_gid_origin_caller(origin_caller_gid_object)
