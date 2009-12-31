@@ -38,14 +38,17 @@ class register_peer_object(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, record_dict, request_hash=None, caller_cred=None):
+    def call(self, cred, record_dict, request_hash=None):
+        user_cred = Credential(string=cred)
+
+        #log the call
+        gid_origin_caller = user_cred.get_gid_origin_caller()
+        origin_hrn = gid_origin_caller.get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, None, self.name))
+
         self.api.auth.authenticateCred(cred, [cred], request_hash)
         self.api.auth.check(cred, "register")
-        if caller_cred==None:
-	        caller_cred=cred
         	
-        #log the call
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, Credential(string=caller_cred).get_gid_caller().get_hrn(), None, self.name))
 
         # make sure this is a peer record
         if 'peer_authority' not in record_dict or \
