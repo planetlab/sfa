@@ -447,11 +447,12 @@ class Sfi:
     
     def delegate_cred(self,cred, hrn, type = 'authority'):
         # the gid and hrn of the object we are delegating
-        object_gid = cred.get_gid_object()
+        user_cred = Credential(string=cred)
+        object_gid = user_cred.get_gid_object()
         object_hrn = object_gid.get_hrn()
-        cred.set_delegate(True)
-        if not cred.get_delegate():
-            raise Exception, "Error: Object credential %(object_hrn)s does not have delegate bit set" % locals()
+        #cred.set_delegate(True)
+        #if not cred.get_delegate():
+        #    raise Exception, "Error: Object credential %(object_hrn)s does not have delegate bit set" % locals()
            
     
         records = self.registry.resolve(cred, hrn)
@@ -461,25 +462,26 @@ class Sfi:
             raise Exception, "Error: Didn't find a %(type)s record for %(hrn)s" % locals()
     
         # the gid of the user who will be delegated too
-        delegee_gid = records[0].get_gid_object()
+        record = GeniRecord(dict=records[0])
+        delegee_gid = record.get_gid_object()
         delegee_hrn = delegee_gid.get_hrn()
         
         # the key and hrn of the user who will be delegating
         user_key = Keypair(filename = self.get_key_file())
-        user_hrn = cred.get_gid_caller().get_hrn()
+        user_hrn = user_cred.get_gid_caller().get_hrn()
     
         dcred = Credential(subject=object_hrn + " delegated to " + delegee_hrn)
         dcred.set_gid_caller(delegee_gid)
         dcred.set_gid_object(object_gid)
-        dcred.set_privileges(cred.get_privileges())
+        dcred.set_privileges(user_cred.get_privileges())
         dcred.set_delegate(True)
         dcred.set_pubkey(object_gid.get_pubkey())
         dcred.set_issuer(user_key, user_hrn)
-        dcred.set_parent(cred)
+        dcred.set_parent(user_cred)
         dcred.encode()
         dcred.sign()
     
-        return dcred
+        return dcred.save_to_string(save_parents=True)
     
     def get_rspec_file(self,rspec):
        if (os.path.isabs(rspec)):
