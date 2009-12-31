@@ -39,7 +39,6 @@ def main():
     # get peer registries
     registries = Registries(sfa_api)
 
-
     # get local peer records
     table = GeniTable()
     peer_records = table.find({'~peer_authority': None})
