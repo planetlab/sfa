@@ -31,6 +31,7 @@ class list(Method):
     returns = [GeniRecord]
     
     def call(self, cred, hrn, origin_hrn=None):
+        user_cred = Credential(string=cred)
         #log the call
         if not origin_hrn:
             origin_hrn = user_cred.get_gid_caller().get_hrn()
