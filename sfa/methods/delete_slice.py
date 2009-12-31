@@ -28,17 +28,18 @@ class delete_slice(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, request_hash=None, origin_hrn=None):
-       
-        if origin_hrn==None:
-            origin_hrn=origin_hrn=Credential(string=cred).get_gid_caller().get_hrn()
+    def call(self, cred, hrn, request_hash=None):
+        user_cred = Credential(string=cred)
+
         #log the call
+        gid_origin_caller = user_cred.get_gid_origin_caller()
+        origin_hrn = gid_origin_caller.get_hrn() 
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
         # This cred will be an slice cred, not a user, so we cant use it to
         # authenticate the caller's request_hash. Let just get the caller's gid
         # from the cred and authenticate using that
-        client_gid = Credential(string=cred).get_gid_caller()
+        client_gid = user_cred.get_gid_caller()
         client_gid_str = client_gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(client_gid_str, [cred, hrn], request_hash)
         self.api.auth.check(cred, 'deleteslice')
@@ -60,6 +61,6 @@ class delete_slice(Method):
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.delete_slice(self.api, hrn, origin_hrn)
+            manager.delete_slice(self.api, hrn, gid_origin_caller)
 
         return 1
