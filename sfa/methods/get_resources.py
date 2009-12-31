@@ -29,7 +29,7 @@ class get_resources(Method):
         Mixed(Parameter(str, "Human readable name (hrn)"),
               Parameter(None, "hrn not specified")),
         Mixed(Parameter(str, "Human readable name of the original caller"),
-              Paramater(None, "Origin hrn not specified"))
+              Parameter(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(str, "String representatin of an rspec")

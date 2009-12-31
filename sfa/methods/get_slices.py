@@ -22,7 +22,7 @@ class get_slices(Method):
     accepts = [
         Parameter(str, "Credential string"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
-              Paramater(None, "Origin hrn not specified"))
+              Parameter(None, "Origin hrn not specified"))
         ]
 
     returns = [Parameter(str, "Human readable slice name (hrn)")]

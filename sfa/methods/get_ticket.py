@@ -37,7 +37,7 @@ class get_ticket(Method):
         Parameter(str, "Human readable name of slice to retrive a ticket for (hrn)"),
         Parameter(str, "Resource specification (rspec)"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
-              Paramater(None, "Origin hrn not specified"))
+              Parameter(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(str, "String represeneation of a ticket object")

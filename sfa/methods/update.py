@@ -31,7 +31,7 @@ class update(Method):
         Parameter(str, "Credential string"),
         Parameter(dict, "Record dictionary to be updated"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
-              Paramater(None, "Origin hrn not specified"))
+              Parameter(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")

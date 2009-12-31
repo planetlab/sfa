@@ -30,7 +30,7 @@ class remove(Method):
         Parameter(str, "Record type"),
         Parameter(str, "Human readable name of slice to instantiate"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
-              Paramater(None, "Origin hrn not specified"))
+              Parameter(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
