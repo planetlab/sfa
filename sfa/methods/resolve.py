@@ -33,7 +33,13 @@ class resolve(Method):
     returns = [GeniRecord]
     
     def call(self, cred, hrn, request_hash=None):
-        
+        user_cred = Credential(string=cred)
+
+        #log the call
+        gid_origin_caller = user_cred.get_gid_origin_caller()
+        origin_hrn = gid_origin_caller.get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+ 
         self.api.auth.authenticateCred(cred, [cred, hrn], request_hash) 
         self.api.auth.check(cred, 'resolve')
 
