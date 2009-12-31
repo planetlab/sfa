@@ -25,7 +25,7 @@ class Slices(SimpleStorage):
 
     rspec_to_slice_tag = {'max_rate':'net_max_rate'}
 
-    def __init__(self, api, ttl = .5, origin_hrn=None):
+    def __init__(self, api, ttl = .5, gid_origin_caller=None):
         self.api = api
         self.ttl = ttl
         self.threshold = None
@@ -36,7 +36,7 @@ class Slices(SimpleStorage):
         SimpleStorage.__init__(self, self.slices_file)
         self.policy = Policy(self.api)    
         self.load()
-        self.origin_hrn=origin_hrn
+        self.gid_origin_caller=gid_origin_caller
 
     def get_slivers(self, hrn, node=None):
          
@@ -248,72 +248,6 @@ class Slices(SimpleStorage):
         self.update(slice_details)
         self.write()
 
-
-    def delete_slice(self, hrn):
-        if self.api.interface in ['aggregate']:
-            self.delete_slice_aggregate(hrn)
-        elif self.api.interface in ['slicemgr']:
-            self.delete_slice_smgr(hrn)
-        
-    def delete_slice_aggregate(self, hrn):
-
-        slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, {'name': slicename})
-        if not slices:
-            return 1        
-        slice = slices[0]
-
-        # determine if this is a peer slice
-        peer = self.get_peer(hrn)
-        if peer:
-            self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', slice['slice_id'], peer)
-        self.api.plshell.DeleteSliceFromNodes(self.api.plauth, slicename, slice['node_ids'])
-        if peer:
-            self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
-        return 1
-
-    def delete_slice_smgr(self, hrn):
-        credential = self.api.getCredential()
-        origin_hrn = self.origin_hrn
-        aggregates = Aggregates(self.api)
-        for aggregate in aggregates:
-            success = False
-            # request hash is optional so lets try the call without it
-            try:
-		request_hash=None	
-                aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
-                success = True
-            except:
-                print >> log, "%s" % (traceback.format_exc())
-                print >> log, "Error calling list nodes at aggregate %s" % aggregate
-            
-            # try sending the request hash if the previous call failed 
-            if not success:
-                try:
-                    arg_list = [credential, hrn]
-                    request_hash = self.api.key.compute_hash(arg_list)
-                    aggregates[aggregate].delete_slice(credential, hrn, request_hash, origin_hrn)
-                    success = True
-                except:
-                    print >> log, "%s" % (traceback.format_exc())
-                    print >> log, "Error calling list nodes at aggregate %s" % aggregate
-                        
-    def create_slice(self, hrn, rspec):
-        
-	# check our slice policy before we procede
-        whitelist = self.policy['slice_whitelist']     
-        blacklist = self.policy['slice_blacklist']
-       
-        if whitelist and hrn not in whitelist or \
-           blacklist and hrn in blacklist:
-            policy_file = self.policy.policy_file
-            print >> log, "Slice %(hrn)s not allowed by policy %(policy_file)s" % locals()
-            return 1
-
-        if self.api.interface in ['aggregate']:     
-            self.create_slice_aggregate(hrn, rspec)
-        elif self.api.interface in ['slicemgr']:
-            self.create_slice_smgr(hrn, rspec)
 
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
         authority = get_authority(slice_hrn)
@@ -577,137 +511,11 @@ class Slices(SimpleStorage):
 
         return 1
 
-    def create_slice_smgr(self, hrn, rspec):
-        spec = RSpec()
-        tempspec = RSpec()
-        spec.parseString(rspec)
-        slicename = hrn_to_pl_slicename(hrn)
-        specDict = spec.toDict()
-        if specDict.has_key('RSpec'): specDict = specDict['RSpec']
-        if specDict.has_key('start_time'): start_time = specDict['start_time']
-        else: start_time = 0
-        if specDict.has_key('end_time'): end_time = specDict['end_time']
-        else: end_time = 0
-
-        rspecs = {}
-        aggregates = Aggregates(self.api)
-        credential = self.api.getCredential()
-
-        # split the netspecs into individual rspecs
-        netspecs = spec.getDictsByTagName('NetSpec')
-        for netspec in netspecs:
-            net_hrn = netspec['name']
-            resources = {'start_time': start_time, 'end_time': end_time, 'networks': netspec}
-            resourceDict = {'RSpec': resources}
-            tempspec.parseDict(resourceDict)
-            rspecs[net_hrn] = tempspec.toxml()
-
-        # send each rspec to the appropriate aggregate/sm
-        origin_hrn = self.origin_hrn
-        for net_hrn in rspecs:
-            try:
-                # if we are directly connected to the aggregate then we can just send them the rspec
-                # if not, then we may be connected to an sm thats connected to the aggregate
-                if net_hrn in aggregates:
-                    # send the whloe rspec to the local aggregate
-                    if net_hrn in [self.api.hrn]:
-                        try:
-                            request_hash = None
-                            aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, origin_hrn)
-                        except:
-                            arg_list = [credential,hrn,rspec]
-                            request_hash = self.api.key.compute_hash(arg_list)
-                            aggregates[net_hrn].create_slice(credential, hrn, rspec, request_hash, origin_hrn)
-                    else:
-                        try:
-                            request_hash = None
-                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
-                        except:
-                            arg_list = [credential,hrn,rspecs[net_hrn]]
-                            request_hash = self.api.key.compute_hash(arg_list)
-                            aggregates[net_hrn].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
-                else:
-                    # lets forward this rspec to a sm that knows about the network
-                    arg_list = [credential, net_hrn]
-                    request_hash = self.api.compute_hash(arg_list)    
-                    for aggregate in aggregates:
-                        try:
-                            network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
-                        except:
-                            network_found = aggregates[aggregate].get_aggregates(credential, net_hrn, request_hash)
-                        if network_networks:
-                            try:
-				request_hash = None
-                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
-                            except:
-                                arg_list = [credential, hrn, rspecs[net_hrn]]
-                                request_hash = self.api.key.compute_hash(arg_list) 
-                                aggregates[aggregate].create_slice(credential, hrn, rspecs[net_hrn], request_hash, origin_hrn)
-                     
-            except:
-                print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % locals()
-                traceback.print_exc()
-        return 1
-
-
-    def start_slice(self, hrn):
-        if self.api.interface in ['aggregate']:
-            self.start_slice_aggregate(hrn)
-        elif self.api.interface in ['slicemgr']:
-            self.start_slice_smgr(hrn)
-
-    def start_slice_aggregate(self, hrn):
-        slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, {'name': slicename}, ['slice_id'])
-        if not slices:
-            raise RecordNotFound(hrn)
-        slice_id = slices[0]
-        attributes = self.api.plshell.GetSliceAttributes(self.api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
-        attribute_id = attreibutes[0]['slice_attribute_id']
-        self.api.plshell.UpdateSliceAttribute(self.api.plauth, attribute_id, "1" )
-        return 1
-
-    def start_slice_smgr(self, hrn):
-        credential = self.api.getCredential()
-        aggregates = Aggregates(self.api)
-        for aggregate in aggregates:
-            aggregates[aggregate].start_slice(credential, hrn)
-        return 1
-
-
-    def stop_slice(self, hrn):
-        if self.api.interface in ['aggregate']:
-            self.stop_slice_aggregate(hrn)
-        elif self.api.interface in ['slicemgr']:
-            self.stop_slice_smgr(hrn)
-
-    def stop_slice_aggregate(self, hrn):
-        slicename = hrn_to_pl_slicename(hrn)
-        slices = self.api.plshell.GetSlices(self.api.plauth, {'name': slicename}, ['slice_id'])
-        if not slices:
-            raise RecordNotFound(hrn)
-        slice_id = slices[0]['slice_id']
-        attributes = self.api.plshell.GetSliceAttributes(self.api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
-        attribute_id = attributes[0]['slice_attribute_id']
-        self.api.plshell.UpdateSliceAttribute(self.api.plauth, attribute_id, "0")
-        return 1
-
-    def stop_slice_smgr(self, hrn):
-        credential = self.api.getCredential()
-        aggregates = Aggregates(self.api)
-        arg_list = [credential, hrn]
-        request_hash = self.api.key.compute_hash(arg_list)
-        for aggregate in aggregates:
-            try:
-                aggregates[aggregate].stop_slice(credential, hrn)
-            except:  
-                aggregates[aggregate].stop_slice(credential, hrn, request_hash)
-
     def sync_slice(self, old_record, new_record, peer):
-	if old_record['expires'] != new_record['expires']:
-           if peer:
-            self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', old_record['slice_id'], peer)
-            self.api.plshell.UpdateSlice(self.api.plauth, old_record['slice_id'], {'expires' : new_record['expires']})
-	if peer:
+        if old_record['expires'] != new_record['expires']:
+            if peer:
+                self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', old_record['slice_id'], peer)
+                self.api.plshell.UpdateSlice(self.api.plauth, old_record['slice_id'], {'expires' : new_record['expires']})
+	    if peer:
             self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', old_record['slice_id'], peer, old_record['peer_slice_id'])
 	return 1
