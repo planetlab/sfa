@@ -111,6 +111,7 @@ class Nodes(SimpleStorage):
         networks = []
         rspec = RSpec()
         credential = self.api.getCredential()
+        origin_hrn = self.origin_hrn
         for aggregate in aggregates:
           if aggregate not in [self.api.auth.client_cred.get_gid_caller().get_hrn()]:
             try:
