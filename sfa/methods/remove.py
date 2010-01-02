@@ -66,7 +66,7 @@ class remove(Method):
             for registry in registries:
                 if registry not in [self.api.hrn]:
                     result=registries[registry].remove_peer_object(credential, record, origin_hrn)
-                        pass
+                    pass
         if type == "user":
             persons = self.api.plshell.GetPersons(self.api.plauth, record['pointer'])
             # only delete this person if he has site ids. if he doesnt, it probably means 
