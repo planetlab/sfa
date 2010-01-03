@@ -59,7 +59,7 @@ def get_credential(api, hrn, type, is_self=False):
 
     return new_cred.save_to_string(save_parents=True)
 
-def resolve(api, hrns, type=None, origin_hrn):
+def resolve(api, hrns, type=None, origin_hrn=None):
 
     # load all know registry names into a prefix tree and attempt to find
     # the longest matching prefix

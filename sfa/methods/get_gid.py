@@ -34,16 +34,22 @@ class get_gid(Method):
     def call(self, cert, hrn, type):
       
         self.api.auth.verify_object_belongs_to_me(hrn)
-        certificate = Certificate(string=cert) 
-        table = GeniTable()
-        records = table.find({'hrn': hrn, 'type': type})
+
+        # resolve the record
+        manager_base = 'sfa.managers'
+        mgr_type = self.api.config.SFA_REGISTRY_TYPE
+        manager_module = manager_base + ".registry_manager_%s" % mgr_type
+        manager = __import__(manager_module, fromlist=[manager_base])
+        records = manager.resolve(self.api, hrn, type, origin_hrn=hrn)
         if not records:
             raise RecordNotFound(hrn)
         record = records[0]
-        gidStr = record['gid']
-        gid = GID(string=gidStr)
-         
+
+        # make sure client's certificate is the gid's pub key 
+        gid = GID(string=record['gid'])
+        certificate = Certificate(string=cert) 
         if not certificate.is_pubkey(gid.get_pubkey()):
             raise ConnectionKeyGIDMismatch(gid.get_subject())
+
+        return record['gid'] 
         
-        return gidStr 
