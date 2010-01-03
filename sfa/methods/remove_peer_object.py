@@ -6,7 +6,6 @@ from sfa.util.record import GeniRecord
 from sfa.util.genitable import GeniTable
 from sfa.util.debug import log
 from sfa.trust.credential import Credential
-from sfa.util.misc import *
 from types import StringTypes
 
 class remove_peer_object(Method):

@@ -2,7 +2,6 @@
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/reset_slices.py $
 
 from sfa.util.faults import *
-from sfa.util.misc import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth

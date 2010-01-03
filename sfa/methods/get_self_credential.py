@@ -6,10 +6,7 @@ from sfa.trust.rights import *
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.trust.auth import Auth
-from sfa.trust.gid import GID
 from sfa.util.record import GeniRecord
-from sfa.util.genitable import *
 from sfa.util.debug import log
 
 class get_self_credential(Method):
@@ -50,54 +47,24 @@ class get_self_credential(Method):
         @return string representation of a credential object
         """
         self.api.auth.verify_object_belongs_to_me(hrn)
-        auth_hrn = self.api.auth.get_authority(hrn)
-         
-        # if this is a root or sub authority get_authority will return
-        # an empty string
-        if not auth_hrn or hrn == self.api.config.SFA_INTERFACE_HRN:
-            auth_hrn = hrn
+        
+        # send the call to the right manager
+        manager_base = 'sfa.managers'
+        mgr_type = self.api.config.SFA_REGISTRY_TYPE
+        manager_module = manager_base + ".registry_manager_%s" % mgr_type
+        manager = __import__(manager_module, fromlist=[manager_base])
 
-        auth_info = self.api.auth.get_auth_info(auth_hrn)
-
-        # find a record that matches
-        record = None
-        table = GeniTable()
-        records = table.findObjects({'type': type, 'hrn':  hrn})
+        # authenticate the gid
+        records = manager.resolve(self.api, hrn, type)
         if not records:
             raise RecordNotFound(hrn)
-        record = records[0]
-        
-        # authenticate the gid
+        record = GeniRecord(dict=records[0])
         gid = record.get_gid_object()
         gid_str = gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(gid_str, [cert, type, hrn], request_hash)
-        
         # authenticate the certificate against the gid in the db
         certificate = Certificate(string=cert)
         if not certificate.is_pubkey(gid.get_pubkey()):
             raise ConnectionKeyGIDMismatch(gid.get_subject())
-
-        # get the right of this record
-        #caller_hrn = certificate.get_subject()    
-        # server.cert has subject 'registry'
-        caller_hrn=hrn
-        rights = self.api.auth.determine_user_rights(caller_hrn, record)
-        if rights.is_empty():
-            raise PermissionError(caller_hrn + " has no rights to " + record.get_name())
-
-        # create the credential
-        gid = record.get_gid_object()
-        cred = Credential(subject = gid.get_subject())
-        cred.set_gid_caller(gid)
-        cred.set_gid_object(gid)
-        cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
-        cred.set_pubkey(gid.get_pubkey())
-        cred.set_privileges(rights)
-        cred.set_delegate(True)
-
-        auth_kind = "authority,sa,ma"
-        cred.set_parent(self.api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
-
-        cred.encode()
-        cred.sign()
-        return cred.save_to_string(save_parents=True)
+        
+        return manager.get_credential(self.api, hrn, type, is_self=True)

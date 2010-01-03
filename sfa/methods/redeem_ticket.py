@@ -2,7 +2,6 @@
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfacomponent/methods/reset_slice.py $
 import xmlrpclib
 from sfa.util.faults import *
-from sfa.util.misc import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 

@@ -4,13 +4,9 @@ import traceback
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.trust.auth import Auth
-from sfa.util.record import GeniRecord
-from sfa.util.genitable import GeniTable
 from sfa.util.debug import log
-from sfa.server.registry import Registries
-from sfa.util.prefixTree import prefixTree
 from sfa.trust.credential import Credential
+from sfa.util.record import GeniRecord
 
 class resolve(Method):
     """
@@ -25,7 +21,8 @@ class resolve(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name (hrn)")
+        Mixed(Parameter(str, "Human readable name (hrn)"),
+              Parameter(list, "List of Human readable names ([hrn])"))  
         ]
 
     returns = [GeniRecord]
@@ -40,44 +37,12 @@ class resolve(Method):
  
         # validate the cred
         self.api.auth.check(cred, 'resolve')
-
-        # load all know registry names into a prefix tree and attempt to find
-        # the longest matching prefix
-        good_records = [] 
-        registries = Registries(self.api)
-        hrns = registries.keys()
-        tree = prefixTree()
-        tree.load(hrns)
-        registry_hrn = tree.best_match(hrn)
-
-        #if there was no match then this record belongs to an unknow registry
-        if not registry_hrn:
-            raise MissingAuthority(hrn)
-
-        # if the best match (longest matching hrn) is not the local registry,
-        # forward the request
-        if registry_hrn != self.api.hrn:
-            credential = self.api.getCredential()
-            records = registries[registry_hrn].resolve(credential, hrn, origin_hrn)
-            good_records = [GeniRecord(dict=record).as_dict() for record in records]
-        if good_records:
-            return good_records
-
-        # if we still havnt found the record yet, try the local registry
-        table = GeniTable()
-        records = table.findObjects(hrn)
-        if not records:
-            raise RecordNotFound(hrn) 
-        for record in records:
-            try:
-                self.api.fill_record_info(record)
-                good_records.append(dict(record))
-            except PlanetLabRecordDoesNotExist:
-                # silently drop the ones that are missing in PL
-                print >> log, "ignoring geni record ", record['hrn'], \
-                              " because pl record does not exist"
-                table.remove(record)
+        # send the call to the right manager
+        manager_base = 'sfa.managers'
+        mgr_type = self.api.config.SFA_REGISTRY_TYPE
+        manager_module = manager_base + ".registry_manager_%s" % mgr_type
+        manager = __import__(manager_module, fromlist=[manager_base])
+        return manager.resolve(self.api, hrn, origin_hrn=origin_hrn)
 
 
-        return good_records    
             

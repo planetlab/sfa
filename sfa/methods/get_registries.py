@@ -2,7 +2,6 @@
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/get_registries.py $
 from types import StringTypes
 from sfa.util.faults import *
-from sfa.util.misc import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
