@@ -95,7 +95,8 @@ def resolve(api, hrns, type=None, origin_hrn=None):
             records.extend([GeniRecord(dict=record).as_dict() for record in peer_records])
 
     # try resolving the remaining unfound records at the local registry
-    remaining_hrns = set(hrns).difference([record['hrn'] for record in records]) 
+    remaining_hrns = set(hrns).difference([record['hrn'] for record in records])
+    remaining_hrns = [hrn for hrn in remaining_hrns] 
     table = GeniTable()
     local_records = table.findObjects({'hrn': remaining_hrns})
     for record in local_records:
@@ -112,7 +113,7 @@ def resolve(api, hrns, type=None, origin_hrn=None):
         raise RecordNotFound(str(hrns))
 
     if type:
-        records = filter(lambda rec: rec['type'] == type, records)
+        records = filter(lambda rec: rec['type'] in [type], records)
 
     return records
 
