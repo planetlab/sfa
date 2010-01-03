@@ -3,7 +3,7 @@
 import sys
 import os
 import traceback
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.genitable import GeniTable
 from sfa.util.geniclient import GeniClient
 from sfa.plc.api import GeniAPI

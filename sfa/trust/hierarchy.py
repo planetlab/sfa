@@ -21,8 +21,7 @@ from sfa.util.report import *
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import *
 from sfa.trust.gid import GID, create_uuid
-
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.config import Config
 from sfa.util.sfaticket import SfaTicket
 

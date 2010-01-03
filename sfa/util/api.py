@@ -17,7 +17,7 @@ from sfa.util.faults import *
 from sfa.util.debug import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.sfalogging import *
 
 # See "2.2 Characters" in the XML specification:

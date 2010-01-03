@@ -70,7 +70,9 @@ class Config:
 
             # create the data directory if it doesnt exist
             if not os.path.isdir(self.SFA_DATA_DIR):
-                os.mkdir(self.SFA_DATA_DIR)
+                try:
+                    os.mkdir(self.SFA_DATA_DIR)
+                except: pass
              
         except IOError, e:
             raise IOError, "Could not find the configuration file: %s" % config_file

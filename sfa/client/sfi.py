@@ -15,7 +15,7 @@ from sfa.trust.credential import Credential
 from sfa.util.geniclient import GeniClient
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import *
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.rspec import RSpec
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol

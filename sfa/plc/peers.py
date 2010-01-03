@@ -1,4 +1,4 @@
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from types import StringTypes
 
 def get_peer(api, hrn):

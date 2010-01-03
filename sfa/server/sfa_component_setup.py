@@ -5,7 +5,7 @@ import tempfile
 from optparse import OptionParser
 from sfa.util.config import Config
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
-import sfa.util.misc as misc
+from sfa.util.namepace import *
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.gid import GID
@@ -185,7 +185,7 @@ def get_gids(registry=None, verbose=False):
     from sfa.plc.api import ComponentAPI
     api = ComponentAPI()
     slicenames = api.nodemanager.GetXIDs().keys()   
-    hrns = [misc.slicename_to_hrn(interface_hrn, slicename) for slicename in slicenames]
+    hrns = [slicename_to_hrn(interface_hrn, slicename) for slicename in slicenames]
         
 
     if verbose:
@@ -197,7 +197,7 @@ def get_gids(registry=None, verbose=False):
         # if this isnt a slice record skip it
         if not record['type'] == 'slice':
             continue
-        slicename = misc.hrn_to_pl_slicename(record['hrn'])
+        slicename = hrn_to_pl_slicename(record['hrn'])
         # if this slice isnt really instatiated skip it
         if not os.path.exists("/vservers/%(slicename)s" % locals()):
             continue

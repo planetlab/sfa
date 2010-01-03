@@ -1,7 +1,7 @@
 import os
 import xmlrpclib
 from sfa.util.faults import *
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.sfaticket import SfaTicket
 
 def init_server():

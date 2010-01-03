@@ -13,7 +13,7 @@ from sfa.trust.rights import RightList
 from sfa.util.faults import *
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.trust.gid import GID
 from sfa.util.sfaticket import *
 

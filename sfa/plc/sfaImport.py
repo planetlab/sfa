@@ -14,10 +14,9 @@ import tempfile
 
 from sfa.util.record import *
 from sfa.util.genitable import GeniTable
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.config import Config
 from sfa.util.report import trace, error
-
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *

@@ -24,7 +24,6 @@ from sfa.util.faults import *
 # to perform this encoding.
 
 class Credential(Certificate):
-    gidOriginCaller = None
     gidCaller = None
     gidObject = None
     lifeTime = None
@@ -41,20 +40,6 @@ class Credential(Certificate):
 
     def __init__(self, create=False, subject=None, string=None, filename=None):
         Certificate.__init__(self, create, subject, string, filename)
-
-    ## set the GID of the original caller
-    #
-    # @param gid GID object of the original caller
-    def set_gid_origin_caller(self, gid):
-        self.gidOriginCaller = gid  
-
-    ##
-    # get the GID of the object
-
-    def get_gid_origin_caller(self):
-        if not self.gidOriginCaller:
-            self.decode()
-        return self.gidOriginCaller
 
     ##
     # set the GID of the caller
@@ -159,14 +144,11 @@ class Credential(Certificate):
     # done immediately before signing the credential.
 
     def encode(self):
-        dict = {"gidOriginCaller": None,
-                "gidCaller": None,
+        dict = {"gidCaller": None,
                 "gidObject": None,
                 "lifeTime": self.lifeTime,
                 "privileges": None,
                 "delegate": self.delegate}
-        if self.gidOriginCaller:
-            dict["gidOriginCaller"] = self.gidOriginCaller.save_to_string(save_parents=True)
         if self.gidCaller:
             dict["gidCaller"] = self.gidCaller.save_to_string(save_parents=True)
         if self.gidObject:
@@ -196,12 +178,6 @@ class Credential(Certificate):
             self.privileges = RightList(string = privStr)
         else:
             self.privileges = None
-
-        gidOriginCallerStr = dict.get("gidOriginCaller", None)
-        if gidOriginCallerStr:
-            self.gidOriginCaller = GID(string=gidOriginCallerStr)
-        else:
-            self.gidOriginCaller = None
 
         gidCallerStr = dict.get("gidCaller", None)
         if gidCallerStr:
@@ -250,11 +226,6 @@ class Credential(Certificate):
         print "CREDENTIAL", self.get_subject()
 
         print "      privs:", self.get_privileges().save_to_string()
-
-        print "  gidOriginCaller:"
-        gidOriginCaller = self.get_gid_origin_caller()
-        if gidOriginCaller:
-            gidOriginCaller.dump(8, dump_parents)
 
         print "  gidCaller:"
         gidCaller = self.get_gid_caller()

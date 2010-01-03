@@ -17,7 +17,7 @@ from sfa.util.debug import *
 from sfa.trust.rights import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.api import *
 from sfa.util.nodemanager import NodeManager
 from sfa.util.sfalogging import *

@@ -8,8 +8,6 @@ import time
 
 from sfa.util.geniserver import *
 from sfa.util.geniclient import *
-from sfa.util.faults import *
-from sfa.util.misc import *
 
 class SliceMgr(GeniServer):
 

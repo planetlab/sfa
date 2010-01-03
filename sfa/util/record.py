@@ -14,7 +14,7 @@ from sfa.trust.gid import *
 import sfa.util.report
 from sfa.util.rspec import *
 from sfa.util.parameter import *
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.row import Row
 
 class GeniRecord(Row):

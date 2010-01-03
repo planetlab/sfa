@@ -3,7 +3,7 @@
 from sfa.util.rspec import RSpec
 import sys
 import pdb
-from sfa.util.misc import *
+from sfa.util.namespace import *
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
