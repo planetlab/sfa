@@ -5,14 +5,13 @@ import os
 import traceback
 from sfa.util.namespace import *
 from sfa.util.genitable import GeniTable
-from sfa.util.geniclient import GeniClient
 from sfa.plc.api import GeniAPI
 from sfa.util.config import Config
 from sfa.trust.certificate import Keypair
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.report import trace, error
 from sfa.server.registry import Registries
-from sfa.util.xmlrpcprotocol import ServerException
+from sfa.util.xmlrpcprotocol import xmlrpcprotocol, ServerException
 import socket
 
 def main():
@@ -32,7 +31,7 @@ def main():
     # and a valid credential
     authority = config.SFA_INTERFACE_HRN
     url = 'http://%s:%s/' %(config.SFA_REGISTRY_HOST, config.SFA_REGISTRY_PORT)
-    registry = GeniClient(url, key_file, cert_file)
+    registry = xmlrpcprotocol.get_server((url, key_file, cert_file)
     sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file, interface='registry')
     credential = sfa_api.getCredential()
 
