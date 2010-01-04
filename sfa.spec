@@ -1,4 +1,3 @@
-
 #
 # $Id$
 #
@@ -97,7 +96,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plc
 %defattr(-,root,root)
-%config (noreplace) /etc/sfa/sfa_config
+%config /etc/sfa/default_config.xml
 %config (noreplace) /etc/sfa/aggregates.xml
 %config (noreplace) /etc/sfa/registries.xml
 /etc/init.d/sfa
