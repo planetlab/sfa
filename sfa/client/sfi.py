@@ -12,7 +12,6 @@ from types import StringTypes, ListType
 from optparse import OptionParser
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
-from sfa.util.geniclient import GeniClient
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import *
 from sfa.util.namespace import *
