@@ -100,7 +100,7 @@ class GeniAPI(BaseAPI):
     
     def getCredentialFromRegistry(self):
         """ 
-        Get our credential from a remote registry using a geniclient connection
+        Get our credential from a remote registry 
         """
         type = 'authority'
         path = self.config.SFA_DATA_DIR
