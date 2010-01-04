@@ -5,9 +5,7 @@ import os
 import sys
 import datetime
 import time
-
 from sfa.util.geniserver import *
-from sfa.util.geniclient import *
 
 class SliceMgr(GeniServer):
 
