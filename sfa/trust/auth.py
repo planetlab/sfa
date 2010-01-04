@@ -231,7 +231,8 @@ class Auth:
 
         if type=="slice":
             researchers = record.get("researcher", [])
-            if (caller_hrn in researchers):
+            pis = record.get("PI", [])
+            if (caller_hrn in researchers + pis):
                 rl.add("refresh")
                 rl.add("embed")
                 rl.add("bind")
