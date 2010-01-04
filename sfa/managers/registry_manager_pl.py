@@ -176,7 +176,7 @@ def register(api, record):
         uuid = create_uuid()
         pkey = Keypair(create=True)
         if 'key' in record and record['key']:
-            if isinstance(record['key'], list):
+            if isinstance(record['key'], types.ListType):
                 pub_key = record['key'][0]
             else:
                 pub_key = record['key']
@@ -310,7 +310,7 @@ def update(api, record_dict):
             keys = person['key_ids']
             keys = api.plshell.GetKeys(api.plauth, person['key_ids'])
             key_exists = False
-            if isinstance(new_record['key'], list):
+            if isinstance(new_record['key'], types.ListType):
                 new_key = new_record['key'][0]
             else:
                 new_key = new_record['key']
