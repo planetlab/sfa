@@ -40,7 +40,7 @@ class Registry(GeniServer):
 
 
 ##
-# Registries is a dictionary of geniclient registry connections keyed on the registry
+# Registries is a dictionary of registry connections keyed on the registry
 # hrn
 
 class Registries(dict):

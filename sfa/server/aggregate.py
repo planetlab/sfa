@@ -35,7 +35,7 @@ class Aggregate(GeniServer):
         self.server.interface = 'aggregate'
 
 ##
-# Aggregates is a dictionary of geniclient aggregate connections keyed on the aggregate hrn
+# Aggregates is a dictionary of aggregate connections keyed on the aggregate hrn
 
 class Aggregates(dict):
 
