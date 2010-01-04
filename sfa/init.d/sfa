@@ -10,6 +10,13 @@
 # $URL$
 #
 
+# recompute /etc/sfa/sfa_config from the xml files
+# not too sure this is the right place, should probably be done by sfa-config-tty..
+xml_files="/etc/sfa/default_config.xml"
+[ -f /etc/sfa/configs/site.xml ] && xml_files="$xml_files /etc/sfa/configs/site.xml"
+plc-config --shell  $xml_files > /etc/sfa/sfa_config
+plc-config --python $xml_files > /etc/sfa/sfa_config.py
+
 # Source config
 . /etc/sfa/sfa_config
 
