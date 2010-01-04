@@ -81,7 +81,7 @@ class Registries(dict):
     def connectRegistries(self):
         """
         Get connection details for the trusted peer registries from file and 
-        create an GeniClient connection to each. 
+        create a connection to each. 
         """
         registries = self.registry_info['registries']['registry']
         if isinstance(registries, dict):
@@ -96,8 +96,8 @@ class Registries(dict):
                     continue
                 self.interfaces.append(registry)
                 # check which client we should use
-                # geniclient is default
-                client_type = 'geniclient'
+                # sfa.util.xmlrpcprotocol is default
+                client_type = 'xmlrpcprotocol'
                 if registry.has_key('client') and registry['client'] in ['geniclientlight']:
                     client_type = 'geniclientlight'
                 
@@ -112,7 +112,6 @@ class Registries(dict):
                     self[hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
 
         # set up a connection to the local registry
-        # connect to registry using GeniClient
         address = self.api.config.SFA_REGISTRY_HOST
         port = self.api.config.SFA_REGISTRY_PORT
         url = 'http://%(address)s:%(port)s' % locals()

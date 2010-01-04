@@ -73,7 +73,7 @@ class Aggregates(dict):
     def connectAggregates(self):
         """
         Get connection details for the trusted peer aggregates from file and 
-        create an GeniClient connection to each. 
+        create an connection to each. 
         """
         aggregates = self.aggregate_info['aggregates']['aggregate']
         if isinstance(aggregates, dict):
@@ -88,8 +88,8 @@ class Aggregates(dict):
                     continue
                 self.interfaces.append(aggregate)
                 # check which client we should use
-                # geniclient is default
-                client_type = 'geniclient'
+                # sfa.util.xmlrpcprotocol is default
+                client_type = 'xmlrpcprotocol'
                 if aggregate.has_key('client') and aggregate['client'] in ['geniclientlight']:
                     client_type = 'geniclientlight'
                 
@@ -104,7 +104,6 @@ class Aggregates(dict):
                     self[hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
 
         # set up a connection to the local registry
-        # connect to registry using GeniClient
         address = self.api.config.SFA_AGGREGATE_HOST
         port = self.api.config.SFA_AGGREGATE_PORT
         url = 'http://%(address)s:%(port)s' % locals()
