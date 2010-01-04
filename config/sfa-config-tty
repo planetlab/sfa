@@ -1,51 +1,17 @@
-#!/usr/bin/python
-
-# Interactively prompts for variable values
-# expected arguments are
-# command -d [default-xml [custom-xml [ consolidated-xml ]]]
-#
-# -d is for the myplc-devel package
-
-# we use 3 instances of PLCConfiguration throughout:
-# cdef : models the defaults, from plc_default.xml
-# cread : merged from plc_default & configs/site.xml
-# cwrite : site.xml + pending changes
+#!/bin/env python
 
 import sys
-import os
-import re
 import readline
-import distutils.file_util
-from optparse import OptionParser
+import plc_config
 
-from sfa.util.config import Config
-from sfa.trust.hierarchy import *
-from sfa.util.misc import *
+def validator(validated_variables):
+    pass
+#    maint_user = validated_variables["PLC_API_MAINTENANCE_USER"]
+#    root_user = validated_variables["PLC_ROOT_USER"]
+#    if maint_user == root_user:
+#        errStr="PLC_API_MAINTENANCE_USER=%s cannot be the same as PLC_ROOT_USER=%s"%(maint_user,root_user)
+#        raise plc_config.ConfigurationException(errStr)
 
-
-all_variables   = ["SFA_REGISTRY_ROOT_AUTH",
-                   "SFA_REGISTRY_LEVEL1_AUTH",
-                   "SFA_REGISTRY_ENABLED",
-                   "SFA_REGISTRY_HOST", 
-                   "SFA_REGISTRY_PORT",
-		   "SFA_REGISTRY_TYPE",
-                   "SFA_AGGREGATE_ENABLED",
-                   "SFA_AGGREGATE_HOST",
-                   "SFA_AGGREGATE_PORT",
-		   "SFA_AGGREGATE_TYPE",
-                   "SFA_SM_ENABLED",
-                   "SFA_SM_HOST",
-                   "SFA_SM_PORT",
-		   "SFA_SM_TYPE",
-                   "SFA_PLC_USER",
-                   "SFA_PLC_PASSWORD",    
-                   "SFA_PLC_URL",
-                   "SFA_PLC_DB_NAME",
-                   "SFA_PLC_DB_HOST",
-                   "SFA_PLC_DB_PORT",
-                   "SFA_PLC_DB_USER",
-                   "SFA_PLC_DB_PASSWORD",
-                   ]
 usual_variables = ["SFA_REGISTRY_ROOT_AUTH",
                    "SFA_REGISTRY_LEVEL1_AUTH",
                    "SFA_REGISTRY_HOST", 
@@ -59,243 +25,16 @@ usual_variables = ["SFA_REGISTRY_ROOT_AUTH",
                    "SFA_PLC_URL",
                    ]
 
-
-mainloop_usage= """Available commands:
- u/U\t\t\tEdit usual variables
- w/W\t\t\tWrite / Write & reload
- q\t\t\tQuit (without saving)
- h/?\t\t\tThis help
----
- l/L [<var>]\tShow Locally modified variables/values
- s/S [<var>]\tShow all current variables/values 
- e/E [<var>]\tEdit variables (all, in category, single)
----
-""" 
-
-command_usage="%prog [options]"
-command_usage += """
-  Unless you specify the -d option, meaning you want to configure
-  using defaults without interactive prompts""" 
-
-variable_usage= """Edit Commands :
-.\tStops prompting, return to mainloop
-=\tShows default value
-?\tThis help    
-"""
-
-def save_config(changes, config_file):
-    # always validate before saving
-    changes = validate(changes) 
-    
-    cfile = open(config_file, 'r')
-    lines = cfile.readlines()
-    cfile.close()
-    newlines = []
-    for line in lines:
-        added = False
-        for variable in changes:
-            if line.startswith(variable+'='):
-                try:
-                    value = int(changes[variable])
-                    newline = '%s=%s\n' % (variable, value)
-                    newlines.append(newline)
-                except:
-                    value = changes[variable]
-                    newline = '%s="%s"\n' % (variable, value)
-                    newlines.append(newline)
-                added = True
-                break
-        if not added:
-            newlines.append(line) 
-    
-    cfile = open(config_file, 'w')
-    cfile.writelines(newlines)
-    cfile.close()
-    print 'updated config file',config_file
-
-def validate(changes):
-
-    if not changes:
-        return {}
-
-    defaults = get_defaults()
-    
-    # SFA_INTERFACE_HRN is SFA_REGISTRY_LEVEL1_AUTH, if thats blank it
-    # then defaults to SFA_REGISTRY_ROOT_AUTH 
-    # SFA_REGISTRY_LEVEL1_AUTH, so if either of these are present we must 
-    # update SFA_INTERFACE_HRN
-    if 'SFA_REGISTRY_ROOT_AUTH' in changes:
-        root_auth = changes['SFA_REGISTRY_ROOT_AUTH']
-    else:
-        root_auth = defaults['SFA_REGISTRY_ROOT_AUTH']
-             
-    if 'SFA_REGISTRY_LEVEL1_AUTH' in changes:
-        level1_auth = changes['SFA_REGISTRY_LEVEL1_AUTH']
-    else:
-        level1_auth = defaults['SFA_REGISTRY_LEVEL1_AUTH']
-                
-    if level1_auth:
-        interface_hrn = level1_auth
-    else:
-        interface_hrn = root_auth
-    changes['SFA_INTERFACE_HRN'] = interface_hrn
-    return changes                            
-
-def get_defaults():
-    sfa_config = Config()
-    
-    defaults = {}
-    for var in dir(sfa_config):
-        if var.startswith('SFA'):
-            value = eval("sfa_config.%s" % var)
-            defaults[var] = value
-
-    return defaults       
-
-def prompt_variable(variable, default_config):
-    if variable in default_config:
-        default_value = default_config[variable]
-    else:
-        default_value = ""  
-   
-    while True:
-        prompt = "%(variable)s : [%(default_value)s] " % locals()
-        try: 
-            answer = raw_input(prompt).strip()
-        except EOFError:
-            raise Exception ('BailOut')
-        except KeyboardInterrupt:
-            print "\n"
-            raise Exception ('BailOut')
-
-        if (answer == "") or (answer == default_value):
-            return default_value
-        elif answer in ['""', "''"]:
-            return ""
-        elif (answer == "."):
-            raise Exception ('BailOut')
-        elif (answer == "?"):
-            print variable_usage.strip()
-        elif (answer == "="):
-            print ("%s defaults to %s" %(variable,default_value))
-        else:
-            return answer
-
-def show_variable(variable, value_dict):
-    print "%s=%s" % (variable, value_dict[variable])                    
-    
-def mainloop (default_config, config_file):
-    changes = {}
-    while True:
-        try:
-            answer = raw_input("Enter command (u for usual changes, w to save, ? for help) ").strip()
-        except EOFError:
-            answer =""
-        except KeyboardInterrupt:
-            print "\nBye"
-            sys.exit()
-        if (answer == "") or (answer in "?hH"):
-            print mainloop_usage
-            continue
-        if answer in ['?']:
-            print "help"  
-
-        if (answer in ["q","Q"]):
-            break
-        elif (answer == "w"):
-            save_config(changes, config_file)
-        elif (answer == "u"):
-            try: 
-                for varname in usual_variables:
-                    changes[varname] = prompt_variable(varname, default_config)
-            except Exception, inst:
-                if (str(inst) != 'BailOut'):
-                    raise
-        elif (answer in ["e","E"]):
-            try:
-                for varname in all_variables:
-                    changes[varname] = prompt_variable(varname, default_config)
-            except Exception, inst:
-                if (str(inst) != 'BailOut'):
-                    raise
-        elif (answer in "sS"):
-            for varname in usual_variables:
-                show_variable (varname, default_config)
-        elif (answer in "lL"):
-            if not changes:
-                print "No changes to display"
-            else:
-                for varname in changes:
-                    show_variable(varname, changes)
-        else:
-            print ("Unknown command >%s< -- use h for help" % answer)
-
-    result = {}
-    result.update(default_config)
-    result.update(changes)
-    return result
-    
-def setup_server_key(config_dict):
-    hrn = config_dict.get('SFA_INTERFACE_HRN')
-    if not hrn: return
-   
-    # Get the path to the authorities directory hierarchy
-    hierarchy = Hierarchy()
-    path = hierarchy.basedir
-    auth_path = hrn.replace(".", os.sep)
- 
-    # define some useful variables   
-    key = 'server.key'
-    cert = 'server.cert'
-    hrn_leaf = get_leaf(hrn)
-    if not hrn_leaf:
-        hrn_leaf = hrn
-    new_server_key = os.sep.join([path, auth_path, hrn_leaf]) + ".pkey"
-    old_server_key = os.sep.join([path, key])
-    old_server_cert = os.sep.join([path, cert])
-
-    # remove old key/cert
-    for fd in [old_server_key, old_server_cert]:
-        if os.path.isfile(fd):
-            os.remove(fd)
-
-    # create new server.key
-    try:
-        distutils.file_util.copy_file(src=new_server_key, dst=old_server_key, verbose=1)
-        print "\t\t%(old_server_key)s\ncopied from\t%(new_server_key)s" % locals()
-    # this is expected when running this tool for the first time (before sfa-import-plc.py)
-    except:
-        print "Could not create %(old_server_key)s - ignore if you haven't run sfa-import-plc.py yet"%locals()
-    
-    
-
-####################
-def main ():
-
-    command=sys.argv[0]
-    argv = sys.argv[1:]
-    save = True
-    parser = OptionParser(usage=command_usage, version="%prog 1.0")
-    parser.set_defaults(config_dir="/etc/sfa",
-                        usual_variables=[])
-    parser.add_option("","--configdir",dest="config_dir",action="append", help="specify configuration directory")
-    parser.add_option("","--usual_variable",dest="usual_variables",action="append", help="add a usual variable")
-    parser.add_option("-d", "--default", action="count", help="dont prompt for values, just use defaults")
-    (config,args) = parser.parse_args()
-    if len(args)>3:
-        parser.error("too many arguments")
-
-    config_dir = parser.values.config_dir
-    config_file = os.sep.join([config_dir, 'sfa_config'])
-    defaults = get_defaults()
-    # if -d is specified dont prompt, just configure with defaults
-    if '-d' in argv:
-        save_config(defaults, config_file)
-        results = defaults
-    else:        
-        results = mainloop (defaults, config_file)
-    setup_server_key(results)
-    return 0
+configuration={ \
+    'name':'sfa',
+    'service':"sfa",
+    'usual_variables':usual_variables,
+    'config_dir':"/etc/sfa",
+    'validate_variables':{},
+    'validator':validator,
+    }
 
 if __name__ == '__main__':
-    main()
+    command=sys.argv[0]
+    argv = sys.argv[1:]
+    plc_config.main(command,argv,configuration)

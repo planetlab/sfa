@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Default SFA configuration file
+
+Thierry Parmentelat 
+
+$Id$
+$URL$
+-->
+
+<!DOCTYPE configuration PUBLIC "-//PlanetLab Central//DTD PLC configuration//EN" "plc_config.dtd">
+
+<configuration>
+  <variables>
+
+    <!-- ======================================== -->
+    <category id="sfa_registry">
+      <name>Registry</name>
+      <description>The settings that affect the registry that will run
+      as part of this SFA instance.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enable Registry</name>
+	  <value>true</value>
+	  <description>Allows this local SFA instance to run as a
+	  registry.</description>
+	</variable>
+
+	<variable id="type" type="string">
+	  <name>Registry type</name>
+	  <value>pl</value>
+	  <description>The type of backend server for this
+	  registry. Some registries may not be myplc.</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost</value>
+	  <description>The hostname where the registry is expected to
+	  be found; using localhost when the local registry is enabled
+	  seems reasonable.</description>
+	</variable>
+
+	<variable id="port" type="int">
+	  <name>Port number</name>
+	  <value>12345</value>
+	  <description>The port where the registry is to be found.</description>
+	</variable>
+
+	<variable id="root_auth" type="string">
+	  <name>Root Authority</name>
+	  <value>plc</value>
+	  <description>The hrn of the registry's root auth.</description>
+	</variable>
+
+	<variable id="level1_auth" type="string">
+	  <name>Level1 Authority</name>
+	  <value></value>
+	  <description>The hrn of the registry's level1 auth (sub
+	  authority). The full name of this interface (only secify if
+	  this interface is a sub authority).</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <!-- ======================================== -->
+    <category id="sfa_aggregate">
+      <name>Aggregate</name>
+      <description>The settings that affect the aggregate manager that will run
+      as part of this SFA instance.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enable Aggregate</name>
+	  <value>true</value>
+	  <description>Allows this local SFA instance to run as an
+	  aggregate manager.</description>
+	</variable>
+
+	<variable id="type" type="string">
+	  <name>Aggregate type</name>
+	  <value>pl</value>
+	  <description>The type of backend server for this
+	  aggregate. Some aggregates may not be myplc.</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost</value>
+	  <description>The hostname where the aggregate is expected to
+	  be found.</description>
+	</variable>
+
+	<variable id="port" type="int">
+	  <name>Port number</name>
+	  <value>12346</value>
+	  <description>The port where the aggregate is to be found.</description>
+	</variable>
+      </variablelist>
+
+    </category>
+
+    <!-- ======================================== -->
+    <category id="sfa_sm">
+      <name>Slice Manager</name>
+      <description>The settings that affect the slice manager that will run
+      as part of this SFA instance.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enable Slice Manager</name>
+	  <value>true</value>
+	  <description>Allows this local SFA instance to run as a
+	  slice manager.</description>
+	</variable>
+
+	<variable id="type" type="string">
+	  <name>Slice Manager type</name>
+	  <value>pl</value>
+	  <description>The type of backend server for this
+	  slice manager. Not all slice managers are myplc.</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost</value>
+	  <description>The hostname where the slice manager is expected to
+	  be found.</description>
+	</variable>
+
+	<variable id="port" type="int">
+	  <name>Port number</name>
+	  <value>12346</value>
+	  <description>The port where the slice manager is to be found.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <!-- ======================================== -->
+    <category id="sfa_plc">
+      <name></name>
+      <description>The settings that tell this SFA instance how to interact with the underlying PLC. Refer to plc-config-tty on this installation for more information.</description>
+
+      <variablelist>
+	<variable id="user" type="string">
+	  <name>PLC login name for an admin user; SFA will carry on operations under this account.</name>
+	  <value>root@localhost.localdomain</value>
+	  <description></description>
+	</variable>
+
+	<variable id="password" type="string">
+	  <name>Password</name>
+	  <value>root</value>
+	  <description>The PLC password for SFA_PLC_USER.</description>
+	</variable>
+
+	<variable id="url" type="string">
+	  <name>URL</name>
+	  <value>https://localhost:443/PLCAPI/</value>
+	  <description>Full URL of PLC interface.</description>
+	</variable>
+
+	<variable id="db_name" type="string">
+	  <name>Database name</name>
+	  <value>planetlab5</value>
+	  <description>Planetlab database name.</description>
+	</variable>
+
+	<variable id="db_host" type="hostname">
+	  <name>Datbase host</name>
+	  <value>localhost</value>
+	  <description>The host where the PLC database can be reached.</description>
+	</variable>
+
+	<variable id="db_port" type="string">
+	  <name>Database port</name>
+	  <value>5432</value>
+	  <description>The port where the PLC database can be reached.</description>
+	</variable>
+
+	<variable id="db_user" type="string">
+	  <name>Database user</name>
+	  <value>pgsqluser</value>
+	  <description></description>
+	</variable>
+
+	<variable id="db_password" type="string">
+	  <name>Database password</name>
+	  <value></value>
+	  <description>The password for PLC_DB_USER.</description>
+	</variable>
+
+      </variablelist>
+    </category>
+
+  </variables>
+
+  <comps>
+    <!-- deprecated - not used anymore - use .lst files instead -->
+  </comps>
+
+</configuration>
