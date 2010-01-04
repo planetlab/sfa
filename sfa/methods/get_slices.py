@@ -31,7 +31,7 @@ class get_slices(Method):
         #log the call
         if not origin_hrn:
             origin_hrn = user_cred.get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn(), None, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, None, self.name))
 
         # validate the cred
         self.api.auth.check(cred, 'listslices')
