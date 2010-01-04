@@ -4,9 +4,9 @@
 from sfa.trust.certificate import Keypair 
 
 from sfa.util.faults import *
+from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-
 from sfa.trust.gid import create_uuid
 from sfa.trust.auth import Auth
 
@@ -28,7 +28,7 @@ class create_gid(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name (hrn)"),
+        Parameter(str, "Human readable name (hrn) or (urn)"),
         Mixed(Parameter(str, "Unique identifier for new GID (uuid)"),
               Parameter(None, "Unique identifier (uuid) not specified")),   
         Parameter(str, "public-key string")
@@ -36,7 +36,11 @@ class create_gid(Method):
 
     returns = Parameter(str, "String represeneation of a GID object")
     
-    def call(self, cred, hrn, uuid, pubkey_str):
+    def call(self, cred, hrn_or_urn, uuid, pubkey_str):
+        
+        # convert urn to hrn     
+        hrn, type = hrn_to_urn(hrn_or_urn) 
+
         # validate the credential
         self.api.auth.check(cred, "getcredential")
         self.api.auth.verify_object_belongs_to_me(hrn)
