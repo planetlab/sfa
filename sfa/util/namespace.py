@@ -3,6 +3,8 @@
 
 from sfa.util.faults import *
 
+URN_PREFIX = "urn:publicid:IDN"
+
 def get_leaf(hrn):
     parts = hrn.split(".")
     return ".".join(parts[-1:])
@@ -47,3 +49,42 @@ def email_to_hrn(auth_hrn, email):
     person_hrn = ".".join([auth_hrn, username])
     
     return person_hrn 
+
+def urn_to_hrn(urn):
+    """
+    convert a urn to hrn
+    return a tuple (hrn, type)
+    """
+
+    # if this is already a hrn dont do anything
+    if not urn.startswith(URN_PREFIX):
+        return urn, None
+    name = urn[len(URN_PREFIX):]
+    hrn_parts = name.split("+")
+    
+    # type is always the second to last element in the list
+    type = hrn_parts.pop(-2)
+
+    # convert hrn_parts (list) into hrn (str) by doing the following    
+    # remove blank elements
+    # replace ':' with '.'
+    # join list elements using '.'
+    hrn = '.'.join([part.replace(':', '.') for part in hrn_parts if part]) 
+   
+    return hrn, type 
+    
+    
+def hrn_to_urn(hrn, type=None):
+    """
+    convert an hrn and type to a urn string
+    """
+    # if  this is already a urn dont do anything 
+    if hrn.startswith(URN_PREFIX):
+        return hrn
+
+    authority = get_authority(hrn)
+    name = get_leaf(hrn)
+    urn = "+".join([unicode(part).replace('.', ':') \
+                    for part in ['',authority,type,name]])
+
+    return URN_PREFIX + urn
