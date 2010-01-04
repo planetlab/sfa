@@ -30,7 +30,6 @@ from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
 from sfa.plc.api import *
-from sfa.util.geniclient import *
 from sfa.trust.gid import create_uuid
 from sfa.plc.sfaImport import *
 from sfa.util.report import trace, error
