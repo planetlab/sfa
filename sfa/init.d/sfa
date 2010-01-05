@@ -60,35 +60,27 @@ start() {
     
     reload
 
-    echo -n $"Starting SFA:  "
-
     if [ "$SFA_REGISTRY_ENABLED" ]; then
-        echo "Registry"
-        daemon /usr/bin/sfa-server.py -r -d $OPTIONS
+        action $"SFA Registry" daemon /usr/bin/sfa-server.py -r -d $OPTIONS
     fi
 
     if [ "$SFA_AGGREGATE_ENABLED" ]; then
-        echo "Aggregate"
-        daemon /usr/bin/sfa-server.py -a -d $OPTIONS
+        action $"SFA Aggregate" daemon /usr/bin/sfa-server.py -a -d $OPTIONS
     fi
         
     if [ "$SFA_SM_ENABLED" ]; then
-        echo "SliceMgr"
-        daemon /usr/bin/sfa-server.py -s -d $OPTIONS
+        action "SFA SliceMgr" daemon /usr/bin/sfa-server.py -s -d $OPTIONS
     fi
 
     RETVAL=$?
-    echo
     [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sfa
 
 }
 
 stop() {
-    echo -n $"Shutting down SFA: "
-    killproc sfa-server.py
+    action $"Shutting down SFA" killproc sfa-server.py
     RETVAL=$?
 
-    echo
     [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sfa
 }
 
