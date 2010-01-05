@@ -10,41 +10,76 @@
 # $URL$
 #
 
-# recompute /etc/sfa/sfa_config from the xml files
-# not too sure this is the right place, should probably be done by sfa-config-tty..
-xml_files="/etc/sfa/default_config.xml"
-[ -f /etc/sfa/configs/site.xml ] && xml_files="$xml_files /etc/sfa/configs/site.xml"
-plc-config --shell  $xml_files > /etc/sfa/sfa_config
-plc-config --python $xml_files > /etc/sfa/sfa_config.py
-
 # Source config
-. /etc/sfa/sfa_config
+[ -f /etc/sfa/sfa_config ] && . /etc/sfa/sfa_config
 
 # source function library
 . /etc/init.d/functions
 
+# Regenerate configuration files - almost verbatim from plc.init
+reload ()
+{
+    force=$1
+
+    # Regenerate the main configuration file from default values
+    # overlaid with site-specific and current values.
+    # Thierry -- 2007-07-05 : values in plc_config.xml are *not* taken into account here
+    files=(
+	/etc/sfa/default_config.xml 
+	/etc/sfa/configs/site.xml
+    )
+    for file in "${files[@]}" ; do
+	if [ -n "$force" -o $file -nt /etc/sfa/plc_config.xml ] ; then
+	    tmp=$(mktemp /tmp/plc_config.xml.XXXXXX)
+	    plc-config --xml "${files[@]}" >$tmp
+	    if [ $? -eq 0 ] ; then
+		mv $tmp /etc/sfa/plc_config.xml
+		chmod 444 /etc/sfa/plc_config.xml
+	    else
+		echo "PLC: Warning: Invalid configuration file(s) detected"
+		rm -f $tmp
+	    fi
+	    break
+	fi
+    done
+
+    # Convert configuration to various formats
+    if [ -n "$force" -o /etc/sfa/plc_config.xml -nt /etc/sfa/plc_config ] ; then
+	plc-config --shell >/etc/sfa/plc_config
+    fi
+    if [ -n "$force" -o /etc/sfa/plc_config.xml -nt /etc/sfa/plc_config.py ] ; then
+	plc-config --python >/etc/sfa/plc_config.py
+    fi
+    if [ -n "$force" -o /etc/sfa/plc_config.xml -nt /etc/sfa/php/plc_config.php ] ; then
+	mkdir -p /etc/sfa/php
+	plc-config --php >/etc/sfa/php/plc_config.php
+    fi
+}
 
 start() {
-        echo -n $"Starting SFA:  "
+    
+    reload
 
-        if [ "$SFA_REGISTRY_ENABLED" ]; then
-            echo "Registry"
-            daemon /usr/bin/sfa-server.py -r -d $OPTIONS
-        fi
+    echo -n $"Starting SFA:  "
 
-        if [ "$SFA_AGGREGATE_ENABLED" ]; then
-            echo "Aggregate"
-            daemon /usr/bin/sfa-server.py -a -d $OPTIONS
-        fi
+    if [ "$SFA_REGISTRY_ENABLED" ]; then
+        echo "Registry"
+        daemon /usr/bin/sfa-server.py -r -d $OPTIONS
+    fi
+
+    if [ "$SFA_AGGREGATE_ENABLED" ]; then
+        echo "Aggregate"
+        daemon /usr/bin/sfa-server.py -a -d $OPTIONS
+    fi
         
-        if [ "$SFA_SM_ENABLED" ]; then
-            echo "SliceMgr"
-            daemon /usr/bin/sfa-server.py -s -d $OPTIONS
-        fi
+    if [ "$SFA_SM_ENABLED" ]; then
+        echo "SliceMgr"
+        daemon /usr/bin/sfa-server.py -s -d $OPTIONS
+    fi
 
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sfa
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/sfa
 
 }
 
@@ -58,31 +93,25 @@ stop() {
 }
 
 
-
 case "$1" in
-  start)
-    start
-    ;;
-  stop)
-    stop
-    ;;
-  restart|reload)
-    stop
-    start
-    ;;
-  condrestart)
-    if [ -f /var/lock/subsys/sfa ]; then
-        stop
-        start
-    fi
-    ;;
-  status)
-    status sfa
-    RETVAL=$?
-    ;;
-  *)
-    echo $"Usage: $0 {start|stop|restart|condrestart|status}"
-    exit 1
+    start) start ;;
+    stop) stop ;;
+    reload) reload force ;;
+    restart) stop; start ;;
+    condrestart)
+	if [ -f /var/lock/subsys/sfa ]; then
+            stop
+            start
+	fi
+	;;
+    status)
+	status sfa
+	RETVAL=$?
+	;;
+    *)
+	echo $"Usage: $0 {start|stop|reload|restart|condrestart|status}"
+	exit 1
+	;;
 esac
 
 exit $RETVAL
