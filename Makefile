@@ -30,6 +30,7 @@ python:
 
 python-install:
 	python setup.py install --root=$(DESTDIR)
+	chmod 444 $(DESTDIR)/etc/sfa/default_config.xml
 
 python-clean:
 	python setup.py clean
