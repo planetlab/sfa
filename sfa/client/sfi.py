@@ -303,8 +303,6 @@ class Sfi:
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
-       #self.slicemgr = GeniClient(sm_url, key_file, cert_file, self.options.protocol)
-       #self.registry = GeniClient(reg_url, key_file, cert_file, self.options.protocol)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file)  
        self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file)  
        return
@@ -785,7 +783,7 @@ class Sfi:
                 raise Exception, "No such aggregate %s" % opts.aggregate
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
-            server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.protocol)
         return server.create_slice(slice_cred, slice_hrn, rspec)
 
     # get a ticket for the specified slice
@@ -802,7 +800,7 @@ class Sfi:
                 raise Exception, "No such aggregate %s" % opts.aggregate
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
-            server = GeniClient(url, self.key_file, self.cert_file, self.options.protocol)
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.protocol)
         ticket_string = server.get_ticket(slice_cred, slice_hrn, rspec)
         file = os.path.join(self.options.sfi_dir, get_leaf(slice_hrn) + ".ticket")
         print "writing ticket to ", file        
