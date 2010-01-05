@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 6
+%define taglevel 7
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -125,6 +125,11 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Tue Jan 05 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-0.9-7
+- checkpointing
+- this is believed to pass the tests; among other things:
+- reworked configuration based on the myplc config with xml skeleton (no more sfa_config)
+
 * Mon Nov 16 2009 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-6
 - This tag includes:
 - - Sfatables
