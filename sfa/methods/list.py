@@ -4,7 +4,7 @@
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.util.record import GeniRecord
+from sfa.util.record import SfaRecord
 from sfa.trust.credential import Credential
 
 class list(Method):
@@ -24,7 +24,7 @@ class list(Method):
               Parameter(None, "Origin hrn not specified"))
         ]
 
-    returns = [GeniRecord]
+    returns = [SfaRecord]
     
     def call(self, cred, hrn, origin_hrn=None):
         user_cred = Credential(string=cred)

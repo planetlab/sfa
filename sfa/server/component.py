@@ -1,5 +1,5 @@
 #
-# Component is a GeniServer that implements the Component interface
+# Component is a SfaServer that implements the Component interface
 #
 ### $Id: 
 ### $URL: 
@@ -19,7 +19,7 @@ except ImportError:
     GeniClientLight = None            
 
 ##
-# Component is a GeniServer that serves component operations.
+# Component is a SfaServer that serves component operations.
 
 class Component(ComponentServer):
     ##

@@ -18,13 +18,13 @@ from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.record import *
 from sfa.util.sfaticket import SfaTicket
-from sfa.util.geniserver import *
+from sfa.util.server import *
 
 ##
-# ComponentManager is a GeniServer that serves slice and
+# ComponentManager is a SfaServer that serves slice and
 # management operations at a node.
 
-class ComponentManager(GeniServer):
+class ComponentManager(SfaServer):
 
     ##
     # Create a new ComponentManager object.
@@ -35,14 +35,14 @@ class ComponentManager(GeniServer):
     # @param cert_file certificate filename containing public key (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file):
-        GeniServer.__init__(self, ip, port, key_file, cert_file)
+        SfaServer.__init__(self, ip, port, key_file, cert_file)
         self.nodemanager = ServerProxy('http://127.0.0.1:812/')
 
     ##
     # Register the server RPCs for the component
 
     def register_functions(self):
-        GeniServer.register_functions(self)
+        SfaServer.register_functions(self)
         self.server.register_function(self.stop_slice)
         self.server.register_function(self.start_slice)
         self.server.register_function(self.reset_slice)
@@ -119,7 +119,7 @@ class ComponentManager(GeniServer):
     # signed and verified correctly. Throw an exception if something is
     # wrong with the ticket.
     #
-    # This is similar to geniserver.decode_authentication
+    # This is similar to decode_authentication
     #
     # @param ticket_string the string representation of the ticket
 
@@ -165,7 +165,7 @@ class ComponentManager(GeniServer):
         else:
             data["initscripts"] = {}
 
-        # copy the rspec attributes from the geniticket into the plticket
+        # copy the rspec attributes from the sfaticket into the plticket
         # attributes. The NM will later copy them back out and put them into
         # the rspec field of the slice record
         for itemname in ticket_rspec.keys():

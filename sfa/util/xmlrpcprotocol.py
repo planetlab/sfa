@@ -1,4 +1,4 @@
-# XMLRPC-specific code for GeniClient
+# XMLRPC-specific code for SFA Client
 
 import xmlrpclib
 

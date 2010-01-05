@@ -12,6 +12,7 @@ class NodeManager:
     
     def __call__(self, *args):
         method = self.method
+        ### WARNING -- hardwired name needs to be computed 
         sfa_slice = "pl_genicw"
         python = "/usr/bin/python"
         vserver_path = "/vservers/%s" % (sfa_slice)

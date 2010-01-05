@@ -6,7 +6,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.debug import log
 from sfa.trust.credential import Credential
-from sfa.util.record import GeniRecord
+from sfa.util.record import SfaRecord
 
 class resolve(Method):
     """
@@ -25,7 +25,7 @@ class resolve(Method):
               Parameter(list, "List of Human readable names ([hrn])"))  
         ]
 
-    returns = [GeniRecord]
+    returns = [SfaRecord]
     
     def call(self, cred, hrn, origin_hrn=None):
         user_cred = Credential(string=cred)

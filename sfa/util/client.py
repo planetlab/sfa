@@ -1,7 +1,7 @@
 ##
-# This module implements the client-side of the Geni API. Stubs are provided
+# This module implements the client-side of the SFA API. Stubs are provided
 # that convert the supplied parameters to the necessary format and send them
-# via XMLRPC to a Geni Server.
+# via XMLRPC to an SFA Server.
 #
 # TODO: Investigate ways to combine this with existing PLC API?
 ##
@@ -16,11 +16,11 @@ from sfa.util.record import *
 from sfa.util.sfaticket import SfaTicket
 
 ##
-# The GeniClient class provides stubs for executing Geni operations. A given
+# The GeniClient class provides stubs for executing SFA operations. A given
 # client object connects to one server. To connect to multiple servers, create
 # multiple GeniClient objects.
 #
-# The Geni protocol uses an HTTPS connection, and the client's side of the
+# The SFA protocol uses an HTTPS connection, and the client's side of the
 # connection uses his private key. Generally, this private key must match the
 # public key that is containing in the GID that the client is providing for
 # those functions that take a GID.
@@ -142,12 +142,12 @@ class GeniClient:
         result_dict_list = self.server.list(cred.save_to_string(save_parents=True), auth_hrn, caller_cred)
         result_rec_list = []
         for dict in result_dict_list:
-             result_rec_list.append(GeniRecord(dict=dict))
+             result_rec_list.append(SfaRecord(dict=dict))
         return result_rec_list
 
     ##
     # Register an object with the registry. In addition to being stored in the
-    # Geni database, the appropriate records will also be created in the
+    # SFA database, the appropriate records will also be created in the
     # PLC databases.
     #
     #
@@ -219,12 +219,12 @@ class GeniClient:
             elif dict['type'] in ['user']:
                 result_rec_list.append(UserRecord(dict=dict))
             else:
-                result_rec_list.append(GeniRecord(dict=dict))
+                result_rec_list.append(SfaRecord(dict=dict))
         return result_rec_list
 
     ##
     # Update an object in the registry. Currently, this only updates the
-    # PLC information associated with the record. The Geni fields (name, type,
+    # PLC information associated with the record. The SFA fields (name, type,
     # GID) are fixed.
     #
     #

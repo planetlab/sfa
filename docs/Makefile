@@ -2,8 +2,8 @@
 doc:
 	pythondoc.py ../sfa/util/certificate.py ../sfa/util/credential.py ../sfa/util/gid.py \
                      ../sfa/util/rights.py ../sfa/util/config.py ../sfa/trust/hierarchy.py \
-                     ../sfa/util/record.py ../sfa/util/geniclient.py \
-                     ../sfa/util/geniserver.py 
+                     ../sfa/util/record.py ../sfa/util/client.py \
+                     ../sfa/util/server.py 
 
 	pythondoc.py ../sfa/registry/registry.py ../sfa/registry/import.py \
                      ../sfa/registry/nuke.py

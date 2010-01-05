@@ -5,9 +5,9 @@ import os
 import sys
 import datetime
 import time
-from sfa.util.geniserver import *
+from sfa.util.server import *
 
-class SliceMgr(GeniServer):
+class SliceMgr(SfaServer):
 
   
     ##
@@ -19,5 +19,5 @@ class SliceMgr(GeniServer):
     # @param cert_file certificate filename containing public key (could be a GID file)     
 
     def __init__(self, ip, port, key_file, cert_file, config = "/etc/sfa/sfa_config"):
-        GeniServer.__init__(self, ip, port, key_file, cert_file)
+        SfaServer.__init__(self, ip, port, key_file, cert_file)
         self.server.interface = 'slicemgr'      

@@ -4,7 +4,7 @@
 #
 # RemoteShell() exports an API that looks identical to that exported by
 # PLC.Shell.Shell(). It's meant to be a drop in replacement for running
-# geniwrapper on a different machine than PLC.
+# SFA on a different machine than PLC.
 
 ### $Id$
 ### $URL$

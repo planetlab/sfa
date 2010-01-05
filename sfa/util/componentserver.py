@@ -6,8 +6,8 @@
 # TODO: investigate ways to combine this with existing PLC server?
 ##
 
-### $Id: geniserver.py 15849 2009-11-23 01:36:21Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/util/geniserver.py $
+### $Id$
+### $URL$
 
 import sys
 import traceback
@@ -26,7 +26,7 @@ from sfa.trust.credential import *
 
 from sfa.util.faults import *
 from sfa.plc.api import ComponentAPI 
-from sfa.util.geniserver import verify_callback, SecureXMLRPCServer
+from sfa.util.server import verify_callback, SecureXMLRPCServer
 from sfa.util.debug import log
 
 
@@ -88,7 +88,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             self.connection.shutdown() # Modified here!
 
 ##
-# Implements an HTTPS XML-RPC server. Generally it is expected that GENI
+# Implements an HTTPS XML-RPC server. Generally it is expected that SFA
 # functions will take a credential string, which is passed to
 # decode_authentication. Decode_authentication() will verify the validity of
 # the credential, and verify that the user is using the key that matches the
@@ -97,7 +97,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 class ComponentServer(threading.Thread):
 
     ##
-    # Create a new GeniServer object.
+    # Create a new SfaServer object.
     #
     # @param ip the ip address to listen on
     # @param port the port to listen on

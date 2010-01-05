@@ -1,5 +1,5 @@
 ##
-# Implements support for geni records
+# Implements support for SFA records
 #
 # TODO: Use existing PLC database methods? or keep this separate?
 ##
@@ -17,9 +17,9 @@ from sfa.util.parameter import *
 from sfa.util.namespace import *
 from sfa.util.row import Row
 
-class GeniRecord(Row):
+class SfaRecord(Row):
     """ 
-    The GeniRecord class implements a Geni Record. A GeniRecord is a tuple
+    The SfaRecord class implements an SFA Record. A SfaRecord is a tuple
     (Hrn, GID, Type, Info).
  
     Hrn specifies the Human Readable Name of the object
@@ -58,7 +58,7 @@ class GeniRecord(Row):
     }
     all_fields = dict(fields.items() + internal_fields.items())
     ##
-    # Create a Geni Record
+    # Create an SFA Record
     #
     # @param name if !=None, assign the name of the record
     # @param gid if !=None, assign the gid of the record
@@ -309,8 +309,8 @@ class GeniRecord(Row):
         record = RecordSpec()
         record.parseString(str)
         record_dict = record.toDict()
-        geni_dict = record_dict['record']
-        self.load_from_dict(geni_dict)
+        sfa_dict = record_dict['record']
+        self.load_from_dict(sfa_dict)
 
     ##
     # Dump the record to stdout
@@ -331,7 +331,7 @@ class GeniRecord(Row):
         #    self.get_gid_object().dump(8, dump_parents)
         #print "    pointer:", self.pointer
        
-        order = GeniRecord.fields.keys() 
+        order = SfaRecord.fields.keys() 
         for key in self.keys():
             if key not in order:
                 order.append(key)
@@ -348,7 +348,7 @@ class GeniRecord(Row):
         return dict(self)
     
 
-class UserRecord(GeniRecord):
+class UserRecord(SfaRecord):
 
     fields = {
         'email': Parameter(str, 'email'),
@@ -358,9 +358,9 @@ class UserRecord(GeniRecord):
         'key': Parameter(str, 'Public key'),
         'slices': Parameter([str], 'List of slices this user belongs to'),
         }
-    fields.update(GeniRecord.fields)
+    fields.update(SfaRecord.fields)
     
-class SliceRecord(GeniRecord):
+class SliceRecord(SfaRecord):
     fields = {
         'name': Parameter(str, 'Slice name'),
         'url': Parameter(str, 'Slice url'),
@@ -368,10 +368,10 @@ class SliceRecord(GeniRecord):
         'researcher': Parameter([str], 'List of users for this slice'),
         'description': Parameter([str], 'Description of this slice'), 
         }
-    fields.update(GeniRecord.fields)
+    fields.update(SfaRecord.fields)
 
  
-class NodeRecord(GeniRecord):
+class NodeRecord(SfaRecord):
     fields = {
         'hostname': Parameter(str, 'This nodes dns name'),
         'node_type': Parameter(str, 'Type of node this is'),
@@ -379,10 +379,10 @@ class NodeRecord(GeniRecord):
         'latitude': Parameter(str, 'latitude'),
         'longitude': Parameter(str, 'longitude'),
         }
-    fields.update(GeniRecord.fields)
+    fields.update(SfaRecord.fields)
 
 
-class AuthorityRecord(GeniRecord):
+class AuthorityRecord(SfaRecord):
     fields =  {
         'name': Parameter(str, 'Name'),
         'login_base': Parameter(str, 'login base'),
@@ -393,6 +393,6 @@ class AuthorityRecord(GeniRecord):
         'researcher': Parameter([str], 'List of researchers'),
         'PI': Parameter([str], 'List of Principal Investigators'),
         }
-    fields.update(GeniRecord.fields)
+    fields.update(SfaRecord.fields)
     
 

@@ -6,7 +6,7 @@ from sfa.trust.rights import *
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.util.record import GeniRecord
+from sfa.util.record import SfaRecord
 from sfa.util.debug import log
 
 class get_self_credential(Method):
@@ -58,7 +58,7 @@ class get_self_credential(Method):
         records = manager.resolve(self.api, hrn, type)
         if not records:
             raise RecordNotFound(hrn)
-        record = GeniRecord(dict=records[0])
+        record = SfaRecord(dict=records[0])
         gid = record.get_gid_object()
         gid_str = gid.save_to_string(save_parents=True)
         self.api.auth.authenticateGid(gid_str, [cert, type, hrn], request_hash)

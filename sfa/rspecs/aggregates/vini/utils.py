@@ -542,7 +542,7 @@ class Topology:
         maxbps = get_tc_rate(maxbw)
         for link in self.nodelinks:
             if link.bps <= 0:
-                raise GeniInvalidArgument(bw, "BW")
+                raise SfaInvalidArgument(bw, "BW")
             if link.bps > maxbps:
                 raise PermissionError(" %s requested %s but max BW is %s" % 
                                       (hrn, format_tc_rate(link.bps), maxbw))

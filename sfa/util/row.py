@@ -25,7 +25,7 @@ class Row(dict):
         #mandatory_fields = self.db.fields(self.table_name, notnull = True, hasdef = False)
         #for field in mandatory_fields:
         #    if not self.has_key(field) or self[field] is None:
-        #        raise GeniInvalidArgument, field + " must be specified and cannot be unset in class %s"%self.__class__.__name__
+        #        raise SfaInvalidArgument, field + " must be specified and cannot be unset in class %s"%self.__class__.__name__
 
         # Validate values before committing
         for key, value in self.iteritems():
@@ -52,6 +52,6 @@ class Row(dict):
         human = time.strftime(time_format, time.gmtime(timestamp))
 
         if check_future and timestamp < time.time():
-            raise GeniInvalidArgument, "'%s' not in the future" % human
+            raise SfaInvalidArgument, "'%s' not in the future" % human
 
         return human

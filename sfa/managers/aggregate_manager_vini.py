@@ -13,7 +13,7 @@ SFA_VINI_WHITELIST = '/etc/sfa/vini.whitelist'
 Copied from create_slice_aggregate() in sfa.plc.slices
 """
 def create_slice_vini_aggregate(api, hrn, nodes):
-    # Get the slice record from geni
+    # Get the slice record
     slice = {}
     registries = Registries(api)
     registry = registries[api.hrn]

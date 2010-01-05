@@ -1,6 +1,6 @@
 from pprint import pprint
 
-from sfa.util.geniclient import *
+from sfa.util.client import *
 from sfa.trust.credential import *
 
 cred = Credential(filename = 'tmack.pl.sa.cred')

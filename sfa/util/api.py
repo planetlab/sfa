@@ -1,8 +1,8 @@
 #
-# Geniwrapper XML-RPC and SOAP interfaces
+# SFA XML-RPC and SOAP interfaces
 #
-### $Id: api.py 15596 2009-10-31 21:42:05Z anil $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/api.py $
+### $Id$
+### $URL$
 #
 
 import sys
@@ -131,7 +131,7 @@ class BaseAPI:
         """
         # Look up method
         if method not in self.methods:
-            raise GeniInvalidAPIMethod, method
+            raise SfaInvalidAPIMethod, method
         
         # Get new instance of method
         try:
@@ -140,7 +140,7 @@ class BaseAPI:
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except ImportError, AttributeError:
-            raise GeniInvalidAPIMethod, method
+            raise SfaInvalidAPIMethod, method
 
     def call(self, source, method, *args):
         """
@@ -186,7 +186,7 @@ class BaseAPI:
 
         # Return result
         if interface == xmlrpclib:
-            if not isinstance(result, GeniFault):
+            if not isinstance(result, SfaFault):
                 result = (result,)
 
             data = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)

@@ -2,8 +2,8 @@ from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
-from sfa.util.record import GeniRecord
-from sfa.util.genitable import GeniTable
+from sfa.util.record import SfaRecord
+from sfa.util.table import SfaTable
 from sfa.util.debug import log
 from sfa.trust.credential import Credential
 from types import StringTypes
@@ -46,7 +46,7 @@ class remove_peer_object(Method):
         try: self.api.auth.verify_object_permission(record['hrn'])
         except: self.api.auth.verify_cred_is_me(cred)
         
-        table = GeniTable()
+        table = SfaTable()
         hrn, type = record['hrn'], record['type']
         records = table.find({'hrn': hrn, 'type': type })
         for record in records:
@@ -88,14 +88,14 @@ class remove_peer_object(Method):
             self.api.plshell.DeleteSite(self.api.plauth, site['site_id'])
            
         else:
-            raise UnknownGeniType(type)
+            raise UnknownSfaType(type)
 
         return 1
 
     def get_peer_name(self, peer_id):
         peers = self.api.plshell.GetPeers(self.api.plauth, [peer_id], ['peername', 'shortname', 'hrn_root'])
         if not peers:
-            raise GeniInvalidArgument, "No such peer"
+            raise SfaInvalidArgument, "No such peer"
         peer = peers[0]
         return peer['shortname'] 
 

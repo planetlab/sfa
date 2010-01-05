@@ -13,7 +13,7 @@ import sys
 import tempfile
 
 from sfa.util.record import *
-from sfa.util.genitable import GeniTable
+from sfa.util.table import SfaTable
 from sfa.util.namespace import *
 from sfa.util.config import Config
 from sfa.util.report import trace, error
@@ -90,11 +90,11 @@ class sfaImport:
                 parent_hrn = hrn
             auth_info = AuthHierarchy.get_auth_info(parent_hrn)
             
-        table = GeniTable()
+        table = SfaTable()
         auth_record = table.find({'type': 'authority', 'hrn': hrn})
 
         if not auth_record:
-            auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
+            auth_record = SfaRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
             auth_record['authority'] = get_authority(auth_record['hrn'])
             trace("Import: inserting authority record for " + hrn, self.logger)
             table.insert(auth_record)
@@ -128,8 +128,8 @@ class sfaImport:
 
         # create the gid
         person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        table = GeniTable()
-        person_record = GeniRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
+        table = SfaTable()
+        person_record = SfaRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         person_record['authority'] = get_authority(person_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'user', 'pointer': person['person_id']})
         if not existing_records:
@@ -154,9 +154,9 @@ class sfaImport:
 
         pkey = Keypair(create=True)
         slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        slice_record = GeniRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
+        slice_record = SfaRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
         slice_record['authority'] = get_authority(slice_record['hrn'])
-        table = GeniTable()
+        table = SfaTable()
         existing_records = table.find({'hrn': hrn, 'type': 'slice', 'pointer': slice['slice_id']})
         if not existing_records:
             table.insert(slice_record)
@@ -181,11 +181,11 @@ class sfaImport:
         if len(hrn) > 64:
             hrn = hrn[:64]
 
-        table = GeniTable()
+        table = SfaTable()
         node_record = table.find({'type': 'node', 'hrn': hrn})
         pkey = Keypair(create=True)
         node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
-        node_record = GeniRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
+        node_record = SfaRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
         node_record['authority'] = get_authority(node_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'node', 'pointer': node['node_id']})
         if not existing_records:
@@ -225,8 +225,8 @@ class sfaImport:
 
         auth_info = AuthHierarchy.get_auth_info(hrn)
 
-        table = GeniTable()
-        auth_record = GeniRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
+        table = SfaTable()
+        auth_record = SfaRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
         auth_record['authority'] = get_authority(auth_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'authority', 'pointer': site['site_id']})
         if not existing_records:
@@ -242,7 +242,7 @@ class sfaImport:
 
     def delete_record(self, hrn, type):
         # delete the record
-        table = GeniTable()
+        table = SfaTable()
         record_list = table.find({'type': type, 'hrn': hrn})
         for record in record_list:
             trace("Import: Removing record %s %s" % (type, hrn), self.logger)

@@ -1,5 +1,5 @@
 ##
-# Geniwrapper uses two crypto libraries: pyOpenSSL and M2Crypto to implement
+# SFA uses two crypto libraries: pyOpenSSL and M2Crypto to implement
 # the necessary crypto functionality. Ideally just one of these libraries
 # would be used, but unfortunately each of these libraries is independently
 # lacking. The pyOpenSSL library is missing many necessary functions, and

@@ -37,7 +37,7 @@ SFA_REGISTRY_LEVEL1_AUTH=""
 SFA_REGISTRY_HOST="localhost"
 
 # Port
-# Geni registry port
+# SFA registry port
 SFA_REGISTRY_PORT=12345
 
 ## ==============================================================
@@ -60,7 +60,7 @@ SFA_AGGREGATE_TYPE='pl'
 SFA_AGGREGATE_HOST="localhost"
 #
 ## Port
-## Geni aggregate server port
+## SFA aggregate server port
 SFA_AGGREGATE_PORT=12346
 
 ## ==============================================================
@@ -83,7 +83,7 @@ SFA_SM_TYPE='pl'
 SFA_SM_HOST="localhost"
 
 # Port
-# Geni slice manager server port  
+# SFA slice manager server port  
 SFA_SM_PORT=12347
 
 ## ===============================================================
@@ -103,7 +103,7 @@ SFA_CM_TYPE='pl'
 SFA_CM_HOST="localhost"
 #
 # Port
-# Geni slice manager server port
+# SFA slice manager server port
 SFA_CM_PORT=12346
 
 

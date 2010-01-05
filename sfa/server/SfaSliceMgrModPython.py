@@ -12,10 +12,10 @@ import traceback
 import xmlrpclib
 from mod_python import apache
 
-from sfa.plc.api import GeniAPI
+from sfa.plc.api import SfaAPI
 from sfa.util.debug import log
 
-api = GeniAPI(interface='slicemgr')
+api = SfaAPI(interface='slicemgr')
 
 class unbuffered:
     """

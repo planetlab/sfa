@@ -1,4 +1,6 @@
 #! /usr/bin/env python
+# $Id$
+# $URL$
 from __future__ import with_statement
 
 import sys
@@ -10,7 +12,7 @@ from optparse import OptionParser
 
 from sfa.trust.certificate import Certificate
 from sfa.trust.credential import Credential
-from sfa.util.record import GeniRecord
+from sfa.util.record import SfaRecord
 from sfa.util.rspec import RSpec
 
 def determine_sfa_filekind(fn):
@@ -59,7 +61,7 @@ def extract_gids(cred, extract_parents):
 
 def create_parser():
    # Generate command line parser
-   parser = OptionParser(usage="genidump [options] filename")
+   parser = OptionParser(usage="%prog [options] filename")
 
    parser.add_option("-e", "--extractgids", action="store_true", dest="extract_gids", default=False, help="Extract GIDs from credentials")
    parser.add_option("-p", "--dumpparents", action="store_true", dest="dump_parents", default=False, help="Show parents")

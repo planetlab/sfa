@@ -25,7 +25,7 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
 
 from sfa.util.faults import *
-from sfa.plc.api import GeniAPI 
+from sfa.plc.api import SfaAPI 
 from sfa.util.debug import log
 
 ##
@@ -146,10 +146,10 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         It was copied out from SimpleXMLRPCServer.py and modified to shutdown the socket cleanly.
         """
         try:
-            self.api = GeniAPI(peer_cert = self.server.peer_cert, 
-                           interface = self.server.interface, 
-                           key_file = self.server.key_file, 
-                           cert_file = self.server.cert_file)
+            self.api = SfaAPI(peer_cert = self.server.peer_cert, 
+                              interface = self.server.interface, 
+                              key_file = self.server.key_file, 
+                              cert_file = self.server.cert_file)
             # get arguments
             request = self.rfile.read(int(self.headers["content-length"]))
             # In previous versions of SimpleXMLRPCServer, _dispatch
@@ -182,16 +182,16 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             self.connection.shutdown() # Modified here!
 
 ##
-# Implements an HTTPS XML-RPC server. Generally it is expected that GENI
+# Implements an HTTPS XML-RPC server. Generally it is expected that SFA
 # functions will take a credential string, which is passed to
 # decode_authentication. Decode_authentication() will verify the validity of
 # the credential, and verify that the user is using the key that matches the
 # GID supplied in the credential.
 
-class GeniServer(threading.Thread):
+class SfaServer(threading.Thread):
 
     ##
-    # Create a new GeniServer object.
+    # Create a new SfaServer object.
     #
     # @param ip the ip address to listen on
     # @param port the port to listen on

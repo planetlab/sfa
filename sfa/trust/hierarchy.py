@@ -1,6 +1,6 @@
 ##
 # This module implements a hierarchy of authorities and performs a similar
-# function as the "tree" module of the original geniwrapper prototype. An HRN
+# function as the "tree" module of the original SFA prototype. An HRN
 # is assumed to be a string of authorities separated by dots. For example,
 # "planetlab.us.arizona.bakers". Each component of the HRN is a different
 # authority, with the last component being a leaf in the tree.

@@ -14,7 +14,7 @@ import sys
 import socket
 import struct
 
-# Message IDs for all the GENI light calls
+# Message IDs for all the SFA light calls
 # This will be used by the aggrMgr controller
 SFA_GET_RESOURCES = 101
 SFA_CREATE_SLICE = 102

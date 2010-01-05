@@ -1,5 +1,5 @@
 #
-# GeniAPI authentication 
+# SfaAPI authentication 
 #
 ### $Id$
 ### $URL$
@@ -149,7 +149,7 @@ class Auth:
         caller_gid = cred.get_gid_caller()
         caller_hrn = caller_gid.get_hrn()
         if caller_hrn != self.config.SFA_INTERFACE_HRN:
-            raise GeniPermissionError(self.config.SFA_INTEFACE_HRN)
+            raise SfaPermissionDenied(self.config.SFA_INTEFACE_HRN)
 
         return   
         

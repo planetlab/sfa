@@ -8,7 +8,7 @@ from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
-from sfa.util.genitable import *
+from sfa.util.table import SfaTable
 from sfa.trust.certificate import Keypair
 
 class get_key(Method):
@@ -36,7 +36,7 @@ class get_key(Method):
         node = nodes[0]
        
         # look up the sfa record
-        table = GeniTable()
+        table = SfaTable()
         records = table.findObjects({'type': 'node', 'pointer': node['node_id']})
         if not records:
             raise RecordNotFound("pointer:" + str(node['node_id']))  

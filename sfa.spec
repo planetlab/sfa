@@ -62,7 +62,7 @@ Requires: sfa
 This package provides the python libraries that the SFA implementation requires
 
 %description plc
-Geniwrapper implements the SFA interface which serves as a layer
+This package implements the SFA interface which serves as a layer
 between the existing PlanetLab interfaces and the SFA API.
 
 %description client
@@ -113,7 +113,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/getNodes.py*
 %{_bindir}/getRecord.py*
 %{_bindir}/setRecord.py*
-%{_bindir}/genidump.py*
+%{_bindir}/sfadump.py*
 
 %files sfatables
 %{_bindir}/sfatables

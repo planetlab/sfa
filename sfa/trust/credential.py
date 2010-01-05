@@ -1,5 +1,5 @@
 ##
-# Implements Geni Credentials
+# Implements SFA Credentials
 #
 # Credentials are layered on top of certificates, and are essentially a
 # certificate that stores a tuple of parameters.

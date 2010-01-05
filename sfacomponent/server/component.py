@@ -1,5 +1,5 @@
 #
-# Component is a GeniServer that implements the Component interface
+# Component is a SfaServer that implements the Component interface
 #
 ### $Id: 
 ### $URL: 
@@ -10,7 +10,7 @@ import os
 import time
 import sys
 
-from sfa.util.geniserver import GeniServer
+from sfa.util.server import SfaServer
 from sfacomponent.plc.api import ComponentAPI
  
 # GeniLight client support is optional
@@ -20,9 +20,9 @@ except ImportError:
     GeniClientLight = None            
 
 ##
-# Component is a GeniServer that serves component operations.
+# Component is a SfaServer that serves component operations.
 
-class Component(GeniServer):
+class Component(SfaServer):
     ##
     # Create a new registry object.
     #
@@ -32,7 +32,7 @@ class Component(GeniServer):
     # @param cert_file certificate filename containing public key (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file):
-        GeniServer.__init__(self, ip, port, key_file, cert_file)
+        SfaServer.__init__(self, ip, port, key_file, cert_file)
         # re-initialize the servers api as Component api  
         self.server.api = ComponentAPI(interface='component', key_file=key_file, cert_file=cert_file)  
         self.server.interface = 'component'

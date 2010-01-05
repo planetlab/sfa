@@ -105,4 +105,4 @@ def xmlrpc_type(arg):
         # documentation purposes.
         return "mixed"
     else:
-        raise GeniAPIError, "XML-RPC cannot marshal %s objects" % arg_type
+        raise SfaAPIError, "XML-RPC cannot marshal %s objects" % arg_type

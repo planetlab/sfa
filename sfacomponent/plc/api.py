@@ -1,5 +1,5 @@
 #
-# Geniwrapper XML-RPC and SOAP interfaces
+# SFA XML-RPC and SOAP interfaces
 #
 ### $Id: api.py 15596 2009-10-31 21:42:05Z anil $
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/api.py $

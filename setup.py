@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Installation script for the geniwrapper module
+Installation script for the sfa module
 """
 
 import sys, os, os.path
@@ -9,34 +9,36 @@ from glob import glob
 import shutil
 from distutils.core import setup
 
-bins = [ 'config/sfa-config-tty',
-            'sfa/plc/sfa-import-plc.py', 
-            'sfa/plc/sfa-nuke-plc.py', 
-            'sfa/server/sfa-server.py', 
-            'sfa/server/sfa-clean-peer-records.py', 
-            'sfa/client/sfi.py', 
-            'sfa/client/getNodes.py',
-            'sfa/client/getRecord.py',
-            'sfa/client/setRecord.py',
-            'sfa/client/genidump.py',
-            'sfatables/sfatables',
-            ]
+bins = [ 
+    'config/sfa-config-tty',
+    'sfa/plc/sfa-import-plc.py', 
+    'sfa/plc/sfa-nuke-plc.py', 
+    'sfa/server/sfa-server.py', 
+    'sfa/server/sfa-clean-peer-records.py', 
+    'sfa/client/sfi.py', 
+    'sfa/client/getNodes.py',
+    'sfa/client/getRecord.py',
+    'sfa/client/setRecord.py',
+    'sfa/client/sfadump.py',
+    'sfatables/sfatables',
+    ]
 
-package_dirs = [ 'sfa', 
-                 'sfa/client',
-                 'sfa/methods',
-                 'sfa/plc',
-                 'sfa/server',
-                 'sfa/trust',
-                 'sfa/util', 
-                 'sfa/managers',
-                 'sfa/rspecs',
-                 'sfa/rspecs/aggregates',
-                 'sfa/rspecs/aggregates/vini',
-                 'sfatables',
-                 'sfatables/commands',
-                 'sfatables/processors',
-                 ]
+package_dirs = [
+    'sfa', 
+    'sfa/client',
+    'sfa/methods',
+    'sfa/plc',
+    'sfa/server',
+    'sfa/trust',
+    'sfa/util', 
+    'sfa/managers',
+    'sfa/rspecs',
+    'sfa/rspecs/aggregates',
+    'sfa/rspecs/aggregates/vini',
+    'sfatables',
+    'sfatables/commands',
+    'sfatables/processors',
+    ]
 
 
 data_files = [('/etc/sfa/', [ 'config/aggregates.xml',

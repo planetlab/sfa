@@ -1,5 +1,5 @@
-# $Id: Filter.py 14587 2009-07-19 13:18:50Z thierry $
-# $URL: svn+ssh://svn.planet-lab.org/svn/PLCAPI/trunk/PLC/Filter.py $
+# $Id$
+# $URL$
 from types import StringTypes
 try:
     set
@@ -136,7 +136,7 @@ class Filter(Parameter, dict):
             # filter on fields
             if not modifiers['-']:
                 if field not in self.fields:
-                    raise GeniInvalidArgument, "Invalid filter field '%s'" % field
+                    raise SfaInvalidArgument, "Invalid filter field '%s'" % field
 
                 if isinstance(value, (list, tuple, set)):
                     # handling filters like '~slice_id':[]
@@ -186,7 +186,7 @@ class Filter(Parameter, dict):
             # sorting and clipping
             else:
                 if field not in ('SORT','OFFSET','LIMIT'):
-                    raise GeniInvalidArgument, "Invalid filter, unknown sort and clip field %r"%field
+                    raise SfaInvalidArgument, "Invalid filter, unknown sort and clip field %r"%field
                 # sorting
                 if field == 'SORT':
                     if not isinstance(value,(list,tuple,set)):
@@ -199,7 +199,7 @@ class Filter(Parameter, dict):
                             field = field[1:]
                             order = 'DESC'
                         if field not in self.fields:
-                            raise GeniInvalidArgument, "Invalid field %r in SORT filter"%field
+                            raise SfaInvalidArgument, "Invalid field %r in SORT filter"%field
                         sorts.append("%s %s"%(field,order))
                 # clipping
                 elif field == 'OFFSET':

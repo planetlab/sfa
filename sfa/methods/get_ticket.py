@@ -7,7 +7,7 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.config import Config
 from sfa.trust.credential import Credential
-from sfa.util.genitable import GeniTable
+from sfa.util.table import SfaTable
 from sfa.util.sfaticket import SfaTicket
 from sfa.plc.slices import Slices
 from sfatables.runtime import SFATablesRules

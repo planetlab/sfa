@@ -11,7 +11,7 @@ from sfa.trust.credential import Credential
 class update(Method):
     """
     Update an object in the registry. Currently, this only updates the
-    PLC information associated with the record. The Geni fields (name, type,
+    PLC information associated with the record. The SFA fields (name, type,
     GID) are fixed.
     
     @param cred credential string specifying rights of the caller

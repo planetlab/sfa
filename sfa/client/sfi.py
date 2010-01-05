@@ -106,7 +106,7 @@ def save_record_to_file(filename, record):
     elif record['type'] in ['authority', 'ma', 'sa']:
         record = AuthorityRecord(dict = record)
     else:
-        record = GeniRecord(dict = record)
+        record = SfaRecord(dict = record)
     str = record.save_to_string()
     file(filename, "w").write(str)
     return
@@ -115,7 +115,7 @@ def save_record_to_file(filename, record):
 # load methods
 def load_record_from_file(filename):
     str = file(filename, "r").read()
-    record = GeniRecord(string=str)
+    record = SfaRecord(string=str)
     return record
 
 
@@ -449,7 +449,7 @@ class Sfi:
             raise Exception, "Error: Didn't find a %(type)s record for %(hrn)s" % locals()
     
         # the gid of the user who will be delegated too
-        record = GeniRecord(dict=records[0])
+        record = SfaRecord(dict=records[0])
         delegee_gid = record.get_gid_object()
         delegee_hrn = delegee_gid.get_hrn()
         
@@ -572,7 +572,7 @@ class Sfi:
             elif record['type'] in ['authority', 'ma', 'sa']:
                 record = AuthorityRecord(dict = record)
             else:
-                record = GeniRecord(dict = record)
+                record = SfaRecord(dict = record)
             if (opts.format=="text"): 
                 record.dump()  
             else:

@@ -1,15 +1,14 @@
-# genitable.py
+### $Id$
+### $URL$
 #
-# implements support for geni records stored in db tables
+# implements support for SFA records stored in db tables
 #
 # TODO: Use existing PLC database methods? or keep this separate?
 
-### $Id$
-### $URL$
-
 import report
-import  pgdb
+import pgdb
 from pg import DB, ProgrammingError
+
 from sfa.util.PostgreSQL import *
 from sfa.trust.gid import *
 from sfa.util.record import *
@@ -17,14 +16,14 @@ from sfa.util.debug import *
 from sfa.util.config import *
 from sfa.util.filter import *
 
-class GeniTable(list):
+class SfaTable(list):
 
-    GENI_TABLE_PREFIX = "sfa"
+    SFA_TABLE_PREFIX = "sfa"
 
     def __init__(self, record_filter = None):
 
         # pgsql doesn't like table names with "." in them, to replace it with "$"
-        self.tablename = GeniTable.GENI_TABLE_PREFIX
+        self.tablename = SfaTable.SFA_TABLE_PREFIX
         self.config = Config()
         self.db = PostgreSQL(self.config)
         # establish a connection to the pgsql server
@@ -46,10 +45,10 @@ class GeniTable(list):
 
     def db_fields(self, obj=None):
         
-        db_fields = self.db.fields(self.GENI_TABLE_PREFIX)
+        db_fields = self.db.fields(self.SFA_TABLE_PREFIX)
         return dict( [ (key,value) for (key, value) in obj.items() \
                         if key in db_fields and
-                        self.is_writable(key, value, GeniRecord.fields)] )      
+                        self.is_writable(key, value, SfaRecord.fields)] )      
 
     @staticmethod
     def is_writable (key,value,dict):
@@ -157,16 +156,16 @@ class GeniTable(list):
         if isinstance(record_filter, (list, tuple, set)):
             ints = filter(lambda x: isinstance(x, (int, long)), record_filter)
             strs = filter(lambda x: isinstance(x, StringTypes), record_filter)
-            record_filter = Filter(GeniRecord.all_fields, {'record_id': ints, 'hrn': strs})
+            record_filter = Filter(SfaRecord.all_fields, {'record_id': ints, 'hrn': strs})
             sql += "AND (%s) %s " % record_filter.sql("OR") 
         elif isinstance(record_filter, dict):
-            record_filter = Filter(GeniRecord.all_fields, record_filter)        
+            record_filter = Filter(SfaRecord.all_fields, record_filter)        
             sql += " AND (%s) %s" % record_filter.sql("AND")
         elif isinstance(record_filter, StringTypes):
-            record_filter = Filter(GeniRecord.all_fields, {'hrn':[record_filter]})    
+            record_filter = Filter(SfaRecord.all_fields, {'hrn':[record_filter]})    
             sql += " AND (%s) %s" % record_filter.sql("AND")
         elif isinstance(record_filter, int):
-            record_filter = Filter(GeniRecord.all_fields, {'record_id':[record_filter]})    
+            record_filter = Filter(SfaRecord.all_fields, {'record_id':[record_filter]})    
             sql += " AND (%s) %s" % record_filter.sql("AND")
 
         results = self.cnx.query(sql).dictresult()
@@ -188,7 +187,7 @@ class GeniTable(list):
             elif result['type'] in ['user']:
                 result_rec_list.append(UserRecord(dict=result))
             else:
-                result_rec_list.append(GeniRecord(dict=result))
+                result_rec_list.append(SfaRecord(dict=result))
         return result_rec_list
 
 
@@ -202,14 +201,14 @@ class GeniTable(list):
                 pass
     
     @staticmethod
-    def geni_records_purge(cninfo):
+    def sfa_records_purge(cninfo):
 
         cnx = DB(cninfo['dbname'], cninfo['address'], 
                  port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
         tableList = cnx.get_tables()
         for table in tableList:
-            if table.startswith(GeniTable.GENI_TABLE_PREFIX) or \
-                    table.startswith('public.' + GeniTable.GENI_TABLE_PREFIX) or \
-                    table.startswith('public."' + GeniTable.GENI_TABLE_PREFIX):
+            if table.startswith(SfaTable.SFA_TABLE_PREFIX) or \
+                    table.startswith('public.' + SfaTable.SFA_TABLE_PREFIX) or \
+                    table.startswith('public."' + SfaTable.SFA_TABLE_PREFIX):
                 report.trace("dropping table " + table)
                 cnx.query("DROP TABLE " + table)

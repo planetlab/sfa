@@ -4,8 +4,8 @@
 ### $URL$
 #
 ##
-# Import PLC records into the Geni database. It is indended that this tool be
-# run once to create Geni records that reflect the current state of the
+# Import PLC records into the SFA database. It is indended that this tool be
+# run once to create SFA records that reflect the current state of the
 # planetlab database.
 #
 # The import tool assumes that the existing PLC hierarchy should all be part
@@ -23,7 +23,7 @@ import tempfile
 import logging.handlers
 import logging
 from sfa.util.record import *
-from sfa.util.genitable import GeniTable
+from sfa.util.table import SfaTable
 from sfa.util.namespace import *
 from sfa.util.config import Config
 from sfa.trust.certificate import convert_public_key, Keypair
@@ -81,7 +81,7 @@ def main():
     plc_auth = sfaImporter.plc_auth 
     AuthHierarchy = sfaImporter.AuthHierarchy
     TrustedRoots = sfaImporter.TrustedRoots
-    table = GeniTable()
+    table = SfaTable()
     if not table.exists():
         table.create()
 

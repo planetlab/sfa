@@ -22,15 +22,15 @@ SFA_MAX_CANNED_RSPEC = '/etc/sfa/max_physical_canned.xml'
 
 topology = {}
 
-class GeniOutOfResource(GeniFault):
+class SfaOutOfResource(SfaFault):
     def __init__(self, interface):
         faultString = "Interface " + interface + " not available"
-        GeniFault.__init__(self, 100, faultString, '')
+        SfaFault.__init__(self, 100, faultString, '')
 
-class GeniNoPairRSpec(GeniFault):
+class SfaNoPairRSpec(SfaFault):
     def __init__(self, interface, interface2):
         faultString = "Interface " + interface + " should be paired with " + interface2
-        GeniFault.__init__(self, 100, faultString, '')
+        SfaFault.__init__(self, 100, faultString, '')
 
 # Returns a mapping from interfaces to the nodes they lie on and their peer interfaces
 # i -> node,i_peer
@@ -140,7 +140,7 @@ def alloc_nodes(api,hrn, requested_ifs):
 # Taken from slices.py
 
 def create_slice_max_aggregate(api, hrn, nodes):
-    # Get the slice record from geni
+    # Get the slice record 
     global topology
     topology = get_interface_map()
     slice = {}
@@ -288,9 +288,9 @@ def create_slice(api, hrn, rspec_xml):
 
     for a in requested_interfaces:
         if (a not in current_hrn_interfaces and a in current_interfaces):
-            raise GeniOutOfResource(a)
+            raise SfaOutOfResource(a)
         if (topology[a][1] not in requested_interfaces):
-            raise GeniNoPairRSpec(a,topology[a][1])
+            raise SfaNoPairRSpec(a,topology[a][1])
     # Request OK
 
     # Allocations to delete

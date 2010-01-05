@@ -9,7 +9,7 @@ class TestRecord(unittest.TestCase):
         pass
 
     def testCreate(self):
-        r = GeniRecord()
+        r = SfaRecord()
 
 if __name__ == "__main__":
     unittest.main()

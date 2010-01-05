@@ -1,5 +1,5 @@
 #
-# Registry is a GeniServer that implements the Registry interface
+# Registry is a SfaServer that implements the Registry interface
 #
 ### $Id$
 ### $URL$
@@ -10,7 +10,7 @@ import os
 import time
 import sys
 
-from sfa.util.geniserver import GeniServer
+from sfa.util.server import SfaServer
 from sfa.util.faults import *
 from sfa.util.storage import *
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
@@ -23,9 +23,9 @@ except ImportError:
     GeniClientLight = None            
 
 ##
-# Registry is a GeniServer that serves registry and slice operations at PLC.
+# Registry is a SfaServer that serves registry and slice operations at PLC.
 
-class Registry(GeniServer):
+class Registry(SfaServer):
     ##
     # Create a new registry object.
     #
@@ -35,7 +35,7 @@ class Registry(GeniServer):
     # @param cert_file certificate filename containing public key (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file):
-        GeniServer.__init__(self, ip, port, key_file, cert_file)
+        SfaServer.__init__(self, ip, port, key_file, cert_file)
         self.server.interface = 'registry' 
 
 

@@ -1,5 +1,5 @@
 #
-# Geniwrapper XML-RPC and SOAP interfaces
+# SFA XML-RPC and SOAP interfaces
 #
 ### $Id$
 ### $URL$
@@ -21,8 +21,9 @@ from sfa.util.namespace import *
 from sfa.util.api import *
 from sfa.util.nodemanager import NodeManager
 from sfa.util.sfalogging import *
+from sfa.util.table import SfaTable
 
-class GeniAPI(BaseAPI):
+class SfaAPI(BaseAPI):
 
     # flat list of method names
     import sfa.methods
@@ -135,8 +136,7 @@ class GeniAPI(BaseAPI):
         if not auth_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
-        from sfa.util.genitable import GeniTable
-        table = GeniTable()
+        table = SfaTable()
         records = table.findObjects(hrn)
         if not records:
             raise RecordNotFound
@@ -177,15 +177,15 @@ class GeniAPI(BaseAPI):
             self.credential = self.getCredentialFromRegistry()
 
     ##
-    # Convert geni fields to PLC fields for use when registering up updating
+    # Convert SFA fields to PLC fields for use when registering up updating
     # registry record in the PLC database
     #
     # @param type type of record (user, slice, ...)
     # @param hrn human readable name
-    # @param geni_fields dictionary of geni fields
+    # @param sfa_fields dictionary of SFA fields
     # @param pl_fields dictionary of PLC fields (output)
 
-    def geni_fields_to_pl_fields(self, type, hrn, record):
+    def sfa_fields_to_pl_fields(self, type, hrn, record):
 
         def convert_ints(tmpdict, int_fields):
             for field in int_fields:
@@ -210,7 +210,7 @@ class GeniAPI(BaseAPI):
         elif type == "node":
             if not "hostname" in pl_record:
                 if not "hostname" in record:
-                    raise MissingGeniInfo("hostname")
+                    raise MissingSfaInfo("hostname")
                 pl_record["hostname"] = record["hostname"]
             if not "model" in pl_record:
                 pl_record["model"] = "geni"
@@ -234,7 +234,7 @@ class GeniAPI(BaseAPI):
 
     def fill_record_pl_info(self, record):
         """
-        Fill in the planetlab specific fields of a Geni record. This
+        Fill in the planetlab specific fields of a SFA record. This
         involves calling the appropriate PLC method to retrieve the 
         database record for the object.
         
@@ -262,7 +262,7 @@ class GeniAPI(BaseAPI):
         elif (type == "node"):
             pl_res = self.plshell.GetNodes(self.plauth, [pointer])
         else:
-            raise UnknownGeniType(type)
+            raise UnknownSfaType(type)
         
         if not pl_res:
             raise PlanetLabRecordDoesNotExist(record['hrn'])
@@ -306,16 +306,15 @@ class GeniAPI(BaseAPI):
 
 
 
-    def fill_record_geni_info(self, record):
-        geni_info = {}
+    def fill_record_sfa_info(self, record):
+        sfa_info = {}
         type = record['type']
-        from sfa.util.genitable import GeniTable
-        table = GeniTable()
+        table = SfaTable()
         if (type == "slice"):
             person_ids = record.get("person_ids", [])
             persons = table.find({'type': 'user', 'pointer': person_ids})
             researchers = [person['hrn'] for person in persons]
-            geni_info['researcher'] = researchers
+            sfa_info['researcher'] = researchers
 
         elif (type == "authority"):
             person_ids = record.get("person_ids", [])
@@ -339,28 +338,28 @@ class GeniAPI(BaseAPI):
                 if 'admin' in person['roles']:
                     admins.append(hrn)
             
-            geni_info['PI'] = pis
-            geni_info['operator'] = techs
-            geni_info['owner'] = admins
+            sfa_info['PI'] = pis
+            sfa_info['operator'] = techs
+            sfa_info['owner'] = admins
             # xxx TODO: OrganizationName
 
         elif (type == "node"):
-            geni_info['dns'] = record.get("hostname", "")
+            sfa_info['dns'] = record.get("hostname", "")
             # xxx TODO: URI, LatLong, IP, DNS
     
         elif (type == "user"):
-            geni_info['email'] = record.get("email", "")
+            sfa_info['email'] = record.get("email", "")
             # xxx TODO: PostalAddress, Phone
 
-        record.update(geni_info)
+        record.update(sfa_info)
 
     def fill_record_info(self, record):
         """
-        Given a geni record, fill in the PLC specific and Geni specific
+        Given a SFA record, fill in the PLC specific and SFA specific
         fields in the record. 
         """
         self.fill_record_pl_info(record)
-        self.fill_record_geni_info(record)
+        self.fill_record_sfa_info(record)
 
     def update_membership_list(self, oldRecord, record, listName, addFunc, delFunc):
         # get a list of the HRNs tht are members of the old and new records
@@ -377,8 +376,7 @@ class GeniAPI(BaseAPI):
         # build a list of the new person ids, by looking up each person to get
         # their pointer
         newIdList = []
-        from sfa.util.genitable import GeniTable
-        table = GeniTable()
+        table = SfaTable()
         records = table.find({'type': 'user', 'hrn': newList})
         for rec in records:
             newIdList.append(rec['pointer'])

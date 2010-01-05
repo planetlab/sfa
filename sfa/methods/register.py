@@ -6,8 +6,7 @@ from sfa.trust.gid import *
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.util.record import GeniRecord
-from sfa.util.genitable import GeniTable
+from sfa.util.record import SfaRecord
 from sfa.util.debug import log
 from sfa.trust.auth import Auth
 from sfa.trust.gid import create_uuid
@@ -16,7 +15,7 @@ from sfa.trust.credential import Credential
 class register(Method):
     """
     Register an object with the registry. In addition to being stored in the
-    Geni database, the appropriate records will also be created in the
+    SFA database, the appropriate records will also be created in the
     PLC databases
     
     @param cred credential string

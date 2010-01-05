@@ -202,7 +202,7 @@ class PostgreSQL:
             print >> log, query
             print >> log, "Params:"
             print >> log, pformat(params)
-            raise GeniDBError("Please contact support")
+            raise SfaDBError("Please contact support")
 
         return cursor
 

@@ -12,7 +12,7 @@ from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
 from sfa.util.storage import *
-from sfa.util.record import GeniRecord
+from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.debug import log

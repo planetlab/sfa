@@ -1,4 +1,4 @@
-# SOAP-specific code for GeniClient
+# SOAP-specific code for SFA Client
 
 import pdb
 from ZSI.client import Binding

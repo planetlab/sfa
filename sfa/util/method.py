@@ -1,5 +1,5 @@
 #
-# Base class for all GeniAPI functions
+# Base class for all SfaAPI functions
 #
 #
 
@@ -22,7 +22,7 @@ from sfa.util.debug import profile, log
 # we inherit object because we use new-style classes for legacy methods
 class Method (object):
     """
-    Base class for all GeniAPI functions. At a minimum, all GeniAPI
+    Base class for all SfaAPI functions. At a minimum, all SfaAPI
     functions must define:
 
     interfaces = [allowed interfaces]
@@ -47,7 +47,7 @@ class Method (object):
 
     def call(self, *args):
         """
-        Method body for all GeniAPI functions. Must override.
+        Method body for all SfaAPI functions. Must override.
 
         """
 
@@ -66,7 +66,7 @@ class Method (object):
     	
     def __call__(self, *args, **kwds):
         """
-        Main entry point for all GeniAPI functions. Type checks
+        Main entry point for all SfaAPI functions. Type checks
         arguments, authenticates, and executes call().
         """
 
@@ -74,7 +74,7 @@ class Method (object):
             start = time.time()
             methodname = self.name
             if not self.api.interface or self.api.interface not in self.interfaces:
-                raise GeniInvalidAPIMethod, methodname, self.api.interface 
+                raise SfaInvalidAPIMethod, methodname, self.api.interface 
 
             # legacy code cannot be type-checked, due to the way Method.args() works
             if not hasattr(self,"skip_typecheck"):
@@ -82,7 +82,7 @@ class Method (object):
 	        		
                 # Check that the right number of arguments were passed in
                 if len(args) < len(min_args) or len(args) > len(max_args):
-                    raise GeniInvalidArgumentCount(len(args), len(min_args), len(max_args))
+                    raise SfaInvalidArgumentCount(len(args), len(min_args), len(max_args))
 
                 for name, value, expected in zip(max_args, args, self.accepts):
                     self.type_check(name, value, expected, args)
@@ -97,7 +97,7 @@ class Method (object):
 
             return result
 
-        except GeniFault, fault:
+        except SfaFault, fault:
 
             caller = ""
 
@@ -218,7 +218,7 @@ class Method (object):
                 try:
                     self.type_check(name, value, item, args)
                     return
-                except GeniInvalidArgument, fault:
+                except SfaInvalidArgument, fault:
                     pass
             raise fault
 
@@ -257,7 +257,7 @@ class Method (object):
             pass
 
         elif not isinstance(value, expected_type):
-            raise GeniInvalidArgument("expected %s, got %s" % \
+            raise SfaInvalidArgument("expected %s, got %s" % \
                                      (xmlrpc_type(expected_type),
                                       xmlrpc_type(type(value))),
                                      name)
@@ -266,20 +266,20 @@ class Method (object):
         if expected_type in StringTypes:
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
-                raise GeniInvalidArgument, "%s must be at least %d bytes long" % (name, min)
+                raise SfaInvalidArgument, "%s must be at least %d bytes long" % (name, min)
             if max is not None and \
                len(value.encode(self.api.encoding)) > max:
-                raise GeniInvalidArgument, "%s must be at most %d bytes long" % (name, max)
+                raise SfaInvalidArgument, "%s must be at most %d bytes long" % (name, max)
         elif expected_type in (list, tuple, set):
             if min is not None and len(value) < min:
-                raise GeniInvalidArgument, "%s must contain at least %d items" % (name, min)
+                raise SfaInvalidArgument, "%s must contain at least %d items" % (name, min)
             if max is not None and len(value) > max:
-                raise GeniInvalidArgument, "%s must contain at most %d items" % (name, max)
+                raise SfaInvalidArgument, "%s must contain at most %d items" % (name, max)
         else:
             if min is not None and value < min:
-                raise GeniInvalidArgument, "%s must be > %s" % (name, str(min))
+                raise SfaInvalidArgument, "%s must be > %s" % (name, str(min))
             if max is not None and value > max:
-                raise GeniInvalidArgument, "%s must be < %s" % (name, str(max))
+                raise SfaInvalidArgument, "%s must be < %s" % (name, str(max))
 
         # If a list with particular types of items is expected
         if isinstance(expected, (list, tuple, set)):
@@ -300,7 +300,7 @@ class Method (object):
                 if isinstance(subparam, Parameter) and \
                    subparam.optional is not None and \
                    not subparam.optional and key not in value.keys():
-                    raise GeniInvalidArgument("'%s' not specified" % key, name)
+                    raise SfaInvalidArgument("'%s' not specified" % key, name)
 
         #if auth is not None:
         #    auth.check(self, *args)

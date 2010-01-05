@@ -8,8 +8,8 @@ from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.util.record import GeniRecord
-from sfa.util.genitable import GeniTable
+from sfa.util.record import SfaRecord
+from sfa.util.table import SfaTable
 from sfa.util.debug import log
 from sfa.trust.auth import Auth
 from sfa.trust.gid import create_uuid
@@ -18,7 +18,7 @@ from sfa.trust.credential import Credential
 class register_peer_object(Method):
     """
     Register a peer object with the registry. In addition to being stored in the
-    Geni database, the appropriate records will also be created in the
+    SFA database, the appropriate records will also be created in the
     PLC databases
     
     @param cred credential string
@@ -51,16 +51,16 @@ class register_peer_object(Method):
         # make sure this is a peer record
         if 'peer_authority' not in record_dict or \
            not record_dict['peer_authority']: 
-            raise GeniInvalidArgument, "peer_authority must be specified" 
+            raise SfaInvalidArgument, "peer_authority must be specified" 
 
-        record = GeniRecord(dict = record_dict)
+        record = SfaRecord(dict = record_dict)
         type, hrn, peer_authority = record['type'], record['hrn'], record['peer_authority']
         record['authority'] = get_authority(record['hrn'])
         # verify permissions
         self.api.auth.verify_cred_is_me(cred)
 
         # check if record already exists
-        table = GeniTable()
+        table = SfaTable()
         existing_records = table.find({'type': type, 'hrn': hrn, 'peer_authority': peer_authority})
         if existing_records:
             for existing_record in existing_records:

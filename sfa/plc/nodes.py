@@ -203,7 +203,7 @@ class Nodes(SimpleStorage):
             elif self.api.plshell_version in ['4.3']:
                 interface_ids.extend(node['interface_ids'])
             else:
-                raise GeniAPIError, "Unsupported plcapi version ", \
+                raise SfaAPIError, "Unsupported plcapi version ", \
                                  self.api.plshell_version
 
         if self.api.plshell_version in ['4.2']:
@@ -211,7 +211,7 @@ class Nodes(SimpleStorage):
         elif self.api.plshell_version in ['4.3']:
             interfaces = self.api.plshell.GetInterfaces(self.api.plauth, interface_ids)
         else:
-            raise GeniAPIError, "Unsupported plcapi version ", \
+            raise SfaAPIError, "Unsupported plcapi version ", \
                                 self.api.plshell_version 
         interface_dict = {}
         for interface in interfaces:
@@ -220,7 +220,7 @@ class Nodes(SimpleStorage):
             elif self.api.plshell_version in ['4.3']:
                 interface_dict[interface['interface_id']] = interface
             else:
-                raise GeniAPIError, "Unsupported plcapi version", \
+                raise SfaAPIError, "Unsupported plcapi version", \
                                     self.api.plshell_version 
 
         # join nodes with thier interfaces
@@ -233,7 +233,7 @@ class Nodes(SimpleStorage):
                 for interface_id in node['interface_ids']:
                     node['interfaces'].append(interface_dict[interface_id])
             else:
-                raise GeniAPIError, "Unsupported plcapi version", \
+                raise SfaAPIError, "Unsupported plcapi version", \
                                     self.api.plshell_version
 
         # convert and threshold to ints

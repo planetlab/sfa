@@ -2,10 +2,9 @@ import types
 import time 
 from sfa.server.registry import Registries
 from sfa.util.prefixTree import prefixTree
-from sfa.util.record import GeniRecord
-from sfa.util.genitable import GeniTable
-from sfa.util.record import GeniRecord
-from sfa.util.genitable import GeniTable
+from sfa.util.record import SfaRecord
+from sfa.util.table import SfaTable
+from sfa.util.record import SfaRecord
 from sfa.trust.gid import GID 
 from sfa.util.namespace import *
 from sfa.trust.credential import *
@@ -19,7 +18,7 @@ def get_credential(api, hrn, type, is_self=False):
         auth_hrn = hrn
     # get record info
     auth_info = api.auth.get_auth_info(auth_hrn)
-    table = GeniTable()
+    table = SfaTable()
     records = table.findObjects({'type': type, 'hrn': hrn})
     if not records:
         raise RecordNotFound(hrn)
@@ -92,12 +91,12 @@ def resolve(api, hrns, type=None, origin_hrn=None):
         if registry_hrn != api.hrn:
             credential = api.getCredential()
             peer_records = registries[registry_hrn].resolve(credential, hrn, origin_hrn)
-            records.extend([GeniRecord(dict=record).as_dict() for record in peer_records])
+            records.extend([SfaRecord(dict=record).as_dict() for record in peer_records])
 
     # try resolving the remaining unfound records at the local registry
     remaining_hrns = set(hrns).difference([record['hrn'] for record in records])
     remaining_hrns = [hrn for hrn in remaining_hrns] 
-    table = GeniTable()
+    table = SfaTable()
     local_records = table.findObjects({'hrn': remaining_hrns})
     for record in local_records:
         try:
@@ -105,7 +104,7 @@ def resolve(api, hrns, type=None, origin_hrn=None):
             records.append(dict(record))
         except PlanetLabRecordDoesNotExist:
             # silently drop the ones that are missing in PL
-            print >> log, "ignoring geni record ", record['hrn'], \
+            print >> log, "ignoring SFA record ", record['hrn'], \
                               " because pl record does not exist"    
             table.remove(record)
 
@@ -137,14 +136,14 @@ def list(api, hrn):
     if registry_hrn != api.hrn:
         credential = api.getCredential()
         record_list = registries[registry_hrn].list(credential, hrn, origin_hrn)
-        records = [GeniRecord(dict=record).as_dict() for record in record_list]
+        records = [SfaRecord(dict=record).as_dict() for record in record_list]
     
     # if we still havnt found the record yet, try the local registry
     if not records:
         if not api.auth.hierarchy.auth_exists(hrn):
             raise MissingAuthority(hrn)
 
-        table = GeniTable()
+        table = SfaTable()
         records = table.find({'authority': hrn})
 
     return records
@@ -156,15 +155,15 @@ def register(api, record):
 
     # validate the type
     if type not in ['authority', 'slice', 'node', 'user']:
-        raise UnknownGeniType(type) 
+        raise UnknownSfaType(type) 
     
     # check if record already exists
-    table = GeniTable()
+    table = SfaTable()
     existing_records = table.find({'type': type, 'hrn': hrn})
     if existing_records:
         raise ExistingRecord(hrn)
        
-    record = GeniRecord(dict = record)
+    record = SfaRecord(dict = record)
     record['authority'] = get_authority(record['hrn'])
     type = record['type']
     hrn = record['hrn']
@@ -195,7 +194,7 @@ def register(api, record):
         # get the GID from the newly created authority
         gid = auth_info.get_gid_object()
         record.set_gid(gid.save_to_string(save_parents=True))
-        pl_record = api.geni_fields_to_pl_fields(type, hrn, record)
+        pl_record = api.sfa_fields_to_pl_fields(type, hrn, record)
         sites = api.plshell.GetSites(api.plauth, [pl_record['login_base']])
         if not sites:
             pointer = api.plshell.AddSite(api.plauth, pl_record)
@@ -207,7 +206,7 @@ def register(api, record):
 
     elif (type == "slice"):
         acceptable_fields=['url', 'instantiation', 'name', 'description']
-        pl_record = api.geni_fields_to_pl_fields(type, hrn, record)
+        pl_record = api.sfa_fields_to_pl_fields(type, hrn, record)
         for key in pl_record.keys():
             if key not in acceptable_fields:
                 pl_record.pop(key)
@@ -241,7 +240,7 @@ def register(api, record):
             api.plshell.AddPersonKey(api.plauth, pointer, {'key_type' : 'ssh', 'key' : pub_key})
 
     elif (type == "node"):
-        pl_record = api.geni_fields_to_pl_fields(type, hrn, record)
+        pl_record = api.sfa_fields_to_pl_fields(type, hrn, record)
         login_base = hrn_to_pl_login_base(record['authority'])
         nodes = api.plshell.GetNodes(api.plauth, [pl_record['hostname']])
         if not nodes:
@@ -260,11 +259,11 @@ def register(api, record):
     return record.get_gid_object().save_to_string(save_parents=True)
 
 def update(api, record_dict):
-    new_record = GeniRecord(dict = record_dict)
+    new_record = SfaRecord(dict = record_dict)
     type = new_record['type']
     hrn = new_record['hrn']
     api.auth.verify_object_permission(hrn)
-    table = GeniTable()
+    table = SfaTable()
     # make sure the record exists
     records = table.findObjects({'type': type, 'hrn': hrn})
     if not records:
@@ -285,7 +284,7 @@ def update(api, record_dict):
         api.plshell.UpdateSite(api.plauth, pointer, new_record)
 
     elif type == "slice":
-        pl_record=api.geni_fields_to_pl_fields(type, hrn, new_record)
+        pl_record=api.sfa_fields_to_pl_fields(type, hrn, new_record)
         if 'name' in pl_record:
             pl_record.pop('name')
             api.plshell.UpdateSlice(api.plauth, pointer, pl_record)
@@ -330,14 +329,14 @@ def update(api, record_dict):
             gid_object = api.auth.hierarchy.create_gid(hrn, uuid, pkey)
             gid = gid_object.save_to_string(save_parents=True)
             record['gid'] = gid
-            record = GeniRecord(dict=record)
+            record = SfaRecord(dict=record)
             table.update(record)
 
     elif type == "node":
         api.plshell.UpdateNode(api.plauth, pointer, new_record)
 
     else:
-        raise UnknownGeniType(type)
+        raise UnknownSfaType(type)
 
     # update membership for researchers, pis, owners, operators
     api.update_membership(record, new_record)
@@ -345,7 +344,7 @@ def update(api, record_dict):
     return 1 
 
 def remove(api, hrn, type, origin_hrn=None):
-    table = GeniTable()
+    table = SfaTable()
     filter = {'hrn': hrn}
     if type not in ['all', '*']:
         filter['type'] = type
@@ -383,7 +382,7 @@ def remove(api, hrn, type, origin_hrn=None):
         if api.plshell.GetSites(api.plauth, record['pointer']):
             api.plshell.DeleteSite(api.plauth, record['pointer'])
     else:
-        raise UnknownGeniType(type)
+        raise UnknownSfaType(type)
 
     table.remove(record)
 

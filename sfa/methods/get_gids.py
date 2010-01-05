@@ -12,7 +12,6 @@ from sfa.trust.auth import Auth
 from sfa.trust.gid import GID
 from sfa.trust.certificate import Certificate
 from sfa.trust.credential import Credential
-from sfa.util.genitable import GeniTable
 
 class get_gids(Method):
     """

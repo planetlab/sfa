@@ -4,8 +4,8 @@ import sys
 import os
 import traceback
 from sfa.util.namespace import *
-from sfa.util.genitable import GeniTable
-from sfa.plc.api import GeniAPI
+from sfa.util.table import SfaTable
+from sfa.plc.api import SfaAPI
 from sfa.util.config import Config
 from sfa.trust.certificate import Keypair
 from sfa.trust.hierarchy import Hierarchy
@@ -32,14 +32,14 @@ def main():
     authority = config.SFA_INTERFACE_HRN
     url = 'http://%s:%s/' %(config.SFA_REGISTRY_HOST, config.SFA_REGISTRY_PORT)
     registry = xmlrpcprotocol.get_server((url, key_file, cert_file)
-    sfa_api = GeniAPI(key_file = key_file, cert_file = cert_file, interface='registry')
+    sfa_api = SfaAPI(key_file = key_file, cert_file = cert_file, interface='registry')
     credential = sfa_api.getCredential()
 
     # get peer registries
     registries = Registries(sfa_api)
 
     # get local peer records
-    table = GeniTable()
+    table = SfaTable()
     peer_records = table.find({'~peer_authority': None})
     for peer_record in peer_records:
         peer_auth = peer_record['peer_authority']

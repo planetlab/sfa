@@ -122,7 +122,7 @@ class Command:
                 try:
                     self.type_check(name, value, item, args)
                     return
-                except GeniInvalidArgument, fault:
+                except SfaInvalidArgument, fault:
                     pass
             raise fault
 
@@ -161,7 +161,7 @@ class Command:
             pass
 
         elif not isinstance(value, expected_type):
-            raise GeniInvalidArgument("expected %s, got %s" % \
+            raise SfaInvalidArgument("expected %s, got %s" % \
                                      (xmlrpc_type(expected_type),
                                       xmlrpc_type(type(value))),
                                      name)
@@ -170,20 +170,20 @@ class Command:
         if expected_type in StringTypes:
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
-                raise GeniInvalidArgument, "%s must be at least %d bytes long" % (name, min)
+                raise SfaInvalidArgument, "%s must be at least %d bytes long" % (name, min)
             if max is not None and \
                len(value.encode(self.api.encoding)) > max:
-                raise GeniInvalidArgument, "%s must be at most %d bytes long" % (name, max)
+                raise SfaInvalidArgument, "%s must be at most %d bytes long" % (name, max)
         elif expected_type in (list, tuple, set):
             if min is not None and len(value) < min:
-                raise GeniInvalidArgument, "%s must contain at least %d items" % (name, min)
+                raise SfaInvalidArgument, "%s must contain at least %d items" % (name, min)
             if max is not None and len(value) > max:
-                raise GeniInvalidArgument, "%s must contain at most %d items" % (name, max)
+                raise SfaInvalidArgument, "%s must contain at most %d items" % (name, max)
         else:
             if min is not None and value < min:
-                raise GeniInvalidArgument, "%s must be > %s" % (name, str(min))
+                raise SfaInvalidArgument, "%s must be > %s" % (name, str(min))
             if max is not None and value > max:
-                raise GeniInvalidArgument, "%s must be < %s" % (name, str(max))
+                raise SfaInvalidArgument, "%s must be < %s" % (name, str(max))
 
         # If a list with particular types of items is expected
         if isinstance(expected, (list, tuple, set)):
@@ -204,7 +204,7 @@ class Command:
                 if isinstance(subparam, Parameter) and \
                    subparam.optional is not None and \
                    not subparam.optional and key not in value.keys():
-                    raise GeniInvalidArgument("'%s' not specified" % key, name)
+                    raise SfaInvalidArgument("'%s' not specified" % key, name)
 
         #if auth is not None:
         #    auth.check(self, *args)

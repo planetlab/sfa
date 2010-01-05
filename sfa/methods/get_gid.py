@@ -11,7 +11,6 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.trust.gid import GID
 from sfa.trust.certificate import Certificate
-from sfa.util.genitable import GeniTable
 
 class get_gid(Method):
     """

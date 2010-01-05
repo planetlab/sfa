@@ -83,7 +83,7 @@ RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 BINS =	./config/sfa-config-tty ./sfa/plc/sfa-import-plc.py ./sfa/plc/sfa-nuke-plc.py \
 	./sfa/server/sfa-server.py \
 	./sfa/client/sfi.py ./sfa/client/getNodes.py ./sfa/client/getRecord.py \
-	./sfa/client/setRecord.py ./sfa/client/genidump.py
+	./sfa/client/setRecord.py ./sfa/client/sfadump.py
 
 sync:
 ifeq (,$(SSHURL))

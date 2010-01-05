@@ -1,5 +1,5 @@
 ##
-# Implements GENI GID. GIDs are based on certificates, and the GID class is a
+# Implements SFA GID. GIDs are based on certificates, and the GID class is a
 # descendant of the certificate class.
 ##
 

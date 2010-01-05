@@ -8,7 +8,7 @@ import time
 import xmlrpclib
 from types import StringTypes, ListType
 
-from sfa.util.geniserver import GeniServer
+from sfa.util.server import SfaServer
 from sfa.util.storage import *
 from sfa.util.faults import *
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
@@ -21,7 +21,7 @@ except ImportError:
     GeniClientLight = None
 
 
-class Aggregate(GeniServer):
+class Aggregate(SfaServer):
 
     ##
     # Create a new aggregate object.
@@ -31,7 +31,7 @@ class Aggregate(GeniServer):
     # @param key_file private key filename of registry
     # @param cert_file certificate filename containing public key (could be a GID file)     
     def __init__(self, ip, port, key_file, cert_file):
-        GeniServer.__init__(self, ip, port, key_file, cert_file)
+        SfaServer.__init__(self, ip, port, key_file, cert_file)
         self.server.interface = 'aggregate'
 
 ##

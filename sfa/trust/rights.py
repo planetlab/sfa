@@ -1,5 +1,5 @@
 ##
-# This Module implements rights and lists of rights for the Geni wrapper. Rights
+# This Module implements rights and lists of rights for the SFA. Rights
 # are implemented by two classes:
 #
 # Right - represents a single right
