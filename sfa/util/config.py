@@ -28,7 +28,7 @@ class Config:
     fast but no type conversions.
     """
 
-    def __init__(self, config_file = "/etc/sfa/sfa_config"):
+    def __init__(self, config_file = "/etc/sfa/sfa_config.py"):
         self.config_file = None
         self.config_path = None
         self.data_path = None
@@ -53,6 +53,9 @@ class Config:
             if not hasattr(self, 'SFA_CONFIG_DIR'):
                 # default to /var/lib/sfa not specified in config
                 self.SFA_CONFIG_DIR="/etc/sfa"
+
+            if not hasattr(self, 'SFA_REGISTRY_LEVEL1_AUTH'):
+                self.SFA_REGISTRY_LEVEL1_AUTH=None
 
             # define interface types
             # this will determine which manager to use
