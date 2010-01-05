@@ -15,6 +15,27 @@ $URL$
   <variables>
 
     <!-- ======================================== -->
+    <category id="sfa">
+      <name>General</name>
+      <description>Basic system variables.</description>
+
+      <variablelist>
+	<variable id="interface_hrn" type="string">
+	  <name>Human readable name</name>
+	  <value>plc</value>
+	  <description>The human readable name for this interface.</description>
+	</variable>
+
+	<variable id="api_debug" type="boolean">
+	  <name>Debug</name>
+	  <value>false</value>
+	  <description>Flag to turn debug on.</description>
+	</variable>
+
+      </variablelist>
+    </category>
+
+    <!-- ======================================== -->
     <category id="sfa_registry">
       <name>Registry</name>
       <description>The settings that affect the registry that will run
