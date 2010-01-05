@@ -174,7 +174,7 @@ $URL$
 	  <description>The host where the PLC database can be reached.</description>
 	</variable>
 
-	<variable id="db_port" type="string">
+	<variable id="db_port" type="int">
 	  <name>Database port</name>
 	  <value>5432</value>
 	  <description>The port where the PLC database can be reached.</description>
