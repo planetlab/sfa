@@ -12,18 +12,20 @@ def validator(validated_variables):
 #        errStr="PLC_API_MAINTENANCE_USER=%s cannot be the same as PLC_ROOT_USER=%s"%(maint_user,root_user)
 #        raise plc_config.ConfigurationException(errStr)
 
-usual_variables = ["SFA_REGISTRY_ROOT_AUTH",
-                   "SFA_REGISTRY_LEVEL1_AUTH",
-                   "SFA_REGISTRY_HOST", 
-                   "SFA_AGGREGATE_HOST",
-                   "SFA_SM_HOST",
-                   "SFA_PLC_USER",
-                   "SFA_PLC_PASSWORD",
-                   "SFA_PLC_DB_HOST",
-                   "SFA_PLC_DB_USER",
-                   "SFA_PLC_DB_PASSWORD",
-                   "SFA_PLC_URL",
-                   ]
+usual_variables = [
+    "SFA_INTERFACE_HRN",
+    "SFA_REGISTRY_ROOT_AUTH",
+    "SFA_REGISTRY_LEVEL1_AUTH",
+    "SFA_REGISTRY_HOST", 
+    "SFA_AGGREGATE_HOST",
+    "SFA_SM_HOST",
+    "SFA_PLC_USER",
+    "SFA_PLC_PASSWORD",
+    "SFA_PLC_DB_HOST",
+    "SFA_PLC_DB_USER",
+    "SFA_PLC_DB_PASSWORD",
+    "SFA_PLC_URL",
+    ]
 
 configuration={ \
     'name':'sfa',
