@@ -1,3 +1,6 @@
+- CM
+* sfa_componet_config needs to define SFA_CM_SLICE_PREFIX
+
 - URN vs HRN
 * methods should support urn or hrn arguments
 * create a module that converts urn to hrn so we can continue using
@@ -6,13 +9,10 @@
 * urn is the standard over the wire format
 
 - Registry
-* refactor to use managers
 * update call should attempt to push updates to federated peers if 
   the peer has a record for an object that is updated locally  
 * api.update_membership() shoudl behave more like resolve when looking up records (attempt to resolve records at federated registeries) instead of only looking in the local registry
-*  sfi remove, if removing a site, remove any record that site is an an authority for
-* support generic registry records (dont depend on postgres! object db?)
-* modify resolve() so that you can resolve more than 1 hrn at at time (list of hrns) 
+* support generic registry records (dont depend on postgres!)
 
 -  sfa-clean-peer-records 
 * instead of resolving each peer record one by one, use one reslove call to resolve a list of hrns (requires updated registry.resolve() method)
