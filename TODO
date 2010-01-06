@@ -9,6 +9,7 @@
 * urn is the standard over the wire format
 
 - Registry
+* sfa.plc.api.SfaAPI.fill_record_pl_info() should add the sites PIs to a slice records researchers list
 * update call should attempt to push updates to federated peers if 
   the peer has a record for an object that is updated locally  
 * api.update_membership() shoudl behave more like resolve when looking up records (attempt to resolve records at federated registeries) instead of only looking in the local registry
