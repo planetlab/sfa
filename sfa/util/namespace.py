@@ -57,8 +57,9 @@ def urn_to_hrn(urn):
     """
 
     # if this is already a hrn dont do anything
-    if not urn.startswith(URN_PREFIX):
+    if not urn or not urn.startswith(URN_PREFIX):
         return urn, None
+
     name = urn[len(URN_PREFIX):]
     hrn_parts = name.split("+")
     
@@ -79,7 +80,7 @@ def hrn_to_urn(hrn, type=None):
     convert an hrn and type to a urn string
     """
     # if  this is already a urn dont do anything 
-    if hrn.startswith(URN_PREFIX):
+    if not hrn or hrn.startswith(URN_PREFIX):
         return hrn
 
     authority = get_authority(hrn)
