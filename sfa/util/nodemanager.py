@@ -6,14 +6,18 @@ class NodeManager:
 
     method = None
 
+    def __init__(self, config):
+        self.config = config
+
     def __getattr__(self, method):
         self.method = method
         return self.__call__
     
     def __call__(self, *args):
         method = self.method
-        ### WARNING -- hardwired name needs to be computed 
-        sfa_slice = "pl_genicw"
+        ### WARNING -- hardwired name needs to be computed
+        sfa_slice_prefix = self.config.SFA_CM_SLICE_PREFIX 
+        sfa_slice = sfa_slice_prefix + "_sfacm"
         python = "/usr/bin/python"
         vserver_path = "/vservers/%s" % (sfa_slice)
         script_path = "/tmp/"
