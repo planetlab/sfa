@@ -72,11 +72,11 @@ class sfaImport:
 
     def create_top_level_auth_records(self, hrn):
         AuthHierarchy = self.AuthHierarchy
-        
+        urn = hrn_to_urn(hrn, 'authority')
         # if auth records for this hrn dont exist, create it
-        if not AuthHierarchy.auth_exists(hrn):
+        if not AuthHierarchy.auth_exists(urn):
             trace("Import: creating top level authorites", self.logger)
-            AuthHierarchy.create_auth(hrn)
+            AuthHierarchy.create_auth(urn)
         
 
         # get the auth info of the newly created root auth (parent)
@@ -127,7 +127,8 @@ class sfaImport:
             pkey = Keypair(create=True)
 
         # create the gid
-        person_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
+        urn = hrn_to_urn(hrn, 'user')
+        person_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         table = SfaTable()
         person_record = SfaRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         person_record['authority'] = get_authority(person_record['hrn'])
@@ -153,7 +154,8 @@ class sfaImport:
         trace("Import: importing slice " + hrn, self.logger)
 
         pkey = Keypair(create=True)
-        slice_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
+        urn = hrn_to_urn(hrn, 'slice')
+        slice_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         slice_record = SfaRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
         slice_record['authority'] = get_authority(slice_record['hrn'])
         table = SfaTable()
@@ -184,7 +186,8 @@ class sfaImport:
         table = SfaTable()
         node_record = table.find({'type': 'node', 'hrn': hrn})
         pkey = Keypair(create=True)
-        node_gid = AuthHierarchy.create_gid(hrn, create_uuid(), pkey)
+        urn = hrn_to_urn(hrn, 'node')
+        node_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         node_record = SfaRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
         node_record['authority'] = get_authority(node_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'node', 'pointer': node['node_id']})
@@ -203,9 +206,8 @@ class sfaImport:
         plc_auth = self.plc_auth
         sitename = site['login_base']
         sitename = cleanup_string(sitename)
-
         hrn = parent_hrn + "." + sitename
-
+        urn = hrn_to_urn(hrn, 'authority')
         # Hardcode 'internet2' into the hrn for sites hosting
         # internet2 nodes. This is a special operation for some vini
         # sites only
@@ -220,10 +222,10 @@ class sfaImport:
         trace("Import: importing site " + hrn, self.logger)
 
         # create the authority
-        if not AuthHierarchy.auth_exists(hrn):
-            AuthHierarchy.create_auth(hrn)
+        if not AuthHierarchy.auth_exists(urn):
+            AuthHierarchy.create_auth(urn)
 
-        auth_info = AuthHierarchy.get_auth_info(hrn)
+        auth_info = AuthHierarchy.get_auth_info(urn)
 
         table = SfaTable()
         auth_record = SfaRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])

@@ -180,7 +180,7 @@ class Hierarchy:
             pkey = Keypair(create = True)
             pkey.save_to_file(privkey_filename)
 
-        gid = self.create_gid(hrn, create_uuid(), pkey)
+        gid = self.create_gid(xrn, create_uuid(), pkey)
         gid.save_to_file(gid_filename, save_parents=True)
 
         # XXX TODO: think up a better way for the dbinfo to work
