@@ -2,6 +2,7 @@
 ### $URL$
 
 from sfa.util.faults import *
+from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
@@ -18,7 +19,7 @@ class create_slice(Method):
     Instantiate the specified slice according to whats defined in the specified rspec      
 
     @param cred credential string specifying the rights of the caller
-    @param hrn human readable name of slice to instantiate
+    @param hrn human readable name of slice to instantiate (hrn or xrn)
     @param rspec resource specification
     @return 1 is successful, faults otherwise  
     """
@@ -27,7 +28,7 @@ class create_slice(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name of slice to instantiate"),
+        Parameter(str, "Human readable name of slice to instantiate (hrn or xrn)"),
         Parameter(str, "Resource specification"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
               Parameter(None, "Origin hrn not specified"))
@@ -35,9 +36,9 @@ class create_slice(Method):
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, requested_rspec, origin_hrn=None):
+    def call(self, cred, xrn, requested_rspec, origin_hrn=None):
+        hrn, type = urn_to_hrn(xrn) 
         user_cred = Credential(string=cred)
-       
         #log the call
         if not origin_hrn:
             origin_hrn = user_cred.get_gid_caller().get_hrn()
@@ -75,11 +76,11 @@ class create_slice(Method):
             mgr_type = self.api.config.SFA_AGGREGATE_TYPE
             manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.create_slice(self.api, hrn, rspec)
+            manager.create_slice(self.api, xrn, rspec)
         elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.create_slice(self.api, hrn, rspec, origin_hrn)
+            manager.create_slice(self.api, xrn, rspec, origin_hrn)
 
         return 1 

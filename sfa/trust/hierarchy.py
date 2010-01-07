@@ -39,12 +39,13 @@ class AuthInfo:
     ##
     # Initialize and authority object.
     #
-    # @param hrn the human readable name of the authority
+    # @param xrn the human readable name of the authority (urn will be converted to hrn)
     # @param gid_filename the filename containing the GID
     # @param privkey_filename the filename containing the private key
     # @param dbinfo_filename the filename containing the database info
 
-    def __init__(self, hrn, gid_filename, privkey_filename, dbinfo_filename):
+    def __init__(self, xrn, gid_filename, privkey_filename, dbinfo_filename):
+        hrn, type = urn_to_hrn(xrn)
         self.hrn = hrn
         self.set_gid_filename(gid_filename)
         self.privkey_filename = privkey_filename
@@ -116,9 +117,10 @@ class Hierarchy:
     # Given a hrn, return the filenames of the GID, private key, and dbinfo
     # files.
     #
-    # @param hrn the human readable name of the authority
+    # @param xrn the human readable name of the authority (urn will be convertd to hrn)
 
-    def get_auth_filenames(self, hrn):
+    def get_auth_filenames(self, xrn):
+        hrn, type = urn_to_hrn(xrn)
         leaf = get_leaf(hrn)
         parent_hrn = get_authority(hrn)
         directory = os.path.join(self.basedir, hrn.replace(".", "/"))
@@ -135,7 +137,8 @@ class Hierarchy:
     #
     # @param the human readable name of the authority to check
 
-    def auth_exists(self, hrn):
+    def auth_exists(self, xrn):
+        hrn, type = urn_to_hrn(xrn) 
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \
             self.get_auth_filenames(hrn)
         
@@ -147,10 +150,11 @@ class Hierarchy:
     # Create an authority. A private key for the authority and the associated
     # GID are created and signed by the parent authority.
     #
-    # @param hrn the human readable name of the authority to create
+    # @param xrn the human readable name of the authority to create (urn will be converted to hrn) 
     # @param create_parents if true, also create the parents if they do not exist
 
-    def create_auth(self, hrn, create_parents=False):
+    def create_auth(self, xrn, create_parents=False):
+        hrn, type = urn_to_hrn(xrn)
         trace("Hierarchy: creating authority: " + hrn)
 
         # create the parent authority if necessary
@@ -191,11 +195,12 @@ class Hierarchy:
     # does not exist, then an exception is thrown. As a side effect, disk files
     # and a subdirectory may be created to store the authority.
     #
-    # @param hrn the human readable name of the authority to create.
+    # @param xrn the human readable name of the authority to create (urn will be converted to hrn).
 
-    def get_auth_info(self, hrn):
+    def get_auth_info(self, xrn):
+        
         #trace("Hierarchy: getting authority: " + hrn)
-   
+        hrn, type = urn_to_hrn(xrn)
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
 
@@ -221,8 +226,13 @@ class Hierarchy:
     # @param uuid the unique identifier to store in the GID
     # @param pkey the public key to store in the GID
 
-    def create_gid(self, hrn, uuid, pkey):
-        gid = GID(subject=hrn, uuid=uuid, hrn=hrn)
+    def create_gid(self, xrn, uuid, pkey):
+        hrn, type = urn_to_hrn(xrn)
+        # Using hrn_to_urn() here to make sure the urn is in the right format
+        # If xrn was a hrn instead of a urn, then the gid's urn will be
+        # of type None 
+        urn = hrn_to_urn(hrn, type)
+        gid = GID(subject=hrn, uuid=uuid, hrn=hrn, urn=urn)
 
         parent_hrn = get_authority(hrn)
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
@@ -251,20 +261,21 @@ class Hierarchy:
     # @param uuid if !=None, change the uuid
     # @param pubkey if !=None, change the public key
 
-    def refresh_gid(self, gid, hrn=None, uuid=None, pubkey=None):
+    def refresh_gid(self, gid, xrn=None, uuid=None, pubkey=None):
         # TODO: compute expiration time of GID, refresh it if necessary
         gid_is_expired = False
 
         # update the gid if we need to
-        if gid_is_expired or hrn or uuid or pubkey:
-            if not hrn:
-                hrn = gid.get_hrn()
+        if gid_is_expired or xrn or uuid or pubkey:
+            
+            if not xrn:
+                xrn = gid.get_urn()
             if not uuid:
                 uuid = gid.get_uuid()
             if not pubkey:
                 pubkey = gid.get_pubkey()
 
-            gid = self.create_gid(hrn, uuid, pubkey)
+            gid = self.create_gid(xrn, uuid, pubkey)
 
         return gid
 
@@ -273,10 +284,11 @@ class Hierarchy:
     # credential will contain the authority privilege and will be signed by
     # the authority's parent.
     #
-    # @param hrn the human readable name of the authority
+    # @param hrn the human readable name of the authority (urn is converted to hrn)
     # @param authority type of credential to return (authority | sa | ma)
 
-    def get_auth_cred(self, hrn, kind="authority"):
+    def get_auth_cred(self, xrn, kind="authority"):
+        hrn, type = urn_to_hrn(xrn) 
         auth_info = self.get_auth_info(hrn)
         gid = auth_info.get_gid_object()
 
@@ -311,9 +323,10 @@ class Hierarchy:
     # This looks almost the same as get_auth_cred, but works for tickets
     # XXX does similarity imply there should be more code re-use?
     #
-    # @param hrn the human readable name of the authority
+    # @param xrn the human readable name of the authority (urn is converted to hrn)
 
-    def get_auth_ticket(self, hrn):
+    def get_auth_ticket(self, xrn):
+        hrn, type = urn_to_hrn(xrn)
         auth_info = self.get_auth_info(hrn)
         gid = auth_info.get_gid_object()
 

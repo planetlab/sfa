@@ -2,6 +2,7 @@
 ### $URL$
 import time
 from sfa.util.faults import *
+from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
@@ -24,7 +25,7 @@ class get_ticket(Method):
     initscripts.
     
     @param cred credential string
-    @param name name of the slice to retrieve a ticket for
+    @param name name of the slice to retrieve a ticket for (hrn or urn)
     @param rspec resource specification dictionary
     
     @return the string representation of a ticket object
@@ -34,7 +35,7 @@ class get_ticket(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name of slice to retrive a ticket for (hrn)"),
+        Parameter(str, "Human readable name of slice to retrive a ticket for (hrn or urn)"),
         Parameter(str, "Resource specification (rspec)"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
               Parameter(None, "Origin hrn not specified"))
@@ -42,7 +43,8 @@ class get_ticket(Method):
 
     returns = Parameter(str, "String represeneation of a ticket object")
     
-    def call(self, cred, hrn, rspec, origin_hrn=None):
+    def call(self, cred, xrn, rspec, origin_hrn=None):
+        hrn, type = urn_to_hrn(xrn)
         user_cred = Credential(string=cred)
 
         #log the call
@@ -81,7 +83,7 @@ class get_ticket(Method):
         rspec_object = RSpec(xml=rspec)
         rspec_object.filter(tagname='NodeSpec', attribute='name', whitelist=valid_hostnames)
         rspec = rspec_object.toxml() 
-        ticket = manager.get_ticket(self.api, hrn, rspec, origin_hrn)
+        ticket = manager.get_ticket(self.api, xrn, rspec, origin_hrn)
         
         return ticket
         

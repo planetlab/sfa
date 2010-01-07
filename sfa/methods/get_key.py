@@ -45,7 +45,8 @@ class get_key(Method):
         # generate a new keypair and gid
         uuid = create_uuid()
         pkey = Keypair(create=True)
-        gid_object = self.api.auth.hierarchy.create_gid(record['hrn'], uuid, pkey)
+        urn = hrn_to_urn(record['hrn'], record['type'])
+        gid_object = self.api.auth.hierarchy.create_gid(urn, uuid, pkey)
         gid = gid_object.save_to_string(save_parents=True)
         record['gid'] = gid
         record.set_gid(gid)

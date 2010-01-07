@@ -50,9 +50,9 @@ class remove_peer_object(Method):
         hrn, type = record['hrn'], record['type']
         records = table.find({'hrn': hrn, 'type': type })
         for record in records:
-	  if record['peer_authority']:
-            self.remove_plc_record(record)
-            table.remove(record)
+            if record['peer_authority']:
+                self.remove_plc_record(record)
+                table.remove(record)
             
         return 1
 

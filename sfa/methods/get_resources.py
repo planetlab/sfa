@@ -2,6 +2,7 @@
 ### $URL$
 
 from sfa.util.faults import *
+from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
@@ -26,7 +27,7 @@ class get_resources(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Mixed(Parameter(str, "Human readable name (hrn)"),
+        Mixed(Parameter(str, "Human readable name (hrn or urn)"),
               Parameter(None, "hrn not specified")),
         Mixed(Parameter(str, "Human readable name of the original caller"),
               Parameter(None, "Origin hrn not specified"))
@@ -34,7 +35,8 @@ class get_resources(Method):
 
     returns = Parameter(str, "String representatin of an rspec")
     
-    def call(self, cred, hrn=None, origin_hrn=None):
+    def call(self, cred, xrn=None, origin_hrn=None):
+        hrn, type = urn_to_hrn(xrn)
         user_cred = Credential(string=cred)
 
         #log the call
@@ -51,13 +53,13 @@ class get_resources(Method):
             mgr_type = self.api.config.SFA_AGGREGATE_TYPE
             manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            rspec = manager.get_rspec(self.api, hrn, origin_hrn)
+            rspec = manager.get_rspec(self.api, xrn, origin_hrn)
             outgoing_rules = SFATablesRules('OUTGOING')
         elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            rspec = manager.get_rspec(self.api, hrn, origin_hrn)
+            rspec = manager.get_rspec(self.api, xrn, origin_hrn)
             outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
 
         filtered_rspec = rspec

@@ -20,7 +20,8 @@ from sfa.util.debug import log
 from sfa.plc.slices import Slices
 import sfa.plc.peers as peers
 
-def delete_slice(api, hrn):
+def delete_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
     if not slices:
@@ -36,19 +37,21 @@ def delete_slice(api, hrn):
         api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
-def create_slice(api, hrn, rspec):
+def create_slice(api, xrn, rspec):
+    hrn, type = urn_to_hrn(xrn)
     # XX just import the legacy module and excute that until
     # we transition the code to this module
     from sfa.plc.slices import Slices
     slices = Slices(api)
     slices.create_slice_aggregate(hrn, rspec)
 
-def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
+def get_ticket(api, xrn, rspec, origin_hrn=None):
+    slice_hrn, type = urn_to_hrn(xrn)
     # the the slice record
     registries = Registries(api)
     registry = registries[api.hrn]
     credential = api.getCredential()
-    records = registry.resolve(credential, slice_hrn)
+    records = registry.resolve(credential, xrn)
     
     # make sure we get a local slice record
     record = None  
@@ -87,7 +90,8 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     
     return new_ticket.save_to_string(save_parents=True)
 
-def start_slice(api, hrn):
+def start_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -99,7 +103,8 @@ def start_slice(api, hrn):
 
     return 1
  
-def stop_slice(api, hrn):
+def stop_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -110,7 +115,7 @@ def stop_slice(api, hrn):
     api.plshell.UpdateSliceTag(api.plauth, attribute_id, "0")
     return 1
 
-def reset_slice(api, hrn):
+def reset_slice(api, xrn):
     # XX not implemented at this interface
     return 1
 
@@ -120,14 +125,14 @@ def get_slices(api):
     from sfa.plc.slices import Slices
     slices = Slices(api)
     slices.refresh()
-    return slices['hrn']
+    return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
      
  
-def get_rspec(api, hrn=None, origin_hrn=None):
+def get_rspec(api, xrn=None, origin_hrn=None):
     from sfa.plc.nodes import Nodes
     nodes = Nodes(api, origin_hrn=origin_hrn)
     if hrn:
-        rspec = nodes.get_rspec(hrn)
+        rspec = nodes.get_rspec(xrn)
     else:
         nodes.refresh()
         rspec = nodes['rspec'] 
@@ -139,7 +144,9 @@ Returns the request context required by sfatables. At some point, this mechanism
 to refer to "contexts", which is the information that sfatables is requesting. But for now, we just
 return the basic information needed in a dict.
 """
-def fetch_context(slice_hrn, user_hrn, contexts):
+def fetch_context(slice_xrn, user_xrn, contexts):
+    slice_hrn = urn_to_hrn(slice_xrn)[0]
+    user_hrn = urn_to_hrn(user_xrn)[0]
     base_context = {'sfa':{'user':{'hrn':user_hrn}}}
     return base_context
 

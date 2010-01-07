@@ -13,7 +13,7 @@ class resolve(Method):
     Resolve a record.
 
     @param cred credential string authorizing the caller
-    @param hrn human readable name to resolve
+    @param hrn human readable name to resolve (hrn or urn) 
     @return a list of record dictionaries or empty list     
     """
 
@@ -21,13 +21,13 @@ class resolve(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Mixed(Parameter(str, "Human readable name (hrn)"),
+        Mixed(Parameter(str, "Human readable name (hrn or urn)"),
               Parameter(list, "List of Human readable names ([hrn])"))  
         ]
 
     returns = [SfaRecord]
     
-    def call(self, cred, hrn, origin_hrn=None):
+    def call(self, cred, xrn, origin_hrn=None):
         user_cred = Credential(string=cred)
 
         #log the call
@@ -42,7 +42,7 @@ class resolve(Method):
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         manager = __import__(manager_module, fromlist=[manager_base])
-        return manager.resolve(self.api, hrn, origin_hrn=origin_hrn)
+        return manager.resolve(self.api, xrn, origin_hrn=origin_hrn)
 
 
             

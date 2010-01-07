@@ -28,7 +28,7 @@ class create_gid(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name (hrn) or (urn)"),
+        Parameter(str, "Human readable name (hrn or urn)"),
         Mixed(Parameter(str, "Unique identifier for new GID (uuid)"),
               Parameter(None, "Unique identifier (uuid) not specified")),   
         Parameter(str, "public-key string")
@@ -36,10 +36,10 @@ class create_gid(Method):
 
     returns = Parameter(str, "String represeneation of a GID object")
     
-    def call(self, cred, hrn_or_urn, uuid, pubkey_str):
+    def call(self, cred, xrn, uuid, pubkey_str):
         
         # convert urn to hrn     
-        hrn, type = hrn_to_urn(hrn_or_urn) 
+        hrn, type = hrn_to_urn(xrn) 
 
         # validate the credential
         self.api.auth.check(cred, "getcredential")
@@ -51,6 +51,6 @@ class create_gid(Method):
 
         pkey = Keypair()
         pkey.load_pubkey_from_string(pubkey_str)
-        gid = self.api.auth.hierarchy.create_gid(hrn, uuid, pkey)
+        gid = self.api.auth.hierarchy.create_gid(xrn, uuid, pkey)
 
         return gid.save_to_string(save_parents=True)

@@ -21,21 +21,22 @@ from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
 import sfa.plc.peers as peers
 
-def delete_slice(api, hrn, origin_hrn=None):
+def delete_slice(api, xrn, origin_hrn=None):
     credential = api.getCredential()
     aggregates = Aggregates(api)
     for aggregate in aggregates:
         success = False
         # request hash is optional so lets try the call without it
         try:
-            aggregates[aggregate].delete_slice(credential, hrn, origin_hrn)
+            aggregates[aggregate].delete_slice(credential, xrn, origin_hrn)
             success = True
         except:
             print >> log, "%s" % (traceback.format_exc())
             print >> log, "Error calling delete slice at aggregate %s" % aggregate
     return 1
 
-def create_slice(api, hrn, rspec, origin_hrn=None):
+def create_slice(api, xrn, rspec, origin_hrn=None):
+    hrn, type = urn_to_hrn(xrn)
     spec = RSpec()
     tempspec = RSpec()
     spec.parseString(rspec)
@@ -63,6 +64,7 @@ def create_slice(api, hrn, rspec, origin_hrn=None):
     #print "aggregates:", aggregates.keys() 
     # send each rspec to the appropriate aggregate/sm
     for net_hrn in rspecs:
+        net_urn = hrn_to_urn(net_hrn, 'authority')
         try:
             # if we are directly connected to the aggregate then we can just 
             # send them the rspec. if not, then we may be connected to an sm 
@@ -70,17 +72,17 @@ def create_slice(api, hrn, rspec, origin_hrn=None):
             if net_hrn in aggregates:
                 # send the whloe rspec to the local aggregate
                 if net_hrn in [api.hrn]:
-                    aggregates[net_hrn].create_slice(credential, hrn, rspec, \
+                    aggregates[net_hrn].create_slice(credential, xrn, rspec, \
                                 origin_hrn)
                 else:
-                    aggregates[net_hrn].create_slice(credential, hrn, \
+                    aggregates[net_hrn].create_slice(credential, xrn, \
                                 rspecs[net_hrn], origin_hrn)
             else:
                 # lets forward this rspec to a sm that knows about the network
                 for aggregate in aggregates:
                     network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
                     if network_found:
-                        aggregates[aggregate].create_slice(credential, hrn, \
+                        aggregates[aggregate].create_slice(credential, xrn, \
                                     rspecs[net_hrn], origin_hrn)
 
         except:
@@ -89,8 +91,8 @@ def create_slice(api, hrn, rspec, origin_hrn=None):
             traceback.print_exc()
     return 1
 
-def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
-    
+def get_ticket(api, xrn, rspec, origin_hrn=None):
+    slice_hrn, type = urn_to_hrn(xrn)
     # get the netspecs contained within the clients rspec
     client_rspec = RSpec(xml=rspec)
     netspecs = client_rspec.getDictsByTagName('NetSpec')
@@ -110,19 +112,20 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     aggregates = Aggregates(api)
     credential = api.getCredential()
     tickets = {}
-    for net_hrn in rspecs:    
+    for net_hrn in rspecs:
+        net_urn = urn_to_hrn(net_hrn, 'authority')     
         try:
             # if we are directly connected to the aggregate then we can just
             # send them the request. if not, then we may be connected to an sm
             # thats connected to the aggregate
             if net_hrn in aggregates:
-                ticket = aggregates[net_hrn].get_ticket(credential, slice_hrn, \
+                ticket = aggregates[net_hrn].get_ticket(credential, xrn, \
                             rspecs[net_hrn], origin_hrn)
                 tickets[net_hrn] = ticket
             else:
                 # lets forward this rspec to a sm that knows about the network
                 for agg in aggregates:
-                    network_found = aggregates[agg].get_aggregates(credential, net_hrn)
+                    network_found = aggregates[agg].get_aggregates(credential, )net_urn
                     if network_found:
                         ticket = aggregates[aggregate].get_ticket(credential, \
                                         slice_hrn, rspecs[net_hrn], origin_hrn)
@@ -160,7 +163,8 @@ def get_ticket(api, slice_hrn, rspec, origin_hrn=None):
     new_ticket.sign()          
     return new_ticket.save_to_string(save_parents=True)
 
-def start_slice(api, hrn):
+def start_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -172,7 +176,8 @@ def start_slice(api, hrn):
 
     return 1
  
-def stop_slice(api, hrn):
+def stop_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -183,7 +188,7 @@ def stop_slice(api, hrn):
     api.plshell.UpdateSliceTag(api.plauth, attribute_id, "0")
     return 1
 
-def reset_slice(api, hrn):
+def reset_slice(api, xrn):
     # XX not implemented at this interface
     return 1
 
@@ -193,13 +198,14 @@ def get_slices(api):
     from sfa.plc.slices import Slices
     slices = Slices(api)
     slices.refresh()
-    return slices['hrn']
+    return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
      
-def get_rspec(api, hrn=None, origin_hrn=None):
+def get_rspec(api, xrn=None, origin_hrn=None):
+    
     from sfa.plc.nodes import Nodes
     nodes = Nodes(api, origin_hrn=origin_hrn)
     if hrn:
-        rspec = nodes.get_rspec(hrn)
+        rspec = nodes.get_rspec(xrn)
     else:
         nodes.refresh()
         rspec = nodes['rspec']
@@ -212,6 +218,8 @@ to refer to "contexts", which is the information that sfatables is requesting. B
 return the basic information needed in a dict.
 """
 def fetch_context(slice_hrn, user_hrn, contexts):
+    slice_hrn = urn_to_hrn(slice_xrn)[0]
+    user_hrn = urn_to_hrn(user_xrn)[0]
     base_context = {'sfa':{'user':{'hrn':user_hrn}}}
     return base_context
 

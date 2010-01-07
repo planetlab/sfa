@@ -38,7 +38,8 @@ class Slices(SimpleStorage):
         self.load()
         self.origin_hrn = origin_hrn
 
-    def get_slivers(self, hrn, node=None):
+    def get_slivers(self, xrn, node=None):
+        hrn, type = urn_to_hrn(xrn)
          
         slice_name = hrn_to_pl_slicename(hrn)
         # XX Should we just call PLCAPI.GetSliceTicket(slice_name) instead
@@ -142,7 +143,8 @@ class Slices(SimpleStorage):
 
         return slivers
  
-    def get_peer(self, hrn):
+    def get_peer(self, xrn):
+        hrn, type = urn_to_hrn(xrn)
         # Becaues of myplc federation,  we first need to determine if this
         # slice belongs to out local plc or a myplc peer. We will assume it 
         # is a local site, unless we find out otherwise  
@@ -163,7 +165,9 @@ class Slices(SimpleStorage):
 
         return peer
 
-    def get_sfa_peer(self, hrn):
+    def get_sfa_peer(self, xrn):
+        hrn, type = urn_to_hrn(xrn)
+
         # return the authority for this hrn or None if we are the authority
         sfa_peer = None
         slice_authority = get_authority(hrn)
@@ -249,7 +253,8 @@ class Slices(SimpleStorage):
 
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
         authority = get_authority(slice_hrn)
-        site_records = registry.resolve(credential, authority)
+        authority_urn = hrn_to_urn(authority, 'authority')
+        site_records = registry.resolve(credential, authority_urn)
             
         site = {}
         for site_record in site_records:
@@ -401,8 +406,8 @@ class Slices(SimpleStorage):
 
                     except: pass   
 
-    def create_slice_aggregate(self, hrn, rspec):
-
+    def create_slice_aggregate(self, xrn, rspec):
+        hrn, type = urn_to_hrn(xrn)
         # Determine if this is a peer slice
         peer = self.get_peer(hrn)
         sfa_peer = self.get_sfa_peer(hrn)

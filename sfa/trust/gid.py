@@ -10,7 +10,7 @@ import xmlrpclib
 import uuid
 
 from sfa.trust.certificate import Certificate
-
+from sfa.util.namespace import *
 ##
 # Create a new uuid. Returns the UUID as a string.
 
@@ -27,6 +27,10 @@ def create_uuid():
 # HRN is a human readable name. It is a dotted form similar to a backward domain
 #    name. For example, planetlab.us.arizona.bakers.
 #
+# URN is a human readable identifier of form:
+#   "urn:publicid:IDN+toplevelauthority[:sub-auth.]*[\res. type]\ +object name"
+#   For  example, urn:publicid:IDN+planetlab:us:arizona+user+bakers      
+#
 # PUBLIC_KEY is the public key of the principal identified by the UUID/HRN.
 # It is a Keypair object as defined in the cert.py module.
 #
@@ -41,6 +45,7 @@ def create_uuid():
 class GID(Certificate):
     uuid = None
     hrn = None
+    urn = None
 
     ##
     # Create a new GID object
@@ -50,12 +55,16 @@ class GID(Certificate):
     # @param string If string!=None, load the GID from a string
     # @param filename If filename!=None, load the GID from a file
 
-    def __init__(self, create=False, subject=None, string=None, filename=None, uuid=None, hrn=None):
+    def __init__(self, create=False, subject=None, string=None, filename=None, uuid=None, hrn=None, urn=None):
+        
         Certificate.__init__(self, create, subject, string, filename)
         if uuid:
             self.uuid = uuid
         if hrn:
             self.hrn = hrn
+        if urn:
+            self.urn = urn
+            self.hrn, type = urn_to_hrn(urn)
 
     def set_uuid(self, uuid):
         self.uuid = uuid
@@ -73,6 +82,15 @@ class GID(Certificate):
             self.decode()
         return self.hrn
 
+    def set_urn(self, urn):
+        self.urn = urn
+        self.hrn, type = urn_to_hrn(urn)
+ 
+    def get_urn(self):
+        if not self.urn:
+            self.decode()
+        return self.urn            
+
     ##
     # Encode the GID fields and package them into the subject-alt-name field
     # of the X509 certificate. This must be called prior to signing the
@@ -80,7 +98,8 @@ class GID(Certificate):
 
     def encode(self):
         dict = {"uuid": self.uuid,
-                "hrn": self.hrn}
+                "hrn": self.hrn,
+                "urn": self.urn}
         str = xmlrpclib.dumps((dict,))
         self.set_data(str)
 
@@ -98,6 +117,7 @@ class GID(Certificate):
 
         self.uuid = dict.get("uuid", None)
         self.hrn = dict.get("hrn", None)
+        self.urn = dict.get("urn", None)
 
     ##
     # Dump the credential to stdout.
@@ -107,6 +127,7 @@ class GID(Certificate):
 
     def dump(self, indent=0, dump_parents=False):
         print " "*indent, " hrn:", self.get_hrn()
+        print " "*indent, " urn:", self.get_urn()
         print " "*indent, "uuid:", self.get_uuid()
 
         if self.parent and dump_parents:

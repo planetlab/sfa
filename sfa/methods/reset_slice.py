@@ -2,6 +2,7 @@
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/reset_slices.py $
 
 from sfa.util.faults import *
+from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
@@ -12,7 +13,7 @@ class reset_slice(Method):
     Reset the specified slice      
 
     @param cred credential string specifying the rights of the caller
-    @param hrn human readable name of slice to instantiate
+    @param xrn human readable name of slice to instantiate (hrn or urn)
     @return 1 is successful, faults otherwise  
     """
 
@@ -20,14 +21,15 @@ class reset_slice(Method):
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name of slice to instantiate"),
+        Parameter(str, "Human readable name of slice to instantiate (hrn or urn)"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
               Parameter(None, "Origin hrn not specified"))
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, hrn, origin_hrn=None):
+    def call(self, cred, xrn, origin_hrn=None):
+        hrn, type = urn_to_hrn(xrn)
         self.api.auth.check(cred, 'resetslice')
         # send the call to the right manager
         manager_base = 'sfa.managers'
@@ -35,16 +37,16 @@ class reset_slice(Method):
             mgr_type = self.api.config.SFA_CM_TYPE
             manager_module = manager_base + ".component_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.reset_slice(self.api, hrn)
+            manager.reset_slice(self.api, xrn)
         elif self.api.interface in ['aggregate']:
             mgr_type = self.api.config.SFA_AGGREGATE_TYPE
             manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.reset_slice(self.api, hrn)
+            manager.reset_slice(self.api, xrn)
         elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            manager.reset_slice(self.api, hrn) 
+            manager.reset_slice(self.api, xrn) 
 
         return 1 

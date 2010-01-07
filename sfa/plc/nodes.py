@@ -88,7 +88,8 @@ class Nodes(SimpleStorage):
         self.update(node_details)
         self.write()       
  
-    def get_remote_resources(self, hrn = None):
+    def get_rspec_smgr(self, xrn = None):
+        hrn, type = urn_to_hrn(xrn)
         # convert and threshold to ints
         if self.has_key('timestamp') and self['timestamp']:
             hr_timestamp = self['timestamp']
@@ -116,7 +117,7 @@ class Nodes(SimpleStorage):
           if aggregate not in [self.api.auth.client_cred.get_gid_caller().get_hrn()]:
             try:
                 # get the rspec from the aggregate
-                agg_rspec = aggregates[aggregate].get_resources(credential, hrn, origin_hrn)
+                agg_rspec = aggregates[aggregate].get_resources(credential, xrn, origin_hrn)
                 # extract the netspec from each aggregates rspec
                 rspec.parseString(agg_rspec)
                 networks.extend([{'NetSpec': rspec.getDictsByTagName('NetSpec')}])
@@ -130,7 +131,7 @@ class Nodes(SimpleStorage):
         resourceDict = {'RSpec': resources}
         # convert rspec dict to xml
         rspec.parseDict(resourceDict)
-        return rspec
+        return rspec.toxml()
 
     def refresh_nodes_smgr(self):
 
@@ -154,23 +155,18 @@ class Nodes(SimpleStorage):
         self.update(nodedict)
         self.write()
 
-    def get_rspec(self, hrn = None):
+    def get_rspec(self, xrn = None):
 
         if self.api.interface in ['slicemgr']:
-            return self.get_rspec_smgr(hrn)
+            return self.get_rspec_smgr(xrn)
         elif self.api.interface in ['aggregate']:
-            return self.get_rspec_aggregate(hrn)     
+            return self.get_rspec_aggregate(xrn)     
 
-    def get_rspec_smgr(self, hrn = None):
-        
-        rspec = self.get_remote_resources(hrn)
-        return rspec.toxml()
-
-    def get_rspec_aggregate(self, hrn = None):
+    def get_rspec_aggregate(self, xrn = None):
         """
         Get resource information from PLC
         """
-
+        hrn, type = urn_to_hrn(xrn)
         slicename = None
         # Get the required nodes
         if not hrn:

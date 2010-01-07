@@ -11,7 +11,12 @@ from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.faults import *
 
-def get_credential(api, hrn, type, is_self=False):    
+def get_credential(api, xrn, type, is_self=False):
+    # convert xrn to hrn     
+    if type:
+        hrn = urn_to_hrn(xrn)[0]
+    else:
+        hrn, type = urn_to_hrn(xrn)
     # Is this a root or sub authority
     auth_hrn = api.auth.get_authority(hrn)
     if not auth_hrn or hrn == api.config.SFA_INTERFACE_HRN:
@@ -58,28 +63,28 @@ def get_credential(api, hrn, type, is_self=False):
 
     return new_cred.save_to_string(save_parents=True)
 
-def resolve(api, hrns, type=None, origin_hrn=None):
+def resolve(api, xrns, type=None, origin_hrn=None):
 
     # load all know registry names into a prefix tree and attempt to find
     # the longest matching prefix
     if not isinstance(hrns, types.ListType):
-        hrns = [hrns]
+        xrns = [xrns]
     
     # create a dict whre key is an registry hrn and its value is a
     # hrns at that registry (determined by the known prefix tree).  
-    hrn_dict = {}
+    xrn_dict = {}
     registries = Registries(api)
     tree = prefixTree()
     registry_hrns = registries.keys()
     tree.load(registry_hrns)
-    for hrn in hrns:
-        registry_hrn = tree.best_match(hrn)
+    for xrn in xrns:
+        registry_hrn = tree.best_match(urn_to_hrn(xrn)[0])
         if registry_hrn not in hrn_dict:
-            hrn_dict[registry_hrn] = []
-        hrn_dict[registry_hrn].append(hrn)
+            xrn_dict[registry_hrn] = []
+        xrn_dict[registry_hrn].append(xrn)
         
     records = [] 
-    for registry_hrn in hrn_dict:
+    for registry_hrn in xrn_dict:
         # skip the hrn without a registry hrn
         # XX should we let the user know the authority is unknown?       
         if not registry_hrn:
@@ -87,10 +92,10 @@ def resolve(api, hrns, type=None, origin_hrn=None):
 
         # if the best match (longest matching hrn) is not the local registry,
         # forward the request
-        hrns = hrn_dict[registry_hrn]
+        xrns = xrn_dict[registry_hrn]
         if registry_hrn != api.hrn:
             credential = api.getCredential()
-            peer_records = registries[registry_hrn].resolve(credential, hrn, origin_hrn)
+            peer_records = registries[registry_hrn].resolve(credential, xrns, origin_hrn)
             records.extend([SfaRecord(dict=record).as_dict() for record in peer_records])
 
     # try resolving the remaining unfound records at the local registry
@@ -116,26 +121,27 @@ def resolve(api, hrns, type=None, origin_hrn=None):
 
     return records
 
-def list(api, hrn):
+def list(api, xrn):
+    hrn, type = hrn_to_urn(xrn)
     # load all know registry names into a prefix tree and attempt to find
     # the longest matching prefix
     records = []
     registries = Registries(api)
-    hrns = registries.keys()
+    registry_hrns = registries.keys()
     tree = prefixTree()
-    tree.load(hrns)
+    tree.load(registry_hrns)
     registry_hrn = tree.best_match(hrn)
     
     #if there was no match then this record belongs to an unknow registry
     if not registry_hrn:
-        raise MissingAuthority(hrn)
+        raise MissingAuthority(xrn)
     
     # if the best match (longest matching hrn) is not the local registry,
     # forward the request
     records = []    
     if registry_hrn != api.hrn:
         credential = api.getCredential()
-        record_list = registries[registry_hrn].list(credential, hrn, origin_hrn)
+        record_list = registries[registry_hrn].list(credential, xrn, origin_hrn)
         records = [SfaRecord(dict=record).as_dict() for record in record_list]
     
     # if we still havnt found the record yet, try the local registry
@@ -343,7 +349,13 @@ def update(api, record_dict):
     
     return 1 
 
-def remove(api, hrn, type, origin_hrn=None):
+def remove(api, xrn, type, origin_hrn=None):
+    # convert xrn to hrn     
+    if type:
+        hrn = urn_to_hrn(xrn)[0]
+    else:
+        hrn, type = urn_to_hrn(xrn)    
+
     table = SfaTable()
     filter = {'hrn': hrn}
     if type not in ['all', '*']:

@@ -27,13 +27,13 @@ class get_gids(Method):
     
     accepts = [
         Parameter(str, "Certificate string"),
-        Mixed(Parameter(str, "Human readable name (hrn)"), 
-              Parameter(type([str]), "List of Human readable names (hrn)")) 
+        Mixed(Parameter(str, "Human readable name (hrn or xrn)"), 
+              Parameter(type([str]), "List of Human readable names (hrn or xrn)")) 
         ]
 
     returns = [Parameter(dict, "Dictionary of gids keyed on hrn")]
     
-    def call(self, cred, hrns):
+    def call(self, cred, xrns):
         # validate the credential
         self.api.auth.check(cred, 'getgids')
         user_cred = Credential(string=cred)
@@ -44,7 +44,7 @@ class get_gids(Method):
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         manager = __import__(manager_module, fromlist=[manager_base])
-        records = manager.resolve(self.api, hrns, None, origin_hrn=origin_hrn)
+        records = manager.resolve(self.api, xrns, None, origin_hrn=origin_hrn)
         if not records:
             raise RecordNotFound(hrns)
 

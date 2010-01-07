@@ -97,7 +97,7 @@ def main():
         sfaImporter.create_top_level_auth_records(level1_auth)
         import_auth = level1_auth
 
-    trace("Import: adding" + import_auth + "to trusted list", logger)
+    trace("Import: adding " + import_auth + " to trusted list", logger)
     authority = AuthHierarchy.get_auth_info(import_auth)
     TrustedRoots.add_gid(authority.get_gid_object())
 

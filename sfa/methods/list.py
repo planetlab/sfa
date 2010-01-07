@@ -2,6 +2,7 @@
 ### $URL$
 
 from sfa.util.faults import *
+from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.record import SfaRecord
@@ -12,21 +13,22 @@ class list(Method):
     List the records in an authority. 
 
     @param cred credential string specifying the rights of the caller
-    @param hrn human readable name of authority to list
+    @param hrn human readable name of authority to list (hrn or urn)
     @return list of record dictionaries         
     """
     interfaces = ['registry']
     
     accepts = [
         Parameter(str, "Credential string"),
-        Parameter(str, "Human readable name (hrn)"),
+        Parameter(str, "Human readable name (hrn or urn)"),
         Mixed(Parameter(str, "Human readable name of the original caller"),
               Parameter(None, "Origin hrn not specified"))
         ]
 
     returns = [SfaRecord]
     
-    def call(self, cred, hrn, origin_hrn=None):
+    def call(self, cred, xrn, origin_hrn=None):
+        hrn, type = urn_to_hrn(xrn)
         user_cred = Credential(string=cred)
         #log the call
         if not origin_hrn:
@@ -41,4 +43,4 @@ class list(Method):
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         manager = __import__(manager_module, fromlist=[manager_base])
-        return manager.list(self.api, hrn) 
+        return manager.list(self.api, xrn) 

@@ -17,16 +17,24 @@ def init_server():
            
     
 
-def start_slice(api, slicename):
+def start_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
     api.nodemanger.Start(slicename)
 
-def stop_slice(api, slicename):
+def stop_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
     api.nodemanager.Stop(slicename)
 
-def delete_slice(api, slicename):
+def delete_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
     api.nodemanager.Destroy(slicename)
 
-def reset_slice(api, slicename):
+def reset_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
     if not api.sliver_exists(slicename):
         raise SliverDoesNotExist(slicename)
     api.nodemanager.ReCreate(slicename)
