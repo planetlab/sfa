@@ -98,7 +98,6 @@ class GID(Certificate):
 
     def encode(self):
         dict = {"uuid": self.uuid,
-                "hrn": self.hrn,
                 "urn": self.urn}
         str = xmlrpclib.dumps((dict,))
         self.set_data(str)
@@ -116,8 +115,8 @@ class GID(Certificate):
             dict = {}
 
         self.uuid = dict.get("uuid", None)
-        self.hrn = dict.get("hrn", None)
         self.urn = dict.get("urn", None)
+        self.hrn = urn_to_hrn(self.urn)[0]
 
     ##
     # Dump the credential to stdout.
