@@ -122,7 +122,7 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     return records
 
 def list(api, xrn):
-    hrn, type = hrn_to_urn(xrn)
+    hrn, type = urn_to_hrn(xrn)
     # load all know registry names into a prefix tree and attempt to find
     # the longest matching prefix
     records = []
