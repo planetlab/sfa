@@ -137,23 +137,22 @@ class RSpec:
             if nodeDom.hasChildNodes():
                 for child in nodeDom.childNodes:
                     childName = self._getName(child)
-                    # skip null children 
-                    if not childName:
-                        continue
-                    # initialize the possible array of children        
-                    if not node[elementName].has_key(childName):
-                        node[elementName][childName] = []
-                    # if child node has text child nodes
-                    # append the children to the array as strings
-                    if child.hasChildNodes() and isinstance(child.childNodes[0], minidom.Text):
-                        for nextchild in child.childNodes:
+                    
+                    # skip null children
+                    if not childName: continue
+
+                    # initialize the possible array of children
+                    if not node[elementName].has_key(childName): node[elementName][childName] = []
+
+                    if isinstance(child, minidom.Text):
+                        # add if data is not empty
+                        if child.data.strip():
                             node[elementName][childName].append(nextchild.data)
-                    # convert element child node to dict
-                    else:       
+                    else:
                         childdict = self.toDict(child)
                         for value in childdict.values():
                             node[elementName][childName].append(value)
-                    #node[childName].append(self.toDict(child))
+
         return node
 
   
