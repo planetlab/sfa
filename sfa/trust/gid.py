@@ -116,7 +116,9 @@ class GID(Certificate):
 
         self.uuid = dict.get("uuid", None)
         self.urn = dict.get("urn", None)
-        self.hrn = urn_to_hrn(self.urn)[0]
+        self.hrn = dict.get("hrn", None)    
+        if self.urn:
+            self.hrn = urn_to_hrn(self.urn)[0]
 
     ##
     # Dump the credential to stdout.
