@@ -12,7 +12,7 @@ from sfa.trust.certificate import Keypair
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.report import trace, error
 from sfa.server.registry import Registries
-from sfa.util.xmlrpcprotocol import *
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol 
 import socket
 
 def main():
@@ -60,7 +60,14 @@ def main():
             try:
                 records = registries[registry_hrn].resolve(credential, target_hrns)
                 found_records.extend([record['hrn'] for record in records])
+            except ServerException:
+                # an exception will be thrown if the record doenst exist
+                # if so remove the record from the local registry
+                continue
             except:
+                # this deosnt necessarily mean the records dont exist
+                # lets give them the benefit of the doubt here (for now)
+                found_records.extend(target_hrns)
                 traceback.print_exc()
 
     # remove what wasnt found 
