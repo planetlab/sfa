@@ -135,7 +135,7 @@ class Nodes(SimpleStorage):
 
     def refresh_nodes_smgr(self):
 
-        rspec = self.get_remote_resources()        
+        rspec = self.get_rspec_smgr()        
         # filter according to policy
         blist = self.policy['node_blacklist']
         wlist = self.policy['node_whitelist']    
