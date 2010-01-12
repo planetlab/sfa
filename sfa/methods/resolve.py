@@ -2,6 +2,7 @@
 ### $URL$
 import traceback
 from sfa.util.faults import *
+from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.debug import log
@@ -29,6 +30,7 @@ class resolve(Method):
     
     def call(self, cred, xrn, origin_hrn=None):
         user_cred = Credential(string=cred)
+        hrn = urn_to_hrn(xrn)[0]
 
         #log the call
         if not origin_hrn:
