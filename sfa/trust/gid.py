@@ -97,6 +97,11 @@ class GID(Certificate):
     # certificate. It may only be called once per certificate.
 
     def encode(self):
+        if self.urn:
+            urn = self.urn
+        else:
+            urn = hrn_to_urn(self.hrn, None)
+ 
         dict = {"uuid": self.uuid,
                 "urn": self.urn}
         str = xmlrpclib.dumps((dict,))
