@@ -204,7 +204,7 @@ def get_rspec(api, xrn=None, origin_hrn=None):
     
     from sfa.plc.nodes import Nodes
     nodes = Nodes(api, origin_hrn=origin_hrn)
-    if hrn:
+    if xrn:
         rspec = nodes.get_rspec(xrn)
     else:
         nodes.refresh()
