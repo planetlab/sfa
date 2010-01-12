@@ -69,7 +69,7 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     # the longest matching prefix
     if not isinstance(xrns, types.ListType):
         xrns = [xrns]
-    
+    hrns = [urn_to_hrn(xrn)[0] for xrn in xrns] 
     # create a dict whre key is an registry hrn and its value is a
     # hrns at that registry (determined by the known prefix tree).  
     xrn_dict = {}
@@ -100,8 +100,11 @@ def resolve(api, xrns, type=None, origin_hrn=None):
 
     # try resolving the remaining unfound records at the local registry
     remaining_hrns = set(hrns).difference([record['hrn'] for record in records])
+    # convert set to list
     remaining_hrns = [hrn for hrn in remaining_hrns] 
     table = SfaTable()
+
+    print remaining_hrns
     local_records = table.findObjects({'hrn': remaining_hrns})
     for record in local_records:
         try:
