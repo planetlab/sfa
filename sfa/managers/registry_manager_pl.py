@@ -79,7 +79,7 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     tree.load(registry_hrns)
     for xrn in xrns:
         registry_hrn = tree.best_match(urn_to_hrn(xrn)[0])
-        if registry_hrn not in hrn_dict:
+        if registry_hrn not in xrn_dict:
             xrn_dict[registry_hrn] = []
         xrn_dict[registry_hrn].append(xrn)
         
