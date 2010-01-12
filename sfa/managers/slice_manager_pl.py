@@ -125,7 +125,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
             else:
                 # lets forward this rspec to a sm that knows about the network
                 for agg in aggregates:
-                    network_found = aggregates[agg].get_aggregates(credential, )net_urn
+                    network_found = aggregates[agg].get_aggregates(credential, net_urn)
                     if network_found:
                         ticket = aggregates[aggregate].get_ticket(credential, \
                                         slice_hrn, rspecs[net_hrn], origin_hrn)
