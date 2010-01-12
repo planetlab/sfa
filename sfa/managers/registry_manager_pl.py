@@ -103,8 +103,6 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     # convert set to list
     remaining_hrns = [hrn for hrn in remaining_hrns] 
     table = SfaTable()
-
-    print remaining_hrns
     local_records = table.findObjects({'hrn': remaining_hrns})
     for record in local_records:
         try:
