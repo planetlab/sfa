@@ -259,5 +259,5 @@ class Nodes(SimpleStorage):
         # convert the rspec dict to xml
         rspec = RSpec()
         rspec.parseDict(resourceDict)
-        return rspec.toxml()
+        return rspec
         
