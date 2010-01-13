@@ -72,7 +72,7 @@ def urn_to_hrn(urn):
     # join list elements using '.'
     hrn = '.'.join([part.replace(':', '.') for part in hrn_parts if part]) 
    
-    return hrn, type 
+    return str(hrn), str(type) 
     
     
 def hrn_to_urn(hrn, type=None):
