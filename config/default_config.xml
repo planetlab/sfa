@@ -153,7 +153,7 @@ $URL$
 
 	<variable id="port" type="int">
 	  <name>Port number</name>
-	  <value>12346</value>
+	  <value>12347</value>
 	  <description>The port where the slice manager is to be found.</description>
 	</variable>
       </variablelist>
