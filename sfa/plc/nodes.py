@@ -50,7 +50,7 @@ class Nodes(SimpleStorage):
 
     def refresh_nodes_aggregate(self):
         rspec = RSpec()
-        rspec.parseString(self.get_rspec().toxml())
+        rspec.parseString(self.get_rspec())
         
         # filter nodes according to policy
         blist = self.policy['node_blacklist']
@@ -131,11 +131,11 @@ class Nodes(SimpleStorage):
         resourceDict = {'RSpec': resources}
         # convert rspec dict to xml
         rspec.parseDict(resourceDict)
-        return rspec
+        return rspec.toxml()
 
     def refresh_nodes_smgr(self):
 
-        rspec = self.get_rspec_smgr()        
+        rspec = RSpec(xml=self.get_rspec_smgr())        
         # filter according to policy
         blist = self.policy['node_blacklist']
         wlist = self.policy['node_whitelist']    
@@ -259,5 +259,5 @@ class Nodes(SimpleStorage):
         # convert the rspec dict to xml
         rspec = RSpec()
         rspec.parseDict(resourceDict)
-        return rspec
+        return rspec.toxml()
         
