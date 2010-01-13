@@ -148,6 +148,9 @@ class RSpec:
                         # add if data is not empty
                         if child.data.strip():
                             node[elementName][childName].append(nextchild.data)
+                    elif child.hasChildNodes() and isinstance(child.childNodes[0], minidom.Text):
+                        for nextchild in child.childNodes:  
+                            node[elementName][childName].append(nextchild.data)
                     else:
                         childdict = self.toDict(child)
                         for value in childdict.values():
