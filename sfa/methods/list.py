@@ -43,4 +43,4 @@ class list(Method):
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         manager = __import__(manager_module, fromlist=[manager_base])
-        return manager.list(self.api, xrn) 
+        return manager.list(self.api, xrn, origin_hrn) 
