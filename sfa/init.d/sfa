@@ -54,6 +54,9 @@ reload ()
 #	mkdir -p /etc/sfa/php
 #	plc-config --php  /etc/sfa/sfa_config.xml >/etc/sfa/php/sfa_config.php
 #    fi
+
+    # [re]generate the sfa_component_config
+    gen-sfa-cm-config.py        
 }
 
 start() {
