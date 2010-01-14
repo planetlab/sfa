@@ -1,6 +1,7 @@
 ### $Id$
 ### $URL$
 import traceback
+import types
 from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method
@@ -28,14 +29,16 @@ class resolve(Method):
 
     returns = [SfaRecord]
     
-    def call(self, cred, xrn, origin_hrn=None):
+    def call(self, cred, xrns, origin_hrn=None):
         user_cred = Credential(string=cred)
-        hrn = urn_to_hrn(xrn)[0]
+	if not isinstance(xrns, types.ListType):
+	    xrns=[xrns]
+	hrns = [urn_to_hrn(xrn)[0] for xrn in xrns]
 
         #log the call
         if not origin_hrn:
             origin_hrn = user_cred.get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrns, self.name))
  
         # validate the cred
         self.api.auth.check(cred, 'resolve')
@@ -44,7 +47,7 @@ class resolve(Method):
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         manager = __import__(manager_module, fromlist=[manager_base])
-        return manager.resolve(self.api, xrn, origin_hrn=origin_hrn)
+        return manager.resolve(self.api, xrns, origin_hrn=origin_hrn)
 
 
             
