@@ -217,13 +217,13 @@ def register(api, record):
         for key in pl_record.keys():
             if key not in acceptable_fields:
                 pl_record.pop(key)
-            slices = api.plshell.GetSlices(api.plauth, [pl_record['name']])
-            if not slices:
-                pointer = api.plshell.AddSlice(api.plauth, pl_record)
-            else:
-                pointer = slices[0]['slice_id']
-            record.set_pointer(pointer)
-            record['pointer'] = pointer
+        slices = api.plshell.GetSlices(api.plauth, [pl_record['name']])
+        if not slices:
+             pointer = api.plshell.AddSlice(api.plauth, pl_record)
+        else:
+             pointer = slices[0]['slice_id']
+        record.set_pointer(pointer)
+        record['pointer'] = pointer
 
     elif  (type == "user"):
         persons = api.plshell.GetPersons(api.plauth, [record['email']])
