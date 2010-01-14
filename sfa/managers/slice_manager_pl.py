@@ -218,8 +218,8 @@ to refer to "contexts", which is the information that sfatables is requesting. B
 return the basic information needed in a dict.
 """
 def fetch_context(slice_hrn, user_hrn, contexts):
-    slice_hrn = urn_to_hrn(slice_xrn)[0]
-    user_hrn = urn_to_hrn(user_xrn)[0]
+    #slice_hrn = urn_to_hrn(slice_xrn)[0]
+    #user_hrn = urn_to_hrn(user_xrn)[0]
     base_context = {'sfa':{'user':{'hrn':user_hrn}}}
     return base_context
 
