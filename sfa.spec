@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 8
+%define taglevel 9
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -125,6 +125,14 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Fri Jan 15 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-9
+- sfa-config-tty now has the same features like plc-config-tty
+- Contains code to support both urn and hrn
+- Cleaned up request_hash related stuff
+- SM, AM and Registry code is organized under respective managers
+- Slice synchronization across federated aggregates
+- some bugs are fixed
+
 * Wed Jan 06 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-0.9-8
 - checkpoint with fewer mentions of geni
 
