@@ -252,8 +252,6 @@ class Slices(SimpleStorage):
 
 
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
-	import pdb
-	pdb.set_trace()
         authority = get_authority(slice_hrn)
         authority_urn = hrn_to_urn(authority, 'authority')
         site_records = registry.resolve(credential, authority_urn)
