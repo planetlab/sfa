@@ -89,23 +89,28 @@ def msg_aggrMgr(cred, hrn, msg_id):
         print "IO error"
     return 0
 
-def start_slice(cred, hrn):
+def start_slice(cred, xrn):
+    hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received start_slice call"
     return msg_aggrMgr(SFA_START_SLICE)
 
-def stop_slice(cred, hrn):
+def stop_slice(cred, xrn):
+    hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received stop_slice call"
     return msg_aggrMgr(SFA_STOP_SLICE)
 
-def delete_slice(cred, hrn):
+def delete_slice(cred, xrn):
+    hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received delete_slice call"
     return msg_aggrMgr(SFA_DELETE_SLICE)
 
-def reset_slices(cred, hrn):
+def reset_slices(cred, xrn):
+    hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received reset_slices call"
     return msg_aggrMgr(SFA_RESET_SLICES)
 
-def create_slice(cred, hrn, rspec):
+def create_slice(cred, xrn, rspec):
+    hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received create_slice call"
     slice_id = generate_slide_id(cred, hrn)
 
@@ -126,7 +131,8 @@ def create_slice(cred, hrn, rspec):
         print "IO error"
     return 0
 
-def get_rspec(cred, hrn=None):
+def get_rspec(cred, xrn=None):
+    hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received get_rspec call"
     slice_id = generate_slide_id(cred, hrn)
 

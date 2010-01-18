@@ -222,8 +222,9 @@ class ZoneResultParser(object):
 
         return clusterList
 
-def get_rspec(api, hrn, origin_hrn):
+def get_rspec(api, xrn, origin_hrn):
     global cloud
+    hrn = urn_to_hrn(xrn)[0]
     conn = getEucaConnection()
 
     if not conn:
@@ -256,7 +257,8 @@ def get_rspec(api, hrn, origin_hrn):
 """
 Hook called via 'sfi.py create'
 """
-def create_slice(api, hrn, xml):
+def create_slice(api, xrn, xml):
+    hrn = urn_to_hrn(xrn)[0]
     return True
 
 def main():

@@ -132,7 +132,8 @@ def create_slice_vini_aggregate(api, hrn, nodes):
 
     return 1
 
-def get_rspec(api, hrn):
+def get_rspec(api, xrn):
+    hrn = urn_to_hrn(xrn)[0]
     topo = Topology(api)      
     if (hrn):
         slicename = hrn_to_pl_slicename(hrn)
@@ -151,7 +152,8 @@ def get_rspec(api, hrn):
 """
 Hook called via 'sfi.py create'
 """
-def create_slice(api, hrn, xml):
+def create_slice(api, xrn, xml):
+    hrn = urn_to_hrn(xrn)[0]
     ### Check the whitelist
     ### It consists of lines of the form: <slice hrn> <bw>
     whitelist = {}
