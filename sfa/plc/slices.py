@@ -252,8 +252,6 @@ class Slices(SimpleStorage):
 
 
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
-	import pdb
-	pdb.set_trace()
         authority = get_authority(slice_hrn)
         authority_urn = hrn_to_urn(authority, 'authority')
         site_records = registry.resolve(credential, authority_urn)
@@ -490,10 +488,13 @@ class Slices(SimpleStorage):
         return 1
 
     def sync_site(self, old_record, new_record, peer):
-        if old_record['max_slices'] != new_record['max_slices']:
+        if old_record['max_slices'] != new_record['max_slices'] or old_record['max_slivers'] != new_record['max_slivers']:
             if peer:
                 self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'site', old_record['site_id'], peer)
-            self.api.plshell.UpdateSite(self.api.plauth, old_record['site_id'], {'max_slices' : new_record['max_slices']})
+	    if old_record['max_slices'] != new_record['max_slices']:
+                self.api.plshell.UpdateSite(self.api.plauth, old_record['site_id'], {'max_slices' : new_record['max_slices']})
+	    if old_record['max_slivers'] != new_record['max_slivers']:
+		self.api.plshell.UpdateSite(self.api.plauth, old_record['site_id'], {'max_slivers' : new_record['max_slivers']})
 	    if peer:
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', old_record['site_id'], peer, old_record['peer_site_id'])
 	return 1
