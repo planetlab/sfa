@@ -80,8 +80,8 @@ RSYNC_EXCLUDES		:= --exclude .svn --exclude CVS --exclude '*~' --exclude TAGS $(
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
 RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
-BINS =	./config/sfa-config-tty ./sfa/plc/sfa-import-plc.py ./sfa/plc/sfa-nuke-plc.py \
-	./sfa/server/sfa-server.py \
+BINS =	./config/sfa-config-tty ./config/gen-sfa-cm-config.py \
+	./sfa/plc/sfa-import-plc.py ./sfa/plc/sfa-nuke-plc.py ./sfa/server/sfa-server.py \
 	./sfa/client/sfi.py ./sfa/client/getNodes.py ./sfa/client/getRecord.py \
 	./sfa/client/setRecord.py ./sfa/client/sfadump.py
 
