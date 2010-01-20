@@ -59,7 +59,7 @@ for d in processor_subdirs:
     d_files = [f for f in glob(d + '/*') if os.path.isfile(f)]
     data_files.append((etc_dir, processor_files))
 
-initscripts = [ '/etc/init.d/sfa' ]
+initscripts = [ '/etc/init.d/sfa', '/etc/init.d/sfa_cm' ]
 
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
