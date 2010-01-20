@@ -113,7 +113,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
     credential = api.getCredential()
     tickets = {}
     for net_hrn in rspecs:
-        net_urn = urn_to_hrn(net_hrn, 'authority')     
+        net_urn = urn_to_hrn(net_hrn)     
         try:
             # if we are directly connected to the aggregate then we can just
             # send them the request. if not, then we may be connected to an sm
