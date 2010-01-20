@@ -11,6 +11,7 @@ from distutils.core import setup
 
 bins = [ 
     'config/sfa-config-tty',
+    'config/gen-sfa-cm-config.py',
     'sfa/plc/sfa-import-plc.py', 
     'sfa/plc/sfa-nuke-plc.py', 
     'sfa/server/sfa-server.py', 

@@ -106,6 +106,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sfa-clean-peer-records.py*
 %{_bindir}/sfa-nuke-plc.py*
 %{_bindir}/sfa-server.py*
+%{_bindir}/gen-sfa-cm-config.py*
 
 %files client
 %config (noreplace) /etc/sfa/sfi_config
