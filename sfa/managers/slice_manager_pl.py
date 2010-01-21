@@ -55,11 +55,11 @@ def create_slice(api, xrn, rspec, origin_hrn=None):
     netspecs = spec.getDictsByTagName('NetSpec')
     for netspec in netspecs:
         net_hrn = netspec['name']
-        resources = {'start_time': start_time, 'end_time': end_time, 'networks': netspec}
+        resources = {'start_time': start_time, 'end_time': end_time, 'networks': {'NetSpec' : netspec}}
         resourceDict = {'RSpec': resources}
         tempspec.parseDict(resourceDict)
         rspecs[net_hrn] = tempspec.toxml()
-
+    
     #print "rspecs:", rspecs.keys()
     #print "aggregates:", aggregates.keys() 
     # send each rspec to the appropriate aggregate/sm
@@ -103,7 +103,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
     for netspec in netspecs:
         net_hrn = netspec['name']
         resources = {'start_time': 0, 'end_time': 0 , 
-                     'network': netspec}
+                     'network': {'NetSpec' : netspec}}
         resourceDict = {'RSpec': resources}
         temp_rspec.parseDict(resourceDict)
         rspecs[net_hrn] = temp_rspec.toxml() 
