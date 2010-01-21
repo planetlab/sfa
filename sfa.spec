@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 9
+%define taglevel 10
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -127,6 +127,15 @@ rm -rf $RPM_BUILD_ROOT
 chkconfig --add sfa
 
 %changelog
+* Thu Jan 21 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-10
+- This tag is quite same as the previous one (sfa-0.9-9) except that the vini and max aggregate managers are also updated for urn support.  Other features are:
+- - sfa-config-tty now has the same features like plc-config-tty
+- - Contains code to support both urn and hrn
+- - Cleaned up request_hash related stuff
+- - SM, AM and Registry code is organized under respective managers
+- - Site and Slice synchronization across federated aggregates
+- - Script to generate sfa_component_config
+
 * Fri Jan 15 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-9
 - sfa-config-tty now has the same features like plc-config-tty
 - Contains code to support both urn and hrn
