@@ -1,15 +1,22 @@
 #!/usr/bin/python
 import sys
 import os
-import sfa.util.xmlrpcprotocol as xmlrpc
+import random
+import string
 import unittest
+import sfa.util.xmlrpcprotocol as xmlrpc
 from unittest import TestCase
 from optparse import OptionParser
 from sfa.util.xmlrpcprotocol import ServerException
 from sfa.util.namespace import *
 from sfa.util.config import *
 from sfa.trust.certificate import *
+from sfa.trust.credential import *
+from sfa.trust.sfaticket import *
 from sfa.client import sfi
+
+def random_string(size):
+    return "".join(random.sample(string.letters, size))
 
 class Client:
     registry = None
@@ -59,8 +66,6 @@ class Client:
                 self.get_credential(self.user, 'user')
             return self.registry.get_credential(self.credential, type, hrn)     
 
-       
-
 class BasicTestCase(unittest.TestCase):
     def __init__(self, testname, client):
         unittest.TestCase.__init__(self, testname)
@@ -85,23 +90,54 @@ class RegistryTest(BasicTestCase):
         BasicTestCase.setUp(self)
 
     def testGetSelfCredential(self):
-        self.client.get_credential()
+        cred = self.client.get_credential()
+        # this will raise an openssl error if the credential string isnt valid
+        Credential(string=cred)
 
     def testRegister(self):
-        assert True 
+        authority = get_authority(self.hrn)
+        auth_record = {'hrn': ".".join([authority, random_string(10)]),
+                       'type': 'authority'}
+        node_record = {'hrn': ".".join([authority, random_string(10)]),
+                       'type': 'node'}
+        slice_record = {'hrn': ".".join([authority, random_string(10)]),
+                        'type': 'slice', 'researcher': [self.hrn]}
+        user_record = {'hrn': ".".join([authority, random_string(10)]),
+                       'type': 'user'}
+
+        all_records = [auth_record, node_record, slice_record, user_record]
+        for record in all_records:
+            try:
+                self.registry.register(self.cred, record)
+                self.registry.resolve(self.cred, record['hrn'])
+            except:
+                raise
+            finally:
+                try: self.registry.remove(record['hrn'])
+
     
     def testRegisterPeerObject(self):
         assert True
    
     def testUpdate(self):
-        assert True
+        record = self.registry.resolve(self.credential, self.hrn)
+        self.registry.update(record) 
 
     def testResolve(self):
+        authority = get_authority(self.hrn)
         self.registry.resolve(self.credential, self.hrn)
-        assert True
    
     def testRemove(self):
-        assert True
+        record = {'hrn': ".".join([authority, random_string(10)]),
+                       'type': 'user'}
+        self.registry.register(self.credential, user_record)
+        self.registry.remove(self.credential, user_record['hrn'])
+        # should generate an exception
+        try:
+            self.registry.resolve(self.credential,  record['hrn'])
+            assert False
+        except:       
+            assert True
  
     def testRemovePeerObject(self):
         assert True
@@ -132,49 +168,85 @@ class RegistryTest(BasicTestCase):
 
 
 class AggregateTest(BasicTestCase):
-    def setup(self):
+    slice = None
+    def setUp(self):
         BasicTestCase.setUp(self)
+        
+        # register a slice that will be used for some test
+        slice_record = {'hrn': ".".join([authority, random_string(10)]),
+                        'type': 'slice', 'researcher': [self.hrn]}
+        self.registry.register(self.credential, slice_record)
+        self.slice = slice_record 
+
+    def tearDown(self):
+        # remove the test slice
+        self.registry.remove(self.credential, self.slice['hrn'])
 
     def testGetSlices(self):
         self.aggregate.get_slices(self.credential)
 
     def testGetResources(self):
-        self.aggregate.get_resources(self.credential)
+        # available resources
+        agg_rspec = self.aggregate.get_resources(self.credential)
+        # resources used by a slice
+        slice_rspec self.aggregate.get_resources(self.credential, self.slice['hrn'])
+        # will raise an exception if the rspec isnt valid
+        RSpec(xml=agg_rspec)
+        RSpec(xml=slice_rspec)
 
     def testCreateSlice(self):
-        assert True
+        # get availabel resources   
+        rspec = self.aggregate.get_resources(self.credential)
+        slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
+        self.aggregate.create_slice(slice_credential, rspec)
 
     def testDeleteSlice(self):
-        assert True
+        slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
+        self.aggregate.delete_slice(slice_credential, self.slice['hrn'])
 
     def testGetTicket(self):
-        assert True
+        slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
+        rspec = self.aggregate.get_resources(self.credential)
+        ticket = self.aggregate.get_ticket(slice_credential, self.slice['hrn'], rspec)
+        # will raise an exception if the ticket inst valid
+        SfaTicket(string=ticket)        
 
 class SlicemgrTest(AggregateTest):
-    def setup(self):
+    def setUp(self):
         AggregateTest.setUp(self)
+        
+        # force calls to go through slice manager   
+        self.aggregate = self.sm
 
 class ComponentTest(BasicTestCase):
-    def setup(self):
+    slice = None
+    def setUp(self):
         BasicTestCase.setUp(self)
+        AggregateTest.setUp(self)
+
+    def tearDown(self):
+        AggregateTest.tearDown(self)
 
     def testStartSlice(self):
-        assert True
+        self.cm.start_slice(self.slice['hrn'])
 
     def testStopSlice(self):
-        assert True
+        self.cm.stop_slice(self.slice['hrn'])
 
     def testDeleteSlice(self):
-        assert True
+        self.cm.delete_slice(self.slice['hrn'])
 
     def testRestartSlice(self):
-        assert True
+        self.cm.restart_slice(self.slice['hrn'])
 
     def testGetSlices(self):
-        assert True        
+        self.cm.get_slices(self.slice['hrn'])
 
     def testRedeemTicket(self):
-        assert True
+        slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
+        rspec = self.aggregate.get_resources(self.credential)
+        ticket = self.aggregate.get_ticket(slice_credential, self.slice['hrn'], rspec)
+        self.cm.redeem_ticket(slice_credential, ticket)
 
 
 def test_names(testcase):
