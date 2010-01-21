@@ -832,7 +832,7 @@ class Sfi:
             try:
                 cm_port = "12346" 
                 url = "https://%(hostname)s:%(cm_port)s" % locals() 
-                print "Calling get_ticket at %(url)s " % locals(),  
+                print "Calling redeem_ticket at %(url)s " % locals(),  
                 cm = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
                 cm.redeem_ticket(slice_cred, ticket.save_to_string(save_parents=True))
                 print "Success"
