@@ -814,7 +814,8 @@ class Sfi:
         # use this to get the right slice credential 
         ticket = SfaTicket(filename=ticket_file)
         ticket.decode()
-        slice_hrn = ticket.attributes['slivers'][0]['hrn']
+	slice_hrn=ticket.gidObject.get_hrn()
+        #slice_hrn = ticket.attributes['slivers'][0]['hrn']
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         
