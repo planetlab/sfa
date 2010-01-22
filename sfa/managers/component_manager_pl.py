@@ -5,7 +5,7 @@ from sfa.util.namespace import *
 from sfa.util.sfaticket import SfaTicket
 
 def init_server():
-    from server import sfa_component_setup
+    from sfa.server import sfa_component_setup
     # get current trusted gids
     try:
         sfa_component_setup.get_trusted_certs()
