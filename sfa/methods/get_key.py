@@ -10,6 +10,7 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.table import SfaTable
 from sfa.trust.certificate import Keypair
+from sfa.trust.gid import create_uuid
 
 class get_key(Method):
     """
