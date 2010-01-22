@@ -13,13 +13,14 @@ all_vars = ['SFA_CONFIG_DIR', 'SFA_DATA_DIR', 'SFA_INTERFACE_HRN',
             'SFA_CM_SLICE_PREFIX', 'SFA_REGISTRY_HOST', 'SFA_REGISTRY_PORT', 
             'SFA_AGGREGATE_HOST', 'SFA_AGGREGATE_PORT', 
             'SFA_SM_HOST', 'SFA_SM_PORT',
-            'SFA_CM_ENABLED', 'SFA_CM_HOST', 'SFA_CM_PORT']
+            'SFA_CM_ENABLED', 'SFA_CM_HOST', 'SFA_CM_PORT', 'SFA_CM_TYPE']
 
 defaults = {
     'SFA_CM_ENABLED': '1',
     'SFA_CM_HOST': 'localhost',
     'SFA_CM_PORT': '12346',
-    'SFA_CM_SLICE_PREFIX': plc_config.PLC_SLICE_PREFIX
+    'SFA_CM_SLICE_PREFIX': plc_config.PLC_SLICE_PREFIX,
+    'SFA_CM_TYPE': 'pl'
     }
 
 host_defaults = {
