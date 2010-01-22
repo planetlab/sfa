@@ -13,10 +13,8 @@ def init_server():
         # our keypair may be old, try refreshing
         sfa_component_setup.get_node_key()
         sfa_component_setup.get_credential(force=True)
-        sfa_component_sertup.get_trusted_certs()
+        sfa_component_setup.get_trusted_certs()
            
-    
-
 def start_slice(api, xrn):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
