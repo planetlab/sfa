@@ -80,7 +80,7 @@ class TreeException(SfaFault):
     def __str__(self):
         return repr(self.value)
 
-class NonexistingRecord(SfaFault):
+class NonExistingRecord(SfaFault):
     def __init__(self, value, extra = None):
         self.value = value
         faultString = "Non exsiting record %(value)s, " % locals()
