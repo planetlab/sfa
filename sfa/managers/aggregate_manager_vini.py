@@ -3,11 +3,10 @@ from sfa.util.namespace import *
 from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.plc.nodes import *
+from sfa.plc.api import *
 from sfa.rspecs.aggregates.vini.utils import *
 from sfa.rspecs.aggregates.vini.rspec import *
 import sys
-
-SFA_VINI_WHITELIST = '/etc/sfa/vini.whitelist'
 
 """
 Copied from create_slice_aggregate() in sfa.plc.slices
@@ -154,26 +153,13 @@ Hook called via 'sfi.py create'
 """
 def create_slice(api, xrn, xml):
     hrn = urn_to_hrn(xrn)[0]
-    ### Check the whitelist
-    ### It consists of lines of the form: <slice hrn> <bw>
-    whitelist = {}
-    f = open(SFA_VINI_WHITELIST)
-    for line in f.readlines():
-        (slice, maxbw) = line.split()
-        whitelist[slice] = maxbw
-        
-    if hrn in whitelist:
-        maxbw = whitelist[hrn]
-    else:
-        raise PermissionError("%s not in VINI whitelist" % hrn)
-        
     rspec = RSpec(xml)
     topo = Topology(api)
     
     topo.nodeTopoFromRSpec(rspec)
 
     # Check request against current allocations
-    topo.verifyNodeTopo(hrn, topo, maxbw)
+    topo.verifyNodeTopo(hrn, topo)
     
     nodes = topo.nodesInTopo()
     hostnames = []
@@ -185,6 +171,8 @@ def create_slice(api, xrn, xml):
     slice = get_slice(api, slicename)
     if slice:
         topo.updateSliceTags(slice)    
+
+    # print topo.toxml(hrn)
 
     return True
 
@@ -199,10 +187,13 @@ def fetch_context(slice_hrn, user_hrn, contexts):
     return base_context
 
 def main():
-    r = RSpec()
-    r.parseFile(sys.argv[1])
-    rspec = r.toDict()
-    create_slice(None,'plc',rspec)
+    api = GeniAPI()
+    #rspec = get_rspec(api, "plc.princeton.iias", None)
+    #print rspec
+    f = open(sys.argv[1])
+    xml = f.read()
+    f.close()
+    create_slice(api, "plc.princeton.iias", xml)
 
 if __name__ == "__main__":
     main()
