@@ -531,7 +531,7 @@ class Topology:
             
         slicenodes = {}
 
-        top = rspecdict['rspec']
+        top = rspecdict['RSpec']
         if ('network' in top):
             sites = top['network'][0]['site']
             for site in sites:
@@ -615,7 +615,7 @@ class Topology:
     """
     def toxml(self, hrn = None):
         xml = XMLBuilder()
-        with xml.rspec(type="VINI"):
+        with xml.RSpec(type="VINI"):
             if hrn:
                 element = xml.network(name="Public VINI", slice=hrn)
             else:
