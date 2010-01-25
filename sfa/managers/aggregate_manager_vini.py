@@ -131,7 +131,7 @@ def create_slice_vini_aggregate(api, hrn, nodes):
 
     return 1
 
-def get_rspec(api, xrn):
+def get_rspec(api, xrn, origin_hrn):
     hrn = urn_to_hrn(xrn)[0]
     topo = Topology(api)      
     if (hrn):
@@ -187,7 +187,7 @@ def fetch_context(slice_hrn, user_hrn, contexts):
     return base_context
 
 def main():
-    api = GeniAPI()
+    api = SfaAPI()
     #rspec = get_rspec(api, "plc.princeton.iias", None)
     #print rspec
     f = open(sys.argv[1])
