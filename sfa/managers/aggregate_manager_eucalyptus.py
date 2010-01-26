@@ -11,14 +11,64 @@ from boto.exception import EC2ResponseError
 from ConfigParser import ConfigParser
 from xmlbuilder import XMLBuilder
 from xml.etree import ElementTree as ET
+from sqlobject import *
 
 import sys
 import os
 
+##
 # The data structure used to represent a cloud.
 # It contains the cloud name, its ip address, image information,
 # key pairs, and clusters information.
+#
 cloud = {}
+
+##
+# A representation of an Eucalyptus instance. This is a support class
+# for instance <-> slice mapping.
+#
+class EucaInstance(SQLObject):
+    instance_id = StringCol(unique=True, default=None)
+    kernel_id   = StringCol()
+    image_id    = StringCol()
+    ramdisk_id  = StringCol()
+    inst_type   = StringCol()
+    key_pair    = StringCol()
+    slice = ForeignKey('Slice')
+
+    ##
+    # Contacts Eucalyptus and tries to reserve this instance.
+    # 
+    # @param botoConn A connection to Eucalyptus.
+    #
+    def reserveInstance(self, botoConn):
+        print >>sys.stderr, 'Reserving an instance. image: %s, kernel: %s, ramdisk: %s, type: %s, key: %s' % \
+                            (self.image_id, self.kernel_id, self.ramdisk_id, self.inst_type, self.key_pair)
+
+        try:
+            reservation = botoConn.run_instances(self.image_id,
+                                                 kernel_id = self.kernel_id,
+                                                 ramdisk_id = self.ramdisk_id,
+                                                 instance_type = self.inst_type,
+                                                 key_name  = self.key_pair)
+            for instance in reservation.instances:
+                self.instance_id = instance.id
+
+        # If there is an error, destroy itself.
+        except EC2ResponseError, ec2RespErr:
+            errTree = ET.fromstring(ec2RespErr.body)
+            msg = errTree.find('.//Message')
+            print >>sys.stderr, msg.text
+            self.destroySelf()
+
+##
+# A representation of a PlanetLab slice. This is a support class
+# for instance <-> slice mapping.
+#
+class Slice(SQLObject):
+    slice_hrn = StringCol()
+    #slice_index = DatabaseIndex('slice_hrn')
+    instances = MultipleJoin('EucaInstance')
 
 ##
 # Initialize the aggregate manager by reading a configuration file.
@@ -42,6 +92,19 @@ def init_server():
     elif cloudURL.find('http://') >= 0:
         cloudURL = cloudURL.replace('http://', '')
     (cloud['ip'], parts) = cloudURL.split(':')
+
+    # Initialize sqlite3 database.
+    dbPath = '/etc/sfa/db'
+    dbName = 'euca_aggregate.db'
+
+    if not os.path.isdir(dbPath):
+        print >>sys.stderr, '%s not found. Creating directory ...' % dbPath
+        os.mkdir(dbPath)
+
+    conn = connectionForURI('sqlite://%s/%s' % (dbPath, dbName))
+    sqlhub.processConnection = conn
+    Slice.createTable(ifNotExists=True)
+    EucaInstance.createTable(ifNotExists=True)
 
 ##
 # Creates a connection to Eucalytpus. This function is inspired by 
@@ -228,8 +291,8 @@ def get_rspec(api, xrn, origin_hrn):
     conn = getEucaConnection()
 
     if not conn:
-        print >>sys.stderr, 'Error: Cannot make a connection to the cloud'
-        return ''
+        print >>sys.stderr, 'Error: Cannot create a connection to Eucalyptus'
+        return 'Cannot create a connection to Eucalyptus'
 
     try:
         # Zones
@@ -245,8 +308,8 @@ def get_rspec(api, xrn, origin_hrn):
         # Key Pairs
         keyPairs = conn.get_all_key_pairs()
         cloud['keypairs'] = keyPairs
-    except EC2ResponseError:
-        errTree = ET.fromstring(EC2ResponseError.body)
+    except EC2ResponseError, ec2RespErr:
+        errTree = ET.fromstring(ec2RespErr.body)
         errMsgE = errTree.find('.//Message')
         print >>sys.stderr, errMsgE.text
 
@@ -258,16 +321,59 @@ def get_rspec(api, xrn, origin_hrn):
 Hook called via 'sfi.py create'
 """
 def create_slice(api, xrn, xml):
+    global cloud
     hrn = urn_to_hrn(xrn)[0]
+
+    conn = getEucaConnection()
+    if not conn:
+        print >>sys.stderr, 'Error: Cannot create a connection to Eucalyptus'
+        return False
+
+    # Get the slice from db or create one.
+    # XXX: For testing purposes, I'll just create the slice.
+    #s = Slice.select(Slice.q.slice_hrn == hrn).getOne(None)
+    #if s is None:
+    s = Slice(slice_hrn = hrn)
+
+    # Process the RSpec
+    rspecXML = RSpec(xml)
+    rspecDict = rspecXML.toDict()
+    request = rspecDict['RSpec']['Request']
+    for cloudSpec in request:
+        cloudSpec = cloudSpec['CloudSpec']
+        for cloudReqInfo in cloudSpec:
+            for nodeReq in cloudReqInfo['Node']:
+                instKernel  = nodeReq['Kernel'][0]
+                instDiskImg = nodeReq['DiskImage'][0]
+                instRamDisk = nodeReq['Ramdisk'][0]
+                instKey     = nodeReq['Key'][0]
+                instType    = nodeReq['instanceType']
+                numInst     = int(nodeReq['number'])
+
+                # Ramdisk is optional.
+                if isinstance(instRamDisk, dict):
+                    instRamDisk = None
+
+                # Create the instances
+                for i in range(0, numInst):
+                    eucaInst = EucaInstance(slice = s, 
+                                            kernel_id = instKernel,
+                                            image_id = instDiskImg,
+                                            ramdisk_id = instRamDisk,
+                                            key_pair = instKey,
+                                            inst_type = instType)
+                    eucaInst.reserveInstance(conn)
+
     return True
 
 def main():
-    #r = RSpec()
-    #r.parseFile(sys.argv[1])
-    #rspec = r.toDict()
-    #create_slice(None,'plc',rspec)
-    rspec = get_rspec('euca', 'hrn:euca', 'oring_hrn')
-    print rspec
+    init_server()
+    r = RSpec()
+    r.parseFile(sys.argv[1])
+    rspec = r.toDict()
+    create_slice(None,'planetcloud.pc.test',rspec)
+    #rspec = get_rspec('euca', 'hrn:euca', 'oring_hrn')
+    #print rspec
 
 if __name__ == "__main__":
     main()
