@@ -341,10 +341,10 @@ class Slices(SimpleStorage):
             person_record = {}
             person_records = registry.resolve(credential, researcher)
             for record in person_records:
-                if record['type'] in ['user']:
+                if record['type'] in ['user'] and record['enabled']:
                     person_record = record
             if not person_record:
-                pass
+                return 1
             person_dict = person_record
             local_person=False
             if peer:
