@@ -8,11 +8,8 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.plc.slices import Slices
 from sfa.util.config import Config
-# RSpecManager_pl is not used. It's used to make sure the module is in place.
-import sfa.rspecs.aggregates.rspec_manager_pl
 from sfa.trust.credential import Credential
 from sfatables.runtime import SFATablesRules
-
 
 class create_slice(Method):
     """
@@ -35,7 +32,18 @@ class create_slice(Method):
         ]
 
     returns = Parameter(int, "1 if successful")
-    
+
+    def __run_sfatables(self, manager, rules, hrn, origin_hrn, rspec):
+        if rules.sorted_rule_list:
+            contexts = rules.contexts
+            request_context = manager.fetch_context(hrn, origin_hrn, contexts)
+            rules.set_context(request_context)
+            newrspec = rules.apply(rspec)
+        else:	
+            newrspec = rspec
+        return newrspec
+
+        
     def call(self, cred, xrn, requested_rspec, origin_hrn=None):
         hrn, type = urn_to_hrn(xrn) 
         user_cred = Credential(string=cred)
@@ -47,40 +55,22 @@ class create_slice(Method):
         # validate the credential
         self.api.auth.check(cred, 'createslice')
 
-        sfa_aggregate_type = Config().get_aggregate_rspec_type()
-        rspec_manager = __import__("sfa.rspecs.aggregates.rspec_manager_"+sfa_aggregate_type, fromlist = ["sfa.rspecs.aggregates"])
-        #Filter the incoming rspec using sfatables
-        if self.api.interface in ['slicemgr']:
-            incoming_rules = SFATablesRules('FORWARD-INCOMING')
-        elif self.api.interface in ['aggregate']:
-            incoming_rules = SFATablesRules('INCOMING')
-
-        if incoming_rules.sorted_rule_list:
-            #incoming_rules.set_slice(hrn) # This is a temporary kludge. Eventually, we'd like to fetch the context requested by the match/target
-
-            contexts = incoming_rules.contexts
-            request_context = rspec_manager.fetch_context(hrn, origin_hrn, contexts)
-            incoming_rules.set_context(request_context)
-            rspec = incoming_rules.apply(requested_rspec)
-        else:	
-            rspec = requested_rspec
-
-        # send the call to the right manager
-        if sfa_aggregate_type not in ['pl']:
-            # To clean up after July 21 - SB
-            rspec = rspec_manager.create_slice(self.api, hrn, rspec)
-            return 1
-
         manager_base = 'sfa.managers'
         if self.api.interface in ['aggregate']:
             mgr_type = self.api.config.SFA_AGGREGATE_TYPE
             manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
+            rspec = self.__run_sfatables(manager, 
+                                         SFATablesRules('INCOMING'),
+                                         hrn, origin_hrn, requested_rspec)
             manager.create_slice(self.api, xrn, rspec)
         elif self.api.interface in ['slicemgr']:
             mgr_type = self.api.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
+            rspec = self.__run_sfatables(manager, 
+                                         SFATablesRules('FORWARD-INCOMING'),
+                                         hrn, origin_hrn, requested_rspec)
             manager.create_slice(self.api, xrn, rspec, origin_hrn)
 
         return 1 
