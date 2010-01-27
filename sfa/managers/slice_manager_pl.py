@@ -137,28 +137,38 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
     # create a new ticket
     new_ticket = SfaTicket(subject = slice_hrn)
     new_ticket.set_gid_caller(api.auth.client_gid)
+    new_ticket.set_issuer(key=api.key, subject=api.hrn)
    
     tmp_rspec = RSpec()
     networks = []
-    valid_data = {} 
+    valid_data = {
+        'timestamp': int(time.time()),
+        'initscripts': [],
+        'slivers': [] 
+    } 
     # merge data from aggregate ticket into new ticket 
     for agg_ticket in tickets.values():
+        # get data from this ticket
         agg_ticket = SfaTicket(string=agg_ticket)
+        attributes = agg_ticket.get_attributes()
+        valid_data['initscripts'].extend(attributes.get('initscripts', []))
+        valid_data['slivers'].extend(attributes.get('slivers', []))
+ 
+        # set the object gid
         object_gid = agg_ticket.get_gid_object()
         new_ticket.set_gid_object(object_gid)
-        new_ticket.set_issuer(key=api.key, subject=api.hrn)
         new_ticket.set_pubkey(object_gid.get_pubkey())
-        
-        #new_ticket.set_attributes(data)
+
+        # build the rspec
         tmp_rspec.parseString(agg_ticket.get_rspec())
         networks.extend([{'NetSpec': tmp_rspec.getDictsByTagName('NetSpec')}])
     
     #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
+    new_ticket.set_attributes(valid_data)
     resources = {'networks': networks, 'start_time': 0, 'duration': 0}
     resourceDict = {'RSpec': resources}
     tmp_rspec.parseDict(resourceDict)
     new_ticket.set_rspec(tmp_rspec.toxml())
-        
     new_ticket.encode()
     new_ticket.sign()          
     return new_ticket.save_to_string(save_parents=True)
