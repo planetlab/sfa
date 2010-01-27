@@ -173,11 +173,19 @@ class RSpec:
         return self.rootNode.toprettyxml()
 
   
+    def __removeWhitespaceNodes(self, parent):
+        for child in list(parent.childNodes):
+            if child.nodeType == minidom.Node.TEXT_NODE and child.data.strip() == '':
+                parent.removeChild(child)
+            else:
+                self.__removeWhitespaceNodes(child)
+
     def parseFile(self, filename):
         """
         read a local xml file and store it as a dom object.
         """
         dom = minidom.parse(filename)
+        self.__removeWhitespaceNodes(dom)
         self.rootNode = dom.childNodes[0]
 
 
@@ -185,8 +193,8 @@ class RSpec:
         """
         read an xml string and store it as a dom object.
         """
-        xml = xml.replace('\n', '').replace('\t', '').strip()
         dom = minidom.parseString(xml)
+        self.__removeWhitespaceNodes(dom)
         self.rootNode = dom.childNodes[0]
 
  
@@ -209,11 +217,13 @@ class RSpec:
 
     def _parseXSD(self, xsdURI):
         """
-        Download XSD from URL, or if file, read local xsd file and set schemaDict
+        Download XSD from URL, or if file, read local xsd file and set
+        schemaDict.
+        
+        Since the schema definiton is a global namespace shared by and
+        agreed upon by others, this should probably be a URL.  Check
+        for URL, download xsd, parse, or if local file, use that.
         """
-        # Since the schema definiton is a global namespace shared by and agreed upon by
-        # others, this should probably be a URL.  Check for URL, download xsd, parse, or 
-        # if local file, use local file.
         schemaDom = None
         if xsdURI.startswith("http"):
             try: 
