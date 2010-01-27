@@ -68,7 +68,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
         raise SliverDoesNotExist(slice_hrn)
     
     # get initscripts
-    initscripts = None
+    initscripts = []
     data = {
         'timestamp': int(time.time()),
         'initscripts': initscripts,
