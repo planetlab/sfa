@@ -617,9 +617,9 @@ class Topology:
         xml = XMLBuilder()
         with xml.RSpec(type="VINI"):
             if hrn:
-                element = xml.network(name="Public VINI", slice=hrn)
+                element = xml.network(name="Public_VINI", slice=hrn)
             else:
-                element = xml.network(name="Public VINI")
+                element = xml.network(name="Public_VINI")
                 
             with element:
                 for site in self.getSites():
