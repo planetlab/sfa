@@ -627,7 +627,8 @@ class Topology:
                 for link in self.sitelinks:
                     link.toxml(xml)
 
-        return str(xml)
+        header = '<?xml version="1.0"?>\n'
+        return header + str(xml)
 
 """
 Create a dictionary of site objects keyed by site ID
