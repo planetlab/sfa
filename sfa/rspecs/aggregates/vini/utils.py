@@ -614,7 +614,7 @@ class Topology:
     Produce XML directly from the topology specification.
     """
     def toxml(self, hrn = None):
-        xml = XMLBuilder()
+        xml = XMLBuilder(format = True, tab_step = "  ")
         with xml.RSpec(type="VINI"):
             if hrn:
                 element = xml.network(name="Public_VINI", slice=hrn)
