@@ -2,7 +2,7 @@ from __future__ import with_statement
 import re
 import socket
 from sfa.util.faults import *
-from sfa.rspecs.aggregates.vini.topology import *
+from sfa.managers.vini.topology import PhysicalLinks
 from xmlbuilder import XMLBuilder
 from lxml import etree
 import sys

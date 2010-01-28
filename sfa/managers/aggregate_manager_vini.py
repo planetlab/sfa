@@ -3,7 +3,7 @@ from sfa.util.namespace import *
 from sfa.server.registry import Registries
 from sfa.plc.nodes import *
 from sfa.plc.api import *
-from sfa.rspecs.aggregates.vini.utils import *
+from sfa.managers.vini.utils import *
 import sys
 
 """
