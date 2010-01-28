@@ -12,7 +12,7 @@ from sfa.util.namespace import *
 from sfa.util.config import *
 from sfa.trust.certificate import *
 from sfa.trust.credential import *
-from sfa.trust.sfaticket import *
+from sfa.util.sfaticket import *
 from sfa.client import sfi
 
 def random_string(size):
@@ -113,7 +113,7 @@ class RegistryTest(BasicTestCase):
             except:
                 raise
             finally:
-                try: self.registry.remove(record['hrn'])
+                self.registry.remove(record['hrn'])
 
     
     def testRegisterPeerObject(self):
@@ -189,7 +189,7 @@ class AggregateTest(BasicTestCase):
         # available resources
         agg_rspec = self.aggregate.get_resources(self.credential)
         # resources used by a slice
-        slice_rspec self.aggregate.get_resources(self.credential, self.slice['hrn'])
+        slice_rspec = self.aggregate.get_resources(self.credential, self.slice['hrn'])
         # will raise an exception if the rspec isnt valid
         RSpec(xml=agg_rspec)
         RSpec(xml=slice_rspec)
