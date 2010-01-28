@@ -151,8 +151,10 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
         # get data from this ticket
         agg_ticket = SfaTicket(string=agg_ticket)
         attributes = agg_ticket.get_attributes()
-        valid_data['initscripts'].extend(attributes.get('initscripts', []))
-        valid_data['slivers'].extend(attributes.get('slivers', []))
+	if attributes.get('initscripts', []) != None:
+            valid_data['initscripts'].extend(attributes.get('initscripts', []))
+	if attributes.get('slivers', []) != None:
+            valid_data['slivers'].extend(attributes.get('slivers', []))
  
         # set the object gid
         object_gid = agg_ticket.get_gid_object()
