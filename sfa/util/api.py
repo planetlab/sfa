@@ -97,7 +97,8 @@ def import_deep(name):
 
 class BaseAPI:
 
-    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods',
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods',
+
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
 
         self.encoding = encoding
