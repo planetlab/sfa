@@ -4,7 +4,11 @@ import socket
 from sfa.util.faults import *
 from sfa.rspecs.aggregates.vini.topology import *
 from xmlbuilder import XMLBuilder
+from lxml import etree
 import sys
+from StringIO import StringIO
+
+VINI_RELAXNG_SCHEMA = "/var/www/html/schemas/vini.rng"
 
 # Taken from bwlimit.py
 #
@@ -481,18 +485,20 @@ class Topology:
 
     def __add_vlink(self, vlink, slicenodes, parent = None):
         n1 = n2 = None
-        if 'endpoints' in vlink:
-            end = vlink['endpoints'].split()
-            n1 = self.lookupNode(end[0])
-            n2 = self.lookupNode(end[1])
+        endpoints = vlink.get("endpoints")
+        if endpoints:
+            (end1, end2) = endpoints.split()
+            n1 = self.lookupNode(end1)
+            n2 = self.lookupNode(end2)
         elif parent:
-            """ Try to infer the endpoints """
-            (n1, n2) = self.__infer_endpoints(parent['endpoints'],slicenodes)
+            """ Try to infer the endpoints for the virtual link """
+            site_endpoints = parent.get("endpoints")
+            (n1, n2) = self.__infer_endpoints(site_endpoints, slicenodes)
         else:
             raise Error("no endpoints given")
 
         #print "Added virtual link: %s -- %s" % (n1.tag, n2.tag)
-        bps = int(vlink['kbps'][0]) * 1000
+        bps = int(vlink.findtext("kbps")) * 1000
         sitelink = self.lookupSiteLink(n1, n2)
         if not sitelink:
             raise PermissionError("nodes %s and %s not adjacent" % 
@@ -520,38 +526,59 @@ class Topology:
         #print "Inferred endpoints: %s %s" % (n[0].idtag, n[1].idtag)
         return n
         
-    def nodeTopoFromRSpec(self, rspec):
+    def nodeTopoFromRSpec(self, xml):
         if self.nodelinks:
             raise Error("virtual topology already present")
             
-        rspecdict = rspec.toDict()
         nodedict = {}
         for node in self.getNodes():
             nodedict[node.idtag] = node
             
         slicenodes = {}
 
-        top = rspecdict['RSpec']
-        if ('network' in top):
-            sites = top['network'][0]['site']
-            for site in sites:
-                for node in site['node']:
-                    if 'sliver' in node:
-                        n = nodedict[node['id']]
-                        slicenodes[n.id] = n
-                        n.add_sliver()
-            links = top['network'][0]['link']
-            for link in links:
-                if 'vlink' in link:
-                    for vlink in link['vlink']:
-                        self.__add_vlink(vlink, slicenodes, link)
-        elif ('request' in top):
-            for sliver in top['request'][0]['sliver']:
-                n = nodedict[sliver['nodeid']]
-                slicenodes[n.id] = n
-                n.add_sliver()
-            for vlink in top['request'][0]['vlink']:
-                self.__add_vlink(vlink, slicenodes)
+        tree = etree.parse(StringIO(xml))
+
+        # Validate the incoming request against the RelaxNG schema
+        relaxng_doc = etree.parse(VINI_RELAXNG_SCHEMA)
+        relaxng = etree.RelaxNG(relaxng_doc)
+        
+        if not relaxng(tree):
+            error = relaxng.error_log.last_error
+            message = "%s (line %s)" % (error.message, error.line)
+            raise InvalidRSpec(message)
+
+        rspec = tree.getroot()
+
+        """
+        Handle requests where the user has annotated a description of the
+        physical resources (nodes and links) with virtual ones (slivers
+        and vlinks).
+        """
+        # Find slivers under node elements
+        for sliver in rspec.iterfind("./network/site/node/sliver"):
+            elem = sliver.getparent()
+            node = nodedict[elem.get("id")]
+            slicenodes[node.id] = node
+            node.add_sliver()
+
+        # Find links under link elements
+        for vlink in rspec.iterfind("./network/link/vlink"):
+            link = vlink.getparent()
+            self.__add_vlink(vlink, slicenodes, link)
+
+        """
+        Handle requests where the user has listed the virtual resources only
+        """
+        # Find slivers that specify nodeid
+        for sliver in rspec.iterfind("./request/sliver[@nodeid]"):
+            node = nodedict[sliver.get("nodeid")]
+            slicenodes[node.id] = node
+            node.add_sliver()
+
+        # Find vlinks that specify endpoints
+        for vlink in rspec.iterfind("./request/vlink[@endpoints]"):
+            self.__add_vlink(vlink, slicenodes)
+
         return
 
     def nodeTopoFromSliceTags(self, slice):

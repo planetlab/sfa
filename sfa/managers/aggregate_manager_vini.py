@@ -1,11 +1,9 @@
 from sfa.util.faults import *
 from sfa.util.namespace import *
-from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.plc.nodes import *
 from sfa.plc.api import *
 from sfa.rspecs.aggregates.vini.utils import *
-from sfa.rspecs.aggregates.vini.rspec import *
 import sys
 
 """
@@ -153,10 +151,8 @@ Hook called via 'sfi.py create'
 """
 def create_slice(api, xrn, xml):
     hrn = urn_to_hrn(xrn)[0]
-    rspec = RSpec(xml)
     topo = Topology(api)
-    
-    topo.nodeTopoFromRSpec(rspec)
+    topo.nodeTopoFromRSpec(xml)
 
     # Check request against current allocations
     topo.verifyNodeTopo(hrn, topo)
