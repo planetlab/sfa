@@ -21,7 +21,6 @@ from sfa.util.namespace import *
 from sfa.util.api import *
 from sfa.util.nodemanager import NodeManager
 from sfa.util.sfalogging import *
-from sfa.util.table import SfaTable
 
 class SfaAPI(BaseAPI):
 
@@ -29,13 +28,16 @@ class SfaAPI(BaseAPI):
     import sfa.methods
     methods = sfa.methods.all
     
-    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods', 
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods', \
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
-        BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert,
-                         interface=interface, key_file=key_file, cert_file=cert_file)
+        BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, \
+                         peer_cert=peer_cert, interface=interface, key_file=key_file, \
+                         cert_file=cert_file)
  
         self.encoding = encoding
 
+        from sfa.util.table import SfaTable
+        self.SfaTable = SfaTable
         # Better just be documenting the API
         if config is None:
             return
@@ -136,7 +138,7 @@ class SfaAPI(BaseAPI):
         if not auth_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
-        table = SfaTable()
+        table = self.SfaTable()
         records = table.findObjects(hrn)
         if not records:
             raise RecordNotFound
@@ -309,7 +311,7 @@ class SfaAPI(BaseAPI):
     def fill_record_sfa_info(self, record):
         sfa_info = {}
         type = record['type']
-        table = SfaTable()
+        table = self.SfaTable()
         if (type == "slice"):
             person_ids = record.get("person_ids", [])
             persons = table.find({'type': 'user', 'pointer': person_ids})
@@ -376,7 +378,7 @@ class SfaAPI(BaseAPI):
         # build a list of the new person ids, by looking up each person to get
         # their pointer
         newIdList = []
-        table = SfaTable()
+        table = self.SfaTable()
         records = table.find({'type': 'user', 'hrn': newList})
         for rec in records:
             newIdList.append(rec['pointer'])
@@ -414,7 +416,7 @@ class SfaAPI(BaseAPI):
 
 class ComponentAPI(BaseAPI):
 
-    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods',
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods',
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
 
         BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert,
