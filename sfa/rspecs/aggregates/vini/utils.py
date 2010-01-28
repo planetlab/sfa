@@ -561,7 +561,7 @@ class Topology:
             slicenodes[node.id] = node
             node.add_sliver()
 
-        # Find links under link elements
+        # Find vlinks under link elements
         for vlink in rspec.iterfind("./network/link/vlink"):
             link = vlink.getparent()
             self.__add_vlink(vlink, slicenodes, link)
