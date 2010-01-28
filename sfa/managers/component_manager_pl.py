@@ -54,6 +54,6 @@ def redeem_ticket(api, ticket_string):
 
     # convert ticket to format nm is used to
     nm_ticket = xmlrpclib.dumps((ticket.attributes,), methodresponse=True)
-    self.api.nodemanager.AdminTicket(nm_ticket)
+    api.nodemanager.AdminTicket(nm_ticket)
     
 
