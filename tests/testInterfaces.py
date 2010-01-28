@@ -225,27 +225,27 @@ class SlicemgrTest(AggregateTest):
 class ComponentTest(BasicTestCase):
     def setUp(self):
         BasicTestCase.setUp(self)
+        self.slice_cred = self.client.get_credential(self.slice['hrn'], 'slice')
 
     def testStartSlice(self):
-        self.cm.start_slice(self.slice['hrn'])
+        self.cm.start_slice(self.slice_cred, self.slice['hrn'])
 
     def testStopSlice(self):
-        self.cm.stop_slice(self.slice['hrn'])
+        self.cm.stop_slice(self.slice_cred, self.slice['hrn'])
 
     def testDeleteSlice(self):
-        self.cm.delete_slice(self.slice['hrn'])
+        self.cm.delete_slice(self.slice_cred, self.slice['hrn'])
 
     def testRestartSlice(self):
-        self.cm.restart_slice(self.slice['hrn'])
+        self.cm.restart_slice(self.slice_cred, self.slice['hrn'])
 
     def testGetSlices(self):
-        self.cm.get_slices(self.slice['hrn'])
+        self.cm.get_slices(self.slice_cred, self.slice['hrn'])
 
     def testRedeemTicket(self):
-        slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
         rspec = self.aggregate.get_resources(self.credential)
-        ticket = self.aggregate.get_ticket(slice_credential, self.slice['hrn'], rspec)
-        self.cm.redeem_ticket(slice_credential, ticket)
+        ticket = self.aggregate.get_ticket(slice_cred, self.slice['hrn'], rspec)
+        self.cm.redeem_ticket(slice_cred, ticket)
 
 
 def test_names(testcase):
