@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <ref name="RSpec"/>
+  </start>
+  <define name="RSpec">
+    <element name="RSpec">
+      <attribute name="type">
+        <data type="NMTOKEN"/>
+      </attribute>
+      <ref name="cloud"/>
+    </element>
+  </define>
+  <define name="cloud">
+    <element name="cloud">
+      <attribute name="id">
+        <data type="NMTOKEN"/>
+      </attribute>
+      <optional>
+	<ref name="user-info"/>
+      </optional>
+      <ref name="ipv4"/>
+      <ref name="keypairs"/>
+      <ref name="images"/>
+      <oneOrMore>
+        <ref name="cluster"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="user-info">
+    <element name="user-info">
+      <ref name="credential"/>
+    </element>
+  </define>
+  <define name="keypairs">
+    <element name="keypairs">
+      <oneOrMore>
+        <ref name="keypair"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="images">
+    <element name="images">
+      <oneOrMore>
+        <ref name="image"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="image">
+    <element name="image">
+      <attribute name="id">
+        <data type="ID"/>
+      </attribute>
+      <ref name="type"/>
+      <ref name="arch"/>
+      <ref name="state"/>
+      <ref name="location"/>
+    </element>
+  </define>
+  <define name="cluster">
+    <element name="cluster">
+      <attribute name="id">
+        <data type="ID"/>
+      </attribute>
+      <ref name="ipv4"/>
+      <ref name="vm-types"/>
+    </element>
+  </define>
+  <define name="vm-types">
+    <element name="vm-types">
+      <oneOrMore>
+        <ref name="vm-type"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="vm-type">
+    <element name="vm-type">
+      <attribute name="name">
+        <data type="ID"/>
+      </attribute>
+      <ref name="free-slots"/>
+      <ref name="max-instances"/>
+      <ref name="cores"/>
+      <ref name="memory"/>
+      <ref name="disk-space"/>
+      <optional>
+        <ref name="request"/>
+      </optional>
+    </element>
+  </define>
+  <define name="request">
+    <element name="request">
+      <ref name="instances"/>
+      <ref name="kernel-image"/>
+      <ref name="ramdisk"/>
+      <ref name="disk-image"/>
+      <ref name="keypair"/>
+    </element>
+  </define>
+  <define name="credential">
+    <element name="credential">
+      <text/>
+    </element>
+  </define>
+  <define name="ipv4">
+    <element name="ipv4">
+      <text/>
+    </element>
+  </define>
+  <define name="keypair">
+    <element name="keypair">
+      <text/>
+    </element>
+  </define>
+  <define name="type">
+    <element name="type">
+      <text/>
+    </element>
+  </define>
+  <define name="arch">
+    <element name="arch">
+      <text/>
+    </element>
+  </define>
+  <define name="state">
+    <element name="state">
+      <text/>
+    </element>
+  </define>
+  <define name="location">
+    <element name="location">
+      <text/>
+    </element>
+  </define>
+  <define name="free-slots">
+    <element name="free-slots">
+      <text/>
+    </element>
+  </define>
+  <define name="max-instances">
+    <element name="max-instances">
+      <text/>
+    </element>
+  </define>
+  <define name="cores">
+    <element name="cores">
+      <text/>
+    </element>
+  </define>
+  <define name="memory">
+    <element name="memory">
+      <attribute name="unit">
+        <data type="NMTOKEN"/>
+      </attribute>
+      <text/>
+    </element>
+  </define>
+  <define name="disk-space">
+    <element name="disk-space">
+      <attribute name="unit">
+        <data type="NMTOKEN"/>
+      </attribute>
+      <text/>
+    </element>
+  </define>
+  <define name="instances">
+    <element name="instances">
+      <text/>
+    </element>
+  </define>
+  <define name="kernel-image">
+    <element name="kernel-image">
+      <attribute name="id">
+        <data type="IDREF"/>
+      </attribute>
+      <empty/>
+    </element>
+  </define>
+  <define name="ramdisk">
+    <element name="ramdisk">
+      <optional>
+        <attribute name="id">
+          <data type="IDREF"/>
+        </attribute>
+      </optional>
+      <empty/>
+    </element>
+  </define>
+  <define name="disk-image">
+    <element name="disk-image">
+      <attribute name="id">
+        <data type="IDREF"/>
+      </attribute>
+      <empty/>
+    </element>
+  </define>
+</grammar>

@@ -11,8 +11,8 @@ cloud = element cloud {
    images,
    cluster+
 }
-user-info = element user-info {
-   credential
+user-info = element user-info { 
+   credential 
 }
 keypairs = element keypairs { keypair+ }
 images = element images { image+ }
