@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <ref name="RSpec"/>
+  </start>
+  <define name="RSpec">
+    <element name="RSpec">
+      <attribute name="type">
+        <data type="NMTOKEN"/>
+      </attribute>
+      <choice>
+        <ref name="network"/>
+        <ref name="request"/>
+      </choice>
+    </element>
+  </define>
+  <define name="network">
+    <element name="network">
+      <attribute name="name">
+        <data type="NMTOKEN"/>
+      </attribute>
+      <optional>
+        <attribute name="slice">
+          <data type="NMTOKEN"/>
+        </attribute>
+      </optional>
+      <oneOrMore>
+        <choice>
+          <ref name="site"/>
+          <ref name="link"/>
+        </choice>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="site">
+    <element name="site">
+      <attribute name="id">
+        <data type="ID"/>
+      </attribute>
+      <element name="name">
+        <text/>
+      </element>
+      <oneOrMore>
+        <ref name="node"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="node">
+    <element name="node">
+      <attribute name="id">
+        <data type="ID"/>
+      </attribute>
+      <ref name="hostname"/>
+      <ref name="kbps"/>
+      <zeroOrMore>
+        <ref name="sliver"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="link">
+    <element name="link">
+      <attribute name="endpoints">
+        <data type="IDREFS"/>
+      </attribute>
+      <optional>
+        <element name="description">
+          <text/>
+        </element>
+      </optional>
+      <optional>
+        <ref name="kbps"/>
+      </optional>
+      <zeroOrMore>
+        <ref name="vlink"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="request">
+    <element name="request">
+      <oneOrMore>
+        <choice>
+          <ref name="sliver"/>
+          <ref name="vlink"/>
+        </choice>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="sliver">
+    <element name="sliver">
+      <optional>
+        <attribute name="nodeid">
+          <data type="ID"/>
+        </attribute>
+      </optional>
+      <empty/>
+    </element>
+  </define>
+  <define name="vlink">
+    <element name="vlink">
+      <optional>
+        <attribute name="endpoints">
+          <data type="IDREFS"/>
+        </attribute>
+      </optional>
+      <optional>
+        <element name="description">
+          <text/>
+        </element>
+      </optional>
+      <optional>
+        <ref name="kbps"/>
+      </optional>
+    </element>
+  </define>
+  <define name="hostname">
+    <element name="hostname">
+      <text/>
+    </element>
+  </define>
+  <define name="kbps">
+    <element name="kbps">
+      <text/>
+    </element>
+  </define>
+</grammar>
