@@ -31,7 +31,7 @@ class get_self_credential(Method):
 
     returns = Parameter(str, "String representation of a credential object")
 
-    def call(self, cert, type, xrn, request_hash=None):
+    def call(self, cert, type, xrn, origin_hrn=None):
         """
         get_self_credential a degenerate version of get_credential used by a client
         to get his initial credential when de doesnt have one. This is the same as
@@ -52,6 +52,11 @@ class get_self_credential(Method):
         else:
             hrn, type = urn_to_hrn(xrn) 
         self.api.auth.verify_object_belongs_to_me(hrn)
+
+	#log the call
+        if not origin_hrn:
+            origin_hrn = hrn
+	self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
         
         # send the call to the right manager
         manager_base = 'sfa.managers'
@@ -66,7 +71,7 @@ class get_self_credential(Method):
         record = SfaRecord(dict=records[0])
         gid = record.get_gid_object()
         gid_str = gid.save_to_string(save_parents=True)
-        self.api.auth.authenticateGid(gid_str, [cert, type, hrn], request_hash)
+        self.api.auth.authenticateGid(gid_str, [cert, type, hrn])
         # authenticate the certificate against the gid in the db
         certificate = Certificate(string=cert)
         if not certificate.is_pubkey(gid.get_pubkey()):
