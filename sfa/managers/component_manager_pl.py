@@ -38,8 +38,13 @@ def reset_slice(api, xrn):
     api.nodemanager.ReCreate(slicename)
  
 def get_slices(api):
-    slicenames = api.nodemanager.GetXIDs().keys()
-    return slicenames
+    # this returns a tuple, the data we want is at index 1 
+    xids = api.nodemanager.GetXIDs()
+    # unfortunately the data we want is given to us as 
+    # a string but we really want it as a dict
+    # lets eval it
+    slices = eval(xids[1])
+    return slices.keys()
 
 def roboot():
     os.system("/sbin/reboot")        
