@@ -372,13 +372,12 @@ class Sfi:
         else:
             # bootstrap user credential
             cert_string = self.cert.save_to_string(save_parents=True)
-            request_hash = self.key.compute_hash([cert_string, "user", self.user])
             user_name=self.user.replace(self.authority+".", '')
             if user_name.count(".") > 0:
                 user_name = user_name.replace(".", '_')
                 self.user=self.authority + "." + user_name
 
-            user_cred = self.registry.get_self_credential(cert_string, "user", self.user, request_hash)
+            user_cred = self.registry.get_self_credential(cert_string, "user", self.user)
             if user_cred:
                cred = Credential(string=user_cred)
                cred.save_to_file(file, save_parents=True)
