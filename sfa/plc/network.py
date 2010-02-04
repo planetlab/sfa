@@ -1,6 +1,7 @@
 from __future__ import with_statement
 import re
 import socket
+from sfa.util.namespace import *
 from sfa.util.faults import *
 from xmlbuilder import XMLBuilder
 #from lxml import etree
@@ -77,16 +78,14 @@ class Iface:
         self.bwlimit = iface['bwlimit']
         self.hostname = iface['hostname']
 
+    """
+    Just print out bwlimit right now
+    """
     def toxml(self, xml):
-        with xml.interface(id = self.idtag):
-            if self.hostname:
-                with xml.hostname:
-                    xml << self.hostname
-            with xml.ipv4:
-                xml << self.ipv4
-            if self.bwlimit:
-                with xml.bwlimit:
-                    xml << format_tc_rate(self.bwlimit)
+        if self.bwlimit:
+            with xml.bwlimit:
+                xml << format_tc_rate(self.bwlimit)
+
 
 class Node:
     def __init__(self, network, node, bps = 1000 * 1000000):
@@ -102,6 +101,7 @@ class Node:
         self.iface_ids = node['interface_ids']
         self.iface_ids.sort()
         self.sliver = False
+        self.whitelist = node['slice_ids_whitelist']
 
     def get_link_id(self, remote):
         if self.id < remote.id:
@@ -121,6 +121,8 @@ class Node:
         i = []
         for id in self.iface_ids:
             i.append(self.network.lookupIface(id))
+            # Only return the first interface
+            break
         return i
         
     def get_virt_ip(self, remote):
@@ -168,7 +170,12 @@ class Node:
     def add_sliver(self):
         self.sliver = True
 
-    def toxml(self, xml, hrn):
+    def toxml(self, xml):
+        slice = self.network.slice
+        if self.whitelist and not self.sliver:
+            if not slice or slice.id not in self.whitelist:
+                return
+
         with xml.node(id = self.idtag):
             with xml.hostname:
                 xml << self.hostname
@@ -225,6 +232,7 @@ class Site:
         self.public = site['is_public']
         self.enabled = site['enabled']
         self.links = set()
+        self.whitelist = False
 
     def get_sitenodes(self):
         n = []
@@ -235,7 +243,7 @@ class Site:
     def add_link(self, link):
         self.links.add(link)
 
-    def toxml(self, xml, hrn, nodes):
+    def toxml(self, xml):
         if not (self.public and self.enabled and self.node_ids):
             return
         with xml.site(id = self.idtag):
@@ -243,11 +251,12 @@ class Site:
                 xml << self.name
                 
             for node in self.get_sitenodes():
-                node.toxml(xml, hrn)
+                node.toxml(xml)
    
     
 class Slice:
-    def __init__(self, network, slice):
+    def __init__(self, network, hrn, slice):
+        self.hrn = hrn
         self.network = network
         self.id = slice['slice_id']
         self.name = slice['name']
@@ -643,13 +652,17 @@ class Network:
 
         return
 
-    def annotateFromSliceTags(self, slice):
+    def annotateFromSliceTags(self):
+        slice = self.slice
+        if not slice:
+            raise Error("no slice associated with network")
+
         if self.nodelinks:
             raise Error("virtual topology already present")
             
         for node in slice.get_nodes(self.nodes):
             node.sliver = True
-            linktag = slice.get_tag('topo_rspec', self.tags, node)
+            linktag = slice.get_tag('topo_rspec', node)
             if linktag:
                 l = eval(linktag.value)
                 for (id, realip, bw, lvip, rvip, vnet) in l:
@@ -702,17 +715,18 @@ class Network:
     """
     Produce XML directly from the topology specification.
     """
-    def toxml(self, hrn = None):
+    def toxml(self):
         xml = XMLBuilder(format = True, tab_step = "  ")
-        with xml.RSpec(type="VINI"):
-            if hrn:
-                element = xml.network(name="Public_VINI", slice=hrn)
+        with xml.RSpec(type=self.type):
+            name = "Public_" + self.type
+            if self.slice:
+                element = xml.network(name=name, slice=self.slice.hrn)
             else:
-                element = xml.network(name="Public_VINI")
+                element = xml.network(name=name)
                 
             with element:
                 for site in self.getSites():
-                    site.toxml(xml, hrn, self.nodes)
+                    site.toxml(xml)
                 for link in self.sitelinks:
                     link.toxml(xml)
 
@@ -763,10 +777,12 @@ class Network:
     """
     Return a Slice object for a single slice
     """
-    def get_slice(self, api, slicename):
+    def get_slice(self, api, hrn):
+        slicename = hrn_to_pl_slicename(hrn)
         slice = api.plshell.GetSlices(api.plauth, [slicename])
         if slice:
-            return Slice(self, slice[0])
+            self.slice = Slice(self, slicename, slice[0])
+            return self.slice
         else:
             return None
     
