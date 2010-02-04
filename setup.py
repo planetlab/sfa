@@ -35,7 +35,6 @@ package_dirs = [
     'sfa/managers',
     'sfa/rspecs',
     'sfa/rspecs/aggregates',
-    'sfa/rspecs/aggregates/vini',
     'sfatables',
     'sfatables/commands',
     'sfatables/processors',
