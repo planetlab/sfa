@@ -4,7 +4,7 @@ import socket
 from sfa.util.namespace import *
 from sfa.util.faults import *
 from xmlbuilder import XMLBuilder
-#from lxml import etree
+from lxml import etree
 import sys
 from StringIO import StringIO
 
@@ -68,7 +68,26 @@ def format_tc_rate(rate):
     else:
         return "%.0fbit" % rate 
 
+class Sliver:
+    def __init__(self, node):
+        self.node = node
+        self.network = node.network
+        self.slice = node.network.slice
+        self.vsys_tags = []
+        
+    def read_from_tags(self):
+        self.vsys_tags = self.slice.get_tags("vsys", self.node)
 
+    def write_to_tags(self):
+        pass
+        
+    def toxml(self, xml):
+        with xml.sliver:
+            for tag in self.vsys_tags:
+                with xml.vsys:
+                    xml << tag.value
+
+        
 class Iface:
     def __init__(self, network, iface):
         self.network = network
@@ -83,7 +102,7 @@ class Iface:
     """
     def toxml(self, xml):
         if self.bwlimit:
-            with xml.bwlimit:
+            with xml.bw_limit:
                 xml << format_tc_rate(self.bwlimit)
 
 
@@ -100,7 +119,7 @@ class Node:
         self.links = set()
         self.iface_ids = node['interface_ids']
         self.iface_ids.sort()
-        self.sliver = False
+        self.sliver = None
         self.whitelist = node['slice_ids_whitelist']
 
     def get_link_id(self, remote):
@@ -168,7 +187,7 @@ class Node:
         return None
 
     def add_sliver(self):
-        self.sliver = True
+        self.sliver = Sliver(self)
 
     def toxml(self, xml):
         slice = self.network.slice
@@ -185,8 +204,7 @@ class Node:
             for iface in self.get_ifaces():
                 iface.toxml(xml)
             if self.sliver:
-                with xml.sliver:
-                    pass
+                self.sliver.toxml(xml)
     
 
 class Link:
@@ -262,20 +280,35 @@ class Slice:
         self.name = slice['name']
         self.node_ids = set(slice['node_ids'])
         self.slice_tag_ids = slice['slice_tag_ids']
+        self.peer_id = slice['peer_slice_id']
     
+    """
+    Use with tags that can have more than one instance
+    """
+    def get_tags(self, tagname, node = None):
+        tags = []
+        for i in self.slice_tag_ids:
+            tag = self.network.lookupSliceTag(i)
+            if tag.tagname == tagname:
+                if not (tag.node_id and node and node.id != tag.node_id):
+                    tags.append(tag)
+        return tags
+        
+    """
+    Use with tags that have only one instance
+    """
     def get_tag(self, tagname, node = None):
         for i in self.slice_tag_ids:
             tag = self.network.lookupSliceTag(i)
             if tag.tagname == tagname:
                 if (not node) or (node.id == tag.node_id):
                     return tag
-        else:
-            return None
+        return None
         
-    def get_nodes(self, nodes):
+    def get_nodes(self):
         n = []
         for id in self.node_ids:
-            n.append(nodes[id])
+            n.append(self.network.nodes[id])
         return n
   
     # Add a new slice tag   
@@ -520,7 +553,7 @@ class Network:
             ifaces.append(self.ifaces[i])
         return ifaces
     
-    def nodesInNetwork(self):
+    def nodesWithSlivers(self):
         nodes = []
         for n in self.nodes:
             node = self.nodes[n]
@@ -660,8 +693,10 @@ class Network:
         if self.nodelinks:
             raise Error("virtual topology already present")
             
-        for node in slice.get_nodes(self.nodes):
-            node.sliver = True
+        for node in slice.get_nodes():
+            node.add_sliver()
+            node.sliver.read_from_tags()
+
             linktag = slice.get_tag('topo_rspec', node)
             if linktag:
                 l = eval(linktag.value)
@@ -675,7 +710,8 @@ class Network:
     def updateSliceTags(self, slice):
         if not self.nodelinks:
             return
- 
+
+        """  Comment this out for right now
         slice.update_tag('vini_topo', 'manual', self.tags)
         slice.assign_egre_key(self.tags)
         slice.turn_on_netns(self.tags)
@@ -695,6 +731,8 @@ class Network:
                 if tag.tagname == 'topo_rspec' and not tag.updated:
                     tag.delete()
                 tag.write(self.api)
+        """
+
                 
     """
     Check the requested topology against the available topology and capacity
