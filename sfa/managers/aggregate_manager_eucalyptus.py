@@ -10,7 +10,7 @@ from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError
 from ConfigParser import ConfigParser
 from xmlbuilder import XMLBuilder
-from xml.etree import ElementTree as ET
+from lxml import etree as ET
 from sqlobject import *
 
 import sys
@@ -22,6 +22,11 @@ import os
 # key pairs, and clusters information.
 #
 cloud = {}
+
+##
+# The location of the RelaxNG schema.
+#
+EUCALYPTUS_RSPEC_SCHEMA='/etc/sfa/eucalyptus.rng'
 
 ##
 # A representation of an Eucalyptus instance. This is a support class
@@ -42,8 +47,13 @@ class EucaInstance(SQLObject):
     # @param botoConn A connection to Eucalyptus.
     #
     def reserveInstance(self, botoConn):
-        print >>sys.stderr, 'Reserving an instance. image: %s, kernel: %s, ramdisk: %s, type: %s, key: %s' % \
-                            (self.image_id, self.kernel_id, self.ramdisk_id, self.inst_type, self.key_pair)
+        print >>sys.stderr, 'Reserving an instance: image: %s, kernel: ' \
+                            '%s, ramdisk: %s, type: %s, key: %s' % \
+                            (self.image_id, self.kernel_id, self.ramdisk_id, 
+                             self.inst_type, self.key_pair)
+
+        # XXX The return statement is for testing. REMOVE in production
+        #return
 
         try:
             reservation = botoConn.run_instances(self.image_id,
@@ -106,6 +116,12 @@ def init_server():
     Slice.createTable(ifNotExists=True)
     EucaInstance.createTable(ifNotExists=True)
 
+    # Make sure the schema exists.
+    if not os.path.exists(EUCALYPTUS_RSPEC_SCHEMA):
+        err = 'Cannot location schema at %s' % EUCALYPTUS_RSPEC_SCHEMA
+        print >>sys.stderr, err
+        raise Exception(err)
+
 ##
 # Creates a connection to Eucalytpus. This function is inspired by 
 # the make_connection() in Euca2ools.
@@ -161,7 +177,34 @@ class EucaRSpecBuilder(object):
         self.cloudInfo = cloud
 
     ##
-    # Creates the ClusterSpec stanza.
+    # Creates a request stanza.
+    # 
+    # @param num The number of instances to create.
+    # @param image The disk image id.
+    # @param kernel The kernel image id.
+    # @param keypair Key pair to embed.
+    # @param ramdisk Ramdisk id (optional).
+    #
+    def __requestXML(self, num, image, kernel, keypair, ramdisk = ''):
+        xml = self.eucaRSpec
+        with xml.request:
+            with xml.instances:
+                xml << str(num)
+            with xml.kernel_image(id=kernel):
+                xml << ''
+            if ramdisk == '':
+                with xml.ramdisk:
+                    xml << ''
+            else:
+                with xml.ramdisk(id=ramdisk):
+                    xml << ''
+            with xml.disk_image(id=image):
+                xml << ''
+            with xml.keypair:
+                xml << keypair
+
+    ##
+    # Creates the cluster stanza.
     #
     # @param clusters Clusters information.
     #
@@ -169,19 +212,25 @@ class EucaRSpecBuilder(object):
         xml = self.eucaRSpec
         for cluster in clusters:
             instances = cluster['instances']
-            with xml.ClusterSpec(id=cluster['name'], ip=cluster['ip']):
-                for inst in instances:
-                    with xml.Node(instanceType=inst[0]):
-                        with xml.FreeSlot:
-                            xml << str(inst[1])
-                        with xml.MaxAllow:
-                            xml << str(inst[2])
-                        with xml.NumCore:
-                            xml << str(inst[3])
-                        with xml.Mem:
-                            xml << str(inst[4])
-                        with xml.DiskSpace(unit='GB'):
-                            xml << str(inst[5])
+            with xml.cluster(id=cluster['name']):
+                with xml.ipv4:
+                    xml << cluster['ip']
+                with xml.vm_types:
+                    for inst in instances:
+                        with xml.vm_type(name=inst[0]):
+                            with xml.free_slots:
+                                xml << str(inst[1])
+                            with xml.max_instances:
+                                xml << str(inst[2])
+                            with xml.cores:
+                                xml << str(inst[3])
+                            with xml.memory(unit='MB'):
+                                xml << str(inst[4])
+                            with xml.disk_space(unit='GB'):
+                                xml << str(inst[5])
+                            if inst[0] == 'm1.small':
+                                self.__requestXML(1, 'emi-88760F45', 'eki-F26610C6', 'cortex')
+
 
     ##
     # Creates the Images stanza.
@@ -190,14 +239,14 @@ class EucaRSpecBuilder(object):
     #
     def __imagesXML(self, images):
         xml = self.eucaRSpec
-        with xml.Images:
+        with xml.images:
             for image in images:
-                with xml.Image(id=image.id):
-                    with xml.Type:
+                with xml.image(id=image.id):
+                    with xml.type:
                         xml << image.type
-                    with xml.Arch:
+                    with xml.arch:
                         xml << image.architecture
-                    with xml.State:
+                    with xml.state:
                         xml << image.state
                     with xml.location:
                         xml << image.location
@@ -209,9 +258,9 @@ class EucaRSpecBuilder(object):
     #
     def __keyPairsXML(self, keypairs):
         xml = self.eucaRSpec
-        with xml.KeyPairs:
+        with xml.keypairs:
             for key in keypairs:
-                with xml.Key:
+                with xml.keypair:
                     xml << key.name
 
     ##
@@ -224,25 +273,13 @@ class EucaRSpecBuilder(object):
 
         xml = self.eucaRSpec
         cloud = self.cloudInfo
-        with xml.RSpec(name='eucalyptus'):
-            with xml.Capacity:
-                with xml.CloudSpec(id=cloud['name'], ip=cloud['ip']):
-                    self.__keyPairsXML(cloud['keypairs'])
-                    self.__imagesXML(cloud['images'])
-                    self.__clustersXML(cloud['clusters'])
-            with xml.Request:
-                with xml.CloudSpec(id=cloud['name'], ip=cloud['ip']):
-                    with xml.Credential(type='X509'):
-                        xml << 'cred'
-                    with xml.Node(instanceType='m1.small', number='1'):
-                        with xml.Kernel:
-                            xml << 'eki-F26610C6'
-                        with xml.Ramdisk:
-                            xml << ''
-                        with xml.DiskImage:
-                            xml << 'emi-88760F45'
-                        with xml.Key:
-                            xml << 'cortex'
+        with xml.RSpec(type='eucalyptus'):
+            with xml.cloud(id=cloud['name']):
+                with xml.ipv4:
+                    xml << cloud['ip']
+                self.__keyPairsXML(cloud['keypairs'])
+                self.__imagesXML(cloud['images'])
+                self.__clustersXML(cloud['clusters'])
         return str(xml)
 
 ##
@@ -335,43 +372,52 @@ def create_slice(api, xrn, xml):
     #if s is None:
     s = Slice(slice_hrn = hrn)
 
+    # Validate RSpec
+    schemaXML = ET.parse(EUCALYPTUS_RSPEC_SCHEMA)
+    rspecValidator = ET.RelaxNG(schemaXML)
+    rspecXML = ET.XML(xml)
+    if not rspecValidator(rspecXML):
+        error = rspecValidator.error_log.last_error
+        message = '%s (line %s)' % (error.message, error.line) 
+        raise Exception(message)
+
     # Process the RSpec
-    rspecXML = RSpec(xml)
-    rspecDict = rspecXML.toDict()
-    request = rspecDict['RSpec']['Request']
-    for cloudSpec in request:
-        cloudSpec = cloudSpec['CloudSpec']
-        for cloudReqInfo in cloudSpec:
-            for nodeReq in cloudReqInfo['Node']:
-                instKernel  = nodeReq['Kernel'][0]
-                instDiskImg = nodeReq['DiskImage'][0]
-                instRamDisk = nodeReq['Ramdisk'][0]
-                instKey     = nodeReq['Key'][0]
-                instType    = nodeReq['instanceType']
-                numInst     = int(nodeReq['number'])
+    requests = rspecXML.findall('.//request')
+    for req in requests:
+        vmTypeElement = req.getparent()
+        instType = vmTypeElement.get('name')
+        numInst  = int(req.find('instances').text)
+        instKernel  = req.find('kernel_image').get('id')
+        instDiskImg = req.find('disk_image').get('id')
+        instKey     = req.find('keypair').text
+        
+        ramDiskElement = req.find('ramdisk')
+        ramDiskAttr    = ramDiskElement.attrib
+        if 'id' in ramDiskAttr:
+            instRamDisk = ramDiskAttr['id']
+        else:
+            instRamDisk = None
 
-                # Ramdisk is optional.
-                if isinstance(instRamDisk, dict):
-                    instRamDisk = None
-
-                # Create the instances
-                for i in range(0, numInst):
-                    eucaInst = EucaInstance(slice = s, 
-                                            kernel_id = instKernel,
-                                            image_id = instDiskImg,
-                                            ramdisk_id = instRamDisk,
-                                            key_pair = instKey,
-                                            inst_type = instType)
-                    eucaInst.reserveInstance(conn)
+        # Create the instances
+        for i in range(0, numInst):
+            eucaInst = EucaInstance(slice = s, 
+                                    kernel_id = instKernel,
+                                    image_id = instDiskImg,
+                                    ramdisk_id = instRamDisk,
+                                    key_pair = instKey,
+                                    inst_type = instType)
+            eucaInst.reserveInstance(conn)
 
     return True
 
 def main():
     init_server()
-    r = RSpec()
-    r.parseFile(sys.argv[1])
-    rspec = r.toDict()
-    create_slice(None,'planetcloud.pc.test',rspec)
+
+    theRSpec = None
+    with open(sys.argv[1]) as xml:
+        theRSpec = xml.read()
+    create_slice(None, 'planetcloud.pc.test', theRSpec)
+
     #rspec = get_rspec('euca', 'hrn:euca', 'oring_hrn')
     #print rspec
 
