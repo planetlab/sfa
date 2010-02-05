@@ -191,11 +191,13 @@ class Slice:
             if tt.multi:
                 tags = self.get_multi_tag(tt.tagname, node)
                 for tag in tags:
-                    xml << (tag.tagname, tag.value)
+                    if not tag.deleted:  ### Debugging
+                        xml << (tag.tagname, tag.value)
             else:
                 tag = self.get_tag(tt.tagname, node)
                 if tag:
-                    xml << (tag.tagname, tag.value)
+                    if not tag.deleted:   ### Debugging
+                        xml << (tag.tagname, tag.value)
 
     def toxml(self, xml):
         with xml.sliver_defaults:
@@ -269,7 +271,7 @@ class Network:
         try:
             val = self.sites[id]
         except:
-            raise KeyError("site ID %s not found" % id)
+            raise InvalidRSpec("site ID %s not found" % id)
         return val
     
     def getSites(self):
@@ -286,7 +288,7 @@ class Network:
         try:
             val = self.nodes[id]
         except:
-            raise KeyError("node ID %s not found" % id)
+            raise InvalidRSpec("node ID %s not found" % id)
         return val
     
     def getNodes(self):
@@ -303,7 +305,7 @@ class Network:
         try:
             val = self.ifaces[id]
         except:
-            raise KeyError("interface ID %s not found" % id)
+            raise InvalidRSpec("interface ID %s not found" % id)
         return val
     
     def getIfaces(self):
@@ -325,7 +327,7 @@ class Network:
         try:
             val = self.tags[id]
         except:
-            raise KeyError("slicetag ID %s not found" % id)
+            raise InvalidRSpec("slicetag ID %s not found" % id)
         return val
     
     def getSliceTags(self):
@@ -339,7 +341,7 @@ class Network:
         try:
             val = self.tagstypes[name]
         except:
-            raise KeyError("tag %s not found" % name)
+            raise InvalidRSpec("tag %s not found" % name)
         return val
     
     def getTagTypes(self):
@@ -350,14 +352,14 @@ class Network:
     
     def __process_attributes(self, element, node=None):
         # Do we need to check caller's role before update???
-        tagtypes = self.GetTagTypes()
+        tagtypes = self.getTagTypes()
         for tt in tagtypes:
             if tt.multi:
                 for e in element.iterfind("./" + tt.tagname):
                     self.slice.update_multi_tag(tt.tagname, e.text, node)
             else:
                 e = element.find("./" + tt.tagname)
-                if e:
+                if e is not None:
                     self.slice.update_tag(tt.tagname, e.text, node)
 
     """
@@ -368,7 +370,11 @@ class Network:
         for node in self.getNodes():
             nodedict[node.idtag] = node
             
-        tree = etree.parse(StringIO(xml))
+        try:
+            tree = etree.parse(StringIO(xml))
+        except etree.XMLSyntaxError:
+            message = str(sys.exc_info()[1])
+            raise InvalidRSpec(message)
 
         if schema:
             # Validate the incoming request against the RelaxNG schema
@@ -406,7 +412,7 @@ class Network:
     def addSlice(self):
         slice = self.slice
         if not slice:
-            raise Error("no slice associated with network")
+            raise InvalidRSpec("no slice associated with network")
 
         for node in slice.get_nodes():
             node.add_sliver()
@@ -420,7 +426,7 @@ class Network:
             if tag.slice_id == self.slice.id:
                 if not tag.updated:
                     tag.delete()
-                #tag.write(self.api)
+                #tag.write(self.api)  ### Debugging
 
     """
     Produce XML directly from the topology specification.
