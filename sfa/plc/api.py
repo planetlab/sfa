@@ -427,7 +427,7 @@ class ComponentAPI(BaseAPI):
         if config is None:
             return
 
-        self.nodemanager = NodeManager(config)
+        self.nodemanager = NodeManager(self.config)
 
     def sliver_exists(self):
         sliver_dict = self.nodemanager.GetXIDs()
