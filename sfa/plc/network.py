@@ -368,8 +368,6 @@ class Network:
         for node in self.getNodes():
             nodedict[node.idtag] = node
             
-        slicenodes = {}
-
         tree = etree.parse(StringIO(xml))
 
         if schema:
@@ -391,14 +389,12 @@ class Network:
         for sliver in rspec.iterfind("./network/site/node/sliver"):
             elem = sliver.getparent()
             node = nodedict[elem.get("id")]
-            slicenodes[node.id] = node
             node.add_sliver()
             self.__process_attributes(sliver, node)
 
         # Find slivers that specify nodeid
         for sliver in rspec.iterfind("./request/sliver[@nodeid]"):
             node = nodedict[sliver.get("nodeid")]
-            slicenodes[node.id] = node
             node.add_sliver()
             self.__process_attributes(sliver, node)
 
