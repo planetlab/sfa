@@ -238,7 +238,7 @@ class TagType:
     def __init__(self, tagtype):
         self.id = tagtype['tag_type_id']
         self.tagname = tagtype['tagname']
-        if self.tagname in ['codemux', 'vsys']:
+        if self.tagname in ['codemux', 'ip_addresses', 'vsys']:
             self.multi = True
         else:
             self.multi = False
@@ -490,8 +490,9 @@ class Network:
     def get_tag_types(self, api):
         tmp = []
         for tag in api.plshell.GetTagTypes(api.plauth):
-            t = tag['tagname'], TagType(tag)
-            tmp.append(t)
+            if tag['category'] == 'slice/rspec':
+                t = tag['tagname'], TagType(tag)
+                tmp.append(t)
         return dict(tmp)
     
     """
