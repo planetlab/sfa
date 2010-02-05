@@ -5,13 +5,13 @@ RSpec = element RSpec {
 }
 cloud = element cloud {
    attribute id { xsd:NMTOKEN },
-   user-info?,
+   user_info?,
    ipv4,
    keypairs,
    images,
    cluster+
 }
-user-info = element user-info { 
+user_info = element user_info { 
    credential 
 }
 keypairs = element keypairs { keypair+ }
@@ -26,23 +26,23 @@ image = element image {
 cluster = element cluster {
    attribute id { xsd:ID },
    ipv4,
-   vm-types
+   vm_types
 }
-vm-types = element vm-types { vm-type+ }
-vm-type = element vm-type {
+vm_types = element vm_types { vm_type+ }
+vm_type = element vm_type {
    attribute name { xsd:ID },
-   free-slots,
-   max-instances,
+   free_slots,
+   max_instances,
    cores,
    memory,
-   disk-space,
+   disk_space,
    request?
 }
 request = element request {
    instances,
-   kernel-image,
+   kernel_image,
    ramdisk,
-   disk-image,
+   disk_image,
    keypair
 }
 credential = element credential { text }
@@ -52,19 +52,19 @@ type = element type { text }
 arch = element arch { text }
 state = element state { text }
 location = element location { text }
-free-slots = element free-slots { text }
-max-instances = element max-instances { text }
+free_slots = element free_slots { text }
+max_instances = element max_instances { text }
 cores = element cores { text }
 memory = element memory {
    attribute unit { xsd:NMTOKEN },
    text
 }
-disk-space = element disk-space {
+disk_space = element disk_space {
    attribute unit { xsd:NMTOKEN },
    text
 }
-instances = element instances { text }
-kernel-image = element kernel-image {
+instances = element instances { xsd:unsignedInt }
+kernel_image = element kernel_image {
    attribute id { xsd:IDREF },
    empty
 }
@@ -72,7 +72,7 @@ ramdisk = element ramdisk {
    attribute id { xsd:IDREF }?,
    empty
 }
-disk-image = element disk-image {
+disk_image = element disk_image {
    attribute id { xsd:IDREF },
    empty
 }

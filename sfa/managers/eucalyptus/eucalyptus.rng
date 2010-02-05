@@ -17,7 +17,7 @@
         <data type="NMTOKEN"/>
       </attribute>
       <optional>
-	<ref name="user-info"/>
+        <ref name="user_info"/>
       </optional>
       <ref name="ipv4"/>
       <ref name="keypairs"/>
@@ -27,8 +27,8 @@
       </oneOrMore>
     </element>
   </define>
-  <define name="user-info">
-    <element name="user-info">
+  <define name="user_info">
+    <element name="user_info">
       <ref name="credential"/>
     </element>
   </define>
@@ -63,26 +63,26 @@
         <data type="ID"/>
       </attribute>
       <ref name="ipv4"/>
-      <ref name="vm-types"/>
+      <ref name="vm_types"/>
     </element>
   </define>
-  <define name="vm-types">
-    <element name="vm-types">
+  <define name="vm_types">
+    <element name="vm_types">
       <oneOrMore>
-        <ref name="vm-type"/>
+        <ref name="vm_type"/>
       </oneOrMore>
     </element>
   </define>
-  <define name="vm-type">
-    <element name="vm-type">
+  <define name="vm_type">
+    <element name="vm_type">
       <attribute name="name">
         <data type="ID"/>
       </attribute>
-      <ref name="free-slots"/>
-      <ref name="max-instances"/>
+      <ref name="free_slots"/>
+      <ref name="max_instances"/>
       <ref name="cores"/>
       <ref name="memory"/>
-      <ref name="disk-space"/>
+      <ref name="disk_space"/>
       <optional>
         <ref name="request"/>
       </optional>
@@ -91,9 +91,9 @@
   <define name="request">
     <element name="request">
       <ref name="instances"/>
-      <ref name="kernel-image"/>
+      <ref name="kernel_image"/>
       <ref name="ramdisk"/>
-      <ref name="disk-image"/>
+      <ref name="disk_image"/>
       <ref name="keypair"/>
     </element>
   </define>
@@ -132,13 +132,13 @@
       <text/>
     </element>
   </define>
-  <define name="free-slots">
-    <element name="free-slots">
+  <define name="free_slots">
+    <element name="free_slots">
       <text/>
     </element>
   </define>
-  <define name="max-instances">
-    <element name="max-instances">
+  <define name="max_instances">
+    <element name="max_instances">
       <text/>
     </element>
   </define>
@@ -155,8 +155,8 @@
       <text/>
     </element>
   </define>
-  <define name="disk-space">
-    <element name="disk-space">
+  <define name="disk_space">
+    <element name="disk_space">
       <attribute name="unit">
         <data type="NMTOKEN"/>
       </attribute>
@@ -165,11 +165,11 @@
   </define>
   <define name="instances">
     <element name="instances">
-      <text/>
+      <data type="unsignedInt"/>
     </element>
   </define>
-  <define name="kernel-image">
-    <element name="kernel-image">
+  <define name="kernel_image">
+    <element name="kernel_image">
       <attribute name="id">
         <data type="IDREF"/>
       </attribute>
@@ -186,8 +186,8 @@
       <empty/>
     </element>
   </define>
-  <define name="disk-image">
-    <element name="disk-image">
+  <define name="disk_image">
+    <element name="disk_image">
       <attribute name="id">
         <data type="IDREF"/>
       </attribute>

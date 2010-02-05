@@ -2,9 +2,9 @@
 <RSpec type="eucalyptus">
   <cloud id="Emulab-Cloud">
     <!-- This element added by the user -->
-    <user-info>
+    <user_info>
       <credential>foobarbaz</credential>
-    </user-info>
+    </user_info>
     <ipv4>155.98.39.85</ipv4>
     <keypairs>
       <keypair>cortex</keypair>
@@ -26,51 +26,51 @@
     </images>
     <cluster id="pcluster">
       <ipv4>10.1.1.2</ipv4>
-      <vm-types>
-        <vm-type name="m1.small">
-          <free-slots>2</free-slots>
-          <max-instances>2</max-instances>
+      <vm_types>
+        <vm_type name="m1.small">
+          <free_slots>2</free_slots>
+          <max_instances>2</max_instances>
           <cores>1</cores>
           <memory unit="MB">128</memory>
-          <disk-space unit="GB">2</disk-space>
+          <disk_space unit="GB">2</disk_space>
           <!-- A request for an instance of this type, added by the user -->
           <request>
             <instances>1</instances>
-            <kernel-image id="eki-F26610C6"/>
+            <kernel_image id="eki-F26610C6"/>
             <ramdisk/>
-            <disk-image id="emi-88760F45"/>
+            <disk_image id="emi-88760F45"/>
             <keypair>cortex</keypair>
           </request>
-        </vm-type>
-        <vm-type name="c1.medium">
-          <free-slots>1</free-slots>
-          <max-instances>2</max-instances>
+        </vm_type>
+        <vm_type name="c1.medium">
+          <free_slots>1</free_slots>
+          <max_instances>2</max_instances>
           <cores>1</cores>
           <memory unit="MB">256</memory>
-          <disk-space unit="GB">5</disk-space>
-        </vm-type>
-        <vm-type name="m1.large">
-          <free-slots>0</free-slots>
-          <max-instances>1</max-instances>
+          <disk_space unit="GB">5</disk_space>
+        </vm_type>
+        <vm_type name="m1.large">
+          <free_slots>0</free_slots>
+          <max_instances>1</max_instances>
           <cores>2</cores>
           <memory unit="MB">512</memory>
-          <disk-space unit="GB">10</disk-space>
-        </vm-type>
-        <vm-type name="m1.xlarge">
-          <free-slots>0</free-slots>
-          <max-instances>1</max-instances>
+          <disk_space unit="GB">10</disk_space>
+        </vm_type>
+        <vm_type name="m1.xlarge">
+          <free_slots>0</free_slots>
+          <max_instances>1</max_instances>
           <cores>2</cores>
           <memory unit="MB">1024</memory>
-          <disk-space unit="GB">20</disk-space>
-        </vm-type>
-        <vm-type name="c1.xlarge">
-          <free-slots>0</free-slots>
-          <max-instances>0</max-instances>
+          <disk_space unit="GB">20</disk_space>
+        </vm_type>
+        <vm_type name="c1.xlarge">
+          <free_slots>0</free_slots>
+          <max_instances>0</max_instances>
           <cores>4</cores>
           <memory unit="MB">2048</memory>
-          <disk-space unit="GB">20</disk-space>
-        </vm-type>
-      </vm-types>
+          <disk_space unit="GB">20</disk_space>
+        </vm_type>
+      </vm_types>
     </cluster>
   </cloud>
 </RSpec>
