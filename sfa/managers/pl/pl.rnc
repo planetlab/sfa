@@ -10,26 +10,7 @@ network = element network {
    site+
 }
 sliver_defaults = element sliver_defaults {
-   capabilities? 
- & codemux* 
- & cpu_pct?
- & cpu_share?
- & delegations?
- & disk_max?
- & initscript?
- & ip_addresses*
- & net_i2_max_kbyte?
- & net_i2_max_rate?
- & net_i2_min_rate?
- & net_i2_share?
- & net_i2_thresh_kbyte?
- & net_max_kbyte?
- & net_max_rate?
- & net_min_rate?
- & net_share?
- & net_thresh_kbyte?
- & vsys*
- & vsys_vnet?
+   sliver_elements
 }
 site = element site { 
    attribute id { xsd:ID },
@@ -38,8 +19,8 @@ site = element site {
 }
 node = element node {
    attribute id { xsd:ID },
-   hostname,
-   bw_limit?,
+   element hostname { text },
+   element bw_limit { attribute units { xsd:NMTOKEN }, text }?,
    sliver*
 }
 request = element request {
@@ -47,47 +28,27 @@ request = element request {
 }
 sliver = element sliver { 
    attribute nodeid { xsd:ID }?,
-   ( capabilities? 
-    & codemux* 
-    & cpu_pct?
-    & cpu_share?
-    & delegations?
-    & disk_max?
-    & initscript?
-    & ip_addresses*
-    & net_i2_max_kbyte?
-    & net_i2_max_rate?
-    & net_i2_min_rate?
-    & net_i2_share?
-    & net_i2_thresh_kbyte?
-    & net_max_kbyte?
-    & net_max_rate?
-    & net_min_rate?
-    & net_share?
-    & net_thresh_kbyte?
-    & vsys*
-    & vsys_vnet?
-   )
+   sliver_elements
 }
-capabilities = element capabilities { text }
-codemux = element codemux { text }
-cpu_pct = element cpu_pct { text }
-cpu_share = element cpu_share { text }
-delegations = element delegations { text }
-disk_max = element disk_max { text }
-initscript = element initscript { text }
-ip_addresses = element ip_addresses { text }
-net_i2_max_kbyte = element net_i2_max_kbyte { text }
-net_i2_max_rate = element net_i2_max_rate { text }
-net_i2_min_rate = element net_i2_min_rate { text }
-net_i2_share = element net_i2_share { text }
-net_i2_thresh_kbyte = element net_i2_thresh_kbyte { text }
-net_max_kbyte = element net_max_kbyte { text }
-net_max_rate = element net_max_rate { text }
-net_min_rate = element net_min_rate { text }
-net_share = element net_share { text }
-net_thresh_kbyte = element net_thresh_kbyte { text }
-vsys = element vsys { text }
-vsys_vnet = element vsys_vnet { text }
-hostname = element hostname { text }
-bw_limit = element bw_limit { attribute units { xsd:NMTOKEN }, text }
+sliver_elements = ( 
+   element capabilities { text }? 
+ & element codemux { text }* 
+ & element cpu_pct { text }?
+ & element cpu_share { text }?
+ & element delegations { text }?
+ & element disk_max { text }?
+ & element initscript { text }?
+ & element ip_addresses {text }*
+ & element net_i2_max_kbyte { text }?
+ & element net_i2_max_rate { text }?
+ & element net_i2_min_rate { text }?
+ & element net_i2_share { text }?
+ & element net_i2_thresh_kbyte { text }?
+ & element net_max_kbyte { text }?
+ & element net_max_rate { text }?
+ & element net_min_rate { text }?
+ & element net_share { text }?
+ & element net_thresh_kbyte { text }?
+ & element vsys {text}*
+ & element vsys_vnet { text }?
+)
