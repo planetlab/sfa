@@ -1,0 +1,96 @@
+start = RSpec
+RSpec = element RSpec { 
+   attribute type { xsd:NMTOKEN },
+   ( network | request )
+}
+network = element network {
+   attribute name { xsd:NMTOKEN },
+   attribute slice { xsd:NMTOKEN }?,
+   sliver_defaults?,
+   site+
+}
+sliver_defaults = element sliver_defaults {
+   capabilities? 
+ & codemux* 
+ & cpu_pct?
+ & cpu_share?
+ & delegations?
+ & disk_max?
+ & initscript?
+ & ip_addresses*
+ & net_i2_max_kbyte?
+ & net_i2_max_rate?
+ & net_i2_min_rate?
+ & net_i2_share?
+ & net_i2_thresh_kbyte?
+ & net_max_kbyte?
+ & net_max_rate?
+ & net_min_rate?
+ & net_share?
+ & net_thresh_kbyte?
+ & openfd_min?
+ & vsys*
+ & vsys_vnet?
+}
+site = element site { 
+   attribute id { xsd:ID },
+   element name { text },
+   node*
+}
+node = element node {
+   attribute id { xsd:ID },
+   hostname,
+   bw_limit?,
+   sliver*
+}
+request = element request {
+   sliver+
+}
+sliver = element sliver { 
+   attribute nodeid { xsd:ID }?,
+   ( capabilities? 
+    & codemux* 
+    & cpu_pct?
+    & cpu_share?
+    & delegations?
+    & disk_max?
+    & initscript?
+    & ip_addresses*
+    & net_i2_max_kbyte?
+    & net_i2_max_rate?
+    & net_i2_min_rate?
+    & net_i2_share?
+    & net_i2_thresh_kbyte?
+    & net_max_kbyte?
+    & net_max_rate?
+    & net_min_rate?
+    & net_share?
+    & net_thresh_kbyte?
+    & openfd_min?
+    & vsys*
+    & vsys_vnet?
+   )
+}
+capabilities = element capabilities { text }
+codemux = element codemux { text }
+cpu_pct = element cpu_pct { text }
+cpu_share = element cpu_share { text }
+delegations = element delegations { text }
+disk_max = element disk_max { text }
+initscript = element initscript { text }
+ip_addresses = element ip_addresses { text }
+net_i2_max_kbyte = element net_i2_max_kbyte { text }
+net_i2_max_rate = element net_i2_max_rate { text }
+net_i2_min_rate = element net_i2_min_rate { text }
+net_i2_share = element net_i2_share { text }
+net_i2_thresh_kbyte = element net_i2_thresh_kbyte { text }
+net_max_kbyte = element net_max_kbyte { text }
+net_max_rate = element net_max_rate { text }
+net_min_rate = element net_min_rate { text }
+net_share = element net_share { text }
+net_thresh_kbyte = element net_thresh_kbyte { text }
+openfd_min = element openfd_min { text }
+vsys = element vsys { text }
+vsys_vnet = element vsys_vnet { text }
+hostname = element hostname { text }
+bw_limit = element bw_limit { attribute units { xsd:NMTOKEN }, text }
