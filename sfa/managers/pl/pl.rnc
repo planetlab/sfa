@@ -28,7 +28,6 @@ sliver_defaults = element sliver_defaults {
  & net_min_rate?
  & net_share?
  & net_thresh_kbyte?
- & openfd_min?
  & vsys*
  & vsys_vnet?
 }
@@ -66,7 +65,6 @@ sliver = element sliver {
     & net_min_rate?
     & net_share?
     & net_thresh_kbyte?
-    & openfd_min?
     & vsys*
     & vsys_vnet?
    )
@@ -89,7 +87,6 @@ net_max_rate = element net_max_rate { text }
 net_min_rate = element net_min_rate { text }
 net_share = element net_share { text }
 net_thresh_kbyte = element net_thresh_kbyte { text }
-openfd_min = element openfd_min { text }
 vsys = element vsys { text }
 vsys_vnet = element vsys_vnet { text }
 hostname = element hostname { text }
