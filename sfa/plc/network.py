@@ -123,7 +123,7 @@ class Slice:
     """
     Use with tags that can have more than one instance
     """
-    def get_tags(self, tagname, node = None):
+    def get_multi_tag(self, tagname, node = None):
         tags = []
         for i in self.slice_tag_ids:
             tag = self.network.lookupSliceTag(i)
@@ -157,7 +157,7 @@ class Slice:
         else:
             record['node_id'] = None
         tag = Slicetag(record)
-        self.network.slicetags[tag.id] = tag
+        self.network.tags[tag.id] = tag
         self.slice_tag_ids.append(tag.id)
         tag.changed = True       
         tag.updated = True
@@ -175,12 +175,22 @@ class Slice:
             tag = self.add_tag(tagname, value, node)
         tag.updated = True
             
+    def update_multi_tag(self, tagname, value, node = None):
+        tags = self.get_multi_tag(tagname, node)
+        for tag in tags:
+            if tag and tag.value == value:
+                value = "no change"
+                break
+        else:
+            tag = self.add_tag(tagname, value, node)
+        tag.updated = True
+            
     def tags_to_xml(self, xml, node = None):
         tag = self.get_tag("cpu_pct", node)
         if tag:
             with xml.cpu_percent:
                 xml << tag.value
-        tags = self.get_tags("vsys", node)
+        tags = self.get_multi_tag("vsys", node)
         for tag in tags:
             with xml.vsys:
                 xml << tag.value
@@ -311,10 +321,16 @@ class Network:
             tags.append(self.tags[t])
         return tags
     
+
+    def __process_attributes(self, element, node=None):
+        for e in element.iterfind("./vsys"):
+            self.slice.update_multi_tag("vsys", e.text, node)
+            
+
     """
     Annotate the objects in the Network with information from the RSpec
     """
-    def addRSpec(self, xml):
+    def addRSpec(self, xml, schema=None):
         nodedict = {}
         for node in self.getNodes():
             nodedict[node.idtag] = node
@@ -323,9 +339,9 @@ class Network:
 
         tree = etree.parse(StringIO(xml))
 
-        if self.schema:
+        if schema:
             # Validate the incoming request against the RelaxNG schema
-            relaxng_doc = etree.parse(self.schema)
+            relaxng_doc = etree.parse(schema)
             relaxng = etree.RelaxNG(relaxng_doc)
         
             if not relaxng(tree):
@@ -335,18 +351,23 @@ class Network:
 
         rspec = tree.getroot()
 
+        defaults = rspec.find("./network/sliver_defaults")
+        self.__process_attributes(defaults)
+
         # Find slivers under node elements
         for sliver in rspec.iterfind("./network/site/node/sliver"):
             elem = sliver.getparent()
             node = nodedict[elem.get("id")]
             slicenodes[node.id] = node
             node.add_sliver()
+            self.__process_attributes(sliver, node)
 
         # Find slivers that specify nodeid
         for sliver in rspec.iterfind("./request/sliver[@nodeid]"):
             node = nodedict[sliver.get("nodeid")]
             slicenodes[node.id] = node
             node.add_sliver()
+            self.__process_attributes(sliver, node)
 
         return
 
@@ -364,13 +385,13 @@ class Network:
     """
     Write any slice tags that have been added or modified back to the DB
     """
-    def updateSliceTags(self, slice):
+    def updateSliceTags(self):
         # Update slice tags in database
         for tag in self.getSliceTags():
-            if tag.slice_id == slice.id:
-                if tag.tagname == 'topo_rspec' and not tag.updated:
+            if tag.slice_id == self.slice.id:
+                if not tag.updated:
                     tag.delete()
-                tag.write(self.api)
+                #tag.write(self.api)
 
     """
     Produce XML directly from the topology specification.
