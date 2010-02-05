@@ -186,14 +186,16 @@ class Slice:
         tag.updated = True
             
     def tags_to_xml(self, xml, node = None):
-        tag = self.get_tag("cpu_pct", node)
-        if tag:
-            with xml.cpu_percent:
-                xml << tag.value
-        tags = self.get_multi_tag("vsys", node)
-        for tag in tags:
-            with xml.vsys:
-                xml << tag.value
+        tagtypes = self.network.getTagTypes()
+        for tt in tagtypes:
+            if tt.multi:
+                tags = self.get_multi_tag(tt.tagname, node)
+                for tag in tags:
+                    xml << (tag.tagname, tag.value)
+            else:
+                tag = self.get_tag(tt.tagname, node)
+                if tag:
+                    xml << (tag.tagname, tag.value)
 
     def toxml(self, xml):
         with xml.sliver_defaults:
@@ -232,6 +234,16 @@ class Slicetag:
             api.plshell.DeleteSliceTag(api.plauth, self.id)
 
 
+class TagType:
+    def __init__(self, tagtype):
+        self.id = tagtype['tag_type_id']
+        self.tagname = tagtype['tagname']
+        if self.tagname in ['codemux', 'vsys']:
+            self.multi = True
+        else:
+            self.multi = False
+
+
 """
 A Network is a compound object consisting of:
 * a dictionary mapping site IDs to Site objects
@@ -246,6 +258,7 @@ class Network:
         self.nodes = self.get_nodes(api)
         self.ifaces = self.get_ifaces(api)
         self.tags = self.get_slice_tags(api)
+        self.tagtypes = self.get_tag_types(api)
         self.slice = None
     
     """ Lookup site based on id or idtag value """
@@ -321,11 +334,31 @@ class Network:
             tags.append(self.tags[t])
         return tags
     
-
+    def lookupTagType(self, name):
+        val = None
+        try:
+            val = self.tagstypes[name]
+        except:
+            raise KeyError("tag %s not found" % name)
+        return val
+    
+    def getTagTypes(self):
+        tags = []
+        for t in self.tagtypes:
+            tags.append(self.tagtypes[t])
+        return tags
+    
     def __process_attributes(self, element, node=None):
-        for e in element.iterfind("./vsys"):
-            self.slice.update_multi_tag("vsys", e.text, node)
-            
+        # Do we need to check caller's role before update???
+        tagtypes = self.GetTagTypes()
+        for tt in tagtypes:
+            if tt.multi:
+                for e in element.iterfind("./" + tt.tagname):
+                    self.slice.update_multi_tag(tt.tagname, e.text, node)
+            else:
+                e = element.find("./" + tt.tagname)
+                if e:
+                    self.slice.update_tag(tt.tagname, e.text, node)
 
     """
     Annotate the objects in the Network with information from the RSpec
@@ -452,6 +485,16 @@ class Network:
         tmp = []
         for tag in api.plshell.GetSliceTags(api.plauth):
             t = tag['slice_tag_id'], Slicetag(tag)
+            tmp.append(t)
+        return dict(tmp)
+    
+    """
+    Create a list of tagtype obects keyed by tag name
+    """
+    def get_tag_types(self, api):
+        tmp = []
+        for tag in api.plshell.GetTagTypes(api.plauth):
+            t = tag['tagname'], TagType(tag)
             tmp.append(t)
         return dict(tmp)
     
