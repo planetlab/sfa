@@ -29,12 +29,9 @@ Group: Applications/System
 
 BuildRequires: make
 Requires: python
-Requires: pyOpenSSL >= 0.7
 Requires: m2crypto
 Requires: libxslt-python
 Requires: python-ZSI
-Requires: python-psycopg2
-Requires: myplc-config
 
 # python 2.5 has uuid module added, for python 2.4 we still need it
 %define has_uuid %(`python -c "import uuid" 2> /dev/null; echo $?`)
@@ -43,15 +40,25 @@ Requires: myplc-config
 Requires: python-uuid
 %endif
 
+%package cm
+Summary: the SFA wrapper around MyPLC's NodeManager
+Group: Applications/System
+Requires: sfa
+Requires: pyOpenSSL >= 0.6
+
 %package plc
 Summary: the SFA wrapper arounf MyPLC
 Group: Applications/System
 Requires: sfa
+Requires: python-psycopg2
+Requires: myplc-config
+Requires: pyOpenSSL >= 0.7
 
 %package client
 Summary: the SFA experimenter-side CLI
 Group: Applications/System
 Requires: sfa
+Requires: pyOpenSSL >= 0.7
 
 %package sfatables
 Summary: sfatables policy tool for SFA
@@ -61,6 +68,10 @@ Requires: sfa
 %description
 This package provides the python libraries that the SFA implementation requires
 
+%description cm
+This package implements the SFA interface which serves as a layer
+between the existing PlanetLab NodeManager interfaces and the SFA API.
+ 
 %description plc
 This package implements the SFA interface which serves as a layer
 between the existing PlanetLab interfaces and the SFA API.
@@ -94,6 +105,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/keyconvert
 /var/www/html/wsdl/*.wsdl
 
+%files cm
+/etc/init.d/sfa_cm
+# cron jobs here 
 
 %files plc
 %defattr(-,root,root)
@@ -101,7 +115,6 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/sfa/aggregates.xml
 %config (noreplace) /etc/sfa/registries.xml
 /etc/init.d/sfa
-/etc/init.d/sfa_cm
 %{_bindir}/sfa-config-tty
 %{_bindir}/sfa-import-plc.py*
 %{_bindir}/sfa-clean-peer-records.py*
@@ -123,9 +136,14 @@ rm -rf $RPM_BUILD_ROOT
 %pre plc
 [ -f %{_sysconfdir}/init.d/sfa ] && service sfa stop ||:
 
+%pre cm
+[ -f %{_sysconfdir}/init.d/sfacm ] && service sfacm stop ||:
+
 %post plc
 chkconfig --add sfa
 
+%post cm
+chkconfig --add sfacm
 %changelog
 * Thu Jan 21 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-10
 - This tag is quite same as the previous one (sfa-0.9-9) except that the vini and max aggregate managers are also updated for urn support.  Other features are:
