@@ -113,7 +113,8 @@ class ViniNode(Node):
         remote_ip = remote.get_virt_ip(self)
         net = self.get_virt_net(remote)
         bw = format_tc_rate(link.bps)
-        return (remote.id, remote.ipaddr, bw, my_ip, remote_ip, net)
+        ipaddr = remote.get_primary_iface().ipv4
+        return (remote.id, ipaddr, bw, my_ip, remote_ip, net)
         
     def add_link(self, link):
         self.links.add(link)
@@ -138,8 +139,7 @@ class ViniNode(Node):
                 xml << self.hostname
             with xml.bw_unallocated(units="kbps"):
                 xml << str(int(self.bps/1000))
-            for iface in self.get_ifaces():
-                iface.toxml(xml)
+            self.get_primary_iface().toxml(xml)
             if self.sliver:
                 self.sliver.toxml(xml)
 
@@ -242,7 +242,7 @@ class Link:
             with  xml.vlink(endpoints=end_ids):
                 with xml.description:
                     xml << "%s -- %s" % (self.end1.name, self.end2.name)
-                with xml.bw(units="kbps"):
+                with xml.kbps:
                     xml << str(int(self.bps/1000))
         else:
             with xml.link(endpoints=end_ids):
@@ -362,11 +362,11 @@ class ViniNetwork(Network):
         # Find vlinks under link elements
         for vlink in self.rspec.iterfind("./network/link/vlink"):
             link = vlink.getparent()
-            self.__add_vlink(vlink, slicenodes, link)
+            self.__add_vlink(vlink, link)
 
         # Find vlinks that specify endpoints
-        for vlink in rspec.iterfind("./request/vlink[@endpoints]"):
-            self.__add_vlink(vlink, slicenodes)
+        for vlink in self.rspec.iterfind("./request/vlink[@endpoints]"):
+            self.__add_vlink(vlink)
 
 
     def addSlice(self):
