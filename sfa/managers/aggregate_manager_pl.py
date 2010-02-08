@@ -90,7 +90,7 @@ def create_slice(api, xrn, xml):
         api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                      slice.peer_id)
 
-    print network.toxml()
+    # print network.toxml()
 
     return True
 
