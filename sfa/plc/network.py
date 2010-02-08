@@ -436,7 +436,7 @@ class Network:
             if tag.slice_id == self.slice.id:
                 if not tag.updated:
                     tag.delete()
-                #tag.write(self.api)  ### Debugging
+                tag.write(self.api) 
 
     """
     Produce XML directly from the topology specification.
