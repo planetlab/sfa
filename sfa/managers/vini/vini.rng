@@ -240,10 +240,7 @@
         </element>
       </optional>
       <optional>
-        <element name="bw">
-          <attribute name="units">
-            <data type="NMTOKEN"/>
-          </attribute>
+        <element name="kbps">
           <text/>
         </element>
       </optional>

@@ -64,5 +64,5 @@ sliver_elements = (
 vlink = element vlink { 
    attribute endpoints { xsd:IDREFS }?,
    element description { text }?,
-   element bw { attribute units { xsd:NMTOKEN }, text }? 
+   element kbps { text }? 
 }
