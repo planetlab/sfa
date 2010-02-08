@@ -39,7 +39,7 @@ class Iface:
 
 
 class Node:
-    def __init__(self, network, node, bps = 1000 * 1000000):
+    def __init__(self, network, node):
         self.network = network
         self.id = node['node_id']
         self.idtag = "n%s" % self.id
@@ -366,10 +366,6 @@ class Network:
     Annotate the objects in the Network with information from the RSpec
     """
     def addRSpec(self, xml, schema=None):
-        nodedict = {}
-        for node in self.getNodes():
-            nodedict[node.idtag] = node
-            
         try:
             tree = etree.parse(StringIO(xml))
         except etree.XMLSyntaxError:
@@ -387,6 +383,7 @@ class Network:
                 raise InvalidRSpec(message)
 
         rspec = tree.getroot()
+        self.rspec = rspec
 
         defaults = rspec.find("./network/sliver_defaults")
         self.__process_attributes(defaults)
