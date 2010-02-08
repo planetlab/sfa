@@ -454,7 +454,7 @@ class Network:
     """
     def get_sites(self, api):
         tmp = []
-        for site in api.plshell.GetSites(api.plauth):
+        for site in api.plshell.GetSites(api.plauth, {'peer_id': None}):
             t = site['site_id'], Site(self, site)
             tmp.append(t)
         return dict(tmp)
@@ -465,7 +465,7 @@ class Network:
     """
     def get_nodes(self, api):
         tmp = []
-        for node in api.plshell.GetNodes(api.plauth):
+        for node in api.plshell.GetNodes(api.plauth, {'peer_id': None}):
             t = node['node_id'], Node(self, node)
             tmp.append(t)
         return dict(tmp)
