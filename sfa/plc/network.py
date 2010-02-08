@@ -28,6 +28,7 @@ class Iface:
         self.ipv4 = iface['ip']
         self.bwlimit = iface['bwlimit']
         self.hostname = iface['hostname']
+        self.primary = iface['is_primary']
 
     """
     Just print out bwlimit right now
@@ -49,13 +50,12 @@ class Node:
         self.sliver = None
         self.whitelist = node['slice_ids_whitelist']
 
-    def get_ifaces(self):
-        i = []
+    def get_primary_iface(self):
         for id in self.iface_ids:
-            i.append(self.network.lookupIface(id))
-            # Only return the first interface
-            break
-        return i
+            iface = self.network.lookupIface(id)
+            if iface.primary:
+                return iface
+        return None
         
     def get_site(self):
         return self.network.lookupSite(self.site_id)
@@ -72,11 +72,7 @@ class Node:
         with xml.node(id = self.idtag):
             with xml.hostname:
                 xml << self.hostname
-            if self.network.type == "VINI":
-                with xml.kbps:
-                    xml << str(int(self.bps/1000))
-            for iface in self.get_ifaces():
-                iface.toxml(xml)
+            self.get_primary_iface().toxml()
             if self.sliver:
                 self.sliver.toxml(xml)
     
