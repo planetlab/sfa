@@ -33,10 +33,13 @@ Requires: m2crypto
 Requires: libxslt-python
 Requires: python-ZSI
 
-# python 2.5 has uuid module added, for python 2.4 we still need it
-%define has_uuid %(`python -c "import uuid" 2> /dev/null; echo $?`)
-%if has_uuid
-%else
+# python 2.5 has uuid module added, for python 2.4 we still need it.
+# we can't really check for if we can load uuid as a python module,
+# it'll be installed by "devel.pkgs". we have the epel repository so
+# python-uuid will be provided. but we can test for the python
+# version.
+%define has_py24 %(`python -c "import sys;sys.exit(sys.version_info[0:2] == (2,4))" 2> /dev/null; echo $?`)
+%if has_py24
 Requires: python-uuid
 %endif
 
