@@ -19,6 +19,9 @@ from sfa.server.registry import Registries
 from sfa.util.debug import log
 from sfa.plc.slices import Slices
 import sfa.plc.peers as peers
+from sfa.plc.network import *
+from sfa.plc.api import SfaAPI
+from sfa.plc.slices import *
 
 def delete_slice(api, xrn):
     hrn, type = urn_to_hrn(xrn)
@@ -37,13 +40,60 @@ def delete_slice(api, xrn):
         api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
-def create_slice(api, xrn, rspec):
+def __get_hostnames(nodes):
+    hostnames = []
+    for node in nodes:
+        hostnames.append(node.hostname)
+    return hostnames
+    
+def create_slice(api, xrn, xml):
     hrn, type = urn_to_hrn(xrn)
-    # XX just import the legacy module and excute that until
-    # we transition the code to this module
-    from sfa.plc.slices import Slices
+    peer = None
+
+    """
+    Verify HRN and initialize the slice record in PLC if necessary.
+    """
     slices = Slices(api)
-    slices.create_slice_aggregate(hrn, rspec)
+    peer = slices.get_peer(hrn)
+    sfa_peer = slices.get_sfa_peer(hrn)
+    registries = Registries(api)
+    registry = registries[api.hrn]
+    credential = api.getCredential()
+    site_id, remote_site_id = slices.verify_site(registry, credential, hrn, 
+                                                 peer, sfa_peer)
+    slice = slices.verify_slice(registry, credential, hrn, site_id, 
+                                remote_site_id, peer, sfa_peer)
+
+    network = Network(api)
+
+    slice = network.get_slice(api, hrn)
+    current = __get_hostnames(slice.get_nodes())
+
+    network.addRSpec(xml, "/var/www/html/schemas/pl.rng")
+    request = __get_hostnames(network.nodesWithSlivers())
+    
+    # remove nodes not in rspec
+    deleted_nodes = list(set(current).difference(request))
+
+    # add nodes from rspec
+    added_nodes = list(set(request).difference(current))
+
+    if peer:
+        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
+
+    api.plshell.AddSliceToNodes(api.plauth, slice.name, added_nodes) 
+    api.plshell.DeleteSliceFromNodes(api.plauth, slice.name, deleted_nodes)
+
+    network.updateSliceTags()
+
+    if peer:
+        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
+                                     slice.peer_id)
+
+    print network.toxml()
+
+    return True
+
 
 def get_ticket(api, xrn, rspec, origin_hrn=None):
     slice_hrn, type = urn_to_hrn(xrn)
@@ -129,32 +179,39 @@ def get_slices(api):
      
  
 def get_rspec(api, xrn=None, origin_hrn=None):
-    from sfa.plc.nodes import Nodes
-    nodes = Nodes(api, origin_hrn=origin_hrn)
-    if xrn:
-        rspec = nodes.get_rspec(xrn)
-    else:
-        nodes.refresh()
-        rspec = nodes['rspec'] 
+    hrn, type = urn_to_hrn(xrn)
+    network = Network(api)
+    if (hrn):
+        network.get_slice(api, hrn)
+        if slice:
+            network.addSlice()
 
-    return rspec
+    return network.toxml()
 
 """
-Returns the request context required by sfatables. At some point, this mechanism should be changed
-to refer to "contexts", which is the information that sfatables is requesting. But for now, we just
-return the basic information needed in a dict.
+Returns the request context required by sfatables. At some point, this
+mechanism should be changed to refer to "contexts", which is the
+information that sfatables is requesting. But for now, we just return
+the basic information needed in a dict.
 """
 def fetch_context(slice_xrn, user_xrn, contexts):
-    slice_hrn = urn_to_hrn(slice_xrn)[0]
-    user_hrn = urn_to_hrn(user_xrn)[0]
+    slice_hrn, type = urn_to_hrn(slice_xrn)
+    user_hrn, type = urn_to_hrn(user_xrn)
     base_context = {'sfa':{'user':{'hrn':user_hrn}}}
     return base_context
 
 def main():
-    r = RSpec()
-    r.parseFile(sys.argv[1])
-    rspec = r.toDict()
-    create_slice(None,'plc.princeton.tmacktestslice',rspec)
+    api = SfaAPI()
+    """
+    rspec = get_rspec(api, "plc.princeton.sapan", None)
+    #rspec = get_rspec(api, "plc.princeton.coblitz", None)
+    #rspec = get_rspec(api, "plc.pl.sirius", None)
+    print rspec
+    """
+    f = open(sys.argv[1])
+    xml = f.read()
+    f.close()
+    create_slice(api, "plc.princeton.sapan", xml)
 
 if __name__ == "__main__":
     main()
