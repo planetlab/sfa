@@ -347,6 +347,9 @@ class Network:
         return tags
     
     def __process_attributes(self, element, node=None):
+        if element is None:
+            return 
+
         # Do we need to check caller's role before update???
         tagtypes = self.getTagTypes()
         for tt in tagtypes:
