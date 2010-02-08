@@ -394,15 +394,25 @@ class Network:
         # Find slivers under node elements
         for sliver in rspec.iterfind("./network/site/node/sliver"):
             elem = sliver.getparent()
-            node = nodedict[elem.get("id")]
-            node.add_sliver()
-            self.__process_attributes(sliver, node)
+            try:
+                node = self.lookupNode(elem.get("id"))
+            except:
+                # Don't worry about nodes from other aggregates
+                pass
+            else:
+                node.add_sliver()
+                self.__process_attributes(sliver, node)
 
         # Find slivers that specify nodeid
         for sliver in rspec.iterfind("./request/sliver[@nodeid]"):
-            node = nodedict[sliver.get("nodeid")]
-            node.add_sliver()
-            self.__process_attributes(sliver, node)
+            try:
+                node = self.lookupNode(sliver.get("nodeid"))
+            except:
+                # Don't worry about nodes from other aggregates
+                pass
+            else:
+                node.add_sliver()
+                self.__process_attributes(sliver, node)
 
         return
 
