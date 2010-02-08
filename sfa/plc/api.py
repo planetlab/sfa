@@ -67,6 +67,7 @@ class SfaAPI(BaseAPI):
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
         try:
+            sys.path.append(os.path.dirname(os.path.realpath("/usr/bin/plcsh")))
             self.plshell_type = 'direct'
             import PLC.Shell
             shell = PLC.Shell.Shell(globals = globals())
