@@ -1,191 +1,213 @@
-from sfa.util.faults import *
-from sfa.util.namespace import *
-from sfa.server.registry import Registries
-from sfa.plc.nodes import *
-from sfa.plc.api import *
-from sfa.managers.vini.utils import *
+### $Id: slices.py 15842 2009-11-22 09:56:13Z anil $
+### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/slices.py $
+
+import datetime
+import time
+import traceback
 import sys
 
-"""
-Copied from create_slice_aggregate() in sfa.plc.slices
-"""
-def create_slice_vini_aggregate(api, hrn, nodes):
-    # Get the slice record
-    slice = {}
-    registries = Registries(api)
-    registry = registries[api.hrn]
-    credential = api.getCredential()
-    records = registry.resolve(credential, hrn)
-    for record in records:
-        if record['type'] in ['slice']:
-            slice = record
-    if not slice:
-        raise RecordNotFound(hrn)   
+from types import StringTypes
+from sfa.util.namespace import *
+from sfa.util.rspec import *
+from sfa.util.specdict import *
+from sfa.util.faults import *
+from sfa.util.record import SfaRecord
+from sfa.util.policy import Policy
+from sfa.util.record import *
+from sfa.util.sfaticket import SfaTicket
+from sfa.server.registry import Registries
+from sfa.util.debug import log
+from sfa.plc.slices import Slices
+import sfa.plc.peers as peers
+from sfa.managers.vini.vini_network import *
+from sfa.plc.api import SfaAPI
+from sfa.plc.slices import *
 
-    # Make sure slice exists at plc, if it doesnt add it
+def delete_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
-    slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids'])
+    slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
     if not slices:
-        parts = slicename.split("_")
-        login_base = parts[0]
-        # if site doesnt exist add it
-        sites = api.plshell.GetSites(api.plauth, [login_base])
-        if not sites:
-            authority = get_authority(hrn)
-            site_records = registry.resolve(credential, authority)
-            site_record = {}
-            if not site_records:
-                raise RecordNotFound(authority)
-            site = site_records[0]
-                
-            # add the site
-            site.pop('site_id')
-            site_id = api.plshell.AddSite(api.plauth, site)
-        else:
-            site = sites[0]
-            
-        slice_fields = {}
-        slice_keys = ['name', 'url', 'description']
-        for key in slice_keys:
-            if key in slice and slice[key]:
-                slice_fields[key] = slice[key]  
-        api.plshell.AddSlice(api.plauth, slice_fields)
-        slice = slice_fields
-        slice['node_ids'] = 0
-    else:
-        slice = slices[0]    
+        return 1
+    slice = slices[0]
 
-    # get the list of valid slice users from the registry and make 
-    # they are added to the slice 
-    researchers = record.get('researcher', [])
-    for researcher in researchers:
-        person_record = {}
-        person_records = registry.resolve(credential, researcher)
-        for record in person_records:
-            if record['type'] in ['user']:
-                person_record = record
-        if not person_record:
-            pass
-        person_dict = person_record
-        persons = api.plshell.GetPersons(api.plauth, [person_dict['email']],
-                                         ['person_id', 'key_ids'])
-
-        # Create the person record 
-        if not persons:
-            person_id=api.plshell.AddPerson(api.plauth, person_dict)
-
-            # The line below enables the user account on the remote aggregate
-            # soon after it is created.
-            # without this the user key is not transfered to the slice
-            # (as GetSlivers returns key of only enabled users),
-            # which prevents the user from login to the slice.
-            # We may do additional checks before enabling the user.
-
-            api.plshell.UpdatePerson(api.plauth, person_id, {'enabled' : True})
-            key_ids = []
-        else:
-            key_ids = persons[0]['key_ids']
-
-        api.plshell.AddPersonToSlice(api.plauth, person_dict['email'],
-                                     slicename)        
-
-        # Get this users local keys
-        keylist = api.plshell.GetKeys(api.plauth, key_ids, ['key'])
-        keys = [key['key'] for key in keylist]
-
-        # add keys that arent already there 
-        for personkey in person_dict['keys']:
-            if personkey not in keys:
-                key = {'key_type': 'ssh', 'key': personkey}
-                api.plshell.AddPersonKey(api.plauth, person_dict['email'], key)
-
-    # find out where this slice is currently running
-    nodelist = api.plshell.GetNodes(api.plauth, slice['node_ids'],
-                                    ['hostname'])
-    hostnames = [node['hostname'] for node in nodelist]
-
-    # remove nodes not in rspec
-    deleted_nodes = list(set(hostnames).difference(nodes))
-    # add nodes from rspec
-    added_nodes = list(set(nodes).difference(hostnames))
-
-    """
-    print >> sys.stderr, "Slice on nodes:"
-    for n in hostnames:
-        print >> sys.stderr, n
-    print >> sys.stderr, "Wants nodes:"
-    for n in nodes:
-        print >> sys.stderr, n
-    print >> sys.stderr, "Deleting nodes:"
-    for n in deleted_nodes:
-        print >> sys.stderr, n
-    print >> sys.stderr, "Adding nodes:"
-    for n in added_nodes:
-        print >> sys.stderr, n
-    """
-
-    api.plshell.AddSliceToNodes(api.plauth, slicename, added_nodes) 
-    api.plshell.DeleteSliceFromNodes(api.plauth, slicename, deleted_nodes)
-
+    # determine if this is a peer slice
+    peer = peers.get_peer(api, hrn)
+    if peer:
+        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
+    api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
+    if peer:
+        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
-def get_rspec(api, xrn, origin_hrn):
-    hrn = urn_to_hrn(xrn)[0]
-    topo = Topology(api)      
-    if (hrn):
-        slicename = hrn_to_pl_slicename(hrn)
-        slice = get_slice(api, slicename)
-        if slice:
-            slice.hrn = hrn
-            topo.nodeTopoFromSliceTags(slice)
-        else:
-            # call the default sfa.plc.nodes.get_rspec() method
-            return Nodes(api).get_rspec(hrn)     
-
-    return topo.toxml(hrn)
-
-
-
-"""
-Hook called via 'sfi.py create'
-"""
-def create_slice(api, xrn, xml):
-    hrn = urn_to_hrn(xrn)[0]
-    topo = Topology(api)
-    topo.nodeTopoFromRSpec(xml)
-
-    # Check request against current allocations
-    topo.verifyNodeTopo(hrn, topo)
-    
-    nodes = topo.nodesInTopo()
+def __get_hostnames(nodes):
     hostnames = []
     for node in nodes:
         hostnames.append(node.hostname)
-    create_slice_vini_aggregate(api, hrn, hostnames)
+    return hostnames
+    
+def create_slice(api, xrn, xml):
+    hrn, type = urn_to_hrn(xrn)
+    peer = None
 
-    slicename = hrn_to_pl_slicename(hrn)
-    slice = get_slice(api, slicename)
-    if slice:
-        topo.updateSliceTags(slice)    
+    """
+    Verify HRN and initialize the slice record in PLC if necessary.
+    """
+    slices = Slices(api)
+    peer = slices.get_peer(hrn)
+    sfa_peer = slices.get_sfa_peer(hrn)
+    registries = Registries(api)
+    registry = registries[api.hrn]
+    credential = api.getCredential()
+    site_id, remote_site_id = slices.verify_site(registry, credential, hrn, 
+                                                 peer, sfa_peer)
+    slice = slices.verify_slice(registry, credential, hrn, site_id, 
+                                remote_site_id, peer, sfa_peer)
 
-    # print topo.toxml(hrn)
+    network = ViniNetwork(api)
+
+    slice = network.get_slice(api, hrn)
+    current = __get_hostnames(slice.get_nodes())
+
+    network.addRSpec(xml, "/var/www/html/schemas/vini.rng")
+    #network.addRSpec(xml, "/root/SVN/sfa/trunk/sfa/managers/vini/vini.rng")
+    request = __get_hostnames(network.nodesWithSlivers())
+    
+    # remove nodes not in rspec
+    deleted_nodes = list(set(current).difference(request))
+
+    # add nodes from rspec
+    added_nodes = list(set(request).difference(current))
+
+    if peer:
+        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
+
+    api.plshell.AddSliceToNodes(api.plauth, slice.name, added_nodes) 
+    api.plshell.DeleteSliceFromNodes(api.plauth, slice.name, deleted_nodes)
+
+    network.updateSliceTags()
+
+    if peer:
+        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
+                                     slice.peer_id)
+
+    print network.toxml()
 
     return True
 
+
+def get_ticket(api, xrn, rspec, origin_hrn=None):
+    slice_hrn, type = urn_to_hrn(xrn)
+    # the the slice record
+    registries = Registries(api)
+    registry = registries[api.hrn]
+    credential = api.getCredential()
+    records = registry.resolve(credential, xrn)
+    
+    # make sure we get a local slice record
+    record = None  
+    for tmp_record in records:
+        if tmp_record['type'] == 'slice' and \
+           not tmp_record['peer_authority']:
+            record = SliceRecord(dict=tmp_record)
+    if not record:
+        raise RecordNotFound(slice_hrn)
+
+    # get sliver info
+    slivers = Slices(api).get_slivers(slice_hrn)
+    if not slivers:
+        raise SliverDoesNotExist(slice_hrn)
+    
+    # get initscripts
+    initscripts = []
+    data = {
+        'timestamp': int(time.time()),
+        'initscripts': initscripts,
+        'slivers': slivers
+    }
+
+    # create the ticket
+    object_gid = record.get_gid_object()
+    new_ticket = SfaTicket(subject = object_gid.get_subject())
+    new_ticket.set_gid_caller(api.auth.client_gid)
+    new_ticket.set_gid_object(object_gid)
+    new_ticket.set_issuer(key=api.key, subject=api.hrn)
+    new_ticket.set_pubkey(object_gid.get_pubkey())
+    new_ticket.set_attributes(data)
+    new_ticket.set_rspec(rspec)
+    #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
+    new_ticket.encode()
+    new_ticket.sign()
+    
+    return new_ticket.save_to_string(save_parents=True)
+
+def start_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
+    slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
+    if not slices:
+        raise RecordNotFound(hrn)
+    slice_id = slices[0]
+    attributes = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
+    attribute_id = attreibutes[0]['slice_attribute_id']
+    api.plshell.UpdateSliceTag(api.plauth, attribute_id, "1" )
+
+    return 1
+ 
+def stop_slice(api, xrn):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
+    slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
+    if not slices:
+        raise RecordNotFound(hrn)
+    slice_id = slices[0]['slice_id']
+    attributes = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
+    attribute_id = attributes[0]['slice_attribute_id']
+    api.plshell.UpdateSliceTag(api.plauth, attribute_id, "0")
+    return 1
+
+def reset_slice(api, xrn):
+    # XX not implemented at this interface
+    return 1
+
+def get_slices(api):
+    # XX just import the legacy module and excute that until
+    # we transition the code to this module
+    from sfa.plc.slices import Slices
+    slices = Slices(api)
+    slices.refresh()
+    return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
+     
+ 
+def get_rspec(api, xrn=None, origin_hrn=None):
+    hrn, type = urn_to_hrn(xrn)
+    network = ViniNetwork(api)
+    if (hrn):
+        network.get_slice(api, hrn)
+        if slice:
+            network.addSlice()
+
+    return network.toxml()
+
 """
-Returns the request context required by sfatables. At some point, this mechanism should be changed
-to refer to "contexts", which is the information that sfatables is requesting. But for now, we just
-return the basic information needed in a dict.
+Returns the request context required by sfatables. At some point, this
+mechanism should be changed to refer to "contexts", which is the
+information that sfatables is requesting. But for now, we just return
+the basic information needed in a dict.
 """
-def fetch_context(slice_hrn, user_hrn, contexts):
-    base_context = {'sfa':{'user':{'hrn':user_hrn},
-                           'slice':{'hrn':slice_hrn}}}
+def fetch_context(slice_xrn, user_xrn, contexts):
+    slice_hrn, type = urn_to_hrn(slice_xrn)
+    user_hrn, type = urn_to_hrn(user_xrn)
+    base_context = {'sfa':{'user':{'hrn':user_hrn}}}
     return base_context
 
 def main():
     api = SfaAPI()
-    #rspec = get_rspec(api, "plc.princeton.iias", None)
-    #print rspec
+    """
+    #rspec = get_rspec(api, None, None)
+    rspec = get_rspec(api, "plc.princeton.iias", None)
+    print rspec
+    """
     f = open(sys.argv[1])
     xml = f.read()
     f.close()
