@@ -198,7 +198,7 @@ the basic information needed in a dict.
 def fetch_context(slice_xrn, user_xrn, contexts):
     slice_hrn, type = urn_to_hrn(slice_xrn)
     user_hrn, type = urn_to_hrn(user_xrn)
-    base_context = {'sfa':{'user':{'hrn':user_hrn}}}
+    base_context = {'sfa':{'user':{'hrn':user_hrn}, 'slice':{'hrn':slice_hrn}}}
     return base_context
 
 def main():
