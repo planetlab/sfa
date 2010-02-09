@@ -146,8 +146,9 @@ class Slice:
         return n
   
     # Add a new slice tag   
-    def add_tag(self, tagname, value, node = None):
-        record = {'slice_tag_id':None, 'slice_id':self.id, 'tagname':tagname, 'value':value}
+    def add_tag(self, tagname, value, node = None, category = 'slice/rspec'):
+        record = {'slice_tag_id':None, 'slice_id':self.id, 'tagname':tagname, 'value':value, 
+                  'category':category}
         if node:
             record['node_id'] = node.id
         else:
@@ -157,6 +158,7 @@ class Slice:
         self.slice_tag_ids.append(tag.id)
         tag.changed = True       
         tag.updated = True
+        tag.writable = True
         return tag
     
     # Update a slice tag if it exists, else add it             
@@ -170,6 +172,8 @@ class Slice:
         else:
             tag = self.add_tag(tagname, value, node)
         tag.updated = True
+        tag.writable = True
+        return tag
             
     def update_multi_tag(self, tagname, value, node = None):
         tags = self.get_multi_tag(tagname, node)
@@ -180,20 +184,23 @@ class Slice:
         else:
             tag = self.add_tag(tagname, value, node)
         tag.updated = True
+        tag.writable = True
+        return tag
             
     def tags_to_xml(self, xml, node = None):
         tagtypes = self.network.getTagTypes()
         for tt in tagtypes:
-            if tt.multi:
-                tags = self.get_multi_tag(tt.tagname, node)
-                for tag in tags:
-                    if not tag.deleted:  ### Debugging
-                        xml << (tag.tagname, tag.value)
-            else:
-                tag = self.get_tag(tt.tagname, node)
-                if tag:
-                    if not tag.deleted:   ### Debugging
-                        xml << (tag.tagname, tag.value)
+            if tt.in_rspec:
+                if tt.multi:
+                    tags = self.get_multi_tag(tt.tagname, node)
+                    for tag in tags:
+                        if not tag.deleted:  ### Debugging
+                            xml << (tag.tagname, tag.value)
+                else:
+                    tag = self.get_tag(tt.tagname, node)
+                    if tag:
+                        if not tag.deleted:   ### Debugging
+                            xml << (tag.tagname, tag.value)
 
     def toxml(self, xml):
         with xml.sliver_defaults:
@@ -212,16 +219,23 @@ class Slicetag:
         self.tagname = tag['tagname']
         self.value = tag['value']
         self.node_id = tag['node_id']
+        self.category = tag['category']
         self.updated = False
         self.changed = False
         self.deleted = False
-    
+        self.writable = False
+        if self.category == 'slice/rspec':
+            self.writable = True
+        
     # Mark a tag as deleted
     def delete(self):
         self.deleted = True
         self.updated = True
     
     def write(self, api):
+        if not self.writable:
+            return
+
         if self.changed:
             if int(self.id) > 0:
                 api.plshell.UpdateSliceTag(api.plauth, self.id, self.value)
@@ -235,11 +249,14 @@ class Slicetag:
 class TagType:
     def __init__(self, tagtype):
         self.id = tagtype['tag_type_id']
+        self.category = tagtype['category']
         self.tagname = tagtype['tagname']
+        self.multi = False
+        self.in_rspec = False
+        if self.category == 'slice/rspec':
+            self.in_rspec = True
         if self.tagname in ['codemux', 'ip_addresses', 'vsys']:
             self.multi = True
-        else:
-            self.multi = False
 
 
 """
@@ -353,13 +370,14 @@ class Network:
         # Do we need to check caller's role before update???
         tagtypes = self.getTagTypes()
         for tt in tagtypes:
-            if tt.multi:
-                for e in element.iterfind("./" + tt.tagname):
-                    self.slice.update_multi_tag(tt.tagname, e.text, node)
-            else:
-                e = element.find("./" + tt.tagname)
-                if e is not None:
-                    self.slice.update_tag(tt.tagname, e.text, node)
+            if tt.in_rspec:
+                if tt.multi:
+                    for e in element.iterfind("./" + tt.tagname):
+                        self.slice.update_multi_tag(tt.tagname, e.text, node)
+                else:
+                    e = element.find("./" + tt.tagname)
+                    if e is not None:
+                        self.slice.update_tag(tt.tagname, e.text, node)
 
     """
     Annotate the objects in the Network with information from the RSpec
@@ -502,9 +520,8 @@ class Network:
     def get_tag_types(self, api):
         tmp = []
         for tag in api.plshell.GetTagTypes(api.plauth):
-            if tag['category'] == 'slice/rspec':
-                t = tag['tagname'], TagType(tag)
-                tmp.append(t)
+            t = tag['tagname'], TagType(tag)
+            tmp.append(t)
         return dict(tmp)
     
     """

@@ -154,19 +154,20 @@ class ViniSite(Site):
 
 class ViniSlice(Slice):
     def assign_egre_key(self):
-        if not self.get_tag('egre_key'):
+        tag = self.get_tag('egre_key')
+        if not tag:
             try:
                 key = free_egre_key()
-                self.update_tag('egre_key', key)
             except:
                 # Should handle this case...
-                pass
+                raise Error("ran out of EGRE keys!")
+            tag = self.update_tag('egre_key', key)
         return
             
     def turn_on_netns(self):
         tag = self.get_tag('netns')
         if (not tag) or (tag.value != '1'):
-            self.update_tag('netns', '1')
+            tag = self.update_tag('netns', '1')
         return
    
     def turn_off_netns(self):
@@ -181,12 +182,13 @@ class ViniSlice(Slice):
             caps = tag.value.split(',')
             for cap in caps:
                 if cap == "CAP_NET_ADMIN":
-                    return
+                    newcaps = tag.value
+                    break
             else:
                 newcaps = "CAP_NET_ADMIN," + tag.value
-                self.update_tag('capabilities', newcaps)
+            self.update_tag('capabilities', newcaps)
         else:
-            self.add_tag('capabilities', 'CAP_NET_ADMIN')
+            tag = self.add_tag('capabilities', 'CAP_NET_ADMIN')
         return
     
     def remove_cap_net_admin(self):
@@ -203,23 +205,6 @@ class ViniSlice(Slice):
             else:
                 tag.delete()
         return
-
-    # Update the vsys/setup-link and vsys/setup-nat slice tags.
-    def add_vsys_tags(self):
-        link = nat = False
-        for tag in self.network.getSliceTags():
-            if tag.tagname == 'vsys':
-                if tag.value == 'setup-link':
-                    link = True
-                elif tag.value == 'setup-nat':
-                    nat = True
-        if not link:
-            self.add_tag('vsys', 'setup-link')
-        if not nat:
-            self.add_tag('vsys', 'setup-nat')
-        return
-
-
 
 class Link:
     def __init__(self, end1, end2, bps = 1000 * 1000000, parent = None):
@@ -387,18 +372,23 @@ class ViniNetwork(Network):
     def updateSliceTags(self):
         slice = self.slice
 
-        slice.update_tag('vini_topo', 'manual')
+        tag = slice.update_tag('vini_topo', 'manual')
         slice.assign_egre_key()
         slice.turn_on_netns()
         slice.add_cap_net_admin()
 
-        for node in slice.get_nodes():
+        for node in self.nodesWithSlivers():
             linkdesc = []
             for link in node.links:
                 linkdesc.append(node.get_topo_rspec(link))
             if linkdesc:
                 topo_str = "%s" % linkdesc
-                slice.update_tag('topo_rspec', topo_str, node)
+                tag = slice.update_tag('topo_rspec', topo_str, node)
+
+        # Update or expire the topo_rspec tags
+        for tag in self.getSliceTags():
+            if tag.tagname in ['topo_rspec']:
+                tag.writable = True
 
         Network.updateSliceTags(self)
 
