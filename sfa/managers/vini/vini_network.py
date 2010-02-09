@@ -385,10 +385,11 @@ class ViniNetwork(Network):
                 topo_str = "%s" % linkdesc
                 tag = slice.update_tag('topo_rspec', topo_str, node, 10)
 
-        # Update or expire the topo_rspec tags
+        # Expire the un-updated topo_rspec tags
         for tag in self.getSliceTags():
             if tag.tagname in ['topo_rspec']:
-                tag.writable = True
+                if not tag.was_updated():
+                    tag.delete()
 
         Network.updateSliceTags(self)
 

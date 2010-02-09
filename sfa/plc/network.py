@@ -151,44 +151,32 @@ class Slice:
     # Add a new slice tag   
     def add_tag(self, tagname, value, node = None, role_id = 40):
         tt = self.network.lookupTagType(tagname)
-        if role_id > tt.min_role_id:
-            raise InvalidRSpec("permission denied to add '%s' tag" % tagname)
-
+        if not tt.permit_update(role_id):
+            raise InvalidRSpec("permission denied to modify '%s' tag" % tagname)
         tag = Slicetag()
         tag.initialize(tagname, value, node, self.network)
         self.network.tags[tag.id] = tag
         self.slice_tag_ids.append(tag.id)
-        tag.changed = True       
-        tag.updated = True
-        tag.writable = True
         return tag
     
     # Update a slice tag if it exists, else add it             
     def update_tag(self, tagname, value, node = None, role_id = 40):
         tag = self.get_tag(tagname, node)
-        if tag and tag.value == value:
-            value = "no change"
-        elif tag:
-            if role_id > tag.min_role_id:
-                raise InvalidRSpec("permission denied to update '%s' tag" % tagname)
-            tag.value = value
-            tag.changed = True
+        if tag:
+            if not tag.permit_update(role_id, value):
+                raise InvalidRSpec("permission denied to modify '%s' tag" % tagname)
+            tag.change(value)
         else:
             tag = self.add_tag(tagname, value, node, role_id)
-        tag.updated = True
-        tag.writable = True
         return tag
             
     def update_multi_tag(self, tagname, value, node = None, role_id = 40):
         tags = self.get_multi_tag(tagname, node)
         for tag in tags:
             if tag and tag.value == value:
-                value = "no change"
                 break
         else:
             tag = self.add_tag(tagname, value, node, role_id)
-        tag.updated = True
-        tag.writable = True
         return tag
             
     def tags_to_xml(self, xml, node = None):
@@ -198,12 +186,12 @@ class Slice:
                 if tt.multi:
                     tags = self.get_multi_tag(tt.tagname, node)
                     for tag in tags:
-                        if not tag.deleted:  ### Debugging
+                        if not tag.was_deleted():  ### Debugging
                             xml << (tag.tagname, tag.value)
                 else:
                     tag = self.get_tag(tt.tagname, node)
                     if tag:
-                        if not tag.deleted:   ### Debugging
+                        if not tag.was_deleted():   ### Debugging
                             xml << (tag.tagname, tag.value)
 
     def toxml(self, xml):
@@ -223,7 +211,7 @@ class Slicetag:
         self.node_id = tag['node_id']
         self.category = tag['category']
         self.min_role_id = tag['min_role_id']
-        self.__init_flags()
+        self.status = None
 
     # Create a new slicetag that will be written to the DB later
     def initialize(self, tagname, value, node, network):
@@ -236,32 +224,45 @@ class Slicetag:
         self.node_id = node.id
         self.category = tt.category
         self.min_role_id = tt.min_role_id
-        self.__init_flags()
+        self.status = "new"
 
-    def __init_flags(self):
-        self.updated = False
-        self.changed = False
-        self.deleted = False
-        self.writable = False
-        if self.category == 'slice/rspec':
-            self.writable = True
+    def permit_update(self, role_id, value = None):
+        if value and self.value == value:
+            return True
+        if role_id > self.min_role_id:
+            return False
+        return True
+        
+    def change(self, value):
+        if self.value != value:
+            self.value = value
+            self.status = "change"
+        else:
+            self.status = "updated"
         
     # Mark a tag as deleted
     def delete(self):
-        self.deleted = True
-        self.updated = True
+        self.status = "delete"
+
+    def was_added(self):
+        return (self.id < 0)
+
+    def was_changed(self):
+        return (self.status == "change")
+
+    def was_deleted(self):
+        return (self.status == "delete")
+
+    def was_updated(self):
+        return (self.status != None)
     
     def write(self, api):
-        if not self.writable:
-            return
-
-        if self.changed:
-            if int(self.id) > 0:
-                api.plshell.UpdateSliceTag(api.plauth, self.id, self.value)
-            else:
-                api.plshell.AddSliceTag(api.plauth, self.slice_id, 
-                                        self.tagname, self.value, self.node_id)
-        elif self.deleted and int(self.id) > 0:
+        if self.was_added():
+            api.plshell.AddSliceTag(api.plauth, self.slice_id, 
+                                    self.tagname, self.value, self.node_id)
+        elif self.was_changed():
+            api.plshell.UpdateSliceTag(api.plauth, self.id, self.value)
+        elif self.was_deleted():
             api.plshell.DeleteSliceTag(api.plauth, self.id)
 
 
@@ -278,6 +279,11 @@ class TagType:
         if self.tagname in ['codemux', 'ip_addresses', 'vsys']:
             self.multi = True
 
+    def permit_update(self, role_id):
+        if role_id > self.min_role_id:
+            return False
+        return True
+        
 
 """
 A Network is a compound object consisting of:
@@ -383,11 +389,13 @@ class Network:
             tags.append(self.tagtypes[t])
         return tags
     
+    """
+    Process the elements under <sliver_defaults> or <sliver>
+    """
     def __process_attributes(self, element, node=None):
         if element is None:
             return 
 
-        # Do we need to check caller's role before update???
         tagtypes = self.getTagTypes()
         for tt in tagtypes:
             if tt.in_rspec:
@@ -465,11 +473,14 @@ class Network:
     Write any slice tags that have been added or modified back to the DB
     """
     def updateSliceTags(self):
+        for tag in self.getSliceTags():
+            if tag.category == 'slice/rspec' and not tag.was_updated() and tag.permit_update(None, 40):
+                # The user wants to delete this tag
+                tag.delete()
+
         # Update slice tags in database
         for tag in self.getSliceTags():
             if tag.slice_id == self.slice.id:
-                if not tag.updated:
-                    tag.delete()
                 tag.write(self.api) 
 
     """
