@@ -561,7 +561,7 @@ class Network:
     def get_slice(self, api, hrn):
         slicename = hrn_to_pl_slicename(hrn)
         slice = api.plshell.GetSlices(api.plauth, [slicename])
-        if slice:
+        if len(slice):
             self.slice = Slice(self, slicename, slice[0])
             return self.slice
         else:
