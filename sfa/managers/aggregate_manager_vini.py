@@ -183,8 +183,7 @@ def get_rspec(api, xrn=None, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
     network = ViniNetwork(api)
     if (hrn):
-        network.get_slice(api, hrn)
-        if slice:
+        if network.get_slice(api, hrn):
             network.addSlice()
 
     return network.toxml()
