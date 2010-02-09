@@ -72,7 +72,9 @@ class Node:
         with xml.node(id = self.idtag):
             with xml.hostname:
                 xml << self.hostname
-            self.get_primary_iface().toxml(xml)
+            iface = self.get_primary_iface()
+            if iface:
+                iface.toxml(xml)
             if self.sliver:
                 self.sliver.toxml(xml)
     
