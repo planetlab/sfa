@@ -144,7 +144,8 @@ class Slice:
     def get_nodes(self):
         n = []
         for id in self.node_ids:
-            n.append(self.network.nodes[id])
+            if id in self.network.nodes:
+                n.append(self.network.nodes[id])
         return n
   
     # Add a new slice tag   
