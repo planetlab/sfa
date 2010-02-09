@@ -147,16 +147,15 @@ class Slice:
             if id in self.network.nodes:
                 n.append(self.network.nodes[id])
         return n
-  
+
     # Add a new slice tag   
-    def add_tag(self, tagname, value, node = None, category = 'slice/rspec'):
-        record = {'slice_tag_id':None, 'slice_id':self.id, 'tagname':tagname, 'value':value, 
-                  'category':category}
-        if node:
-            record['node_id'] = node.id
-        else:
-            record['node_id'] = None
-        tag = Slicetag(record)
+    def add_tag(self, tagname, value, node = None, role_id = 40):
+        tt = self.network.lookupTagType(tagname)
+        if role_id > tt.min_role_id:
+            raise InvalidRSpec("permission denied to add '%s' tag" % tagname)
+
+        tag = Slicetag()
+        tag.initialize(tagname, value, node, self.network)
         self.network.tags[tag.id] = tag
         self.slice_tag_ids.append(tag.id)
         tag.changed = True       
@@ -165,27 +164,29 @@ class Slice:
         return tag
     
     # Update a slice tag if it exists, else add it             
-    def update_tag(self, tagname, value, node = None):
+    def update_tag(self, tagname, value, node = None, role_id = 40):
         tag = self.get_tag(tagname, node)
         if tag and tag.value == value:
             value = "no change"
         elif tag:
+            if role_id > tag.min_role_id:
+                raise InvalidRSpec("permission denied to update '%s' tag" % tagname)
             tag.value = value
             tag.changed = True
         else:
-            tag = self.add_tag(tagname, value, node)
+            tag = self.add_tag(tagname, value, node, role_id)
         tag.updated = True
         tag.writable = True
         return tag
             
-    def update_multi_tag(self, tagname, value, node = None):
+    def update_multi_tag(self, tagname, value, node = None, role_id = 40):
         tags = self.get_multi_tag(tagname, node)
         for tag in tags:
             if tag and tag.value == value:
                 value = "no change"
                 break
         else:
-            tag = self.add_tag(tagname, value, node)
+            tag = self.add_tag(tagname, value, node, role_id)
         tag.updated = True
         tag.writable = True
         return tag
@@ -212,17 +213,32 @@ class Slice:
 
 class Slicetag:
     newid = -1 
-    def __init__(self, tag):
+    def __init__(self, tag = None):
+        if not tag:
+            return
         self.id = tag['slice_tag_id']
-        if not self.id:
-            # Make one up for the time being...
-            self.id = Slicetag.newid
-            Slicetag.newid -= 1
         self.slice_id = tag['slice_id']
         self.tagname = tag['tagname']
         self.value = tag['value']
         self.node_id = tag['node_id']
         self.category = tag['category']
+        self.min_role_id = tag['min_role_id']
+        self.__init_flags()
+
+    # Create a new slicetag that will be written to the DB later
+    def initialize(self, tagname, value, node, network):
+        tt = network.lookupTagType(tagname)
+        self.id = Slicetag.newid
+        Slicetag.newid -=1
+        self.slice_id = network.slice.id
+        self.tagname = tagname
+        self.value = value
+        self.node_id = node.id
+        self.category = tt.category
+        self.min_role_id = tt.min_role_id
+        self.__init_flags()
+
+    def __init_flags(self):
         self.updated = False
         self.changed = False
         self.deleted = False
@@ -254,6 +270,7 @@ class TagType:
         self.id = tagtype['tag_type_id']
         self.category = tagtype['category']
         self.tagname = tagtype['tagname']
+        self.min_role_id = tagtype['min_role_id']
         self.multi = False
         self.in_rspec = False
         if self.category == 'slice/rspec':
@@ -355,7 +372,7 @@ class Network:
     def lookupTagType(self, name):
         val = None
         try:
-            val = self.tagstypes[name]
+            val = self.tagtypes[name]
         except:
             raise InvalidRSpec("tag %s not found" % name)
         return val
