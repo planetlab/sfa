@@ -32,8 +32,9 @@ def get_credential(api, xrn, type, is_self=False):
     # verify_cancreate_credential requires that the member lists
     # (researchers, pis, etc) be filled in
     api.fill_record_info(record)
-    if not record['enabled']:
-        raise AccountNotEnabled(": PlanetLab account %s is not enabled. Please contact your site PI" %(record['email']))
+    if record['type']=='user':
+       if not record['enabled']:
+          raise AccountNotEnabled(": PlanetLab account %s is not enabled. Please contact your site PI" %(record['email']))
 
     # get the callers gid
     # if this is a self cred the record's gid is the caller's gid
