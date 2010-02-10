@@ -372,7 +372,7 @@ class ViniNetwork(Network):
     def updateSliceTags(self):
         slice = self.slice
 
-        tag = slice.update_tag('vini_topo', 'manual', 10)
+        tag = slice.update_tag('vini_topo', 'manual', None, 10)
         slice.assign_egre_key()
         slice.turn_on_netns()
         slice.add_cap_net_admin()

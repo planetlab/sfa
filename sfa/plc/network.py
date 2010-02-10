@@ -221,7 +221,10 @@ class Slicetag:
         self.slice_id = network.slice.id
         self.tagname = tagname
         self.value = value
-        self.node_id = node.id
+        if node:
+            self.node_id = node.id
+        else:
+            self.node_id = None
         self.category = tt.category
         self.min_role_id = tt.min_role_id
         self.status = "new"
