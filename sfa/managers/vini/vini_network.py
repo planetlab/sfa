@@ -157,10 +157,9 @@ class ViniSlice(Slice):
         tag = self.get_tag('egre_key')
         if not tag:
             try:
-                key = free_egre_key()
+                key = self.network.free_egre_key()
             except:
-                # Should handle this case...
-                raise Error("ran out of EGRE keys!")
+                raise InvalidRSpec("ran out of EGRE keys!")
             tag = self.update_tag('egre_key', key, None, 10)
         return
             
@@ -392,6 +391,24 @@ class ViniNetwork(Network):
                     tag.delete()
 
         Network.updateSliceTags(self)
+
+    """
+    Find a free EGRE key
+    """
+    def free_egre_key(self):
+        used = set()
+        for tag in self.getSliceTags():
+            if tag.tagname == 'egre_key':
+                used.add(int(tag.value))
+                
+        for i in range(1, 256):
+            if i not in used:
+                key = i
+                break
+        else:
+            raise KeyError("No more EGRE keys available")
+        
+        return str(key)
 
     """
     Produce XML directly from the topology specification.
