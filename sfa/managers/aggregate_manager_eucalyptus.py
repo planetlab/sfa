@@ -88,7 +88,7 @@ def init_server():
     configParser.read(['/etc/sfa/eucalyptus_aggregate.conf', 'eucalyptus_aggregate.conf'])
     if len(configParser.sections()) < 1:
         print >>sys.stderr, 'No cloud defined in the config file'
-        raise 'Cannot find cloud definition in configuration file.'
+        raise Exception('Cannot find cloud definition in configuration file.')
 
     # Only read the first section.
     cloudSec = configParser.sections()[0]
@@ -173,7 +173,7 @@ class EucaRSpecBuilder(object):
     # @param cloud A dictionary containing data about a 
     #              cloud (ex. clusters, ip)
     def __init__(self, cloud):
-        self.eucaRSpec = XMLBuilder()
+        self.eucaRSpec = XMLBuilder(format = True, tab_step = "  ")
         self.cloudInfo = cloud
 
     ##
@@ -379,7 +379,7 @@ def create_slice(api, xrn, xml):
     if not rspecValidator(rspecXML):
         error = rspecValidator.error_log.last_error
         message = '%s (line %s)' % (error.message, error.line) 
-        raise Exception(message)
+        raise InvalidRSpec(message)
 
     # Process the RSpec
     requests = rspecXML.findall('.//request')
