@@ -36,13 +36,23 @@ vm_type = element vm_type {
    cores,
    memory,
    disk_space,
-   request?
+   request?,
+   euca_instances?
 }
 request = element request {
    instances,
    kernel_image,
    ramdisk,
    disk_image,
+   keypair
+}
+euca_instances = element euca_instances {
+   euca_instance+
+}
+euca_instance = element euca_instance {
+   attribute id { xsd:ID },
+   state,
+   public_dns,
    keypair
 }
 credential = element credential { text }
@@ -55,6 +65,7 @@ location = element location { text }
 free_slots = element free_slots { text }
 max_instances = element max_instances { text }
 cores = element cores { text }
+public_dns = element public_dns { text }
 memory = element memory {
    attribute unit { xsd:NMTOKEN },
    text

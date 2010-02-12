@@ -86,6 +86,9 @@
       <optional>
         <ref name="request"/>
       </optional>
+      <optional>
+        <ref name="euca_instances"/>
+      </optional>
     </element>
   </define>
   <define name="request">
@@ -94,6 +97,23 @@
       <ref name="kernel_image"/>
       <ref name="ramdisk"/>
       <ref name="disk_image"/>
+      <ref name="keypair"/>
+    </element>
+  </define>
+  <define name="euca_instances">
+    <element name="euca_instances">
+      <oneOrMore>
+        <ref name="euca_instance"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="euca_instance">
+    <element name="euca_instance">
+      <attribute name="id">
+        <data type="ID"/>
+      </attribute>
+      <ref name="state"/>
+      <ref name="public_dns"/>
       <ref name="keypair"/>
     </element>
   </define>
@@ -144,6 +164,11 @@
   </define>
   <define name="cores">
     <element name="cores">
+      <text/>
+    </element>
+  </define>
+  <define name="public_dns">
+    <element name="public_dns">
       <text/>
     </element>
   </define>

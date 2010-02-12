@@ -209,7 +209,9 @@ class EucaRSpecBuilder(object):
     # @param clusters Clusters information.
     #
     def __clustersXML(self, clusters):
+        cloud = self.cloudInfo
         xml = self.eucaRSpec
+
         for cluster in clusters:
             instances = cluster['instances']
             with xml.cluster(id=cluster['name']):
@@ -230,7 +232,17 @@ class EucaRSpecBuilder(object):
                                 xml << str(inst[5])
                             if inst[0] == 'm1.small':
                                 self.__requestXML(1, 'emi-88760F45', 'eki-F26610C6', 'cortex')
-
+                            if 'instances' in cloud and inst[0] in cloud['instances']:
+                                existingEucaInstances = cloud['instances'][inst[0]]
+                                with xml.euca_instances:
+                                    for eucaInst in existingEucaInstances:
+                                        with xml.euca_instance(id=eucaInst['id']):
+                                            with xml.state:
+                                                xml << eucaInst['state']
+                                            with xml.public_dns:
+                                                xml << eucaInst['public_dns']
+                                            with xml.keypair:
+                                                xml << eucaInst['key']
 
     ##
     # Creates the Images stanza.
@@ -345,6 +357,38 @@ def get_rspec(api, xrn, origin_hrn):
         # Key Pairs
         keyPairs = conn.get_all_key_pairs()
         cloud['keypairs'] = keyPairs
+
+        if hrn:
+            instanceId = []
+            instances  = []
+
+            # Get the instances that belong to the given slice from sqlite3
+            # XXX use getOne() in production because the slice's hrn is supposed
+            # to be unique. For testing, uniqueness is turned off in the db.
+            theSlice = list(Slice.select(Slice.q.slice_hrn == hrn))[-1]
+            for instance in theSlice.instances:
+                instanceId.append(instance.instance_id)
+
+            # Get the information about those instances using their ids.
+            reservations = conn.get_all_instances(instanceId)
+            for reservation in reservations:
+                for instance in reservation.instances:
+                    instances.append(instance)
+
+            # Construct a dictory for the EucaRSpecBuilder
+            instancesDict = {}
+            for instance in instances:
+                instList = instancesDict.setdefault(instance.instance_type, [])
+                instInfoDict = {} 
+
+                instInfoDict['id'] = instance.id
+                instInfoDict['public_dns'] = instance.public_dns_name
+                instInfoDict['state'] = instance.state
+                instInfoDict['key'] = instance.key_name
+
+                instList.append(instInfoDict)
+            cloud['instances'] = instancesDict
+
     except EC2ResponseError, ec2RespErr:
         errTree = ET.fromstring(ec2RespErr.body)
         errMsgE = errTree.find('.//Message')
@@ -413,13 +457,13 @@ def create_slice(api, xrn, xml):
 def main():
     init_server()
 
-    theRSpec = None
-    with open(sys.argv[1]) as xml:
-        theRSpec = xml.read()
-    create_slice(None, 'planetcloud.pc.test', theRSpec)
+    #theRSpec = None
+    #with open(sys.argv[1]) as xml:
+        #theRSpec = xml.read()
+    #create_slice(None, 'planetcloud.pc.test', theRSpec)
 
-    #rspec = get_rspec('euca', 'hrn:euca', 'oring_hrn')
-    #print rspec
+    rspec = get_rspec('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy')
+    print rspec
 
 if __name__ == "__main__":
     main()
