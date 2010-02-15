@@ -110,6 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files cm
 /etc/init.d/sfa_cm
+%{_bindir}/sfa_component_setup.py*
 # cron jobs here 
 
 %files plc
