@@ -40,8 +40,8 @@ Requires: python-lxml
 # it'll be installed by "devel.pkgs". we have the epel repository so
 # python-uuid will be provided. but we can test for the python
 # version.
-%define has_py24 %(`python -c "import sys;sys.exit(sys.version_info[0:2] == (2,4))" 2> /dev/null; echo $?`)
-%if has_py24
+%define has_py24 %( python -c "import sys;sys.exit(sys.version_info[0:2] == (2,4))" 2> /dev/null; echo $? )
+%if %has_py24
 Requires: python-uuid
 %endif
 
@@ -111,7 +111,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/wsdl/*.wsdl
 
 %files cm
-/etc/init.d/sfa_cm
+/etc/init.d/sfa-cm
 %{_bindir}/sfa_component_setup.py*
 # cron jobs here 
 
@@ -143,13 +143,13 @@ rm -rf $RPM_BUILD_ROOT
 [ -f %{_sysconfdir}/init.d/sfa ] && service sfa stop ||:
 
 %pre cm
-[ -f %{_sysconfdir}/init.d/sfacm ] && service sfacm stop ||:
+[ -f %{_sysconfdir}/init.d/sfa-cm ] && service sfa-cm stop ||:
 
 %post plc
 chkconfig --add sfa
 
 %post cm
-chkconfig --add sfacm
+chkconfig --add sfa-cm
 %changelog
 * Thu Jan 21 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-10
 - This tag is quite same as the previous one (sfa-0.9-9) except that the vini and max aggregate managers are also updated for urn support.  Other features are:
