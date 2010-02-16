@@ -40,8 +40,6 @@ def delete_slice(api, xrn, origin_hrn=None):
 
 def create_slice(api, xrn, rspec, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
-    aggs = Aggregates(api)
-    cred = api.getCredential()
 
     # Validate the RSpec against PlanetLab's schema
     schema = "/var/www/html/schemas/pl.rng"
