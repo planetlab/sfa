@@ -184,7 +184,9 @@ def get_gids(registry=None, verbose=False):
     # get a list of slices on this node
     from sfa.plc.api import ComponentAPI
     api = ComponentAPI()
-    slicenames = api.nodemanager.GetXIDs().keys()   
+    xids_tuple = api.nodemanager.GetXIDs()
+    slices = eval(xids_tuple[1])
+    slicenames = slices.keys()   
     hrns = [slicename_to_hrn(interface_hrn, slicename) for slicename in slicenames]
         
 
