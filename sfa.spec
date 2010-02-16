@@ -32,6 +32,8 @@ Requires: python
 Requires: m2crypto
 Requires: libxslt-python
 Requires: python-ZSI
+# xmlbuilder depends on  lxml
+Requires: python-lxml
 
 # python 2.5 has uuid module added, for python 2.4 we still need it.
 # we can't really check for if we can load uuid as a python module,
