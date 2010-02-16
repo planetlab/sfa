@@ -43,7 +43,22 @@ def create_slice(api, xrn, rspec, origin_hrn=None):
     aggs = Aggregates(api)
     cred = api.getCredential()
 
-    # Validate the RSpec here against PlanetLab's schema
+    # Validate the RSpec against PlanetLab's schema
+    schema = "/var/www/html/schemas/pl.rng"
+    if schema:
+        try:
+            tree = etree.parse(StringIO(rspec))
+        except etree.XMLSyntaxError:
+            message = str(sys.exc_info()[1])
+            raise InvalidRSpec(message)
+
+        relaxng_doc = etree.parse(schema)
+        relaxng = etree.RelaxNG(relaxng_doc)
+        
+        if not relaxng(tree):
+            error = relaxng.error_log.last_error
+            message = "%s (line %s)" % (error.message, error.line)
+            raise InvalidRSpec(message)
 
     aggs = Aggregates(api)
     cred = api.getCredential()                                                 
