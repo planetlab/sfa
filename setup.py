@@ -48,7 +48,7 @@ data_files = [('/etc/sfa/', [ 'config/aggregates.xml',
                               'config/sfi_config']),
               ('/etc/sfatables/matches/', glob('sfatables/matches/*.xml')),
               ('/etc/sfatables/targets/', glob('sfatables/targets/*.xml')),
-              ('/etc/init.d/', ['sfa/init.d/sfa', 'sfa/init.d/sfa_cm'])]
+              ('/etc/init.d/', ['sfa/init.d/sfa', 'sfa/init.d/sfa-cm'])]
 
 # add sfatables processors as data_files
 processor_files = [f for f in glob('sfatables/processors/*') if os.path.isfile(f)]
@@ -59,7 +59,7 @@ for d in processor_subdirs:
     d_files = [f for f in glob(d + '/*') if os.path.isfile(f)]
     data_files.append((etc_dir, processor_files))
 
-initscripts = [ '/etc/init.d/sfa', '/etc/init.d/sfa_cm' ]
+initscripts = [ '/etc/init.d/sfa', '/etc/init.d/sfa-cm' ]
 
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
