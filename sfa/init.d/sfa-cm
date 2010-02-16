@@ -16,12 +16,20 @@
 # source function library
 . /etc/init.d/functions
 
+init_key() {
+    # if key doesnt exist use sfa_componenet_setup to get it  
+    if [ ! -f /var/lib/sfa/server.key ]; then
+        /usr/bin/sfa_component_setup.py -k
+    fi
+}
 
 start() {
         echo -n $"Starting SFA:  "
 
         if [ "$SFA_CM_ENABLED" ]; then
             echo "Component Mgr"
+            # make sure server key (nodes private key) exists first
+            init_key
             /usr/bin/sfa-server.py -c -d $OPTIONS
         fi
 
