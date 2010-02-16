@@ -105,6 +105,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 # sfa and sfatables depend each other.
+%{_bindir}/sfa-server.py*
 /etc/sfatables/*
 %{python_sitelib}/*
 /usr/bin/keyconvert
@@ -125,7 +126,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sfa-import-plc.py*
 %{_bindir}/sfa-clean-peer-records.py*
 %{_bindir}/sfa-nuke-plc.py*
-%{_bindir}/sfa-server.py*
 %{_bindir}/gen-sfa-cm-config.py*
 
 %files client
