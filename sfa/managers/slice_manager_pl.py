@@ -190,23 +190,26 @@ def get_rspec(api, xrn=None, origin_hrn=None):
             try:
                 # get the rspec from the aggregate
                 agg_rspec = aggs[agg].get_resources(cred, xrn, origin_hrn)
-
-                tree = etree.parse(StringIO(agg_rspec))
-                root = tree.getroot()
-                if root.get("type") in ["Planetlab", "VINI"]:
-                    # Validate the aggregate's RSpec?
-
-                    if rspec == None:
-                        rspec = root
-                    else:
-                        for network in root.iterfind("./network"):
-                            rspec.append(deepcopy(network))
             except:
                 # XX print out to some error log
                 print >> log, "Error getting resources at aggregate %s" % agg
                 traceback.print_exc(log)
                 print >> log, "%s" % (traceback.format_exc())
 
+                
+            try:
+                tree = etree.parse(StringIO(agg_rspec))
+            except etree.XMLSyntaxError:
+                message = agg + ": " + str(sys.exc_info()[1])
+                raise InvalidRSpec(message)
+
+            root = tree.getroot()
+            if root.get("type") in ["Planetlab", "VINI"]:
+                if rspec == None:
+                    rspec = root
+                else:
+                    for network in root.iterfind("./network"):
+                        rspec.append(deepcopy(network))
 
     return etree.tostring(rspec, xml_declaration=True, pretty_print=True)
 
