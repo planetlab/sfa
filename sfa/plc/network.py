@@ -492,11 +492,10 @@ class Network:
     def toxml(self):
         xml = XMLBuilder(format = True, tab_step = "  ")
         with xml.RSpec(type=self.type):
-            name = "Public_" + self.type
             if self.slice:
-                element = xml.network(name=name, slice=self.slice.hrn)
+                element = xml.network(name=self.api.hrn, slice=self.slice.hrn)
             else:
-                element = xml.network(name=name)
+                element = xml.network(name=self.api.hrn)
                 
             with element:
                 if self.slice:
