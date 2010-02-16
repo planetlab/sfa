@@ -113,8 +113,8 @@ def resolve(api, xrns, type=None, origin_hrn=None):
             records.append(dict(record))
         except PlanetLabRecordDoesNotExist:
             # silently drop the ones that are missing in PL
-            print >> log, "ignoring SFA record ", record['hrn'], \
-                              " because pl record does not exist"    
+            api.logger.info("ignoring SFA record %s because pl record \
+                             does not exist" % record['hrn'])    
             table.remove(record)
 
     if not records:
