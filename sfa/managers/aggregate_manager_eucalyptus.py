@@ -410,12 +410,6 @@ def create_slice(api, xrn, xml):
         print >>sys.stderr, 'Error: Cannot create a connection to Eucalyptus'
         return False
 
-    # Get the slice from db or create one.
-    # XXX: For testing purposes, I'll just create the slice.
-    #s = Slice.select(Slice.q.slice_hrn == hrn).getOne(None)
-    #if s is None:
-    s = Slice(slice_hrn = hrn)
-
     # Validate RSpec
     schemaXML = ET.parse(EUCALYPTUS_RSPEC_SCHEMA)
     rspecValidator = ET.RelaxNG(schemaXML)
@@ -423,9 +417,31 @@ def create_slice(api, xrn, xml):
     if not rspecValidator(rspecXML):
         error = rspecValidator.error_log.last_error
         message = '%s (line %s)' % (error.message, error.line) 
-        raise InvalidRSpec(message)
+        # XXX: InvalidRSpec is new. Currently, I am not working with Trunk code.
+        #raise InvalidRSpec(message)
+        raise Exception(message)
 
-    # Process the RSpec
+    # Get the slice from db or create one.
+    s = Slice.select(Slice.q.slice_hrn == hrn).getOne(None)
+    if s is None:
+        s = Slice(slice_hrn = hrn)
+
+    # Process any changes in existing instance allocation
+    pendingRmInst = []
+    for sliceInst in s.instances:
+        pendingRmInst.append(sliceInst.instance_id)
+    existingInstGroup = rspecXML.findall('.//euca_instances')
+    for instGroup in existingInstGroup:
+        for existingInst in instGroup:
+            if existingInst.get('id') in pendingRmInst:
+                pendingRmInst.remove(existingInst.get('id'))
+    for inst in pendingRmInst:
+        print >>sys.stderr, 'Instance %s will be terminated' % inst
+        dbInst = EucaInstance.select(EucaInstance.q.instance_id == inst).getOne(None)
+        dbInst.destroySelf()
+    conn.terminate_instances(pendingRmInst)
+
+    # Process new instance requests
     requests = rspecXML.findall('.//request')
     for req in requests:
         vmTypeElement = req.getparent()
@@ -457,13 +473,13 @@ def create_slice(api, xrn, xml):
 def main():
     init_server()
 
-    #theRSpec = None
-    #with open(sys.argv[1]) as xml:
-        #theRSpec = xml.read()
-    #create_slice(None, 'planetcloud.pc.test', theRSpec)
+    theRSpec = None
+    with open(sys.argv[1]) as xml:
+        theRSpec = xml.read()
+    create_slice(None, 'planetcloud.pc.test', theRSpec)
 
-    rspec = get_rspec('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy')
-    print rspec
+    #rspec = get_rspec('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy')
+    #print rspec
 
 if __name__ == "__main__":
     main()
