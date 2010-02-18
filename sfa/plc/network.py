@@ -420,6 +420,15 @@ class Network:
             message = str(sys.exc_info()[1])
             raise InvalidRSpec(message)
 
+        # Filter out stuff that's not for us
+        rspec = tree.getroot()
+        for network in rspec.iterfind("./network"):
+            if network.get("name") != self.api.hrn:
+                rspec.remove(network)
+        for request in rspec.iterfind("./request"):
+            if request.get("name") != self.api.hrn:
+                rspec.remove(request)
+
         if schema:
             # Validate the incoming request against the RelaxNG schema
             relaxng_doc = etree.parse(schema)
@@ -430,10 +439,9 @@ class Network:
                 message = "%s (line %s)" % (error.message, error.line)
                 raise InvalidRSpec(message)
 
-        rspec = tree.getroot()
         self.rspec = rspec
 
-        defaults = rspec.find("./network/sliver_defaults")
+        defaults = rspec.find(".//sliver_defaults")
         self.__process_attributes(defaults)
 
         # Find slivers under node elements
