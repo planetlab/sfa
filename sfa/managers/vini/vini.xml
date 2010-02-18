@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<RSpec type="VINI">
-  <network name="Public_VINI">
+<RSpec type="SFA">
+  <network name="plc.vini">
     <site id="s2">
       <name>Princeton</name>
       <node id="n1">

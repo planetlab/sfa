@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<RSpec type="VINI">
-  <request>
+<RSpec type="SFA">
+  <request name="plc.vini">
     <sliver nodeid="n18"/>
     <sliver nodeid="n20"/>
     <sliver nodeid="n22"/>
