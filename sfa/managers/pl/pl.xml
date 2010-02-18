@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<RSpec type="PlanetLab">
-  <network name="Public_PlanetLab">
+<RSpec type="SFA">
+  <network name="plc">
     <site id="s10242">
       <name>HU Berlin - IWI</name>
       <node id="n10855">
