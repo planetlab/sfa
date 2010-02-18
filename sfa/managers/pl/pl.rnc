@@ -24,7 +24,9 @@ node = element node {
    sliver*
 }
 request = element request {
-   sliver+
+   attribute name { xsd:NMTOKEN },
+   sliver_defaults?,
+   sliver*
 }
 sliver = element sliver { 
    attribute nodeid { xsd:ID }?,
