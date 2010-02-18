@@ -105,9 +105,15 @@
   </define>
   <define name="request">
     <element name="request">
-      <oneOrMore>
+      <attribute name="name">
+        <data type="NMTOKEN"/>
+      </attribute>
+      <optional>
+        <ref name="sliver_defaults"/>
+      </optional>
+      <zeroOrMore>
         <ref name="sliver"/>
-      </oneOrMore>
+      </zeroOrMore>
       <zeroOrMore>
         <ref name="vlink"/>
       </zeroOrMore>

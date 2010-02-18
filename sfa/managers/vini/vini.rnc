@@ -32,7 +32,9 @@ link = element link {
    vlink*
 }
 request = element request {
-   sliver+,
+   attribute name { xsd:NMTOKEN },
+   sliver_defaults?,
+   sliver*,
    vlink*
 }
 sliver = element sliver { 
