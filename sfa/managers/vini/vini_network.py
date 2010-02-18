@@ -240,7 +240,7 @@ class Link:
 
 
 class ViniNetwork(Network):
-    def __init__(self, api, type = "VINI"):
+    def __init__(self, api, type = "SFA"):
         Network.__init__(self, api, type)
         self.sitelinks = []
         self.nodelinks = []

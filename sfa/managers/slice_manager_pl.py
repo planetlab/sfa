@@ -41,8 +41,10 @@ def delete_slice(api, xrn, origin_hrn=None):
 def create_slice(api, xrn, rspec, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
 
-    # Validate the RSpec against PlanetLab's schema
-    schema = "/var/www/html/schemas/pl.rng"
+    # Validate the RSpec against PlanetLab's schema --disabled for now
+    # The schema used here needs to aggregate the PL and VINI schemas
+    # schema = "/var/www/html/schemas/pl.rng"
+    schema = None
     if schema:
         try:
             tree = etree.parse(StringIO(rspec))
@@ -217,12 +219,14 @@ def get_rspec(api, xrn=None, origin_hrn=None):
                 raise InvalidRSpec(message)
 
             root = tree.getroot()
-            if root.get("type") in ["Planetlab", "VINI"]:
+            if root.get("type") in ["SFA"]:
                 if rspec == None:
                     rspec = root
                 else:
                     for network in root.iterfind("./network"):
                         rspec.append(deepcopy(network))
+                    for request in root.iterfind("./request"):
+                        rspec.append(deepcopy(request))
 
     return etree.tostring(rspec, xml_declaration=True, pretty_print=True)
 

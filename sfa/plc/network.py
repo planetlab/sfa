@@ -295,7 +295,7 @@ A Network is a compound object consisting of:
 * a dictionary mapping interface IDs to Iface objects
 """
 class Network:
-    def __init__(self, api, type = "PlanetLab"):
+    def __init__(self, api, type = "SFA"):
         self.api = api
         self.type = type
         self.sites = self.get_sites(api)
