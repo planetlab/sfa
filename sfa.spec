@@ -28,7 +28,7 @@ Summary: the SFA python libraries
 Group: Applications/System
 
 BuildRequires: make
-Requires: python
+Requires: python >= 2.5
 Requires: m2crypto
 Requires: libxslt-python
 Requires: python-ZSI
