@@ -13,17 +13,14 @@ import sys
 import traceback
 import threading
 import socket, os
-
 import SocketServer
 import BaseHTTPServer
 import SimpleHTTPServer
 import SimpleXMLRPCServer
-
 from OpenSSL import SSL
-
+from Queue import Queue
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
-
 from sfa.util.faults import *
 from sfa.plc.api import SfaAPI 
 from sfa.util.debug import log
@@ -85,51 +82,7 @@ def verify_callback(conn, x509, err, depth, preverify):
     return 0
 
 ##
-# Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
-
-class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
-    def __init__(self, server_address, HandlerClass, key_file, cert_file, logRequests=True):
-        """Secure XML-RPC server.
-
-        It it very similar to SimpleXMLRPCServer but it uses HTTPS for transporting XML data.
-        """
-        self.logRequests = logRequests
-        self.interface = None
-        self.key_file = key_file
-        self.cert_file = cert_file
-	#for compatibility with python 2.4 (centos53)
-	if sys.version_info < (2, 5):
-	   SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)
-	else:
-           SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, True, None)
-        SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
-        ctx = SSL.Context(SSL.SSLv23_METHOD)
-        ctx.use_privatekey_file(key_file)
-        ctx.use_certificate_file(cert_file)
-        ctx.set_verify(SSL.VERIFY_PEER | SSL.VERIFY_FAIL_IF_NO_PEER_CERT, verify_callback)
-        ctx.set_app_data(self)
-        self.socket = SSL.Connection(ctx, socket.socket(self.address_family,
-                                                        self.socket_type))
-        self.server_bind()
-        self.server_activate()
-
-    # _dispatch
-    #
-    # Convert an exception on the server to a full stack trace and send it to
-    # the client.
-
-    def _dispatch(self, method, params):
-        try:
-            return SimpleXMLRPCServer.SimpleXMLRPCDispatcher._dispatch(self, method, params)
-        except:
-            # can't use format_exc() as it is not available in jython yet
-            # (evein in trunk).
-            type, value, tb = sys.exc_info()
-            raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
-
-##
 # taken from the web (XXX find reference). Implents HTTPS xmlrpc request handler
-
 class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
     """Secure XML-RPC request handler class.
 
@@ -182,6 +135,99 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             self.connection.shutdown() # Modified here!
 
 ##
+# Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
+class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
+    def __init__(self, server_address, HandlerClass, key_file, cert_file, logRequests=True):
+        """Secure XML-RPC server.
+
+        It it very similar to SimpleXMLRPCServer but it uses HTTPS for transporting XML data.
+        """
+        self.logRequests = logRequests
+        self.interface = None
+        self.key_file = key_file
+        self.cert_file = cert_file
+        #for compatibility with python 2.4 (centos53)
+        if sys.version_info < (2, 5):
+            SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)
+        else:
+           SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self, True, None)
+        SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
+        ctx = SSL.Context(SSL.SSLv23_METHOD)
+        ctx.use_privatekey_file(key_file)
+        ctx.use_certificate_file(cert_file)
+        ctx.set_verify(SSL.VERIFY_PEER | SSL.VERIFY_FAIL_IF_NO_PEER_CERT, verify_callback)
+        ctx.set_app_data(self)
+        self.socket = SSL.Connection(ctx, socket.socket(self.address_family,
+                                                        self.socket_type))
+        self.server_bind()
+        self.server_activate()
+
+    # _dispatch
+    #
+    # Convert an exception on the server to a full stack trace and send it to
+    # the client.
+
+    def _dispatch(self, method, params):
+        try:
+            return SimpleXMLRPCServer.SimpleXMLRPCDispatcher._dispatch(self, method, params)
+        except:
+            # can't use format_exc() as it is not available in jython yet
+            # (evein in trunk).
+            type, value, tb = sys.exc_info()
+            raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
+
+## From Active State code: http://code.activestate.com/recipes/574454/
+# This is intended as a drop-in replacement for the ThreadingMixIn class in 
+# module SocketServer of the standard lib. Instead of spawning a new thread 
+# for each request, requests are processed by of pool of reusable threads.
+class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
+    """
+    use a thread pool instead of a new thread on every request
+    """
+    numThreads = 10
+    allow_reuse_address = True  # seems to fix socket.error on server restart
+
+    def serve_forever(self):
+        """
+        Handle one request at a time until doomsday.
+        """
+        # set up the threadpool
+        self.requests = Queue(self.numThreads)
+
+        for x in range(self.numThreads):
+            t = threading.Thread(target = self.process_request_thread)
+            t.setDaemon(1)
+            t.start()
+
+        # server main loop
+        while True:
+            self.handle_request()
+            
+        self.server_close()
+
+    
+    def process_request_thread(self):
+        """
+        obtain request from queue instead of directly from server socket
+        """
+        while True:
+            SocketServer.ThreadingMixIn.process_request_thread(self, *self.requests.get())
+
+    
+    def handle_request(self):
+        """
+        simply collect requests and put them on the queue for the workers.
+        """
+        try:
+            request, client_address = self.get_request()
+        except socket.error:
+            return
+        if self.verify_request(request, client_address):
+            self.requests.put((request, client_address))
+
+class ThreadedServer(ThreadPoolMixIn, SecureXMLRPCServer):
+    pass
+##
 # Implements an HTTPS XML-RPC server. Generally it is expected that SFA
 # functions will take a credential string, which is passed to
 # decode_authentication. Decode_authentication() will verify the validity of
@@ -203,7 +249,8 @@ class SfaServer(threading.Thread):
         threading.Thread.__init__(self)
         self.key = Keypair(filename = key_file)
         self.cert = Certificate(filename = cert_file)
-        self.server = SecureXMLRPCServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
+        #self.server = SecureXMLRPCServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
+        self.server = ThreadedServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
         self.trusted_cert_list = None
         self.register_functions()
 
