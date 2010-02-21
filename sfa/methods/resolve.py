@@ -31,9 +31,9 @@ class resolve(Method):
     
     def call(self, cred, xrns, origin_hrn=None):
         user_cred = Credential(string=cred)
-	if not isinstance(xrns, types.ListType):
-	    xrns=[xrns]
-	hrns = [urn_to_hrn(xrn)[0] for xrn in xrns]
+        if not isinstance(xrns, types.ListType):
+            xrns=[xrns]
+        hrns = [urn_to_hrn(xrn)[0] for xrn in xrns]
 
         #log the call
         if not origin_hrn:
