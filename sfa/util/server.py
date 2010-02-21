@@ -184,6 +184,9 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
     """
     use a thread pool instead of a new thread on every request
     """
+    # XX TODO: Make this configurable
+    # config = Config()
+    # numThreads = config.SFA_SERVER_NUM_THREADS
     numThreads = 25
     allow_reuse_address = True  # seems to fix socket.error on server restart
 
