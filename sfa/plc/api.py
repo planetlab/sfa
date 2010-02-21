@@ -266,7 +266,7 @@ class SfaAPI(BaseAPI):
             node_list = self.plshell.GetNodes(self.plauth, node_ids)
             nodes = list_to_dict(node_list, 'node_id')
         if site_ids:
-            site_lists = self.plshell.GetSites(self.plauth, site_ids)
+            site_list = self.plshell.GetSites(self.plauth, site_ids)
             sites = list_to_dict(site_list, 'site_id')
         if slice_ids:
             slice_list = self.plshell.GetSlices(self.plauth, slice_ids)
