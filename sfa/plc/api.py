@@ -45,7 +45,6 @@ class SfaAPI(BaseAPI):
         self.SfaTable = SfaTable
         # Better just be documenting the API
         if config is None:
-            print "CONFIG IS NONE"
             return
 
         # Load configuration
