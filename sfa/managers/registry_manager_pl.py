@@ -76,6 +76,7 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     # create a dict whre key is an registry hrn and its value is a
     # hrns at that registry (determined by the known prefix tree).  
     xrn_dict = {}
+    # XX Preload this into the api module
     registries = Registries(api)
     tree = prefixTree()
     registry_hrns = registries.keys()
@@ -107,16 +108,8 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     remaining_hrns = [hrn for hrn in remaining_hrns] 
     table = SfaTable()
     local_records = table.findObjects({'hrn': remaining_hrns})
-    for record in local_records:
-        try:
-            api.fill_record_info(record)
-            records.append(dict(record))
-        except PlanetLabRecordDoesNotExist:
-            # silently drop the ones that are missing in PL
-            api.logger.info("ignoring SFA record %s because pl record \
-                             does not exist" % record['hrn'])    
-            table.remove(record)
-
+    api.fill_record_info(local_records)
+    records.extend(local_records)
     if not records:
         raise RecordNotFound(str(hrns))
 
