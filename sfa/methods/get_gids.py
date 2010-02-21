@@ -44,7 +44,7 @@ class get_gids(Method):
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         manager = __import__(manager_module, fromlist=[manager_base])
-        records = manager.resolve(self.api, xrns, None, origin_hrn=origin_hrn)
+        records = manager.resolve(self.api, xrns, None, origin_hrn=origin_hrn, full = False)
         if not records:
             raise RecordNotFound(hrns)
 
