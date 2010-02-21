@@ -380,52 +380,63 @@ class SfaAPI(BaseAPI):
 
         return records   
 
-    def fill_record_sfa_info(self, record):
-        sfa_info = {}
-        type = record['type']
+    def fill_record_sfa_info(self, records):
+        # get person ids
+        has_authority = False
+        has_slice = False
+        person_ids = []
+        for record in records:
+            if record['type'] == 'authority':
+                has_authority = True
+            person_ids.extend(record.get("person_ids", []))
+        
+        # get sfa info
         table = self.SfaTable()
-        if (type == "slice"):
-            person_ids = record.get("person_ids", [])
-            persons = table.find({'type': 'user', 'pointer': person_ids})
-            researchers = [person['hrn'] for person in persons]
-            sfa_info['researcher'] = researchers
-
-        elif (type == "authority"):
-            person_ids = record.get("person_ids", [])
-            persons = table.find({'type': 'user', 'pointer': person_ids})
-            persons_dict = {}
-            for person in persons:
-                persons_dict[person['pointer']] = person 
-            pl_persons = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'roles'])
-            pis, techs, admins = [], [], []
-            for person in pl_persons:
-                pointer = person['person_id']
-                
-                if pointer not in persons_dict:
-                    # this means there is not sfa record for this user
-                    continue    
-                hrn = persons_dict[pointer]['hrn']    
-                if 'pi' in person['roles']:
-                    pis.append(hrn)
-                if 'tech' in person['roles']:
-                    techs.append(hrn)
-                if 'admin' in person['roles']:
-                    admins.append(hrn)
+        person_list, persons = [], {}
+        pl_person_list, pl_persons = [], {}
+        person_list = table.find({'type': 'user', 'pointer': person_ids})
+        persons = list_to_dict(person_list, 'pointer')
+        if has_authority:
+            pl_person_list = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'roles'])
+            pl_persons = list_to_dict(pl_person_list, 'person_id')
             
-            sfa_info['PI'] = pis
-            sfa_info['operator'] = techs
-            sfa_info['owner'] = admins
-            # xxx TODO: OrganizationName
 
-        elif (type == "node"):
-            sfa_info['dns'] = record.get("hostname", "")
-            # xxx TODO: URI, LatLong, IP, DNS
+        # fill sfa info
+        for record in records:
+            sfa_info = {}
+            type = record['type']
+            if (type == "slice"):
+                researchers = [persons[person_id]['hrn'] for person_id in record['person_ids'] \
+                               if person_id in persons] 
+                sfa_info['researcher'] = researchers
+         
+            elif (type == "authority"):
+                pis, techs, admins = [], [], []
+                for pointer in record['person_ids']:
+                    if pointer not in persons or pointer not in pl_persons:
+                        # this means there is not sfa or pl record for this user
+                        continue   
+                    hrn = persons[pointer]['hrn'] 
+                    roles = pl_persons[pointer]['roles']   
+                    if 'pi' in roles:
+                        pis.append(hrn)
+                    if 'tech' in roles:
+                        techs.append(hrn)
+                    if 'admin' in roles:
+                        admins.append(hrn)
+            
+                    sfa_info['PI'] = pis
+                    sfa_info['operator'] = techs
+                    sfa_info['owner'] = admins
+                    # xxx TODO: OrganizationName
+            elif (type == "node"):
+                sfa_info['dns'] = record.get("hostname", "")
+                # xxx TODO: URI, LatLong, IP, DNS
     
-        elif (type == "user"):
-            sfa_info['email'] = record.get("email", "")
-            # xxx TODO: PostalAddress, Phone
-
-        record.update(sfa_info)
+            elif (type == "user"):
+                sfa_info['email'] = record.get("email", "")
+                # xxx TODO: PostalAddress, Phone
+            record.update(sfa_info)
 
     def fill_record_info(self, records):
         """
@@ -436,9 +447,7 @@ class SfaAPI(BaseAPI):
             records = [records]
 
         self.fill_record_pl_info(records)
-        for record in records:
-            self.fill_record_sfa_info(record)        
-        #self.fill_record_sfa_info(records)
+        self.fill_record_sfa_info(records)
 
     def update_membership_list(self, oldRecord, record, listName, addFunc, delFunc):
         # get a list of the HRNs tht are members of the old and new records
