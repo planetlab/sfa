@@ -121,7 +121,7 @@ class BaseAPI:
         self.cert_file = cert_file
         self.cert = Certificate(filename=self.cert_file)
         self.credential = None
-        
+        self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
 
@@ -150,6 +150,7 @@ class BaseAPI:
         """
         function = self.callable(method)
         function.source = source
+        self.source = source
         return function(*args)
 
     def handle(self, source, data):
