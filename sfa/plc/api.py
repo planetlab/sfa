@@ -403,6 +403,9 @@ class SfaAPI(BaseAPI):
 
         # fill sfa info
         for record in records:
+            # skip records with no pl info (top level authorities)
+            if record['pointer'] == -1:
+                continue 
             sfa_info = {}
             type = record['type']
             if (type == "slice"):
