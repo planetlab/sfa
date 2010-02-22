@@ -117,7 +117,6 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 
         
         except Exception, fault:
-            raise
             # This should only happen if the module is buggy
             # internal error, report as HTTP server error
             self.send_response(500)
