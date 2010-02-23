@@ -110,7 +110,9 @@ def resolve(api, xrns, type=None, origin_hrn=None, full=True):
     local_records = table.findObjects({'hrn': remaining_hrns})
     if full:
         api.fill_record_info(local_records)
-    records.extend(local_records)
+    
+    # convert local record objects to dicts
+    records.extend([dict(record) for record in local_records])
     if not records:
         raise RecordNotFound(str(hrns))
 
