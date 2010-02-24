@@ -143,8 +143,8 @@ class RecordNotFound(SfaFault):
         self.value = value
         faultString = "Record not found: %(value)s" % locals()
         SfaFault.__init__(self, 102, faultString, extra)
-    #def __str__(self):
-    #    return repr(self.value)
+    def __str__(self):
+        return repr(self.value)
 
 class UnknownSfaType(SfaFault):
     def __init__(self, value, extra = None):
