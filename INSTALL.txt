@@ -79,7 +79,6 @@ root     24970     1  0 May11 ?        00:00:00 /usr/bin/python /usr/bin/sfa-ser
 	SFI_REGISTRY='http://vplc25.inria.fr:12345/'
 	SFI_SM='http://vplc25.inria.fr:12347/' 
 
- (e) # source ~/.sfi/sfi_config 
 ------
 5) Testing:
 
