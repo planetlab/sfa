@@ -26,12 +26,6 @@ def list_to_dict(recs, key):
     keys = [rec[key] for rec in recs]
     return dict(zip(keys, recs))
 
-def handle_exception(method):
-    def wrapper(*args, **kwargs):
-        try: return method(*args, **kwargs)
-        except: raise SfaAPIError(traceback.format_exc())
-    return wrapper
-
 class SfaAPI(BaseAPI):
 
     # flat list of method names
@@ -71,27 +65,17 @@ class SfaAPI(BaseAPI):
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
 
-    @handle_exception 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
-        try:
-            sys.path.append(os.path.dirname(os.path.realpath("/usr/bin/plcsh")))
-            self.plshell_type = 'direct'
-            import PLC.Shell
-            shell = PLC.Shell.Shell(globals = globals())
-            shell.AuthCheck(self.plauth)
-            return shell
-        except ImportError:
-            self.plshell_type = 'xmlrpc' 
-            # connect via xmlrpc
-            url = self.config.SFA_PLC_URL
-            shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
-            shell.AuthCheck(self.plauth)
-            return shell
+        # connect via xmlrpc
+        self.plshell_type = 'xmlrpc' 
+        url = self.config.SFA_PLC_URL
+        shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
+        shell.AuthCheck(self.plauth)
+        return shell
     
-    @handle_exception 
     def getPLCShellVersion(self):
         # We need to figure out what version of PLCAPI we are talking to.
         # Some calls we need to make later will be different depending on
