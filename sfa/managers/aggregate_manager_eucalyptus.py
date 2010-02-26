@@ -396,6 +396,11 @@ def get_rspec(api, xrn, origin_hrn):
 
     rspec = EucaRSpecBuilder(cloud).toXML()
 
+    # Remove the instances records so next time they won't 
+    # show up.
+    if 'instances' in cloud:
+        del cloud['instances']
+
     return rspec
 
 """
