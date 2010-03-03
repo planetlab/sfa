@@ -277,6 +277,9 @@ class Slices(SimpleStorage):
         else:
             site_id = sites[0]['site_id']
             remote_site_id = sites[0]['peer_site_id']
+	    old_site = sites[0]
+	    #the site is alredy on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
+	    self.sync_site(old_site, site, peer)
 
 
         return (site_id, remote_site_id) 
@@ -338,10 +341,10 @@ class Slices(SimpleStorage):
             person_record = {}
             person_records = registry.resolve(credential, researcher)
             for record in person_records:
-                if record['type'] in ['user']:
+                if record['type'] in ['user'] and record['enabled']:
                     person_record = record
             if not person_record:
-                pass
+                return 1
             person_dict = person_record
             local_person=False
             if peer:
@@ -484,11 +487,23 @@ class Slices(SimpleStorage):
 
         return 1
 
+    def sync_site(self, old_record, new_record, peer):
+        if old_record['max_slices'] != new_record['max_slices'] or old_record['max_slivers'] != new_record['max_slivers']:
+            if peer:
+                self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'site', old_record['site_id'], peer)
+	    if old_record['max_slices'] != new_record['max_slices']:
+                self.api.plshell.UpdateSite(self.api.plauth, old_record['site_id'], {'max_slices' : new_record['max_slices']})
+	    if old_record['max_slivers'] != new_record['max_slivers']:
+		self.api.plshell.UpdateSite(self.api.plauth, old_record['site_id'], {'max_slivers' : new_record['max_slivers']})
+	    if peer:
+                self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', old_record['site_id'], peer, old_record['peer_site_id'])
+	return 1
+
     def sync_slice(self, old_record, new_record, peer):
         if old_record['expires'] != new_record['expires']:
             if peer:
                 self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', old_record['slice_id'], peer)
-                self.api.plshell.UpdateSlice(self.api.plauth, old_record['slice_id'], {'expires' : new_record['expires']})
+            self.api.plshell.UpdateSlice(self.api.plauth, old_record['slice_id'], {'expires' : new_record['expires']})
 	    if peer:
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', old_record['slice_id'], peer, old_record['peer_slice_id'])
 	return 1

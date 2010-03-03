@@ -123,8 +123,7 @@ class SfaTicket(Certificate):
             print "        ", attrname, self.get_attributes()[attrname]
 
         print "       rspec:"
-        for attrname in self.get_rspec().keys():
-            print "        ", attrname, self.get_rspec()[attrname]
+        print "        ", self.get_rspec()
 
         if self.parent and dump_parents:
            print "PARENT",

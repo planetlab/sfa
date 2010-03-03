@@ -1,16 +1,26 @@
-
-<!-- run "runtime.py vini.rspec" to apply current rule set to this file -->
-
-<RSpec>
-  <Request>
-    <LinkSpec name="foobar">
-      <endpoint>i2atla1</endpoint>
-      <endpoint>i2chic1</endpoint>
-      <kbps>1001</kbps>
-    </LinkSpec>
-    <LinkSpec name="baz">
-      <endpoint>i2hous1</endpoint>
-      <endpoint>i2newy1</endpoint>
-    </LinkSpec>
-  </Request>
+<?xml version="1.0"?>
+<RSpec type="VINI">
+  <request>
+    <sliver nodeid="n18"/>
+    <sliver nodeid="n20"/>
+    <sliver nodeid="n22"/>
+    <sliver nodeid="n26"/>
+    <sliver nodeid="n28"/>
+    <sliver nodeid="n30"/>
+    <sliver nodeid="n32"/>
+    <sliver nodeid="n34"/>
+    <sliver nodeid="n36"/>
+    <vlink endpoints="n18 n22"/>
+    <vlink endpoints="n18 n26"/>
+    <vlink endpoints="n18 n28"/>
+    <vlink endpoints="n20 n22"/>
+    <vlink endpoints="n22 n26"/>
+    <vlink endpoints="n26 n30"/>
+    <vlink endpoints="n28 n30"/>
+    <vlink endpoints="n28 n32"/>
+    <vlink endpoints="n30 n36"/>
+    <vlink endpoints="n34 n36"/>
+    <vlink endpoints="n32 n36"/>
+    <vlink endpoints="n32 n34"/>
+  </request>
 </RSpec>

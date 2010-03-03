@@ -1,70 +1,15 @@
+from __future__ import with_statement
 import re
 import socket
 from sfa.util.faults import *
-from sfa.rspecs.aggregates.vini.topology import *
+from sfa.managers.vini.topology import PhysicalLinks
+from xmlbuilder import XMLBuilder
+from lxml import etree
+import sys
+from StringIO import StringIO
 
-default_topo_xml = """
-            <LinkSpec>
-                <endpoint>i2atla1</endpoint>
-                <endpoint>i2chic1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2atla1</endpoint>
-                <endpoint>i2hous1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2atla1</endpoint>
-                <endpoint>i2wash1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2chic1</endpoint>
-                <endpoint>i2kans1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2chic1</endpoint>
-                <endpoint>i2wash1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2hous1</endpoint>
-                <endpoint>i2kans1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2hous1</endpoint>
-                <endpoint>i2losa1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2kans1</endpoint>
-                <endpoint>i2salt1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2losa1</endpoint>
-                <endpoint>i2salt1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2losa1</endpoint>
-                <endpoint>i2seat1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2newy1</endpoint>
-                <endpoint>i2wash1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>
-            <LinkSpec>
-                <endpoint>i2salt1</endpoint>
-                <endpoint>i2seat1</endpoint>
-                <kbps>1000</kbps>
-            </LinkSpec>"""
-      
+VINI_RELAXNG_SCHEMA = "/var/www/html/schemas/vini.rng"
+
 # Taken from bwlimit.py
 #
 # See tc_util.c and http://physics.nist.gov/cuu/Units/binary.html. Be
@@ -129,12 +74,14 @@ def format_tc_rate(rate):
 class Node:
     def __init__(self, node, bps = 1000 * 1000000):
         self.id = node['node_id']
+        self.idtag = "n%s" % self.id
         self.hostname = node['hostname']
-        self.shortname = self.hostname.replace('.vini-veritas.net', '')
+        self.name = self.shortname = self.hostname.replace('.vini-veritas.net', '')
         self.site_id = node['site_id']
         self.ipaddr = socket.gethostbyname(self.hostname)
         self.bps = bps
         self.links = set()
+        self.sliver = False
 
     def get_link_id(self, remote):
         if self.id < remote.id:
@@ -200,21 +147,58 @@ class Node:
         if len(sl):
             return sl.pop()
         return None
+
+    def add_sliver(self):
+        self.sliver = True
+
+    def toxml(self, xml, hrn):
+        if not self.tag:
+            return
+        with xml.node(id = self.idtag):
+            with xml.hostname:
+                xml << self.hostname
+            with xml.kbps:
+                xml << str(int(self.bps/1000))
+            if self.sliver:
+                with xml.sliver:
+                    pass
     
 
 class Link:
-    def __init__(self, end1, end2, bps = 1000 * 1000000):
+    def __init__(self, end1, end2, bps = 1000 * 1000000, parent = None):
         self.end1 = end1
         self.end2 = end2
         self.bps = bps
-        
+        self.parent = parent
+        self.children = []
+
         end1.add_link(self)
         end2.add_link(self)
         
+        if self.parent:
+            self.parent.children.append(self)
+            
+    def toxml(self, xml):
+        end_ids = "%s %s" % (self.end1.idtag, self.end2.idtag)
+
+        if self.parent:
+            element = xml.vlink(endpoints=end_ids)
+        else:
+            element = xml.link(endpoints=end_ids)
+
+        with element:
+            with xml.description:
+                xml << "%s -- %s" % (self.end1.name, self.end2.name)
+            with xml.kbps:
+                xml << str(int(self.bps/1000))
+            for child in self.children:
+                child.toxml(xml)
         
+
 class Site:
     def __init__(self, site):
         self.id = site['site_id']
+        self.idtag = "s%s" % self.id
         self.node_ids = site['node_ids']
         self.name = site['abbreviated_name'].replace(" ", "_")
         self.tag = site['login_base']
@@ -230,7 +214,17 @@ class Site:
     
     def add_link(self, link):
         self.links.add(link)
-    
+
+    def toxml(self, xml, hrn, nodes):
+        if not (self.public and self.enabled and self.node_ids):
+            return
+        with xml.site(id = self.idtag):
+            with xml.name:
+                xml << self.name
+                
+            for node in self.get_sitenodes(nodes):
+                node.toxml(xml, hrn)
+   
     
 class Slice:
     def __init__(self, slice):
@@ -422,8 +416,11 @@ class Topology:
                         pass
 
     
+    """ Lookup site based on id or idtag value """
     def lookupSite(self, id):
         val = None
+        if isinstance(id, basestring):
+            id = int(id.lstrip('s'))
         try:
             val = self.sites[id]
         except:
@@ -436,8 +433,11 @@ class Topology:
             sites.append(self.sites[s])
         return sites
         
+    """ Lookup node based on id or idtag value """
     def lookupNode(self, id):
         val = None
+        if isinstance(id, basestring):
+            id = int(id.lstrip('n'))
         try:
             val = self.nodes[id]
         except:
@@ -453,8 +453,9 @@ class Topology:
     def nodesInTopo(self):
         nodes = []
         for n in self.nodes:
-            if self.nodes[n].links:
-                nodes.append(self.nodes[n])
+            node = self.nodes[n]
+            if node.sliver:
+                nodes.append(node)
         return nodes
             
     def lookupSliceTag(self, id):
@@ -481,27 +482,111 @@ class Topology:
                 return link
         return None
     
-    def nodeTopoFromRSpec(self, rspec):
+
+    def __add_vlink(self, vlink, slicenodes, parent = None):
+        n1 = n2 = None
+        endpoints = vlink.get("endpoints")
+        if endpoints:
+            (end1, end2) = endpoints.split()
+            n1 = self.lookupNode(end1)
+            n2 = self.lookupNode(end2)
+        elif parent:
+            """ Try to infer the endpoints for the virtual link """
+            site_endpoints = parent.get("endpoints")
+            (n1, n2) = self.__infer_endpoints(site_endpoints, slicenodes)
+        else:
+            raise Error("no endpoints given")
+
+        #print "Added virtual link: %s -- %s" % (n1.tag, n2.tag)
+        bps = int(vlink.findtext("kbps")) * 1000
+        sitelink = self.lookupSiteLink(n1, n2)
+        if not sitelink:
+            raise PermissionError("nodes %s and %s not adjacent" % 
+                                  (n1.idtag, n2.idtag))
+        self.nodelinks.append(Link(n1, n2, bps, sitelink))
+        return
+
+    """ 
+    Infer the endpoints of the virtual link.  If the slice exists on 
+    only a single node at each end of the physical link, we'll assume that
+    the user wants the virtual link to terminate at these nodes.
+    """
+    def __infer_endpoints(self, endpoints, slicenodes):
+        n = []
+        ends = endpoints.split()
+        for end in ends:
+            found = 0
+            site = self.lookupSite(end)
+            for id in site.node_ids:
+                if id in slicenodes:
+                    n.append(slicenodes[id])
+                    found += 1
+            if found != 1:
+                raise Error("could not infer endpoint for site %s" % site.id)
+        #print "Inferred endpoints: %s %s" % (n[0].idtag, n[1].idtag)
+        return n
+        
+    def nodeTopoFromRSpec(self, xml):
         if self.nodelinks:
             raise Error("virtual topology already present")
             
-        rspecdict = rspec.toDict()
         nodedict = {}
         for node in self.getNodes():
-            nodedict[node.tag] = node
+            nodedict[node.idtag] = node
             
-        linkspecs = rspecdict['RSpec']['Request'][0]['NetSpec'][0]['LinkSpec']    
-        for l in linkspecs:
-            n1 = nodedict[l['endpoint'][0]]
-            n2 = nodedict[l['endpoint'][1]]
-            bps = int(l['kbps'][0]) * 1000
-            self.nodelinks.append(Link(n1, n2, bps))
- 
+        slicenodes = {}
+
+        tree = etree.parse(StringIO(xml))
+
+        # Validate the incoming request against the RelaxNG schema
+        relaxng_doc = etree.parse(VINI_RELAXNG_SCHEMA)
+        relaxng = etree.RelaxNG(relaxng_doc)
+        
+        if not relaxng(tree):
+            error = relaxng.error_log.last_error
+            message = "%s (line %s)" % (error.message, error.line)
+            raise InvalidRSpec(message)
+
+        rspec = tree.getroot()
+
+        """
+        Handle requests where the user has annotated a description of the
+        physical resources (nodes and links) with virtual ones (slivers
+        and vlinks).
+        """
+        # Find slivers under node elements
+        for sliver in rspec.iterfind("./network/site/node/sliver"):
+            elem = sliver.getparent()
+            node = nodedict[elem.get("id")]
+            slicenodes[node.id] = node
+            node.add_sliver()
+
+        # Find vlinks under link elements
+        for vlink in rspec.iterfind("./network/link/vlink"):
+            link = vlink.getparent()
+            self.__add_vlink(vlink, slicenodes, link)
+
+        """
+        Handle requests where the user has listed the virtual resources only
+        """
+        # Find slivers that specify nodeid
+        for sliver in rspec.iterfind("./request/sliver[@nodeid]"):
+            node = nodedict[sliver.get("nodeid")]
+            slicenodes[node.id] = node
+            node.add_sliver()
+
+        # Find vlinks that specify endpoints
+        for vlink in rspec.iterfind("./request/vlink[@endpoints]"):
+            self.__add_vlink(vlink, slicenodes)
+
+        return
+
     def nodeTopoFromSliceTags(self, slice):
         if self.nodelinks:
             raise Error("virtual topology already present")
             
         for node in slice.get_nodes(self.nodes):
+            node.sliver = True
             linktag = slice.get_tag('topo_rspec', self.tags, node)
             if linktag:
                 l = eval(linktag.value)
@@ -509,7 +594,8 @@ class Topology:
                     if node.id < id:
                         bps = get_tc_rate(bw)
                         remote = self.lookupNode(id)
-                        self.nodelinks.append(Link(node, remote, bps))
+                        sitelink = self.lookupSiteLink(node, remote)
+                        self.nodelinks.append(Link(node,remote,bps,sitelink))
 
     def updateSliceTags(self, slice):
         if not self.nodelinks:
@@ -538,14 +624,10 @@ class Topology:
     """
     Check the requested topology against the available topology and capacity
     """
-    def verifyNodeTopo(self, hrn, topo, maxbw):
-        maxbps = get_tc_rate(maxbw)
+    def verifyNodeTopo(self, hrn, topo):
         for link in self.nodelinks:
             if link.bps <= 0:
-                raise SfaInvalidArgument(bw, "BW")
-            if link.bps > maxbps:
-                raise PermissionError(" %s requested %s but max BW is %s" % 
-                                      (hrn, format_tc_rate(link.bps), maxbw))
+                raise GeniInvalidArgument(bw, "BW")
                 
             n1 = link.end1
             n2 = link.end2
@@ -559,72 +641,21 @@ class Topology:
     Produce XML directly from the topology specification.
     """
     def toxml(self, hrn = None):
-        xml = """<?xml version="1.0"?>
-<RSpec name="vini">
-    <Capacity>
-        <NetSpec name="physical_topology">"""
-
-        for site in self.getSites():
-            if not (site.public and site.enabled and site.node_ids):
-                continue
-            
-            xml += """
-            <SiteSpec name="%s"> """ % site.name
-
-            for node in site.get_sitenodes(self.nodes):
-                if not node.tag:
-                    continue
+        xml = XMLBuilder(format = True, tab_step = "  ")
+        with xml.RSpec(type="VINI"):
+            if hrn:
+                element = xml.network(name="Public_VINI", slice=hrn)
+            else:
+                element = xml.network(name="Public_VINI")
                 
-                xml += """
-                <NodeSpec name="%s">
-                    <hostname>%s</hostname>
-                    <kbps>%s</kbps>
-                </NodeSpec>""" % (node.tag, node.hostname, int(node.bps/1000))
-            xml += """
-            </SiteSpec>"""
-            
-        for link in self.sitelinks:
-            xml += """
-            <SiteLinkSpec>
-                <endpoint>%s</endpoint>
-                <endpoint>%s</endpoint> 
-                <kbps>%s</kbps>
-            </SiteLinkSpec>""" % (link.end1.name, link.end2.name, int(link.bps/1000))
-            
-        
-        if hrn:
-            name = hrn
-        else:
-            name = 'default_topology'
-        xml += """
-        </NetSpec>
-    </Capacity>
-    <Request>
-        <NetSpec name="%s">""" % name
-        
-        if hrn:
-            for link in self.nodelinks:
-                xml += """
-            <LinkSpec>
-                <endpoint>%s</endpoint>
-                <endpoint>%s</endpoint> 
-                <kbps>%s</kbps>
-            </LinkSpec>""" % (link.end1.tag, link.end2.tag, int(link.bps/1000))
-        else:
-            xml += default_topo_xml
-            
-        xml += """
-        </NetSpec>
-    </Request>
-</RSpec>"""
+            with element:
+                for site in self.getSites():
+                    site.toxml(xml, hrn, self.nodes)
+                for link in self.sitelinks:
+                    link.toxml(xml)
 
-        # Remove all leading whitespace and newlines
-        lines = xml.split("\n")
-        noblanks = ""
-        for line in lines:
-            noblanks += line.strip()
-        return noblanks
-
+        header = '<?xml version="1.0"?>\n'
+        return header + str(xml)
 
 """
 Create a dictionary of site objects keyed by site ID

@@ -1,10 +1,3 @@
-# * require certificate as an argument
-# * lookup gid in db
-# * get pubkey from gid
-# * if certifacate matches pubkey from gid, return gid, else raise exception
-#  if not peer.is_pubkey(gid.get_pubkey()):
-#            raise ConnectionKeyGIDMismatch(gid.get_subject())
-
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
@@ -44,7 +37,7 @@ class get_gids(Method):
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
         manager_module = manager_base + ".registry_manager_%s" % mgr_type
         manager = __import__(manager_module, fromlist=[manager_base])
-        records = manager.resolve(self.api, xrns, None, origin_hrn=origin_hrn)
+        records = manager.resolve(self.api, xrns, None, origin_hrn=origin_hrn, full = False)
         if not records:
             raise RecordNotFound(hrns)
 

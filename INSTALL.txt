@@ -74,12 +74,11 @@ root     24970     1  0 May11 ?        00:00:00 /usr/bin/python /usr/bin/sfa-ser
  (c) # cp  /etc/sfa/sfi_config ~/.sfi/
  (d) edit ~/.sfi/sfi_config. A sample configuration looks like:
 
-	export SFI_AUTH=plc.pl
-	export SFI_USER=plc.pl.root
-	export SFI_REGISTRY=http://vplc25.inria.fr:12345/
-	export SFI_SM=http://vplc25.inria.fr:12347/ 
+	SFI_AUTH='plc.pl'
+	SFI_USER='plc.pl.root'
+	SFI_REGISTRY='http://vplc25.inria.fr:12345/'
+	SFI_SM='http://vplc25.inria.fr:12347/' 
 
- (e) # source ~/.sfi/sfi_config 
 ------
 5) Testing:
 

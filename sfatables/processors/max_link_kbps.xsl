@@ -15,7 +15,7 @@
   <xsl:variable name="max-link-kbps" select="//RSpec//target-context/argument[name='max-link-kbps']/value"/>
 
   <!-- Modify LinkSpecs for which kbps > max-link-kbps -->
-  <xsl:template match="LinkSpec/kbps">
+  <xsl:template match="vlink/kbps">
     <xsl:choose>
       <xsl:when test=". &gt; $max-link-kbps">
 	<kbps><xsl:value-of select="$max-link-kbps"/></kbps>
@@ -27,7 +27,7 @@
   </xsl:template>
       
   <!-- Fill in missing kbps values --> 
-  <xsl:template match="LinkSpec[not(kbps)]">
+  <xsl:template match="vlink[not(kbps)]">
     <xsl:copy>
       <xsl:copy-of select="@* | *"/>
       <kbps><xsl:value-of select="$max-link-kbps"/></kbps>

@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 9
+%define taglevel 10
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -28,30 +28,42 @@ Summary: the SFA python libraries
 Group: Applications/System
 
 BuildRequires: make
-Requires: python
-Requires: pyOpenSSL >= 0.7
+Requires: python >= 2.5
 Requires: m2crypto
 Requires: libxslt-python
 Requires: python-ZSI
-Requires: python-psycopg2
-Requires: myplc-config
+# xmlbuilder depends on  lxml
+Requires: python-lxml
 
-# python 2.5 has uuid module added, for python 2.4 we still need it
-%define has_uuid %(`python -c "import uuid" 2> /dev/null; echo $?`)
-%if has_uuid
-%else
+# python 2.5 has uuid module added, for python 2.4 we still need it.
+# we can't really check for if we can load uuid as a python module,
+# it'll be installed by "devel.pkgs". we have the epel repository so
+# python-uuid will be provided. but we can test for the python
+# version.
+%define has_py24 %( python -c "import sys;sys.exit(sys.version_info[0:2] == (2,4))" 2> /dev/null; echo $? )
+%if %has_py24
 Requires: python-uuid
 %endif
+
+%package cm
+Summary: the SFA wrapper around MyPLC's NodeManager
+Group: Applications/System
+Requires: sfa
+Requires: pyOpenSSL >= 0.6
 
 %package plc
 Summary: the SFA wrapper arounf MyPLC
 Group: Applications/System
 Requires: sfa
+Requires: python-psycopg2
+Requires: myplc-config
+Requires: pyOpenSSL >= 0.7
 
 %package client
 Summary: the SFA experimenter-side CLI
 Group: Applications/System
 Requires: sfa
+Requires: pyOpenSSL >= 0.7
 
 %package sfatables
 Summary: sfatables policy tool for SFA
@@ -61,6 +73,10 @@ Requires: sfa
 %description
 This package provides the python libraries that the SFA implementation requires
 
+%description cm
+This package implements the SFA interface which serves as a layer
+between the existing PlanetLab NodeManager interfaces and the SFA API.
+ 
 %description plc
 This package implements the SFA interface which serves as a layer
 between the existing PlanetLab interfaces and the SFA API.
@@ -89,11 +105,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 # sfa and sfatables depend each other.
+%{_bindir}/sfa-server.py*
 /etc/sfatables/*
 %{python_sitelib}/*
 /usr/bin/keyconvert
 /var/www/html/wsdl/*.wsdl
 
+%files cm
+/etc/init.d/sfa-cm
+%{_bindir}/sfa_component_setup.py*
+# cron jobs here 
 
 %files plc
 %defattr(-,root,root)
@@ -105,7 +126,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sfa-import-plc.py*
 %{_bindir}/sfa-clean-peer-records.py*
 %{_bindir}/sfa-nuke-plc.py*
-%{_bindir}/sfa-server.py*
+%{_bindir}/gen-sfa-cm-config.py*
 
 %files client
 %config (noreplace) /etc/sfa/sfi_config
@@ -121,10 +142,24 @@ rm -rf $RPM_BUILD_ROOT
 %pre plc
 [ -f %{_sysconfdir}/init.d/sfa ] && service sfa stop ||:
 
+%pre cm
+[ -f %{_sysconfdir}/init.d/sfa-cm ] && service sfa-cm stop ||:
+
 %post plc
 chkconfig --add sfa
 
+%post cm
+chkconfig --add sfa-cm
 %changelog
+* Thu Jan 21 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-10
+- This tag is quite same as the previous one (sfa-0.9-9) except that the vini and max aggregate managers are also updated for urn support.  Other features are:
+- - sfa-config-tty now has the same features like plc-config-tty
+- - Contains code to support both urn and hrn
+- - Cleaned up request_hash related stuff
+- - SM, AM and Registry code is organized under respective managers
+- - Site and Slice synchronization across federated aggregates
+- - Script to generate sfa_component_config
+
 * Fri Jan 15 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-9
 - sfa-config-tty now has the same features like plc-config-tty
 - Contains code to support both urn and hrn

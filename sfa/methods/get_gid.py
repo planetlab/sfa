@@ -1,10 +1,3 @@
-# * require certificate as an argument
-# * lookup gid in db
-# * get pubkey from gid
-# * if certifacate matches pubkey from gid, return gid, else raise exception
-#  if not peer.is_pubkey(gid.get_pubkey()):
-#            raise ConnectionKeyGIDMismatch(gid.get_subject())
-
 from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method

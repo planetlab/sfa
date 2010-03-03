@@ -38,12 +38,10 @@ print s.%(method)s%(args)s"""  % locals()
             f.close()
             # make the file executeable
             chmod_cmd = "/bin/chmod 775 %(filename)s" % locals()
-            print chmod_cmd
             (status, output) = commands.getstatusoutput(chmod_cmd)
 
             # execute the commad as a slice with root NM privs    
             cmd = 'su - %(sfa_slice)s -c "%(python)s %(scriptname)s"' % locals()
-            print cmd
             (status, output) = commands.getstatusoutput(cmd)
             return (status, output)  
         finally: os.unlink(filename)

@@ -5,7 +5,7 @@ from sfa.util.namespace import *
 from sfa.util.sfaticket import SfaTicket
 
 def init_server():
-    from server import sfa_component_setup
+    from sfa.server import sfa_component_setup
     # get current trusted gids
     try:
         sfa_component_setup.get_trusted_certs()
@@ -13,10 +13,8 @@ def init_server():
         # our keypair may be old, try refreshing
         sfa_component_setup.get_node_key()
         sfa_component_setup.get_credential(force=True)
-        sfa_component_sertup.get_trusted_certs()
+        sfa_component_setup.get_trusted_certs()
            
-    
-
 def start_slice(api, xrn):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
@@ -40,8 +38,13 @@ def reset_slice(api, xrn):
     api.nodemanager.ReCreate(slicename)
  
 def get_slices(api):
-    slicenames = api.nodemanager.GetXIDs().keys()
-    return slicenames
+    # this returns a tuple, the data we want is at index 1 
+    xids = api.nodemanager.GetXIDs()
+    # unfortunately the data we want is given to us as 
+    # a string but we really want it as a dict
+    # lets eval it
+    slices = eval(xids[1])
+    return slices.keys()
 
 def roboot():
     os.system("/sbin/reboot")        
@@ -56,6 +59,6 @@ def redeem_ticket(api, ticket_string):
 
     # convert ticket to format nm is used to
     nm_ticket = xmlrpclib.dumps((ticket.attributes,), methodresponse=True)
-    self.api.nodemanager.AdminTicket(nm_ticket)
+    api.nodemanager.AdminTicket(nm_ticket)
     
 

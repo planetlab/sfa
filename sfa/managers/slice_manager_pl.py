@@ -5,8 +5,11 @@ import datetime
 import time
 import traceback
 import sys
-
+from copy import deepcopy
+from lxml import etree
+from StringIO import StringIO
 from types import StringTypes
+
 from sfa.util.namespace import *
 from sfa.util.rspec import *
 from sfa.util.specdict import *
@@ -37,59 +40,38 @@ def delete_slice(api, xrn, origin_hrn=None):
 
 def create_slice(api, xrn, rspec, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
-    spec = RSpec()
-    tempspec = RSpec()
-    spec.parseString(rspec)
-    slicename = hrn_to_pl_slicename(hrn)
-    specDict = spec.toDict()
-    if specDict.has_key('RSpec'): specDict = specDict['RSpec']
-    if specDict.has_key('start_time'): start_time = specDict['start_time']
-    else: start_time = 0
-    if specDict.has_key('end_time'): end_time = specDict['end_time']
-    else: end_time = 0
 
-    rspecs = {}
-    aggregates = Aggregates(api)
-    credential = api.getCredential()
-    # split the netspecs into individual rspecs
-    netspecs = spec.getDictsByTagName('NetSpec')
-    for netspec in netspecs:
-        net_hrn = netspec['name']
-        resources = {'start_time': start_time, 'end_time': end_time, 'networks': netspec}
-        resourceDict = {'RSpec': resources}
-        tempspec.parseDict(resourceDict)
-        rspecs[net_hrn] = tempspec.toxml()
-
-    #print "rspecs:", rspecs.keys()
-    #print "aggregates:", aggregates.keys() 
-    # send each rspec to the appropriate aggregate/sm
-    for net_hrn in rspecs:
-        net_urn = hrn_to_urn(net_hrn, 'authority')
+    # Validate the RSpec against PlanetLab's schema --disabled for now
+    # The schema used here needs to aggregate the PL and VINI schemas
+    # schema = "/var/www/html/schemas/pl.rng"
+    schema = None
+    if schema:
         try:
-            # if we are directly connected to the aggregate then we can just 
-            # send them the rspec. if not, then we may be connected to an sm 
-            # thats connected to the aggregate
-            if net_hrn in aggregates:
-                # send the whloe rspec to the local aggregate
-                if net_hrn in [api.hrn]:
-                    aggregates[net_hrn].create_slice(credential, xrn, rspec, \
-                                origin_hrn)
-                else:
-                    aggregates[net_hrn].create_slice(credential, xrn, \
-                                rspecs[net_hrn], origin_hrn)
-            else:
-                # lets forward this rspec to a sm that knows about the network
-                for aggregate in aggregates:
-                    network_found = aggregates[aggregate].get_aggregates(credential, net_hrn)
-                    if network_found:
-                        aggregates[aggregate].create_slice(credential, xrn, \
-                                    rspecs[net_hrn], origin_hrn)
+            tree = etree.parse(StringIO(rspec))
+        except etree.XMLSyntaxError:
+            message = str(sys.exc_info()[1])
+            raise InvalidRSpec(message)
 
-        except:
-            print >> log, "Error creating slice %(hrn)s at aggregate %(net_hrn)s" % \
-                           locals()
-            traceback.print_exc()
-    return 1
+        relaxng_doc = etree.parse(schema)
+        relaxng = etree.RelaxNG(relaxng_doc)
+        
+        if not relaxng(tree):
+            error = relaxng.error_log.last_error
+            message = "%s (line %s)" % (error.message, error.line)
+            raise InvalidRSpec(message)
+
+    aggs = Aggregates(api)
+    cred = api.getCredential()                                                 
+    for agg in aggs:
+        if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
+            try:
+                # Just send entire RSpec to each aggregate
+                aggs[agg].create_slice(cred, xrn, rspec, origin_hrn)
+            except:
+                print >> log, "Error creating slice %s at %s" % (hrn, agg)
+                traceback.print_exc()
+
+    return True
 
 def get_ticket(api, xrn, rspec, origin_hrn=None):
     slice_hrn, type = urn_to_hrn(xrn)
@@ -103,7 +85,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
     for netspec in netspecs:
         net_hrn = netspec['name']
         resources = {'start_time': 0, 'end_time': 0 , 
-                     'network': netspec}
+                     'network': {'NetSpec' : netspec}}
         resourceDict = {'RSpec': resources}
         temp_rspec.parseDict(resourceDict)
         rspecs[net_hrn] = temp_rspec.toxml() 
@@ -113,7 +95,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
     credential = api.getCredential()
     tickets = {}
     for net_hrn in rspecs:
-        net_urn = urn_to_hrn(net_hrn, 'authority')     
+        net_urn = urn_to_hrn(net_hrn)     
         try:
             # if we are directly connected to the aggregate then we can just
             # send them the request. if not, then we may be connected to an sm
@@ -137,28 +119,40 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
     # create a new ticket
     new_ticket = SfaTicket(subject = slice_hrn)
     new_ticket.set_gid_caller(api.auth.client_gid)
+    new_ticket.set_issuer(key=api.key, subject=api.hrn)
    
     tmp_rspec = RSpec()
     networks = []
-    valid_data = {} 
+    valid_data = {
+        'timestamp': int(time.time()),
+        'initscripts': [],
+        'slivers': [] 
+    } 
     # merge data from aggregate ticket into new ticket 
     for agg_ticket in tickets.values():
+        # get data from this ticket
         agg_ticket = SfaTicket(string=agg_ticket)
+        attributes = agg_ticket.get_attributes()
+	if attributes.get('initscripts', []) != None:
+            valid_data['initscripts'].extend(attributes.get('initscripts', []))
+	if attributes.get('slivers', []) != None:
+            valid_data['slivers'].extend(attributes.get('slivers', []))
+ 
+        # set the object gid
         object_gid = agg_ticket.get_gid_object()
         new_ticket.set_gid_object(object_gid)
-        new_ticket.set_issuer(key=api.key, subject=api.hrn)
         new_ticket.set_pubkey(object_gid.get_pubkey())
-        
-        #new_ticket.set_attributes(data)
+
+        # build the rspec
         tmp_rspec.parseString(agg_ticket.get_rspec())
         networks.extend([{'NetSpec': tmp_rspec.getDictsByTagName('NetSpec')}])
     
     #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
+    new_ticket.set_attributes(valid_data)
     resources = {'networks': networks, 'start_time': 0, 'duration': 0}
     resourceDict = {'RSpec': resources}
     tmp_rspec.parseDict(resourceDict)
     new_ticket.set_rspec(tmp_rspec.toxml())
-        
     new_ticket.encode()
     new_ticket.sign()          
     return new_ticket.save_to_string(save_parents=True)
@@ -201,26 +195,51 @@ def get_slices(api):
     return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
      
 def get_rspec(api, xrn=None, origin_hrn=None):
-    
-    from sfa.plc.nodes import Nodes
-    nodes = Nodes(api, origin_hrn=origin_hrn)
-    if xrn:
-        rspec = nodes.get_rspec(xrn)
-    else:
-        nodes.refresh()
-        rspec = nodes['rspec']
+    hrn, type = urn_to_hrn(xrn)
+    rspec = None
 
-    return rspec
+    aggs = Aggregates(api)
+    cred = api.getCredential()                                                 
+    for agg in aggs:
+        if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
+            try:
+                # get the rspec from the aggregate
+                agg_rspec = aggs[agg].get_resources(cred, xrn, origin_hrn)
+            except:
+                # XX print out to some error log
+                print >> log, "Error getting resources at aggregate %s" % agg
+                traceback.print_exc(log)
+                print >> log, "%s" % (traceback.format_exc())
+
+                
+            try:
+                tree = etree.parse(StringIO(agg_rspec))
+            except etree.XMLSyntaxError:
+                message = agg + ": " + str(sys.exc_info()[1])
+                raise InvalidRSpec(message)
+
+            root = tree.getroot()
+            if root.get("type") in ["SFA"]:
+                if rspec == None:
+                    rspec = root
+                else:
+                    for network in root.iterfind("./network"):
+                        rspec.append(deepcopy(network))
+                    for request in root.iterfind("./request"):
+                        rspec.append(deepcopy(request))
+
+    return etree.tostring(rspec, xml_declaration=True, pretty_print=True)
 
 """
-Returns the request context required by sfatables. At some point, this mechanism should be changed
-to refer to "contexts", which is the information that sfatables is requesting. But for now, we just
-return the basic information needed in a dict.
+Returns the request context required by sfatables. At some point, this
+mechanism should be changed to refer to "contexts", which is the
+information that sfatables is requesting. But for now, we just return
+the basic information needed in a dict.
 """
 def fetch_context(slice_hrn, user_hrn, contexts):
     #slice_hrn = urn_to_hrn(slice_xrn)[0]
     #user_hrn = urn_to_hrn(user_xrn)[0]
-    base_context = {'sfa':{'user':{'hrn':user_hrn}}}
+    base_context = {'sfa':{'user':{'hrn':user_hrn}, 'slice':{'hrn':slice_hrn}}}
     return base_context
 
 def main():

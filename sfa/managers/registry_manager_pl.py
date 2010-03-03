@@ -32,6 +32,9 @@ def get_credential(api, xrn, type, is_self=False):
     # verify_cancreate_credential requires that the member lists
     # (researchers, pis, etc) be filled in
     api.fill_record_info(record)
+    if record['type']=='user':
+       if not record['enabled']:
+          raise AccountNotEnabled(": PlanetLab account %s is not enabled. Please contact your site PI" %(record['email']))
 
     # get the callers gid
     # if this is a self cred the record's gid is the caller's gid
@@ -63,7 +66,7 @@ def get_credential(api, xrn, type, is_self=False):
 
     return new_cred.save_to_string(save_parents=True)
 
-def resolve(api, xrns, type=None, origin_hrn=None):
+def resolve(api, xrns, type=None, origin_hrn=None, full=True):
 
     # load all know registry names into a prefix tree and attempt to find
     # the longest matching prefix
@@ -73,6 +76,7 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     # create a dict whre key is an registry hrn and its value is a
     # hrns at that registry (determined by the known prefix tree).  
     xrn_dict = {}
+    # XX Preload this into the api module
     registries = Registries(api)
     tree = prefixTree()
     registry_hrns = registries.keys()
@@ -104,16 +108,11 @@ def resolve(api, xrns, type=None, origin_hrn=None):
     remaining_hrns = [hrn for hrn in remaining_hrns] 
     table = SfaTable()
     local_records = table.findObjects({'hrn': remaining_hrns})
-    for record in local_records:
-        try:
-            api.fill_record_info(record)
-            records.append(dict(record))
-        except PlanetLabRecordDoesNotExist:
-            # silently drop the ones that are missing in PL
-            print >> log, "ignoring SFA record ", record['hrn'], \
-                              " because pl record does not exist"    
-            table.remove(record)
-
+    if full:
+        api.fill_record_info(local_records)
+    
+    # convert local record objects to dicts
+    records.extend([dict(record) for record in local_records])
     if not records:
         raise RecordNotFound(str(hrns))
 

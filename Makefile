@@ -7,7 +7,7 @@ DESTDIR="/"
 ##########
 all: keyconvert python wsdl
 
-install: keyconvert-install python-install wsdl-install
+install: keyconvert-install python-install wsdl-install xmlbuilder-install
 
 clean: keyconvert-clean python-clean wsdl-clean
 
@@ -28,6 +28,9 @@ keyconvert-clean:
 ##########
 python: 
 
+xmlbuilder-install:
+	python xmlbuilder-0.9/setup.py install 
+	
 python-install:
 	python setup.py install --root=$(DESTDIR)
 	chmod 444 $(DESTDIR)/etc/sfa/default_config.xml
@@ -36,7 +39,7 @@ python-clean:
 	python setup.py clean
 	rm $(init)
 
-.PHONY: python python-install python-clean
+.PHONY: python python-install python-clean xmlbuilder-install
 ##########
 wsdl: 
 	$(MAKE) -C wsdl 
@@ -80,8 +83,8 @@ RSYNC_EXCLUDES		:= --exclude .svn --exclude CVS --exclude '*~' --exclude TAGS $(
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
 RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) $(RSYNC_EXCLUDES)
 
-BINS =	./config/sfa-config-tty ./sfa/plc/sfa-import-plc.py ./sfa/plc/sfa-nuke-plc.py \
-	./sfa/server/sfa-server.py \
+BINS =	./config/sfa-config-tty ./config/gen-sfa-cm-config.py \
+	./sfa/plc/sfa-import-plc.py ./sfa/plc/sfa-nuke-plc.py ./sfa/server/sfa-server.py \
 	./sfa/client/sfi.py ./sfa/client/getNodes.py ./sfa/client/getRecord.py \
 	./sfa/client/setRecord.py ./sfa/client/sfadump.py
 

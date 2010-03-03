@@ -80,7 +80,7 @@ class TreeException(SfaFault):
     def __str__(self):
         return repr(self.value)
 
-class NonexistingRecord(SfaFault):
+class NonExistingRecord(SfaFault):
     def __init__(self, value, extra = None):
         self.value = value
         faultString = "Non exsiting record %(value)s, " % locals()
@@ -143,8 +143,8 @@ class RecordNotFound(SfaFault):
         self.value = value
         faultString = "Record not found: %(value)s" % locals()
         SfaFault.__init__(self, 102, faultString, extra)
-    #def __str__(self):
-    #    return repr(self.value)
+    def __str__(self):
+        return repr(self.value)
 
 class UnknownSfaType(SfaFault):
     def __init__(self, value, extra = None):
@@ -252,6 +252,21 @@ class MissingSfaInfo(SfaFault):
         self.value = value
         faultString = "Missing information: %(value)s" % locals()
         SfaFault.__init__(self, 102, faultString, extra) 
+    def __str__(self):
+        return repr(self.value)
+
+class InvalidRSpec(SfaFault):
+    def __init__(self, value, extra = None):
+        self.value = value
+        faultString = "Invalid RSpec: %(value)s" % locals()
+        SfaFault.__init__(self, 108, faultString, extra)
+    def __str__(self):
+        return repr(self.value)
+
+class AccountNotEnabled(SfaFault):
+    def __init__(self,  extra = None):
+        faultString = "Account Disabled"
+        SfaFault.__init__(self, 108, faultString, extra)
     def __str__(self):
         return repr(self.value)
 

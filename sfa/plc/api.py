@@ -21,7 +21,10 @@ from sfa.util.namespace import *
 from sfa.util.api import *
 from sfa.util.nodemanager import NodeManager
 from sfa.util.sfalogging import *
-from sfa.util.table import SfaTable
+
+def list_to_dict(recs, key):
+    keys = [rec[key] for rec in recs]
+    return dict(zip(keys, recs))
 
 class SfaAPI(BaseAPI):
 
@@ -29,13 +32,16 @@ class SfaAPI(BaseAPI):
     import sfa.methods
     methods = sfa.methods.all
     
-    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods', 
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods', \
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
-        BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert,
-                         interface=interface, key_file=key_file, cert_file=cert_file)
+        BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, \
+                         peer_cert=peer_cert, interface=interface, key_file=key_file, \
+                         cert_file=cert_file)
  
         self.encoding = encoding
 
+        from sfa.util.table import SfaTable
+        self.SfaTable = SfaTable
         # Better just be documenting the API
         if config is None:
             return
@@ -49,9 +55,8 @@ class SfaAPI(BaseAPI):
         self.cert_file = cert_file
         self.cert = Certificate(filename=self.cert_file)
         self.credential = None
-        
         # Initialize the PLC shell only if SFA wraps a myPLC
-        rspec_type = self.config.get_aggregate_rspec_type()
+        rspec_type = self.config.get_aggregate_type()
         if (rspec_type == 'pl' or rspec_type == 'vini'):
             self.plshell = self.getPLCShell()
             self.plshell_version = self.getPLCShellVersion()
@@ -64,20 +69,13 @@ class SfaAPI(BaseAPI):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
-        try:
-            self.plshell_type = 'direct'
-            import PLC.Shell
-            shell = PLC.Shell.Shell(globals = globals())
-            shell.AuthCheck(self.plauth)
-            return shell
-        except ImportError:
-            self.plshell_type = 'xmlrpc' 
-            # connect via xmlrpc
-            url = self.config.SFA_PLC_URL
-            shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
-            shell.AuthCheck(self.plauth)
-            return shell
-
+        # connect via xmlrpc
+        self.plshell_type = 'xmlrpc' 
+        url = self.config.SFA_PLC_URL
+        shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
+        shell.AuthCheck(self.plauth)
+        return shell
+    
     def getPLCShellVersion(self):
         # We need to figure out what version of PLCAPI we are talking to.
         # Some calls we need to make later will be different depending on
@@ -136,7 +134,7 @@ class SfaAPI(BaseAPI):
         if not auth_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
-        table = SfaTable()
+        table = self.SfaTable()
         records = table.findObjects(hrn)
         if not records:
             raise RecordNotFound
@@ -232,7 +230,7 @@ class SfaAPI(BaseAPI):
 
         return pl_record
 
-    def fill_record_pl_info(self, record):
+    def fill_record_pl_info(self, records):
         """
         Fill in the planetlab specific fields of a SFA record. This
         involves calling the appropriate PLC method to retrieve the 
@@ -242,124 +240,208 @@ class SfaAPI(BaseAPI):
     
         @param record: record to fill in field (in/out param)     
         """
-        type = record['type']
-        pointer = record['pointer']
-        auth_hrn = self.hrn
-        login_base = ''
-        # records with pointer==-1 do not have plc info associated with them.
-        # for example, the top level authority records which are
-        # authorities, but not PL "sites"
-        if pointer == -1:
-            record.update({})
-            return
+        # get ids by type
+        node_ids, site_ids, slice_ids = [], [], [] 
+        person_ids, key_ids = [], []
+        type_map = {'node': node_ids, 'authority': site_ids,
+                    'slice': slice_ids, 'user': person_ids}
+                  
+        for record in records:
+            for type in type_map:
+                if type == record['type']:
+                    type_map[type].append(record['pointer'])
 
-        if (type in ["authority"]):
-            pl_res = self.plshell.GetSites(self.plauth, [pointer])
-        elif (type == "slice"):
-            pl_res = self.plshell.GetSlices(self.plauth, [pointer])
-        elif (type == "user"):
-            pl_res = self.plshell.GetPersons(self.plauth, [pointer])
-        elif (type == "node"):
-            pl_res = self.plshell.GetNodes(self.plauth, [pointer])
-        else:
-            raise UnknownSfaType(type)
-        
-        if not pl_res:
-            raise PlanetLabRecordDoesNotExist(record['hrn'])
-
-        # convert ids to hrns
-        pl_record = pl_res[0]
-        if 'site_id' in pl_record:
-            sites = self.plshell.GetSites(self.plauth, pl_record['site_id'], ['login_base'])
-            site = sites[0]
-            login_base = site['login_base']
-            pl_record['site'] = ".".join([auth_hrn, login_base])
-        if 'person_ids' in pl_record:
-            persons =  self.plshell.GetPersons(self.plauth, pl_record['person_ids'], ['email'])
-            emails = [person['email'] for person in persons]
-            usernames = [email.split('@')[0] for email in emails]
-            person_hrns = [".".join([auth_hrn, login_base, username]) for username in usernames]
-            pl_record['persons'] = person_hrns 
-        if 'slice_ids' in pl_record:
-            slices = self.plshell.GetSlices(self.plauth, pl_record['slice_ids'], ['name'])
-            slicenames = [slice['name'] for slice in slices]
-            slice_hrns = [slicename_to_hrn(auth_hrn, slicename) for slicename in slicenames]
-            pl_record['slices'] = slice_hrns
-        if 'node_ids' in pl_record:
-            nodes = self.plshell.GetNodes(self.plauth, pl_record['node_ids'], ['hostname'])
-            hostnames = [node['hostname'] for node in nodes]
-            node_hrns = [hostname_to_hrn(auth_hrn, login_base, hostname) for hostname in hostnames]
-            pl_record['nodes'] = node_hrns
-        if 'site_ids' in pl_record:
-            sites = self.plshell.GetSites(self.plauth, pl_record['site_ids'], ['login_base'])
-            login_bases = [site['login_base'] for site in sites]
-            site_hrns = [".".join([auth_hrn, lbase]) for lbase in login_bases]
-            pl_record['sites'] = site_hrns
-        if 'key_ids' in pl_record:
-            keys = self.plshell.GetKeys(self.plauth, pl_record['key_ids'])
-            pubkeys = []
-            if keys:
-                pubkeys = [key['key'] for key in keys]
-            pl_record['keys'] = pubkeys     
-
-        record.update(pl_record)
-
-
-
-    def fill_record_sfa_info(self, record):
-        sfa_info = {}
-        type = record['type']
-        table = SfaTable()
-        if (type == "slice"):
-            person_ids = record.get("person_ids", [])
-            persons = table.find({'type': 'user', 'pointer': person_ids})
-            researchers = [person['hrn'] for person in persons]
-            sfa_info['researcher'] = researchers
-
-        elif (type == "authority"):
-            person_ids = record.get("person_ids", [])
-            persons = table.find({'type': 'user', 'pointer': person_ids})
-            persons_dict = {}
+        # get pl records
+        nodes, sites, slices, persons, keys = {}, {}, {}, {}, {}
+        if node_ids:
+            node_list = self.plshell.GetNodes(self.plauth, node_ids)
+            nodes = list_to_dict(node_list, 'node_id')
+        if site_ids:
+            site_list = self.plshell.GetSites(self.plauth, site_ids)
+            sites = list_to_dict(site_list, 'site_id')
+        if slice_ids:
+            slice_list = self.plshell.GetSlices(self.plauth, slice_ids)
+            slices = list_to_dict(slice_list, 'slice_id')
+        if person_ids:
+            person_list = self.plshell.GetPersons(self.plauth, person_ids)
+            persons = list_to_dict(person_list, 'person_id')
             for person in persons:
-                persons_dict[person['pointer']] = person 
-            pl_persons = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'roles'])
-            pis, techs, admins = [], [], []
-            for person in pl_persons:
-                pointer = person['person_id']
-                
-                if pointer not in persons_dict:
-                    # this means there is not sfa record for this user
-                    continue    
-                hrn = persons_dict[pointer]['hrn']    
-                if 'pi' in person['roles']:
-                    pis.append(hrn)
-                if 'tech' in person['roles']:
-                    techs.append(hrn)
-                if 'admin' in person['roles']:
-                    admins.append(hrn)
+                key_ids.extend(persons[person]['key_ids'])
+
+        pl_records = {'node': nodes, 'authority': sites,
+                      'slice': slices, 'user': persons}
+
+        if key_ids:
+            key_list = self.plshell.GetKeys(self.plauth, key_ids)
+            keys = list_to_dict(key_list, 'key_id')
+
+        # fill record info
+        for record in records:
+            # records with pointer==-1 do not have plc info associated with them.
+            # for example, the top level authority records which are
+            # authorities, but not PL "sites"
+            if record['pointer'] == -1:
+                continue
+           
+            for type in pl_records:
+                if record['type'] == type:
+                    if record['pointer'] in pl_records[type]:
+                        record.update(pl_records[type][record['pointer']])
+                        break
+            # fill in key info
+            if record['type'] == 'user':
+                pubkeys = [keys[key_id]['key'] for key_id in record['key_ids'] if key_id in keys] 
+                record['keys'] = pubkeys
+
+        # fill in record hrns
+        records = self.fill_record_hrns(records)   
+ 
+        return records
+
+    def fill_record_hrns(self, records):
+        """
+        convert pl ids to hrns
+        """
+
+        # get ids
+        slice_ids, person_ids, site_ids, node_ids = [], [], [], []
+        for record in records:
+            if 'site_id' in record:
+                site_ids.append(record['site_id'])
+            if 'site_ids' in records:
+                site_ids.extend(record['site_ids'])
+            if 'person_ids' in record:
+                person_ids.extend(record['person_ids'])
+            if 'slice_ids' in record:
+                slice_ids.extend(record['slice_ids'])
+            if 'node_ids' in record:
+                node_ids.extend(record['node_ids'])
+
+        # get pl records
+        slices, persons, sites, nodes = {}, {}, {}, {}
+        if site_ids:
+            site_list = self.plshell.GetSites(self.plauth, site_ids, ['site_id', 'login_base'])
+            sites = list_to_dict(site_list, 'site_id')
+        if person_ids:
+            person_list = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'email'])
+            persons = list_to_dict(person_list, 'person_id')
+        if slice_ids:
+            slice_list = self.plshell.GetSlices(self.plauth, slice_ids, ['slice_id', 'name'])
+            slices = list_to_dict(slice_list, 'slice_id')       
+        if node_ids:
+            node_list = self.plshell.GetNodes(self.plauth, node_ids, ['node_id', 'hostname'])
+            nodes = list_to_dict(node_list, 'node_id')
+       
+        # convert ids to hrns
+        for record in records:
+             
+            # get all relevant data
+            type = record['type']
+            pointer = record['pointer']
+            auth_hrn = self.hrn
+            login_base = ''
+            if pointer == -1:
+                continue
+
+            if 'site_id' in record:
+                site = sites[record['site_id']]
+                login_base = site['login_base']
+                record['site'] = ".".join([auth_hrn, login_base])
+            if 'person_ids' in record:
+                emails = [persons[person_id]['email'] for person_id in record['person_ids'] \
+                          if person_id in  persons]
+                usernames = [email.split('@')[0] for email in emails]
+                person_hrns = [".".join([auth_hrn, login_base, username]) for username in usernames]
+                record['persons'] = person_hrns 
+            if 'slice_ids' in record:
+                slicenames = [slices[slice_id]['name'] for slice_id in record['slice_ids'] \
+                              if slice_id in slices]
+                slice_hrns = [slicename_to_hrn(auth_hrn, slicename) for slicename in slicenames]
+                record['slices'] = slice_hrns
+            if 'node_ids' in record:
+                hostnames = [nodes[node_id]['hostname'] for node_id in record['node_ids'] \
+                             if node_id in nodes]
+                node_hrns = [hostname_to_hrn(auth_hrn, login_base, hostname) for hostname in hostnames]
+                record['nodes'] = node_hrns
+            if 'site_ids' in record:
+                login_bases = [sites[site_id]['login_base'] for site_id in record['site_ids'] \
+                               if site_id in sites]
+                site_hrns = [".".join([auth_hrn, lbase]) for lbase in login_bases]
+                record['sites'] = site_hrns
+
+        return records   
+
+    def fill_record_sfa_info(self, records):
+        # get person ids
+        has_authority = False
+        has_slice = False
+        person_ids = []
+        for record in records:
+            if record['type'] == 'authority':
+                has_authority = True
+            person_ids.extend(record.get("person_ids", []))
+        
+        # get sfa info
+        table = self.SfaTable()
+        person_list, persons = [], {}
+        pl_person_list, pl_persons = [], {}
+        person_list = table.find({'type': 'user', 'pointer': person_ids})
+        persons = list_to_dict(person_list, 'pointer')
+        if has_authority:
+            pl_person_list = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'roles'])
+            pl_persons = list_to_dict(pl_person_list, 'person_id')
             
-            sfa_info['PI'] = pis
-            sfa_info['operator'] = techs
-            sfa_info['owner'] = admins
-            # xxx TODO: OrganizationName
 
-        elif (type == "node"):
-            sfa_info['dns'] = record.get("hostname", "")
-            # xxx TODO: URI, LatLong, IP, DNS
+        # fill sfa info
+        for record in records:
+            # skip records with no pl info (top level authorities)
+            if record['pointer'] == -1:
+                continue 
+            sfa_info = {}
+            type = record['type']
+            if (type == "slice"):
+                researchers = [persons[person_id]['hrn'] for person_id in record['person_ids'] \
+                               if person_id in persons] 
+                sfa_info['researcher'] = researchers
+         
+            elif (type == "authority"):
+                pis, techs, admins = [], [], []
+                for pointer in record['person_ids']:
+                    if pointer not in persons or pointer not in pl_persons:
+                        # this means there is not sfa or pl record for this user
+                        continue   
+                    hrn = persons[pointer]['hrn'] 
+                    roles = pl_persons[pointer]['roles']   
+                    if 'pi' in roles:
+                        pis.append(hrn)
+                    if 'tech' in roles:
+                        techs.append(hrn)
+                    if 'admin' in roles:
+                        admins.append(hrn)
+            
+                    sfa_info['PI'] = pis
+                    sfa_info['operator'] = techs
+                    sfa_info['owner'] = admins
+                    # xxx TODO: OrganizationName
+            elif (type == "node"):
+                sfa_info['dns'] = record.get("hostname", "")
+                # xxx TODO: URI, LatLong, IP, DNS
     
-        elif (type == "user"):
-            sfa_info['email'] = record.get("email", "")
-            # xxx TODO: PostalAddress, Phone
+            elif (type == "user"):
+                sfa_info['email'] = record.get("email", "")
+                # xxx TODO: PostalAddress, Phone
+            record.update(sfa_info)
 
-        record.update(sfa_info)
-
-    def fill_record_info(self, record):
+    def fill_record_info(self, records):
         """
         Given a SFA record, fill in the PLC specific and SFA specific
         fields in the record. 
         """
-        self.fill_record_pl_info(record)
-        self.fill_record_sfa_info(record)
+        if not isinstance(records, list):
+            records = [records]
+
+        self.fill_record_pl_info(records)
+        self.fill_record_sfa_info(records)
 
     def update_membership_list(self, oldRecord, record, listName, addFunc, delFunc):
         # get a list of the HRNs tht are members of the old and new records
@@ -376,7 +458,7 @@ class SfaAPI(BaseAPI):
         # build a list of the new person ids, by looking up each person to get
         # their pointer
         newIdList = []
-        table = SfaTable()
+        table = self.SfaTable()
         records = table.find({'type': 'user', 'hrn': newList})
         for rec in records:
             newIdList.append(rec['pointer'])
@@ -414,7 +496,7 @@ class SfaAPI(BaseAPI):
 
 class ComponentAPI(BaseAPI):
 
-    def __init__(self, config = "/etc/sfa/sfa_config", encoding = "utf-8", methods='sfa.methods',
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods',
                  peer_cert = None, interface = None, key_file = None, cert_file = None):
 
         BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, peer_cert=peer_cert,
@@ -425,7 +507,7 @@ class ComponentAPI(BaseAPI):
         if config is None:
             return
 
-        self.nodemanager = NodeManager(config)
+        self.nodemanager = NodeManager(self.config)
 
     def sliver_exists(self):
         sliver_dict = self.nodemanager.GetXIDs()
