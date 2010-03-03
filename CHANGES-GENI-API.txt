@@ -1,0 +1,9 @@
+2010-03-03  Josh Karlin  <jkarlin@localhost.localdomain>
+
+	* sfa/trust/certificate.py (Certificate.load_from_string):
+	Certificates no longer use a parent separator.  Now uses the
+	standard openssl chaining format which is to simply append
+	certificates together.
+
+
+
