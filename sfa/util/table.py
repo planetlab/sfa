@@ -127,19 +127,10 @@ class SfaTable(list):
         self.db.commit()
 
     def quote_string(self, value):
-        return str(self.quote(value))
+        return str(self.db.quote(value))
 
     def quote(self, value):
-        """
-        Returns quoted version of the specified value.
-        """
-
-        # The pgdb._quote function is good enough for general SQL
-        # quoting, except for array types.
-        if isinstance(value, (list, tuple, set)):
-            return "ARRAY[%s]" % ", ".join(map, self.quote_string, value)
-        else:
-            return pgdb._quote(value)
+        return self.db.quote(value)
 
     def find(self, record_filter = None, columns=None):
         if not columns:
