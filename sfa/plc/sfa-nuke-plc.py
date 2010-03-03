@@ -13,7 +13,6 @@ import sys
 from sfa.trust.hierarchy import *
 from sfa.util.record import *
 from sfa.util.table import SfaTable
-from sfa.util.config import Config
 
 def process_options():
 
@@ -26,7 +25,8 @@ def main():
     process_options()
 
     print "Purging SFA records from database"
-    SfaTable.sfa_records_purge(Config().get_plc_dbinfo())
+    table = SfaTable()
+    table.sfa_records_purge()
 
 if __name__ == "__main__":
     main()
