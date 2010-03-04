@@ -44,6 +44,13 @@ if not psycopg2:
 
     pgdb.pgdbTypeCache.typecast = unicast(pgdb.pgdbTypeCache.typecast)
 
+def handle_exception(f):
+    def wrapper(*args, **kwds):
+        try: return f(*args, **kwds)
+        except Exception, fault:
+            raise SfaDBError(str(fault))
+    return wrapper
+
 class PostgreSQL:
     def __init__(self, config):
         self.config = config
@@ -51,6 +58,7 @@ class PostgreSQL:
 #        self.debug = True
         self.connection = None
 
+    @handle_exception
     def cursor(self):
         if self.connection is None:
             # (Re)initialize database connection
@@ -132,13 +140,12 @@ class PostgreSQL:
         return self.rowcount
 
     def next_id(self, table_name, primary_key):
-	sequence = "%(table_name)s_%(primary_key)s_seq" % locals()	
-	sql = "SELECT nextval('%(sequence)s')" % locals()
-	rows = self.selectall(sql, hashref = False)
-	if rows: 
-	    return rows[0][0]
-		
-	return None 
+        sequence = "%(table_name)s_%(primary_key)s_seq" % locals()	
+        sql = "SELECT nextval('%(sequence)s')" % locals()
+        rows = self.selectall(sql, hashref = False)
+        if rows: 
+            return rows[0][0]
+        return None 
 
     def last_insert_id(self, table_name, primary_key):
         if isinstance(self.lastrowid, int):
@@ -202,7 +209,7 @@ class PostgreSQL:
             print >> log, query
             print >> log, "Params:"
             print >> log, pformat(params)
-            raise SfaDBError("Please contact support: %s" % e)
+            raise SfaDBError("Please contact support: %s" % str(e))
 
         return cursor
 
