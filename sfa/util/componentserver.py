@@ -13,20 +13,16 @@ import sys
 import traceback
 import threading
 import socket, os
-
 import SocketServer
 import BaseHTTPServer
 import SimpleHTTPServer
 import SimpleXMLRPCServer
-
 from OpenSSL import SSL
-
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
-
 from sfa.util.faults import *
 from sfa.plc.api import ComponentAPI 
-from sfa.util.server import verify_callback, SecureXMLRPCServer
+from sfa.util.server import verify_callback, ThreadedServer 
 from sfa.util.debug import log
 
 
@@ -49,7 +45,9 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         It was copied out from SimpleXMLRPCServer.py and modified to shutdown the socket cleanly.
         """
         try:
-            self.api = ComponentAPI(peer_cert = self.server.peer_cert, 
+            peer_cert = Certificate()
+            peer_cert.load_from_pyopenssl_x509(self.connection.get_peer_certificate())
+            self.api = ComponentAPI(peer_cert = peer_cert, 
                            interface = self.server.interface, 
                            key_file = self.server.key_file, 
                            cert_file = self.server.cert_file)
@@ -75,6 +73,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             # internal error, report as HTTP server error
             self.send_response(500)
             self.end_headers()
+            traceback.print_exc()
         else:
             # got a valid XML RPC response
             self.send_response(200)
@@ -109,7 +108,7 @@ class ComponentServer(threading.Thread):
         threading.Thread.__init__(self)
         self.key = Keypair(filename = key_file)
         self.cert = Certificate(filename = cert_file)
-        self.server = SecureXMLRPCServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
+        self.server = ThreadedServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
         self.trusted_cert_list = None
         self.register_functions()
 
