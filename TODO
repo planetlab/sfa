@@ -1,21 +1,14 @@
-- resolve xmlbuilder dependency
-  * add xmlbuilder to source
-  * update makefile
-  * update specfile  
-  * test rpm
-  
+- test rpms: build/install
+
 - Stop invalid users
 * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
 
 - Component manager
+  * only call get_gids() if there are slices with no gids installed
   * GetTicket - must verify_{site,slice,person,keys} on remote aggregate 
-  * REdeem ticket - RedeemTicket/AdminTicket not working. Why?
+  * Redeem ticket - RedeemTicket/AdminTicket not working. Why?
   * install the slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
 
-
-- sfa.util.api
-  * preload registries/aggregates into the api object (i.e. api.registries = Registries())
- 
 - Protogeni
 * agree on standard set of functon calls
 * agree on standard set of privs
@@ -30,10 +23,14 @@
 * api.update_membership() shoudl behave more like resolve when looking up records (attempt to resolve records at federated registeries) instead of only looking in the local registry
 * support generic registry records (dont depend on postgres!)
 
-- Aggregate
-* sfa.plc.slices.verify_site() should check if site['max_slices'] needs to be updated
-* sfa.plc.slices.verify_slice() should check if slice['expires'] needs to be updated
- 
+- Auth Service
+  * develop a simple service where users auth using username/passord and 
+    receive their cred
+  * service manages users key/cert,creds
+  
+- GUI
+  * requires user's cred (depends on Auth Service above)
+      
 -  SM call routing
 * sfi -a option should send request to sm with an extra argument to 
   specify which am to contact instead of connecting directly to the am 
@@ -43,7 +40,4 @@
 * should sfa have native initscript support or should we piggyback off of myplc?
 * should this be in the rspec
 
-- error messages
-* error messages should be easier to understand
-* (failing to connect to plcapi shoudl return a helpful message, not a generic internal server error) 
 
