@@ -191,7 +191,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
         Handle one request at a time until doomsday.
         """
         # set up the threadpool
-        self.requests = Queue(self.numThreads)
+        self.requests = Queue()
 
         for x in range(self.numThreads):
             t = threading.Thread(target = self.process_request_thread)
