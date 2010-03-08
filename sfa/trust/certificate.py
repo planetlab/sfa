@@ -70,7 +70,7 @@ def convert_public_key(key):
 class Keypair:
    key = None       # public/private keypair
    m2key = None     # public key (m2crypto format)
-
+   
    ##
    # Creates a Keypair object
    # @param create If create==True, creates a new public/private key and
@@ -218,7 +218,7 @@ class Keypair:
 class Certificate:
    digest = "md5"
 
-   data = None
+   data = {}
    cert = None
    issuerKey = None
    issuerSubject = None
@@ -266,13 +266,23 @@ class Certificate:
 
    def load_from_string(self, string):
        # if it is a chain of multiple certs, then split off the first one and
-       # load it
-       parts = string.split(Certificate.separator, 1)
+       # load it (support for the ---parent--- tag as well as normal chained certs)
+
+       string = string.strip()
+
+       parts = []
+       if string.count('-----BEGIN CERTIFICATE-----') > 1 and \
+              string.count(Certificate.separator) == 0:
+           parts = string.split('-----END CERTIFICATE-----',1)
+           parts[0] += '-----END CERTIFICATE-----'
+       else:
+           parts = string.split(Certificate.separator, 1)
+       
        self.cert = crypto.load_certificate(crypto.FILETYPE_PEM, parts[0])
 
        # if there are more certs, then create a parent and let the parent load
        # itself from the remainder of the string
-       if len(parts) > 1:
+       if len(parts) > 1 and parts[1] != '':
            self.parent = self.__class__()
            self.parent.load_from_string(parts[1])
 
@@ -289,10 +299,10 @@ class Certificate:
    #
    # @param save_parents If save_parents==True, then also save the parent certificates.
 
-   def save_to_string(self, save_parents=False):
+   def save_to_string(self, save_parents=True):
        string = crypto.dump_certificate(crypto.FILETYPE_PEM, self.cert)
        if save_parents and self.parent:
-          string = string + Certificate.separator + self.parent.save_to_string(save_parents)
+          string = string + self.parent.save_to_string(save_parents)
        return string
 
    ##
@@ -403,31 +413,31 @@ class Certificate:
    # the X509 subject_alt_name extension. Set_data can only be called once, due
    # to limitations in the underlying library.
 
-   def set_data(self, str):
+   def set_data(self, str, field='subjectAltName'):
        # pyOpenSSL only allows us to add extensions, so if we try to set the
        # same extension more than once, it will not work
-       if self.data != None:
-          raise "cannot set subjectAltName more than once"
-       self.data = str
-       self.add_extension("subjectAltName", 0, "URI:http://" + str)
+       if self.data.has_key(field):
+          raise "cannot set ", field, " more than once"
+       self.data[field] = str
+       self.add_extension(field, 0, "URI:http://" + str)
 
    ##
    # Return the data string that was previously set with set_data
 
-   def get_data(self):
-       if self.data:
-           return self.data
+   def get_data(self, field='subjectAltName'):
+       if self.data.has_key(field):
+           return self.data[field]
 
        try:
-           uri = self.get_extension("subjectAltName")
+           uri = self.get_extension(field)
        except LookupError:
-           self.data = None
-           return self.data
+           self.data.pop(field)
+           return None
 
        if not uri.startswith("URI:http://"):
-           raise "bad encoding in subjectAltName"
-       self.data = uri[11:]
-       return self.data
+           raise "bad encoding in ", field       
+       self.data[field] = uri[11:]
+       return self.data[field]
 
    ##
    # Sign the certificate using the issuer private key and issuer subject previous set with set_issuer().
