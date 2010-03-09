@@ -18,7 +18,7 @@ def create_uuid():
     return str(uuid.uuid4().int)
 
 ##
-# GID is a tuplie:
+# GID is a tuple:
 #    (uuid, hrn, public_key)
 #
 # UUID is a unique identifier and is created by the python uuid module
@@ -101,11 +101,14 @@ class GID(Certificate):
             urn = self.urn
         else:
             urn = hrn_to_urn(self.hrn, None)
- 
-        dict = {"uuid": self.uuid,
-                "urn": self.urn}
-        str = xmlrpclib.dumps((dict,))
-        self.set_data(str)
+            
+        szURN = "URI:" + urn
+        szUUID = "URI:" + uuid.UUID(int=self.uuid).urn
+        
+        
+        str = szURN + ", " + szUUID
+        self.set_data(str, 'subjectAltName')
+
 
     ##
     # Decode the subject-alt-name field of the X509 certificate into the
@@ -113,12 +116,19 @@ class GID(Certificate):
     # functions in this class.
 
     def decode(self):
-        data = self.get_data()
+        data = self.get_data('subjectAltName')
+        dict = {}
         if data:
-            dict = xmlrpclib.loads(self.get_data())[0][0]
-        else:
-            dict = {}
-
+            if data.lower().startswith('uri:http://<params>'):
+                dict = xmlrpclib.loads(data[11:])[0][0]
+            else:
+                spl = data.split(', ')
+                for val in spl:
+                    if val.lower().startswith('uri:urn:uuid:'):
+                        dict['uuid'] = uuid.UUID(val[4:]).int
+                    elif val.lower().startswith('uri:urn:publicid:idn+'):
+                        dict['urn'] = val[4:]
+                    
         self.uuid = dict.get("uuid", None)
         self.urn = dict.get("urn", None)
         self.hrn = dict.get("hrn", None)    

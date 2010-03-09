@@ -1,5 +1,8 @@
 2010-03-08  Josh Karlin  <jkarlin@localhost.localdomain>
 
+	* sfa/trust/gid.py (GID.encode): States URI and UUID explicitly without xml
+	(GID.decode): GIDs now encode/decode URI and UUID without the xml (but can still read it)
+
 	* sfa/trust/certificate.py (Certificate.save_to_string): SaveParents defaults to true
 	(Certificate.save_to_string): Saves without the parent tag.  
 	(Certificate.set_data): Accepts optional field

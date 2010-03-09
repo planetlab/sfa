@@ -218,7 +218,6 @@ class Keypair:
 class Certificate:
    digest = "md5"
 
-   data = {}
    cert = None
    issuerKey = None
    issuerSubject = None
@@ -236,6 +235,7 @@ class Certificate:
    # @param filename If filename!=None, load the certficiate from the file.
 
    def __init__(self, create=False, subject=None, string=None, filename=None):
+       self.data = {}
        if create or subject:
            self.create()
        if subject:
@@ -419,7 +419,7 @@ class Certificate:
        if self.data.has_key(field):
           raise "cannot set ", field, " more than once"
        self.data[field] = str
-       self.add_extension(field, 0, "URI:http://" + str)
+       self.add_extension(field, 0, str)
 
    ##
    # Return the data string that was previously set with set_data
@@ -430,13 +430,10 @@ class Certificate:
 
        try:
            uri = self.get_extension(field)
+           self.data[field] = uri           
        except LookupError:
-           self.data.pop(field)
            return None
-
-       if not uri.startswith("URI:http://"):
-           raise "bad encoding in ", field       
-       self.data[field] = uri[11:]
+       
        return self.data[field]
 
    ##
