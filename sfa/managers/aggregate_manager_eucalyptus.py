@@ -370,7 +370,10 @@ def get_rspec(api, xrn, origin_hrn):
                 instanceId.append(instance.instance_id)
 
             # Get the information about those instances using their ids.
-            reservations = conn.get_all_instances(instanceId)
+            if len(instanceId) > 0:
+                reservations = conn.get_all_instances(instanceId)
+            else:
+                reservations = []
             for reservation in reservations:
                 for instance in reservation.instances:
                     instances.append(instance)
