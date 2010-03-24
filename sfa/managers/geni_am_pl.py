@@ -24,3 +24,6 @@ def GetVersion():
     version['geni_api'] = 1
     version['geni_stitching'] = False
     return version
+
+def ListResources(creds, options):
+    return "Hello World"

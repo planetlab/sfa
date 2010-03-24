@@ -27,4 +27,5 @@ stop_slice
 update
 remove_peer_object
 GetVersion
+ListResources
 """.split()
