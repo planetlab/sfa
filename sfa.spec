@@ -40,8 +40,11 @@ Requires: python-lxml
 # it'll be installed by "devel.pkgs". we have the epel repository so
 # python-uuid will be provided. but we can test for the python
 # version.
-%define has_py24 %( python -c "import sys;sys.exit(sys.version_info[0:2] == (2,4))" 2> /dev/null; echo $? )
-%if %has_py24
+# %define has_py24 %( python -c "import sys;sys.exit(sys.version_info[0:2] == (2,4))" 2> /dev/null; echo $? )
+# %if %has_py24
+#
+# this also didn't work very well. I'll just check for distroname - baris
+%if %{distroname} == "centos5"
 Requires: python-uuid
 %endif
 
