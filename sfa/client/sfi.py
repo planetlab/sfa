@@ -121,7 +121,8 @@ def load_record_from_file(filename):
 
 
 class Sfi:
-    
+
+    geni_am = None
     slicemgr = None
     registry = None
     user = None
@@ -148,7 +149,9 @@ class Sfi:
                   "reset": "name",
                   "start": "name",
                   "stop": "name",
-                  "delegate": "name"
+                  "delegate": "name",
+                  "GetVersion": "name",
+                   
                  }
 
         if additional_cmdargs:
@@ -201,6 +204,7 @@ class Sfi:
                             help="delegate user credential")
            parser.add_option("-s", "--slice", dest="delegate_slice",
                             help="delegate slice credential", metavar="HRN", default=None)
+
         return parser
 
         
@@ -209,6 +213,8 @@ class Sfi:
         # Generate command line parser
         parser = OptionParser(usage="sfi [options] command [command_options] [command_args]",
                              description="Commands: gid,list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset")
+        parser.add_option("-g", "--geni_am", dest="geni_am",
+                          help="geni am", metavar="URL", default=None)
         parser.add_option("-r", "--registry", dest="registry",
                          help="root registry", metavar="URL", default=None)
         parser.add_option("-s", "--slicemgr", dest="sm",
@@ -269,7 +275,13 @@ class Sfi:
        else:
           print "You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in %s"%config_file
           errors +=1 
-    
+          
+
+       if (self.options.geni_am is not None):
+           geni_am_url = self.options.geni_am
+       elif hasattr(config,"SFI_GENI_AM"):
+           geni_am_url = config.SFI_GENI_AM
+           
        # Set user HRN
        if (self.options.user is not None):
           self.user = self.options.user
@@ -304,7 +316,8 @@ class Sfi:
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file)  
-       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file)  
+       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file)
+       self.geni_am = xmlrpcprotocol.get_server(geni_am_url, key_file, cert_file)
        return
     
     #
@@ -609,7 +622,7 @@ class Sfi:
            print "Error: Didn't find a user record for", args[0]
            return
     
-       # the gid of the user who will be delegated too
+       # the gid of the user who will be delegated to
        delegee_gid = records[0].get_gid_object()
        delegee_hrn = delegee_gid.get_hrn()
     
@@ -885,6 +898,13 @@ class Sfi:
             server = self.get_component_server_from_hrn(opts.component)
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         return server.reset_slice(slice_cred, slice_hrn)
+
+
+    # GENI AM related calls
+
+    def GetVersion(self,opts,args):
+        server = self.geni_am
+        print server.GetVersion()
     
     #
     # Main: parse arguments and dispatch to command

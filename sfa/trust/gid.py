@@ -19,7 +19,7 @@ def create_uuid():
 
 ##
 # GID is a tuple:
-#    (uuid, hrn, public_key)
+#    (uuid, urn, public_key)
 #
 # UUID is a unique identifier and is created by the python uuid module
 #    (or the utility function create_uuid() in gid.py).

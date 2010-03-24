@@ -131,6 +131,7 @@ class BaseAPI:
         Return a new instance of the specified method.
         """
         # Look up method
+        print self.methods
         if method not in self.methods:
             raise SfaInvalidAPIMethod, method
         

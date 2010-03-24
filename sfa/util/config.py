@@ -71,6 +71,9 @@ class Config:
             if not hasattr(self, 'SFA_CM_TYPE'):
                 self.SFA_COMPONENT_TYPE='pl'
 
+            if not hasattr(self, 'SFA_GAM_TYPE'):
+                self.SFA_GAM_TYPE='pl'
+
             # create the data directory if it doesnt exist
             if not os.path.isdir(self.SFA_DATA_DIR):
                 try:

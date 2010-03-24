@@ -26,4 +26,5 @@ start_slice
 stop_slice
 update
 remove_peer_object
+GetVersion
 """.split()
