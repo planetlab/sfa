@@ -151,6 +151,7 @@ class Sfi:
                   "stop": "name",
                   "delegate": "name",
                   "GetVersion": "name",
+                  "ListResources": "name"
                    
                  }
 
@@ -905,6 +906,13 @@ class Sfi:
     def GetVersion(self,opts,args):
         server = self.geni_am
         print server.GetVersion()
+
+    def ListResources(self,opts,args):
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        server = self.geni_am
+        call_options = {}
+        return server.ListResources([user_cred], call_options)
+        
     
     #
     # Main: parse arguments and dispatch to command
