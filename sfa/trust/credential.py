@@ -14,6 +14,7 @@ from sfa.trust.certificate import Certificate
 from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
+from sfa.util.sfalogging import *
 
 ##
 # Credential is a tuple:
@@ -156,7 +157,7 @@ class Credential(Certificate):
         if self.privileges:
             dict["privileges"] = self.privileges.save_to_string()
         str = xmlrpclib.dumps((dict,), allow_none=True)
-        self.set_data(str)
+        self.set_data('URI:http://' + str)
 
     ##
     # Retrieve the attributes of the credential from the alt-subject-name field
@@ -164,9 +165,10 @@ class Credential(Certificate):
     # get_* methods of this class and should not need to be called explicitly.
 
     def decode(self):
-        data = self.get_data()
+        data = self.get_data().lstrip('URI:http://')
+        
         if data:
-            dict = xmlrpclib.loads(self.get_data())[0][0]
+            dict = xmlrpclib.loads(data)[0][0]
         else:
             dict = {}
 

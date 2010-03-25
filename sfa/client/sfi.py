@@ -911,7 +911,7 @@ class Sfi:
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         server = self.geni_am
         call_options = {}
-        return server.ListResources([user_cred], call_options)
+        print server.ListResources([user_cred], call_options)
         
     
     #

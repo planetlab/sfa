@@ -16,7 +16,7 @@
 
 privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "getcredential", "*"],
                    "refresh": ["remove", "update"],
-                   "resolve": ["resolve", "list", "getcredential"],
+                   "resolve": ["resolve", "list", "getcredential", "listresources", "getversion"],
                    "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", 
                           "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", 
                           "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy"],
