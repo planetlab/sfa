@@ -33,11 +33,13 @@ def ListResources(api, creds, options):
     manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
     manager = __import__(manager_module, fromlist=[manager_base])
 
-    urn = None
+    hrn = None
     if options.has_key('geni_slice_urn'):
-        urn = options['geni_slice_urn']
+        xrn = options['geni_slice_urn']
+        hrn, type = urn_to_hrn(xrn)
 
-    rspec = manager.get_rspec(api, urn, None)
+
+    rspec = manager.get_rspec(api, hrn, None)
     #outgoing_rules = SFATablesRules('OUTGOING')
     
     if options.has_key('geni_compressed') and options['geni_compressed'] == True:

@@ -912,6 +912,13 @@ class Sfi:
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         server = self.geni_am
         call_options = {'geni_compressed': True}
+        if args:
+            urn = args[0]
+        else:
+            urn = None
+        if urn:
+            call_options['geni_slice_urn'] = urn
+            
         rspec = server.ListResources([user_cred], call_options)
         rspec = zlib.decompress(rspec.decode('base64'))
         print rspec

@@ -8,7 +8,6 @@
 
 import xmlrpclib
 import uuid
-
 from sfa.trust.certificate import Certificate
 from sfa.util.namespace import *
 ##
@@ -59,7 +58,7 @@ class GID(Certificate):
         
         Certificate.__init__(self, create, subject, string, filename)
         if uuid:
-            self.uuid = uuid
+            self.uuid = int(uuid)
         if hrn:
             self.hrn = hrn
         if urn:
