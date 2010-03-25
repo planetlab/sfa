@@ -41,12 +41,6 @@ def verify_callback(conn, x509, err, depth, preverify):
        #print "  depth > 0 in verify_callback"
        return 0
 
-    # create a Certificate object and load it from the client's x509
-    ctx = conn.get_context()
-    server = ctx.get_app_data()
-    server.peer_cert = Certificate()
-    server.peer_cert.load_from_pyopenssl_x509(x509)
-
     # the certificate verification done by openssl checks a number of things
     # that we aren't interested in, so we look out for those error messages
     # and ignore them
@@ -99,7 +93,9 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         It was copied out from SimpleXMLRPCServer.py and modified to shutdown the socket cleanly.
         """
         try:
-            self.api = SfaAPI(peer_cert = self.server.peer_cert, 
+            peer_cert = Certificate()
+            peer_cert.load_from_pyopenssl_x509(self.connection.get_peer_certificate())
+            self.api = SfaAPI(peer_cert = peer_cert, 
                               interface = self.server.interface, 
                               key_file = self.server.key_file, 
                               cert_file = self.server.cert_file)
@@ -121,6 +117,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             # internal error, report as HTTP server error
             self.send_response(500)
             self.end_headers()
+            traceback.print_exc()
         else:
             # got a valid XML RPC response
             self.send_response(200)
@@ -194,7 +191,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
         Handle one request at a time until doomsday.
         """
         # set up the threadpool
-        self.requests = Queue(self.numThreads)
+        self.requests = Queue()
 
         for x in range(self.numThreads):
             t = threading.Thread(target = self.process_request_thread)

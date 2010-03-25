@@ -365,12 +365,21 @@ def get_rspec(api, xrn, origin_hrn):
             # Get the instances that belong to the given slice from sqlite3
             # XXX use getOne() in production because the slice's hrn is supposed
             # to be unique. For testing, uniqueness is turned off in the db.
-            theSlice = list(Slice.select(Slice.q.slice_hrn == hrn))[-1]
+            # If the slice isn't found in the database, create a record for the 
+            # slice.
+            matchedSlices = list(Slice.select(Slice.q.slice_hrn == hrn))
+            if matchedSlices:
+                theSlice = matchedSlices[-1]
+            else:
+                theSlice = Slice(slice_hrn = hrn)
             for instance in theSlice.instances:
                 instanceId.append(instance.instance_id)
 
             # Get the information about those instances using their ids.
-            reservations = conn.get_all_instances(instanceId)
+            if len(instanceId) > 0:
+                reservations = conn.get_all_instances(instanceId)
+            else:
+                reservations = []
             for reservation in reservations:
                 for instance in reservation.instances:
                     instances.append(instance)

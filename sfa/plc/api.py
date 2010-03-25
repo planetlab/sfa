@@ -69,13 +69,22 @@ class SfaAPI(BaseAPI):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
-        # connect via xmlrpc
-        self.plshell_type = 'xmlrpc' 
-        url = self.config.SFA_PLC_URL
-        shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
-        shell.AuthCheck(self.plauth)
-        return shell
-    
+
+        try:
+            sys.path.append(os.path.dirname(os.path.realpath("/usr/bin/plcsh")))
+            self.plshell_type = 'direct'
+            import PLC.Shell
+            shell = PLC.Shell.Shell(globals = globals())
+            shell.AuthCheck(self.plauth)
+            return shell
+        except ImportError:
+            self.plshell_type = 'xmlrpc' 
+            # connect via xmlrpc
+            url = self.config.SFA_PLC_URL
+            shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
+            shell.AuthCheck(self.plauth)
+            return shell
+
     def getPLCShellVersion(self):
         # We need to figure out what version of PLCAPI we are talking to.
         # Some calls we need to make later will be different depending on

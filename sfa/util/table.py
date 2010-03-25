@@ -7,7 +7,6 @@
 
 import report
 import pgdb
-from pg import DB, ProgrammingError
 
 from sfa.util.PostgreSQL import *
 from sfa.trust.gid import *
@@ -26,9 +25,6 @@ class SfaTable(list):
         self.tablename = SfaTable.SFA_TABLE_PREFIX
         self.config = Config()
         self.db = PostgreSQL(self.config)
-        # establish a connection to the pgsql server
-        cninfo = self.config.get_plc_dbinfo()     
-        self.cnx = DB(cninfo['dbname'], cninfo['address'], port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
 
         if record_filter:
             records = self.find(record_filter)
@@ -36,13 +32,12 @@ class SfaTable(list):
                 self.append(record)             
 
     def exists(self):
-        tableList = self.cnx.get_tables()
-        if 'public.' + self.tablename in tableList:
-            return True
-        if 'public."' + self.tablename + '"' in tableList:
+        sql = "SELECT * from pg_tables"
+        tables = self.db.selectall(sql)
+        tables = filter(lambda row: row['tablename'].startswith(self.SFA_TABLE_PREFIX), tables)
+        if tables:
             return True
         return False
-
     def db_fields(self, obj=None):
         
         db_fields = self.db.fields(self.SFA_TABLE_PREFIX)
@@ -79,28 +74,28 @@ class SfaTable(list):
                    for field in ['hrn', 'type', 'authority', 'peer_authority', 'pointer']]
         # IF EXISTS doenst exist in postgres < 8.2
         try:
-            self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
-        except ProgrammingError:
+            self.db.do('DROP TABLE IF EXISTS ' + self.tablename)
+        except:
             try:
-                self.cnx.query('DROP TABLE ' + self.tablename)
-            except ProgrammingError:
+                self.db.do('DROP TABLE' + self.tablename)
+            except:
                 pass
          
-        self.cnx.query(querystr)
+        self.db.do(querystr)
         for index in indexes:
-            self.cnx.query(index)
+            self.db.do(index)
 
     def remove(self, record):
         query_str = "DELETE FROM %s WHERE record_id = %s" % \
                     (self.tablename, record['record_id']) 
-        self.cnx.query(query_str)
+        self.db.do(query_str)
         
         # if this is a site, remove all records where 'authority' == the 
         # site's hrn
         if record['type'] == 'site':
             sql = " DELETE FROM %s WHERE authority = %s" % \
                     (self.tablename, record['hrn'])
-            self.cnx.query(sql) 
+            self.db.do(sql) 
 
     def insert(self, record):
         db_fields = self.db_fields(record)
@@ -132,19 +127,10 @@ class SfaTable(list):
         self.db.commit()
 
     def quote_string(self, value):
-        return str(self.quote(value))
+        return str(self.db.quote(value))
 
     def quote(self, value):
-        """
-        Returns quoted version of the specified value.
-        """
-
-        # The pgdb._quote function is good enough for general SQL
-        # quoting, except for array types.
-        if isinstance(value, (list, tuple, set)):
-            return "ARRAY[%s]" % ", ".join(map, self.quote_string, value)
-        else:
-            return pgdb._quote(value)
+        return self.db.quote(value)
 
     def find(self, record_filter = None, columns=None):
         if not columns:
@@ -168,7 +154,7 @@ class SfaTable(list):
             record_filter = Filter(SfaRecord.all_fields, {'record_id':[record_filter]})    
             sql += " AND (%s) %s" % record_filter.sql("AND")
 
-        results = self.cnx.query(sql).dictresult()
+        results = self.db.selectall(sql)
         if isinstance(results, dict):
             results = [results]
         return results
@@ -193,22 +179,12 @@ class SfaTable(list):
 
     def drop(self):
         try:
-            self.cnx.query('DROP TABLE IF EXISTS ' + self.tablename)
-        except ProgrammingError:
+            self.db.do('DROP TABLE IF EXISTS ' + self.tablename)
+        except:
             try:
-                self.cnx.query('DROP TABLE ' + self.tablename)
-            except ProgrammingError:
+                self.db.do('DROP TABLE ' + self.tablename)
+            except:
                 pass
     
-    @staticmethod
-    def sfa_records_purge(cninfo):
-
-        cnx = DB(cninfo['dbname'], cninfo['address'], 
-                 port=cninfo['port'], user=cninfo['user'], passwd=cninfo['password'])
-        tableList = cnx.get_tables()
-        for table in tableList:
-            if table.startswith(SfaTable.SFA_TABLE_PREFIX) or \
-                    table.startswith('public.' + SfaTable.SFA_TABLE_PREFIX) or \
-                    table.startswith('public."' + SfaTable.SFA_TABLE_PREFIX):
-                report.trace("dropping table " + table)
-                cnx.query("DROP TABLE " + table)
+    def sfa_records_purge():
+        self.drop()
