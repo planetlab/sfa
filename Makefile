@@ -29,8 +29,10 @@ keyconvert-clean:
 python: 
 
 xmlbuilder-install:
-	python xmlbuilder-0.9/setup.py install 
-	
+	cd xmlbuilder-0.9
+	python setup.py install 
+	cd -
+
 python-install:
 	python setup.py install --root=$(DESTDIR)
 	chmod 444 $(DESTDIR)/etc/sfa/default_config.xml
