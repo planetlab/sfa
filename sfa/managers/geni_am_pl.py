@@ -18,6 +18,8 @@ from sfa.plc.slices import Slices
 import sfa.plc.peers as peers
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
+from sfa.util.sfalogging import *
+import zlib
 
 def GetVersion():
     version = {}
@@ -25,5 +27,22 @@ def GetVersion():
     version['geni_stitching'] = False
     return version
 
-def ListResources(creds, options):
-    return "Hello World"
+def ListResources(api, creds, options):
+    manager_base = 'sfa.managers'
+    mgr_type = 'pl'
+    manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+    manager = __import__(manager_module, fromlist=[manager_base])
+
+    urn = None
+    if options.has_key('geni_slice_urn'):
+        urn = options['geni_slice_urn']
+
+    rspec = manager.get_rspec(api, urn, None)
+    #outgoing_rules = SFATablesRules('OUTGOING')
+    
+    if options.has_key('geni_compressed') and options['geni_compressed'] == True:
+        rspec = zlib.compress(rspec).encode('base64')
+        
+    return rspec
+
+

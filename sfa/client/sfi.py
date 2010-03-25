@@ -19,6 +19,7 @@ from sfa.util.rspec import RSpec
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
+import zlib
 
 # utility methods here
 # display methods
@@ -910,9 +911,10 @@ class Sfi:
     def ListResources(self,opts,args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         server = self.geni_am
-        call_options = {}
-        print server.ListResources([user_cred], call_options)
-        
+        call_options = {'geni_compressed': True}
+        rspec = server.ListResources([user_cred], call_options)
+        rspec = zlib.decompress(rspec.decode('base64'))
+        print rspec
     
     #
     # Main: parse arguments and dispatch to command
