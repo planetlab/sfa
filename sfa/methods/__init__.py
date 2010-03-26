@@ -28,4 +28,5 @@ update
 remove_peer_object
 GetVersion
 ListResources
+CreateSliver
 """.split()

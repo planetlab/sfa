@@ -16,7 +16,7 @@ class GetVersion(Method):
     returns = Parameter(dict, "Version information")
 
     def call(self):
-        self.api.logger.info("interface: %s" % (self.name))
+        self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
 
         manager_base = 'sfa.managers'
 

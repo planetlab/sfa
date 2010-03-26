@@ -152,8 +152,8 @@ class Sfi:
                   "stop": "name",
                   "delegate": "name",
                   "GetVersion": "name",
-                  "ListResources": "name"
-                   
+                  "ListResources": "name",
+                  "CreateSliver": "name" 
                  }
 
         if additional_cmdargs:
@@ -912,17 +912,27 @@ class Sfi:
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         server = self.geni_am
         call_options = {'geni_compressed': True}
+        xrn = None
+        cred = user_cred
         if args:
-            urn = args[0]
-        else:
-            urn = None
-        if urn:
-            call_options['geni_slice_urn'] = urn
+            xrn = args[0]
+            cred = self.get_slice_cred(xrn).save_to_string(save_parents=True)
+
+        if xrn:
+            call_options['geni_slice_urn'] = xrn
             
         rspec = server.ListResources([user_cred], call_options)
         rspec = zlib.decompress(rspec.decode('base64'))
         print rspec
-    
+        
+    def CreateSliver(self,opts,args):
+        slice_xrn = args[0]
+        user_cred = self.get_user_cred()
+        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
+        rspec_file = self.get_rspec_file(args[1])
+        rspec = open(rspec_file).read()
+        server = self.geni_am
+        return server.CreateSliver(slice_xrn, [slice_cred], rspec)
     #
     # Main: parse arguments and dispatch to command
     #

@@ -27,19 +27,20 @@ def GetVersion():
     version['geni_stitching'] = False
     return version
 
+
 def ListResources(api, creds, options):
     manager_base = 'sfa.managers'
     mgr_type = 'pl'
     manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
     manager = __import__(manager_module, fromlist=[manager_base])
 
-    hrn = None
+    xrn = None
     if options.has_key('geni_slice_urn'):
         xrn = options['geni_slice_urn']
-        hrn, type = urn_to_hrn(xrn)
+        api.logger.info(xrn)
 
 
-    rspec = manager.get_rspec(api, hrn, None)
+    rspec = manager.get_rspec(api, xrn, None)
     #outgoing_rules = SFATablesRules('OUTGOING')
     
     if options.has_key('geni_compressed') and options['geni_compressed'] == True:
@@ -47,4 +48,13 @@ def ListResources(api, creds, options):
         
     return rspec
 
+
+def CreateSlice(api, slice_xrn, creds, rspec):
+    manager_base = 'sfa.managers'
+    mgr_type = 'pl'
+    manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+    manager = __import__(manager_module, fromlist=[manager-base])
+
+    allocated = manager.create_slice(api, slice_xrn, rspec)
+    return allocated
 

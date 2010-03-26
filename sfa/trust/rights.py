@@ -19,10 +19,10 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                    "resolve": ["resolve", "list", "getcredential", "listresources", "getversion"],
                    "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", 
                           "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", 
-                          "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy"],
-                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", "getsliceresources"],
+                          "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy", "createsliver"],
+                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver",  "deleteslice", "updateslice", "getsliceresources"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
-                   "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids"],
+                   "control": ["updateslice", "createslice", "createsliver", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids"],
                    "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
                    "operator": ["gettrustedcerts", "getgids"]}
