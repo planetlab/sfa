@@ -29,4 +29,5 @@ remove_peer_object
 GetVersion
 ListResources
 CreateSliver
+get_geni_aggregates
 """.split()

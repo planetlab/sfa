@@ -20,10 +20,11 @@ class get_aggregates(Method):
     interfaces = ['registry', 'aggregate', 'slicemgr']
     
     accepts = [
-        Parameter(str, "Credential string"),
+        Parameter(str, "Credential string"),        
         Mixed(Parameter(str, "Human readable name (hrn or urn)"),
               Parameter(None, "hrn not specified"))
         ]
+    
 
     returns = [Parameter(dict, "Aggregate interface information")]
     
@@ -42,5 +43,6 @@ class get_aggregates(Method):
             interfaces = aggregates.interfaces
         else:
             interfaces = [interface for interface in aggregates.interfaces if interface['hrn'] in hrn_list]
-      
+
+
         return interfaces

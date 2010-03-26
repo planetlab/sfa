@@ -153,7 +153,8 @@ class Sfi:
                   "delegate": "name",
                   "GetVersion": "name",
                   "ListResources": "name",
-                  "CreateSliver": "name" 
+                  "CreateSliver": "name",
+                  "get_geni_aggregates": "name"
                  }
 
         if additional_cmdargs:
@@ -717,11 +718,26 @@ class Sfi:
         """
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = None
-        if args: 
+        if args:
             hrn = args[0]
+
         result = self.registry.get_aggregates(user_cred, hrn)
         display_list(result)
         return 
+
+    def get_geni_aggregates(self, opts, args):
+        """
+        return a list of details about known aggregates
+        """
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        hrn = None
+        if args:
+            hrn = args[0]
+
+        result = self.registry.get_geni_aggregates(user_cred, hrn)
+        display_list(result)
+        return 
+
 
     def registries(self, opts, args):
         """
