@@ -186,5 +186,5 @@ class SfaTable(list):
             except:
                 pass
     
-    def sfa_records_purge():
+    def sfa_records_purge(self):
         self.drop()

@@ -11,7 +11,7 @@ import xmlrpclib
 class SfaFault(xmlrpclib.Fault):
     def __init__(self, faultCode, faultString, extra = None):
         if extra:
-            faultString += ": " + extra
+            faultString += ": " + str(extra)
         xmlrpclib.Fault.__init__(self, faultCode, faultString)
 
 class SfaInvalidAPIMethod(SfaFault):
