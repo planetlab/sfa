@@ -59,7 +59,7 @@ class SfaAPI(BaseAPI):
         rspec_type = self.config.get_aggregate_type()
         if (rspec_type == 'pl' or rspec_type == 'vini'):
             self.plshell = self.getPLCShell()
-            self.plshell_version = self.getPLCShellVersion()
+            self.plshell_version = "4.3"
 
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
@@ -82,21 +82,6 @@ class SfaAPI(BaseAPI):
             url = self.config.SFA_PLC_URL
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
             return shell
-
-    def getPLCShellVersion(self):
-        # We need to figure out what version of PLCAPI we are talking to.
-        # Some calls we need to make later will be different depending on
-        # the api version. 
-        try:
-            # This is probably a bad way to determine api versions
-            # but its easy and will work for now. Lets try to make 
-            # a call that only exists is PLCAPI.4.3. If it fails, we
-            # can assume the api version is 4.2
-            self.plshell.GetTagTypes(self.plauth)
-            return '4.3'
-        except:
-            return '4.2'
-            
 
     def getCredential(self):
         if self.interface in ['registry']:
