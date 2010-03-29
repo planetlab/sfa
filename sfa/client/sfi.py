@@ -612,11 +612,10 @@ class Sfi:
        # the gid of the user who will be delegated too
        delegee_gid = GID(string=records[0]['gid'])
        delegee_hrn = delegee_gid.get_hrn()
-    
+   
        # the key and hrn of the user who will be delegating
        user_key = Keypair(filename = self.get_key_file())
        user_hrn = user_cred.get_gid_caller().get_hrn()
-   
        subject_string = "%s delegated to %s" % (object_hrn, delegee_hrn)
        dcred = Credential(subject=subject_string)
        dcred.set_gid_caller(delegee_gid)

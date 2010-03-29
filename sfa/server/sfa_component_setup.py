@@ -6,10 +6,14 @@ from optparse import OptionParser
 from sfa.util.config import Config
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.namespace import *
+from sfa.util.faults import *
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.gid import GID
 from sfa.trust.hierarchy import Hierarchy
+
+KEYDIR = "/var/lib/sfa/"
+CONFDIR = "/etc/sfa/"
 
 def get_server(url=None, port=None, keyfile=None, certfile=None,verbose=False):
     """
@@ -45,6 +49,26 @@ def create_default_dirs():
     for dir in all_dirs:
         if not os.path.exists(dir):
             os.makedirs(dir)
+
+def has_node_key():
+    key_file = KEYDIR + os.sep + 'server.key'
+    return os.path.exists(key_file) 
+
+def clean_key_cred():
+    """
+    remove the existing keypair and cred  and generate new ones
+    """
+    files = ["server.key", "server.cert", "node.cred"]
+    for f in files:
+        filepath = KEYDIR + os.sep + f
+        if os.path.isfile(filepath):
+            os.unlink(f)
+   
+    # install the new key pair
+    # get_credential will take care of generating the new keypair
+    # and credential 
+    get_credential()
+    
              
 def get_node_key(registry=None, verbose=False):
     # this call requires no authentication, 
@@ -74,7 +98,8 @@ def create_server_keypair(keyfile=None, certfile=None, hrn="component", verbose=
     cert.set_pubkey(key)
     cert.sign()
     cert.save_to_file(certfile, save_parents=True)       
-        
+
+@handle_gid_mismatch_exception
 def get_credential(registry=None, force=False, verbose=False):
     config = Config()
     hierarchy = Hierarchy()
@@ -115,6 +140,18 @@ def get_credential(registry=None, force=False, verbose=False):
     
     return cred
 
+def handle_gid_mismatch_exception(f):
+    def wrapper(*args, **kwds):
+        try: return f(*args, **kwds)
+        except ConnectionKeyGIDMismatch:
+            # clean regen server keypair and try again
+            print "cleaning keys and trying again"
+            clean_key_cred()
+            return f(args, kwds)
+
+    return wrapper        
+         
+@handle_gid_mismatch_exception
 def get_trusted_certs(registry=None, verbose=False):
     """
     refresh our list of trusted certs.
@@ -157,6 +194,7 @@ def get_trusted_certs(registry=None, verbose=False):
                 print "Removing old gid ", gid_name
             os.unlink(trusted_certs_dir + os.sep + gid_name)                     
 
+@handle_gid_mismatch_exception
 def get_gids(registry=None, verbose=False):
     """
     Get the gid for all instantiated slices on this node and store it
