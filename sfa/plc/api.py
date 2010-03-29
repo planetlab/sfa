@@ -75,14 +75,12 @@ class SfaAPI(BaseAPI):
             self.plshell_type = 'direct'
             import PLC.Shell
             shell = PLC.Shell.Shell(globals = globals())
-            shell.AuthCheck(self.plauth)
             return shell
         except ImportError:
             self.plshell_type = 'xmlrpc' 
             # connect via xmlrpc
             url = self.config.SFA_PLC_URL
             shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
-            shell.AuthCheck(self.plauth)
             return shell
 
     def getPLCShellVersion(self):
