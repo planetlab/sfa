@@ -5,104 +5,31 @@
 # certificate that stores a tuple of parameters.
 ##
 
-### $Id$
-### $URL$
+### $Id: credential.py 17477 2010-03-25 16:49:34Z jkarlin $
+### $URL: svn+ssh://svn.planet-lab.org/svn/sfa/branches/geni-api/sfa/trust/credential.py $
 
 import xmlrpclib
-import random
-import os
 
-
-import xml.dom.minidom
-from xml.dom.minidom import Document
-from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.certificate import Certificate
 from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
 from sfa.util.sfalogging import *
 
-
-signed_cred_template = \
-'''
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-  %s
-<signed-credential>
-  <signatures>
-  %s
-  </signatures>
-</signed-credential>
-'''
-
-
-credential_template = \
-'''
-  <credential xml:id="%s">
-    <type>privilege</type>
-    <serial>8</serial>
-    <owner_gid>%s</owner_gid>
-    <owner_urn>%s</owner_urn>
-    <target_gid>%s</target_gid>
-    <target_urn>%s</target_urn>
-    <uuid></uuid>
-    <expires>%s</expires>
-    <privileges>
-    %s
-    </privileges>
-  </credential>
-'''
-
-
-signature_template = \
-'''
-<Signature xml:id="Sig_%s" xmlns="http://www.w3.org/2000/09/xmldsig#">
-    <SignedInfo>
-      <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-      <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
-      <Reference URI="#%s">
-      <Transforms>
-        <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
-      </Transforms>
-      <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-      <DigestValue></DigestValue>
-      </Reference>
-    </SignedInfo>
-    <SignatureValue />
-      <KeyInfo>
-        <X509Data>
-          <X509SubjectName/>
-          <X509IssuerSerial/>
-          <X509Certificate/>
-        </X509Data>
-      <KeyValue />
-      </KeyInfo>
-    </Signature>
-'''
-
-
-
-
-
 ##
 # Credential is a tuple:
-#    (GIDCaller, GIDObject, LifeTime, Privileges, DelegateBit)
+#     (GIDCaller, GIDObject, LifeTime, Privileges, Delegate)
 #
-# These fields are encoded in one of two ways.  The legacy style places
-# it in the subjectAltName of an X509 certificate.  The new credentials
-# are placed in signed XML.
+# These fields are encoded using xmlrpc into the subjectAltName field of the
+# x509 certificate. Note: Call encode() once the fields have been filled in
+# to perform this encoding.
 
-
-class Credential(Certificate):
+class CredentialLegacy(Certificate):
     gidCaller = None
     gidObject = None
     lifeTime = None
     privileges = None
     delegate = False
-    issuer_key = None
-    issuer_gid = None
-    issuer_pubkey = None
-    parent = None
-    xml = None
 
     ##
     # Create a Credential object
@@ -113,46 +40,7 @@ class Credential(Certificate):
     # @param filename If filename!=None, load the credential from the file
 
     def __init__(self, create=False, subject=None, string=None, filename=None):
-
-        # Check if this is a legacy credential, translate it if so
-        if string or filename:
-            if str:
-                str = string
-            elif filename:
-                str = file(filename).read()
-                
-            if str.strip().startswith("-----"):
-                self.translate_legacy(str)
-                
-
-    ##
-    # Translate a legacy credential into a new one
-    #
-    # @param String of the legacy credential
-
-    def translate_legacy(self, str):
-        legacy = CredentialLegacy(create, subject, string, filename)
-        self.gidCaller = legacy.get_gid_caller()
-        self.gidObject = legacy.get_gid_object()
-        self.lifeTime = legacy.get_lifetime()
-        self.privileges = legacy.get_privileges()
-        self.delegate = legacy.get_delegate()
-        self.encode()
-
-    ##
-    # Need the issuer's private key and name
-    # @param key Keypair object containing the private key of the issuer
-    # @param gid GID of the issuing authority
-
-    def set_issuer_keys(self, privkey, gid):
-        self.issuer_key = privkey
-        self.issuer_gid = gid
-
-    def set_pubkey(self, pubkey):
-        self.issuer_pubkey = pubkey
-
-    def set_parent(self, cred):
-        self.parent = cred
+        Certificate.__init__(self, create, subject, string, filename)
 
     ##
     # set the GID of the caller
@@ -251,88 +139,26 @@ class Credential(Certificate):
             return False
         return rights.can_perform(op_name)
 
-    def append_sub(self, doc, parent, element, text):
-        parent.appendChild(doc.createElement(element).appendChild(doc.createTextNode(text)))
-
     ##
-    # Encode the attributes of the credential into an XML string    
-    # This should be done immediately before signing the credential.    
+    # Encode the attributes of the credential into a string and store that
+    # string in the alt-subject-name field of the X509 object. This should be
+    # done immediately before signing the credential.
 
     def encode(self):
+        dict = {"gidCaller": None,
+                "gidObject": None,
+                "lifeTime": self.lifeTime,
+                "privileges": None,
+                "delegate": self.delegate}
+        if self.gidCaller:
+            dict["gidCaller"] = self.gidCaller.save_to_string(save_parents=True)
+        if self.gidObject:
+            dict["gidObject"] = self.gidObject.save_to_string(save_parents=True)
+        if self.privileges:
+            dict["privileges"] = self.privileges.save_to_string()
+        str = xmlrpclib.dumps((dict,), allow_none=True)
+        self.set_data('URI:http://' + str)
 
-        # Get information from the parent credential
-        if self.parent:
-            p_doc = xml.dom.minidom.parseString(self.parent)
-            p_signed_cred = p_doc.getElementsByTagName("signed-credential")[0]
-            p_cred = p_signed_cred.getElementsByTagName("credential")[0]               
-            p_signatures = p_signed_cred.getElementsByTagName("signatures")[0]
-            p_sigs = p_signatures.getElementsByTagName("Signature")
-
-        # Create the XML document
-        doc = Document()
-        signed_cred = doc.createElement("signed-credential")
-        doc.appendChild(signed_cred)  
-        
-
-        # Fill in the <credential> bit
-        cred = doc.createElement("credential")
-        cred.setAttribute("xml:id", refid)
-        signed_cred.appendChild(cred)
-        self.append_sub(doc, cred, "type", "privilege")
-        self.append_sub(doc, cred, "serial", "8")
-        self.append_sub(doc, cred, "owner_gid", cur_cred.gidCaller.save_to_string())
-        self.append_sub(doc, cred, "owner_urn", cur_cred.gidCaller.get_urn())
-        self.append_sub(doc, cred, "target_gid", cur_cred.gidObject.save_to_string())
-        self.append_sub(doc, cred, "target_urn", cur_cred.gidObject.get_urn())
-        self.append_sub(doc, cred, "uuid", "")
-        self.append_sub(doc, cred, "expires", self.lifeTime)
-        priveleges = doc.createElement("privileges")
-        cred.appendChild(priveleges)
-
-        # Add the parent credential if it exists
-        if self.parent:
-            cred.appendChild(doc.createElement("parent").appendChild(p_cred))
-            
-
-        # Fill out any priveleges here
-
-
-
-        signed_cred.appendChild(cred)
-
-
-        # Fill in the <signature> bit
-        signatures = doc.createElement("signatures")
-
-        sz_sig = signature_template % (refid,refid)
-
-        sdoc = xml.dom.minidom.parseString(sz_sig)
-        sig_ele = doc.importNode(sdoc.getElemenetsByTagName("Signature")[0], True)
-        signatures.appendChild(sig_ele)
-
-
-        # Add any parent signatures
-        if self.parent:
-            for sig in p_sigs:
-                signatures.appendChild(sig)
-
-        # Get the finished product
-        self.xml = doc.toxml()
-
-
-##         # Call out to xmlsec1 to sign it
-##         XMLSEC = '/usr/bin/xmlsec1'
-
-##         filename = "/tmp/cred_%d" % random.random()
-##         f = open(filename, "w")
-##         f.write(whole);
-##         f.close()
-##         signed = os.popen('/usr/bin/xmlsec1 --sign --node-id "%s" --privkey-pem %s,%s %s'
-##                  % ('ref1', self.issuer_privkey, self.issuer_cert, filename)).readlines()
-##         os.rm(filename)
-
-##         self.encoded = signed
-        
     ##
     # Retrieve the attributes of the credential from the alt-subject-name field
     # of the X509 certificate. This is automatically done by the various

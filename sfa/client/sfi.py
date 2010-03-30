@@ -478,7 +478,7 @@ class Sfi:
         dcred.set_privileges(user_cred.get_privileges())
         dcred.set_delegate(True)
         dcred.set_pubkey(object_gid.get_pubkey())
-        dcred.set_issuer(user_key, user_hrn)
+        dcred.set_issuer(user_key, user_cred.get_gid_caller())
         dcred.set_parent(user_cred)
         dcred.encode()
         dcred.sign()
