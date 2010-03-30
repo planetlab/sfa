@@ -15,6 +15,17 @@ from sfa.trust.hierarchy import Hierarchy
 KEYDIR = "/var/lib/sfa/"
 CONFDIR = "/etc/sfa/"
 
+def handle_gid_mismatch_exception(f):
+    def wrapper(*args, **kwds):
+        try: return f(*args, **kwds)
+        except ConnectionKeyGIDMismatch:
+            # clean regen server keypair and try again
+            print "cleaning keys and trying again"
+            clean_key_cred()
+            return f(args, kwds)
+
+    return wrapper
+
 def get_server(url=None, port=None, keyfile=None, certfile=None,verbose=False):
     """
     returns an xmlrpc connection to the service a the specified 
@@ -140,17 +151,6 @@ def get_credential(registry=None, force=False, verbose=False):
     
     return cred
 
-def handle_gid_mismatch_exception(f):
-    def wrapper(*args, **kwds):
-        try: return f(*args, **kwds)
-        except ConnectionKeyGIDMismatch:
-            # clean regen server keypair and try again
-            print "cleaning keys and trying again"
-            clean_key_cred()
-            return f(args, kwds)
-
-    return wrapper        
-         
 @handle_gid_mismatch_exception
 def get_trusted_certs(registry=None, verbose=False):
     """
@@ -224,10 +224,24 @@ def get_gids(registry=None, verbose=False):
     api = ComponentAPI()
     xids_tuple = api.nodemanager.GetXIDs()
     slices = eval(xids_tuple[1])
-    slicenames = slices.keys()   
-    hrns = [slicename_to_hrn(interface_hrn, slicename) for slicename in slicenames]
-        
+    slicenames = slices.keys()
 
+    # generate a list of slices that dont have gids installed
+    slices_without_gids = []
+    for slicename in slicenames:
+        if not os.path.isfile("/vservers/%s/etc/slice.gid" % slicename) \
+        or not os.path.isfile("/vservers/%s/etc/node.gid" % slicename):
+            slices_without_gids.append(slicename) 
+    
+    # convert slicenames to hrns
+    hrns = [slicename_to_hrn(interface_hrn, slicename) \
+            for slicename in slices_without_gids]
+    
+    # exit if there are no gids to install
+    print hrns
+    if not hrns:
+        return
+        
     if verbose:
         print "Getting gids for slices on this node from registry"  
     # get the gids
