@@ -60,6 +60,12 @@ class AuthInfo:
         self.gid_filename = fn
         self.gid_object = None
 
+    def get_privkey_filename(self):
+        return self.privkey_filename
+
+    def get_gid_filename(self):
+        return self.gid_filename
+
     ##
     # Get the GID in the form of a GID object
 
@@ -307,7 +313,7 @@ class Hierarchy:
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            cred.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.get_gid_object())
+            cred.set_issuer(parent_auth_info.get_privkey_filename(), parent_auth_info.get_gid_filename())
             cred.set_parent(self.get_auth_cred(parent_hrn, kind))
 
         cred.encode()

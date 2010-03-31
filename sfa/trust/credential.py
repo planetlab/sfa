@@ -23,35 +23,12 @@ from sfa.util.faults import *
 from sfa.util.sfalogging import *
 
 
-signed_cred_template = \
-'''
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-  %s
-<signed-credential>
-  <signatures>
-  %s
-  </signatures>
-</signed-credential>
-'''
-
-
-credential_template = \
-'''
-  <credential xml:id="%s">
-    <type>privilege</type>
-    <serial>8</serial>
-    <owner_gid>%s</owner_gid>
-    <owner_urn>%s</owner_urn>
-    <target_gid>%s</target_gid>
-    <target_urn>%s</target_urn>
-    <uuid></uuid>
-    <expires>%s</expires>
-    <privileges>
-    %s
-    </privileges>
-  </credential>
-'''
-
+# TODO:
+# . Need to verify credentials
+# . Need to add privileges
+# . Need to fix lifetime
+# . Need to make sure delegation is fully supported
+# . Need to test
 
 signature_template = \
 '''
@@ -92,13 +69,13 @@ signature_template = \
 # are placed in signed XML.
 
 
-class Credential(Certificate):
+class Credential(object):
     gidCaller = None
     gidObject = None
     lifeTime = None
     privileges = None
     delegate = False
-    issuer_key = None
+    issuer_privkey = None
     issuer_gid = None
     issuer_pubkey = None
     parent = None
@@ -116,14 +93,17 @@ class Credential(Certificate):
 
         # Check if this is a legacy credential, translate it if so
         if string or filename:
-            if str:
+            if string:                
                 str = string
             elif filename:
                 str = file(filename).read()
                 
             if str.strip().startswith("-----"):
                 self.translate_legacy(str)
-                
+            else:
+                self.xml = str
+                # Let's not mess around with invalid credentials
+                self.verify_chain()
 
     ##
     # Translate a legacy credential into a new one
@@ -131,13 +111,12 @@ class Credential(Certificate):
     # @param String of the legacy credential
 
     def translate_legacy(self, str):
-        legacy = CredentialLegacy(create, subject, string, filename)
+        legacy = CredentialLegacy(False,string=str)
         self.gidCaller = legacy.get_gid_caller()
         self.gidObject = legacy.get_gid_object()
         self.lifeTime = legacy.get_lifetime()
         self.privileges = legacy.get_privileges()
         self.delegate = legacy.get_delegate()
-        self.encode()
 
     ##
     # Need the issuer's private key and name
@@ -145,7 +124,7 @@ class Credential(Certificate):
     # @param gid GID of the issuing authority
 
     def set_issuer_keys(self, privkey, gid):
-        self.issuer_key = privkey
+        self.issuer_privkey = privkey
         self.issuer_gid = gid
 
     def set_pubkey(self, pubkey):
@@ -252,7 +231,9 @@ class Credential(Certificate):
         return rights.can_perform(op_name)
 
     def append_sub(self, doc, parent, element, text):
-        parent.appendChild(doc.createElement(element).appendChild(doc.createTextNode(text)))
+        ele = doc.createElement(element)
+        ele.appendChild(doc.createTextNode(text))
+        parent.appendChild(ele)
 
     ##
     # Encode the attributes of the credential into an XML string    
@@ -275,17 +256,18 @@ class Credential(Certificate):
         
 
         # Fill in the <credential> bit
+        refid = "ref1"
         cred = doc.createElement("credential")
         cred.setAttribute("xml:id", refid)
         signed_cred.appendChild(cred)
         self.append_sub(doc, cred, "type", "privilege")
         self.append_sub(doc, cred, "serial", "8")
-        self.append_sub(doc, cred, "owner_gid", cur_cred.gidCaller.save_to_string())
-        self.append_sub(doc, cred, "owner_urn", cur_cred.gidCaller.get_urn())
-        self.append_sub(doc, cred, "target_gid", cur_cred.gidObject.save_to_string())
-        self.append_sub(doc, cred, "target_urn", cur_cred.gidObject.get_urn())
+        self.append_sub(doc, cred, "owner_gid", self.gidCaller.save_to_string())
+        self.append_sub(doc, cred, "owner_urn", self.gidCaller.get_urn())
+        self.append_sub(doc, cred, "target_gid", self.gidObject.save_to_string())
+        self.append_sub(doc, cred, "target_urn", self.gidObject.get_urn())
         self.append_sub(doc, cred, "uuid", "")
-        self.append_sub(doc, cred, "expires", self.lifeTime)
+        self.append_sub(doc, cred, "expires", str(self.lifeTime))
         priveleges = doc.createElement("privileges")
         cred.appendChild(priveleges)
 
@@ -307,7 +289,7 @@ class Credential(Certificate):
         sz_sig = signature_template % (refid,refid)
 
         sdoc = xml.dom.minidom.parseString(sz_sig)
-        sig_ele = doc.importNode(sdoc.getElemenetsByTagName("Signature")[0], True)
+        sig_ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
         signatures.appendChild(sig_ele)
 
 
@@ -316,56 +298,109 @@ class Credential(Certificate):
             for sig in p_sigs:
                 signatures.appendChild(sig)
 
+        signed_cred.appendChild(signatures)
         # Get the finished product
         self.xml = doc.toxml()
+        #print doc.toprettyxml()
 
 
-##         # Call out to xmlsec1 to sign it
-##         XMLSEC = '/usr/bin/xmlsec1'
 
-##         filename = "/tmp/cred_%d" % random.random()
-##         f = open(filename, "w")
-##         f.write(whole);
-##         f.close()
-##         signed = os.popen('/usr/bin/xmlsec1 --sign --node-id "%s" --privkey-pem %s,%s %s'
-##                  % ('ref1', self.issuer_privkey, self.issuer_cert, filename)).readlines()
-##         os.rm(filename)
 
-##         self.encoded = signed
+    def save_to_string(self):
+        if not self.xml:
+            self.encode()
+        return self.xml
+
+    def sign(self):
+        if not self.xml:
+            self.encode()
         
+        # Call out to xmlsec1 to sign it
+        XMLSEC = '/usr/bin/xmlsec1'
+
+        filename = "/tmp/cred_%d" % random.randint(0,999999999)
+        f = open(filename, "w")
+        f.write(self.xml);
+        f.close()
+        signed = os.popen('/usr/bin/xmlsec1 --sign --node-id "%s" --privkey-pem %s,%s %s' \
+                 % ('ref1', self.issuer_privkey, self.issuer_gid, filename)).read()
+        os.remove(filename)
+
+        self.xml = signed
+
+    def getTextNode(self, element, subele):
+        sub = element.getElementsByTagName(subele)[0]
+        return sub.childNodes[0].nodeValue
+
     ##
-    # Retrieve the attributes of the credential from the alt-subject-name field
-    # of the X509 certificate. This is automatically done by the various
-    # get_* methods of this class and should not need to be called explicitly.
+    # Retrieve the attributes of the credential from the XML.
+    # This is automatically caleld by the various get_* methods of
+    # this class and should not need to be called explicitly.
 
     def decode(self):
-        data = self.get_data().lstrip('URI:http://')
+        p_doc = xml.dom.minidom.parseString(self.xml)
+        p_signed_cred = p_doc.getElementsByTagName("signed-credential")[0]
+        p_cred = p_signed_cred.getElementsByTagName("credential")[0]
+        p_signatures = p_signed_cred.getElementsByTagName("signatures")[0]
+        p_sigs = p_signatures.getElementsByTagName("Signature")
+
+        self.lifeTime = self.getTextNode(p_cred, "expires")
+        self.gidCaller = GID(string=self.getTextNode(p_cred, "owner_gid"))
+        self.gidObject = GID(string=self.getTextNode(p_cred, "target_gid"))
         
-        if data:
-            dict = xmlrpclib.loads(data)[0][0]
-        else:
-            dict = {}
+            
+        
+##     ##
+##     # Retrieve the attributes of the credential from the alt-subject-name field
+##     # of the X509 certificate. This is automatically done by the various
+##     # get_* methods of this class and should not need to be called explicitly.
 
-        self.lifeTime = dict.get("lifeTime", None)
-        self.delegate = dict.get("delegate", None)
+##     def decode(self):
+##         data = self.get_data().lstrip('URI:http://')
+        
+##         if data:
+##             dict = xmlrpclib.loads(data)[0][0]
+##         else:
+##             dict = {}
 
-        privStr = dict.get("privileges", None)
-        if privStr:
-            self.privileges = RightList(string = privStr)
-        else:
-            self.privileges = None
+##         self.lifeTime = dict.get("lifeTime", None)
+##         self.delegate = dict.get("delegate", None)
 
-        gidCallerStr = dict.get("gidCaller", None)
-        if gidCallerStr:
-            self.gidCaller = GID(string=gidCallerStr)
-        else:
-            self.gidCaller = None
+##         privStr = dict.get("privileges", None)
+##         if privStr:
+##             self.privileges = RightList(string = privStr)
+##         else:
+##             self.privileges = None
 
-        gidObjectStr = dict.get("gidObject", None)
-        if gidObjectStr:
-            self.gidObject = GID(string=gidObjectStr)
-        else:
-            self.gidObject = None
+##         gidCallerStr = dict.get("gidCaller", None)
+##         if gidCallerStr:
+##             self.gidCaller = GID(string=gidCallerStr)
+##         else:
+##             self.gidCaller = None
+
+##         gidObjectStr = dict.get("gidObject", None)
+##         if gidObjectStr:
+##             self.gidObject = GID(string=gidObjectStr)
+##         else:
+##             self.gidObject = None
+
+
+    ##
+    # Verify for the initial credential:
+    # 1. That the signature is valid
+    # 2. That the xml signer's certificate matches the object's certificate
+    # 3. That the urns match those in the gids
+    #
+    # Verify for the delegated credentials:
+    # 1. That the signature is valid
+    
+    # 4. 
+    # 3. That the object's certificate stays the s
+    # 2. That the GID of the 
+
+    def verify(self, trusted_certs = None):
+        
+
 
     ##
     # Verify that a chain of credentials is valid (see cert.py:verify). In

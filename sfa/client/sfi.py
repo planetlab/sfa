@@ -8,6 +8,7 @@ import os, os.path
 import tempfile
 import traceback
 import socket
+import random
 from types import StringTypes, ListType
 from optparse import OptionParser
 from sfa.trust.certificate import Keypair, Certificate
@@ -478,7 +479,15 @@ class Sfi:
         dcred.set_privileges(user_cred.get_privileges())
         dcred.set_delegate(True)
         dcred.set_pubkey(object_gid.get_pubkey())
-        dcred.set_issuer(user_key, user_cred.get_gid_caller())
+
+        # Save the issuer's gid to a file
+        fname = self.options.sfi_dir + os.sep + "gid_%d" % random.randint(0,999999999)
+        f = open(fname, "w")
+        f.write(user_cred.get_gid_caller().save_to_string())
+        f.close()
+        dcred.set_issuer_keys(self.get_key_file(), fname)
+        os.remove(fname)
+        
         dcred.set_parent(user_cred)
         dcred.encode()
         dcred.sign()

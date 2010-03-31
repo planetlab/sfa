@@ -55,7 +55,7 @@ def get_credential(api, xrn, type, is_self=False):
     new_cred = Credential(subject = object_gid.get_subject())
     new_cred.set_gid_caller(caller_gid)
     new_cred.set_gid_object(object_gid)
-    new_cred.set_issuer_keys(auth_info.get_pkey_object(), auth_info.get_gid_object())
+    new_cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
     new_cred.set_pubkey(object_gid.get_pubkey())
     new_cred.set_privileges(rights)
     new_cred.set_delegate(True)
