@@ -25,7 +25,7 @@ from sfa.util.sfalogging import *
 
 # TODO:
 # . Need to verify credentials
-# . Need to add privileges
+# . Need to add privileges (make PG and PL privs work together and add delegation per privelege instead of global)
 # . Need to fix lifetime
 # . Need to make sure delegation is fully supported
 # . Need to test
@@ -271,14 +271,18 @@ class Credential(object):
         priveleges = doc.createElement("privileges")
         cred.appendChild(priveleges)
 
+        if self.privileges:
+            rights = self.privileges.save_to_string().split(",")
+            for right in rights:
+                priv = doc.createElement("privelege")
+                priv.append_sub(doc, priv, "name", right.strip())
+                priv.append_sub(doc, priv, "can_delegate", str(self.delegate))
+                priveleges.appendChild(priv)
+
         # Add the parent credential if it exists
         if self.parent:
-            cred.appendChild(doc.createElement("parent").appendChild(p_cred))
-            
-
-        # Fill out any priveleges here
-
-
+            cred.appendChild(doc.createElement("parent").appendChild(p_cred))         
+        
 
         signed_cred.appendChild(cred)
 
@@ -347,7 +351,23 @@ class Credential(object):
         self.lifeTime = self.getTextNode(p_cred, "expires")
         self.gidCaller = GID(string=self.getTextNode(p_cred, "owner_gid"))
         self.gidObject = GID(string=self.getTextNode(p_cred, "target_gid"))
-        
+        privs = p_cred.getElementsByTagName("priveleges")[0]
+        sz_privs = ''
+        delegates = []
+        for priv in privs.getElementsByTagName("privelege"):
+            sz_privs += self.getTextNode(priv, "name")
+            sz_privs += ", "
+            delegates.append(self.getTextNode(priv, "can_delegate"))
+
+        # Can we delegate?
+        delegate = False
+        if "false" not in delegates:
+            self.delegate = True
+
+        # Make the rights list
+        sz_privs.rstrip(", ")
+        self.priveleges = RightList(string=sz_privs)
+        self.delegate
             
         
 ##     ##
@@ -398,7 +418,7 @@ class Credential(object):
     # 3. That the object's certificate stays the s
     # 2. That the GID of the 
 
-    def verify(self, trusted_certs = None):
+    #def verify(self, trusted_certs = None):
         
 
 
