@@ -23,6 +23,10 @@ from sfa.util.nodemanager import NodeManager
 from sfa.util.sfalogging import *
 
 def list_to_dict(recs, key):
+    """
+    convert a list of dictionaries into a dictionary keyed on the 
+    specified dictionary key 
+    """
     keys = [rec[key] for rec in recs]
     return dict(zip(keys, recs))
 
@@ -70,18 +74,11 @@ class SfaAPI(BaseAPI):
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
 
-        try:
-            sys.path.append(os.path.dirname(os.path.realpath("/usr/bin/plcsh")))
-            self.plshell_type = 'direct'
-            import PLC.Shell
-            shell = PLC.Shell.Shell(globals = globals())
-            return shell
-        except ImportError:
-            self.plshell_type = 'xmlrpc' 
-            # connect via xmlrpc
-            url = self.config.SFA_PLC_URL
-            shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
-            return shell
+        self.plshell_type = 'xmlrpc' 
+        # connect via xmlrpc
+        url = self.config.SFA_PLC_URL
+        shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
+        return shell
 
     def getCredential(self):
         if self.interface in ['registry']:
@@ -269,7 +266,7 @@ class SfaAPI(BaseAPI):
 
         # fill record info
         for record in records:
-            # records with pointer==-1 do not have plc info associated with them.
+            # records with pointer==-1 do not have plc info.
             # for example, the top level authority records which are
             # authorities, but not PL "sites"
             if record['pointer'] == -1:
@@ -365,24 +362,46 @@ class SfaAPI(BaseAPI):
 
     def fill_record_sfa_info(self, records):
         # get person ids
-        has_authority = False
-        has_slice = False
         person_ids = []
+        site_ids = []
         for record in records:
-            if record['type'] == 'authority':
-                has_authority = True
             person_ids.extend(record.get("person_ids", []))
+            site_ids.extend(record.get("site_ids", [])) 
+            if 'site_id' in record:
+                site_ids.append(record['site_id']) 
         
-        # get sfa info
+        # get all pis from the sites we've encountered
+        # and store them in a dictionary keyed on site_id 
+        site_pis = {}
+        if site_ids:
+            pi_filter = {'|roles': ['pi'], '|site_ids': site_ids} 
+            pi_list = self.plshell.GetPersons(self.plauth, pi_filter, ['person_id', 'site_ids'])
+            for pi in pi_list:
+                # we will need the pi's hrns also
+                person_ids.append(pi['person_id'])
+                
+                # we also need to keep track of the sites these pis
+                # belong to
+                for site_id in pi['site_ids']:
+                    if site_id in site_pis:
+                        site_pis[site_id].append(pi)
+                    else:
+                        site_pis[site_id] = [pi]
+                 
+        # get sfa records for all records associated with these records.   
+        # we'll replace pl ids (person_ids) with hrns from the sfa records
+        # we obtain
+        
+        # get the sfa records
         table = self.SfaTable()
         person_list, persons = [], {}
-        pl_person_list, pl_persons = [], {}
         person_list = table.find({'type': 'user', 'pointer': person_ids})
         persons = list_to_dict(person_list, 'pointer')
-        if has_authority:
-            pl_person_list = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'roles'])
-            pl_persons = list_to_dict(pl_person_list, 'person_id')
-            
+
+        # get the pl records
+        pl_person_list, pl_persons = [], {}
+        pl_person_list = self.plshell.GetPersons(self.plauth, person_ids, ['person_id', 'roles'])
+        pl_persons = list_to_dict(pl_person_list, 'person_id')
 
         # fill sfa info
         for record in records:
@@ -392,10 +411,15 @@ class SfaAPI(BaseAPI):
             sfa_info = {}
             type = record['type']
             if (type == "slice"):
+                # slice users
                 researchers = [persons[person_id]['hrn'] for person_id in record['person_ids'] \
                                if person_id in persons] 
                 sfa_info['researcher'] = researchers
-         
+                # pis at the slice's site
+                pl_pis = site_pis[record['site_id']]
+                pi_ids = [pi['person_id'] for pi in pl_pis] 
+                sfa_info['PI'] = [persons[person_id]['hrn'] for person_id in pi_ids]
+                
             elif (type == "authority"):
                 pis, techs, admins = [], [], []
                 for pointer in record['person_ids']:
@@ -410,7 +434,6 @@ class SfaAPI(BaseAPI):
                         techs.append(hrn)
                     if 'admin' in roles:
                         admins.append(hrn)
-            
                     sfa_info['PI'] = pis
                     sfa_info['operator'] = techs
                     sfa_info['owner'] = admins
