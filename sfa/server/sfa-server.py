@@ -175,7 +175,6 @@ def main():
 
     config = Config()
     hierarchy = Hierarchy()
-    trusted_roots = TrustedRootList(config.get_trustedroots_dir())
     server_key_file = os.path.join(hierarchy.basedir, "server.key")
     server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
 
