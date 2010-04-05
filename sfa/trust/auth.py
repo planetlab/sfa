@@ -27,9 +27,11 @@ class Auth:
         self.hierarchy = Hierarchy()
         if not config:
             self.config = Config()
+        self.load_trusted_certs()
+
+    def load_trusted_certs(self):
         self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
-
-
+        
     def check(self, cred, operation):
         """
         Check the credential against the peer cert (callerGID included 
