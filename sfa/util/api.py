@@ -19,6 +19,8 @@ from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.namespace import *
 from sfa.util.sfalogging import *
+from sfa.server.registry import Registries
+from sfa.server.aggregate import Aggregates
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -115,6 +117,7 @@ class BaseAPI:
         # Load configuration
         self.config = Config(config)
         self.auth = Auth(peer_cert)
+        self.hrn = self.config.SFA_INTERFACE_HRN
         self.interface = interface
         self.key_file = key_file
         self.key = Keypair(filename=self.key_file)
@@ -124,6 +127,12 @@ class BaseAPI:
         self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
+        
+        # load registries
+        self.registries = Registries(self) 
+
+        # load aggregates
+        self.aggregates = Aggregates(self)
 
 
     def callable(self, method):
