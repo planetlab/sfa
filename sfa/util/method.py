@@ -77,6 +77,7 @@ class Method (object):
                 raise SfaInvalidAPIMethod, methodname, self.api.interface 
 
             # legacy code cannot be type-checked, due to the way Method.args() works
+
             if not hasattr(self,"skip_typecheck"):
                 (min_args, max_args, defaults) = self.args()
 	        		
@@ -87,6 +88,7 @@ class Method (object):
                 for name, value, expected in zip(max_args, args, self.accepts):
                     self.type_check(name, value, expected, args)
 
+            
             result = self.call(*args, **kwds)
             runtime = time.time() - start
 

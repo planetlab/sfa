@@ -11,7 +11,7 @@
 import xmlrpclib
 import random
 import os
-
+import datetime
 
 import xml.dom.minidom
 from xml.dom.minidom import Document
@@ -20,14 +20,14 @@ from sfa.trust.certificate import Certificate
 from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
-from sfa.util.sfalogging import *
+from sfa.util.sfalogging import logger
 
 
 # TODO:
-# . Need to verify credentials
-# . Need to add privileges (make PG and PL privs work together and add delegation per privelege instead of global)
-# . Need to fix lifetime
-# . Need to make sure delegation is fully supported
+# . Need to verify credential parents (delegation)
+# . implement verify_chain
+# . Need to manage ref #s
+# . Need to add privileges (make PG and PL privs work together and add delegation per privilege instead of global)
 # . Need to test
 
 signature_template = \
@@ -58,11 +58,9 @@ signature_template = \
 
 
 
-
-
 ##
 # Credential is a tuple:
-#    (GIDCaller, GIDObject, LifeTime, Privileges, DelegateBit)
+#    (GIDCaller, GIDObject, Expiration (in UTC time), Privileges, DelegateBit)
 #
 # These fields are encoded in one of two ways.  The legacy style places
 # it in the subjectAltName of an X509 certificate.  The new credentials
@@ -72,7 +70,7 @@ signature_template = \
 class Credential(object):
     gidCaller = None
     gidObject = None
-    lifeTime = None
+    expiration = None
     privileges = None
     delegate = False
     issuer_privkey = None
@@ -80,7 +78,7 @@ class Credential(object):
     issuer_pubkey = None
     parent = None
     xml = None
-
+    max_refid = 0
     ##
     # Create a Credential object
     #
@@ -102,9 +100,8 @@ class Credential(object):
                 self.translate_legacy(str)
             else:
                 self.xml = str
-                # Let's not mess around with invalid credentials
-                self.verify_chain()
-
+                self.decode()
+                
     ##
     # Translate a legacy credential into a new one
     #
@@ -114,6 +111,11 @@ class Credential(object):
         legacy = CredentialLegacy(False,string=str)
         self.gidCaller = legacy.get_gid_caller()
         self.gidObject = legacy.get_gid_object()
+        lifetime = legacy.get_lifetime()
+        if not lifetime:
+            self.set_lifetime(3600)
+        else:
+            self.set_lifetime(int(lifetime))
         self.lifeTime = legacy.get_lifetime()
         self.privileges = legacy.get_privileges()
         self.delegate = legacy.get_delegate()
@@ -127,6 +129,12 @@ class Credential(object):
         self.issuer_privkey = privkey
         self.issuer_gid = gid
 
+    def set_issuer(self, issuer):
+        issuer = issuer
+
+    def set_subject(self, subject):
+        subject = subject
+        
     def set_pubkey(self, pubkey):
         self.issuer_pubkey = pubkey
 
@@ -171,17 +179,23 @@ class Credential(object):
     # set the lifetime of this credential
     #
     # @param lifetime lifetime of credential
+    # . if lifeTime is a datetime object, it is used for the expiration time
+    # . if lifeTime is an integer value, it is considered the number of minutes
+    #   remaining before expiration
 
     def set_lifetime(self, lifeTime):
-        self.lifeTime = lifeTime
+        if isinstance(lifeTime, int):
+            self.expiration = datetime.timedelta(seconds=lifeTime*60) + datetime.datetime.utcnow()
+        else:
+            self.expiration = lifeTime
 
     ##
-    # get the lifetime of the credential
+    # get the lifetime of the credential (in minutes)
 
     def get_lifetime(self):
         if not self.lifeTime:
             self.decode()
-        return self.lifeTime
+        return self.expiration
 
     ##
     # set the delegate bit
@@ -226,8 +240,10 @@ class Credential(object):
 
     def can_perform(self, op_name):
         rights = self.get_privileges()
+        
         if not rights:
             return False
+
         return rights.can_perform(op_name)
 
     def append_sub(self, doc, parent, element, text):
@@ -240,10 +256,13 @@ class Credential(object):
     # This should be done immediately before signing the credential.    
 
     def encode(self):
+        p_sigs = None
 
         # Get information from the parent credential
         if self.parent:
-            p_doc = xml.dom.minidom.parseString(self.parent)
+            if not self.parent.xml:
+                self.parent.encode()            
+            p_doc = xml.dom.minidom.parseString(self.parent.xml)
             p_signed_cred = p_doc.getElementsByTagName("signed-credential")[0]
             p_cred = p_signed_cred.getElementsByTagName("credential")[0]               
             p_signatures = p_signed_cred.getElementsByTagName("signatures")[0]
@@ -256,7 +275,9 @@ class Credential(object):
         
 
         # Fill in the <credential> bit
-        refid = "ref1"
+        refid = "ref%d" % (self.max_refid + 1)
+        self.max_refid += 1
+        
         cred = doc.createElement("credential")
         cred.setAttribute("xml:id", refid)
         signed_cred.appendChild(cred)
@@ -267,21 +288,26 @@ class Credential(object):
         self.append_sub(doc, cred, "target_gid", self.gidObject.save_to_string())
         self.append_sub(doc, cred, "target_urn", self.gidObject.get_urn())
         self.append_sub(doc, cred, "uuid", "")
-        self.append_sub(doc, cred, "expires", str(self.lifeTime))
-        priveleges = doc.createElement("privileges")
-        cred.appendChild(priveleges)
+        if  not self.expiration:
+            self.set_lifetime(3600)
+        self.expiration = self.expiration.replace(microsecond=0)
+        self.append_sub(doc, cred, "expires", self.expiration.isoformat())
+        privileges = doc.createElement("privileges")
+        cred.appendChild(privileges)
 
         if self.privileges:
             rights = self.privileges.save_to_string().split(",")
             for right in rights:
-                priv = doc.createElement("privelege")
-                priv.append_sub(doc, priv, "name", right.strip())
-                priv.append_sub(doc, priv, "can_delegate", str(self.delegate))
-                priveleges.appendChild(priv)
+                priv = doc.createElement("privilege")
+                self.append_sub(doc, priv, "name", right.strip())
+                self.append_sub(doc, priv, "can_delegate", str(self.delegate))
+                privileges.appendChild(priv)
 
         # Add the parent credential if it exists
         if self.parent:
-            cred.appendChild(doc.createElement("parent").appendChild(p_cred))         
+            parent = doc.createElement("parent")
+            parent.appendChild(p_cred)
+            cred.appendChild(parent)
         
 
         signed_cred.appendChild(cred)
@@ -295,6 +321,11 @@ class Credential(object):
         sdoc = xml.dom.minidom.parseString(sz_sig)
         sig_ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
         signatures.appendChild(sig_ele)
+        
+        # Add any existing signatures from the parent credential
+        if p_sigs:
+            for sig in p_sigs:
+                signatures.appendChild(sig)
 
 
         # Add any parent signatures
@@ -308,9 +339,19 @@ class Credential(object):
         #print doc.toprettyxml()
 
 
+    def save_to_random_tmp_file(self):
+        filename = "/tmp/cred_%d" % random.randint(0,999999999)
+        self.save_to_file(filename)
+        return filename
+    
+    def save_to_file(self, filename, save_parents=True):
+        if not self.xml:
+            self.encode()
+        f = open(filename, "w")
+        f.write(self.xml)
+        f.close()
 
-
-    def save_to_string(self):
+    def save_to_string(self, save_parents=True):
         if not self.xml:
             self.encode()
         return self.xml
@@ -320,14 +361,10 @@ class Credential(object):
             self.encode()
         
         # Call out to xmlsec1 to sign it
-        XMLSEC = '/usr/bin/xmlsec1'
-
-        filename = "/tmp/cred_%d" % random.randint(0,999999999)
-        f = open(filename, "w")
-        f.write(self.xml);
-        f.close()
+        ref = 'Sig_ref%d' % self.max_refid
+        filename = self.save_to_random_tmp_file()
         signed = os.popen('/usr/bin/xmlsec1 --sign --node-id "%s" --privkey-pem %s,%s %s' \
-                 % ('ref1', self.issuer_privkey, self.issuer_gid, filename)).read()
+                 % (ref, self.issuer_privkey, self.issuer_gid, filename)).read()
         os.remove(filename)
 
         self.xml = signed
@@ -342,21 +379,26 @@ class Credential(object):
     # this class and should not need to be called explicitly.
 
     def decode(self):
-        p_doc = xml.dom.minidom.parseString(self.xml)
-        p_signed_cred = p_doc.getElementsByTagName("signed-credential")[0]
-        p_cred = p_signed_cred.getElementsByTagName("credential")[0]
-        p_signatures = p_signed_cred.getElementsByTagName("signatures")[0]
-        p_sigs = p_signatures.getElementsByTagName("Signature")
+        doc = xml.dom.minidom.parseString(self.xml)
+        signed_cred = doc.getElementsByTagName("signed-credential")[0]
+        cred = signed_cred.getElementsByTagName("credential")[0]
+        signatures = signed_cred.getElementsByTagName("signatures")[0]
+        sigs = signatures.getElementsByTagName("Signature")
 
-        self.lifeTime = self.getTextNode(p_cred, "expires")
-        self.gidCaller = GID(string=self.getTextNode(p_cred, "owner_gid"))
-        self.gidObject = GID(string=self.getTextNode(p_cred, "target_gid"))
-        privs = p_cred.getElementsByTagName("priveleges")[0]
+
+        self.max_refid = int(cred.getAttribute("xml:id")[3:])
+        sz_expires = self.getTextNode(cred, "expires")
+        if sz_expires != '':
+            self.expiration = datetime.datetime.strptime(sz_expires, '%Y-%m-%dT%H:%M:%S')            
+        self.lifeTime = self.getTextNode(cred, "expires")
+        self.gidCaller = GID(string=self.getTextNode(cred, "owner_gid"))
+        self.gidObject = GID(string=self.getTextNode(cred, "target_gid"))
+        privs = cred.getElementsByTagName("privileges")[0]
         sz_privs = ''
         delegates = []
-        for priv in privs.getElementsByTagName("privelege"):
+        for priv in privs.getElementsByTagName("privilege"):
             sz_privs += self.getTextNode(priv, "name")
-            sz_privs += ", "
+            sz_privs += ","
             delegates.append(self.getTextNode(priv, "can_delegate"))
 
         # Can we delegate?
@@ -366,61 +408,34 @@ class Credential(object):
 
         # Make the rights list
         sz_privs.rstrip(", ")
-        self.priveleges = RightList(string=sz_privs)
+        self.privileges = RightList(string=sz_privs)
         self.delegate
-            
+
         
-##     ##
-##     # Retrieve the attributes of the credential from the alt-subject-name field
-##     # of the X509 certificate. This is automatically done by the various
-##     # get_* methods of this class and should not need to be called explicitly.
-
-##     def decode(self):
-##         data = self.get_data().lstrip('URI:http://')
-        
-##         if data:
-##             dict = xmlrpclib.loads(data)[0][0]
-##         else:
-##             dict = {}
-
-##         self.lifeTime = dict.get("lifeTime", None)
-##         self.delegate = dict.get("delegate", None)
-
-##         privStr = dict.get("privileges", None)
-##         if privStr:
-##             self.privileges = RightList(string = privStr)
-##         else:
-##             self.privileges = None
-
-##         gidCallerStr = dict.get("gidCaller", None)
-##         if gidCallerStr:
-##             self.gidCaller = GID(string=gidCallerStr)
-##         else:
-##             self.gidCaller = None
-
-##         gidObjectStr = dict.get("gidObject", None)
-##         if gidObjectStr:
-##             self.gidObject = GID(string=gidObjectStr)
-##         else:
-##             self.gidObject = None
-
-
     ##
-    # Verify for the initial credential:
-    # 1. That the signature is valid
-    # 2. That the xml signer's certificate matches the object's certificate
-    # 3. That the urns match those in the gids
+    # For a simple credential (no delegation) verify..
+    # . That the signature is valid for the credential's xml:id
+    # . That the signer's pub key matches the pub key of the target (object)
+    # . That the target/owner urns match those in the gids
     #
-    # Verify for the delegated credentials:
-    # 1. That the signature is valid
+    # @param trusted_certs: The certificates of trusted CA certificates
     
-    # 4. 
-    # 3. That the object's certificate stays the s
-    # 2. That the GID of the 
+    def verify(self, trusted_certs):
+        if not self.xml:
+            self.decode()        
 
-    #def verify(self, trusted_certs = None):
-        
+        # Verify the sigatures
+        filename = self.save_to_random_tmp_file()
+        cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
 
+        ref = "Sig_ref%d" % self.max_refid
+        verified = os.popen('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
+                            % (ref, cert_args, filename)).read()
+
+        if not verified.strip().startswith("OK"):
+            raise CredentialNotVerifiable("xmlsec1 error: " + verified)
+
+        os.remove(filename)
 
     ##
     # Verify that a chain of credentials is valid (see cert.py:verify). In
@@ -430,23 +445,26 @@ class Credential(object):
     #
     # Each credential must be a subset of the rights of the parent.
 
-    def verify_chain(self, trusted_certs = None):
-        # do the normal certificate verification stuff
-        Certificate.verify_chain(self, trusted_certs)
-
-        if self.parent:
-            # make sure the parent delegated rights to the child
-            if not self.parent.get_delegate():
-                raise MissingDelegateBit(self.parent.get_subject())
-
-            # make sure the rights given to the child are a subset of the
-            # parents rights
-            if not self.parent.get_privileges().is_superset(self.get_privileges()):
-                raise ChildRightsNotSubsetOfParent(self.get_subject() 
-                                                   + " " + self.parent.get_privileges().save_to_string()
-                                                   + " " + self.get_privileges().save_to_string())
-
+    def verify_chain(self, trusted_certs):
         return
+
+ ##    def verify_chain(self, trusted_certs = None):
+##         # do the normal certificate verification stuff
+##         Certificate.verify_chain(self, trusted_certs)
+
+##         if self.parent:
+##             # make sure the parent delegated rights to the child
+##             if not self.parent.get_delegate():
+##                 raise MissingDelegateBit(self.parent.get_subject())
+
+##             # make sure the rights given to the child are a subset of the
+##             # parents rights
+##             if not self.parent.get_privileges().is_superset(self.get_privileges()):
+##                 raise ChildRightsNotSubsetOfParent(self.get_subject() 
+##                                                    + " " + self.parent.get_privileges().save_to_string()
+##                                                    + " " + self.get_privileges().save_to_string())
+
+##         return
 
     ##
     # Dump the contents of a credential to stdout in human-readable format

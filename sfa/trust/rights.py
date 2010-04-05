@@ -10,6 +10,7 @@
 # allows "listslices", "listcomponentresources", etc.
 ##
 
+
 ##
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.

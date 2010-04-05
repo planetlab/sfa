@@ -10,6 +10,8 @@ import xmlrpclib
 import uuid
 from sfa.trust.certificate import Certificate
 from sfa.util.namespace import *
+from sfa.util.sfalogging import logger
+
 ##
 # Create a new uuid. Returns the UUID as a string.
 
@@ -57,6 +59,8 @@ class GID(Certificate):
     def __init__(self, create=False, subject=None, string=None, filename=None, uuid=None, hrn=None, urn=None):
         
         Certificate.__init__(self, create, subject, string, filename)
+        if subject:
+            logger.info("subject: %s" % subject)
         if uuid:
             self.uuid = int(uuid)
         if hrn:
@@ -107,6 +111,8 @@ class GID(Certificate):
         
         str = szURN + ", " + szUUID
         self.set_data(str, 'subjectAltName')
+
+        
 
 
     ##

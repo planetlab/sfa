@@ -28,7 +28,7 @@ class SfaTable(list):
 
         if record_filter:
             records = self.find(record_filter)
-            for record in reocrds:
+            for record in records:
                 self.append(record)             
 
     def exists(self):
@@ -179,8 +179,9 @@ class SfaTable(list):
 
     def drop(self):
         try:
-            self.db.do('DROP TABLE IF EXISTS ' + self.tablename)
+            self.db.do('DROP TABLE IF EXISTS ' + self.tablename)            
         except:
+
             try:
                 self.db.do('DROP TABLE ' + self.tablename)
             except:

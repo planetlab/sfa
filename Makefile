@@ -7,7 +7,7 @@ DESTDIR="/"
 ##########
 all: keyconvert python wsdl
 
-install: keyconvert-install python-install wsdl-install xmlbuilder-install
+install: keyconvert-install python-install wsdl-install xmlbuilder-install 
 
 clean: keyconvert-clean python-clean wsdl-clean
 

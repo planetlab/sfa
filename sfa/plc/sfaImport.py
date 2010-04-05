@@ -206,6 +206,7 @@ class sfaImport:
         plc_auth = self.plc_auth
         sitename = site['login_base']
         sitename = cleanup_string(sitename)
+        print 'importing site %s' % sitename
         hrn = parent_hrn + "." + sitename
         urn = hrn_to_urn(hrn, 'authority')
         # Hardcode 'internet2' into the hrn for sites hosting

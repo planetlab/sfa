@@ -95,7 +95,8 @@ class ExistingRecord(SfaFault):
         SfaFault.__init__(self, 111, faultString, extra)
     def __str__(self):
         return repr(self.value)
-        
+
+    
 class NonexistingCredType(SfaFault):
     def __init__(self, value, extra = None):
         self.value = value
@@ -270,3 +271,10 @@ class AccountNotEnabled(SfaFault):
     def __str__(self):
         return repr(self.value)
 
+class CredentialNotVerifiable(SfaFault):
+    def __init__(self, value, extra = None):
+        self.value = value
+        faultString = "Unable to verify credential: %(value)s, " %locals()
+        SfaFault.__init__(self, 115, faultString, extra)
+    def __str__(self):
+        return repr(self.value)

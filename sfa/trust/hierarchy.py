@@ -309,11 +309,11 @@ class Hierarchy:
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
-            cred.set_issuer_keys(auth_info.get_pkey_object(), auth_info.get_gid_object())
+            cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            cred.set_issuer(parent_auth_info.get_privkey_filename(), parent_auth_info.get_gid_filename())
+            cred.set_issuer_keys(parent_auth_info.get_privkey_filename(), parent_auth_info.get_gid_filename())
             cred.set_parent(self.get_auth_cred(parent_hrn, kind))
 
         cred.encode()
