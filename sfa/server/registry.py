@@ -89,23 +89,30 @@ class Registries(dict):
         """
         if not new_hrns:
             return
+
+        trusted_certs_dir = self.api.config.get_trustedroots_dir()
         for new_hrn in new_hrns:
-            # get path for the new gid file
-            trusted_certs_dir = self.api.config.get_trustedroots_dir()
-            gid_filename = os.path.join(trusted_certs_dir, '%s.gid' % new_hrn)
-            
-            # get gid from the registry
-            registry = self.get_connections(self.interfaces[new_hrn])[new_hrn]
-            trusted_gids = registry.get_trusted_certs()
-            if not trusted_gids:
+            try:
+                # get gid from the registry
+                registry = self.get_connections(self.interfaces[new_hrn])[new_hrn]
+                trusted_gids = registry.get_trusted_certs()
+                # default message
+                message = "interface: registry\tunable to retrieve and install trusted gid for %s" % new_hrn 
+                if trusted_gids:
+                    # the gid we want shoudl be the first one in the list, but lets 
+                    # make sure
+                    for trusted_gid in trusted_gids:
+                        gid = GID(string=trusted_gids[0])
+                        if gid.get_hrn() == new_hrn:
+                            gid_filename = os.path.join(trusted_certs_dir, '%s.gid' % new_hrn)
+                            gid.save_to_file(gid_filename, save_parents=True)
+                            message = "interface: registry\tinstalled trusted gid for %s" % \
+                                (new_hrn)
+                # log the message
+                self.api.logger.info(message)
+            except:
                 message = "interface: registry\tunable to retrieve and install trusted gid for %s" % new_hrn 
                 self.api.logger.info(message)
-                continue
-            gid = GID(string=trusted_gids[0])
-            gid.save_to_file(gid_filename, save_parents=True)
-            message = "interface: registry\tinstalled trusted gid for %s" % \
-                        (new_hrn)
-            self.api.logger.info(message)
         
         # reload the trusted certs list
         self.api.auth.load_trusted_certs()
