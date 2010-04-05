@@ -13,6 +13,8 @@ import sys
 from sfa.util.server import SfaServer
 from sfa.util.faults import *
 from sfa.util.storage import *
+from sfa.trust.gid import GID
+from sfa.util.table import SfaTable
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
  
@@ -24,7 +26,6 @@ except ImportError:
 
 ##
 # Registry is a SfaServer that serves registry and slice operations at PLC.
-
 class Registry(SfaServer):
     ##
     # Create a new registry object.
@@ -33,7 +34,7 @@ class Registry(SfaServer):
     # @param port the port to listen on
     # @param key_file private key filename of registry
     # @param cert_file certificate filename containing public key (could be a GID file)
-
+    
     def __init__(self, ip, port, key_file, cert_file):
         SfaServer.__init__(self, ip, port, key_file, cert_file)
         self.server.interface = 'registry' 
@@ -45,77 +46,130 @@ class Registry(SfaServer):
 
 class Registries(dict):
 
-    required_fields = ['hrn', 'addr', 'port']
+    default_fields = {
+        'hrn': '',
+        'addr': '', 
+        'port': '', 
+    }
 
     def __init__(self, api, file = "/etc/sfa/registries.xml"):
         dict.__init__(self, {})
         self.api = api
-        self.interfaces = []
-       
-        # create default connection dict
-        connection_dict = {}
-        for field in self.required_fields:
-            connection_dict[field] = ''
-        registries_dict = {'registries': {'registry': [connection_dict]}}
-
-        # get possible config file locations
-        loaded = False
-        path = os.path.dirname(os.path.abspath(__file__))
-        filename = file.split(os.sep)[-1]
-        alt_file = path + os.sep + filename
-        files = [file, alt_file]
-    
-        for f in files:
-            try:
-                if os.path.isfile(f):
-                    self.registry_info = XmlStorage(f, registries_dict)
-                    loaded = True
-            except: pass
-
-        # if file is missing, just recreate it in the right place
-        if not loaded:
-            self.registry_info = XmlStorage(file, registries_dict)
-        self.registry_info.load()
-        self.connectRegistries()
         
-    def connectRegistries(self):
-        """
-        Get connection details for the trusted peer registries from file and 
-        create a connection to each. 
-        """
-        registries = self.registry_info['registries']['registry']
-        if isinstance(registries, dict):
-            registries = [registries]
-        if isinstance(registries, list):
-            for registry in registries:
-                # make sure the required fields are present
-                if not set(self.required_fields).issubset(registry.keys()):
-                    continue
-                hrn, address, port = registry['hrn'], registry['addr'], registry['port']
-                if not hrn or not address or not port:
-                    continue
-                self.interfaces.append(registry)
-                # check which client we should use
-                # sfa.util.xmlrpcprotocol is default
-                client_type = 'xmlrpcprotocol'
-                if registry.has_key('client') and registry['client'] in ['geniclientlight']:
-                    client_type = 'geniclientlight'
-                
-                # create url
-                url = 'http://%(address)s:%(port)s' % locals()
+        # create default connection dict
+        registries_dict = {'registries': {'registry': [default_fields]}}
 
-                # create the client connection
-                # make sure module exists before trying to instantiate it
-                if client_type in ['geniclientlight'] and GeniClientLight:
-                    self[hrn] = GeniClientLight(url, self.api.key_file, self.api.cert_file) 
-                else:    
-                    self[hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
+        # load config file
+        self.registry_info = XmlStorage(file, registries_dict)
+        self.registry_info.load()
+        self.interfaces = self.registry_info['registries']['registry']
+        if not isinstance(self.interfaces, list):
+            self.interfaces = [self.interfaces]
+        
+        # Attempt to get any missing peer gids
+        # There should be a gid file in /etc/sfa/trusted_roots for every
+        # peer registry found in in the registries.xml config file. If there
+        # are any missing gids, request a new one from the peer registry.
+        gids_current = self.api.auth.trusted_cert_list.get_list()
+        hrns_current = [gid.get_hrn() for gid in gids_found] 
+        hrns_expected = self.interfaces.keys()
+        new_hrns = set(hrns_current).difference(hrns_expected)
+        
+        self.get_peer_gids(new_hrns)
+
+        # update the local db records for these registries
+        self.update_db_records()
+        
+        # create connections to the registries
+        self.update(self.get_connections(interfaces))
+
+    def get_peer_gids(self, new_hrns):
+        """
+        Install trusted gids from the specified interfaces.  
+        """
+        if not new_hrns:
+            return
+        for new_hrn in new_hrns:
+            # get path for the new gid file
+            trusted_certs_dir = self.api.config.get_trustedroots_dir()
+            gid_filename = os.path.join(trusted_certs_dir, '%s.gid' % new_hrn)
+            
+            # get gid from the registry
+            registry = self.get_connections(self.interfaces[new_hrn])[new_hrn]
+            trusted_gids = registry.get_trusted_certs()
+            if not trusted_gids:
+                message = "interface: registry\tunable to retrieve and install trusted gid for %s" % new_hrn 
+                self.api.logger.info(message)
+                continue
+            gid = GID(string=trusted_gids[0])
+            gid.save_to_file(gid_filename, save_parents=True)
+            message = "interface: registry\tinstalled trusted gid for %s" % \
+                        (new_hrn)
+            self.api.logger.info(message)
+        
+        # reload the trusted certs list
+        self.api.auth.load_trusted_certs()
+
+    def update_db_records(self):
+        """
+        Make sure there is a record in the local db for allowed registries
+        defined in the config file (registries.xml). Removes old records from
+        the db.         
+        """
+        # get hrns we expect to find
+        hrns_expected = self.interfaces.keys()
+
+        # get hrns that actually exist in the db
+        table = SfaTable()
+        records = table.find({'type': 'sa'})
+        hrns_found = [record['hrn'] for record in records]
+        
+        # remove old records
+        for record in records:
+            if record['hrn'] not in hrns_expected:
+                table.remove(record)
+
+        # add new records
+        for hrn in hrns_expected:
+            if hrn not in hrns_found:
+                record = {
+                    'hrn': hrn,
+                    'type': 'sa',
+                }
+            table.insert(record)
+                        
+ 
+    def get_connections(self, registries):
+        """
+        read connection details for the trusted peer registries from file return 
+        a dictionary of connections keyed on interface hrn. 
+        """
+        connections = {}
+        required_fields = self.default_fields.keys()
+        if not isinstance(registries, []):
+            registries = [registries]
+        for registry in registries:
+            # make sure the required fields are present and not null
+            for key in required_fields
+                if not registry.get(key):
+                    continue 
+            hrn, address, port = registry['hrn'], registry['addr'], registry['port']
+            url = 'http://%(address)s:%(port)s' % locals()
+            # check which client we should use
+            # sfa.util.xmlrpcprotocol is default
+            client_type = 'xmlrpcprotocol'
+            if registry.has_key('client') and \
+               registry['client'] in ['geniclientlight'] and \
+               GeniClientLight:
+                client_type = 'geniclientlight'
+                connections[hrn] = GeniClientLight(url, self.api.key_file, self.api.cert_file) 
+            else:
+                connections[hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
 
         # set up a connection to the local registry
         address = self.api.config.SFA_REGISTRY_HOST
         port = self.api.config.SFA_REGISTRY_PORT
         url = 'http://%(address)s:%(port)s' % locals()
         local_registry = {'hrn': self.api.hrn, 'addr': address, 'port': port}
-        self.interfaces.append(local_registry)
-        self[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)            
-    
+        connections[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)            
+        return connections 
