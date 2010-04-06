@@ -25,12 +25,12 @@ class Aggregate(SfaServer):
 ##
 # Aggregates is a dictionary of aggregate connections keyed on the aggregate hrn
 
-class Aggregates(dict):
+class Aggregates(Interfaces):
 
-    default_dict = {'registries': {'registry': [default_fields]}}
+    default_dict = {'aggregates': {'aggregate': [Interfaces.default_fields]}}
  
-    def __init__(self, api, file = "/etc/sfa/aggregates.xml"):
-        Interfaces.__init__(self, api, conf_file, 'sa')
+    def __init__(self, api, conf_file = "/etc/sfa/aggregates.xml"):
+        Interfaces.__init__(self, api, conf_file, 'ma')
 
     def connectAggregates(self, interfaces):
         """

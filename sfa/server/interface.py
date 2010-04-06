@@ -6,10 +6,13 @@
 
 from sfa.util.faults import *
 from sfa.util.storage import *
+from sfa.util.namespace import *
 from sfa.trust.gid import GID
 from sfa.util.table import SfaTable
+from sfa.util.record import SfaRecord
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
+
  
 # GeniLight client support is optional
 try:
@@ -47,13 +50,13 @@ class Interfaces(dict):
     types = ['sa', 'ma']
 
     def __init__(self, api, conf_file, type):
-        if type not in self.allowed_types:
+        if type not in self.types:
             raise SfaInfaildArgument('Invalid type %s: must be in %s' % (type, self.types))    
         dict.__init__(self, {})
         self.api = api
         
         # load config file
-        self.interface_info = XmlStorage(conf_file, default_dict)
+        self.interface_info = XmlStorage(conf_file, self.default_dict)
         self.interface_info.load()
         self.interfaces = self.interface_info.values()[0].values()[0]
         if not isinstance(self.interfaces, list):
@@ -63,18 +66,17 @@ class Interfaces(dict):
         # There should be a gid file in /etc/sfa/trusted_roots for every
         # peer registry found in in the registries.xml config file. If there
         # are any missing gids, request a new one from the peer registry.
-        gids_current = self.api.auth.trusted_cert_list.get_list()
-        hrns_current = [gid.get_hrn() for gid in gids_found] 
-        hrns_expected = [interface['hrn'] for interfaces in self.interfaces] 
-        new_hrns = set(hrns_current).difference(hrns_expected)
-        
+        gids_current = self.api.auth.trusted_cert_list
+        hrns_current = [gid.get_hrn() for gid in gids_current] 
+        hrns_expected = [interface['hrn'] for interface in self.interfaces] 
+        new_hrns = set(hrns_expected).difference(hrns_current)
         self.get_peer_gids(new_hrns)
 
         # update the local db records for these registries
         self.update_db_records(type)
         
         # create connections to the registries
-        self.update(self.get_connections(interfaces))
+        self.update(self.get_connections(self.interfaces))
 
     def get_peer_gids(self, new_hrns):
         """
@@ -84,6 +86,9 @@ class Interfaces(dict):
             return
         trusted_certs_dir = self.api.config.get_trustedroots_dir()
         for new_hrn in new_hrns:
+            # the gid for this interface should already be installed  
+            if new_hrn == self.api.config.SFA_INTERFACE_HRN:
+                continue
             try:
                 # get gid from the registry
                 interface = self.get_connections(self.interfaces[new_hrn])[new_hrn]
@@ -118,13 +123,13 @@ class Interfaces(dict):
         the db.         
         """
         # get hrns we expect to find
-        hrns_expected = self.interfaces.keys()
+        hrns_expected = [interface['hrn'] for interface in self.interfaces]
 
         # get hrns that actually exist in the db
         table = SfaTable()
         records = table.find({'type': type})
         hrns_found = [record['hrn'] for record in records]
-        
+       
         # remove old records
         for record in records:
             if record['hrn'] not in hrns_expected:
@@ -136,8 +141,11 @@ class Interfaces(dict):
                 record = {
                     'hrn': hrn,
                     'type': type,
+                    'pointer': -1, 
+                    'authority': get_authority(hrn),
                 }
-            table.insert(record)
+                record = SfaRecord(dict=record)
+                table.insert(record)
                         
  
     def get_connections(self, interfaces):
@@ -147,7 +155,7 @@ class Interfaces(dict):
         """
         connections = {}
         required_fields = self.default_fields.keys()
-        if not isinstance(interfaces, []):
+        if not isinstance(interfaces, list):
             interfaces = [interfaces]
         for interface in interfaces:
             # make sure the required fields are present and not null
