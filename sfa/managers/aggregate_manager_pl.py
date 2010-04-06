@@ -15,7 +15,6 @@ from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.record import *
 from sfa.util.sfaticket import SfaTicket
-from sfa.server.registry import Registries
 from sfa.util.debug import log
 from sfa.plc.slices import Slices
 import sfa.plc.peers as peers
@@ -56,8 +55,7 @@ def create_slice(api, xrn, xml):
     slices = Slices(api)
     peer = slices.get_peer(hrn)
     sfa_peer = slices.get_sfa_peer(hrn)
-    registries = Registries(api)
-    registry = registries[api.hrn]
+    registry = api.registries[api.hrn]
     credential = api.getCredential()
     site_id, remote_site_id = slices.verify_site(registry, credential, hrn, 
                                                  peer, sfa_peer)
@@ -98,8 +96,7 @@ def create_slice(api, xrn, xml):
 def get_ticket(api, xrn, rspec, origin_hrn=None):
     slice_hrn, type = urn_to_hrn(xrn)
     # the the slice record
-    registries = Registries(api)
-    registry = registries[api.hrn]
+    registry = api.registries[api.hrn]
     credential = api.getCredential()
     records = registry.resolve(credential, xrn)
     
