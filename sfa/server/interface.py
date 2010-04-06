@@ -54,14 +54,21 @@ class Interfaces(dict):
             raise SfaInfaildArgument('Invalid type %s: must be in %s' % (type, self.types))    
         dict.__init__(self, {})
         self.api = api
-        
+        self.type = type  
         # load config file
         self.interface_info = XmlStorage(conf_file, self.default_dict)
         self.interface_info.load()
         self.interfaces = self.interface_info.values()[0].values()[0]
         if not isinstance(self.interfaces, list):
             self.interfaces = [self.interfaces]
-        
+        # get connections
+        self.update(self.get_connections(self.interfaces))
+
+    def sync_interfaces(self):
+        """
+        Install missing trusted gids and db records for our federated
+        interfaces
+        """     
         # Attempt to get any missing peer gids
         # There should be a gid file in /etc/sfa/trusted_roots for every
         # peer registry found in in the registries.xml config file. If there
@@ -73,11 +80,8 @@ class Interfaces(dict):
         self.get_peer_gids(new_hrns)
 
         # update the local db records for these registries
-        self.update_db_records(type)
+        self.update_db_records(self.type)
         
-        # create connections to the registries
-        self.update(self.get_connections(self.interfaces))
-
     def get_peer_gids(self, new_hrns):
         """
         Install trusted gids from the specified interfaces.  
