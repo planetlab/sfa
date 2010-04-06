@@ -46,5 +46,5 @@ class Aggregates(Interfaces):
         local_aggregate = {'hrn': self.api.hrn, 'addr': address, 'port': port}
         self.interfaces.append(local_aggregate) 
         connections[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
-        return connetions
+        return connections
 
