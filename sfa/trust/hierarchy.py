@@ -303,7 +303,7 @@ class Hierarchy:
         cred.set_gid_object(gid)
         cred.set_privileges(kind)
         cred.set_delegate(True)
-        cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
+        #cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
 
         parent_hrn = get_authority(hrn)
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:

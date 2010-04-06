@@ -478,7 +478,7 @@ class Sfi:
         dcred.set_gid_object(object_gid)
         dcred.set_privileges(user_cred.get_privileges())
         dcred.set_delegate(True)
-        dcred.set_pubkey(object_gid.get_pubkey())
+        
 
         # Save the issuer's gid to a file
         fname = self.options.sfi_dir + os.sep + "gid_%d" % random.randint(0,999999999)

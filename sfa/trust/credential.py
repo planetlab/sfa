@@ -13,8 +13,8 @@ import random
 import os
 import datetime
 
-import xml.dom.minidom
-from xml.dom.minidom import Document
+#import xml.dom.minidom
+from xml.dom.minidom import Document, parseString
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.certificate import Certificate
 from sfa.trust.rights import *
@@ -24,10 +24,14 @@ from sfa.util.sfalogging import logger
 
 
 # TODO:
-# . Need to verify credential parents (delegation)
-# . implement verify_chain
-# . Need to manage ref #s
-# . Need to add privileges (make PG and PL privs work together and add delegation per privilege instead of global)
+# . SFA is using set_parent to do chaining, but that's no longer necessary
+#   with the new credentials. fix.
+#    . This probably requires setting up some sort of CA hierarchy.
+# . Make sure that the creds pass xml verification (probably need some reordering)
+# . Need to implement full verification (parent signatures etc).
+# . remove verify_chain
+# . make delegation per privilege instead of global
+# . make privs match between PG and PL
 # . Need to test
 
 signature_template = \
@@ -76,9 +80,11 @@ class Credential(object):
     issuer_privkey = None
     issuer_gid = None
     issuer_pubkey = None
-    parent = None
+    parent_xml = None
+    signatures = []
     xml = None
-    max_refid = 0
+    refid = None
+    
     ##
     # Create a Credential object
     #
@@ -117,7 +123,7 @@ class Credential(object):
         else:
             self.set_lifetime(int(lifetime))
         self.lifeTime = legacy.get_lifetime()
-        self.privileges = legacy.get_privileges()
+        self.set_privileges(legacy.get_privileges())
         self.delegate = legacy.get_delegate()
 
     ##
@@ -129,17 +135,38 @@ class Credential(object):
         self.issuer_privkey = privkey
         self.issuer_gid = gid
 
-    def set_issuer(self, issuer):
-        issuer = issuer
+    #def set_issuer(self, issuer):
+    #    issuer = issuer
 
-    def set_subject(self, subject):
-        subject = subject
+    #def set_subject(self, subject):
+    #    subject = subject
         
-    def set_pubkey(self, pubkey):
-        self.issuer_pubkey = pubkey
+    #def set_pubkey(self, pubkey):
+    #    self.issuer_pubkey = pubkey
 
+
+    ##
+    # Store the parent's credential in self.parent_xml
+    # Store the parent's signatures in self.signatures
+    # Update this credential's refid
     def set_parent(self, cred):
-        self.parent = cred
+        if not cred.xml:
+            cred.encode()
+
+        logger.info("Setting parent for %s to %s" % (self.gidCaller.get_urn(), cred.gidCaller.get_urn()))
+        doc = parseString(cred.xml)
+        signed = doc.getElementsByTagName("signed-credential")[0]
+        cred = signed.getElementsByTagName("credential")[0]
+        signatures = signed.getElementsByTagName("signatures")[0]
+        sigs = signatures.getElementsByTagName("Signature")
+
+        self.parent_xml = cred.toxml()
+        self.signatures = []
+        for sig in sigs:
+            self.signatures.append(sig.toxml())
+
+        self.updateRefID()
+        
 
     ##
     # set the GID of the caller
@@ -258,28 +285,14 @@ class Credential(object):
     def encode(self):
         p_sigs = None
 
-        # Get information from the parent credential
-        if self.parent:
-            if not self.parent.xml:
-                self.parent.encode()            
-            p_doc = xml.dom.minidom.parseString(self.parent.xml)
-            p_signed_cred = p_doc.getElementsByTagName("signed-credential")[0]
-            p_cred = p_signed_cred.getElementsByTagName("credential")[0]               
-            p_signatures = p_signed_cred.getElementsByTagName("signatures")[0]
-            p_sigs = p_signatures.getElementsByTagName("Signature")
-
         # Create the XML document
         doc = Document()
         signed_cred = doc.createElement("signed-credential")
         doc.appendChild(signed_cred)  
         
-
-        # Fill in the <credential> bit
-        refid = "ref%d" % (self.max_refid + 1)
-        self.max_refid += 1
-        
+        # Fill in the <credential> bit        
         cred = doc.createElement("credential")
-        cred.setAttribute("xml:id", refid)
+        cred.setAttribute("xml:id", self.get_refid())
         signed_cred.appendChild(cred)
         self.append_sub(doc, cred, "type", "privilege")
         self.append_sub(doc, cred, "serial", "8")
@@ -304,39 +317,29 @@ class Credential(object):
                 privileges.appendChild(priv)
 
         # Add the parent credential if it exists
-        if self.parent:
-            parent = doc.createElement("parent")
-            parent.appendChild(p_cred)
-            cred.appendChild(parent)
-        
+        if self.parent_xml:
+            sdoc = parseString(self.parent_xml)
+            p_cred = doc.importNode(sdoc.getElementsByTagName("credential")[0], True)
+            p = doc.createElement("parent")
+            p.appendChild(p_cred)
+            cred.appendChild(p)
 
-        signed_cred.appendChild(cred)
 
-
-        # Fill in the <signature> bit
+        # Create the <signatures> tag
         signatures = doc.createElement("signatures")
-
-        sz_sig = signature_template % (refid,refid)
-
-        sdoc = xml.dom.minidom.parseString(sz_sig)
-        sig_ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
-        signatures.appendChild(sig_ele)
-        
-        # Add any existing signatures from the parent credential
-        if p_sigs:
-            for sig in p_sigs:
-                signatures.appendChild(sig)
-
+        signed_cred.appendChild(signatures)
 
         # Add any parent signatures
-        if self.parent:
-            for sig in p_sigs:
-                signatures.appendChild(sig)
+        if self.parent_xml:
+            for sig in self.signatures:
+                sdoc = parseString(sig)
+                ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
+                signatures.appendChild(ele)
 
-        signed_cred.appendChild(signatures)
         # Get the finished product
         self.xml = doc.toxml()
         #print doc.toprettyxml()
+        #self.sign()
 
 
     def save_to_random_tmp_file(self):
@@ -356,30 +359,101 @@ class Credential(object):
             self.encode()
         return self.xml
 
+    def get_refid(self):
+        if not self.refid:
+            self.refid = 'ref0'
+        return self.refid
+
+    def set_refid(self, rid):
+        self.refid = rid
+
+    ##
+    # Figure out what refids exist, and update this credential's id
+    # so that it doesn't clobber the others.  Returns the refids of
+    # the parents.
+    
+    def updateRefID(self):
+        if not self.parent_xml:
+            self.set_refid('ref0')
+            return []
+        
+        refs = []
+        
+        next_xml = self.parent_xml
+
+        logger.info("instance--")
+
+        while next_xml:
+            doc = parseString(next_xml)
+            cred = doc.getElementsByTagName("credential")[0]
+            refid = cred.getAttribute("xml:id")
+            logger.info("Found refid %s" % refid)
+            assert(refid not in refs)
+            refs.append(refid)
+
+            parent = doc.getElementsByTagName("parent")
+            if len(parent) > 0:
+                next_xml = parent[0].getElementsByTagName("credential")[0].toxml()
+            else:
+                next_xml = None
+
+        # Find a unique refid for this credential
+        rid = self.get_refid()
+        while rid in refs:
+            val = int(rid[3:])
+            rid = "ref%d" % (val + 1)
+
+        # Set the new refid
+        self.set_refid(rid)
+
+        # Return the set of parent credential ref ids
+        return refs
+
+    
+
     def sign(self):
+        if not self.issuer_privkey or not self.issuer_gid:
+            return
+        
         if not self.xml:
             self.encode()
+
+        doc = parseString(self.xml)
+        sigs = doc.getElementsByTagName("signatures")[0]
+        # Create the signature template
+        refid = self.get_refid()
+        sz_sig = signature_template % (refid,refid)
+        sdoc = parseString(sz_sig)
+        sig_ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
+        sigs.appendChild(sig_ele)
+
+        self.xml = doc.toxml()
+
         
         # Call out to xmlsec1 to sign it
-        ref = 'Sig_ref%d' % self.max_refid
+        ref = 'Sig_%s' % self.get_refid()
         filename = self.save_to_random_tmp_file()
         signed = os.popen('/usr/bin/xmlsec1 --sign --node-id "%s" --privkey-pem %s,%s %s' \
                  % (ref, self.issuer_privkey, self.issuer_gid, filename)).read()
         os.remove(filename)
 
+
         self.xml = signed
 
     def getTextNode(self, element, subele):
         sub = element.getElementsByTagName(subele)[0]
-        return sub.childNodes[0].nodeValue
-
+        if len(sub.childNodes) > 0:            
+            return sub.childNodes[0].nodeValue
+        else:
+            return None
+        
     ##
     # Retrieve the attributes of the credential from the XML.
     # This is automatically caleld by the various get_* methods of
     # this class and should not need to be called explicitly.
 
     def decode(self):
-        doc = xml.dom.minidom.parseString(self.xml)
+        doc = parseString(self.xml)
         signed_cred = doc.getElementsByTagName("signed-credential")[0]
         cred = signed_cred.getElementsByTagName("credential")[0]
         signatures = signed_cred.getElementsByTagName("signatures")[0]
@@ -411,7 +485,16 @@ class Credential(object):
         self.privileges = RightList(string=sz_privs)
         self.delegate
 
-        
+        # Is there a parent?
+        parent = cred.getElementsByTagName("parent")
+        if len(parent) > 0:
+            self.parent_xml = self.getTextNode(cred, "parent")
+            self.updateRefID()
+
+        # Get the signatures
+        for sig in sigs:
+            self.signatures.append(sig.toxml())
+            
     ##
     # For a simple credential (no delegation) verify..
     # . That the signature is valid for the credential's xml:id
@@ -428,7 +511,7 @@ class Credential(object):
         filename = self.save_to_random_tmp_file()
         cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
 
-        ref = "Sig_ref%d" % self.max_refid
+        ref = "Sig_%s" % self.get_refid()
         verified = os.popen('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
                             % (ref, cert_args, filename)).read()
 
@@ -488,7 +571,7 @@ class Credential(object):
 
         print "   delegate:", self.get_delegate()
 
-        if self.parent and dump_parents:
+        if self.parent_xml and dump_parents:
            print "PARENT",
-           self.parent.dump(dump_parents)
+           #self.parent.dump(dump_parents)
 
