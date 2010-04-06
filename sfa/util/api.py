@@ -19,8 +19,6 @@ from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.namespace import *
 from sfa.util.sfalogging import *
-from sfa.server.registry import Registries
-from sfa.server.aggregate import Aggregates
 
 # See "2.2 Characters" in the XML specification:
 #
@@ -129,9 +127,11 @@ class BaseAPI:
         self.logger=get_sfa_logger()
         
         # load registries
+        from sfa.server.registry import Registries
         self.registries = Registries(self) 
 
         # load aggregates
+        from sfa.server.aggregate import Aggregates
         self.aggregates = Aggregates(self)
 
 
