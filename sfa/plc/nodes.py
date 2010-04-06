@@ -16,7 +16,6 @@ from sfa.util.debug import log
 from sfa.util.rspec import *
 from sfa.util.specdict import * 
 from sfa.util.policy import Policy
-from sfa.server.aggregate import Aggregates 
 
 class Nodes(SimpleStorage):
 
@@ -107,7 +106,7 @@ class Nodes(SimpleStorage):
         end_time = int(threshold.strftime("%s"))
         duration = end_time - start_time
 
-        aggregates = Aggregates(self.api)
+        aggregates = self.api.aggregates
         rspecs = {}
         networks = []
         rspec = RSpec()

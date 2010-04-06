@@ -20,13 +20,11 @@ from sfa.util.prefixTree import prefixTree
 from sfa.util.rspec import *
 from sfa.util.sfaticket import *
 from sfa.util.debug import log
-from sfa.server.registry import Registries
-from sfa.server.aggregate import Aggregates
 import sfa.plc.peers as peers
 
 def delete_slice(api, xrn, origin_hrn=None):
     credential = api.getCredential()
-    aggregates = Aggregates(api)
+    aggregates = api.aggregates
     for aggregate in aggregates:
         success = False
         # request hash is optional so lets try the call without it
@@ -60,7 +58,7 @@ def create_slice(api, xrn, rspec, origin_hrn=None):
             message = "%s (line %s)" % (error.message, error.line)
             raise InvalidRSpec(message)
 
-    aggs = Aggregates(api)
+    aggs = api.aggregates
     cred = api.getCredential()                                                 
     for agg in aggs:
         if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
@@ -91,7 +89,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
         rspecs[net_hrn] = temp_rspec.toxml() 
     
     # send the rspec to the appropiate aggregate/sm
-    aggregates = Aggregates(api)
+    aggregates = api.aggregates
     credential = api.getCredential()
     tickets = {}
     for net_hrn in rspecs:
@@ -198,7 +196,7 @@ def get_rspec(api, xrn=None, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
     rspec = None
 
-    aggs = Aggregates(api)
+    aggs = api.aggregates
     cred = api.getCredential()                                                 
     for agg in aggs:
         if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
