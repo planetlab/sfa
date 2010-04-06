@@ -32,7 +32,7 @@ class Aggregates(Interfaces):
     def __init__(self, api, conf_file = "/etc/sfa/aggregates.xml"):
         Interfaces.__init__(self, api, conf_file, 'ma')
 
-    def connectAggregates(self, interfaces):
+    def get_connections(self, interfaces):
         """
         Get connection details for the trusted peer aggregates from file and 
         create an connection to each. 
