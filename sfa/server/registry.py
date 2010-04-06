@@ -72,13 +72,13 @@ class Registries(dict):
         # are any missing gids, request a new one from the peer registry.
         gids_current = self.api.auth.trusted_cert_list.get_list()
         hrns_current = [gid.get_hrn() for gid in gids_found] 
-        hrns_expected = self.interfaces.keys()
+        hrns_expected = [interface['hrn'] for interfaces in self.interfaces] 
         new_hrns = set(hrns_current).difference(hrns_expected)
         
         self.get_peer_gids(new_hrns)
 
         # update the local db records for these registries
-        self.update_db_records()
+        self.update_db_records('sa')
         
         # create connections to the registries
         self.update(self.get_connections(interfaces))
@@ -117,7 +117,7 @@ class Registries(dict):
         # reload the trusted certs list
         self.api.auth.load_trusted_certs()
 
-    def update_db_records(self):
+    def update_db_records(self, type):
         """
         Make sure there is a record in the local db for allowed registries
         defined in the config file (registries.xml). Removes old records from
