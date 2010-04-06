@@ -5,12 +5,12 @@ import os
 import sys
 import datetime
 import time
-import xmlrpclib
-from types import StringTypes, ListType
 
 from sfa.util.server import SfaServer
 from sfa.util.storage import *
 from sfa.util.faults import *
+from sfa.trust.gid import GID
+from sfa.util.table import SfaTable
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
 
@@ -39,35 +39,36 @@ class Aggregate(SfaServer):
 
 class Aggregates(dict):
 
-    required_fields = ['hrn', 'addr', 'port']
-     
+    default_fields = {
+        'hrn': '',
+        'addr': '',
+        'port': '',
+    }    
+ 
     def __init__(self, api, file = "/etc/sfa/aggregates.xml"):
         dict.__init__(self, {})
         self.api = api
-        self.interfaces = []
-        # create default connection dict
-        connection_dict = {}
-        for field in self.required_fields:
-            connection_dict[field] = ''
-        aggregates_dict = {'aggregates': {'aggregate': [connection_dict]}}
-        # get possible config file locations
-        loaded = False
-        path = os.path.dirname(os.path.abspath(__file__))
-        filename = file.split(os.sep)[-1]
-        alt_file = path + os.sep + filename
-        files = [file, alt_file]
         
-        for f in files:
-            try:
-                if os.path.isfile(f):
-                    self.aggregate_info = XmlStorage(f, aggregates_dict)
-                    loaded = True
-            except: pass
-
-        # if file is missing, just recreate it in the right place
-        if not loaded:
-            self.aggregate_info = XmlStorage(file, aggregates_dict)
+        # create default connection dict
+        aggregates_dict = {'aggregates': {'aggregate': [default_fields]}}
+        
+        # load config file
+        self.aggregate_info = XmlStorage(file, aggregates_dict)
         self.aggregate_info.load()
+        self.interfaces = self.registry_info['aggregates']['aggregate']
+        if not isinstance(self.interfaces, list):
+            self.interfaces = [self.interfaces]
+
+        # Attempt to get any missing peer gids
+        # There should be a gid file in /etc/sfa/trusted_roots for every
+        # peer registry found in in the aggregates.xml config file. If there
+        # are any missing gids, request a new one from the peer registry.
+        gids_current = self.api.auth.trusted_cert_list.get_list()
+        hrns_current = [gid.get_hrn() for gid in gids_found]
+        hrns_expected = [interface['hrn'] for interfaces in self.interfaces]
+        new_hrns = set(hrns_current).difference(hrns_expected)
+
+        self.get_peer_gids(new_hrns)
         self.connectAggregates()
 
     def connectAggregates(self):
