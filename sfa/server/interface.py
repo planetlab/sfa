@@ -151,7 +151,7 @@ class Interfaces(dict):
             interfaces = [interfaces]
         for interface in interfaces:
             # make sure the required fields are present and not null
-            for key in required_fields
+            for key in required_fields:
                 if not interface.get(key):
                     continue 
             hrn, address, port = interface['hrn'], interface['addr'], interface['port']

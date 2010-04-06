@@ -30,7 +30,7 @@ class Aggregates(dict):
     default_dict = {'registries': {'registry': [default_fields]}}
  
     def __init__(self, api, file = "/etc/sfa/aggregates.xml"):
-        Interfaces.__init__(self, conf_file, 'sa')
+        Interfaces.__init__(self, api, conf_file, 'sa')
 
     def connectAggregates(self, interfaces):
         """
