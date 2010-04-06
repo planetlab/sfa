@@ -26,11 +26,12 @@ class get_trusted_certs(Method):
         # If cred is not specified just return the gid for this interface.
         # This is true when when a peer is attempting to initiate federation
         # with this interface 
+        print cred
         if not cred:
             gid_strings = []
             for gid in self.api.auth.trusted_cert_list:
                 if gid.get_hrn() == self.api.config.SFA_INTERFACE_HRN:
-                    gid_strings.append[gid.save_to_string(save_parents=True)]   
+                    gid_strings.append(gid.save_to_string(save_parents=True))   
             return gid_strings
 
         # authenticate the cred
