@@ -208,7 +208,7 @@ def get_rspec(api, xrn=None, origin_hrn=None):
                 print >> log, "Error getting resources at aggregate %s" % agg
                 traceback.print_exc(log)
                 print >> log, "%s" % (traceback.format_exc())
-
+                continue
                 
             try:
                 tree = etree.parse(StringIO(agg_rspec))
