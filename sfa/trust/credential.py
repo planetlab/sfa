@@ -637,32 +637,6 @@ class Credential(object):
             parent_cred.verify_parent(Credential(string=parent_cred.parent_xml))
 
     ##
-    # Verify that a chain of credentials is valid (see cert.py:verify). In
-    # addition to the checks for ordinary certificates, verification also
-    # ensures that the delegate bit was set by each parent in the chain. If
-    # a delegate bit was not set, then an exception is thrown.
-    #
-    # Each credential must be a subset of the rights of the parent.
-
- ##    def verify_chain(self, trusted_certs = None):
-##         # do the normal certificate verification stuff
-##         Certificate.verify_chain(self, trusted_certs)
-
-##         if self.parent:
-##             # make sure the parent delegated rights to the child
-##             if not self.parent.get_delegate():
-##                 raise MissingDelegateBit(self.parent.get_subject())
-
-##             # make sure the rights given to the child are a subset of the
-##             # parents rights
-##             if not self.parent.get_privileges().is_superset(self.get_privileges()):
-##                 raise ChildRightsNotSubsetOfParent(self.get_subject() 
-##                                                    + " " + self.parent.get_privileges().save_to_string()
-##                                                    + " " + self.get_privileges().save_to_string())
-
-##         return
-
-    ##
     # Dump the contents of a credential to stdout in human-readable format
     #
     # @param dump_parents If true, also dump the parent certificates
@@ -682,9 +656,8 @@ class Credential(object):
         if gidObject:
             gidObject.dump(8, dump_parents)
 
-        print "   delegate:", self.get_delegate()
 
         if self.parent_xml and dump_parents:
            print "PARENT",
-           #self.parent.dump(dump_parents)
+           Credential(string=self.parent_xml).dump_parents()
 
