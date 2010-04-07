@@ -58,7 +58,7 @@ def get_credential(api, xrn, type, is_self=False):
     new_cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
     #new_cred.set_pubkey(object_gid.get_pubkey())
     new_cred.set_privileges(rights)
-    new_cred.set_delegate(True)
+    new_cred.get_privileges().delegate_all_privileges(True)
     auth_kind = "authority,ma,sa"
     # Parent not necessary, verify with certs
     #new_cred.set_parent(api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))

@@ -1,8 +1,7 @@
 ##
 # Implements SFA Credentials
 #
-# Credentials are layered on top of certificates, and are essentially a
-# certificate that stores a tuple of parameters.
+# Credentials are signed XML files that assign a subject gid privileges to an object gid
 ##
 
 ### $Id$
@@ -13,7 +12,6 @@ import random
 import os
 import datetime
 
-#import xml.dom.minidom
 from xml.dom.minidom import Document, parseString
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.certificate import Certificate
@@ -24,16 +22,12 @@ from sfa.util.sfalogging import logger
 
 
 # TODO:
-# . SFA is using set_parent to do chaining, but that's no longer necessary
-#   with the new credentials. fix.
-#    . This probably requires setting up some sort of CA hierarchy.
-# . Make sure that the creds pass xml verification (probably need some reordering)
 # . Need to implement full verification (parent signatures etc).
 # . remove verify_chain
 # . make delegation per privilege instead of global
 # . make privs match between PG and PL
 # . what about tickets?  do they need to be redone to be like credentials?
-# . Need to test
+# . Need to test delegation, xml verification
 
 signature_template = \
 '''
@@ -127,7 +121,7 @@ class Signature(object):
 
 ##
 # Credential is a tuple:
-#    (GIDCaller, GIDObject, Expiration (in UTC time), Privileges, DelegateBit)
+#    (GIDCaller, GIDObject, Expiration (in UTC time), Privileges)
 #
 # These fields are encoded in one of two ways.  The legacy style places
 # it in the subjectAltName of an X509 certificate.  The new credentials
@@ -139,7 +133,6 @@ class Credential(object):
     gidObject = None
     expiration = None
     privileges = None
-    delegate = False
     issuer_privkey = None
     issuer_gid = None
     issuer_pubkey = None
@@ -187,7 +180,7 @@ class Credential(object):
             self.set_lifetime(int(lifetime))
         self.lifeTime = legacy.get_lifetime()
         self.set_privileges(legacy.get_privileges())
-        self.delegate = legacy.get_delegate()
+        self.get_privileges().delegate_all_privileges(legacy.get_delegate())
 
     ##
     # Need the issuer's private key and name
@@ -286,22 +279,7 @@ class Credential(object):
             self.decode()
         return self.expiration
 
-    ##
-    # set the delegate bit
-    #
-    # @param delegate boolean (True or False)
-
-    def set_delegate(self, delegate):
-        self.delegate = delegate
-
-    ##
-    # get the delegate bit
-
-    def get_delegate(self):
-        if not self.delegate:
-            self.decode()
-        return self.delegate
-
+ 
     ##
     # set the privileges
     #
@@ -312,6 +290,7 @@ class Credential(object):
             self.privileges = RightList(string = privs)
         else:
             self.privileges = privs
+        
 
     ##
     # return the privileges as a RightList object
@@ -371,11 +350,11 @@ class Credential(object):
         cred.appendChild(privileges)
 
         if self.privileges:
-            rights = self.privileges.save_to_string().split(",")
-            for right in rights:
+            rights = self.get_privileges()
+            for right in rights.rights:
                 priv = doc.createElement("privilege")
-                self.append_sub(doc, priv, "name", right.strip())
-                self.append_sub(doc, priv, "can_delegate", str(self.delegate))
+                self.append_sub(doc, priv, "name", right.kind)
+                self.append_sub(doc, priv, "can_delegate", str(right.delegate))
                 privileges.appendChild(priv)
 
         # Add the parent credential if it exists
@@ -637,9 +616,23 @@ class Credential(object):
         if root_issuer != target_authority:
             raise CredentialNotVerifiable("issuer (%s) != authority of target (%s)" \
                                           % (root_issuer, target_authority))
-                                          
+
+    ##
+    # -- For Delegates (credentials with parents) verify that:
+    # . The privileges must be a subset of the parent credentials
+    # . The privileges must have "can_delegate" set for each delegated privilege
+    # . The target gid must be the same between child and parents
+    # . The expiry time on the child must be no later than the parent
+    # . The signer of the child must be the owner of the parent
         
     def verify_parent(self, parent_cred):
+        # make sure the rights given to the child are a subset of the
+        # parents rights (and check delegate bits)
+        if not parent_cred.get_privileges().is_superset(self.get_privileges()):
+            raise ChildRightsNotSubsetOfParent(
+                self.parent.get_privileges().save_to_string() + " " +
+                self.get_privileges().save_to_string())
+        
         if parent_cred.parent_xml:
             parent_cred.verify_parent(Credential(string=parent_cred.parent_xml))
 
@@ -650,9 +643,6 @@ class Credential(object):
     # a delegate bit was not set, then an exception is thrown.
     #
     # Each credential must be a subset of the rights of the parent.
-
-    def verify_chain(self, trusted_certs):
-        return
 
  ##    def verify_chain(self, trusted_certs = None):
 ##         # do the normal certificate verification stuff

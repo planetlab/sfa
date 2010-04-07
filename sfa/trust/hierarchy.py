@@ -302,7 +302,7 @@ class Hierarchy:
         cred.set_gid_caller(gid)
         cred.set_gid_object(gid)
         cred.set_privileges(kind)
-        cred.set_delegate(True)
+        cred.get_privileges().delegate_all_privileges(True)
         #cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
 
         parent_hrn = get_authority(hrn)

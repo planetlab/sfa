@@ -477,7 +477,7 @@ class Sfi:
         dcred.set_gid_caller(delegee_gid)
         dcred.set_gid_object(object_gid)
         dcred.set_privileges(user_cred.get_privileges())
-        dcred.set_delegate(True)
+        dcred.get_privileges().delegate_all_privileges(True)
         
 
         # Save the issuer's gid to a file
@@ -623,7 +623,7 @@ class Sfi:
        object_gid = object_cred.get_gid_object()
        object_hrn = object_gid.get_hrn()
     
-       if not object_cred.get_delegate():
+       if not object_cred.get_privileges().get_all_delegate():
            print "Error: Object credential", object_hrn, "does not have delegate bit set"
            return
     
@@ -645,8 +645,9 @@ class Sfi:
        dcred = Credential(subject=object_hrn + " delegated to " + delegee_hrn)
        dcred.set_gid_caller(delegee_gid)
        dcred.set_gid_object(object_gid)
+       privs = object_cred.get_privileges()
        dcred.set_privileges(object_cred.get_privileges())
-       dcred.set_delegate(True)
+       dcred.get_privileges().delegate_all_privileges(True)
        dcred.set_pubkey(object_gid.get_pubkey())
        dcred.set_issuer(user_key, user_hrn)
        dcred.set_parent(object_cred)

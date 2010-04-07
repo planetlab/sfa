@@ -23,7 +23,7 @@ class TestCred(unittest.TestCase):
       gidObject = GID(subject="object", uuid=create_uuid(), hrn="foo.object")
       lifeTime = 12345
       delegate = True
-      rights = "embed,bind"
+      rights = "embed:1,bind:1"
 
       cred.set_gid_caller(gidCaller)
       self.assertEqual(cred.get_gid_caller().get_subject(), gidCaller.get_subject())
@@ -33,9 +33,6 @@ class TestCred(unittest.TestCase):
 
       cred.set_lifetime(lifeTime)
       self.assertEqual(cred.get_lifetime(), lifeTime)
-
-      cred.set_delegate(delegate)
-      self.assertEqual(cred.get_delegate(), delegate)
 
       cred.set_privileges(rights)
       self.assertEqual(cred.get_privileges().save_to_string(), rights)

@@ -78,9 +78,10 @@ class Right:
    #
    # @param kind is a string naming the right. For example "control"
 
-   def __init__(self, kind):
+   def __init__(self, kind, delegate=False):
       self.kind = kind
-
+      self.delegate = delegate
+      
    ##
    # Test to see if this right object is allowed to perform an operation.
    # Returns True if the operation is allowed, False otherwise.
@@ -108,6 +109,9 @@ class Right:
    def is_superset(self, child):
       my_allowed_ops = privilege_table.get(self.kind.lower(), None)
       child_allowed_ops = privilege_table.get(child.kind.lower(), None)
+
+      if not self.delegate:
+          return False
 
       if "*" in my_allowed_ops:
           return True
@@ -140,9 +144,9 @@ class RightList:
     #
     # @param right is either a Right object or a string describing the right
 
-    def add(self, right):
+    def add(self, right, delegate=False):
         if isinstance(right, str):
-            right = Right(kind = right)
+            right = Right(kind = right, delegate=delegate)
         self.rights.append(right)
 
     ##
@@ -157,16 +161,23 @@ class RightList:
 
         parts = string.split(",")
         for part in parts:
-            self.rights.append(Right(part))
+            if ':' in part:
+                spl = part.split(':')
+                kind = spl[0]
+                delegate = int(spl[1])
+            else:
+                kind = part
+                delegate = 0
+            self.rights.append(Right(kind, bool(delegate)))
 
     ##
     # Save the rightlist object to a string. It is saved in the format of a
     # comma-separated list.
 
-    def save_to_string(self):
+    def save_to_string(self):        
         right_names = []
         for right in self.rights:
-            right_names.append(right.kind)
+            right_names.append('%s:%d' % (right.kind, right.delegate))
 
         return ",".join(right_names)
 
@@ -203,7 +214,29 @@ class RightList:
 
 
     ##
-    # Determine tje rights that an object should have. The rights are entirely
+    # set the delegate bit to 'delegate' on
+    # all privileges
+    #
+    # @param delegate boolean (True or False)
+
+    def delegate_all_privileges(self, delegate):
+        for right in self.rights:
+            right.delegate = delegate
+
+    ##
+    # true if all privileges have delegate bit set true
+    # false otherwise
+
+    def get_all_delegate(self):
+        for right in self.rights:
+            if not right.delegate:
+                return False
+        return True
+
+
+
+    ##
+    # Determine the rights that an object should have. The rights are entirely
     # dependent on the type of the object. For example, users automatically
     # get "refresh", "resolve", and "info".
     #
