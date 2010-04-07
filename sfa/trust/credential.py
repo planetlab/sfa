@@ -63,11 +63,67 @@ signature_template = \
 
 
 
+##
+# Utility function to get the text of an XML element
+#
+def getTextNode(element, subele):
+    sub = element.getElementsByTagName(subele)[0]
+    if len(sub.childNodes) > 0:            
+        return sub.childNodes[0].nodeValue
+    else:
+        return None
+        
 
-#class Signature(object):
 
-#class Signed_Credential(object):
+##
+# Signature contains information about an xmlsec1 signature
+# for a signed-credential
+
+class Signature(object):
+    refid = None
+    issuer_gid = None
+    xml = None
     
+    def __init__(self, string=None):
+        if string:
+            self.xml = string
+            self.decode()
+
+
+
+    def get_refid(self):
+        if not self.refid:
+            self.decode()
+        return self.refid
+
+    def get_xml(self):
+        if not self.xml:
+            self.encode()
+        return self.xml
+
+    def set_refid(self, id):
+        self.refid = id
+
+    def get_issuer_gid(self):
+        if not self.gid:
+            self.decode()
+        return self.gid        
+
+    def set_issuer_gid(self, gid):
+        self.gid = gid
+
+    def decode(self):
+        doc = parseString(self.xml)
+        sig = doc.getElementsByTagName("Signature")[0]
+        self.set_refid(sig.getAttribute("xml:id").strip("Sig_"))
+        keyinfo = sig.getElementsByTagName("X509Data")[0]
+        szgid = getTextNode(keyinfo, "X509Certificate")
+        szgid = "-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----" % szgid
+        self.set_issuer_gid(GID(string=szgid))        
+        
+    def encode(self):
+        self.xml = signature_template % (self.get_refid(), self.get_refid())
+
 
 ##
 # Credential is a tuple:
@@ -169,7 +225,7 @@ class Credential(object):
         self.parent_xml = cred.toxml()
         self.signatures = []
         for sig in sigs:
-            self.signatures.append(sig.toxml())
+            self.signatures.append(Signature(string=sig.toxml()))
 
         self.updateRefID()
         
@@ -338,7 +394,7 @@ class Credential(object):
         # Add any parent signatures
         if self.parent_xml:
             for sig in self.signatures:
-                sdoc = parseString(sig)
+                sdoc = parseString(sig.get_xml())
                 ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
                 signatures.appendChild(ele)
 
@@ -405,27 +461,27 @@ class Credential(object):
         # Return the set of parent credential ref ids
         return refs
 
-    
+    def get_xml(self):
+        if not self.xml:
+            self.encode()
+        return self.xml
 
     def sign(self):
         if not self.issuer_privkey or not self.issuer_gid:
             return
         
-        if not self.xml:
-            self.encode()
-
-        doc = parseString(self.xml)
+        doc = parseString(self.get_xml())
         sigs = doc.getElementsByTagName("signatures")[0]
-        # Create the signature template
-        refid = self.get_refid()
-        sz_sig = signature_template % (refid,refid)
-        sdoc = parseString(sz_sig)
+
+        # Create the signature template to be signed
+        signature = Signature()
+        signature.set_refid(self.get_refid())
+        sdoc = parseString(signature.get_xml())        
         sig_ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
         sigs.appendChild(sig_ele)
 
         self.xml = doc.toxml()
 
-        
         # Call out to xmlsec1 to sign it
         ref = 'Sig_%s' % self.get_refid()
         filename = self.save_to_random_tmp_file()
@@ -465,19 +521,19 @@ class Credential(object):
 
 
         self.set_refid(cred.getAttribute("xml:id"))
-        sz_expires = self.getTextNode(cred, "expires")
+        sz_expires = getTextNode(cred, "expires")
         if sz_expires != '':
             self.expiration = datetime.datetime.strptime(sz_expires, '%Y-%m-%dT%H:%M:%S')            
-        self.lifeTime = self.getTextNode(cred, "expires")
-        self.gidCaller = GID(string=self.getTextNode(cred, "owner_gid"))
-        self.gidObject = GID(string=self.getTextNode(cred, "target_gid"))
+        self.lifeTime = getTextNode(cred, "expires")
+        self.gidCaller = GID(string=getTextNode(cred, "owner_gid"))
+        self.gidObject = GID(string=getTextNode(cred, "target_gid"))
         privs = cred.getElementsByTagName("privileges")[0]
         sz_privs = ''
         delegates = []
         for priv in privs.getElementsByTagName("privilege"):
-            sz_privs += self.getTextNode(priv, "name")
+            sz_privs += getTextNode(priv, "name")
             sz_privs += ","
-            delegates.append(self.getTextNode(priv, "can_delegate"))
+            delegates.append(getTextNode(priv, "can_delegate"))
 
         # Can we delegate?
         delegate = False
@@ -492,12 +548,12 @@ class Credential(object):
         # Is there a parent?
         parent = cred.getElementsByTagName("parent")
         if len(parent) > 0:
-            self.parent_xml = self.getTextNode(cred, "parent")
+            self.parent_xml = getTextNode(cred, "parent")
             self.updateRefID()
 
         # Get the signatures
         for sig in sigs:
-            self.signatures.append(sig.toxml())
+            self.signatures.append(Signature(string=sig.toxml()))
             
     ##
     # Verify that:
@@ -520,7 +576,6 @@ class Credential(object):
     # @param trusted_certs: The certificates of trusted CA certificates
     
     def verify(self, trusted_certs):
-        logger.info("verifying cert")
         if not self.xml:
             self.decode()        
 
@@ -537,8 +592,6 @@ class Credential(object):
             refs.append("Sig_%s" % ref)
 
         for ref in refs:
-            logger.info('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
-                            % (ref, cert_args, filename))
             verified = os.popen('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
                             % (ref, cert_args, filename)).read()
             if not verified.strip().startswith("OK"):
@@ -557,6 +610,8 @@ class Credential(object):
 
     ##
     # Make sure the issuer of this credential is the target's authority
+    # Security hole: Because PL GID's use hrns in the CN instead of urns,
+    # the type is not checked, only the authority name.
     def verify_issuer(self):
         target_authority = get_authority(self.get_gid_object().get_hrn())
 
@@ -567,23 +622,16 @@ class Credential(object):
             if cur_cred.parent_xml:
                 cur_cred = Credential(string=cur_cred.parent_xml)
             else:
-                root_refid = "Sig_%s" % cur_cred.get_refid()                
+                root_refid = cur_cred.get_refid()                
                 cur_cred = None
 
         # Find the signature for the root credential
         root_issuer = None
         for sig in self.signatures:
-            doc = parseString(sig)
-            esig = doc.getElementsByTagName("Signature")[0]
-            ref = esig.getAttribute("xml:id")
-            if ref.lower() == root_refid.lower():
-                # Found the right signature, look for the issuer
-                keyinfo = esig.getElementsByTagName("X509Data")[0]
-                root_issuer = self.getTextNode(keyinfo, "X509SubjectName")
-                root_issuer = root_issuer.strip('CN=')
+            if sig.get_refid().lower() == root_refid.lower():
+                root_issuer = sig.get_issuer_gid().get_urn()
                 
         # Ensure that the signer of the root credential is the target_authority
-        root_issuer = hrn_to_urn(root_issuer, 'authority')
         target_authority = hrn_to_urn(target_authority, 'authority')
 
         if root_issuer != target_authority:
