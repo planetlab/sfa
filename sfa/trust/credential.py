@@ -32,6 +32,7 @@ from sfa.util.sfalogging import logger
 # . remove verify_chain
 # . make delegation per privilege instead of global
 # . make privs match between PG and PL
+# . what about tickets?  do they need to be redone to be like credentials?
 # . Need to test
 
 signature_template = \
@@ -61,6 +62,12 @@ signature_template = \
 '''
 
 
+
+
+#class Signature(object):
+
+#class Signed_Credential(object):
+    
 
 ##
 # Credential is a tuple:
@@ -153,7 +160,6 @@ class Credential(object):
         if not cred.xml:
             cred.encode()
 
-        logger.info("Setting parent for %s to %s" % (self.gidCaller.get_urn(), cred.gidCaller.get_urn()))
         doc = parseString(cred.xml)
         signed = doc.getElementsByTagName("signed-credential")[0]
         cred = signed.getElementsByTagName("credential")[0]
@@ -338,7 +344,7 @@ class Credential(object):
 
         # Get the finished product
         self.xml = doc.toxml()
-        #print doc.toprettyxml()
+        #print doc.toxml()
         #self.sign()
 
 
@@ -378,25 +384,15 @@ class Credential(object):
             return []
         
         refs = []
-        
-        next_xml = self.parent_xml
 
-        logger.info("instance--")
-
-        while next_xml:
-            doc = parseString(next_xml)
-            cred = doc.getElementsByTagName("credential")[0]
-            refid = cred.getAttribute("xml:id")
-            logger.info("Found refid %s" % refid)
-            assert(refid not in refs)
-            refs.append(refid)
-
-            parent = doc.getElementsByTagName("parent")
-            if len(parent) > 0:
-                next_xml = parent[0].getElementsByTagName("credential")[0].toxml()
+        next_cred = Credential(string=self.parent_xml)
+        while next_cred:
+            refs.append(next_cred.get_refid())
+            if next_cred.parent_xml:
+                next_cred = Credential(string=next_cred.parent_xml)
             else:
-                next_xml = None
-
+                next_cred = None
+        
         # Find a unique refid for this credential
         rid = self.get_refid()
         while rid in refs:
@@ -454,13 +450,21 @@ class Credential(object):
 
     def decode(self):
         doc = parseString(self.xml)
-        signed_cred = doc.getElementsByTagName("signed-credential")[0]
-        cred = signed_cred.getElementsByTagName("credential")[0]
-        signatures = signed_cred.getElementsByTagName("signatures")[0]
-        sigs = signatures.getElementsByTagName("Signature")
+        sigs = None
+        signed_cred = doc.getElementsByTagName("signed-credential")
+
+        # Is this a signed-cred or just a cred?
+        if len(signed_cred) > 0:
+            cred = signed_cred[0].getElementsByTagName("credential")[0]
+            signatures = signed_cred[0].getElementsByTagName("signatures")
+            if len(signatures) > 0:
+                sigs = signatures[0].getElementsByTagName("Signature")
+        else:
+            cred = doc.getElementsByTagName("credential")[0]
+        
 
 
-        self.max_refid = int(cred.getAttribute("xml:id")[3:])
+        self.set_refid(cred.getAttribute("xml:id"))
         sz_expires = self.getTextNode(cred, "expires")
         if sz_expires != '':
             self.expiration = datetime.datetime.strptime(sz_expires, '%Y-%m-%dT%H:%M:%S')            
@@ -496,29 +500,100 @@ class Credential(object):
             self.signatures.append(sig.toxml())
             
     ##
-    # For a simple credential (no delegation) verify..
-    # . That the signature is valid for the credential's xml:id
-    # . That the signer's pub key matches the pub key of the target (object)
-    # . That the target/owner urns match those in the gids
+    # Verify that:
+    # . All of the signatures are valid and that the issuers trace back
+    #   to trusted roots (performed by xmlsec1)
+    # . That the issuer of the credential is the authority in the target's urn
+    #    . In the case of a delegated credential, this must be true of the root
+    #
+    # -- For Delegates (credentials with parents)
+    # . The privileges must be a subset of the parent credentials
+    # . The privileges must have "can_delegate" set for each delegated privilege
+    # . The target gid must be the same between child and parents
+    # . The expiry time on the child must be no later than the parent
+    # . The signer of the child must be the owner of the parent
+    #
+    # -- Verify does *NOT*
+    # . ensure that an xmlrpc client's gid matches a credential gid, that
+    #   must be done elsewhere
     #
     # @param trusted_certs: The certificates of trusted CA certificates
     
     def verify(self, trusted_certs):
+        logger.info("verifying cert")
         if not self.xml:
             self.decode()        
 
-        # Verify the sigatures
+        # Verify the signatures
         filename = self.save_to_random_tmp_file()
         cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
 
-        ref = "Sig_%s" % self.get_refid()
-        verified = os.popen('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
-                            % (ref, cert_args, filename)).read()
+        
+        refs = []
+        refs.append("Sig_%s" % self.get_refid())
 
-        if not verified.strip().startswith("OK"):
-            raise CredentialNotVerifiable("xmlsec1 error: " + verified)
+        parentRefs = self.updateRefID()
+        for ref in parentRefs:
+            refs.append("Sig_%s" % ref)
+
+        for ref in refs:
+            logger.info('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
+                            % (ref, cert_args, filename))
+            verified = os.popen('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
+                            % (ref, cert_args, filename)).read()
+            if not verified.strip().startswith("OK"):
+                raise CredentialNotVerifiable("xmlsec1 error: " + verified)
 
         os.remove(filename)
+
+        # Verify the parents (delegation)
+        #if self.parent_xml:
+        #    self.verify_parent(Credential(string=self.parent_xml))
+
+        # Make sure the issuer is the target's authority
+        self.verify_issuer()
+
+
+
+    ##
+    # Make sure the issuer of this credential is the target's authority
+    def verify_issuer(self):
+        target_authority = get_authority(self.get_gid_object().get_hrn())
+
+        # Find the root credential's refid
+        cur_cred = self
+        root_refid = None
+        while cur_cred:            
+            if cur_cred.parent_xml:
+                cur_cred = Credential(string=cur_cred.parent_xml)
+            else:
+                root_refid = "Sig_%s" % cur_cred.get_refid()                
+                cur_cred = None
+
+        # Find the signature for the root credential
+        root_issuer = None
+        for sig in self.signatures:
+            doc = parseString(sig)
+            esig = doc.getElementsByTagName("Signature")[0]
+            ref = esig.getAttribute("xml:id")
+            if ref.lower() == root_refid.lower():
+                # Found the right signature, look for the issuer
+                keyinfo = esig.getElementsByTagName("X509Data")[0]
+                root_issuer = self.getTextNode(keyinfo, "X509SubjectName")
+                root_issuer = root_issuer.strip('CN=')
+                
+        # Ensure that the signer of the root credential is the target_authority
+        root_issuer = hrn_to_urn(root_issuer, 'authority')
+        target_authority = hrn_to_urn(target_authority, 'authority')
+
+        if root_issuer != target_authority:
+            raise CredentialNotVerifiable("issuer (%s) != authority of target (%s)" \
+                                          % (root_issuer, target_authority))
+                                          
+        
+    def verify_parent(self, parent_cred):
+        if parent_cred.parent_xml:
+            parent_cred.verify_parent(Credential(string=parent_cred.parent_xml))
 
     ##
     # Verify that a chain of credentials is valid (see cert.py:verify). In

@@ -60,7 +60,8 @@ def get_credential(api, xrn, type, is_self=False):
     new_cred.set_privileges(rights)
     new_cred.set_delegate(True)
     auth_kind = "authority,ma,sa"
-    new_cred.set_parent(api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
+    # Parent not necessary, verify with certs
+    #new_cred.set_parent(api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
     new_cred.encode()
     new_cred.sign()
 

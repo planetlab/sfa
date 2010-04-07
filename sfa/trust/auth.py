@@ -28,6 +28,7 @@ class Auth:
         if not config:
             self.config = Config()
         self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
+        self.trusted_cert_file_list = TrustedRootList(self.config.get_trustedroots_dir()).get_file_list()
 
 
     def check(self, cred, operation):
@@ -56,7 +57,7 @@ class Auth:
                 raise InsufficientRights(operation)
 
         if self.trusted_cert_list:
-            self.client_cred.verify_chain(self.trusted_cert_list)
+            self.client_cred.verify(self.trusted_cert_file_list)
             if self.client_gid:
                 self.client_gid.verify_chain(self.trusted_cert_list)
             if self.object_gid:
@@ -98,7 +99,7 @@ class Auth:
 
     def validateCred(self, cred):
         if self.trusted_cert_list:
-            cred.verify_chain(self.trusted_cert_list)
+            cred.verify(self.trusted_cert_file_list)
             caller_gid = cred.get_gid_caller()
             object_gid = cred.get_gid_object()
             if caller_gid:

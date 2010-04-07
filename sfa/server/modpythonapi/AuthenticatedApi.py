@@ -18,6 +18,7 @@ class AuthenticatedApi(BaseApi):
         BaseApi.__init__(self, encoding)
         if trustedRootsDir:
             self.trusted_cert_list = TrustedRootList(trustedRootsDir).get_list()
+            self.trusted_cert_file_list = TrustedRootList(trustedRootsDir).get_file_list()
         else:
             self.trusted_cert_list = None
 
@@ -40,7 +41,7 @@ class AuthenticatedApi(BaseApi):
 
     def validateCred(self, cred):
         if self.trusted_cert_list:
-            cred.verify_chain(self.trusted_cert_list)
+            cred.verify(self.trusted_cert_file_list)
             caller_gid = cred.get_gid_caller()
             object_gid = cred.get_gid_object()
             if caller_gid:

@@ -314,6 +314,8 @@ class Hierarchy:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
             cred.set_issuer_keys(parent_auth_info.get_privkey_filename(), parent_auth_info.get_gid_filename())
+
+            
             cred.set_parent(self.get_auth_cred(parent_hrn, kind))
 
         cred.encode()
