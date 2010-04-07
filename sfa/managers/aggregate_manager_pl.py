@@ -67,7 +67,8 @@ def create_slice(api, xrn, xml):
     slice = network.get_slice(api, hrn)
     current = __get_hostnames(slice.get_nodes())
 
-    network.addRSpec(xml, "/var/www/html/schemas/pl.rng")
+    network.addRSpec(xml, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
+    
     request = __get_hostnames(network.nodesWithSlivers())
     
     # remove nodes not in rspec

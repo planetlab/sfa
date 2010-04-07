@@ -127,7 +127,10 @@ class Interfaces(dict):
         the db.         
         """
         # get hrns we expect to find
-        hrns_expected = [interface['hrn'] for interface in self.interfaces]
+        # ignore records for local interfaces
+        ignore_interfaces = [self.api.config.SFA_INTERFACE_HRN]
+        hrns_expected = [interface['hrn'] for interface in self.interfaces \
+                         if interface['hrn'] not in ignore_interfaces]
 
         # get hrns that actually exist in the db
         table = SfaTable()

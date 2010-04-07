@@ -45,7 +45,8 @@ package_dirs = [
 data_files = [('/etc/sfa/', [ 'config/aggregates.xml',
                               'config/registries.xml',
                               'config/default_config.xml',
-                              'config/sfi_config']),
+                              'config/sfi_config',
+                              'sfa/managers/pl/pl.rng']),
               ('/etc/sfatables/matches/', glob('sfatables/matches/*.xml')),
               ('/etc/sfatables/targets/', glob('sfatables/targets/*.xml')),
               ('/etc/init.d/', ['sfa/init.d/sfa', 'sfa/init.d/sfa-cm'])]

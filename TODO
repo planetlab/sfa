@@ -4,7 +4,6 @@
 * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
 
 - Component manager
-  * only call get_gids() if there are slices with no gids installed
   * GetTicket - must verify_{site,slice,person,keys} on remote aggregate 
   * Redeem ticket - RedeemTicket/AdminTicket not working. Why?
   * install the slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
@@ -17,11 +16,12 @@
   slices were on it and recreate them? do we make some sort of transaction log)   
 
 - Registry
-* sfa.plc.api.SfaAPI.fill_record_pl_info() should add the sites PIs to a slice records researchers list
+* sign peer gids 
 * update call should attempt to push updates to federated peers if 
   the peer has a record for an object that is updated locally  
 * api.update_membership() shoudl behave more like resolve when looking up records (attempt to resolve records at federated registeries) instead of only looking in the local registry
-* support generic registry records (dont depend on postgres!)
+* move db tables into db with less overhead (tokyocabinet?)
+* make resolve, fill_record_info more fault tolerent. Skip records with failures
 
 - Auth Service
   * develop a simple service where users auth using username/passord and 
