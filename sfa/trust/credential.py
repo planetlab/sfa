@@ -579,8 +579,8 @@ class Credential(object):
         os.remove(filename)
 
         # Verify the parents (delegation)
-        #if self.parent_xml:
-        #    self.verify_parent(Credential(string=self.parent_xml))
+        if self.parent_xml:
+            self.verify_parent(Credential(string=self.parent_xml))
 
         # Make sure the issuer is the target's authority
         self.verify_issuer()
