@@ -21,13 +21,15 @@ from sfa.util.faults import *
 from sfa.util.sfalogging import logger
 
 
+# Two years, in minutes 
+DEFAULT_CREDENTIAL_LIFETIME = 1051200
+
+
 # TODO:
-# . Need to implement full verification (parent signatures etc).
-# . remove verify_chain
-# . make delegation per privilege instead of global
 # . make privs match between PG and PL
-# . what about tickets?  do they need to be redone to be like credentials?
 # . Need to test delegation, xml verification
+
+
 
 signature_template = \
 '''
@@ -186,7 +188,7 @@ class Credential(object):
         lifetime = legacy.get_lifetime()
         if not lifetime:
             # Default to two years
-            self.set_lifetime(1051200)
+            self.set_lifetime(DEFAULT_CREDENTIAL_LIFETIME)
         else:
             self.set_lifetime(int(lifetime))
         self.lifeTime = legacy.get_lifetime()
@@ -201,15 +203,6 @@ class Credential(object):
     def set_issuer_keys(self, privkey, gid):
         self.issuer_privkey = privkey
         self.issuer_gid = gid
-
-    #def set_issuer(self, issuer):
-    #    issuer = issuer
-
-    #def set_subject(self, subject):
-    #    subject = subject
-        
-    #def set_pubkey(self, pubkey):
-    #    self.issuer_pubkey = pubkey
 
 
     ##
@@ -425,7 +418,7 @@ class Credential(object):
         next_cred = self.parent
         while next_cred:
             refs.append(next_cred.get_refid())
-            if next_cred.parent_xml:
+            if next_cred.parent:
                 next_cred = next_cred.parent
             else:
                 next_cred = None
