@@ -175,7 +175,8 @@ class Credential(object):
         self.gidObject = legacy.get_gid_object()
         lifetime = legacy.get_lifetime()
         if not lifetime:
-            self.set_lifetime(3600)
+            # Default to two years
+            self.set_lifetime(1051200)
         else:
             self.set_lifetime(int(lifetime))
         self.lifeTime = legacy.get_lifetime()
@@ -540,6 +541,7 @@ class Credential(object):
     #   to trusted roots (performed by xmlsec1)
     # . That the issuer of the credential is the authority in the target's urn
     #    . In the case of a delegated credential, this must be true of the root
+    # . That all of the gids presented in the credential are valid
     #
     # -- For Delegates (credentials with parents)
     # . The privileges must be a subset of the parent credentials
@@ -562,6 +564,17 @@ class Credential(object):
         filename = self.save_to_random_tmp_file()
         cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
 
+        # Verify the gids of this cred and of its parents
+        trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
+
+        cur_cred = self
+        while cur_cred:
+            cur_cred.get_gid_object().verify_chain(trusted_cert_objects)
+            cur_cred.get_gid_caller().verify_chain(trusted_cert_objects)
+            if self.parent_xml:
+                cur_cred = Credential(string=self.parent_xml)
+            else:
+                cur_cred = None
         
         refs = []
         refs.append("Sig_%s" % self.get_refid())
@@ -589,10 +602,8 @@ class Credential(object):
 
     ##
     # Make sure the issuer of this credential is the target's authority
-    # Security hole: Because PL GID's use hrns in the CN instead of urns,
-    # the type is not checked, only the authority name.
-    def verify_issuer(self):
-        target_authority = get_authority(self.get_gid_object().get_hrn())
+    def verify_issuer(self):        
+        target_authority = get_authority(self.get_gid_object().get_urn())
 
         # Find the root credential's refid
         cur_cred = self
@@ -609,6 +620,7 @@ class Credential(object):
         for sig in self.signatures:
             if sig.get_refid().lower() == root_refid.lower():
                 root_issuer = sig.get_issuer_gid().get_urn()
+                
                 
         # Ensure that the signer of the root credential is the target_authority
         target_authority = hrn_to_urn(target_authority, 'authority')

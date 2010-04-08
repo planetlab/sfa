@@ -42,12 +42,6 @@ class AuthenticatedApi(BaseApi):
     def validateCred(self, cred):
         if self.trusted_cert_list:
             cred.verify(self.trusted_cert_file_list)
-            caller_gid = cred.get_gid_caller()
-            object_gid = cred.get_gid_object()
-            if caller_gid:
-                caller_gid.verify_chain(self.trusted_cert_list)
-            if object_gid:
-                object_gid.verify_chain(self.trusted_cert_list)
 
     def authenticateGid(self, gidStr, argList, requestHash):
         gid = GID(string = gidStr)

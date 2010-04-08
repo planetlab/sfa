@@ -9,7 +9,11 @@ def get_leaf(hrn):
     parts = hrn.split(".")
     return ".".join(parts[-1:])
 
-def get_authority(hrn):
+def get_authority(xrn):
+    hrn, type = urn_to_hrn(xrn)
+    if type and type == 'authority':
+        return hrn
+    
     parts = hrn.split(".")
     return ".".join(parts[:-1])
 
