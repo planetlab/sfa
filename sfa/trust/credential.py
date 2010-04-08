@@ -136,8 +136,8 @@ class Credential(object):
     issuer_privkey = None
     issuer_gid = None
     issuer_pubkey = None
-    parent_xml = None
-    signatures = []
+    parent = None
+    signature = None
     xml = None
     refid = None
     
@@ -163,7 +163,17 @@ class Credential(object):
             else:
                 self.xml = str
                 self.decode()
-                
+
+
+    def get_signature(self):
+        if not self.signature:
+            self.decode()
+        return self.signature
+
+    def set_signature(self, sig):
+        self.signature = sig
+
+        
     ##
     # Translate a legacy credential into a new one
     #
@@ -203,24 +213,9 @@ class Credential(object):
 
 
     ##
-    # Store the parent's credential in self.parent_xml
-    # Store the parent's signatures in self.signatures
-    # Update this credential's refid
+    # Set this credential's parent
     def set_parent(self, cred):
-        if not cred.xml:
-            cred.encode()
-
-        doc = parseString(cred.xml)
-        signed = doc.getElementsByTagName("signed-credential")[0]
-        cred = signed.getElementsByTagName("credential")[0]
-        signatures = signed.getElementsByTagName("signatures")[0]
-        sigs = signatures.getElementsByTagName("Signature")
-
-        self.parent_xml = cred.toxml()
-        self.signatures = []
-        for sig in sigs:
-            self.signatures.append(Signature(string=sig.toxml()))
-
+        self.parent = cred
         self.updateRefID()
         
 
@@ -359,8 +354,8 @@ class Credential(object):
                 privileges.appendChild(priv)
 
         # Add the parent credential if it exists
-        if self.parent_xml:
-            sdoc = parseString(self.parent_xml)
+        if self.parent:
+            sdoc = parseString(self.parent.get_xml())
             p_cred = doc.importNode(sdoc.getElementsByTagName("credential")[0], True)
             p = doc.createElement("parent")
             p.appendChild(p_cred)
@@ -372,12 +367,18 @@ class Credential(object):
         signed_cred.appendChild(signatures)
 
         # Add any parent signatures
-        if self.parent_xml:
-            for sig in self.signatures:
-                sdoc = parseString(sig.get_xml())
+        if self.parent:
+            cur_cred = self.parent
+            while cur_cred:
+                sdoc = parseString(cur_cred.get_signature().get_xml())
                 ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
                 signatures.appendChild(ele)
 
+                if cur_cred.parent:
+                    cur_cred = cur_cred.parent
+                else:
+                    cur_cred = None
+                
         # Get the finished product
         self.xml = doc.toxml()
         #print doc.toxml()
@@ -415,17 +416,17 @@ class Credential(object):
     # the parents.
     
     def updateRefID(self):
-        if not self.parent_xml:
+        if not self.parent:
             self.set_refid('ref0')
             return []
         
         refs = []
 
-        next_cred = Credential(string=self.parent_xml)
+        next_cred = self.parent
         while next_cred:
             refs.append(next_cred.get_refid())
             if next_cred.parent_xml:
-                next_cred = Credential(string=next_cred.parent_xml)
+                next_cred = next_cred.parent
             else:
                 next_cred = None
         
@@ -528,12 +529,23 @@ class Credential(object):
         # Is there a parent?
         parent = cred.getElementsByTagName("parent")
         if len(parent) > 0:
-            self.parent_xml = getTextNode(cred, "parent")
+            self.parent = Credential(string=getTextNode(cred, "parent"))
             self.updateRefID()
 
-        # Get the signatures
+        # Assign the signatures to the credentials
         for sig in sigs:
-            self.signatures.append(Signature(string=sig.toxml()))
+            Sig = Signature(string=sig.toxml())
+
+            cur_cred = self
+            while cur_cred:
+                if cur_cred.get_refid() == Sig.get_refid():
+                    cur_cred.set_signature(Sig)
+                    
+                if cur_cred.parent:
+                    cur_cred = cur_cred.parent
+                else:
+                    cur_cred = None
+                
             
     ##
     # Verify that:
@@ -571,8 +583,8 @@ class Credential(object):
         while cur_cred:
             cur_cred.get_gid_object().verify_chain(trusted_cert_objects)
             cur_cred.get_gid_caller().verify_chain(trusted_cert_objects)
-            if self.parent_xml:
-                cur_cred = Credential(string=self.parent_xml)
+            if cur_cred.parent:
+                cur_cred = cur_cred.parent
             else:
                 cur_cred = None
         
@@ -592,8 +604,8 @@ class Credential(object):
         os.remove(filename)
 
         # Verify the parents (delegation)
-        if self.parent_xml:
-            self.verify_parent(Credential(string=self.parent_xml))
+        if self.parent:
+            self.verify_parent(self.parent)
 
         # Make sure the issuer is the target's authority
         self.verify_issuer()
@@ -605,22 +617,16 @@ class Credential(object):
     def verify_issuer(self):        
         target_authority = get_authority(self.get_gid_object().get_urn())
 
-        # Find the root credential's refid
+        # Find the root credential's signature
         cur_cred = self
         root_refid = None
         while cur_cred:            
-            if cur_cred.parent_xml:
-                cur_cred = Credential(string=cur_cred.parent_xml)
+            if cur_cred.parent:
+                cur_cred = cur_cred.parent
             else:
-                root_refid = cur_cred.get_refid()                
+                root_issuer = cur_cred.get_signature().get_issuer_gid().get_urn()
                 cur_cred = None
 
-        # Find the signature for the root credential
-        root_issuer = None
-        for sig in self.signatures:
-            if sig.get_refid().lower() == root_refid.lower():
-                root_issuer = sig.get_issuer_gid().get_urn()
-                
                 
         # Ensure that the signer of the root credential is the target_authority
         target_authority = hrn_to_urn(target_authority, 'authority')
@@ -644,9 +650,23 @@ class Credential(object):
             raise ChildRightsNotSubsetOfParent(
                 self.parent.get_privileges().save_to_string() + " " +
                 self.get_privileges().save_to_string())
-        
-        if parent_cred.parent_xml:
-            parent_cred.verify_parent(Credential(string=parent_cred.parent_xml))
+
+        # make sure my target gid is the same as the parent's
+        if not parent_cred.get_gid_object().save_to_string() == \
+           self.get_gid_object().save_to_string():
+            raise CredentialNotVerifiable("target gid not equal between parent and child")
+
+        # make sure my expiry time is <= my parent's
+        if not parent_cred.get_lifetime() >= self.get_lifetime():
+            raise CredentialNotVerifiable("delegated credential expires after parent")
+
+        # make sure my signer is the parent's caller
+        if not parent_cred.get_gid_caller().save_to_string(False) == \
+           self.get_signature().get_issuer_gid().save_to_string(False):
+            raise CredentialNotVerifiable("delegated credential not signed by parent caller")
+                
+        if parent_cred.parent:
+            parent_cred.verify_parent(parent_cred.parent)
 
     ##
     # Dump the contents of a credential to stdout in human-readable format
@@ -669,7 +689,7 @@ class Credential(object):
             gidObject.dump(8, dump_parents)
 
 
-        if self.parent_xml and dump_parents:
+        if self.parent and dump_parents:
            print "PARENT",
-           Credential(string=self.parent_xml).dump_parents()
+           self.parent.dump_parents()
 
