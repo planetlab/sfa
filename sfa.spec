@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 10
+%define taglevel 11
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -154,6 +154,14 @@ chkconfig --add sfa
 %post cm
 chkconfig --add sfa-cm
 %changelog
+* Thu Apr 08 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
+- SfaServer now uses a pool of threads to handle requests concurrently
+- sfa.util.rspec no longer used to process/manage rspecs (deprecated). This is now handled by sfa.plc.network and is not backwards compatible
+- PIs can now get a slice credential for any slice at thier site without having to be a member of the slice
+- Registry records for federated peers (defined in registries.xml, aggregates.xml) updated when sfa service is started
+- Interfaces will try to fetch and install gids from peers listed in registries.xml/aggregates.xml if gid is not found in /etc/sfa/trusted_roots dir   
+- Componet manager does not install gid files if slice already has them  
+ 
 * Thu Jan 21 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-10
 - This tag is quite same as the previous one (sfa-0.9-9) except that the vini and max aggregate managers are also updated for urn support.  Other features are:
 - - sfa-config-tty now has the same features like plc-config-tty
