@@ -28,7 +28,7 @@ DEFAULT_CREDENTIAL_LIFETIME = 1051200
 # TODO:
 # . make privs match between PG and PL
 # . Need to test delegation, xml verification
-
+# . Need to add support for other types of credentials, e.g. tickets
 
 
 signature_template = \
@@ -210,7 +210,6 @@ class Credential(object):
     def set_parent(self, cred):
         self.parent = cred
         self.updateRefID()
-        
 
     ##
     # set the GID of the caller
@@ -264,7 +263,7 @@ class Credential(object):
     # get the lifetime of the credential (in minutes)
 
     def get_lifetime(self):
-        if not self.lifeTime:
+        if not self.expiration:
             self.decode()
         return self.expiration
 
@@ -422,6 +421,7 @@ class Credential(object):
                 next_cred = next_cred.parent
             else:
                 next_cred = None
+
         
         # Find a unique refid for this credential
         rid = self.get_refid()
@@ -443,7 +443,6 @@ class Credential(object):
     def sign(self):
         if not self.issuer_privkey or not self.issuer_gid:
             return
-        
         doc = parseString(self.get_xml())
         sigs = doc.getElementsByTagName("signatures")[0]
 
@@ -463,8 +462,8 @@ class Credential(object):
                  % (ref, self.issuer_privkey, self.issuer_gid, filename)).read()
         os.remove(filename)
 
-
         self.xml = signed
+        
 
     def getTextNode(self, element, subele):
         sub = element.getElementsByTagName(subele)[0]
@@ -479,6 +478,8 @@ class Credential(object):
     # this class and should not need to be called explicitly.
 
     def decode(self):
+        if not self.xml:
+            return
         doc = parseString(self.xml)
         sigs = None
         signed_cred = doc.getElementsByTagName("signed-credential")
@@ -497,27 +498,21 @@ class Credential(object):
         self.set_refid(cred.getAttribute("xml:id"))
         sz_expires = getTextNode(cred, "expires")
         if sz_expires != '':
-            self.expiration = datetime.datetime.strptime(sz_expires, '%Y-%m-%dT%H:%M:%S')            
+            self.expiration = datetime.datetime.strptime(sz_expires, '%Y-%m-%dT%H:%M:%S')        
         self.lifeTime = getTextNode(cred, "expires")
         self.gidCaller = GID(string=getTextNode(cred, "owner_gid"))
-        self.gidObject = GID(string=getTextNode(cred, "target_gid"))
+        self.gidObject = GID(string=getTextNode(cred, "target_gid"))   
+
+
+        # Process privileges
         privs = cred.getElementsByTagName("privileges")[0]
-        sz_privs = ''
-        delegates = []
+        rlist = RightList()
         for priv in privs.getElementsByTagName("privilege"):
-            sz_privs += getTextNode(priv, "name")
-            sz_privs += ","
-            delegates.append(getTextNode(priv, "can_delegate"))
+            kind = getTextNode(priv, "name")
+            deleg = bool(getTextNode(priv, "can_delegate"))
+            rlist.add(Right(kind.strip(), deleg))
+        self.set_privileges(rlist)
 
-        # Can we delegate?
-        delegate = False
-        if "false" not in delegates:
-            self.delegate = True
-
-        # Make the rights list
-        sz_privs.rstrip(", ")
-        self.privileges = RightList(string=sz_privs)
-        self.delegate
 
         # Is there a parent?
         parent = cred.getElementsByTagName("parent")

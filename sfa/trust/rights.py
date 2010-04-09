@@ -11,6 +11,7 @@
 ##
 
 
+
 ##
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
@@ -146,7 +147,7 @@ class RightList:
 
     def add(self, right, delegate=False):
         if isinstance(right, str):
-            right = Right(kind = right, delegate=delegate)
+            right = Right(right, delegate)
         self.rights.append(right)
 
     ##
@@ -163,10 +164,10 @@ class RightList:
         for part in parts:
             if ':' in part:
                 spl = part.split(':')
-                kind = spl[0]
-                delegate = int(spl[1])
+                kind = spl[0].strip()
+                delegate = bool(int(spl[1]))
             else:
-                kind = part
+                kind = part.strip()
                 delegate = 0
             self.rights.append(Right(kind, bool(delegate)))
 
@@ -177,7 +178,7 @@ class RightList:
     def save_to_string(self):        
         right_names = []
         for right in self.rights:
-            right_names.append('%s:%d' % (right.kind, right.delegate))
+            right_names.append('%s:%d' % (right.kind.strip(), right.delegate))
 
         return ",".join(right_names)
 

@@ -65,12 +65,16 @@ class GID(Certificate):
             self.uuid = int(uuid)
         if hrn:
             self.hrn = hrn
+            self.urn = hrn_to_urn(hrn, 'unknown')
         if urn:
             self.urn = urn
             self.hrn, type = urn_to_hrn(urn)
 
     def set_uuid(self, uuid):
-        self.uuid = uuid
+        if isinstance(uuid, str):
+            self.uuid = int(uuid)
+        else:
+            self.uuid = uuid
 
     def get_uuid(self):
         if not self.uuid:
