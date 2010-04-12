@@ -101,12 +101,6 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
                               cert_file = self.server.cert_file)
             # get arguments
             request = self.rfile.read(int(self.headers["content-length"]))
-            # In previous versions of SimpleXMLRPCServer, _dispatch
-            # could be overridden in this class, instead of in
-            # SimpleXMLRPCDispatcher. To maintain backwards compatibility,
-            # check to see if a subclass implements _dispatch and dispatch
-            # using that method if present.
-            #response = self.server._marshaled_dispatch(request, getattr(self, '_dispatch', None))
             remote_addr = (remote_ip, remote_port) = self.connection.getpeername()
             self.api.remote_addr = remote_addr
             response = self.api.handle(remote_addr, request)

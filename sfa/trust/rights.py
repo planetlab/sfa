@@ -30,6 +30,7 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                    "operator": ["gettrustedcerts", "getgids"]}
 
 
+
 ##
 # Determine tje rights that an object should have. The rights are entirely
 # dependent on the type of the object. For example, users automatically
@@ -52,11 +53,15 @@ def determine_rights(type, name):
         rl.add("resolve")
         rl.add("info")
     elif type == "sa":
-        rl.add("authority,sa")
+        rl.add("authority")
+        rl.add("sa")
     elif type == "ma":
-        rl.add("authority,ma")
+        rl.add("authority")
+        rl.add("ma")
     elif type == "authority":
-        rl.add("authority,sa,ma")
+        rl.add("authority")
+        rl.add("sa")
+        rl.add("ma")
     elif type == "slice":
         rl.add("refresh")
         rl.add("embed")

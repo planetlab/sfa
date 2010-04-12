@@ -16,8 +16,6 @@ from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.debug import log
-from sfa.server.aggregate import Aggregates
-from sfa.server.registry import Registries
 
 MAXINT =  2L**31-1
 
@@ -212,29 +210,16 @@ class Slices(SimpleStorage):
 
     def refresh_slices_smgr(self):
         slice_hrns = []
-        aggregates = Aggregates(self.api)
         credential = self.api.getCredential()
-        for aggregate in aggregates:
+        for aggregate in self.api.aggregates:
             success = False
-            # request hash is optional so lets try the call without it 
             try:
-                slices = aggregates[aggregate].get_slices(credential)
+                slices = self.api.aggregates[aggregate].get_slices(credential)
                 slice_hrns.extend(slices)
                 success = True
             except:
                 print >> log, "%s" % (traceback.format_exc())
                 print >> log, "Error calling slices at aggregate %(aggregate)s" % locals()
-
-            # try sending the request hash if the previous call failed 
-            if not success:
-                arg_list = [credential]
-                try:
-                    slices = aggregates[aggregate].get_slices(credential)
-                    slice_hrns.extend(slices)
-                    success = True
-                except:
-                    print >> log, "%s" % (traceback.format_exc())
-                    print >> log, "Error calling slices at aggregate %(aggregate)s" % locals()
 
         # update timestamp and threshold
         timestamp = datetime.datetime.now()
@@ -420,8 +405,7 @@ class Slices(SimpleStorage):
         slicename = hrn_to_pl_slicename(hrn) 
         slice = {}
         slice_record = None
-        registries = Registries(self.api)
-        registry = registries[self.api.hrn]
+        registry = self.api.registries[self.api.hrn]
         credential = self.api.getCredential()
 
         site_id, remote_site_id = self.verify_site(registry, credential, hrn, peer, sfa_peer)

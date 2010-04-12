@@ -43,6 +43,9 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import Config
 from sfa.util.report import trace
+from sfa.plc.api import SfaAPI
+from sfa.server.registry import Registries
+from sfa.server.aggregate import Aggregates
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():
@@ -154,6 +157,17 @@ def init_server(options, config):
             manager.init_server()
             
 
+def sync_interfaces():
+    """
+    Attempt to install missing trusted gids and db records for 
+    our federated interfaces
+    """
+    api = SfaAPI()
+    registries = Registries(api)
+    aggregates = Aggregates(api)
+    registries.sync_interfaces()
+    aggregates.sync_interfaces()
+
 def main():
     # xxx get rid of globals - name consistently CamelCase or under_score
     global AuthHierarchy
@@ -184,12 +198,12 @@ def main():
 
     config = Config()
     hierarchy = Hierarchy()
-    trusted_roots = TrustedRootList(config.get_trustedroots_dir())
     server_key_file = os.path.join(hierarchy.basedir, "server.key")
     server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
 
     init_server_key(server_key_file, server_cert_file, config, hierarchy)
-    init_server(options, config)   
+    init_server(options, config)
+    sync_interfaces()   
  
     # start registry server
     if (options.registry):

@@ -27,10 +27,12 @@ class Auth:
         self.hierarchy = Hierarchy()
         if not config:
             self.config = Config()
-        self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
+        self.load_trusted_certs()
         self.trusted_cert_file_list = TrustedRootList(self.config.get_trustedroots_dir()).get_file_list()
 
-
+    def load_trusted_certs(self):
+        self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
+        
     def check(self, cred, operation):
         """
         Check the credential against the peer cert (callerGID included 
@@ -225,11 +227,15 @@ class Auth:
             pis = record.get("PI", [])
             operators = record.get("operator", [])
             if (caller_hrn == self.config.SFA_INTERFACE_HRN):
-                rl.add("authority,sa,ma",)
+                rl.add("authority")
+                rl.add("sa")
+                rl.add("ma")
             if (caller_hrn in pis):
-                rl.add("authority,sa")
+                rl.add("authority")
+                rl.add("sa")
             if (caller_hrn in operators):
-                rl.add("authority,ma")
+                rl.add("authority")
+                rl.add("ma")
 
         elif type == "user":
             rl.add("refresh")

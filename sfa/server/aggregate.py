@@ -1,24 +1,12 @@
 ### $Id$
 ### $URL$
 
-import os
-import sys
-import datetime
-import time
-import xmlrpclib
-from types import StringTypes, ListType
 
 from sfa.util.server import SfaServer
-from sfa.util.storage import *
 from sfa.util.faults import *
+from sfa.server.interface import Interfaces
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
-
-# GeniLight client support is optional
-try:
-    from egeni.geniLight_client import *
-except ImportError:
-    GeniClientLight = None
 
 
 class Aggregate(SfaServer):
@@ -37,71 +25,19 @@ class Aggregate(SfaServer):
 ##
 # Aggregates is a dictionary of aggregate connections keyed on the aggregate hrn
 
-class Aggregates(dict):
+class Aggregates(Interfaces):
 
-    required_fields = ['hrn', 'addr', 'port']
-     
-    def __init__(self, api, file = "/etc/sfa/aggregates.xml"):
-        dict.__init__(self, {})
-        self.api = api
-        self.interfaces = []
-        # create default connection dict
-        connection_dict = {}
-        for field in self.required_fields:
-            connection_dict[field] = ''
-        aggregates_dict = {'aggregates': {'aggregate': [connection_dict]}}
-        # get possible config file locations
-        loaded = False
-        path = os.path.dirname(os.path.abspath(__file__))
-        filename = file.split(os.sep)[-1]
-        alt_file = path + os.sep + filename
-        files = [file, alt_file]
-        
-        for f in files:
-            try:
-                if os.path.isfile(f):
-                    self.aggregate_info = XmlStorage(f, aggregates_dict)
-                    loaded = True
-            except: pass
+    default_dict = {'aggregates': {'aggregate': [Interfaces.default_fields]}}
+ 
+    def __init__(self, api, conf_file = "/etc/sfa/aggregates.xml"):
+        Interfaces.__init__(self, api, conf_file, 'ma')
 
-        # if file is missing, just recreate it in the right place
-        if not loaded:
-            self.aggregate_info = XmlStorage(file, aggregates_dict)
-        self.aggregate_info.load()
-        self.connectAggregates()
-
-    def connectAggregates(self):
+    def get_connections(self, interfaces):
         """
         Get connection details for the trusted peer aggregates from file and 
         create an connection to each. 
         """
-        aggregates = self.aggregate_info['aggregates']['aggregate']
-        if isinstance(aggregates, dict):
-            aggregates = [aggregates]
-        if isinstance(aggregates, list):
-            for aggregate in aggregates:
-                # make sure the required fields are present
-                if not set(self.required_fields).issubset(aggregate.keys()):
-                    continue
-                hrn, address, port = aggregate['hrn'], aggregate['addr'], aggregate['port']
-                if not hrn or not address or not port:
-                    continue
-                self.interfaces.append(aggregate)
-                # check which client we should use
-                # sfa.util.xmlrpcprotocol is default
-                client_type = 'xmlrpcprotocol'
-                if aggregate.has_key('client') and aggregate['client'] in ['geniclientlight']:
-                    client_type = 'geniclientlight'
-                
-                # create url
-                url = 'http://%(address)s:%(port)s' % locals()
-
-                # create the client connection
-                # make sure module exists before trying to instantiate it
-                if client_type in ['geniclientlight'] and GeniClientLight:
-                    self[hrn] = GeniClientLight(url, self.api.key_file, self.api.cert_file)
-                else:
-                    self[hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
+        connections = Interfaces.get_connections(self, interfaces)
 
         # set up a connection to the local registry
         address = self.api.config.SFA_AGGREGATE_HOST
@@ -109,6 +45,6 @@ class Aggregates(dict):
         url = 'http://%(address)s:%(port)s' % locals()
         local_aggregate = {'hrn': self.api.hrn, 'addr': address, 'port': port}
         self.interfaces.append(local_aggregate) 
-        self[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
-
+        connections[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
+        return connections
 

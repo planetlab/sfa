@@ -106,6 +106,12 @@ $URL$
 	  <description>The type of backend server for this
 	  aggregate. Some aggregates may not be myplc.</description>
 	</variable>
+    
+    <variable id="rspec_schema" type="string">
+      <name>RSpec Schema</name>
+      <value>/etc/sfa/pl.rng</value>
+      <description>The path to the default schema</description>
+    </variable>
 
 	<variable id="host" type="hostname">
 	  <name>Hostname</name>

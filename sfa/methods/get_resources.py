@@ -45,7 +45,11 @@ class get_resources(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
         # validate the cred    
+        self.api.logger.info("Checking for %s" % self.api.interface)
+        #self.api.logger.info("Credential = %s" % cred)
         self.api.auth.check(cred, 'listnodes')
+        self.api.logger.info("Checked out!")
+        
 
         # send the call to the right manager
         manager_base = 'sfa.managers'

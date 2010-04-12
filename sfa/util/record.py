@@ -366,6 +366,7 @@ class SliceRecord(SfaRecord):
         'url': Parameter(str, 'Slice url'),
         'expires': Parameter(int, 'Date and time this slice exipres'),
         'researcher': Parameter([str], 'List of users for this slice'),
+        'PI': Parameter([str], 'List of PIs responsible for this slice'),
         'description': Parameter([str], 'Description of this slice'), 
         }
     fields.update(SfaRecord.fields)

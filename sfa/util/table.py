@@ -179,9 +179,8 @@ class SfaTable(list):
 
     def drop(self):
         try:
-            self.db.do('DROP TABLE IF EXISTS ' + self.tablename)            
+            self.db.do('DROP TABLE IF EXISTS ' + self.tablename)
         except:
-
             try:
                 self.db.do('DROP TABLE ' + self.tablename)
             except:

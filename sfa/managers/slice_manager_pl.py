@@ -20,13 +20,12 @@ from sfa.util.prefixTree import prefixTree
 from sfa.util.rspec import *
 from sfa.util.sfaticket import *
 from sfa.util.debug import log
-from sfa.server.registry import Registries
-from sfa.server.aggregate import Aggregates
+from sfa.util.sfalogging import logger
 import sfa.plc.peers as peers
 
 def delete_slice(api, xrn, origin_hrn=None):
     credential = api.getCredential()
-    aggregates = Aggregates(api)
+    aggregates = api.aggregates
     for aggregate in aggregates:
         success = False
         # request hash is optional so lets try the call without it
@@ -60,7 +59,7 @@ def create_slice(api, xrn, rspec, origin_hrn=None):
             message = "%s (line %s)" % (error.message, error.line)
             raise InvalidRSpec(message)
 
-    aggs = Aggregates(api)
+    aggs = api.aggregates
     cred = api.getCredential()                                                 
     for agg in aggs:
         if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
@@ -91,7 +90,7 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
         rspecs[net_hrn] = temp_rspec.toxml() 
     
     # send the rspec to the appropiate aggregate/sm
-    aggregates = Aggregates(api)
+    aggregates = api.aggregates
     credential = api.getCredential()
     tickets = {}
     for net_hrn in rspecs:
@@ -198,19 +197,22 @@ def get_rspec(api, xrn=None, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
     rspec = None
 
-    aggs = Aggregates(api)
+    aggs = api.aggregates
     cred = api.getCredential()                                                 
+
+    print >> log, "Aggregates = %s" % aggs
     for agg in aggs:
         if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
             try:
                 # get the rspec from the aggregate
                 agg_rspec = aggs[agg].get_resources(cred, xrn, origin_hrn)
             except:
+                
                 # XX print out to some error log
                 print >> log, "Error getting resources at aggregate %s" % agg
                 traceback.print_exc(log)
                 print >> log, "%s" % (traceback.format_exc())
-
+                continue
                 
             try:
                 tree = etree.parse(StringIO(agg_rspec))

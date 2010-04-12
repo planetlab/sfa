@@ -115,6 +115,7 @@ class BaseAPI:
         # Load configuration
         self.config = Config(config)
         self.auth = Auth(peer_cert)
+        self.hrn = self.config.SFA_INTERFACE_HRN
         self.interface = interface
         self.key_file = key_file
         self.key = Keypair(filename=self.key_file)
@@ -124,6 +125,14 @@ class BaseAPI:
         self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
+        
+        # load registries
+        from sfa.server.registry import Registries
+        self.registries = Registries(self) 
+
+        # load aggregates
+        from sfa.server.aggregate import Aggregates
+        self.aggregates = Aggregates(self)
 
 
     def callable(self, method):
