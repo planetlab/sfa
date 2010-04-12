@@ -142,7 +142,8 @@ class Credential(object):
     signature = None
     xml = None
     refid = None
-    
+    legacy = None
+
     ##
     # Create a Credential object
     #
@@ -161,6 +162,7 @@ class Credential(object):
                 str = file(filename).read()
                 
             if str.strip().startswith("-----"):
+                self.legacy = CredentialLegacy(False,string=str)
                 self.translate_legacy(str)
             else:
                 self.xml = str
@@ -463,6 +465,11 @@ class Credential(object):
         os.remove(filename)
 
         self.xml = signed
+
+        # This is no longer a legacy credential
+        if self.legacy:
+            self.legacy = None
+
         
 
     def getTextNode(self, element, subele):
@@ -560,12 +567,22 @@ class Credential(object):
         if not self.xml:
             self.decode()        
 
+        trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
+
+        # Use legacy verification if this is a legacy credential
+        if self.legacy:
+            self.legacy.verify_chain(trusted_cert_objects)
+            if self.legacy.client_gid:
+                self.legacy.client_gid.verify_chain(trusted_cert_objects)
+            if self.legacy.object_gid:
+                self.legacy.object_gid.verify_chain(trusted_cert_objects)
+            return True
+
         # Verify the signatures
         filename = self.save_to_random_tmp_file()
         cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
 
         # Verify the gids of this cred and of its parents
-        trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
 
         cur_cred = self
         while cur_cred:
@@ -598,8 +615,9 @@ class Credential(object):
         # Make sure the issuer is the target's authority
         self.verify_issuer()
 
+        return True
 
-
+        
     ##
     # Make sure the issuer of this credential is the target's authority
     def verify_issuer(self):        
