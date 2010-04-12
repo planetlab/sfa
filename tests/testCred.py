@@ -64,8 +64,11 @@ class TestCred(unittest.TestCase):
       gid.encode()
       gid.sign()
       return gid, keys
+
+
    
-   def testDelegation(self):
+
+   def testDelegationAndVerification(self):
       gidAuthority, keys = self.createSignedGID("site", "urn:publicid:IDN+plc+authority+site")
       gidCaller, ckeys = self.createSignedGID("foo", "urn:publicid:IDN+plc:site+user+foo",
                                           keys, gidAuthority)
@@ -86,11 +89,13 @@ class TestCred(unittest.TestCase):
       cred.set_issuer_keys("/tmp/auth_key", "/tmp/auth_gid")
       cred.sign()
 
+
       cred.verify(['/tmp/auth_gid'])
 
       # Test copying
       cred2 = Credential(string=cred.save_to_string())
       cred2.verify(['/tmp/auth_gid'])
+
 
       # Test delegation
       delegated = Credential()
@@ -105,20 +110,62 @@ class TestCred(unittest.TestCase):
       delegated.set_issuer_keys("/tmp/caller_pkey", "/tmp/caller_gid")
 
       delegated.encode()
+
       delegated.sign()
       
       # This should verify
       delegated.verify(['/tmp/auth_gid'])
-      delegated.save_to_file("/tmp/dcred")
 
+      backup = Credential(string=delegated.get_xml())
 
       # Test that verify catches an incorrect lifetime      
       delegated.set_lifetime(6000)
-
-      WHY IS THIS CRASHING??  
       delegated.encode()
       delegated.sign()
-      delegated.verify(['/tmp/auth_gid'])
+      try:
+         delegated.verify(['/tmp/auth_gid'])
+         assert(1==0)
+      except CredentialNotVerifiable:
+         pass
+
+      # Test that verify catches an incorrect signer
+      delegated = Credential(string=backup.get_xml())
+      delegated.set_issuer_keys("/tmp/auth_key", "/tmp/auth_gid")
+      delegated.encode()
+      delegated.sign()
+
+      try:
+         delegated.verify(['/tmp/auth_gid'])
+         assert(1==0)
+      except CredentialNotVerifiable:
+         pass
+
+
+      # Test that verify catches a changed gid
+      delegated = Credential(string=backup.get_xml())
+      delegated.set_gid_object(delegated.get_gid_caller())
+      delegated.encode()
+      delegated.sign()
+
+      try:
+         delegated.verify(['/tmp/auth_gid'])
+         assert(1==0)
+      except CredentialNotVerifiable:
+         pass
+
+
+      # Test that verify catches a credential with the wrong authority for the object
+      test = Credential(string=cred.get_xml())
+      test.set_issuer_keys("/tmp/caller_pkey", "/tmp/caller_gid")
+      test.encode()
+      test.sign()
+
+      try:
+         test.verify(['/tmp/auth_gid'])
+         assert(1==0)
+      except CredentialNotVerifiable:
+         pass      
+      
       
 
 if __name__ == "__main__":

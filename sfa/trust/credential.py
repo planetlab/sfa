@@ -470,14 +470,11 @@ class Credential(object):
         if self.legacy:
             self.legacy = None
 
+        # Update signatures
+        self.decode()
+
         
 
-    def getTextNode(self, element, subele):
-        sub = element.getElementsByTagName(subele)[0]
-        if len(sub.childNodes) > 0:            
-            return sub.childNodes[0].nodeValue
-        else:
-            return None
         
     ##
     # Retrieve the attributes of the credential from the XML.
@@ -488,7 +485,7 @@ class Credential(object):
         if not self.xml:
             return
         doc = parseString(self.xml)
-        sigs = None
+        sigs = []
         signed_cred = doc.getElementsByTagName("signed-credential")
 
         # Is this a signed-cred or just a cred?
@@ -524,7 +521,9 @@ class Credential(object):
         # Is there a parent?
         parent = cred.getElementsByTagName("parent")
         if len(parent) > 0:
-            self.parent = Credential(string=getTextNode(cred, "parent"))
+            parent_doc = parent[0].getElementsByTagName("credential")[0]
+            parent_xml = parent_doc.toxml()
+            self.parent = Credential(string=parent_xml)
             self.updateRefID()
 
         # Assign the signatures to the credentials
