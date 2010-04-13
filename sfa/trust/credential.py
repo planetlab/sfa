@@ -11,22 +11,16 @@ import xmlrpclib
 import os
 import datetime
 from random import randint
-
-
 from xml.dom.minidom import Document, parseString
+from lxml import etree
+
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.certificate import Certificate
 from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
 from sfa.util.sfalogging import logger
-from lxml import etree
 
-
-def str2bool(str):
-    if str.lower() in ['yes','true','1']:
-        return True
-    return False
 
 
 # Two years, in minutes 
@@ -35,8 +29,8 @@ DEFAULT_CREDENTIAL_LIFETIME = 1051200
 
 # TODO:
 # . make privs match between PG and PL
-# . Need to test delegation, xml verification
 # . Need to add support for other types of credentials, e.g. tickets
+
 
 
 signature_template = \
@@ -65,11 +59,19 @@ signature_template = \
     </Signature>
 '''
 
+##
+# Convert a string into a bool
+
+def str2bool(str):
+    if str.lower() in ['yes','true','1']:
+        return True
+    return False
+
 
 
 ##
 # Utility function to get the text of an XML element
-#
+
 def getTextNode(element, subele):
     sub = element.getElementsByTagName(subele)[0]
     if len(sub.childNodes) > 0:            
@@ -77,7 +79,15 @@ def getTextNode(element, subele):
     else:
         return None
         
+##
+# Utility function to set the text of an XML element
+# It creates the element, adds the text to it,
+# and then appends it to the parent.
 
+def append_sub(doc, parent, element, text):
+    ele = doc.createElement(element)
+    ele.appendChild(doc.createTextNode(text))
+    parent.appendChild(ele)
 
 ##
 # Signature contains information about an xmlsec1 signature
@@ -130,10 +140,10 @@ class Signature(object):
 
 
 ##
-# Credential is a tuple:
-#    (GIDCaller, GIDObject, Expiration (in UTC time), Privileges)
+# A credential provides a caller gid with privileges to an object gid.
+# A signed credential is signed by the object's authority.
 #
-# These fields are encoded in one of two ways.  The legacy style places
+# Credentials are encoded in one of two ways.  The legacy style places
 # it in the subjectAltName of an X509 certificate.  The new credentials
 # are placed in signed XML.
 
@@ -312,10 +322,6 @@ class Credential(object):
 
         return rights.can_perform(op_name)
 
-    def append_sub(self, doc, parent, element, text):
-        ele = doc.createElement(element)
-        ele.appendChild(doc.createTextNode(text))
-        parent.appendChild(ele)
 
     ##
     # Encode the attributes of the credential into an XML string    
@@ -333,17 +339,17 @@ class Credential(object):
         cred = doc.createElement("credential")
         cred.setAttribute("xml:id", self.get_refid())
         signed_cred.appendChild(cred)
-        self.append_sub(doc, cred, "type", "privilege")
-        self.append_sub(doc, cred, "serial", "8")
-        self.append_sub(doc, cred, "owner_gid", self.gidCaller.save_to_string())
-        self.append_sub(doc, cred, "owner_urn", self.gidCaller.get_urn())
-        self.append_sub(doc, cred, "target_gid", self.gidObject.save_to_string())
-        self.append_sub(doc, cred, "target_urn", self.gidObject.get_urn())
-        self.append_sub(doc, cred, "uuid", "")
+        append_sub(doc, cred, "type", "privilege")
+        append_sub(doc, cred, "serial", "8")
+        append_sub(doc, cred, "owner_gid", self.gidCaller.save_to_string())
+        append_sub(doc, cred, "owner_urn", self.gidCaller.get_urn())
+        append_sub(doc, cred, "target_gid", self.gidObject.save_to_string())
+        append_sub(doc, cred, "target_urn", self.gidObject.get_urn())
+        append_sub(doc, cred, "uuid", "")
         if  not self.expiration:
             self.set_lifetime(3600)
         self.expiration = self.expiration.replace(microsecond=0)
-        self.append_sub(doc, cred, "expires", self.expiration.isoformat())
+        append_sub(doc, cred, "expires", self.expiration.isoformat())
         privileges = doc.createElement("privileges")
         cred.appendChild(privileges)
 
@@ -351,8 +357,8 @@ class Credential(object):
             rights = self.get_privileges()
             for right in rights.rights:
                 priv = doc.createElement("privilege")
-                self.append_sub(doc, priv, "name", right.kind)
-                self.append_sub(doc, priv, "can_delegate", str(right.delegate).lower())
+                append_sub(doc, priv, "name", right.kind)
+                append_sub(doc, priv, "can_delegate", str(right.delegate).lower())
                 privileges.appendChild(priv)
 
         # Add the parent credential if it exists
@@ -383,8 +389,6 @@ class Credential(object):
                 
         # Get the finished product
         self.xml = doc.toxml()
-        #print doc.toxml()
-        #self.sign()
 
 
     def save_to_random_tmp_file(self):
@@ -501,7 +505,7 @@ class Credential(object):
         
     ##
     # Retrieve the attributes of the credential from the XML.
-    # This is automatically caleld by the various get_* methods of
+    # This is automatically called by the various get_* methods of
     # this class and should not need to be called explicitly.
 
     def decode(self):
@@ -537,7 +541,14 @@ class Credential(object):
         for priv in privs.getElementsByTagName("privilege"):
             kind = getTextNode(priv, "name")
             deleg = str2bool(getTextNode(priv, "can_delegate"))
-            rlist.add(Right(kind.strip(), deleg))
+            if kind == '*':
+                # Convert * into the default privileges for the credential's type                
+                _ , type = urn_to_hrn(self.gidObject)
+                rl = rlist.determine_rights(type, urn)
+                for r in rlist.rights:
+                    rlist.add(r)
+            else:
+                rlist.add(Right(kind.strip(), deleg))
         self.set_privileges(rlist)
 
 

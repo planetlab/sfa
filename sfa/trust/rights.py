@@ -264,11 +264,15 @@ class RightList:
             rl.add("resolve")
             rl.add("info")
         elif type == "sa":
-            rl.add("authority,sa")
+            rl.add("authority")
+            rl.add("sa")
         elif type == "ma":
-            rl.add("authority,ma")
+            rl.add("authority")
+            rl.add("ma")
         elif type == "authority":
-            rl.add("authority,sa,ma")
+            rl.add("authority")
+            rl.add("sa")
+            rl.add("ma")
         elif type == "slice":
             rl.add("refresh")
             rl.add("embed")
