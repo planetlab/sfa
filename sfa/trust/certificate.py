@@ -23,6 +23,7 @@ from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
 from M2Crypto import EVP
+from random import randint
 
 from sfa.util.faults import *
 
@@ -309,10 +310,16 @@ class Certificate:
    # Save the certificate to a file.
    # @param save_parents If save_parents==True, then also save the parent certificates.
 
-   def save_to_file(self, filename, save_parents=False):
+   def save_to_file(self, filename, save_parents=True):
        string = self.save_to_string(save_parents=save_parents)
        open(filename, 'w').write(string)
-
+   ##
+   # Save the certificate to a random file in /tmp/
+   # @param save_parents If save_parents==True, then also save the parent certificates.
+   def save_to_random_tmp_file(self, save_parents=True):
+       filename = "/tmp/cert_%d" % randint(0,999999999)
+       self.save_to_file(filename, save_parents)
+       return filename
    ##
    # Sets the issuer private key and name
    # @param key Keypair object containing the private key of the issuer

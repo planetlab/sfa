@@ -52,6 +52,7 @@ class TestCred(unittest.TestCase):
       self.assertEqual(cred2.get_privileges().save_to_string(), rights)
 
 
+
    def createSignedGID(self, subject, urn, issuer_pkey = None, issuer_gid = None):
       gid = GID(subject=subject, uuid=1, urn=urn)
       keys = Keypair(create=True)
@@ -65,7 +66,7 @@ class TestCred(unittest.TestCase):
       gid.sign()
       return gid, keys
 
-
+   
    
 
    def testDelegationAndVerification(self):

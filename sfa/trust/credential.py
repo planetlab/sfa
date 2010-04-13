@@ -8,9 +8,10 @@
 ### $URL$
 
 import xmlrpclib
-import random
 import os
 import datetime
+from random import randint
+
 
 from xml.dom.minidom import Document, parseString
 from sfa.trust.credential_legacy import CredentialLegacy
@@ -19,6 +20,8 @@ from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
 from sfa.util.sfalogging import logger
+from lxml import etree
+
 
 
 # Two years, in minutes 
@@ -380,7 +383,7 @@ class Credential(object):
 
 
     def save_to_random_tmp_file(self):
-        filename = "/tmp/cred_%d" % random.randint(0,999999999)
+        filename = "/tmp/cred_%d" % randint(0,999999999)
         self.save_to_file(filename)
         return filename
     
@@ -457,11 +460,23 @@ class Credential(object):
 
         self.xml = doc.toxml()
 
+
+        # Split the issuer GID into multiple certificates if it's a chain
+        chain = GID(filename=self.issuer_gid)
+        gid_files = []
+        while chain:
+            gid_files.append(chain.save_to_random_tmp_file(False))
+            if chain.get_parent():
+                chain = chain.get_parent()
+            else:
+                chain = None
+
+
         # Call out to xmlsec1 to sign it
         ref = 'Sig_%s' % self.get_refid()
         filename = self.save_to_random_tmp_file()
         signed = os.popen('/usr/bin/xmlsec1 --sign --node-id "%s" --privkey-pem %s,%s %s' \
-                 % (ref, self.issuer_privkey, self.issuer_gid, filename)).read()
+                 % (ref, self.issuer_privkey, ",".join(gid_files), filename)).read()
         os.remove(filename)
 
         self.xml = signed
@@ -545,6 +560,7 @@ class Credential(object):
     # Verify that:
     # . All of the signatures are valid and that the issuers trace back
     #   to trusted roots (performed by xmlsec1)
+    # . The XML matches the credential schema
     # . That the issuer of the credential is the authority in the target's urn
     #    . In the case of a delegated credential, this must be true of the root
     # . That all of the gids presented in the credential are valid
@@ -565,6 +581,10 @@ class Credential(object):
     def verify(self, trusted_certs):
         if not self.xml:
             self.decode()        
+
+        # Check for schema conformance
+        
+        
 
         trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
 
