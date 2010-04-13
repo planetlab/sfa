@@ -479,6 +479,9 @@ class Credential(object):
                  % (ref, self.issuer_privkey, ",".join(gid_files), filename)).read()
         os.remove(filename)
 
+        for gid_file in gid_files:
+            os.remove(gid_file)
+
         self.xml = signed
 
         # This is no longer a legacy credential
