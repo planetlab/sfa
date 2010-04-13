@@ -167,7 +167,7 @@ class TestCred(unittest.TestCase):
       except CredentialNotVerifiable:
          pass      
       
-      
+      # Test that * gets translated properly
 
 if __name__ == "__main__":
     unittest.main()

@@ -92,6 +92,7 @@ def append_sub(doc, parent, element, text):
 ##
 # Signature contains information about an xmlsec1 signature
 # for a signed-credential
+#
 
 class Signature(object):
     refid = None
@@ -146,6 +147,11 @@ class Signature(object):
 # Credentials are encoded in one of two ways.  The legacy style places
 # it in the subjectAltName of an X509 certificate.  The new credentials
 # are placed in signed XML.
+#
+# WARNING:
+# In general, a signed credential obtained externally should
+# not be changed else the signature is no longer valid.  So, once
+# you have loaded an existing signed credential, do not call encode() or sign() on it.
 
 
 class Credential(object):
@@ -326,6 +332,10 @@ class Credential(object):
     ##
     # Encode the attributes of the credential into an XML string    
     # This should be done immediately before signing the credential.    
+    # WARNING:
+    # In general, a signed credential obtained externally should
+    # not be changed else the signature is no longer valid.  So, once
+    # you have loaded an existing signed credential, do not call encode() or sign() on it.
 
     def encode(self):
         p_sigs = None
@@ -453,6 +463,14 @@ class Credential(object):
         if not self.xml:
             self.encode()
         return self.xml
+
+    ##
+    # Sign the XML file created by encode()
+    #
+    # WARNING:
+    # In general, a signed credential obtained externally should
+    # not be changed else the signature is no longer valid.  So, once
+    # you have loaded an existing signed credential, do not call encode() or sign() on it.
 
     def sign(self):
         if not self.issuer_privkey or not self.issuer_gid:
