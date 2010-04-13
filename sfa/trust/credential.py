@@ -23,6 +23,11 @@ from sfa.util.sfalogging import logger
 from lxml import etree
 
 
+def str2bool(str):
+    if str.lower() in ['yes','true','1']:
+        return True
+    return False
+
 
 # Two years, in minutes 
 DEFAULT_CREDENTIAL_LIFETIME = 1051200
@@ -347,7 +352,7 @@ class Credential(object):
             for right in rights.rights:
                 priv = doc.createElement("privilege")
                 self.append_sub(doc, priv, "name", right.kind)
-                self.append_sub(doc, priv, "can_delegate", str(right.delegate))
+                self.append_sub(doc, priv, "can_delegate", str(right.delegate).lower())
                 privileges.appendChild(priv)
 
         # Add the parent credential if it exists
@@ -531,7 +536,7 @@ class Credential(object):
         rlist = RightList()
         for priv in privs.getElementsByTagName("privilege"):
             kind = getTextNode(priv, "name")
-            deleg = bool(getTextNode(priv, "can_delegate"))
+            deleg = str2bool(getTextNode(priv, "can_delegate"))
             rlist.add(Right(kind.strip(), deleg))
         self.set_privileges(rlist)
 
