@@ -5,17 +5,15 @@
 ### $URL$
 #
 
-import time
 
 from sfa.trust.credential import Credential
 from sfa.trust.trustedroot import TrustedRootList
-from sfa.trust.rights import RightList
 from sfa.util.faults import *
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
 from sfa.util.namespace import *
-from sfa.trust.gid import GID
 from sfa.util.sfaticket import *
+from sfa.util.sfalogging import logger
 
 class Auth:
     """
@@ -62,7 +60,7 @@ class Auth:
             self.client_cred.verify(self.trusted_cert_file_list)
         else:
            raise MissingTrustedRoots(self.config.get_trustedroots_dir())
-
+       
         return True
 
     def check_ticket(self, ticket):

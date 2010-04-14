@@ -7,18 +7,16 @@
 ### $Id$
 ### $URL$
 
-import xmlrpclib
 import os
 import datetime
 from random import randint
 from xml.dom.minidom import Document, parseString
-from lxml import etree
 
 from sfa.trust.credential_legacy import CredentialLegacy
-from sfa.trust.certificate import Certificate
 from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
+
 from sfa.util.sfalogging import logger
 
 
@@ -95,11 +93,12 @@ def append_sub(doc, parent, element, text):
 #
 
 class Signature(object):
-    refid = None
-    issuer_gid = None
-    xml = None
+
     
     def __init__(self, string=None):
+        self.refid = None
+        self.issuer_gid = None
+        self.xml = None
         if string:
             self.xml = string
             self.decode()
@@ -155,18 +154,7 @@ class Signature(object):
 
 
 class Credential(object):
-    gidCaller = None
-    gidObject = None
-    expiration = None
-    privileges = None
-    issuer_privkey = None
-    issuer_gid = None
-    issuer_pubkey = None
-    parent = None
-    signature = None
-    xml = None
-    refid = None
-    legacy = None
+
 
     ##
     # Create a Credential object
@@ -177,6 +165,19 @@ class Credential(object):
     # @param filename If filename!=None, load the credential from the file
 
     def __init__(self, create=False, subject=None, string=None, filename=None):
+        self.gidCaller = None
+        self.gidObject = None
+        self.expiration = None
+        self.privileges = None
+        self.issuer_privkey = None
+        self.issuer_gid = None
+        self.issuer_pubkey = None
+        self.parent = None
+        self.signature = None
+        self.xml = None
+        self.refid = None
+        self.legacy = None
+
 
         # Check if this is a legacy credential, translate it if so
         if string or filename:
@@ -338,8 +339,6 @@ class Credential(object):
     # you have loaded an existing signed credential, do not call encode() or sign() on it.
 
     def encode(self):
-        p_sigs = None
-
         # Create the XML document
         doc = Document()
         signed_cred = doc.createElement("signed-credential")
@@ -561,9 +560,9 @@ class Credential(object):
             deleg = str2bool(getTextNode(priv, "can_delegate"))
             if kind == '*':
                 # Convert * into the default privileges for the credential's type                
-                _ , type = urn_to_hrn(self.gidObject)
-                rl = rlist.determine_rights(type, urn)
-                for r in rlist.rights:
+                _ , type = urn_to_hrn(self.gidObject.get_urn())
+                rl = rlist.determine_rights(type, self.gidObject.get_urn())
+                for r in rl.rights:
                     rlist.add(r)
             else:
                 rlist.add(Right(kind.strip(), deleg))
@@ -619,10 +618,6 @@ class Credential(object):
         if not self.xml:
             self.decode()        
 
-        # Check for schema conformance
-        
-        
-
         trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
 
         # Use legacy verification if this is a legacy credential
@@ -661,16 +656,13 @@ class Credential(object):
                             % (ref, cert_args, filename)).read()
             if not verified.strip().startswith("OK"):
                 raise CredentialNotVerifiable("xmlsec1 error: " + verified)
-
         os.remove(filename)
 
         # Verify the parents (delegation)
         if self.parent:
             self.verify_parent(self.parent)
-
         # Make sure the issuer is the target's authority
         self.verify_issuer()
-
         return True
 
         
@@ -679,9 +671,9 @@ class Credential(object):
     def verify_issuer(self):        
         target_authority = get_authority(self.get_gid_object().get_urn())
 
+        
         # Find the root credential's signature
         cur_cred = self
-        root_refid = None
         while cur_cred:            
             if cur_cred.parent:
                 cur_cred = cur_cred.parent
@@ -689,9 +681,10 @@ class Credential(object):
                 root_issuer = cur_cred.get_signature().get_issuer_gid().get_urn()
                 cur_cred = None
 
-                
         # Ensure that the signer of the root credential is the target_authority
         target_authority = hrn_to_urn(target_authority, 'authority')
+
+        logger.info( "%s %s" % (root_issuer, target_authority))
 
         if root_issuer != target_authority:
             raise CredentialNotVerifiable("issuer (%s) != authority of target (%s)" \
@@ -752,6 +745,6 @@ class Credential(object):
 
 
         if self.parent and dump_parents:
-           print "PARENT",
-           self.parent.dump_parents()
+            print "PARENT",
+            self.parent.dump_parents()
 

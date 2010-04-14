@@ -267,11 +267,16 @@ class Certificate:
 
    def load_from_string(self, string):
        # if it is a chain of multiple certs, then split off the first one and
-       # load it (support for the ---parent--- tag as well as normal chained certs)
+       # load it (support for the ---parent--- tag as well as normal chained certs)       
 
-       string = string.strip()
-
+       string = string.strip()       
+       
+       
+       if not string.startswith('-----'):
+           string = '-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----' % string
+           
        parts = []
+       
        if string.count('-----BEGIN CERTIFICATE-----') > 1 and \
               string.count(Certificate.separator) == 0:
            parts = string.split('-----END CERTIFICATE-----',1)
@@ -290,7 +295,7 @@ class Certificate:
    ##
    # Load the certificate from a file
 
-   def load_from_file(self, filename):
+   def load_from_file(self, filename):     
        file = open(filename)
        string = file.read()
        self.load_from_string(string)

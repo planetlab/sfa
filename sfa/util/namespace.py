@@ -89,7 +89,10 @@ def hrn_to_urn(hrn, type=None):
 
     authority = get_authority(hrn)
     name = get_leaf(hrn)
-    urn = "+".join([unicode(part).replace('.', ':') \
-                    for part in ['',authority,type,name]])
-
+    
+    if authority.startswith("plc"):
+        urn = "+".join(['',authority.replace('.',':'),type,name])
+    else:
+        urn = "+".join(['',authority,type,name])
+        
     return URN_PREFIX + urn
