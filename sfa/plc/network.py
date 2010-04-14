@@ -115,6 +115,7 @@ class Slice:
         self.network = network
         self.id = slice['slice_id']
         self.name = slice['name']
+        self.peer_id = slice['peer_id']
         self.node_ids = set(slice['node_ids'])
         self.slice_tag_ids = slice['slice_tag_ids']
     
