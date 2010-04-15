@@ -54,4 +54,13 @@ def DeleteSliver(api, slice_xrn, creds):
 
     allocated = manager.delete_slice(api, slice_xrn)
     return allocated
-    
+
+def SliverStatus(api, slice_xrn):
+    result = {}
+    result['geni_urn'] = slice_xrn
+    result['geni_status'] = 'unknown'
+    result['geni_resources'] = {}
+    return result
+
+def RenewSliver(api, slice_xrn, creds, renew_time):
+    return False

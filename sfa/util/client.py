@@ -276,13 +276,7 @@ class GeniClient:
         return result
 
 
-    ## delete slice
-    #
-    # @param cred a credential
-    # @param hrn slice to delete
-    def delete_slice(self, cred, hrn, caller_cred=None):
-        result = self.server.delete_slice(cred.save_to_string(save_parents=True), hrn, caller_cred)
-        return result    
+ 
 
     # ------------------------------------------------------------------------
     # Slice Interface

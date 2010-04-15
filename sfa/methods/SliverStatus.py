@@ -3,11 +3,10 @@ from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter
 
-class DeleteSliver(Method):
+class SliverStatus(Method):
     """
-    Delete sliver from a slice.   Callers can check on the status of
-    the resources using SliverStatus.
-
+    Get the status of a sliver
+    
     @param slice_urn (string) URN of slice to allocate to
     @param credentials ([string]) of credentials
     
@@ -28,14 +27,14 @@ class DeleteSliver(Method):
         found = False
         for cred in creds:
             try:
-                self.api.auth.check(cred, 'deleteslice')
+                self.api.auth.check(cred, 'sliverstatus')
                 found = True
                 break
             except:
                 continue
             
         if not found:
-            raise InsufficientRights('DeleteSliver: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
+            raise InsufficientRights('SliverStatus: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
             
         
         manager_base = 'sfa.managers'
@@ -44,7 +43,7 @@ class DeleteSliver(Method):
             mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
             manager_module = manager_base + ".geni_am_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            return manager.DeleteSliver(self.api, slice_xrn, creds)
+            return manager.SliverStatus(self.api, slice_xrn, creds)
 
         return ''
     

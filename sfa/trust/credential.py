@@ -18,11 +18,12 @@ from sfa.trust.gid import *
 from sfa.util.faults import *
 
 from sfa.util.sfalogging import logger
+from dateutil.parser import parse
 
 
 
-# Two years, in minutes 
-DEFAULT_CREDENTIAL_LIFETIME = 1051200
+# Two years, in seconds 
+DEFAULT_CREDENTIAL_LIFETIME = 60 * 60 * 24 * 365 * 2
 
 
 # TODO:
@@ -287,17 +288,17 @@ class Credential(object):
     #
     # @param lifetime lifetime of credential
     # . if lifeTime is a datetime object, it is used for the expiration time
-    # . if lifeTime is an integer value, it is considered the number of minutes
+    # . if lifeTime is an integer value, it is considered the number of seconds
     #   remaining before expiration
 
     def set_lifetime(self, lifeTime):
         if isinstance(lifeTime, int):
-            self.expiration = datetime.timedelta(seconds=lifeTime*60) + datetime.datetime.utcnow()
+            self.expiration = datetime.timedelta(seconds=lifeTime) + datetime.datetime.utcnow()
         else:
             self.expiration = lifeTime
 
     ##
-    # get the lifetime of the credential (in minutes)
+    # get the lifetime of the credential (in datetime format)
 
     def get_lifetime(self):
         if not self.expiration:
@@ -366,7 +367,7 @@ class Credential(object):
         append_sub(doc, cred, "target_urn", self.gidObject.get_urn())
         append_sub(doc, cred, "uuid", "")
         if  not self.expiration:
-            self.set_lifetime(3600)
+            self.set_lifetime(DEFAULT_CREDENTIAL_LIFETIME)
         self.expiration = self.expiration.replace(microsecond=0)
         append_sub(doc, cred, "expires", self.expiration.isoformat())
         privileges = doc.createElement("privileges")
@@ -558,10 +559,7 @@ class Credential(object):
 
 
         self.set_refid(cred.getAttribute("xml:id"))
-        sz_expires = getTextNode(cred, "expires")
-        if sz_expires != '':
-            self.expiration = datetime.datetime.strptime(sz_expires, '%Y-%m-%dT%H:%M:%S')        
-        self.lifeTime = getTextNode(cred, "expires")
+        self.set_lifetime(parse(getTextNode(cred, "expires")))
         self.gidCaller = GID(string=getTextNode(cred, "owner_gid"))
         self.gidObject = GID(string=getTextNode(cred, "target_gid"))   
 

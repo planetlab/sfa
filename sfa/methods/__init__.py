@@ -31,4 +31,6 @@ ListResources
 CreateSliver
 get_geni_aggregates
 DeleteSliver
+SliverStatus
+RenewSliver
 """.split()
