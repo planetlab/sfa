@@ -177,7 +177,8 @@ class Credential(object):
         self.xml = None
         self.refid = None
         self.legacy = None
-        self.xmlsec_path = '/usr/bin/env xmlsec1'
+
+
 
 
         # Check if this is a legacy credential, translate it if so
@@ -193,6 +194,14 @@ class Credential(object):
             else:
                 self.xml = str
                 self.decode()
+
+        # Find an xmlsec1 path
+        self.xmlsec_path = ''
+        paths = ['/usr/bin','/usr/local/bin','/bin','/opt/bin','/opt/local/bin']
+        for path in paths:
+            if os.path.isfile(path + '/' + 'xmlsec1'):
+                self.xmlsec_path = path + '/' + 'xmlsec1'
+                break
 
 
     def get_signature(self):
