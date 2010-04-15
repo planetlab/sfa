@@ -402,7 +402,11 @@ class Credential(object):
 
 
     def save_to_random_tmp_file(self):
-        filename = "/tmp/cred_%d" % randint(0,999999999)
+        while True:
+            filename = "/tmp/cred_%d" % randint(0,999999999)
+            if not os.path.isfile(filename):
+                break
+            
         self.save_to_file(filename)
         return filename
     

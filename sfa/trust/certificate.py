@@ -322,7 +322,10 @@ class Certificate:
    # Save the certificate to a random file in /tmp/
    # @param save_parents If save_parents==True, then also save the parent certificates.
    def save_to_random_tmp_file(self, save_parents=True):
-       filename = "/tmp/cert_%d" % randint(0,999999999)
+       while True:
+           filename = "/tmp/cred_%d" % randint(0,999999999)
+           if not os.path.isfile(filename):
+               break
        self.save_to_file(filename, save_parents)
        return filename
    ##
