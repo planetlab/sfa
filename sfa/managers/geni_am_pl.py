@@ -1,22 +1,10 @@
-import datetime
-import time
-import traceback
-import sys
-
-from types import StringTypes
 from sfa.util.namespace import *
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
-from sfa.util.record import SfaRecord
-from sfa.util.policy import Policy
+
 from sfa.util.record import *
-from sfa.util.sfaticket import SfaTicket
-from sfa.server.registry import Registries
-from sfa.util.debug import log
-from sfa.plc.slices import Slices
-import sfa.plc.peers as peers
-from sfa.plc.api import SfaAPI
+
 from sfa.plc.slices import *
 from sfa.util.sfalogging import *
 import zlib
@@ -49,7 +37,7 @@ def ListResources(api, creds, options):
     return rspec
 
 
-def CreateSlice(api, slice_xrn, creds, rspec):
+def CreateSliver(api, slice_xrn, creds, rspec):
     manager_base = 'sfa.managers'
     mgr_type = 'pl'
     manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
@@ -58,3 +46,12 @@ def CreateSlice(api, slice_xrn, creds, rspec):
     allocated = manager.create_slice(api, slice_xrn, rspec)
     return allocated
 
+def DeleteSliver(api, slice_xrn, creds):
+    manager_base = 'sfa.managers'
+    mgr_type = 'pl'
+    manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+    manager = __import__(manager_module, fromlist=[manager_base])
+
+    allocated = manager.delete_slice(api, slice_xrn)
+    return allocated
+    

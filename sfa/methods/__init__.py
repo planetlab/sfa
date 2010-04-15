@@ -30,4 +30,5 @@ GetVersion
 ListResources
 CreateSliver
 get_geni_aggregates
+DeleteSliver
 """.split()

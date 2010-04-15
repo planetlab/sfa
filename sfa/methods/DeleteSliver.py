@@ -3,7 +3,7 @@ from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter
 
-class CreateSliver(Method):
+class DeleteSliver(Method):
     """
     Allocate resources to a slice.  This operation is expected to
     start the allocated resources asynchornously after the operation
@@ -19,11 +19,10 @@ class CreateSliver(Method):
     accepts = [
         Parameter(str, "Slice URN"),
         Parameter(type([str]), "List of credentials"),
-        Parameter(str, "RSpec")
         ]
-    returns = Parameter(str, "Allocated RSpec")
+    returns = Parameter(bool, "Success or Failure")
 
-    def call(self, slice_xrn, creds, rspec):
+    def call(self, slice_xrn, creds):
         hrn, type = urn_to_hrn(slice_xrn)
 
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tcaller-creds: %s\tmethod-name: %s"%(self.api.interface, hrn, creds, self.name))
@@ -32,14 +31,14 @@ class CreateSliver(Method):
         found = False
         for cred in creds:
             try:
-                self.api.auth.check(cred, 'createslice')
+                self.api.auth.check(cred, 'deleteslice')
                 found = True
                 break
             except:
                 continue
             
         if not found:
-            raise InsufficientRights('CreateSliver: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
+            raise InsufficientRights('DeleteSliver: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
             
         
         manager_base = 'sfa.managers'
@@ -48,7 +47,7 @@ class CreateSliver(Method):
             mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
             manager_module = manager_base + ".geni_am_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            return manager.CreateSliver(self.api, slice_xrn, creds, rspec)
+            return manager.DeleteSliver(self.api, slice_xrn, creds)
 
         return ''
     
