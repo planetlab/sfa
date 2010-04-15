@@ -177,6 +177,7 @@ class Credential(object):
         self.xml = None
         self.refid = None
         self.legacy = None
+        self.xmlsec_path = '/usr/bin/env xmlsec1'
 
 
         # Check if this is a legacy credential, translate it if so
@@ -501,8 +502,8 @@ class Credential(object):
         # Call out to xmlsec1 to sign it
         ref = 'Sig_%s' % self.get_refid()
         filename = self.save_to_random_tmp_file()
-        signed = os.popen('/usr/bin/xmlsec1 --sign --node-id "%s" --privkey-pem %s,%s %s' \
-                 % (ref, self.issuer_privkey, ",".join(gid_files), filename)).read()
+        signed = os.popen('%s --sign --node-id "%s" --privkey-pem %s,%s %s' \
+                 % (self.xmlsec_path, ref, self.issuer_privkey, ",".join(gid_files), filename)).read()
         os.remove(filename)
 
         for gid_file in gid_files:
@@ -652,8 +653,8 @@ class Credential(object):
             refs.append("Sig_%s" % ref)
 
         for ref in refs:
-            verified = os.popen('/usr/bin/xmlsec1 --verify --node-id "%s" %s %s 2>&1' \
-                            % (ref, cert_args, filename)).read()
+            verified = os.popen('%s --verify --node-id "%s" %s %s 2>&1' \
+                            % (self.xmlsec_path, ref, cert_args, filename)).read()
             if not verified.strip().startswith("OK"):
                 raise CredentialNotVerifiable("xmlsec1 error: " + verified)
         os.remove(filename)
@@ -683,8 +684,6 @@ class Credential(object):
 
         # Ensure that the signer of the root credential is the target_authority
         target_authority = hrn_to_urn(target_authority, 'authority')
-
-        logger.info( "%s %s" % (root_issuer, target_authority))
 
         if root_issuer != target_authority:
             raise CredentialNotVerifiable("issuer (%s) != authority of target (%s)" \
