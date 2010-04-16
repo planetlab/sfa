@@ -22,7 +22,7 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                    "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", 
                           "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "renewsliver",
                           "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy", "createsliver", "sliverestatus"],
-                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver",  "deleteslice", "updateslice", "getsliceresources"],
+                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver",  "deleteslice", "updateslice", "getsliceresources", "shutdown"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
                    "control": ["updateslice", "createslice", "createsliver", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids"],
                    "info": ["listslices", "listnodes", "getpolicy"],

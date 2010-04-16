@@ -155,7 +155,11 @@ class Sfi:
                   "GetVersion": "name",
                   "ListResources": "name",
                   "CreateSliver": "name",
-                  "get_geni_aggregates": "name"
+                  "get_geni_aggregates": "name",
+                  "DeleteSliver": "name",
+                  "SliverStatus": "name",
+                  "RenewSliver": "name",
+                  "Shutdown": "name"
                  }
 
         if additional_cmdargs:
@@ -959,6 +963,14 @@ class Sfi:
         rspec = open(rspec_file).read()
         server = self.geni_am
         return server.CreateSliver(slice_xrn, [slice_cred], rspec)
+    
+    def DeleteSliver(self, opts, args):
+        slice_xrn = args[0]
+        user_cred = self.get_user_cred()
+        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
+        server = self.geni_am
+        return server.DeleteSliver(slice_xrn, [slice_cred])    
+    
     #
     # Main: parse arguments and dispatch to command
     #

@@ -33,4 +33,5 @@ get_geni_aggregates
 DeleteSliver
 SliverStatus
 RenewSliver
+Shutdown
 """.split()

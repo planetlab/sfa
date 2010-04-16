@@ -64,3 +64,7 @@ def SliverStatus(api, slice_xrn):
 
 def RenewSliver(api, slice_xrn, creds, renew_time):
     return False
+
+def Shutdown(api, slice_xrn, creds):
+    return False
+
