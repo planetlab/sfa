@@ -38,7 +38,7 @@ class stop_slice(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
         # validate the cred
-        self.api.auth.check(cred, 'stopslice')
+        self.api.auth.check(cred, 'stopslice', hrn)
        
         # send the call to the right manager
         manager_base = 'sfa.managers'

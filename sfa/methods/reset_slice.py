@@ -30,7 +30,7 @@ class reset_slice(Method):
     
     def call(self, cred, xrn, origin_hrn=None):
         hrn, type = urn_to_hrn(xrn)
-        self.api.auth.check(cred, 'resetslice')
+        self.api.auth.check(cred, 'resetslice', hrn)
         # send the call to the right manager
         manager_base = 'sfa.managers'
         if self.api.interface in ['component']:

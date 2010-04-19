@@ -53,7 +53,7 @@ class create_slice(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
          
         # validate the credential
-        self.api.auth.check(cred, 'createslice')
+        self.api.auth.check(cred, 'createslice', hrn)
 
         manager_base = 'sfa.managers'
         if self.api.interface in ['aggregate']:

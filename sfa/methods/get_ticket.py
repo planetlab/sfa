@@ -53,7 +53,7 @@ class get_ticket(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
         # validate the cred
-        self.api.auth.check(cred, "getticket")
+        self.api.auth.check(cred, "getticket", hrn)
 	
         # set the right outgoing rules
         manager_base = 'sfa.managers'
