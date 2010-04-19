@@ -32,7 +32,7 @@ class Auth:
     def load_trusted_certs(self):
         self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
         
-    def check(self, cred, operation):
+    def check(self, cred, operation, hrn = None):
         """
         Check the credential against the peer cert (callerGID included 
         in the credential matches the caller that is connected to the 
@@ -66,6 +66,13 @@ class Auth:
         else:
            raise MissingTrustedRoots(self.config.get_trustedroots_dir())
 
+        # Make sure the credential's target matches the specified hrn. 
+        # This check does not apply to trusted peers 
+        trusted_peers = [gid.get_hrn() for gid in self.trusted_cert_list.get_list()]
+        if hrn and client_gid.get_hrn() not in trusted_peers:
+            if not hrn == object_gid.get_hrn():
+                raise PermissionError("Target hrn: %s doesn't match specified hrn: %s " % \
+                                       (object_gid.get_hrn(), hrn) )       
         return True
 
     def check_ticket(self, ticket):
