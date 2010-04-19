@@ -102,6 +102,7 @@ class Site:
     def toxml(self, xml):
         if not (self.public and self.enabled and self.node_ids):
             return
+
         with xml.site(id = self.idtag):
             with xml.name:
                 xml << self.name

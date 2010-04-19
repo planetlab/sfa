@@ -22,8 +22,7 @@ import traceback
 from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
-from M2Crypto import EVP
-from random import randint
+from tempfile import mkstemp
 
 from sfa.util.faults import *
 
@@ -315,19 +314,24 @@ class Certificate:
    # Save the certificate to a file.
    # @param save_parents If save_parents==True, then also save the parent certificates.
 
-   def save_to_file(self, filename, save_parents=True):
+   def save_to_file(self, filename, save_parents=True, filep=None):
        string = self.save_to_string(save_parents=save_parents)
-       open(filename, 'w').write(string)
+       if filep:
+           f = filep
+       else:
+           f = open(filename, 'w')
+       f.write(string)
+       f.close()
+
    ##
    # Save the certificate to a random file in /tmp/
-   # @param save_parents If save_parents==True, then also save the parent certificates.
-   def save_to_random_tmp_file(self, save_parents=True):
-       while True:
-           filename = "/tmp/cred_%d" % randint(0,999999999)
-           if not os.path.isfile(filename):
-               break
-       self.save_to_file(filename, save_parents)
-       return filename
+   # @param save_parents If save_parents==True, then also save the parent certificates.  
+   def save_to_random_tmp_file(self, save_parents=True):       
+       fp, filename = mkstemp(suffix='cert', text=True)
+       fp = os.fdopen(fp, "w")
+       self.save_to_file(filename, save_parents=True, filep=fp)
+       return filename   
+
    ##
    # Sets the issuer private key and name
    # @param key Keypair object containing the private key of the issuer

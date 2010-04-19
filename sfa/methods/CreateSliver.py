@@ -2,6 +2,9 @@ from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter
+from sfatables.runtime import SFATablesRules
+import sys
+from sfa.trust.credential import Credential
 
 class CreateSliver(Method):
     """
@@ -23,6 +26,17 @@ class CreateSliver(Method):
         ]
     returns = Parameter(str, "Allocated RSpec")
 
+    def __run_sfatables(self, manager, rules, hrn, origin_hrn, rspec):
+        if rules.sorted_rule_list:
+            contexts = rules.contexts
+            request_context = manager.fetch_context(hrn, origin_hrn, contexts)
+            rules.set_context(request_context)
+            newrspec = rules.apply(rspec)
+        else:    
+            newrspec = rspec
+        return newrspec
+
+
     def call(self, slice_xrn, creds, rspec):
         hrn, type = urn_to_hrn(slice_xrn)
 
@@ -33,14 +47,16 @@ class CreateSliver(Method):
         for cred in creds:
             try:
                 self.api.auth.check(cred, 'createslice')
+                origin_hrn = Credential(string=cred).get_gid_caller().get_hrn()
                 found = True
                 break
             except:
+                error = sys.exc_info()[:2]
                 continue
             
         if not found:
-            raise InsufficientRights('CreateSliver: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
-            
+            raise InsufficientRights('CreateSliver: Access denied: %s -- %s' % (error[0],error[1]))
+             
         
         manager_base = 'sfa.managers'
 
@@ -48,6 +64,8 @@ class CreateSliver(Method):
             mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
             manager_module = manager_base + ".geni_am_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
+            rspec = self.__run_sfatables(manager, SFATablesRules('INCOMING'),
+                                         hrn, origin_hrn, rspec)
             return manager.CreateSliver(self.api, slice_xrn, creds, rspec)
 
         return ''

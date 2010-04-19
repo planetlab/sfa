@@ -23,6 +23,7 @@ from sfa.util.debug import log
 from sfa.util.sfalogging import logger
 import sfa.plc.peers as peers
 
+
 def delete_slice(api, xrn, origin_hrn=None):
     credential = api.getCredential()
     aggregates = api.aggregates

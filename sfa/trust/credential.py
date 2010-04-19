@@ -9,8 +9,8 @@
 
 import os
 import datetime
-from random import randint
 from xml.dom.minidom import Document, parseString
+from tempfile import mkstemp
 
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import *
@@ -411,19 +411,19 @@ class Credential(object):
         self.xml = doc.toxml()
 
 
-    def save_to_random_tmp_file(self):
-        while True:
-            filename = "/tmp/cred_%d" % randint(0,999999999)
-            if not os.path.isfile(filename):
-                break
-            
-        self.save_to_file(filename)
+    def save_to_random_tmp_file(self):       
+        fp, filename = mkstemp(suffix='cred', text=True)
+        fp = os.fdopen(fp, "w")
+        self.save_to_file(filename, save_parents=True, filep=fp)
         return filename
     
-    def save_to_file(self, filename, save_parents=True):
+    def save_to_file(self, filename, save_parents=True, filep=None):
         if not self.xml:
             self.encode()
-        f = open(filename, "w")
+        if filep:
+            f = filep 
+        else:
+            f = open(filename, "w")
         f.write(self.xml)
         f.close()
 

@@ -947,17 +947,15 @@ class Sfi:
         if args:
             xrn = args[0]
             cred = self.get_slice_cred(xrn).save_to_string(save_parents=True)
-
         if xrn:
             call_options['geni_slice_urn'] = xrn
             
-        rspec = server.ListResources([user_cred], call_options)
+        rspec = server.ListResources([cred], call_options)
         rspec = zlib.decompress(rspec.decode('base64'))
         print rspec
         
     def CreateSliver(self, opts, args):
         slice_xrn = args[0]
-        user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
@@ -966,10 +964,28 @@ class Sfi:
     
     def DeleteSliver(self, opts, args):
         slice_xrn = args[0]
-        user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
         server = self.geni_am
         return server.DeleteSliver(slice_xrn, [slice_cred])    
+
+    def SliverStatus(self, opts, args):
+        slice_xrn = args[0]
+        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
+        server = self.geni_am
+        return server.SliverStatus(slice_xrn, [slice_cred])
+    
+    def RenewSliver(self, opts, args):
+        slice_xrn = args[0]
+        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
+        time = args[1]
+        server = self.geni_am
+        return server.RenewSliver(slice_xrn, [slice_cred], time)   
+
+    def Shutdown(self, opts, args):
+        slice_xrn = args[0]
+        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
+        server = self.geni_am
+        return server.Shutdown(slice_xrn, [slice_cred])         
     
     #
     # Main: parse arguments and dispatch to command

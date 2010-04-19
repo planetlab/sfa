@@ -34,4 +34,5 @@ DeleteSliver
 SliverStatus
 RenewSliver
 Shutdown
+Resolve
 """.split()

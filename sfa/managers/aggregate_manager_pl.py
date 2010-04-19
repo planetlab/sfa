@@ -146,7 +146,7 @@ def start_slice(api, xrn):
         raise RecordNotFound(hrn)
     slice_id = slices[0]
     attributes = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
-    attribute_id = attreibutes[0]['slice_attribute_id']
+    attribute_id = attributes[0]['slice_attribute_id']
     api.plshell.UpdateSliceTag(api.plauth, attribute_id, "1" )
 
     return 1
