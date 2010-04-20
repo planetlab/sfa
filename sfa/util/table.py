@@ -84,7 +84,9 @@ class SfaTable(list):
         self.db.do(querystr)
         for index in indexes:
             self.db.do(index)
-
+        
+        sefl.db.commit()
+    
     def remove(self, record):
         query_str = "DELETE FROM %s WHERE record_id = %s" % \
                     (self.tablename, record['record_id']) 
@@ -92,10 +94,11 @@ class SfaTable(list):
         
         # if this is a site, remove all records where 'authority' == the 
         # site's hrn
-        if record['type'] == 'site':
+        if record['type'] == 'authority':
             sql = " DELETE FROM %s WHERE authority = %s" % \
                     (self.tablename, record['hrn'])
-            self.db.do(sql) 
+            self.db.do(sql)
+            self.db.commit() 
 
     def insert(self, record):
         db_fields = self.db_fields(record)
