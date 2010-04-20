@@ -10,12 +10,6 @@ from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.faults import *
 
-def GetVersion():
-    version = {}
-    version['geni_api'] = 1
-    return version
-
-
     
 
 def get_credential(api, xrn, type, is_self=False):
@@ -74,6 +68,15 @@ def get_credential(api, xrn, type, is_self=False):
 
     return new_cred.save_to_string(save_parents=True)
 
+
+# The GENI GetVersion call
+def GetVersion():
+    version = {}
+    version['geni_api'] = 1
+    return version
+
+
+
 # The GENI resolve call
 def Resolve(api, xrn, creds):
     records = resolve(api, xrn)
@@ -83,7 +86,7 @@ def Resolve(api, xrn, creds):
     
     record = records[0]
     if record.type == 'slice':
-        return {'geni_urn': xrn, 'geni_creator': record.gid}
+        return {'geni_urn': xrn, 'geni_creator': " ".join(record.PI)}
     if record.type == 'user':
         return {'geni_urn': xrn, 'geni_certificate': record.gid}
     

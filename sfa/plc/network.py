@@ -7,7 +7,7 @@ from xmlbuilder import XMLBuilder
 from lxml import etree
 import sys
 from StringIO import StringIO
-
+from sfa.util.sfalogging import logger
 
 class Sliver:
     def __init__(self, node):
@@ -16,6 +16,7 @@ class Sliver:
         self.slice = node.network.slice
         
     def toxml(self, xml):
+        logger.info("sliver to xml!")
         with xml.sliver:
             self.slice.tags_to_xml(xml, self.node)
 
@@ -64,6 +65,7 @@ class Node:
         self.sliver = Sliver(self)
 
     def toxml(self, xml):
+        logger.info("node.toxml(I)")
         slice = self.network.slice
         if self.whitelist and not self.sliver:
             if not slice or slice.id not in self.whitelist:
@@ -197,6 +199,8 @@ class Slice:
                             xml << (tag.tagname, tag.value)
 
     def toxml(self, xml):
+        logger.info("slice to xml!")
+
         with xml.sliver_defaults:
             self.tags_to_xml(xml)
 
@@ -442,9 +446,9 @@ class Network:
                 raise InvalidRSpec(message)
 
         self.rspec = rspec
-
         defaults = rspec.find(".//sliver_defaults")
         self.__process_attributes(defaults)
+
 
         # Find slivers under node elements
         for sliver in rspec.iterfind("./network/site/node/sliver"):

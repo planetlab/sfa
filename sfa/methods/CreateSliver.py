@@ -5,6 +5,7 @@ from sfa.util.parameter import Parameter
 from sfatables.runtime import SFATablesRules
 import sys
 from sfa.trust.credential import Credential
+from sfa.util.sfalogging import logger
 
 class CreateSliver(Method):
     """
@@ -40,24 +41,13 @@ class CreateSliver(Method):
     def call(self, slice_xrn, creds, rspec):
         hrn, type = urn_to_hrn(slice_xrn)
 
-        self.api.logger.info("interface: %s\ttarget-hrn: %s\tcaller-creds: %s\tmethod-name: %s"%(self.api.interface, hrn, creds, self.name))
+        self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
 
-        # Validate that at least one of the credentials is good enough
-        found = False
-        for cred in creds:
-            try:
-                self.api.auth.check(cred, 'createslice')
-                origin_hrn = Credential(string=cred).get_gid_caller().get_hrn()
-                found = True
-                break
-            except:
-                error = sys.exc_info()[:2]
-                continue
-            
-        if not found:
-            raise InsufficientRights('CreateSliver: Access denied: %s -- %s' % (error[0],error[1]))
-             
-        
+        # Find the valid credentials
+        ValidCreds = self.api.auth.checkCredentials(creds, 'createslice', hrn)
+
+        origin_hrn = Credential(string=ValidCreds[0]).get_gid_caller().get_hrn()
+
         manager_base = 'sfa.managers'
 
         if self.api.interface in ['geni_am']:
@@ -66,7 +56,7 @@ class CreateSliver(Method):
             manager = __import__(manager_module, fromlist=[manager_base])
             rspec = self.__run_sfatables(manager, SFATablesRules('INCOMING'),
                                          hrn, origin_hrn, rspec)
-            return manager.CreateSliver(self.api, slice_xrn, creds, rspec)
-
+            logger.info("Calling with rspec = %s"% rspec)
+            return manager.CreateSliver(self.api, slice_xrn, ValidCreds, rspec)            
         return ''
     

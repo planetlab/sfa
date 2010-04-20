@@ -26,24 +26,12 @@ class RenewSliver(Method):
 
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tcaller-creds: %s\tmethod-name: %s"%(self.api.interface, hrn, creds, self.name))
 
-        # Validate that at least one of the credentials is good enough
-        found = False
-        validCred = None
-        for cred in creds:
-            try:
-                self.api.auth.check(cred, 'renewsliver')
-                validCred = cred
-                found = True
-                break
-            except:
-                continue
-            
-        if not found:
-            raise InsufficientRights('SliverStatus: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
-            
+        # Find the valid credentials
+        ValidCreds = self.api.auth.checkCredentials(creds, 'renewsliver', hrn)
+
         # Validate that the time does not go beyond the credential's expiration time
         requested_time = parse(expiration_time)
-        if requested_time > Credential(string=validCred).get_lifetime():
+        if requested_time > Credential(string=ValidCreds[0]).get_lifetime():
             raise InsufficientRights('SliverStatus: Credential expires before requested expiration time')
         
         manager_base = 'sfa.managers'
@@ -52,7 +40,7 @@ class RenewSliver(Method):
             mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
             manager_module = manager_base + ".geni_am_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            return manager.RenewSliver(self.api, slice_xrn, creds, expiration_time)
+            return manager.RenewSliver(self.api, slice_xrn, ValidCreds, expiration_time)
 
         return ''
     

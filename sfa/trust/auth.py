@@ -15,6 +15,8 @@ from sfa.util.namespace import *
 from sfa.util.sfaticket import *
 from sfa.util.sfalogging import logger
 
+import sys
+
 class Auth:
     """
     Credential based authentication
@@ -31,6 +33,23 @@ class Auth:
         self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
         self.trusted_cert_file_list = TrustedRootList(self.config.get_trustedroots_dir()).get_file_list()
 
+        
+        
+    def checkCredentials(self, creds, operation, hrn = None):
+        valid = []
+        for cred in creds:
+            try:
+                self.check(cred, operation, hrn)
+                valid.append(cred)
+            except:
+                error = sys.exc_info()[:2]
+                continue
+            
+        if not len(valid):
+            raise InsufficientRights('Access denied: %s -- %s' % (error[0],error[1]))
+        
+        return valid
+        
         
     def check(self, cred, operation, hrn = None):
         """
@@ -65,10 +84,10 @@ class Auth:
         # Make sure the credential's target matches the specified hrn. 
         # This check does not apply to trusted peers
         trusted_peers = [gid.get_hrn() for gid in self.trusted_cert_list]
-        if hrn and client_gid.get_hrn() not in trusted_peers:
-            if not hrn == object_gid.get_hrn():
+        if hrn and self.client_gid.get_hrn() not in trusted_peers:
+            if not hrn == self.object_gid.get_hrn():
                 raise PermissionError("Target hrn: %s doesn't match specified hrn: %s " % \
-                                       (object_gid.get_hrn(), hrn) )       
+                                       (self.object_gid.get_hrn(), hrn) )       
         return True
 
     def check_ticket(self, ticket):

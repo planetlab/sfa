@@ -2,7 +2,7 @@ from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter
-
+from sfa.trust.credential import Credential
 
 class Resolve(Method):
     """
@@ -22,11 +22,14 @@ class Resolve(Method):
         for cred in creds:
             try:
                 self.api.auth.check(cred, 'resolve')
+                # Make sure it's an authority and not a user
+                if cred.get_gid_caller().get_type() != 'authority':
+                    raise 'NotAuthority'
                 found = True
                 break
             except:
                 continue
-            
+                
         if not found:
             raise InsufficientRights('Resolve: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
         

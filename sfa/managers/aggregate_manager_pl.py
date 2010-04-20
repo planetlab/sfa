@@ -66,16 +66,21 @@ def create_slice(api, xrn, xml):
 
     slice = network.get_slice(api, hrn)
     current = __get_hostnames(slice.get_nodes())
-
+    api.logger.info("Current = %s" % " ".join(current))
+    api.logger.info("before addrspec")
     network.addRSpec(xml, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
-    
+    api.logger.info("after addrspec")
     request = __get_hostnames(network.nodesWithSlivers())
     
     # remove nodes not in rspec
     deleted_nodes = list(set(current).difference(request))
+    api.logger.info("Deleted nodes = " + " ".join(deleted_nodes))
 
     # add nodes from rspec
     added_nodes = list(set(request).difference(current))
+    api.logger.info("Added nodes = " + " ".join(added_nodes))
+    
+
 
     if peer:
         api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)

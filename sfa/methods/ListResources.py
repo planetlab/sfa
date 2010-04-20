@@ -9,7 +9,7 @@ import sys
 
 class ListResources(Method):
     """
-    Returns information about available resources or resources allocated to this    slice
+    Returns information about available resources or resources allocated to this slice
     @param credential list
     @param options dictionary
     @return string
@@ -24,22 +24,15 @@ class ListResources(Method):
     def call(self, creds, options):
         self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
             
-        # Validate that at least one of the credentials is good enough
-        found = False
-        for cred in creds:
-            try:
-                self.api.auth.check(cred, 'listnodes')
-                found = True
-                user_cred = Credential(string=cred)
-                break
-            except:
-                error = sys.exc_info()[:2]
-                continue
+        # Find the valid credentials
+        hrn = None
+        if options.has_key('geni_slice_urn'):
+            xrn = options['geni_slice_urn']
+            hrn, _ = urn_to_hrn(xrn)        
             
-        if not found:
-            raise InsufficientRights('ListResources: Access denied: %s -- %s' % (error[0],error[1]))
-        
-        origin_hrn = user_cred.get_gid_caller().get_hrn()
+        ValidCreds = self.api.auth.checkCredentials(creds, 'listnodes', hrn)
+        origin_hrn = Credential(string=ValidCreds[0]).get_gid_caller().get_hrn()
+            
                     
         manager_base = 'sfa.managers'
 
@@ -47,7 +40,7 @@ class ListResources(Method):
             mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
             manager_module = manager_base + ".geni_am_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            rspec = manager.ListResources(self.api, creds, options)
+            rspec = manager.ListResources(self.api, ValidCreds, options)
             outgoing_rules = SFATablesRules('OUTGOING')
             
         

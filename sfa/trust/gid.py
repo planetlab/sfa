@@ -98,6 +98,12 @@ class GID(Certificate):
             self.decode()
         return self.urn            
 
+    def get_type(self):
+        if not self.urn:
+            self.decode()
+        _, t = urn_to_hrn(self.urn)
+        return t
+    
     ##
     # Encode the GID fields and package them into the subject-alt-name field
     # of the X509 certificate. This must be called prior to signing the
