@@ -102,8 +102,8 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             # get arguments
             request = self.rfile.read(int(self.headers["content-length"]))
             remote_addr = (remote_ip, remote_port) = self.connection.getpeername()
-            self.api.remote_addr = remote_addr
-            response = self.api.handle(remote_addr, request)
+            self.api.remote_addr = remote_addr            
+            response = self.api.handle(remote_addr, request, self.server.method_map)
 
         
         except Exception, fault:
@@ -136,6 +136,8 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         self.interface = None
         self.key_file = key_file
         self.cert_file = cert_file
+        self.method_map = {}
+
         #for compatibility with python 2.4 (centos53)
         if sys.version_info < (2, 5):
             SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)
@@ -250,7 +252,7 @@ class SfaServer(threading.Thread):
 
     ##
     # Register functions that will be served by the XMLRPC server. This
-    # function should be overrided by each descendant class.
+    # function should be overridden by each descendant class.
 
     def register_functions(self):
         self.server.register_function(self.noop)

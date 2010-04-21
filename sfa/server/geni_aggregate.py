@@ -33,4 +33,4 @@ class GENIAggregate(SfaServer):
     def __init__(self, ip, port, key_file, cert_file):
         SfaServer.__init__(self, ip, port, key_file, cert_file)
         self.server.interface = 'geni_am'
-
+        self.server.method_map = {'Resolve': 'ResolveGENI'}

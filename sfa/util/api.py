@@ -125,6 +125,7 @@ class BaseAPI:
         self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
+        self.method_map = {}
         
         # load registries
         from sfa.server.registry import Registries
@@ -163,7 +164,8 @@ class BaseAPI:
         self.source = source
         return function(*args)
 
-    def handle(self, source, data):
+    
+    def handle(self, source, data, method_map):
         """
         Handle an XML-RPC or SOAP request from the specified source.
         """
@@ -171,7 +173,10 @@ class BaseAPI:
         try:
             interface = xmlrpclib
             (args, method) = xmlrpclib.loads(data)
+            if method_map.has_key(method):
+                method = method_map[method]
             methodresponse = True
+            
         except Exception, e:
             if SOAPpy is not None:
                 interface = SOAPpy
