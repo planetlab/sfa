@@ -19,6 +19,9 @@ slice-manager.wsdl:
 
 aggregate.wsdl:
 	PYTHONPATH=../ python sfa2wsdl.py --aggregate > $@
+	
+geni_am.wsdl:
+	PYTHONPATH=../ python sfa2wsdl.py --geni_aggregate > $@
 
 sfa.wsdl:
 	PYTHONPATH=../ python sfa2wsdl.py --registry --slice-manager --aggregate > $@
