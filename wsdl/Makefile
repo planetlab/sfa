@@ -12,16 +12,16 @@ registry.wsdl slice-manager.wsdl aggregate.wsdl sfa.wsdl:
 	touch $@
 else
 registry.wsdl:
-	PYTHONPATH=../ ./sfa2wsdl.py --registry > $@
+	PYTHONPATH=../ python sfa2wsdl.py --registry > $@
 
 slice-manager.wsdl:
-	PYTHONPATH=../ ./sfa2wsdl.py --slice-manager > $@
+	PYTHONPATH=../ python sfa2wsdl.py --slice-manager > $@
 
 aggregate.wsdl:
-	PYTHONPATH=../ ./sfa2wsdl.py --aggregate > $@
+	PYTHONPATH=../ python sfa2wsdl.py --aggregate > $@
 
 sfa.wsdl:
-	PYTHONPATH=../ ./sfa2wsdl.py --registry --slice-manager --aggregate > $@
+	PYTHONPATH=../ python sfa2wsdl.py --registry --slice-manager --aggregate > $@
 endif
 
 #################### install

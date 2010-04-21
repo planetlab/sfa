@@ -56,7 +56,7 @@ class CreateSliver(Method):
             manager = __import__(manager_module, fromlist=[manager_base])
             rspec = self.__run_sfatables(manager, SFATablesRules('INCOMING'),
                                          hrn, origin_hrn, rspec)
-            logger.info("Calling with rspec = %s"% rspec)
+
             return manager.CreateSliver(self.api, slice_xrn, ValidCreds, rspec)            
         return ''
     

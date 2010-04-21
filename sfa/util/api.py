@@ -125,7 +125,6 @@ class BaseAPI:
         self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"
         self.logger=get_sfa_logger()
-        self.method_map = {}
         
         # load registries
         from sfa.server.registry import Registries
