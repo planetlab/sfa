@@ -13,7 +13,7 @@ from sfa.util.record import SfaRecord
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
 
- 
+
 # GeniLight client support is optional
 try:
     from egeni.geniLight_client import *
@@ -164,14 +164,15 @@ class Interfaces(dict):
         required_fields = self.default_fields.keys()
         if not isinstance(interfaces, list):
             interfaces = [interfaces]
+
         for interface in interfaces:
             # make sure the required fields are present and not null
             if not all([interface.get(key) for key in required_fields]):
                 continue
-
+            
             hrn, address, port = interface['hrn'], interface['addr'], interface['port']
             url = 'http://%(address)s:%(port)s' % locals()
-
+            
             # check which client we should use
             # sfa.util.xmlrpcprotocol is default
             client_type = 'xmlrpcprotocol'
