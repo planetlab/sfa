@@ -509,8 +509,9 @@ class Network:
             with element:
                 if self.slice:
                     self.slice.toxml(xml)
-                for site in self.getSites():
-                    site.toxml(xml)
+                else:
+                    for site in self.getSites():
+                        site.toxml(xml)
 
         header = '<?xml version="1.0"?>\n'
         return header + str(xml)
