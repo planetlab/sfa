@@ -950,7 +950,7 @@ class Sfi:
         if xrn:
             call_options['geni_slice_urn'] = xrn
             
-        rspec = server.Purple([cred], call_options)
+        rspec = server.ListResources([cred], call_options)
         rspec = zlib.decompress(rspec.decode('base64'))
         print rspec
         
