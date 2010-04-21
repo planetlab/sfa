@@ -34,5 +34,5 @@ DeleteSliver
 SliverStatus
 RenewSliver
 Shutdown
-Resolve
+ResolveGENI
 """.split()
