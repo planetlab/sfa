@@ -7,8 +7,7 @@ from sfa.trust.credential import Credential
 class Resolve(Method):
     """
     Lookup a URN and return information about the corresponding object.
-    @param slice_urn (string) URN of slice to renew
-    @param credentials ([string]) of credentials
+    @param urn
     
     """
     interfaces = ['registry']
@@ -18,21 +17,7 @@ class Resolve(Method):
         ]
     returns = Parameter(bool, "Success or Failure")
 
-    def call(self, xrn, creds):
-        for cred in creds:
-            try:
-                self.api.auth.check(cred, 'resolve')
-                # Make sure it's an authority and not a user
-                if cred.get_gid_caller().get_type() != 'authority':
-                    raise 'NotAuthority'
-                found = True
-                break
-            except:
-                continue
-                
-        if not found:
-            raise InsufficientRights('Resolve: Credentials either did not verify, were no longer valid, or did not have appropriate privileges')
-        
+    def call(self, xrn):
 
         manager_base = 'sfa.managers'
 
@@ -40,6 +25,6 @@ class Resolve(Method):
             mgr_type = self.api.config.SFA_REGISTRY_TYPE
             manager_module = manager_base + ".registry_manager_%s" % mgr_type
             manager = __import__(manager_module, fromlist=[manager_base])
-            return manager.Resolve(self.api, xrn, creds)
+            return manager.Resolve(self.api, xrn, '')
                
         return {}
