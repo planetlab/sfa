@@ -4,10 +4,6 @@
 # overwritten by the specfile
 DESTDIR="/"
 
-ifndef PREFIX
-	PREFIX="/usr"
-endif
-
 ##########
 all: keyconvert python wsdl
 
@@ -38,13 +34,8 @@ xmlbuilder-install:
 	cd xmlbuilder-0.9 && python setup.py install --root=$(DESTDIR) && cd -
  
 python-install:
-	python setup.py install --root=$(DESTDIR) --home=$(PREFIX) | grep copying >> python_install.log	
+	python setup.py install --root=$(DESTDIR)	
 	chmod 444 $(DESTDIR)/etc/sfa/default_config.xml
-
-python-uninstall:
-	python setup.py uninstall
-	bash uninstall_python.sh
-	$(awk '{print $$4}' python_install.log)
 
 python-clean:
 	python setup.py clean
