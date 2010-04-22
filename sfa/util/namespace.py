@@ -91,7 +91,11 @@ def hrn_to_urn(hrn, type=None):
     name = get_leaf(hrn)
     
     if authority.startswith("plc"):
-        urn = "+".join(['',authority.replace('.',':'),type,name])
+        if type == None:
+            urn = "+".join(['',authority.replace('.',':'),name])
+        else:
+            urn = "+".join(['',authority.replace('.',':'),type,name])
+
     else:
         urn = "+".join(['',authority,type,name])
         
