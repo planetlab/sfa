@@ -85,7 +85,7 @@ class SfaTable(list):
         for index in indexes:
             self.db.do(index)
         
-        sefl.db.commit()
+        self.db.commit()
     
     def remove(self, record):
         query_str = "DELETE FROM %s WHERE record_id = %s" % \
@@ -183,9 +183,11 @@ class SfaTable(list):
     def drop(self):
         try:
             self.db.do('DROP TABLE IF EXISTS ' + self.tablename)
+            self.db.commit()
         except:
             try:
                 self.db.do('DROP TABLE ' + self.tablename)
+                self.db.commit()
             except:
                 pass
     
