@@ -290,13 +290,13 @@ class TagType:
         return True
         
 
-"""
-A Network is a compound object consisting of:
-* a dictionary mapping site IDs to Site objects
-* a dictionary mapping node IDs to Node objects
-* a dictionary mapping interface IDs to Iface objects
-"""
 class Network:
+    """
+    A Network is a compound object consisting of:
+    * a dictionary mapping site IDs to Site objects
+    * a dictionary mapping node IDs to Node objects
+    * a dictionary mapping interface IDs to Iface objects
+    """
     def __init__(self, api, type = "SFA"):
         self.api = api
         self.type = type
@@ -307,8 +307,8 @@ class Network:
         self.tagtypes = self.get_tag_types(api)
         self.slice = None
     
-    """ Lookup site based on id or idtag value """
     def lookupSite(self, id):
+        """ Lookup site based on id or idtag value """
         val = None
         if isinstance(id, basestring):
             id = int(id.lstrip('s'))
@@ -324,8 +324,8 @@ class Network:
             sites.append(self.sites[s])
         return sites
         
-    """ Lookup node based on id or idtag value """
     def lookupNode(self, id):
+        """ Lookup node based on id or idtag value """
         val = None
         if isinstance(id, basestring):
             id = int(id.lstrip('n'))
@@ -341,8 +341,8 @@ class Network:
             nodes.append(self.nodes[n])
         return nodes
     
-    """ Lookup iface based on id or idtag value """
     def lookupIface(self, id):
+        """ Lookup iface based on id or idtag value """
         val = None
         if isinstance(id, basestring):
             id = int(id.lstrip('i'))
@@ -394,10 +394,10 @@ class Network:
             tags.append(self.tagtypes[t])
         return tags
     
-    """
-    Process the elements under <sliver_defaults> or <sliver>
-    """
     def __process_attributes(self, element, node=None):
+        """
+        Process the elements under <sliver_defaults> or <sliver>
+        """
         if element is None:
             return 
 
@@ -412,10 +412,10 @@ class Network:
                     if e is not None:
                         self.slice.update_tag(tt.tagname, e.text, node)
 
-    """
-    Annotate the objects in the Network with information from the RSpec
-    """
     def addRSpec(self, xml, schema=None):
+        """
+        Annotate the objects in the Network with information from the RSpec
+        """
         try:
             tree = etree.parse(StringIO(xml))
         except etree.XMLSyntaxError:
@@ -471,10 +471,10 @@ class Network:
 
         return
 
-    """
-    Annotate the objects in the Network with information from the slice
-    """
     def addSlice(self):
+        """
+        Annotate the objects in the Network with information from the slice
+        """
         slice = self.slice
         if not slice:
             raise InvalidRSpec("no slice associated with network")
@@ -482,10 +482,10 @@ class Network:
         for node in slice.get_nodes():
             node.add_sliver()
 
-    """
-    Write any slice tags that have been added or modified back to the DB
-    """
     def updateSliceTags(self):
+        """
+        Write any slice tags that have been added or modified back to the DB
+        """
         for tag in self.getSliceTags():
             if tag.category == 'slice/rspec' and not tag.was_updated() and tag.permit_update(None, 40):
                 # The user wants to delete this tag
@@ -496,10 +496,10 @@ class Network:
             if tag.slice_id == self.slice.id:
                 tag.write(self.api) 
 
-    """
-    Produce XML directly from the topology specification.
-    """
     def toxml(self):
+        """
+        Produce XML directly from the topology specification.
+        """
         xml = XMLBuilder(format = True, tab_step = "  ")
         with xml.RSpec(type=self.type):
             if self.slice:
@@ -516,10 +516,10 @@ class Network:
         header = '<?xml version="1.0"?>\n'
         return header + str(xml)
 
-    """
-    Create a dictionary of site objects keyed by site ID
-    """
     def get_sites(self, api):
+        """
+        Create a dictionary of site objects keyed by site ID
+        """
         tmp = []
         for site in api.plshell.GetSites(api.plauth, {'peer_id': None}):
             t = site['site_id'], Site(self, site)
@@ -527,50 +527,50 @@ class Network:
         return dict(tmp)
 
 
-    """
-    Create a dictionary of node objects keyed by node ID
-    """
     def get_nodes(self, api):
+        """
+        Create a dictionary of node objects keyed by node ID
+        """
         tmp = []
         for node in api.plshell.GetNodes(api.plauth, {'peer_id': None}):
             t = node['node_id'], Node(self, node)
             tmp.append(t)
         return dict(tmp)
 
-    """
-    Create a dictionary of node objects keyed by node ID
-    """
     def get_ifaces(self, api):
+        """
+        Create a dictionary of node objects keyed by node ID
+        """
         tmp = []
         for iface in api.plshell.GetInterfaces(api.plauth):
             t = iface['interface_id'], Iface(self, iface)
             tmp.append(t)
         return dict(tmp)
 
-    """
-    Create a dictionary of slicetag objects keyed by slice tag ID
-    """
     def get_slice_tags(self, api):
+        """
+        Create a dictionary of slicetag objects keyed by slice tag ID
+        """
         tmp = []
         for tag in api.plshell.GetSliceTags(api.plauth):
             t = tag['slice_tag_id'], Slicetag(tag)
             tmp.append(t)
         return dict(tmp)
     
-    """
-    Create a list of tagtype obects keyed by tag name
-    """
     def get_tag_types(self, api):
+        """
+        Create a list of tagtype obects keyed by tag name
+        """
         tmp = []
         for tag in api.plshell.GetTagTypes(api.plauth):
             t = tag['tagname'], TagType(tag)
             tmp.append(t)
         return dict(tmp)
     
-    """
-    Return a Slice object for a single slice
-    """
     def get_slice(self, api, hrn):
+        """
+        Return a Slice object for a single slice
+        """
         slicename = hrn_to_pl_slicename(hrn)
         slice = api.plshell.GetSlices(api.plauth, [slicename])
         if len(slice):

@@ -82,7 +82,7 @@ class Auth:
            raise MissingTrustedRoots(self.config.get_trustedroots_dir())
        
         # Make sure the credential's target matches the specified hrn. 
-        # This check does not apply to trusted peers
+        # This check does not apply to trusted peers 
         trusted_peers = [gid.get_hrn() for gid in self.trusted_cert_list]
         if hrn and self.client_gid.get_hrn() not in trusted_peers:
             if not hrn == self.object_gid.get_hrn():
