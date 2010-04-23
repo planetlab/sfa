@@ -5,7 +5,7 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.credential import Credential
 from sfatables.runtime import SFATablesRules
 import sys
-
+import zlib
 
 class ListResources(Method):
     """
@@ -49,6 +49,10 @@ class ListResources(Method):
             context = {'sfa':{'user':{'hrn':origin_hrn}, 'slice':{'hrn':None}}}
             outgoing_rules.set_context(context)
             filtered_rspec = outgoing_rules.apply(rspec)      
+ 
+        if options.has_key('geni_compressed') and options['geni_compressed'] == True:
+            filtered_rspec = zlib.compress(rspec).encode('base64')
+    
 
         return filtered_rspec  
     

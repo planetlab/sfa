@@ -16,7 +16,6 @@ class Sliver:
         self.slice = node.network.slice
         
     def toxml(self, xml):
-        logger.info("sliver to xml!")
         with xml.sliver:
             self.slice.tags_to_xml(xml, self.node)
 
@@ -65,7 +64,6 @@ class Node:
         self.sliver = Sliver(self)
 
     def toxml(self, xml):
-        logger.info("node.toxml(I)")
         slice = self.network.slice
         if self.whitelist and not self.sliver:
             if not slice or slice.id not in self.whitelist:
@@ -199,8 +197,6 @@ class Slice:
                             xml << (tag.tagname, tag.value)
 
     def toxml(self, xml):
-        logger.info("slice to xml!")
-
         with xml.sliver_defaults:
             self.tags_to_xml(xml)
 

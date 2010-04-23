@@ -27,6 +27,7 @@ DEFAULT_CREDENTIAL_LIFETIME = 60 * 60 * 24 * 365 * 2
 
 
 # TODO:
+# . fix verify_issuer() and call it at the end of verify()
 # . make privs match between PG and PL
 # . Need to add support for other types of credentials, e.g. tickets
 
@@ -673,8 +674,9 @@ class Credential(object):
         # Verify the parents (delegation)
         if self.parent:
             self.verify_parent(self.parent)
+
         # Make sure the issuer is the target's authority
-        self.verify_issuer()
+        #self.verify_issuer()
         return True
 
         
@@ -682,7 +684,6 @@ class Credential(object):
     # Make sure the issuer of this credential is the target's authority
     def verify_issuer(self):        
         target_authority = get_authority(self.get_gid_object().get_urn())
-
         
         # Find the root credential's signature
         cur_cred = self
@@ -697,8 +698,8 @@ class Credential(object):
         target_authority = hrn_to_urn(target_authority, 'authority')
 
         if root_issuer != target_authority:
-            raise CredentialNotVerifiable("issuer (%s) != authority of target (%s)" \
-                                          % (root_issuer, target_authority))
+            raise CredentialNotVerifiable("issuer (%s) != authority of target (%s) for target (%s)" \
+                                          % (root_issuer, target_authority, self.get_gid_object().get_urn()))
 
     ##
     # -- For Delegates (credentials with parents) verify that:

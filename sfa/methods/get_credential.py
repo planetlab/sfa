@@ -42,7 +42,6 @@ class get_credential(Method):
         if not origin_hrn:
             origin_hrn = Credential(string=cred).get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))	
-        self.api.logger.info("get_credential cred = %s" % cred)
         self.api.auth.check(cred, 'getcredential')
         self.api.auth.verify_object_belongs_to_me(hrn)
 

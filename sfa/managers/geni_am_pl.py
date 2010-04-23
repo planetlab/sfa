@@ -7,7 +7,8 @@ from sfa.util.record import *
 
 from sfa.plc.slices import *
 from sfa.util.sfalogging import *
-import zlib
+from lxml import etree
+from StringIO import StringIO
 
 def GetVersion():
     version = {}
@@ -29,11 +30,25 @@ def ListResources(api, creds, options):
 
 
     rspec = manager.get_rspec(api, xrn, None)
-    #outgoing_rules = SFATablesRules('OUTGOING')
     
-    if options.has_key('geni_compressed') and options['geni_compressed'] == True:
-        rspec = zlib.compress(rspec).encode('base64')
+    
+    # Filter out those objects that aren't allocated
+    if xrn:
+        tree = etree.parse(StringIO(rspec))    
+        used_nodes = [sliver.getparent() for sliver in tree.iterfind("./network/site/node/sliver")]
+        used_sites = [node.getparent() for node in used_nodes]
+        for node in tree.iterfind("./network/site/node"):
+            if node not in used_nodes:
+                parent = node.getparent()
+                parent.remove(node)
         
+        # Remove unused sites
+        for site in tree.iterfind("./network/site"):
+            if site not in used_sites:
+                parent = site.getparent()
+                parent.remove(site)
+        rspec = etree.tostring(tree)
+
     return rspec
 
 
