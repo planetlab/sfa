@@ -46,12 +46,12 @@ def __get_hostnames(nodes):
     return hostnames
     
 def create_slice(api, xrn, xml):
-    hrn, type = urn_to_hrn(xrn)
-    peer = None
-
     """
     Verify HRN and initialize the slice record in PLC if necessary.
     """
+
+    hrn, type = urn_to_hrn(xrn)
+    peer = None
     slices = Slices(api)
     peer = slices.get_peer(hrn)
     sfa_peer = slices.get_sfa_peer(hrn)
@@ -66,7 +66,7 @@ def create_slice(api, xrn, xml):
 
     slice = network.get_slice(api, hrn)
     current = __get_hostnames(slice.get_nodes())
-
+    
     network.addRSpec(xml, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
     
     request = __get_hostnames(network.nodesWithSlivers())
