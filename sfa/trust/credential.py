@@ -677,16 +677,18 @@ class Credential(object):
         return list
     
     ##
-    # Make sure the credential's target gid was signed by the same entity that signed
-    # the original credential.
+    # Make sure the credential's target gid was signed by (or is the same) as the entity that signed
+    # the original credential.  
     def verify_issuer(self):                
         root_cred = self.get_credential_list()[-1]
         root_target_gid = root_cred.get_gid_object()
         root_cred_signer = root_cred.get_signature().get_issuer_gid()
         
-        if not root_target_gid.is_signed_by_cert(root_cred_signer):
-            raise CredentialNotVerifiable("Signer of credential (%s) is not the same as the issuer of the target object (%s)" \
-                                            % (root_cred_signer.get_urn(), root_target_gid.get_urn()))
+        if root_target_gid.is_signed_by_cert(root_cred_signer) or \
+            root_target_gid.save_to_string() == root_cred_signer.save_to_string():
+            pass
+        else:            
+            raise CredentialNotVerifiable("Could not verify credential signer")
         
 
     ##
