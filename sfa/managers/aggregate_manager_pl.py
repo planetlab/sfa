@@ -180,19 +180,31 @@ def get_slices(api):
     slice_urns = [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slice_hrns]
 
     # cache the result
-    api.cache.add('slices', slice_urns) 
+    if api.cache:
+        api.cache.add('slices', slice_urns) 
+
     return slice_urns
     
-     
- 
 def get_rspec(api, xrn=None, origin_hrn=None):
+    # look in cache first
+    if api.cache and not xrn:
+        rspec = api.cache.get('nodes')
+        if rspec:
+            return rspec 
+
     hrn, type = urn_to_hrn(xrn)
     network = Network(api)
     if (hrn):
         if network.get_slice(api, hrn):
             network.addSlice()
 
-    return network.toxml()
+    rspec = network.toxml()
+
+    # cache the result
+    if api.cache and not xrn:
+        api.cache.add('nodes', rspec)
+
+    return rspec
 
 """
 Returns the request context required by sfatables. At some point, this

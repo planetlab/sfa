@@ -7,7 +7,6 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.config import Config
-from sfa.plc.nodes import Nodes
 # RSpecManager_pl is not used. This line is a check that ensures that everything is in place for the import to work.
 import sfa.rspecs.aggregates.rspec_manager_pl
 from sfa.trust.credential import Credential

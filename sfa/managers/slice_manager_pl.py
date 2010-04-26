@@ -17,7 +17,6 @@ from sfa.util.faults import *
 from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
-from sfa.util.rspec import *
 from sfa.util.sfaticket import *
 from sfa.util.debug import log
 import sfa.plc.peers as peers
@@ -203,13 +202,20 @@ def get_slices(api):
             print >> log, "Error calling slices at aggregate %(aggregate)s" % locals()
 
     # cache the result
-    api.cache.add('slices', slices)
+    if api.cache:
+        api.cache.add('slices', slices)
+
     return slices
  
 def get_rspec(api, xrn=None, origin_hrn=None):
+    # look in cache first 
+    if api.cache and not xrn:
+        rspec =  api.cache.get('nodes')
+        if rspec:
+            return rspec
+
     hrn, type = urn_to_hrn(xrn)
     rspec = None
-
     aggs = api.aggregates
     cred = api.getCredential()                                                 
     for agg in aggs:
@@ -240,7 +246,11 @@ def get_rspec(api, xrn=None, origin_hrn=None):
                     for request in root.iterfind("./request"):
                         rspec.append(deepcopy(request))
 
-    return etree.tostring(rspec, xml_declaration=True, pretty_print=True)
+    rspec =  etree.tostring(rspec, xml_declaration=True, pretty_print=True)
+    if api.cache and not xrn:
+        api.cache.add('nodes', rspec)
+ 
+    return rspec
 
 """
 Returns the request context required by sfatables. At some point, this
