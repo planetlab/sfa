@@ -44,7 +44,7 @@ class CreateSliver(Method):
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
 
         # Find the valid credentials
-        ValidCreds = self.api.auth.checkCredentials(creds, 'createslice', hrn)
+        ValidCreds = self.api.auth.checkCredentials(creds, 'createsliver', hrn)
 
         origin_hrn = Credential(string=ValidCreds[0]).get_gid_caller().get_hrn()
 

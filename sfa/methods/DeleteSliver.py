@@ -25,7 +25,7 @@ class DeleteSliver(Method):
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
 
         # Find the valid credentials
-        ValidCreds = self.api.auth.checkCredentials(creds, 'deleteslice', hrn)
+        ValidCreds = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)
         
         manager_base = 'sfa.managers'
 

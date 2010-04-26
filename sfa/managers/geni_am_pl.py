@@ -70,7 +70,7 @@ def DeleteSliver(api, slice_xrn, creds):
     allocated = manager.delete_slice(api, slice_xrn)
     return allocated
 
-def SliverStatus(api, slice_xrn):
+def SliverStatus(api, slice_xrn, creds):
     result = {}
     result['geni_urn'] = slice_xrn
     result['geni_status'] = 'unknown'

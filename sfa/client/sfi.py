@@ -947,6 +947,7 @@ class Sfi:
         if args:
             xrn = args[0]
             cred = self.get_slice_cred(xrn).save_to_string(save_parents=True)
+
         if xrn:
             call_options['geni_slice_urn'] = xrn
             
