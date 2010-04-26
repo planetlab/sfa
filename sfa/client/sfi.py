@@ -973,7 +973,7 @@ class Sfi:
         slice_xrn = args[0]
         slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
         server = self.geni_am
-        return server.SliverStatus(slice_xrn, [slice_cred])
+        print server.SliverStatus(slice_xrn, [slice_cred])
     
     def RenewSliver(self, opts, args):
         slice_xrn = args[0]
