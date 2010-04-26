@@ -36,11 +36,12 @@ class SfaAPI(BaseAPI):
     import sfa.methods
     methods = sfa.methods.all
     
-    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods', \
-                 peer_cert = None, interface = None, key_file = None, cert_file = None):
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", 
+                 methods='sfa.methods', peer_cert = None, interface = None, 
+                key_file = None, cert_file = None, cache = None):
         BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, \
                          peer_cert=peer_cert, interface=interface, key_file=key_file, \
-                         cert_file=cert_file)
+                         cert_file=cert_file, cache=cache)
  
         self.encoding = encoding
 

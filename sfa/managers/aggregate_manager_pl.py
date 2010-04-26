@@ -168,12 +168,21 @@ def reset_slice(api, xrn):
     return 1
 
 def get_slices(api):
-    # XX just import the legacy module and excute that until
-    # we transition the code to this module
-    from sfa.plc.slices import Slices
-    slices = Slices(api)
-    slices.refresh()
-    return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
+    # look in cache first
+    if api.cache:
+        slices = api.cache.get('slices')
+        if slices:
+            return slices
+
+    # get data from db 
+    slices = api.plshell.GetSlices(api.plauth, {'peer_id': None}, ['name'])
+    slice_hrns = [slicename_to_hrn(api.hrn, slice['name']) for slice in slices]
+    slice_urns = [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slice_hrns]
+
+    # cache the result
+    api.cache.add('slices', slice_urns) 
+    return slice_urns
+    
      
  
 def get_rspec(api, xrn=None, origin_hrn=None):

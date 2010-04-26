@@ -22,7 +22,8 @@ from Queue import Queue
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
 from sfa.util.faults import *
-from sfa.plc.api import SfaAPI 
+from sfa.plc.api import SfaAPI
+from sfa.util.cache import Cache 
 from sfa.util.debug import log
 
 ##
@@ -90,7 +91,8 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
     def do_POST(self):
         """Handles the HTTPS POST request.
 
-        It was copied out from SimpleXMLRPCServer.py and modified to shutdown the socket cleanly.
+        It was copied out from SimpleXMLRPCServer.py and modified to shutdown 
+        the socket cleanly.
         """
         try:
             peer_cert = Certificate()
@@ -98,7 +100,8 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             self.api = SfaAPI(peer_cert = peer_cert, 
                               interface = self.server.interface, 
                               key_file = self.server.key_file, 
-                              cert_file = self.server.cert_file)
+                              cert_file = self.server.cert_file,
+                              cache = self.cache)
             # get arguments
             request = self.rfile.read(int(self.headers["content-length"]))
             remote_addr = (remote_ip, remote_port) = self.connection.getpeername()
@@ -136,6 +139,8 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         self.interface = None
         self.key_file = key_file
         self.cert_file = cert_file
+        # add cache to the request handler
+        HandlerClass.cache = Cache()
         #for compatibility with python 2.4 (centos53)
         if sys.version_info < (2, 5):
             SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)

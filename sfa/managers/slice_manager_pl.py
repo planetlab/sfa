@@ -185,13 +185,27 @@ def reset_slice(api, xrn):
     return 1
 
 def get_slices(api):
-    # XX just import the legacy module and excute that until
-    # we transition the code to this module
-    from sfa.plc.slices import Slices
-    slices = Slices(api)
-    slices.refresh()
-    return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
-     
+    # look in cache first
+    if api.cache:
+        slices = api.cache.get('slices')
+        if slices:
+            return slices    
+
+    # fetch from aggregates
+    slices = []
+    credential = api.getCredential()
+    for aggregate in api.aggregates:
+        try:
+            tmp_slices = api.aggregates[aggregate].get_slices(credential)
+            slices.extend(tmp_slices)
+        except:
+            print >> log, "%s" % (traceback.format_exc())
+            print >> log, "Error calling slices at aggregate %(aggregate)s" % locals()
+
+    # cache the result
+    api.cache.add('slices', slices)
+    return slices
+ 
 def get_rspec(api, xrn=None, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
     rspec = None

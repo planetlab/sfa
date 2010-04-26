@@ -11,7 +11,6 @@ from sfa.util.namespace import *
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
-from sfa.util.storage import *
 from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
@@ -19,21 +18,14 @@ from sfa.util.debug import log
 
 MAXINT =  2L**31-1
 
-class Slices(SimpleStorage):
+class Slices:
 
     rspec_to_slice_tag = {'max_rate':'net_max_rate'}
 
     def __init__(self, api, ttl = .5, origin_hrn=None):
         self.api = api
-        self.ttl = ttl
-        self.threshold = None
-        path = self.api.config.SFA_DATA_DIR
-        filename = ".".join([self.api.interface, self.api.hrn, "slices"])
         filepath = path + os.sep + filename
-        self.slices_file = filepath
-        SimpleStorage.__init__(self, self.slices_file)
         self.policy = Policy(self.api)    
-        self.load()
         self.origin_hrn = origin_hrn
 
     def get_slivers(self, xrn, node=None):
@@ -175,66 +167,6 @@ class Slices(SimpleStorage):
             sfa_peer = site_authority
 
         return sfa_peer 
-
-    def refresh(self):
-        """
-        Update the cached list of slices
-        """
-        # Reload components list
-        now = datetime.datetime.now()
-        if not self.has_key('threshold') or not self.has_key('timestamp') or \
-           now > datetime.datetime.fromtimestamp(time.mktime(time.strptime(self['threshold'], self.api.time_format))):
-            if self.api.interface in ['aggregate']:
-                self.refresh_slices_aggregate()
-            elif self.api.interface in ['slicemgr']:
-                self.refresh_slices_smgr()
-
-    def refresh_slices_aggregate(self):
-        slices = self.api.plshell.GetSlices(self.api.plauth, {'peer_id': None}, ['name'])
-        slice_hrns = [slicename_to_hrn(self.api.hrn, slice['name']) for slice in slices]
-
-         # update timestamp and threshold
-        timestamp = datetime.datetime.now()
-        hr_timestamp = timestamp.strftime(self.api.time_format)
-        delta = datetime.timedelta(hours=self.ttl)
-        threshold = timestamp + delta
-        hr_threshold = threshold.strftime(self.api.time_format)
-        
-        slice_details = {'hrn': slice_hrns,
-                         'timestamp': hr_timestamp,
-                         'threshold': hr_threshold
-                        }
-        self.update(slice_details)
-        self.write()     
-        
-
-    def refresh_slices_smgr(self):
-        slice_hrns = []
-        credential = self.api.getCredential()
-        for aggregate in self.api.aggregates:
-            success = False
-            try:
-                slices = self.api.aggregates[aggregate].get_slices(credential)
-                slice_hrns.extend(slices)
-                success = True
-            except:
-                print >> log, "%s" % (traceback.format_exc())
-                print >> log, "Error calling slices at aggregate %(aggregate)s" % locals()
-
-        # update timestamp and threshold
-        timestamp = datetime.datetime.now()
-        hr_timestamp = timestamp.strftime(self.api.time_format)
-        delta = datetime.timedelta(hours=self.ttl)
-        threshold = timestamp + delta
-        hr_threshold = threshold.strftime(self.api.time_format)
-
-        slice_details = {'hrn': slice_hrns,
-                         'timestamp': hr_timestamp,
-                         'threshold': hr_threshold
-                        }
-        self.update(slice_details)
-        self.write()
-
 
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
         authority = get_authority(slice_hrn)
