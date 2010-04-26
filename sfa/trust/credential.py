@@ -27,7 +27,6 @@ DEFAULT_CREDENTIAL_LIFETIME = 60 * 60 * 24 * 365 * 2
 
 
 # TODO:
-# . fix verify_issuer() and call it at the end of verify()
 # . make privs match between PG and PL
 # . Need to add support for other types of credentials, e.g. tickets
 
@@ -397,16 +396,10 @@ class Credential(object):
 
         # Add any parent signatures
         if self.parent:
-            cur_cred = self.parent
-            while cur_cred:
+            for cur_cred in self.get_credential_list()[1:]:
                 sdoc = parseString(cur_cred.get_signature().get_xml())
                 ele = doc.importNode(sdoc.getElementsByTagName("Signature")[0], True)
                 signatures.appendChild(ele)
-
-                if cur_cred.parent:
-                    cur_cred = cur_cred.parent
-                else:
-                    cur_cred = None
                 
         # Get the finished product
         self.xml = doc.toxml()
@@ -594,16 +587,10 @@ class Credential(object):
         for sig in sigs:
             Sig = Signature(string=sig.toxml())
 
-            cur_cred = self
-            while cur_cred:
+            for cur_cred in self.get_credential_list():
                 if cur_cred.get_refid() == Sig.get_refid():
                     cur_cred.set_signature(Sig)
-                    
-                if cur_cred.parent:
-                    cur_cred = cur_cred.parent
-                else:
-                    cur_cred = None
-                
+                                    
             
     ##
     # Verify that:
@@ -648,14 +635,10 @@ class Credential(object):
 
         # Verify the gids of this cred and of its parents
 
-        cur_cred = self
-        while cur_cred:
+        for cur_cred in self.get_credential_list():
             cur_cred.get_gid_object().verify_chain(trusted_cert_objects)
-            cur_cred.get_gid_caller().verify_chain(trusted_cert_objects)
-            if cur_cred.parent:
-                cur_cred = cur_cred.parent
-            else:
-                cur_cred = None
+            cur_cred.get_gid_caller().verify_chain(trusted_cert_objects)            
+
         
         refs = []
         refs.append("Sig_%s" % self.get_refid())
@@ -676,30 +659,35 @@ class Credential(object):
             self.verify_parent(self.parent)
 
         # Make sure the issuer is the target's authority
-        #self.verify_issuer()
+        self.verify_issuer()
         return True
 
-        
     ##
-    # Make sure the issuer of this credential is the target's authority
-    def verify_issuer(self):        
-        target_authority = get_authority(self.get_gid_object().get_urn())
-        
-        # Find the root credential's signature
+    # Creates a list of the credential and its parents, with the root 
+    # (original delegated credential) as the last item in the list
+    def get_credential_list(self):    
         cur_cred = self
-        while cur_cred:            
+        list = []
+        while cur_cred:
+            list.append(cur_cred)
             if cur_cred.parent:
                 cur_cred = cur_cred.parent
             else:
-                root_issuer = cur_cred.get_signature().get_issuer_gid().get_urn()
                 cur_cred = None
-
-        # Ensure that the signer of the root credential is the target_authority
-        target_authority = hrn_to_urn(target_authority, 'authority')
-
-        if root_issuer != target_authority:
-            raise CredentialNotVerifiable("issuer (%s) != authority of target (%s) for target (%s)" \
-                                          % (root_issuer, target_authority, self.get_gid_object().get_urn()))
+        return list
+    
+    ##
+    # Make sure the credential's target gid was signed by the same entity that signed
+    # the original credential.
+    def verify_issuer(self):                
+        root_cred = self.get_credential_list()[-1]
+        root_target_gid = root_cred.get_gid_object()
+        root_cred_signer = root_cred.get_signature().get_issuer_gid()
+        
+        if not root_target_gid.is_signed_by_cert(root_cred_signer):
+            raise CredentialNotVerifiable("Signer of credential (%s) is not the same as the issuer of the target object (%s)" \
+                                            % (root_cred_signer.get_urn(), root_target_gid.get_urn()))
+        
 
     ##
     # -- For Delegates (credentials with parents) verify that:
