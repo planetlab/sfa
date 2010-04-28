@@ -593,6 +593,10 @@ class Credential(object):
                                     
             
     ##
+    # Verify
+    #   trusted_certs: A list of trusted GID filenames (not GID objects!) 
+    #                  Chaining is not supported within the GIDs by xmlsec1.
+    #    
     # Verify that:
     # . All of the signatures are valid and that the issuers trace back
     #   to trusted roots (performed by xmlsec1)
@@ -600,6 +604,7 @@ class Credential(object):
     # . That the issuer of the credential is the authority in the target's urn
     #    . In the case of a delegated credential, this must be true of the root
     # . That all of the gids presented in the credential are valid
+    # . The credential is not expired
     #
     # -- For Delegates (credentials with parents)
     # . The privileges must be a subset of the parent credentials
@@ -628,6 +633,10 @@ class Credential(object):
             if self.legacy.object_gid:
                 self.legacy.object_gid.verify_chain(trusted_cert_objects)
             return True
+        
+        # make sure it is not expired
+        if self.get_lifetime() < datetime.datetime.utcnow():
+            raise CredentialNotVerifiable("credential is expired")
 
         # Verify the signatures
         filename = self.save_to_random_tmp_file()
