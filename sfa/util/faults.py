@@ -218,7 +218,15 @@ class CertNotSignedByParent(SfaFault):
         SfaFault.__init__(self, 103, faultString, extra)
     def __str__(self):
         return repr(self.value)
-
+    
+class GidParentHrn(SfaFault):
+    def __init__(self, value, extra = None):
+        self.value = value
+        faultString = "Cert URN is not an extension of its parent: %(value)s" % locals()
+        SfaFault.__init__(self, 103, faultString, extra)
+    def __str__(self):
+        return repr(self.value)
+        
 class GidInvalidParentHrn(SfaFault):
     def __init__(self, value, extra = None):
         self.value = value
