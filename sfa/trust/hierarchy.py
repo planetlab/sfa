@@ -165,8 +165,9 @@ class Hierarchy:
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
-        if (parent_hrn) and (not self.auth_exists(parent_hrn)) and (create_parents):
-            self.create_auth(parent_hrn, create_parents)
+        parent_urn = hrn_to_urn(parent_hrn, 'authority')
+        if (parent_hrn) and (not self.auth_exists(parent_urn)) and (create_parents):
+            self.create_auth(parent_urn, create_parents)
 
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \
             self.get_auth_filenames(hrn)

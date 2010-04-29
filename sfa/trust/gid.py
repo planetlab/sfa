@@ -177,12 +177,12 @@ class GID(Certificate):
 
     def verify_chain(self, trusted_certs = None):
         # do the normal certificate verification stuff
-        Certificate.verify_chain(self, trusted_certs)
-
+        Certificate.verify_chain(self, trusted_certs)        
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not self.get_hrn().startswith(self.parent.get_hrn()):
                 raise GidParentHrn(self.parent.get_subject())
+                
 
         return
 

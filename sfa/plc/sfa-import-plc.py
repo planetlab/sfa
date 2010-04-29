@@ -94,7 +94,7 @@ def main():
         import_auth = root_auth
     else:
         if not AuthHierarchy.auth_exists(level1_auth):
-            AuthHierarchy.create_auth(level1_auth)
+            AuthHierarchy.create_auth(hrn_to_urn(level1_auth,'authority'))
         sfaImporter.create_top_level_auth_records(level1_auth)
         import_auth = level1_auth
 

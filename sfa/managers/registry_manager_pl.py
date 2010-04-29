@@ -183,7 +183,7 @@ def list(api, xrn, origin_hrn=None):
 def register(api, record):
 
     hrn, type = record['hrn'], record['type']
-
+    urn = hrn_to_urn(hrn,type)
     # validate the type
     if type not in ['authority', 'slice', 'node', 'user']:
         raise UnknownSfaType(type) 
@@ -212,7 +212,7 @@ def register(api, record):
                 pub_key = record['key']
             pkey = convert_public_key(pub_key)
 
-        gid_object = api.auth.hierarchy.create_gid(hrn, uuid, pkey)
+        gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey)
         gid = gid_object.save_to_string(save_parents=True)
         record['gid'] = gid
         record.set_gid(gid)
@@ -220,7 +220,7 @@ def register(api, record):
     if type in ["authority"]:
         # update the tree
         if not api.auth.hierarchy.auth_exists(hrn):
-            api.auth.hierarchy.create_auth(hrn)
+            api.auth.hierarchy.create_auth(hrn_to_urn(hrn,'authority'))
 
         # get the GID from the newly created authority
         gid = auth_info.get_gid_object()
@@ -293,6 +293,7 @@ def update(api, record_dict):
     new_record = SfaRecord(dict = record_dict)
     type = new_record['type']
     hrn = new_record['hrn']
+    urn = hrn_to_urn(hrn,type)
     api.auth.verify_object_permission(hrn)
     table = SfaTable()
     # make sure the record exists
@@ -357,7 +358,7 @@ def update(api, record_dict):
             # update the openssl key and gid
             pkey = convert_public_key(new_key)
             uuid = create_uuid()
-            gid_object = api.auth.hierarchy.create_gid(hrn, uuid, pkey)
+            gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey)
             gid = gid_object.save_to_string(save_parents=True)
             record['gid'] = gid
             record = SfaRecord(dict=record)

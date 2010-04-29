@@ -23,6 +23,7 @@ from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
 from tempfile import mkstemp
+from sfa.util.sfalogging import logger
 
 from sfa.util.faults import *
 
