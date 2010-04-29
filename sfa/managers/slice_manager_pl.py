@@ -17,7 +17,6 @@ from sfa.util.faults import *
 from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
-from sfa.util.rspec import *
 from sfa.util.sfaticket import *
 from sfa.util.debug import log
 from sfa.util.sfalogging import logger
@@ -187,17 +186,38 @@ def reset_slice(api, xrn):
     return 1
 
 def get_slices(api):
-    # XX just import the legacy module and excute that until
-    # we transition the code to this module
-    from sfa.plc.slices import Slices
-    slices = Slices(api)
-    slices.refresh()
-    return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
-     
+    # look in cache first
+    if api.cache:
+        slices = api.cache.get('slices')
+        if slices:
+            return slices    
+
+    # fetch from aggregates
+    slices = []
+    credential = api.getCredential()
+    for aggregate in api.aggregates:
+        try:
+            tmp_slices = api.aggregates[aggregate].get_slices(credential)
+            slices.extend(tmp_slices)
+        except:
+            print >> log, "%s" % (traceback.format_exc())
+            print >> log, "Error calling slices at aggregate %(aggregate)s" % locals()
+
+    # cache the result
+    if api.cache:
+        api.cache.add('slices', slices)
+
+    return slices
+ 
 def get_rspec(api, xrn=None, origin_hrn=None):
+    # look in cache first 
+    if api.cache and not xrn:
+        rspec =  api.cache.get('nodes')
+        if rspec:
+            return rspec
+
     hrn, type = urn_to_hrn(xrn)
     rspec = None
-
     aggs = api.aggregates
     cred = api.getCredential()                                                 
 
@@ -231,7 +251,11 @@ def get_rspec(api, xrn=None, origin_hrn=None):
                     for request in root.iterfind("./request"):
                         rspec.append(deepcopy(request))
 
-    return etree.tostring(rspec, xml_declaration=True, pretty_print=True)
+    rspec =  etree.tostring(rspec, xml_declaration=True, pretty_print=True)
+    if api.cache and not xrn:
+        api.cache.add('nodes', rspec)
+ 
+    return rspec
 
 """
 Returns the request context required by sfatables. At some point, this

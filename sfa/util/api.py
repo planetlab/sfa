@@ -97,14 +97,15 @@ def import_deep(name):
 
 class BaseAPI:
 
-    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods',
-
-                 peer_cert = None, interface = None, key_file = None, cert_file = None):
+    cache = None
+ 
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", 
+                 methods='sfa.methods', peer_cert = None, interface = None, 
+                 key_file = None, cert_file = None, cache = cache):
 
         self.encoding = encoding
         
         # flat list of method names
-         
         self.methods_module = methods_module = __import__(methods, fromlist=[methods])
         self.methods = methods_module.all
 
@@ -121,6 +122,7 @@ class BaseAPI:
         self.key = Keypair(filename=self.key_file)
         self.cert_file = cert_file
         self.cert = Certificate(filename=self.cert_file)
+        self.cache = cache
         self.credential = None
         self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"

@@ -98,7 +98,7 @@ class SfaTable(list):
             sql = " DELETE FROM %s WHERE authority = %s" % \
                     (self.tablename, record['hrn'])
             self.db.do(sql)
-            self.db.commit() 
+        self.db.commit() 
 
     def insert(self, record):
         db_fields = self.db_fields(record)
