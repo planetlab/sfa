@@ -24,7 +24,7 @@ class Slices:
 
     def __init__(self, api, ttl = .5, origin_hrn=None):
         self.api = api
-        filepath = path + os.sep + filename
+        #filepath = path + os.sep + filename
         self.policy = Policy(self.api)    
         self.origin_hrn = origin_hrn
 
