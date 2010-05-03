@@ -224,6 +224,9 @@ class Sfi:
         parser.add_option("-v", "--verbose",
                          action="store_true", dest="verbose", default=False,
                          help="verbose mode")
+        parser.add_option("-D", "--debug",
+                          action="store_true", dest="debug", default=False,
+                          help="Debug (xml-rpc) protocol messages")
         parser.add_option("-p", "--protocol",
                          dest="protocol", default="xmlrpc",
                          help="RPC protocol (xmlrpc or soap)")
@@ -303,8 +306,8 @@ class Sfi:
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
-       self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file)  
-       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file)  
+       self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options.debug)  
+       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file, self.options.debug)  
        return
     
     #
@@ -516,7 +519,7 @@ class Sfi:
         record = records[0]
         cm_port = "12346"
         url = "https://%s:%s" % (record['hostname'], cm_port)
-        return xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
+        return xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.debug)
     
     #
     # Following functions implement the commands
@@ -749,7 +752,7 @@ class Sfi:
                 raise Exception, "No such aggregate %s" % agg_hrn
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])     
-            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.debug)
         if args:
             cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
             hrn = args[0]
@@ -782,7 +785,7 @@ class Sfi:
                 raise Exception, "No such aggregate %s" % opts.aggregate
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
-            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.debug)
         return server.create_slice(slice_cred, slice_hrn, rspec)
 
     # get a ticket for the specified slice
@@ -799,7 +802,7 @@ class Sfi:
                 raise Exception, "No such aggregate %s" % opts.aggregate
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
-            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.debug)
         ticket_string = server.get_ticket(slice_cred, slice_hrn, rspec)
         file = os.path.join(self.options.sfi_dir, get_leaf(slice_hrn) + ".ticket")
         print "writing ticket to ", file        
@@ -832,7 +835,7 @@ class Sfi:
                 cm_port = "12346" 
                 url = "https://%(hostname)s:%(cm_port)s" % locals() 
                 print "Calling redeem_ticket at %(url)s " % locals(),  
-                cm = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
+                cm = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.debug)
                 cm.redeem_ticket(slice_cred, ticket.save_to_string(save_parents=True))
                 print "Success"
             except socket.gaierror:

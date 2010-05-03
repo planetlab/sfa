@@ -45,10 +45,10 @@ class XMLRPCTransport(xmlrpclib.Transport):
         parser = xmlrpclib.ExpatParser(unmarshaller)
         return parser, unmarshaller
 
-def get_server(url, key_file, cert_file):
+def get_server(url, key_file, cert_file, debug=False):
     transport = XMLRPCTransport()
     transport.key_file = key_file
     transport.cert_file = cert_file
 
-    return xmlrpclib.ServerProxy(url, transport, allow_none=True)
+    return xmlrpclib.ServerProxy(url, transport, allow_none=True, verbose=debug)
 
