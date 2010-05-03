@@ -782,7 +782,7 @@ class Sfi:
                 raise Exception, "No such aggregate %s" % opts.aggregate
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
-            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.protocol)
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
         return server.create_slice(slice_cred, slice_hrn, rspec)
 
     # get a ticket for the specified slice
@@ -799,7 +799,7 @@ class Sfi:
                 raise Exception, "No such aggregate %s" % opts.aggregate
             aggregate = aggregates[0]
             url = "http://%s:%s" % (aggregate['addr'], aggregate['port'])
-            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file, self.options.protocol)
+            server = xmlrpcprotocol.get_server(url, self.key_file, self.cert_file)
         ticket_string = server.get_ticket(slice_cred, slice_hrn, rspec)
         file = os.path.join(self.options.sfi_dir, get_leaf(slice_hrn) + ".ticket")
         print "writing ticket to ", file        
