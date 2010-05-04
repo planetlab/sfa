@@ -48,16 +48,20 @@ def main():
 
 
 def display(options):
+    """
+    Display the sepcified GID
+    """
     gidfile = os.path.abspath(options.display)
-    print gidfile
     if not gidfile or not os.path.isfile(gidfile):
         print "No such gid: %s" % gidfile
-        sys.exit(1) 
+        sys.exit(1)
     gid = GID(filename=gidfile)
     gid.dump(dump_parents=True)
 
 def sign(options):
-    from sfa.util.table import SfaTable
+    """
+    Sign the specified gid
+    """
     hierarchy = Hierarchy()
     config = Config()
     parent_hrn = config.SFA_INTERFACE_HRN
@@ -97,8 +101,34 @@ def sign(options):
     gid.save_to_file(outfile, save_parents=True)            
     
 
-def export(options):
+def export_gid(options):
     from sfa.util.table import SfaTable
+    # lookup the record for the specified hrn 
+    hrn = options.export
+
+    # check sfa table first    
+    table = SfaTable()
+    records = table.find({'hrn': hrn, type: 'authority'})
+    if not records:
+        # check the authorities hierarchy 
+        hierarchy = Hierarchy()
+        try:
+            auth_info = hierarchy.get_auth_info()
+            gid = auth_info.gid_object 
+        except:
+            print "Record: %s not found" % hrn
+            sys.exit(1)
+    else:
+        record = records[0]
+        gid = GID(string=record['gid'])
+        
+    # get the outfile
+    outfile = options.outfile
+    if not outfile:
+        outfile = os.path.abspath('./%s.gid' % gid.get_hrn())
+
+    gid.save_to_file(outfile, save_parents=True)
+    
     pass
 
 def import_gid(options):
