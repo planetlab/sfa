@@ -127,13 +127,45 @@ def export_gid(options):
     if not outfile:
         outfile = os.path.abspath('./%s.gid' % gid.get_hrn())
 
+    # save it
     gid.save_to_file(outfile, save_parents=True)
-    
-    pass
 
 def import_gid(options):
+    """
+    Import the specified gid into the registry (db and authorities 
+    hierarchy) overwriting any previous gid.
+    """
     from sfa.util.table import SfaTable
-    pass
+    from sfa.util.record import SfaRecord
+    # load the gid
+    gidfile = os.path.abspath(options.importgid)
+    if not gidfile or not os.path.isfile(gidfile):
+        print "No such gid: %s" % gidfile
+        sys.exit(1)
+    gid = GID(filename=gidfile)
+    
+    # check if it exists within the hierarchy
+    hierarchy = Hierarchy()
+    if not hierarchy.auth_exists(gid.get_hrn()):
+        print "%s not found in hierarchy" % gid.get_hrn()
+        sys.exit(1)
 
+    # check if record exists in db
+    table = SfaTable()
+    records = table.find({'hrn': gid.get_hrn(), 'type': 'authority'})
+    if not records:
+        print "%s not found in record database" % get.get_hrn()  
+        sys.exit(1)
+
+    # update the database record
+    record = records[0]
+    record['gid'] = gid.save_to_string(save_parents=True)
+    table.update(record)
+
+    # update the hierarchy
+    auth_info = hierarchy.get_auth_info(gid.get_hrn())  
+    filename = auth_info.gid_filename
+    gid.save_to_file(filename, save_parents=True) 
+    
 if __name__ == '__main__':
     main()
