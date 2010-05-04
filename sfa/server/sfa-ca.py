@@ -87,10 +87,13 @@ def sign(options):
     outfile = options.outfile
     if not outfile:
         outfile = os.path.abspath('./signed-%s.gid' % gid.get_hrn())
-    
+   
+    # check if gid already has a parent
+ 
     # sign the gid
     gid.set_issuer(parent_key, parent_hrn)
     gid.set_parent(parent_gid)
+    gid.sign()
     gid.save_to_file(outfile, save_parents=True)            
     
 
