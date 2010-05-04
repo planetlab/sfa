@@ -138,7 +138,7 @@ class GID(Certificate):
 
         if self.parent and dump_parents:
             print " "*indent, "parent:"
-            self.parent.dump(indent+4)
+            self.parent.dump(indent+4, dump_parents)
 
     ##
     # Verify the chain of authenticity of the GID. First perform the checks
