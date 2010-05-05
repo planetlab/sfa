@@ -657,8 +657,6 @@ class Credential(object):
             refs.append("Sig_%s" % ref)
 
         for ref in refs:
-            logger.info('%s --verify --node-id "%s" %s %s 2>&1' \
-                            % (self.xmlsec_path, ref, cert_args, filename))
             verified = os.popen('%s --verify --node-id "%s" %s %s 2>&1' \
                             % (self.xmlsec_path, ref, cert_args, filename)).read()
             if not verified.strip().startswith("OK"):

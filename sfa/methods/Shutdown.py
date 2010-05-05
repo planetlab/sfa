@@ -19,7 +19,7 @@ class Shutdown(Method):
         ]
     returns = Parameter(bool, "Success or Failure")
 
-    def call(self, slice_xrn, creds, expiration_time):
+    def call(self, slice_xrn, creds):
         hrn, type = urn_to_hrn(slice_xrn)
 
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tcaller-creds: %s\tmethod-name: %s"%(self.api.interface, hrn, creds, self.name))

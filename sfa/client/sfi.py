@@ -689,6 +689,7 @@ class Sfi:
         record_filepath = args[0]
         rec_file = self.get_record_file(record_filepath)
         record = load_record_from_file(rec_file).as_dict()
+        print record
         return self.registry.register(auth_cred, record)
     
     # update named registry entry

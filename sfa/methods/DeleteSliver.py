@@ -21,7 +21,6 @@ class DeleteSliver(Method):
 
     def call(self, slice_xrn, creds):
         hrn, type = urn_to_hrn(slice_xrn)
-
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
 
         # Find the valid credentials

@@ -10,6 +10,8 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.util.debug import log
 from sfa.trust.credential import Credential
 
+from sfa.util.sfalogging import logger
+
 class get_credential(Method):
     """
     Retrive a credential for an object
@@ -44,7 +46,6 @@ class get_credential(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))	
         self.api.auth.check(cred, 'getcredential')
         self.api.auth.verify_object_belongs_to_me(hrn)
-
         # send the call to the right manager
         manager_base = 'sfa.managers'
         mgr_type = self.api.config.SFA_REGISTRY_TYPE
