@@ -19,7 +19,6 @@ def get_credential(api, xrn, type, is_self=False):
     else:
         hrn, type = urn_to_hrn(xrn)
         
-    api.logger.info("Getting credential for " + xrn)
     # Is this a root or sub authority
     auth_hrn = api.auth.get_authority(hrn)
     if not auth_hrn or hrn == api.config.SFA_INTERFACE_HRN:

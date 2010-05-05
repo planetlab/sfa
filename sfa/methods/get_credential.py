@@ -10,7 +10,6 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.util.debug import log
 from sfa.trust.credential import Credential
 
-from sfa.util.sfalogging import logger
 
 class get_credential(Method):
     """

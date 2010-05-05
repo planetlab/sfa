@@ -238,7 +238,6 @@ class Auth:
         rl = RightList()
         type = record['type']
 
-        logger.info("caller_hrn = " + caller_hrn + " type = " + type)
 
         if type=="slice":
             researchers = record.get("researcher", [])
@@ -253,7 +252,6 @@ class Auth:
         elif type == "authority":
             pis = record.get("PI", [])
             operators = record.get("operator", [])
-            logger.info("pis = " + str(pis) + " ops = " + str(operators))
             if (caller_hrn == self.config.SFA_INTERFACE_HRN):
                 rl.add("authority")
                 rl.add("sa")
