@@ -1,9 +1,10 @@
 import logging
+import os
 
 #SFA access log initialization
-
+TMPDIR = os.getenv("TMPDIR", "/tmp")
+SFA_HTTPD_ACCESS_LOGFILE = TMPDIR + "/" + 'sfa_httpd_access.log'
 SFA_ACCESS_LOGFILE='/var/log/sfa_access.log'
-SFA_HTTPD_ACCESS_LOGFILE='/tmp/sfa_httpd_access.log'
 logger=logging.getLogger()
 logger.setLevel(logging.INFO)
 try:
