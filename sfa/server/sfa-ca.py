@@ -65,7 +65,6 @@ def sign_gid(gid, parent_key, parent_gid):
     gid.set_issuer(parent_key, parent_gid.get_hrn())
     gid.set_parent(parent_gid)
     gid.sign()
-    gid.save_to_file(outfile, save_parents=True)
     return gid 
 
 def sign(options):
@@ -75,7 +74,7 @@ def sign(options):
     hierarchy = Hierarchy()
     config = Config()
     default_authority = config.SFA_INTERFACE_HRN
-    auth_info = hierarchy.get_auth_info(parent_hrn)
+    auth_info = hierarchy.get_auth_info(default_authority)
 
     # load the gid
     gidfile = os.path.abspath(options.sign)
@@ -107,7 +106,9 @@ def sign(options):
     # check if gid already has a parent
  
     # sign the gid
-    sign_gid(gid, parent_key, parent_gid)
+    gid = sign_gid(gid, parent_key, parent_gid)
+    # save the signed gid
+    gid.save_to_file(outfile, save_parents=True)
     
 
 def export_gid(options):
