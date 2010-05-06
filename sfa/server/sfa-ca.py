@@ -83,6 +83,9 @@ def sign(options):
         sys.exit(1)
     gid = GID(filename=gidfile)
 
+    # remove previous parent
+    gid = GID(string=gid.save_to_string(save_parents=False))
+
     # load the parent private info
     authority = options.authority    
     # if no pkey was specified, then use the this authority's key
