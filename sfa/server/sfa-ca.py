@@ -31,8 +31,8 @@ def main():
                       help="name of gid to export from registry")
     parser.add_option("-o", "--outfile", dest="outfile",
                       help="where to write the exprted gid") 
-    parser.add_option("-v", "--verbose", dest="verobse", 
-                      help="be verbose")           
+    parser.add_option("-v", "--verbose", dest="verbose", default=False, 
+                      action="store_true", help="be verbose")           
                 
     (options, args) = parser.parse_args()
 
@@ -106,8 +106,13 @@ def sign(options):
     # check if gid already has a parent
  
     # sign the gid
+    if options.verbose:
+        print "Signing %s gid with parent %s" % \
+              (gid.get_hrn(), parent_gid.get_hrn())
     gid = sign_gid(gid, parent_key, parent_gid)
     # save the signed gid
+    if options.verbose:
+        print "Writing signed gid %s" % outfile  
     gid.save_to_file(outfile, save_parents=True)
     
 
@@ -138,6 +143,8 @@ def export_gid(options):
         outfile = os.path.abspath('./%s.gid' % gid.get_hrn())
 
     # save it
+    if options.verbose:
+        print "Writing %s gid to %s" % (gid.get_hrn(), outfile)
     gid.save_to_file(outfile, save_parents=True)
 
 def import_gid(options):
@@ -171,19 +178,26 @@ def import_gid(options):
     record = records[0]
     record['gid'] = gid.save_to_string(save_parents=True)
     table.update(record)
+    if options.verbose:
+        print "Imported %s gid into db" % record['hrn']
 
     # update the hierarchy
     auth_info = hierarchy.get_auth_info(gid.get_hrn())  
     filename = auth_info.gid_filename
     gid.save_to_file(filename, save_parents=True)
+    if options.verbose:
+        print "Writing %s gid to %s" % (gid.get_hrn(), filename)
 
     # re-sign all existing gids signed by this authority  
     # create a dictionary of records keyed on the record's authority
     record_dict = defaultdict(list)
     # only get regords that belong to this authority 
     # or any of its sub authorities   
-    all_records = table.find({'hrn': '%s*' % gid.get_hrn()})
-    for record in records:
+    child_records = table.find({'hrn': '%s*' % gid.get_hrn()})
+    if not child_records:
+        return
+  
+    for record in child_records:
         record_dict[record['authority']].append(record) 
 
     # start with the authority we just imported       
@@ -199,6 +213,9 @@ def import_gid(options):
                 record_gid = GID(string=record['gid'])
                 parent_pkey = Keypair(filename=auth_info.privkey_filename)
                 parent_gid = GID(filename=auth_info.gid_filename)
+                if options.verbose:
+                    print "re-signing %s gid with parent %s" % \
+                           (record['hrn'], parent_gid.get_hrn())  
                 signed_gid = sign_gid(record_gid, parent_pkey, parent_gid)
                 record['gid'] = signed_gid.save_to_string(save_parents=True)
                 table.update(record)
@@ -206,6 +223,8 @@ def import_gid(options):
                 # if this is an authority then update the hierarchy
                 if record['type'] == 'authority':
                     record_info = hierarchy.get_auth_info(record['hrn'])
+                    if options.verbose:
+                        print "Writing %s gid to %s" % (record['hrn'], record_info.gid_filename) 
                     signed_gid.save_to_file(filename=record_info.gid_filename, save_parents=True)
 
              # update list of next authorities
