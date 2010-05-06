@@ -11,6 +11,7 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID, create_uuid
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import Config
+from collections import defaultdict
 
 def main():
     args = sys.argv
@@ -22,6 +23,8 @@ def main():
                       help="gid to sign" )
     parser.add_option("-k", "--key", dest="key", default=None, 
                       help="keyfile to use for signing")
+    parser.add_option("-a", "--authority", dest="authority", default=None, 
+                      help="sign the gid using the specified authority ")
     parser.add_option("-i", "--import", dest="importgid", default=None,
                       help="gid file to import into the registry")
     parser.add_option("-e", "--export", dest="export", 
@@ -58,13 +61,20 @@ def display(options):
     gid = GID(filename=gidfile)
     gid.dump(dump_parents=True)
 
+def sign_gid(gid, parent_key, parent_gid):
+    gid.set_issuer(parent_key, parent_gid.get_hrn())
+    gid.set_parent(parent_gid)
+    gid.sign()
+    gid.save_to_file(outfile, save_parents=True)
+    return gid 
+
 def sign(options):
     """
     Sign the specified gid
     """
     hierarchy = Hierarchy()
     config = Config()
-    parent_hrn = config.SFA_INTERFACE_HRN
+    default_authority = config.SFA_INTERFACE_HRN
     auth_info = hierarchy.get_auth_info(parent_hrn)
 
     # load the gid
@@ -74,17 +84,19 @@ def sign(options):
         sys.exit(1)
     gid = GID(filename=gidfile)
 
-    # load the parent private key
-    pkeyfile = options.key
+    # load the parent private info
+    authority = options.authority    
     # if no pkey was specified, then use the this authority's key
-    if not pkeyfile:
-        pkeyfile = auth_info.privkey_filename
-    if not os.path.isfile(pkeyfile):
-        print "no such pkey: %s.\nPlease specify a valid private key" % pkeyfile
-        sys.exit(1)
-    parent_key = Keypair(filename=pkeyfile)
+    if not authority:
+        authority = default_authority 
+    
+    if not hierarchy.auth_exists(authority):
+        print "no such authority: %s" % authority    
 
-    # load the parent gid
+    # load the parent gid and key 
+    auth_info = hierarchy.get_auth_info(authority)
+    pkeyfile = auth_info.privkey_filename
+    parent_key = Keypair(filename=pkeyfile)
     parent_gid = auth_info.gid_object
 
     # get the outfile
@@ -95,10 +107,7 @@ def sign(options):
     # check if gid already has a parent
  
     # sign the gid
-    gid.set_issuer(parent_key, parent_hrn)
-    gid.set_parent(parent_gid)
-    gid.sign()
-    gid.save_to_file(outfile, save_parents=True)            
+    sign_gid(gid, parent_key, parent_gid)
     
 
 def export_gid(options):
@@ -165,7 +174,46 @@ def import_gid(options):
     # update the hierarchy
     auth_info = hierarchy.get_auth_info(gid.get_hrn())  
     filename = auth_info.gid_filename
-    gid.save_to_file(filename, save_parents=True) 
-    
+    gid.save_to_file(filename, save_parents=True)
+
+    # re-sign all existing gids signed by this authority  
+    # create a dictionary of records keyed on the record's authority
+    record_dict = defaultdict(list)
+    # only get regords that belong to this authority 
+    # or any of its sub authorities   
+    all_records = table.find({'hrn': '%s*' % gid.get_hrn()])
+    for record in records:
+        record_dict[record['authority']].append(record) 
+
+    # start with the authority we just imported       
+    authorities = [gid.get_hrn()]
+    while authorities:
+        next_authorities = []
+        for authority in authorities:
+            # create a new signed gid for each record at this authority 
+            # and update the registry
+            auth_info = hierarchy.get_auth_info(authority)
+            records = record_dict[authority]
+            for record in records:
+                record_gid = GID(string=record['gid'])
+                parent_pkey = Keypair(filename=auth_info.privkey_filename)
+                parent_gid = GID(filename=auth_info.gid_filename)
+                signed_gid = sign_gid(record_gid, parent_pkey, parent_gid)
+                record['gid'] = signed_gid.save_to_string(save_parents=True)
+                table.update(record)
+                
+                # if this is an authority then update the hierarchy
+                if record['type'] == 'authority':
+                    record_info = hierarchy.get_auth_info(record['hrn'])
+                    signed_gid.save_to_file(filename=record_info.gid_filename, save_parents=True)
+
+             # update list of next authorities
+            tmp_authorities = set([record['hrn'] for record in records \
+                                   if record['type'] == 'authority']))
+            next_authorities.extend(tmp_authorities)
+
+        # move on to next set of authorities
+        authorities = next_authorities     
+
 if __name__ == '__main__':
     main()
