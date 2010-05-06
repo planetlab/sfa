@@ -181,7 +181,7 @@ def import_gid(options):
     record_dict = defaultdict(list)
     # only get regords that belong to this authority 
     # or any of its sub authorities   
-    all_records = table.find({'hrn': '%s*' % gid.get_hrn()])
+    all_records = table.find({'hrn': '%s*' % gid.get_hrn()})
     for record in records:
         record_dict[record['authority']].append(record) 
 
@@ -209,7 +209,7 @@ def import_gid(options):
 
              # update list of next authorities
             tmp_authorities = set([record['hrn'] for record in records \
-                                   if record['type'] == 'authority']))
+                                   if record['type'] == 'authority'])
             next_authorities.extend(tmp_authorities)
 
         # move on to next set of authorities
