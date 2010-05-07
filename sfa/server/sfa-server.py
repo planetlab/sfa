@@ -150,12 +150,12 @@ def init_server(options, config):
             manager.init_server()    
             
 
-def sync_interfaces():
+def sync_interfaces(server_key_file, server_cert_file):
     """
     Attempt to install missing trusted gids and db records for 
     our federated interfaces
     """
-    api = SfaAPI()
+    api = SfaAPI(key_file = server_key_file, cert_file = server_cert_file)
     registries = Registries(api)
     aggregates = Aggregates(api)
     registries.sync_interfaces()
@@ -185,7 +185,6 @@ def main():
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
 
-    if (options.daemon):  daemon()
 
     config = Config()
     hierarchy = Hierarchy()
@@ -194,8 +193,9 @@ def main():
 
     init_server_key(server_key_file, server_cert_file, config, hierarchy)
     init_server(options, config)
-    sync_interfaces()   
+    sync_interfaces(server_key_file, server_cert_file)   
  
+    if (options.daemon):  daemon()
     # start registry server
     if (options.registry):
         from sfa.server.registry import Registry

@@ -102,13 +102,14 @@ class Interfaces(dict):
                 interface_info =  self.interfaces[new_hrn]
                 interface = self.get_connections(self.interfaces[new_hrn])[new_hrn]
                 trusted_gids = interface.get_trusted_certs()
-                # default message
-                message = "interface: %s\tunable to install trusted gid for %s" % \
-                           (self.api.interface, new_hrn) 
                 if trusted_gids:
                     # the gid we want shoudl be the first one in the list, 
                     # but lets make sure
                     for trusted_gid in trusted_gids:
+                        # default message
+                        message = "interface: %s\t" % (self.api.interface)
+                        message += "unable to install trusted gid for %s" % \
+                                   (new_hrn) 
                         gid = GID(string=trusted_gids[0])
                         peer_gids.append(gid) 
                         if gid.get_hrn() == new_hrn:
@@ -116,8 +117,8 @@ class Interfaces(dict):
                             gid.save_to_file(gid_filename, save_parents=True)
                             message = "interface: %s\tinstalled trusted gid for %s" % \
                                 (self.api.interface, new_hrn)
-                # log the message
-                self.api.logger.info(message)
+                        # log the message
+                        self.api.logger.info(message)
             except:
                 message = "interface: %s\tunable to install trusted gid for %s" % \
                             (self.api.interface, new_hrn) 
