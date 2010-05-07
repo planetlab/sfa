@@ -87,7 +87,7 @@ def main():
 
     # create root authority 
     sfaImporter.create_top_level_auth_records(root_auth)
-    if not root_auth == interface_hrn
+    if not root_auth == interface_hrn:
         sfaImporter.create_top_level_auth_records(interface_hrn)
 
     trace("Import: adding " + interface_hrn + " to trusted list", logger)
