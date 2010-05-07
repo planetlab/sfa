@@ -8,6 +8,8 @@ import os, os.path
 import tempfile
 import traceback
 import socket
+from lxml import etree
+from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
 from sfa.trust.certificate import Keypair, Certificate
@@ -15,35 +17,24 @@ from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import *
 from sfa.util.namespace import *
-from sfa.util.rspec import RSpec
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
+
 
 # utility methods here
 # display methods
 def display_rspec(rspec, format = 'rspec'):
     if format in ['dns']:
-        spec = RSpec()
-        spec.parseString(rspec)
-        hostnames = []
-        nodespecs = spec.getDictsByTagName('NodeSpec')
-        for nodespec in nodespecs:
-            if nodespec.has_key('name') and nodespec['name']:
-                if isinstance(nodespec['name'], ListType):
-                    hostnames.extend(nodespec['name'])
-                elif isinstance(nodespec['name'], StringTypes):
-                     hostnames.append(nodespec['name'])
-        result = hostnames
+        tree = etree.parse(StringIO(rspec))
+        root = tree.getroot()
+        result = root.xpath("./network/site/node/hostname/text()")
     elif format in ['ip']:
-        spec = RSpec()
-        spec.parseString(rspec)
-        ips = []
-        ifspecs = spec.getDictsByTagName('IfSpec')
-        for ifspec in ifspecs:
-            if ifspec.has_key('addr') and ifspec['addr']:
-                ips.append(ifspec['addr'])
-        result = ips
+        # The IP address is not yet part of the new RSpec
+        # so this doesn't do anything yet.
+        tree = etree.parse(StringIO(rspec))
+        root = tree.getroot()
+        result = root.xpath("./network/site/node/ipv4/text()")
     else:
         result = rspec
 
@@ -821,11 +812,10 @@ class Sfi:
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         
-        # get a list node hostnames from the nodespecs in the rspec 
-        rspec = RSpec()
-        rspec.parseString(ticket.rspec)
-        nodespecs = rspec.getDictsByTagName('NodeSpec')
-        hostnames = [nodespec['name'] for nodespec in nodespecs]
+        # get a list of node hostnames from the RSpec 
+        tree = etree.parse(StringIO(ticket.rspec))
+        root = tree.getroot()
+        hostnames = root.xpath("./network/site/node/hostname/text()")
         
         # create an xmlrpc connection to the component manager at each of these
         # components and gall redeem_ticket
