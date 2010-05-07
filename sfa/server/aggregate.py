@@ -44,7 +44,7 @@ class Aggregates(Interfaces):
         port = self.api.config.SFA_AGGREGATE_PORT
         url = 'http://%(address)s:%(port)s' % locals()
         local_aggregate = {'hrn': self.api.hrn, 'addr': address, 'port': port}
-        self.interfaces.append(local_aggregate) 
+        self.interfaces[self.api.hrn] = local_aggregate 
         connections[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
         return connections
 

@@ -51,5 +51,6 @@ class Registries(Interfaces):
         port = self.api.config.SFA_REGISTRY_PORT
         url = 'http://%(address)s:%(port)s' % locals()
         local_registry = {'hrn': self.api.hrn, 'addr': address, 'port': port}
+        self.interfaces[self.api.hrn] = local_registry
         connections[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)            
         return connections 

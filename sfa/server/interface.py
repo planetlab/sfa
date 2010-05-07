@@ -3,13 +3,13 @@
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/server/interface.py $
 #
 
-
 from sfa.util.faults import *
 from sfa.util.storage import *
 from sfa.util.namespace import *
 from sfa.trust.gid import GID
 from sfa.util.table import SfaTable
 from sfa.util.record import SfaRecord
+import traceback
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
 
@@ -58,9 +58,14 @@ class Interfaces(dict):
         # load config file
         self.interface_info = XmlStorage(conf_file, self.default_dict)
         self.interface_info.load()
-        self.interfaces = self.interface_info.values()[0].values()[0]
-        if not isinstance(self.interfaces, list):
-            self.interfaces = [self.interfaces]
+        interfaces = self.interface_info.values()[0].values()[0]
+        if not isinstance(interfaces, list):
+            interfaces = [self.interfaces]
+        self.interfaces = {}
+        for interface in interfaces:
+            self.interfaces[interface['hrn']] = interface
+
+        print "INTERFACES", self.interfaces
         # get connections
         self.update(self.get_connections(self.interfaces))
 
@@ -75,19 +80,19 @@ class Interfaces(dict):
         # are any missing gids, request a new one from the peer registry.
         gids_current = self.api.auth.trusted_cert_list
         hrns_current = [gid.get_hrn() for gid in gids_current] 
-        hrns_expected = [interface['hrn'] for interface in self.interfaces] 
+        hrns_expected = self.interfaces.keys() 
         new_hrns = set(hrns_expected).difference(hrns_current)
-        self.get_peer_gids(new_hrns)
-
+        gids = self.get_peer_gids(new_hrns)
         # update the local db records for these registries
-        self.update_db_records(self.type)
+        self.update_db_records(self.type, gids)
         
     def get_peer_gids(self, new_hrns):
         """
         Install trusted gids from the specified interfaces.  
         """
+        peer_gids = []
         if not new_hrns:
-            return
+            return peer_gids
         trusted_certs_dir = self.api.config.get_trustedroots_dir()
         for new_hrn in new_hrns:
             # the gid for this interface should already be installed  
@@ -95,6 +100,7 @@ class Interfaces(dict):
                 continue
             try:
                 # get gid from the registry
+                interface_info =  self.interfaces[new_hrn]
                 interface = self.get_connections(self.interfaces[new_hrn])[new_hrn]
                 trusted_gids = interface.get_trusted_certs()
                 # default message
@@ -105,6 +111,7 @@ class Interfaces(dict):
                     # but lets make sure
                     for trusted_gid in trusted_gids:
                         gid = GID(string=trusted_gids[0])
+                        peer_gids.append(gid) 
                         if gid.get_hrn() == new_hrn:
                             gid_filename = os.path.join(trusted_certs_dir, '%s.gid' % new_hrn)
                             gid.save_to_file(gid_filename, save_parents=True)
@@ -116,21 +123,25 @@ class Interfaces(dict):
                 message = "interface: %s\tunable to install trusted gid for %s" % \
                             (self.api.interface, new_hrn) 
                 self.api.logger.info(message)
+                traceback.print_exc()
         
         # reload the trusted certs list
         self.api.auth.load_trusted_certs()
+        return peer_gids
 
-    def update_db_records(self, type):
+    def update_db_records(self, type, gids):
         """
         Make sure there is a record in the local db for allowed registries
         defined in the config file (registries.xml). Removes old records from
         the db.         
         """
+        if not gids: 
+            return
         # get hrns we expect to find
         # ignore records for local interfaces
         ignore_interfaces = [self.api.config.SFA_INTERFACE_HRN]
-        hrns_expected = [interface['hrn'] for interface in self.interfaces \
-                         if interface['hrn'] not in ignore_interfaces]
+        hrns_expected = [gid.get_hrn() for gid in gids \
+                         if gid.get_hrn() not in ignore_interfaces]
 
         # get hrns that actually exist in the db
         table = SfaTable()
@@ -143,18 +154,19 @@ class Interfaces(dict):
                 table.remove(record)
 
         # add new records
-        for hrn in hrns_expected:
+        for gid in gids:
+            hrn = gid.get_hrn()
             if hrn not in hrns_found:
                 record = {
                     'hrn': hrn,
                     'type': type,
                     'pointer': -1, 
                     'authority': get_authority(hrn),
+                    'gid': gid.save_to_string(save_parents=True),
                 }
                 record = SfaRecord(dict=record)
                 table.insert(record)
                         
- 
     def get_connections(self, interfaces):
         """
         read connection details for the trusted peer registries from file return 
