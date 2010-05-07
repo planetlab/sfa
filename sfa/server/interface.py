@@ -65,7 +65,6 @@ class Interfaces(dict):
         for interface in interfaces:
             self.interfaces[interface['hrn']] = interface
 
-        print "INTERFACES", self.interfaces
         # get connections
         self.update(self.get_connections(self.interfaces))
 
