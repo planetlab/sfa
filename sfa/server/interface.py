@@ -65,8 +65,6 @@ class Interfaces(dict):
         for interface in interfaces:
             self.interfaces[interface['hrn']] = interface
 
-        # get connections
-        self.update(self.get_connections(self.interfaces))
 
     def sync_interfaces(self):
         """
@@ -100,7 +98,7 @@ class Interfaces(dict):
             try:
                 # get gid from the registry
                 interface_info =  self.interfaces[new_hrn]
-                interface = self.get_connections(self.interfaces[new_hrn])[new_hrn]
+                interface = self[new_hrn]
                 trusted_gids = interface.get_trusted_certs()
                 if trusted_gids:
                     # the gid we want shoudl be the first one in the list, 
@@ -167,16 +165,14 @@ class Interfaces(dict):
                 record = SfaRecord(dict=record)
                 table.insert(record)
                         
-    def get_connections(self, interfaces):
+    def get_connections(self):
         """
         read connection details for the trusted peer registries from file return 
         a dictionary of connections keyed on interface hrn. 
         """
         connections = {}
         required_fields = self.default_fields.keys()
-        if not isinstance(interfaces, list):
-            interfaces = [interfaces]
-        for interface in interfaces:
+        for interface in self.interfaces.values():
             # make sure the required fields are present and not null
             if not all([interface.get(key) for key in required_fields]):
                 continue
