@@ -203,7 +203,9 @@ def main():
     for (record_hrn, type) in existing_records.keys():
         record = existing_records[(record_hrn, type)]
         # if this is the interface name dont do anything
-        if record_hrn == interface_hrn or record['peer_authority']:
+        if record_hrn == interface_hrn or \
+           record_hrn == root_auth or \
+           record['peer_authority']:
             continue
         # dont delete vini's internet2 placeholdder record
         # normally this would be deleted becuase it does not have a plc record 
