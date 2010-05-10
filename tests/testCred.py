@@ -71,13 +71,13 @@ class TestCred(unittest.TestCase):
 
    def testDelegationAndVerification(self):
       gidAuthority, keys = self.createSignedGID("site", "urn:publicid:IDN+plc+authority+site")
-      gidCaller, ckeys = self.createSignedGID("foo", "urn:publicid:IDN+plc:site+user+foo",
+      gidCaller, ckeys = self.createSignedGID("site.foo", "urn:publicid:IDN+plc:site+user+foo",
                                           keys, gidAuthority)
-      gidObject, _ = self.createSignedGID("bar_slice", "urn:publicid:IDN+plc:site+slice+bar_slice",
+      gidObject, _ = self.createSignedGID("site.slice", "urn:publicid:IDN+plc:site+slice+bar_slice",
                                           keys, gidAuthority)
-      gidDelegatee, _ = self.createSignedGID("delegatee", "urn:publicid:IDN+plc:site+user+delegatee",
+      gidDelegatee, _ = self.createSignedGID("site.delegatee", "urn:publicid:IDN+plc:site+user+delegatee",
                                              keys, gidAuthority)
-      
+
       cred = Credential()
       cred.set_gid_caller(gidCaller)
       cred.set_gid_object(gidObject)

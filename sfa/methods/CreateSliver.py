@@ -45,7 +45,6 @@ class CreateSliver(Method):
 
         # Find the valid credentials
         ValidCreds = self.api.auth.checkCredentials(creds, 'createsliver', hrn)
-
         origin_hrn = Credential(string=ValidCreds[0]).get_gid_caller().get_hrn()
 
         manager_base = 'sfa.managers'
