@@ -249,8 +249,6 @@ class Certificate:
 
        if intermediate:
            self.set_intermediate_ca(intermediate)
-       else:
-           self.set_intermediate_ca(False)
 
    ##
    # Create a blank X509 certificate and store it in this object.
