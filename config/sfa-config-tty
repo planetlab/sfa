@@ -15,7 +15,6 @@ def validator(validated_variables):
 usual_variables = [
     "SFA_INTERFACE_HRN",
     "SFA_REGISTRY_ROOT_AUTH",
-    "SFA_REGISTRY_LEVEL1_AUTH",
     "SFA_REGISTRY_HOST", 
     "SFA_AGGREGATE_HOST",
     "SFA_SM_HOST",

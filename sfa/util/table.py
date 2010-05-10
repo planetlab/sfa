@@ -84,20 +84,22 @@ class SfaTable(list):
         self.db.do(querystr)
         for index in indexes:
             self.db.do(index)
+        
         self.db.commit()
-
+    
     def remove(self, record):
-        query_str = "DELETE FROM %s WHERE record_id = %s" % \
-                    (self.tablename, record['record_id']) 
-        self.db.do(query_str)
+        params = {'record_id': record['record_id']}
+        template = "DELETE FROM %s " % self.tablename
+        sql = template + "WHERE record_id = %(record_id)s"
+        self.db.do(sql, params)
         
         # if this is a site, remove all records where 'authority' == the 
         # site's hrn
-        if record['type'] == 'site':
-            sql = " DELETE FROM %s WHERE authority = %s" % \
-                    (self.tablename, record['hrn'])
-            self.db.do(sql) 
-        self.db.commit()
+        if record['type'] == 'authority':
+            params = {'authority': record['hrn']}
+            sql = template + "WHERE authority = %(authority)s"
+            self.db.do(sql, params)
+        self.db.commit() 
 
     def insert(self, record):
         db_fields = self.db_fields(record)
@@ -182,9 +184,11 @@ class SfaTable(list):
     def drop(self):
         try:
             self.db.do('DROP TABLE IF EXISTS ' + self.tablename)
+            self.db.commit()
         except:
             try:
                 self.db.do('DROP TABLE ' + self.tablename)
+                self.db.commit()
             except:
                 pass
     

@@ -21,6 +21,7 @@ from sfa.util.namespace import *
 from sfa.util.api import *
 from sfa.util.nodemanager import NodeManager
 from sfa.util.sfalogging import *
+from collections import defaultdict
 
 def list_to_dict(recs, key):
     """
@@ -36,11 +37,12 @@ class SfaAPI(BaseAPI):
     import sfa.methods
     methods = sfa.methods.all
     
-    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", methods='sfa.methods', \
-                 peer_cert = None, interface = None, key_file = None, cert_file = None):
+    def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", 
+                 methods='sfa.methods', peer_cert = None, interface = None, 
+                key_file = None, cert_file = None, cache = None):
         BaseAPI.__init__(self, config=config, encoding=encoding, methods=methods, \
                          peer_cert=peer_cert, interface=interface, key_file=key_file, \
-                         cert_file=cert_file)
+                         cert_file=cert_file, cache=cache)
  
         self.encoding = encoding
 
@@ -361,6 +363,10 @@ class SfaAPI(BaseAPI):
         return records   
 
     def fill_record_sfa_info(self, records):
+
+        def startswith(prefix, values):
+            return [value for value in values if value.startswith(prefix)]
+
         # get person ids
         person_ids = []
         site_ids = []
@@ -396,7 +402,12 @@ class SfaAPI(BaseAPI):
         table = self.SfaTable()
         person_list, persons = [], {}
         person_list = table.find({'type': 'user', 'pointer': person_ids})
-        persons = list_to_dict(person_list, 'pointer')
+        # create a hrns keyed on the sfa record's pointer.
+        # Its possible for  multiple records to have the same pointer so
+        # the dict's value will be a list of hrns.
+        persons = defaultdict(list)
+        for person in person_list:
+            persons[person['pointer']].append(person)
 
         # get the pl records
         pl_person_list, pl_persons = [], {}
@@ -411,32 +422,36 @@ class SfaAPI(BaseAPI):
             sfa_info = {}
             type = record['type']
             if (type == "slice"):
-                # slice users
-                researchers = [persons[person_id]['hrn'] for person_id in record['person_ids'] \
-                               if person_id in persons] 
-                sfa_info['researcher'] = researchers
+                # all slice users are researchers
+                record['PI'] = []
+                record['researchers'] = []
+                for person_id in record['person_ids']:
+                    hrns = [person['hrn'] for person in persons[person_id]]
+                    record['researchers'].extend(hrns)                
+
                 # pis at the slice's site
                 pl_pis = site_pis[record['site_id']]
-                pi_ids = [pi['person_id'] for pi in pl_pis] 
-                sfa_info['PI'] = [persons[person_id]['hrn'] for person_id in pi_ids]
+                pi_ids = [pi['person_id'] for pi in pl_pis]
+                for person_id in pi_ids:
+                    hrns = [person['hrn'] for person in persons[person_id]]
+                    record['PI'].extend(hrns)
                 
             elif (type == "authority"):
-                pis, techs, admins = [], [], []
+                record['PI'] = []
+                record['operator'] = []
+                record['owner'] = []
                 for pointer in record['person_ids']:
                     if pointer not in persons or pointer not in pl_persons:
                         # this means there is not sfa or pl record for this user
                         continue   
-                    hrn = persons[pointer]['hrn'] 
+                    hrns = [person['hrn'] for person in persons[pointer]] 
                     roles = pl_persons[pointer]['roles']   
                     if 'pi' in roles:
-                        pis.append(hrn)
+                        record['PI'].extend(hrns)
                     if 'tech' in roles:
-                        techs.append(hrn)
+                        record['operator'].extend(hrns)
                     if 'admin' in roles:
-                        admins.append(hrn)
-                    sfa_info['PI'] = pis
-                    sfa_info['operator'] = techs
-                    sfa_info['owner'] = admins
+                        record['owner'].extend(hrns)
                     # xxx TODO: OrganizationName
             elif (type == "node"):
                 sfa_info['dns'] = record.get("hostname", "")

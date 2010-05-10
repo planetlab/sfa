@@ -327,7 +327,7 @@ class Certificate:
              self.issuerReq = req
        if cert:
           # if a cert was supplied, then get the subject from the cert
-          subject = cert.cert.get_issuer()
+          subject = cert.cert.get_subject()
        assert(subject)
        self.issuerSubject = subject
 
@@ -525,6 +525,10 @@ class Certificate:
             #print "TRUSTED CERT", trusted_cert.dump()
             #print "Client is signed by Trusted?", self.is_signed_by_cert(trusted_cert)
             if self.is_signed_by_cert(trusted_cert):
+                # make sure sure the trusted cert's hrn is a prefix of the
+                # signed cert's hrn
+                if not self.get_subject().startswith(trusted_cert.get_subject()):
+                    raise GidParentHrn(trusted_cert.get_subject()) 
                 #print self.get_subject(), "is signed by a root"
                 return
 

@@ -38,7 +38,7 @@ class delete_slice(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
         # validate the credential
-        self.api.auth.check(cred, 'deleteslice')
+        self.api.auth.check(cred, 'deleteslice', hrn)
 
         # send the call to the right manager
         manager_base = 'sfa.managers'

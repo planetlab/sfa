@@ -74,7 +74,7 @@ def main():
     if not config.SFA_REGISTRY_ENABLED:
         sys.exit(0)
     root_auth = config.SFA_REGISTRY_ROOT_AUTH
-    level1_auth = config.SFA_REGISTRY_LEVEL1_AUTH
+    interface_hrn = config.SFA_INTERFACE_HRN
     keys_filename = config.config_path + os.sep + 'person_keys.py' 
     sfaImporter = sfaImport(logger)
     shell = sfaImporter.shell
@@ -85,27 +85,20 @@ def main():
     if not table.exists():
         table.create()
 
-    if not level1_auth or level1_auth in ['']:
-        level1_auth = None
-    
-    if not level1_auth:
-        sfaImporter.create_top_level_auth_records(root_auth)
-        import_auth = root_auth
-    else:
-        if not AuthHierarchy.auth_exists(level1_auth):
-            AuthHierarchy.create_auth(level1_auth)
-        sfaImporter.create_top_level_auth_records(level1_auth)
-        import_auth = level1_auth
+    # create root authority 
+    sfaImporter.create_top_level_auth_records(root_auth)
+    if not root_auth == interface_hrn:
+        sfaImporter.create_top_level_auth_records(interface_hrn)
 
-    trace("Import: adding " + import_auth + " to trusted list", logger)
-    authority = AuthHierarchy.get_auth_info(import_auth)
+    trace("Import: adding " + interface_hrn + " to trusted list", logger)
+    authority = AuthHierarchy.get_auth_info(interface_hrn)
     TrustedRoots.add_gid(authority.get_gid_object())
 
-    if ".vini" in import_auth and import_auth.endswith('vini'):
+    if ".vini" in interface_hrn and interface_hrn.endswith('vini'):
         # create a fake internet2 site first
         i2site = {'name': 'Internet2', 'abbreviated_name': 'I2',
                     'login_base': 'internet2', 'site_id': -1}
-        sfaImporter.import_site(import_auth, i2site)
+        sfaImporter.import_site(interface_hrn, i2site)
    
     # create dict of all existing sfa records
     existing_records = {}
@@ -158,19 +151,19 @@ def main():
 
     # start importing 
     for site in sites:
-        site_hrn = import_auth + "." + site['login_base']
+        site_hrn = interface_hrn + "." + site['login_base']
         # import if hrn is not in list of existing hrns or if the hrn exists
         # but its not a site record
         if site_hrn not in existing_hrns or \
            (site_hrn, 'authority') not in existing_records:
-            site_hrn = sfaImporter.import_site(import_auth, site)
+            site_hrn = sfaImporter.import_site(interface_hrn, site)
              
         # import node records
         for node_id in site['node_ids']:
             if node_id not in nodes_dict:
                 continue 
             node = nodes_dict[node_id]
-            hrn =  hostname_to_hrn(import_auth, site['login_base'], node['hostname'])
+            hrn =  hostname_to_hrn(interface_hrn, site['login_base'], node['hostname'])
             if hrn not in existing_hrns or \
                (hrn, 'node') not in existing_records:
                 sfaImporter.import_node(site_hrn, node)
@@ -180,7 +173,7 @@ def main():
             if slice_id not in slices_dict:
                 continue 
             slice = slices_dict[slice_id]
-            hrn = slicename_to_hrn(import_auth, slice['name'])
+            hrn = slicename_to_hrn(interface_hrn, slice['name'])
             if hrn not in existing_hrns or \
                (hrn, 'slice') not in existing_records:
                 sfaImporter.import_slice(site_hrn, slice)      
@@ -210,11 +203,13 @@ def main():
     for (record_hrn, type) in existing_records.keys():
         record = existing_records[(record_hrn, type)]
         # if this is the interface name dont do anything
-        if record_hrn == import_auth or record['peer_authority']:
+        if record_hrn == interface_hrn or \
+           record_hrn == root_auth or \
+           record['peer_authority']:
             continue
         # dont delete vini's internet2 placeholdder record
         # normally this would be deleted becuase it does not have a plc record 
-        if ".vini" in import_auth and import_auth.endswith('vini') and \
+        if ".vini" in interface_hrn and interface_hrn.endswith('vini') and \
            record_hrn.endswith("internet2"):     
             continue
 
@@ -222,7 +217,7 @@ def main():
         
         if type == 'authority':    
             for site in sites:
-                site_hrn = import_auth + "." + site['login_base']
+                site_hrn = interface_hrn + "." + site['login_base']
                 if site_hrn == record_hrn and site['site_id'] == record['pointer']:
                     found = True
                     break

@@ -46,12 +46,12 @@ def __get_hostnames(nodes):
     return hostnames
     
 def create_slice(api, xrn, xml):
-    hrn, type = urn_to_hrn(xrn)
-    peer = None
-
     """
     Verify HRN and initialize the slice record in PLC if necessary.
     """
+
+    hrn, type = urn_to_hrn(xrn)
+    peer = None
     slices = Slices(api)
     peer = slices.get_peer(hrn)
     sfa_peer = slices.get_sfa_peer(hrn)
@@ -66,7 +66,7 @@ def create_slice(api, xrn, xml):
 
     slice = network.get_slice(api, hrn)
     current = __get_hostnames(slice.get_nodes())
-
+    
     network.addRSpec(xml, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
     
     request = __get_hostnames(network.nodesWithSlivers())
@@ -168,22 +168,43 @@ def reset_slice(api, xrn):
     return 1
 
 def get_slices(api):
-    # XX just import the legacy module and excute that until
-    # we transition the code to this module
-    from sfa.plc.slices import Slices
-    slices = Slices(api)
-    slices.refresh()
-    return [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slices['hrn']]
-     
- 
+    # look in cache first
+    if api.cache:
+        slices = api.cache.get('slices')
+        if slices:
+            return slices
+
+    # get data from db 
+    slices = api.plshell.GetSlices(api.plauth, {'peer_id': None}, ['name'])
+    slice_hrns = [slicename_to_hrn(api.hrn, slice['name']) for slice in slices]
+    slice_urns = [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slice_hrns]
+
+    # cache the result
+    if api.cache:
+        api.cache.add('slices', slice_urns) 
+
+    return slice_urns
+    
 def get_rspec(api, xrn=None, origin_hrn=None):
+    # look in cache first
+    if api.cache and not xrn:
+        rspec = api.cache.get('nodes')
+        if rspec:
+            return rspec 
+
     hrn, type = urn_to_hrn(xrn)
     network = Network(api)
     if (hrn):
         if network.get_slice(api, hrn):
             network.addSlice()
 
-    return network.toxml()
+    rspec = network.toxml()
+
+    # cache the result
+    if api.cache and not xrn:
+        api.cache.add('nodes', rspec)
+
+    return rspec
 
 """
 Returns the request context required by sfatables. At some point, this

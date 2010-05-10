@@ -14,7 +14,7 @@ def reset_slice(api, slicename):
 def get_slices(api):
     return 
 
-def roboot():
+def reboot():
     return
 
 def redeem_ticket(api, ticket_string):

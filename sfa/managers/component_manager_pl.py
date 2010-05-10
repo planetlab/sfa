@@ -46,7 +46,7 @@ def get_slices(api):
     slices = eval(xids[1])
     return slices.keys()
 
-def roboot():
+def reboot():
     os.system("/sbin/reboot")        
 
 def redeem_ticket(api, ticket_string):

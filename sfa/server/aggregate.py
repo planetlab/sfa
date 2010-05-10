@@ -30,21 +30,13 @@ class Aggregates(Interfaces):
     default_dict = {'aggregates': {'aggregate': [Interfaces.default_fields]}}
  
     def __init__(self, api, conf_file = "/etc/sfa/aggregates.xml"):
-        Interfaces.__init__(self, api, conf_file, 'ma')
-
-    def get_connections(self, interfaces):
-        """
-        Get connection details for the trusted peer aggregates from file and 
-        create an connection to each. 
-        """
-        connections = Interfaces.get_connections(self, interfaces)
-
+        Interfaces.__init__(self, api, conf_file)
         # set up a connection to the local registry
         address = self.api.config.SFA_AGGREGATE_HOST
         port = self.api.config.SFA_AGGREGATE_PORT
         url = 'http://%(address)s:%(port)s' % locals()
         local_aggregate = {'hrn': self.api.hrn, 'addr': address, 'port': port}
-        self.interfaces.append(local_aggregate) 
-        connections[self.api.hrn] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
-        return connections
+        self.interfaces[self.api.hrn] = local_aggregate
 
+        # get connections
+        self.update(self.get_connections())

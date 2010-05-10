@@ -14,6 +14,7 @@ bins = [
     'config/gen-sfa-cm-config.py',
     'sfa/plc/sfa-import-plc.py', 
     'sfa/plc/sfa-nuke-plc.py', 
+    'sfa/server/sfa-ca.py', 
     'sfa/server/sfa-server.py', 
     'sfa/server/sfa-clean-peer-records.py', 
     'sfa/server/sfa_component_setup.py', 
