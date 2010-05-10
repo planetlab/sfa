@@ -30,7 +30,7 @@ class Aggregates(Interfaces):
     default_dict = {'aggregates': {'aggregate': [Interfaces.default_fields]}}
  
     def __init__(self, api, conf_file = "/etc/sfa/aggregates.xml"):
-        Interfaces.__init__(self, api, conf_file, 'ma')
+        Interfaces.__init__(self, api, conf_file)
         # set up a connection to the local registry
         address = self.api.config.SFA_AGGREGATE_HOST
         port = self.api.config.SFA_AGGREGATE_PORT

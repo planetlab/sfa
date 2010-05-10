@@ -46,10 +46,9 @@ class Interfaces(dict):
     # defined by the class 
     default_dict = {}
 
-    # allowed types
-    types = ['sa', 'ma']
+    types = ['authority']
 
-    def __init__(self, api, conf_file, type):
+    def __init__(self, api, conf_file, type='authority'):
         if type not in self.types:
             raise SfaInfaildArgument('Invalid type %s: must be in %s' % (type, self.types))    
         dict.__init__(self, {})

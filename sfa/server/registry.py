@@ -37,7 +37,7 @@ class Registries(Interfaces):
     default_dict = {'registries': {'registry': [Interfaces.default_fields]}}
 
     def __init__(self, api, conf_file = "/etc/sfa/registries.xml"):
-        Interfaces.__init__(self, api, conf_file, 'sa') 
+        Interfaces.__init__(self, api, conf_file) 
         address = self.api.config.SFA_REGISTRY_HOST
         port = self.api.config.SFA_REGISTRY_PORT
         url = 'http://%(address)s:%(port)s' % locals()
