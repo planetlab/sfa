@@ -157,7 +157,7 @@ def list(api, xrn, origin_hrn=None):
     tree = prefixTree()
     tree.load(registry_hrns)
     registry_hrn = tree.best_match(hrn)
-    
+   
     #if there was no match then this record belongs to an unknow registry
     if not registry_hrn:
         raise MissingAuthority(xrn)

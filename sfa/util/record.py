@@ -355,7 +355,7 @@ class UserRecord(SfaRecord):
         'first_name': Parameter(str, 'First name'),
         'last_name': Parameter(str, 'Last name'),
         'phone': Parameter(str, 'Phone Number'),
-        'key': Parameter(str, 'Public key'),
+        'keys': Parameter(str, 'Public key'),
         'slices': Parameter([str], 'List of slices this user belongs to'),
         }
     fields.update(SfaRecord.fields)

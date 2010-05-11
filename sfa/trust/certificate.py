@@ -361,7 +361,7 @@ class Certificate:
              self.issuerReq = req
        if cert:
           # if a cert was supplied, then get the subject from the cert
-          subject = cert.cert.get_issuer()
+          subject = cert.cert.get_subject()
        assert(subject)
        self.issuerSubject = subject
 

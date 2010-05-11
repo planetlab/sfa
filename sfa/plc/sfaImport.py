@@ -56,9 +56,6 @@ class sfaImport:
         self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))
         self.plc_auth = self.config.get_plc_auth()
         self.root_auth = self.config.SFA_REGISTRY_ROOT_AUTH
-        self.level1_auth = self.config.SFA_REGISTRY_LEVEL1_AUTH
-        if not self.level1_auth or self.level1_auth in ['']:
-            self.level1_auth = None
         
         # connect to planetlab
         self.shell = None
@@ -71,25 +68,18 @@ class sfaImport:
 
 
     def create_top_level_auth_records(self, hrn):
+        # create the authority if it doesnt already exist 
         AuthHierarchy = self.AuthHierarchy
         urn = hrn_to_urn(hrn, 'authority')
-        # if auth records for this hrn dont exist, create it
         if not AuthHierarchy.auth_exists(urn):
             trace("Import: creating top level authorites", self.logger)
             AuthHierarchy.create_auth(urn)
-        
-
-        # get the auth info of the newly created root auth (parent)
-        # or level1_auth if it exists
-        if self.level1_auth:
-            auth_info = AuthHierarchy.get_auth_info(hrn)
+        parent_hrn = get_authority(hrn)
+        if not parent_hrn:
             parent_hrn = hrn
-        else:
-            parent_hrn = get_authority(hrn)
-            if not parent_hrn:
-                parent_hrn = hrn
-            auth_info = AuthHierarchy.get_auth_info(parent_hrn)
-            
+        auth_info = AuthHierarchy.get_auth_info(parent_hrn)
+        
+        # create the db record if it doesnt already exist    
         table = SfaTable()
         auth_record = table.find({'type': 'authority', 'hrn': hrn})
 

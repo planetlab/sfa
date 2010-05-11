@@ -76,14 +76,7 @@ $URL$
 	  <description>The hrn of the registry's root auth.</description>
 	</variable>
 
-	<variable id="level1_auth" type="string">
-	  <name>Level1 Authority</name>
-	  <value></value>
-	  <description>The hrn of the registry's level1 auth (sub
-	  authority). The full name of this interface (only secify if
-	  this interface is a sub authority).</description>
-	</variable>
-      </variablelist>
+    </variablelist>
     </category>
 
     <!-- ======================================== -->

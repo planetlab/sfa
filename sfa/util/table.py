@@ -88,16 +88,17 @@ class SfaTable(list):
         self.db.commit()
     
     def remove(self, record):
-        query_str = "DELETE FROM %s WHERE record_id = %s" % \
-                    (self.tablename, record['record_id']) 
-        self.db.do(query_str)
+        params = {'record_id': record['record_id']}
+        template = "DELETE FROM %s " % self.tablename
+        sql = template + "WHERE record_id = %(record_id)s"
+        self.db.do(sql, params)
         
         # if this is a site, remove all records where 'authority' == the 
         # site's hrn
         if record['type'] == 'authority':
-            sql = " DELETE FROM %s WHERE authority = %s" % \
-                    (self.tablename, record['hrn'])
-            self.db.do(sql)
+            params = {'authority': record['hrn']}
+            sql = template + "WHERE authority = %(authority)s"
+            self.db.do(sql, params)
         self.db.commit() 
 
     def insert(self, record):
