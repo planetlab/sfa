@@ -34,6 +34,8 @@ class get_geni_aggregates(Method):
         
         geni_aggs = Aggregates(self.api, '/etc/sfa/geni_aggregates.xml')        
 
+        geni_aggs = geni_aggs.interfaces.values()
+
         hrn_list = [] 
         if hrn:
             if isinstance(hrn, StringTypes):
@@ -42,16 +44,15 @@ class get_geni_aggregates(Method):
                 hrn_list = hrn
         
         if not hrn_list:
-            interfaces = geni_aggs.interfaces
+            interfaces = geni_aggs
         else:
-            interfaces = [interface for interface in geni_aggs.interfaces if interface['hrn'] in hrn_list]
-        
+            interfaces = [interface for interface in geni_aggs if interface['hrn'] in hrn_list]
+
+
         # Remove Aggregate's default sfa-aggregate 
         interfaces = interfaces[:-1]
 
-        # Remove empty interfaces
-        interfaces = [interface for interface in interfaces if interface['hrn'] != '']
-
+        
         # Add urns
         for interface in interfaces:
             interface['urn'] = hrn_to_urn(interface['hrn'], 'authority')

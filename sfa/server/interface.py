@@ -61,8 +61,17 @@ class Interfaces(dict):
         if not isinstance(interfaces, list):
             interfaces = [self.interfaces]
         self.interfaces = {}
+        required_fields = self.default_fields.keys()
         for interface in interfaces:
-            self.interfaces[interface['hrn']] = interface
+            valid = True
+            # skp any interface definition that has a null hrn, 
+            # address or port
+            for field in required_fields:
+                if field not in interface or not interface[field]:
+                    valid = False
+                    break
+            if valid:     
+                self.interfaces[interface['hrn']] = interface
 
 
     def sync_interfaces(self):

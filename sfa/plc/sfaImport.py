@@ -68,18 +68,22 @@ class sfaImport:
 
 
     def create_top_level_auth_records(self, hrn):
-        # create the authority if it doesnt already exist 
         AuthHierarchy = self.AuthHierarchy
         urn = hrn_to_urn(hrn, 'authority')
-        if not AuthHierarchy.auth_exists(urn):
-            trace("Import: creating top level authorites", self.logger)
-            AuthHierarchy.create_auth(urn)
+        # make sure parent exists
         parent_hrn = get_authority(hrn)
         if not parent_hrn:
             parent_hrn = hrn
-        auth_info = AuthHierarchy.get_auth_info(parent_hrn)
+        if not parent_hrn == hrn:
+            self.create_top_level_auth_records(parent_hrn)
+
+        # create the authority if it doesnt already exist 
+        if not AuthHierarchy.auth_exists(urn):
+            trace("Import: creating top level authorites", self.logger)
+            AuthHierarchy.create_auth(urn)
         
         # create the db record if it doesnt already exist    
+        auth_info = AuthHierarchy.get_auth_info(hrn)
         table = SfaTable()
         auth_record = table.find({'type': 'authority', 'hrn': hrn})
 
