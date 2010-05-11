@@ -39,8 +39,8 @@ class get_aggregates(Method):
                 hrn_list = hrn
         
         if not hrn_list:
-            interfaces = aggregates.interfaces
+            interfaces = aggregates.interfaces.keys()
         else:
-            interfaces = [interface for interface in aggregates.interfaces if interface['hrn'] in hrn_list]
+            interfaces = [interface for interface in aggregates.interfaces if interface in hrn_list]
       
         return interfaces

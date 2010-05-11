@@ -39,8 +39,8 @@ class get_registries(Method):
                 hrn_list = hrn
 
         if not hrn_list:
-            interfaces = registries.interfaces
+            interfaces = registries.interfaces.keys()
         else:
-            interfaces = [interface for interface in registries.interfaces if interface['hrn'] in hrn_list]
+            interfaces = [interface for interface in registries.interfaces if interface in hrn_list]
 
         return interfaces
