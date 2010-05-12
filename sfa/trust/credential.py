@@ -662,7 +662,7 @@ class Credential(object):
                             % (self.xmlsec_path, ref, cert_args, filename)).read()
             if not verified.strip().startswith("OK"):
                 raise CredentialNotVerifiable("xmlsec1 error: " + verified)
-        os.remove(filename)
+#        os.remove(filename)
 
         # Verify the parents (delegation)
         if self.parent:

@@ -45,7 +45,7 @@ def __get_hostnames(nodes):
         hostnames.append(node.hostname)
     return hostnames
     
-def create_slice(api, xrn, xml):
+def create_slice(api, xrn, xml, reg_objects=None):
     """
     Verify HRN and initialize the slice record in PLC if necessary.
     """
@@ -58,9 +58,10 @@ def create_slice(api, xrn, xml):
     registry = api.registries[api.hrn]
     credential = api.getCredential()
     site_id, remote_site_id = slices.verify_site(registry, credential, hrn, 
-                                                 peer, sfa_peer)
+                                                 peer, sfa_peer, reg_objects)
+
     slice = slices.verify_slice(registry, credential, hrn, site_id, 
-                                remote_site_id, peer, sfa_peer)
+                                remote_site_id, peer, sfa_peer, reg_objects)
 
     network = Network(api)
 

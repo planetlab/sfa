@@ -7,6 +7,7 @@ from sfa.util.record import *
 
 from sfa.plc.slices import *
 from sfa.util.sfalogging import *
+from sfa.util.record import SfaRecord
 from lxml import etree
 from StringIO import StringIO
 
@@ -53,12 +54,30 @@ def ListResources(api, creds, options):
 
 
 def CreateSliver(api, slice_xrn, creds, rspec):
+    reg_objects = {}
+    hrn, type = urn_to_hrn(slice_xrn)
+    
+    hrn_auth = get_authority(hrn)
+    
+    #site = SfaRecord(hrn=hrn_auth, type='authority')
+    site = {}
+    site['site_id'] = 0
+    site['name'] = 'geni.%s' % slice_xrn
+    site['enabled'] = True
+    site['max_slices'] = 100
+    site['login_base'] = get_leaf(hrn_auth)
+    site['abbreviated_name'] = hrn
+    site['max_slivers'] = 1000
+    
+    reg_objects['site'] = site
+    
     manager_base = 'sfa.managers'
     mgr_type = 'pl'
     manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
     manager = __import__(manager_module, fromlist=[manager_base])
 
-    allocated = manager.create_slice(api, slice_xrn, rspec)
+    allocated = manager.create_slice(api, slice_xrn, rspec, reg_objects)
+    
     return allocated
 
 def DeleteSliver(api, slice_xrn, creds):

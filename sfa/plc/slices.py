@@ -168,40 +168,46 @@ class Slices:
 
         return sfa_peer 
 
-    def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
+    def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer, reg_objects=None):
         authority = get_authority(slice_hrn)
         authority_urn = hrn_to_urn(authority, 'authority')
-        site_records = registry.resolve(credential, authority_urn)
+        
+        if reg_objects:
+            site = reg_objects['site']
+        else:
+            site_records = registry.resolve(credential, authority_urn)
+            site = {}            
+            for site_record in site_records:            
+                if site_record['type'] == 'authority':
+                    site = site_record
+            if not site:
+                raise RecordNotFound(authority)
             
-        site = {}
-        for site_record in site_records:
-            if site_record['type'] == 'authority':
-                site = site_record
-        if not site:
-            raise RecordNotFound(authority)
         remote_site_id = site.pop('site_id')    
                 
         login_base = get_leaf(authority)
         sites = self.api.plshell.GetSites(self.api.plauth, login_base)
+
         if not sites:
             site_id = self.api.plshell.AddSite(self.api.plauth, site)
             if peer:
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)   
             # mark this site as an sfa peer record
-            if sfa_peer:
+            if sfa_peer and not reg_objects:
                 peer_dict = {'type': 'authority', 'hrn': authority, 'peer_authority': sfa_peer, 'pointer': site_id}
                 registry.register_peer_object(credential, peer_dict)
         else:
             site_id = sites[0]['site_id']
             remote_site_id = sites[0]['peer_site_id']
+            
 	    old_site = sites[0]
-	    #the site is alredy on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
-	    self.sync_site(old_site, site, peer)
+	    #the site is already on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
+        self.sync_site(old_site, site, peer)
 
 
         return (site_id, remote_site_id) 
 
-    def verify_slice(self, registry, credential, slice_hrn, site_id, remote_site_id, peer, sfa_peer):
+    def verify_slice(self, registry, credential, slice_hrn, site_id, remote_site_id, peer, sfa_peer, reg_objects=None):
         slice = {}
         slice_record = None
         authority = get_authority(slice_hrn)
