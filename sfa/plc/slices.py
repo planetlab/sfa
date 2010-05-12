@@ -211,13 +211,19 @@ class Slices:
         slice = {}
         slice_record = None
         authority = get_authority(slice_hrn)
-        slice_records = registry.resolve(credential, slice_hrn)
 
-        for record in slice_records:
-            if record['type'] in ['slice']:
-                slice_record = record
-        if not slice_record:
-            raise RecordNotFound(hrn)
+        if reg_objects:
+            slice_record = reg_objects['slice_record']
+        else:
+            slice_records = registry.resolve(credential, slice_hrn)
+    
+            for record in slice_records:
+                if record['type'] in ['slice']:
+                    slice_record = record
+            if not slice_record:
+                raise RecordNotFound(hrn)
+            
+        
         slicename = hrn_to_pl_slicename(slice_hrn)
         parts = slicename.split("_")
         login_base = parts[0]

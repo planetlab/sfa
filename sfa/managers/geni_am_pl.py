@@ -2,7 +2,7 @@ from sfa.util.namespace import *
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
-
+from sfa.trust.credential import Credential
 from sfa.util.record import *
 
 from sfa.plc.slices import *
@@ -10,6 +10,7 @@ from sfa.util.sfalogging import *
 from sfa.util.record import SfaRecord
 from lxml import etree
 from StringIO import StringIO
+from time import mktime
 
 def GetVersion():
     version = {}
@@ -54,22 +55,36 @@ def ListResources(api, creds, options):
 
 
 def CreateSliver(api, slice_xrn, creds, rspec):
-    reg_objects = {}
     hrn, type = urn_to_hrn(slice_xrn)
     
     hrn_auth = get_authority(hrn)
     
-    #site = SfaRecord(hrn=hrn_auth, type='authority')
+    # Build up objects that an SFA registry would return if SFA
+    # could contact the slice's registry directly
+    reg_objects = {}
+
     site = {}
     site['site_id'] = 0
-    site['name'] = 'geni.%s' % slice_xrn
+    site['name'] = 'geni.%s' % hrn_auth
     site['enabled'] = True
     site['max_slices'] = 100
+    
+    # Note:
+    # Is it okay if this login base is the same as one already at this myplc site?  
+    # Do we need uniqueness?  Should use hrn_auth instead of just the leaf perhaps?
     site['login_base'] = get_leaf(hrn_auth)
     site['abbreviated_name'] = hrn
-    site['max_slivers'] = 1000
-    
+    site['max_slivers'] = 1000    
     reg_objects['site'] = site
+    
+    slice = {}
+    slice['expires'] = int(mktime(Credential(string=creds[0]).get_lifetime().timetuple()))
+    slice['hrn'] = hrn
+    slice['name'] = site['login_base'] + "_" +  get_leaf(hrn)
+    slice['url'] = hrn
+    slice['description'] = hrn
+    slice['pointer'] = 0
+    reg_objects['slice_record'] = slice
     
     manager_base = 'sfa.managers'
     mgr_type = 'pl'
