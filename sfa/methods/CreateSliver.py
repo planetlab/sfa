@@ -23,7 +23,8 @@ class CreateSliver(Method):
     accepts = [
         Parameter(str, "Slice URN"),
         Parameter(type([str]), "List of credentials"),
-        Parameter(str, "RSpec")
+        Parameter(str, "RSpec"),
+        Parameter(type([]), "List of user information")
         ]
     returns = Parameter(str, "Allocated RSpec")
 
@@ -38,7 +39,7 @@ class CreateSliver(Method):
         return newrspec
 
 
-    def call(self, slice_xrn, creds, rspec):
+    def call(self, slice_xrn, creds, rspec, users):
         hrn, type = urn_to_hrn(slice_xrn)
 
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
@@ -56,6 +57,6 @@ class CreateSliver(Method):
             rspec = self.__run_sfatables(manager, SFATablesRules('INCOMING'),
                                          hrn, origin_hrn, rspec)
 
-            return manager.CreateSliver(self.api, slice_xrn, ValidCreds, rspec)            
+            return manager.CreateSliver(self.api, slice_xrn, ValidCreds, rspec, users)            
         return ''
     

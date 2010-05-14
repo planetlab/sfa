@@ -8,7 +8,6 @@ from sfa.util.record import *
 from sfa.plc.slices import *
 from sfa.util.sfalogging import *
 from sfa.util.record import SfaRecord
-from lxml import etree
 from StringIO import StringIO
 from time import mktime
 
@@ -54,7 +53,7 @@ def ListResources(api, creds, options):
     return rspec
 
 
-def CreateSliver(api, slice_xrn, creds, rspec):
+def CreateSliver(api, slice_xrn, creds, rspec, users):
     hrn, type = urn_to_hrn(slice_xrn)
     
     hrn_auth = get_authority(hrn)
@@ -85,6 +84,22 @@ def CreateSliver(api, slice_xrn, creds, rspec):
     slice['description'] = hrn
     slice['pointer'] = 0
     reg_objects['slice_record'] = slice
+    
+    
+    # Note:
+    # Left off here, need to properly fill out the slice record and 
+    # stuff the user information in to get through slices.verify_persons
+    # Need to hear back from Tony Mack to find out how accurate the user
+    # information needs to be.
+    for user in users:
+        slice['researcher'].append(user.getdefault('name', 'geni_default_user'))
+        
+        
+    keys = []
+    for user in users:
+        keys += user['keys']
+        
+    reg_objects['keys'] = keys
     
     manager_base = 'sfa.managers'
     mgr_type = 'pl'

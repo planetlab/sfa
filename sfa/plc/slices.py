@@ -257,18 +257,21 @@ class Slices:
 	    self.sync_slice(slice, slice_record, peer)
 
         slice['peer_slice_id'] = slice_record['pointer']
-        self.verify_persons(registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer)
+        self.verify_persons(registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer, reg_objects)
     
         return slice        
 
-    def verify_persons(self, registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer):
+    def verify_persons(self, registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer, reg_objects=None):
         # get the list of valid slice users from the registry and make 
         # sure they are added to the slice 
         slicename = hrn_to_pl_slicename(slice_record['hrn'])
         researchers = slice_record.get('researcher', [])
         for researcher in researchers:
             person_record = {}
-            person_records = registry.resolve(credential, researcher)
+            if reg_objects:
+                person_records = reg_objects['users']['researcher']
+            else:
+                person_records = registry.resolve(credential, researcher)
             for record in person_records:
                 if record['type'] in ['user'] and record['enabled']:
                     person_record = record
