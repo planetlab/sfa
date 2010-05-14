@@ -23,6 +23,12 @@ bins = [
     'sfa/client/getRecord.py',
     'sfa/client/setRecord.py',
     'sfa/client/sfadump.py',
+    'sfa/client/sfiListNodes.py',
+    'sfa/client/sfiListSlivers.py',
+    'sfa/client/sfiAddSliver.py',
+    'sfa/client/sfiDeleteSliver.py',
+    'sfa/client/sfiAddAttribute.py',
+    'sfa/client/sfiDeleteAttribute.py',
     'sfatables/sfatables',
     ]
 
