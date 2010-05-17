@@ -265,28 +265,31 @@ class Slices:
         # get the list of valid slice users from the registry and make 
         # sure they are added to the slice 
         slicename = hrn_to_pl_slicename(slice_record['hrn'])
-        researchers = slice_record.get('researcher', [])
+        if reg_objects:
+            researchers = reg_objects['users'].keys()
+        else:
+            researchers = slice_record.get('researcher', [])
         for researcher in researchers:
-            person_record = {}
             if reg_objects:
-                person_records = reg_objects['users']['researcher']
+                person_dict = reg_objects['users'][researcher]
             else:
                 person_records = registry.resolve(credential, researcher)
-            for record in person_records:
-                if record['type'] in ['user'] and record['enabled']:
-                    person_record = record
-            if not person_record:
-                return 1
-            person_dict = person_record
+                for record in person_records:
+                    if record['type'] in ['user'] and record['enabled']:
+                        person_record = record
+                if not person_record:
+                    return 1
+                person_dict = person_record
+
             local_person=False
             if peer:
                 peer_id = self.api.plshell.GetPeers(self.api.plauth, {'shortname': peer}, ['peer_id'])[0]['peer_id']
                 persons = self.api.plshell.GetPersons(self.api.plauth, {'email': [person_dict['email']], 'peer_id': peer_id}, ['person_id', 'key_ids'])
-		if not persons:
-		    persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
-		    if persons:
-                       local_person=True
-
+                if not persons:
+                    persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
+                    if persons:
+                        local_person=True
+                        
             else:
                 persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])   
         

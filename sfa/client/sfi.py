@@ -955,7 +955,7 @@ class Sfi:
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
         server = self.geni_am
-        return server.CreateSliver(slice_xrn, [slice_cred], rspec)
+        return server.CreateSliver(slice_xrn, [slice_cred], rspec, [])
     
     def DeleteSliver(self, opts, args):
         slice_xrn = args[0]
