@@ -44,5 +44,4 @@ class get_aggregates(Method):
         else:
             interfaces = [interface for interface in aggregates.interfaces if interface in hrn_list]
 
-
         return interfaces
