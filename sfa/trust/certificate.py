@@ -563,14 +563,8 @@ class Certificate:
             #print "TRUSTED CERT", trusted_cert.dump()
             #print "Client is signed by Trusted?", self.is_signed_by_cert(trusted_cert)
             if self.is_signed_by_cert(trusted_cert):
-                # make sure sure the trusted cert's hrn is a prefix of the
-                # signed cert's hrn
-                trusted_hrn, _ = urn_to_hrn(trusted_cert.get_subject())
-                cur_hrn, _ = urn_to_hrn(self.get_subject())
-                if not cur_hrn.startswith(trusted_hrn):
-                    raise GidParentHrn(trusted_cert.get_subject() + " " + self.get_subject()) 
                 #print self.get_subject(), "is signed by a root"
-                return
+                return trusted_cert
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
