@@ -115,11 +115,11 @@ class GID(Certificate):
         else:
             urn = hrn_to_urn(self.hrn, None)
             
-        szURN = "URI:" + urn
-        szUUID = "URI:" + uuid.UUID(int=self.uuid).urn
+        str = "URI:" + urn
+	
+	if self.uuid:
+	    str += ", " + "URI:" + uuid.UUID(int=self.uuid).urn
         
-        
-        str = szURN + ", " + szUUID
         self.set_data(str, 'subjectAltName')
 
         
