@@ -202,7 +202,7 @@ class Slices:
             
 	    old_site = sites[0]
 	    #the site is already on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
-        self.sync_site(old_site, site, peer)
+            self.sync_site(old_site, site, peer)
 
 
         return (site_id, remote_site_id) 
