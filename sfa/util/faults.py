@@ -106,7 +106,7 @@ class NonexistingCredType(SfaFault):
         return repr(self.value)
 
 class NonexistingFile(SfaFault):
-    def __init__(self, value):
+    def __init__(self, value, extra = None):
         self.value = value
         faultString = "Non existing file: %(value)s, " % locals()
         SfaFault.__init__(self, 111, faultString, extra)
@@ -114,7 +114,7 @@ class NonexistingFile(SfaFault):
         return repr(self.value)
 
 class InvalidRPCParams(SfaFault):
-    def __init__(self, value):
+    def __init__(self, value, extra = None):
         self.value = value
         faultString = "Invalid RPC Params: %(value)s, " % locals()
         SfaFault.__init__(self, 102, faultString, extra)
@@ -244,7 +244,7 @@ class SliverDoesNotExist(SfaFault):
         return repr(self.value)
 
 class BadRequestHash(xmlrpclib.Fault):
-   def __init__(self, hash = None):
+    def __init__(self, hash = None, extra = None):
         faultString = "bad request hash: " + str(hash)
         xmlrpclib.Fault.__init__(self, 902, faultString)
 
