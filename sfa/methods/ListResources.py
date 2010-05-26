@@ -30,7 +30,7 @@ class ListResources(Method):
             xrn = options['geni_slice_urn']
             hrn, _ = urn_to_hrn(xrn)        
             
-        ValidCreds = self.api.auth.checkCredentials(creds, 'listresources', hrn)
+        ValidCreds = self.api.auth.checkCredentials(creds, '', hrn)
         origin_hrn = Credential(string=ValidCreds[0]).get_gid_caller().get_hrn()
             
                     

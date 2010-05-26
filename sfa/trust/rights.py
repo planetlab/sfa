@@ -15,19 +15,22 @@
 ##
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
+# Note that "*" is a privilege granted by ProtoGENI slice authorities, and we
+# give it access to the GENI AM calls
 
-privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "listresources", "getcredential", "*"],
+privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "getcredential", "*"],
                    "refresh": ["remove", "update"],
-                   "resolve": ["resolve", "list", "listresources", "getcredential", "getversion"],
+                   "resolve": ["resolve", "list", "getcredential"],
                    "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "deleteslice", "deletesliver", "updateslice",
                           "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "renewsliver",
                           "deleteslice", "deletesliver", "resetslice", "listslices", "listnodes", "getpolicy", "sliverstatus"],
                    "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "renewsliver", "deleteslice", "deletesliver", "updateslice", "sliverstatus", "getsliceresources", "shutdown"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
                    "control": ["updateslice", "createslice", "createsliver", "renewsliver", "sliverstatus", "stopslice", "startslice", "deleteslice", "deletesliver", "resetslice", "getsliceresources", "getgids"],
-                   "info": ["listslices", "listnodes", "getpolicy","listresources"],
+                   "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
-                   "operator": ["gettrustedcerts", "getgids"]}
+                   "operator": ["gettrustedcerts", "getgids"],                   
+                   "*": ["createsliver", "deletesliver", "sliverstatus", "renewsliver", "shutdown"]} 
 
 
 
