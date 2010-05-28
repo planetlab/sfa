@@ -93,8 +93,12 @@ def CreateSliver(api, slice_xrn, creds, rspec, users):
         reg_objects['users'] = {}
         for user in users:
             user['key_ids'] = []
-            user['first_name'] = user['email']
-            user['last_name'] = user['email']
+            if user['email']:
+                user['email'] = user['email'] + "@geni.net"
+            else:
+                user['email'] = user['urn'] + "@geni.net"
+            user['first_name'] = user['urn']
+            user['last_name'] = user['urn']
             reg_objects['users'][user['email']] = user     
             
                
