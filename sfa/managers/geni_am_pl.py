@@ -95,8 +95,8 @@ def CreateSliver(api, slice_xrn, creds, rspec, users):
             user['key_ids'] = []
             hrn, _ = urn_to_hrn(user['urn'])
             user['email'] = hrn + "@geni.net"
-            user['first_name'] = user['urn']
-            user['last_name'] = user['urn']
+            user['first_name'] = hrn
+            user['last_name'] = hrn
             reg_objects['users'][user['email']] = user     
             
                
