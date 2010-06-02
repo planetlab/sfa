@@ -60,6 +60,12 @@ class AuthInfo:
         self.gid_filename = fn
         self.gid_object = None
 
+    def get_privkey_filename(self):
+        return self.privkey_filename
+
+    def get_gid_filename(self):
+        return self.gid_filename
+
     ##
     # Get the GID in the form of a GID object
 
@@ -159,8 +165,9 @@ class Hierarchy:
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
-        if (parent_hrn) and (not self.auth_exists(parent_hrn)) and (create_parents):
-            self.create_auth(parent_hrn, create_parents)
+        parent_urn = hrn_to_urn(parent_hrn, 'authority')
+        if (parent_hrn) and (not self.auth_exists(parent_urn)) and (create_parents):
+            self.create_auth(parent_urn, create_parents)
 
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \
             self.get_auth_filenames(hrn)
@@ -296,18 +303,20 @@ class Hierarchy:
         cred.set_gid_caller(gid)
         cred.set_gid_object(gid)
         cred.set_privileges(kind)
-        cred.set_delegate(True)
-        cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
+        cred.get_privileges().delegate_all_privileges(True)
+        #cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
 
         parent_hrn = get_authority(hrn)
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
-            cred.set_issuer(auth_info.get_pkey_object(), hrn)
+            cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            cred.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
+            cred.set_issuer_keys(parent_auth_info.get_privkey_filename(), parent_auth_info.get_gid_filename())
+
+            
             cred.set_parent(self.get_auth_cred(parent_hrn, kind))
 
         cred.encode()

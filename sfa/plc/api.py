@@ -76,6 +76,7 @@ class SfaAPI(BaseAPI):
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
 
+
         self.plshell_type = 'xmlrpc' 
         # connect via xmlrpc
         url = self.config.SFA_PLC_URL
@@ -135,8 +136,8 @@ class SfaAPI(BaseAPI):
         new_cred = Credential(subject = object_gid.get_subject())
         new_cred.set_gid_caller(object_gid)
         new_cred.set_gid_object(object_gid)
-        new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
-        new_cred.set_pubkey(object_gid.get_pubkey())
+        new_cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
+        
         r1 = determine_rights(type, hrn)
         new_cred.set_privileges(r1)
 

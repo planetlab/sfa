@@ -28,7 +28,7 @@ class SfaTable(list):
 
         if record_filter:
             records = self.find(record_filter)
-            for record in reocrds:
+            for record in records:
                 self.append(record)             
 
     def exists(self):

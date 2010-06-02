@@ -8,9 +8,10 @@
 
 import xmlrpclib
 import uuid
-
 from sfa.trust.certificate import Certificate
 from sfa.util.namespace import *
+from sfa.util.sfalogging import logger
+
 ##
 # Create a new uuid. Returns the UUID as a string.
 
@@ -18,8 +19,8 @@ def create_uuid():
     return str(uuid.uuid4().int)
 
 ##
-# GID is a tuplie:
-#    (uuid, hrn, public_key)
+# GID is a tuple:
+#    (uuid, urn, public_key)
 #
 # UUID is a unique identifier and is created by the python uuid module
 #    (or the utility function create_uuid() in gid.py).
@@ -58,16 +59,22 @@ class GID(Certificate):
     def __init__(self, create=False, subject=None, string=None, filename=None, uuid=None, hrn=None, urn=None):
         
         Certificate.__init__(self, create, subject, string, filename)
+        if subject:
+            logger.info("subject: %s" % subject)
         if uuid:
-            self.uuid = uuid
+            self.uuid = int(uuid)
         if hrn:
             self.hrn = hrn
+            self.urn = hrn_to_urn(hrn, 'unknown')
         if urn:
             self.urn = urn
             self.hrn, type = urn_to_hrn(urn)
 
     def set_uuid(self, uuid):
-        self.uuid = uuid
+        if isinstance(uuid, str):
+            self.uuid = int(uuid)
+        else:
+            self.uuid = uuid
 
     def get_uuid(self):
         if not self.uuid:
@@ -91,6 +98,12 @@ class GID(Certificate):
             self.decode()
         return self.urn            
 
+    def get_type(self):
+        if not self.urn:
+            self.decode()
+        _, t = urn_to_hrn(self.urn)
+        return t
+    
     ##
     # Encode the GID fields and package them into the subject-alt-name field
     # of the X509 certificate. This must be called prior to signing the
@@ -101,11 +114,16 @@ class GID(Certificate):
             urn = self.urn
         else:
             urn = hrn_to_urn(self.hrn, None)
- 
-        dict = {"uuid": self.uuid,
-                "urn": self.urn}
-        str = xmlrpclib.dumps((dict,))
-        self.set_data(str)
+            
+        str = "URI:" + urn
+
+        if self.uuid:
+            str += ", " + "URI:" + uuid.UUID(int=self.uuid).urn
+        
+        self.set_data(str, 'subjectAltName')
+
+        
+
 
     ##
     # Decode the subject-alt-name field of the X509 certificate into the
@@ -113,12 +131,19 @@ class GID(Certificate):
     # functions in this class.
 
     def decode(self):
-        data = self.get_data()
+        data = self.get_data('subjectAltName')
+        dict = {}
         if data:
-            dict = xmlrpclib.loads(self.get_data())[0][0]
-        else:
-            dict = {}
-
+            if data.lower().startswith('uri:http://<params>'):
+                dict = xmlrpclib.loads(data[11:])[0][0]
+            else:
+                spl = data.split(', ')
+                for val in spl:
+                    if val.lower().startswith('uri:urn:uuid:'):
+                        dict['uuid'] = uuid.UUID(val[4:]).int
+                    elif val.lower().startswith('uri:urn:publicid:idn+'):
+                        dict['urn'] = val[4:]
+                    
         self.uuid = dict.get("uuid", None)
         self.urn = dict.get("urn", None)
         self.hrn = dict.get("hrn", None)    
@@ -152,12 +177,19 @@ class GID(Certificate):
 
     def verify_chain(self, trusted_certs = None):
         # do the normal certificate verification stuff
-        Certificate.verify_chain(self, trusted_certs)
-
+        trusted_root = Certificate.verify_chain(self, trusted_certs)        
+       
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not self.get_hrn().startswith(self.parent.get_hrn()):
                 raise GidParentHrn(self.parent.get_subject())
+        else:
+            # make sure that the trusted root's hrn is a prefix of the child's
+            trusted_gid = GID(string=trusted_root.save_to_string())
+            trusted_hrn = trusted_gid.get_hrn()
+            cur_hrn = self.get_hrn()
+            if not self.get_hrn().startswith(trusted_hrn):
+                raise GidParentHrn(trusted_hrn + " " + self.get_hrn())
 
         return
 

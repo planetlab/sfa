@@ -168,50 +168,62 @@ class Slices:
 
         return sfa_peer 
 
-    def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer):
+    def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer, reg_objects=None):
         authority = get_authority(slice_hrn)
         authority_urn = hrn_to_urn(authority, 'authority')
-        site_records = registry.resolve(credential, authority_urn)
+        
+        if reg_objects:
+            site = reg_objects['site']
+        else:
+            site_records = registry.resolve(credential, authority_urn)
+            site = {}            
+            for site_record in site_records:            
+                if site_record['type'] == 'authority':
+                    site = site_record
+            if not site:
+                raise RecordNotFound(authority)
             
-        site = {}
-        for site_record in site_records:
-            if site_record['type'] == 'authority':
-                site = site_record
-        if not site:
-            raise RecordNotFound(authority)
         remote_site_id = site.pop('site_id')    
                 
         login_base = get_leaf(authority)
         sites = self.api.plshell.GetSites(self.api.plauth, login_base)
+
         if not sites:
             site_id = self.api.plshell.AddSite(self.api.plauth, site)
             if peer:
                 self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)   
             # mark this site as an sfa peer record
-            if sfa_peer:
+            if sfa_peer and not reg_objects:
                 peer_dict = {'type': 'authority', 'hrn': authority, 'peer_authority': sfa_peer, 'pointer': site_id}
                 registry.register_peer_object(credential, peer_dict)
         else:
             site_id = sites[0]['site_id']
             remote_site_id = sites[0]['peer_site_id']
+            
 	    old_site = sites[0]
-	    #the site is alredy on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
-	    self.sync_site(old_site, site, peer)
+	    #the site is already on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
+            self.sync_site(old_site, site, peer)
 
 
         return (site_id, remote_site_id) 
 
-    def verify_slice(self, registry, credential, slice_hrn, site_id, remote_site_id, peer, sfa_peer):
+    def verify_slice(self, registry, credential, slice_hrn, site_id, remote_site_id, peer, sfa_peer, reg_objects=None):
         slice = {}
         slice_record = None
         authority = get_authority(slice_hrn)
-        slice_records = registry.resolve(credential, slice_hrn)
 
-        for record in slice_records:
-            if record['type'] in ['slice']:
-                slice_record = record
-        if not slice_record:
-            raise RecordNotFound(hrn)
+        if reg_objects:
+            slice_record = reg_objects['slice_record']
+        else:
+            slice_records = registry.resolve(credential, slice_hrn)
+    
+            for record in slice_records:
+                if record['type'] in ['slice']:
+                    slice_record = record
+            if not slice_record:
+                raise RecordNotFound(hrn)
+            
+        
         slicename = hrn_to_pl_slicename(slice_hrn)
         parts = slicename.split("_")
         login_base = parts[0]
@@ -245,33 +257,39 @@ class Slices:
 	    self.sync_slice(slice, slice_record, peer)
 
         slice['peer_slice_id'] = slice_record['pointer']
-        self.verify_persons(registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer)
+        self.verify_persons(registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer, reg_objects)
     
         return slice        
 
-    def verify_persons(self, registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer):
+    def verify_persons(self, registry, credential, slice_record, site_id, remote_site_id, peer, sfa_peer, reg_objects=None):
         # get the list of valid slice users from the registry and make 
         # sure they are added to the slice 
         slicename = hrn_to_pl_slicename(slice_record['hrn'])
-        researchers = slice_record.get('researcher', [])
+        if reg_objects:
+            researchers = reg_objects['users'].keys()
+        else:
+            researchers = slice_record.get('researcher', [])
         for researcher in researchers:
-            person_record = {}
-            person_records = registry.resolve(credential, researcher)
-            for record in person_records:
-                if record['type'] in ['user'] and record['enabled']:
-                    person_record = record
-            if not person_record:
-                return 1
-            person_dict = person_record
+            if reg_objects:
+                person_dict = reg_objects['users'][researcher]
+            else:
+                person_records = registry.resolve(credential, researcher)
+                for record in person_records:
+                    if record['type'] in ['user'] and record['enabled']:
+                        person_record = record
+                if not person_record:
+                    return 1
+                person_dict = person_record
+
             local_person=False
             if peer:
                 peer_id = self.api.plshell.GetPeers(self.api.plauth, {'shortname': peer}, ['peer_id'])[0]['peer_id']
                 persons = self.api.plshell.GetPersons(self.api.plauth, {'email': [person_dict['email']], 'peer_id': peer_id}, ['person_id', 'key_ids'])
-		if not persons:
-		    persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
-		    if persons:
-                       local_person=True
-
+                if not persons:
+                    persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])
+                    if persons:
+                        local_person=True
+                        
             else:
                 persons = self.api.plshell.GetPersons(self.api.plauth, [person_dict['email']], ['person_id', 'key_ids'])   
         

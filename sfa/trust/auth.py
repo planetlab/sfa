@@ -5,17 +5,17 @@
 ### $URL$
 #
 
-import time
 
 from sfa.trust.credential import Credential
 from sfa.trust.trustedroot import TrustedRootList
-from sfa.trust.rights import RightList
 from sfa.util.faults import *
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
 from sfa.util.namespace import *
-from sfa.trust.gid import GID
 from sfa.util.sfaticket import *
+from sfa.util.sfalogging import logger
+
+import sys
 
 class Auth:
     """
@@ -31,6 +31,25 @@ class Auth:
 
     def load_trusted_certs(self):
         self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
+        self.trusted_cert_file_list = TrustedRootList(self.config.get_trustedroots_dir()).get_file_list()
+
+        
+        
+    def checkCredentials(self, creds, operation, hrn = None):
+        valid = []
+        for cred in creds:
+            try:
+                self.check(cred, operation, hrn)
+                valid.append(cred)
+            except:
+                error = sys.exc_info()[:2]
+                continue
+            
+        if not len(valid):
+            raise InsufficientRights('Access denied: %s -- %s' % (error[0],error[1]))
+        
+        return valid
+        
         
     def check(self, cred, operation, hrn = None):
         """
@@ -58,14 +77,10 @@ class Auth:
                 raise InsufficientRights(operation)
 
         if self.trusted_cert_list:
-            self.client_cred.verify_chain(self.trusted_cert_list)
-            if self.client_gid:
-                self.client_gid.verify_chain(self.trusted_cert_list)
-            if self.object_gid:
-                self.object_gid.verify_chain(self.trusted_cert_list)
+            self.client_cred.verify(self.trusted_cert_file_list)
         else:
            raise MissingTrustedRoots(self.config.get_trustedroots_dir())
-
+       
         # Make sure the credential's target matches the specified hrn. 
         # This check does not apply to trusted peers 
         trusted_peers = [gid.get_hrn() for gid in self.trusted_cert_list]
@@ -107,13 +122,7 @@ class Auth:
 
     def validateCred(self, cred):
         if self.trusted_cert_list:
-            cred.verify_chain(self.trusted_cert_list)
-            caller_gid = cred.get_gid_caller()
-            object_gid = cred.get_gid_object()
-            if caller_gid:
-                caller_gid.verify_chain(self.trusted_cert_list)
-            if object_gid:
-                object_gid.verify_chain(self.trusted_cert_list)
+            cred.verify(self.trusted_cert_file_list)
 
     def authenticateGid(self, gidStr, argList, requestHash=None):
         gid = GID(string = gidStr)
@@ -229,6 +238,7 @@ class Auth:
         rl = RightList()
         type = record['type']
 
+
         if type=="slice":
             researchers = record.get("researcher", [])
             pis = record.get("PI", [])
@@ -243,11 +253,15 @@ class Auth:
             pis = record.get("PI", [])
             operators = record.get("operator", [])
             if (caller_hrn == self.config.SFA_INTERFACE_HRN):
-                rl.add("authority,sa,ma",)
+                rl.add("authority")
+                rl.add("sa")
+                rl.add("ma")
             if (caller_hrn in pis):
-                rl.add("authority,sa")
+                rl.add("authority")
+                rl.add("sa")
             if (caller_hrn in operators):
-                rl.add("authority,ma")
+                rl.add("authority")
+                rl.add("ma")
 
         elif type == "user":
             rl.add("refresh")

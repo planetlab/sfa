@@ -34,3 +34,13 @@ class TrustedRootList:
 
         return gid_list
 
+    def get_file_list(self):
+        gid_file_list = []
+        
+        file_list = os.listdir(self.basedir)
+        for gid_file in file_list:
+            fn = os.path.join(self.basedir, gid_file)
+            if os.path.isfile(fn):
+                gid_file_list.append(fn)
+
+        return gid_file_list

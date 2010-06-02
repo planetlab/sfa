@@ -13,7 +13,7 @@ import traceback
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
 
- 
+
 # GeniLight client support is optional
 try:
     from egeni.geniLight_client import *
@@ -100,6 +100,8 @@ class Interfaces(dict):
             return peer_gids
         trusted_certs_dir = self.api.config.get_trustedroots_dir()
         for new_hrn in new_hrns:
+            if not new_hrn:
+                continue
             # the gid for this interface should already be installed  
             if new_hrn == self.api.config.SFA_INTERFACE_HRN:
                 continue
@@ -184,9 +186,10 @@ class Interfaces(dict):
             # make sure the required fields are present and not null
             if not all([interface.get(key) for key in required_fields]):
                 continue
- 
+            
             hrn, address, port = interface['hrn'], interface['addr'], interface['port']
             url = 'http://%(address)s:%(port)s' % locals()
+            
             # check which client we should use
             # sfa.util.xmlrpcprotocol is default
             client_type = 'xmlrpcprotocol'

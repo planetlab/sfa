@@ -95,7 +95,8 @@ class ExistingRecord(SfaFault):
         SfaFault.__init__(self, 111, faultString, extra)
     def __str__(self):
         return repr(self.value)
-        
+
+    
 class NonexistingCredType(SfaFault):
     def __init__(self, value, extra = None):
         self.value = value
@@ -105,7 +106,7 @@ class NonexistingCredType(SfaFault):
         return repr(self.value)
 
 class NonexistingFile(SfaFault):
-    def __init__(self, value):
+    def __init__(self, value, extra = None):
         self.value = value
         faultString = "Non existing file: %(value)s, " % locals()
         SfaFault.__init__(self, 111, faultString, extra)
@@ -113,7 +114,7 @@ class NonexistingFile(SfaFault):
         return repr(self.value)
 
 class InvalidRPCParams(SfaFault):
-    def __init__(self, value):
+    def __init__(self, value, extra = None):
         self.value = value
         faultString = "Invalid RPC Params: %(value)s, " % locals()
         SfaFault.__init__(self, 102, faultString, extra)
@@ -217,7 +218,15 @@ class CertNotSignedByParent(SfaFault):
         SfaFault.__init__(self, 103, faultString, extra)
     def __str__(self):
         return repr(self.value)
-
+    
+class GidParentHrn(SfaFault):
+    def __init__(self, value, extra = None):
+        self.value = value
+        faultString = "Cert URN is not an extension of its parent: %(value)s" % locals()
+        SfaFault.__init__(self, 103, faultString, extra)
+    def __str__(self):
+        return repr(self.value)
+        
 class GidInvalidParentHrn(SfaFault):
     def __init__(self, value, extra = None):
         self.value = value
@@ -235,7 +244,7 @@ class SliverDoesNotExist(SfaFault):
         return repr(self.value)
 
 class BadRequestHash(xmlrpclib.Fault):
-   def __init__(self, hash = None):
+    def __init__(self, hash = None, extra = None):
         faultString = "bad request hash: " + str(hash)
         xmlrpclib.Fault.__init__(self, 902, faultString)
 
@@ -270,3 +279,10 @@ class AccountNotEnabled(SfaFault):
     def __str__(self):
         return repr(self.value)
 
+class CredentialNotVerifiable(SfaFault):
+    def __init__(self, value, extra = None):
+        self.value = value
+        faultString = "Unable to verify credential: %(value)s, " %locals()
+        SfaFault.__init__(self, 115, faultString, extra)
+    def __str__(self):
+        return repr(self.value)

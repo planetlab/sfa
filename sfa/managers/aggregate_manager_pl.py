@@ -45,7 +45,7 @@ def __get_hostnames(nodes):
         hostnames.append(node.hostname)
     return hostnames
     
-def create_slice(api, xrn, xml):
+def create_slice(api, xrn, xml, reg_objects=None):
     """
     Verify HRN and initialize the slice record in PLC if necessary.
     """
@@ -58,9 +58,10 @@ def create_slice(api, xrn, xml):
     registry = api.registries[api.hrn]
     credential = api.getCredential()
     site_id, remote_site_id = slices.verify_site(registry, credential, hrn, 
-                                                 peer, sfa_peer)
+                                                 peer, sfa_peer, reg_objects)
+
     slice = slices.verify_slice(registry, credential, hrn, site_id, 
-                                remote_site_id, peer, sfa_peer)
+                                remote_site_id, peer, sfa_peer, reg_objects)
 
     network = Network(api)
 
@@ -68,7 +69,6 @@ def create_slice(api, xrn, xml):
     current = __get_hostnames(slice.get_nodes())
     
     network.addRSpec(xml, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
-    
     request = __get_hostnames(network.nodesWithSlivers())
     
     # remove nodes not in rspec
@@ -76,6 +76,8 @@ def create_slice(api, xrn, xml):
 
     # add nodes from rspec
     added_nodes = list(set(request).difference(current))
+    
+
 
     if peer:
         api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
@@ -146,7 +148,7 @@ def start_slice(api, xrn):
         raise RecordNotFound(hrn)
     slice_id = slices[0]
     attributes = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
-    attribute_id = attreibutes[0]['slice_attribute_id']
+    attribute_id = attributes[0]['slice_attribute_id']
     api.plshell.UpdateSliceTag(api.plauth, attribute_id, "1" )
 
     return 1

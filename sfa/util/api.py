@@ -142,6 +142,7 @@ class BaseAPI:
         Return a new instance of the specified method.
         """
         # Look up method
+        print self.methods
         if method not in self.methods:
             raise SfaInvalidAPIMethod, method
         
@@ -164,7 +165,8 @@ class BaseAPI:
         self.source = source
         return function(*args)
 
-    def handle(self, source, data):
+    
+    def handle(self, source, data, method_map):
         """
         Handle an XML-RPC or SOAP request from the specified source.
         """
@@ -172,7 +174,10 @@ class BaseAPI:
         try:
             interface = xmlrpclib
             (args, method) = xmlrpclib.loads(data)
+            if method_map.has_key(method):
+                method = method_map[method]
             methodresponse = True
+            
         except Exception, e:
             if SOAPpy is not None:
                 interface = SOAPpy

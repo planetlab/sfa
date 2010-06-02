@@ -82,8 +82,9 @@ def main():
     AuthHierarchy = sfaImporter.AuthHierarchy
     TrustedRoots = sfaImporter.TrustedRoots
     table = SfaTable()
+
     if not table.exists():
-        table.create()
+       table.create()
 
     # create root authority 
     sfaImporter.create_top_level_auth_records(root_auth)
@@ -148,10 +149,11 @@ def main():
     slices_dict = {}
     for slice in slices:
         slices_dict[slice['slice_id']] = slice
-
     # start importing 
     for site in sites:
         site_hrn = interface_hrn + "." + site['login_base']
+        print "Importing site: %s" % site_hrn
+
         # import if hrn is not in list of existing hrns or if the hrn exists
         # but its not a site record
         if site_hrn not in existing_hrns or \

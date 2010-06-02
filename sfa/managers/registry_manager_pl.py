@@ -10,12 +10,15 @@ from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.faults import *
 
+    
+
 def get_credential(api, xrn, type, is_self=False):
     # convert xrn to hrn     
     if type:
         hrn = urn_to_hrn(xrn)[0]
     else:
         hrn, type = urn_to_hrn(xrn)
+        
     # Is this a root or sub authority
     auth_hrn = api.auth.get_authority(hrn)
     if not auth_hrn or hrn == api.config.SFA_INTERFACE_HRN:
@@ -54,16 +57,41 @@ def get_credential(api, xrn, type, is_self=False):
     new_cred = Credential(subject = object_gid.get_subject())
     new_cred.set_gid_caller(caller_gid)
     new_cred.set_gid_object(object_gid)
-    new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn)
-    new_cred.set_pubkey(object_gid.get_pubkey())
+    new_cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
+    #new_cred.set_pubkey(object_gid.get_pubkey())
     new_cred.set_privileges(rights)
-    new_cred.set_delegate(True)
+    new_cred.get_privileges().delegate_all_privileges(True)
     auth_kind = "authority,ma,sa"
-    new_cred.set_parent(api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
+    # Parent not necessary, verify with certs
+    #new_cred.set_parent(api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
     new_cred.encode()
     new_cred.sign()
 
     return new_cred.save_to_string(save_parents=True)
+
+
+# The GENI GetVersion call
+def GetVersion():
+    version = {}
+    version['geni_api'] = 1
+    return version
+
+
+
+# The GENI resolve call
+def Resolve(api, xrn, creds):
+    records = resolve(api, xrn)
+    
+    if len(records) == 0:
+        return {}
+    
+    record = records[0]
+    if record.type == 'slice':
+        return {'geni_urn': xrn, 'geni_creator': " ".join(record.PI)}
+    if record.type == 'user':
+        return {'geni_urn': xrn, 'geni_certificate': record.gid}
+    
+    
 
 def resolve(api, xrns, type=None, origin_hrn=None, full=True):
 
@@ -156,7 +184,7 @@ def list(api, xrn, origin_hrn=None):
 def register(api, record):
 
     hrn, type = record['hrn'], record['type']
-
+    urn = hrn_to_urn(hrn,type)
     # validate the type
     if type not in ['authority', 'slice', 'node', 'user']:
         raise UnknownSfaType(type) 
@@ -185,7 +213,7 @@ def register(api, record):
                 pub_key = record['key']
             pkey = convert_public_key(pub_key)
 
-        gid_object = api.auth.hierarchy.create_gid(hrn, uuid, pkey)
+        gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey)
         gid = gid_object.save_to_string(save_parents=True)
         record['gid'] = gid
         record.set_gid(gid)
@@ -193,7 +221,7 @@ def register(api, record):
     if type in ["authority"]:
         # update the tree
         if not api.auth.hierarchy.auth_exists(hrn):
-            api.auth.hierarchy.create_auth(hrn)
+            api.auth.hierarchy.create_auth(hrn_to_urn(hrn,'authority'))
 
         # get the GID from the newly created authority
         gid = auth_info.get_gid_object()
@@ -266,6 +294,7 @@ def update(api, record_dict):
     new_record = SfaRecord(dict = record_dict)
     type = new_record['type']
     hrn = new_record['hrn']
+    urn = hrn_to_urn(hrn,type)
     api.auth.verify_object_permission(hrn)
     table = SfaTable()
     # make sure the record exists
@@ -330,7 +359,7 @@ def update(api, record_dict):
             # update the openssl key and gid
             pkey = convert_public_key(new_key)
             uuid = create_uuid()
-            gid_object = api.auth.hierarchy.create_gid(hrn, uuid, pkey)
+            gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey)
             gid = gid_object.save_to_string(save_parents=True)
             record['gid'] = gid
             record = SfaRecord(dict=record)

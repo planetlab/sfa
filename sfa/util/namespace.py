@@ -9,7 +9,11 @@ def get_leaf(hrn):
     parts = hrn.split(".")
     return ".".join(parts[-1:])
 
-def get_authority(hrn):
+def get_authority(xrn):
+    hrn, type = urn_to_hrn(xrn)
+    if type and type == 'authority':
+        return hrn
+    
     parts = hrn.split(".")
     return ".".join(parts[:-1])
 
@@ -85,7 +89,14 @@ def hrn_to_urn(hrn, type=None):
 
     authority = get_authority(hrn)
     name = get_leaf(hrn)
-    urn = "+".join([unicode(part).replace('.', ':') \
-                    for part in ['',authority,type,name]])
+    
+    if authority.startswith("plc"):
+        if type == None:
+            urn = "+".join(['',authority.replace('.',':'),name])
+        else:
+            urn = "+".join(['',authority.replace('.',':'),type,name])
 
+    else:
+        urn = "+".join(['',authority,type,name])
+        
     return URN_PREFIX + urn

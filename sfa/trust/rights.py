@@ -10,22 +10,28 @@
 # allows "listslices", "listcomponentresources", etc.
 ##
 
+
+
 ##
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
+# Note that "*" is a privilege granted by ProtoGENI slice authorities, and we
+# give it access to the GENI AM calls
 
 privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "getcredential", "*"],
                    "refresh": ["remove", "update"],
                    "resolve": ["resolve", "list", "getcredential"],
-                   "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", 
-                          "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", 
-                          "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy"],
-                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice", "getsliceresources"],
+                   "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "deleteslice", "deletesliver", "updateslice",
+                          "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "renewsliver",
+                          "deleteslice", "deletesliver", "resetslice", "listslices", "listnodes", "getpolicy", "sliverstatus"],
+                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "renewsliver", "deleteslice", "deletesliver", "updateslice", "sliverstatus", "getsliceresources", "shutdown"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
-                   "control": ["updateslice", "createslice", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids"],
+                   "control": ["updateslice", "createslice", "createsliver", "renewsliver", "sliverstatus", "stopslice", "startslice", "deleteslice", "deletesliver", "resetslice", "getsliceresources", "getgids"],
                    "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
-                   "operator": ["gettrustedcerts", "getgids"]}
+                   "operator": ["gettrustedcerts", "getgids"],                   
+                   "*": ["createsliver", "deletesliver", "sliverstatus", "renewsliver", "shutdown"]} 
+
 
 
 ##
@@ -50,11 +56,15 @@ def determine_rights(type, name):
         rl.add("resolve")
         rl.add("info")
     elif type == "sa":
-        rl.add("authority,sa")
+        rl.add("authority")
+        rl.add("sa")
     elif type == "ma":
-        rl.add("authority,ma")
+        rl.add("authority")
+        rl.add("ma")
     elif type == "authority":
-        rl.add("authority,sa,ma")
+        rl.add("authority")
+        rl.add("sa")
+        rl.add("ma")
     elif type == "slice":
         rl.add("refresh")
         rl.add("embed")
@@ -72,50 +82,54 @@ def determine_rights(type, name):
 
 
 class Right:
-   ##
-   # Create a new right.
-   #
-   # @param kind is a string naming the right. For example "control"
+    ##
+    # Create a new right.
+    #
+    # @param kind is a string naming the right. For example "control"
 
-   def __init__(self, kind):
-      self.kind = kind
+    def __init__(self, kind, delegate=False):
+        self.kind = kind
+        self.delegate = delegate
 
-   ##
-   # Test to see if this right object is allowed to perform an operation.
-   # Returns True if the operation is allowed, False otherwise.
-   #
-   # @param op_name is a string naming the operation. For example "listslices".
+    ##
+    # Test to see if this right object is allowed to perform an operation.
+    # Returns True if the operation is allowed, False otherwise.
+    #
+    # @param op_name is a string naming the operation. For example "listslices".
 
-   def can_perform(self, op_name):
-      allowed_ops = privilege_table.get(self.kind.lower(), None)
-      if not allowed_ops:
-         return False
+    def can_perform(self, op_name):
+        allowed_ops = privilege_table.get(self.kind.lower(), None)
+        if not allowed_ops:
+            return False
 
-      # if "*" is specified, then all ops are permitted
-      if "*" in allowed_ops:
-         return True
+        # if "*" is specified, then all ops are permitted
+        if "*" in allowed_ops:
+            return True
 
-      return (op_name.lower() in allowed_ops)
+        return (op_name.lower() in allowed_ops)
 
-   ##
-   # Test to see if this right is a superset of a child right. A right is a
-   # superset if every operating that is allowed by the child is also allowed
-   # by this object.
-   #
-   # @param child is a Right object describing the child right
+    ##
+    # Test to see if this right is a superset of a child right. A right is a
+    # superset if every operating that is allowed by the child is also allowed
+    # by this object.
+    #
+    # @param child is a Right object describing the child right
 
-   def is_superset(self, child):
-      my_allowed_ops = privilege_table.get(self.kind.lower(), None)
-      child_allowed_ops = privilege_table.get(child.kind.lower(), None)
+    def is_superset(self, child):
+        my_allowed_ops = privilege_table.get(self.kind.lower(), None)
+        child_allowed_ops = privilege_table.get(child.kind.lower(), None)
 
-      if "*" in my_allowed_ops:
-          return True
+        if not self.delegate:
+            return False
 
-      for right in child_allowed_ops:
-          if not right in my_allowed_ops:
-              return False
+        if "*" in my_allowed_ops:
+            return True
 
-      return True
+        for right in child_allowed_ops:
+            if not right in my_allowed_ops:
+                return False
+
+        return True
 
 ##
 # A RightList object represents a list of privileges.
@@ -139,9 +153,9 @@ class RightList:
     #
     # @param right is either a Right object or a string describing the right
 
-    def add(self, right):
+    def add(self, right, delegate=False):
         if isinstance(right, str):
-            right = Right(kind = right)
+            right = Right(right, delegate)
         self.rights.append(right)
 
     ##
@@ -156,7 +170,14 @@ class RightList:
 
         parts = string.split(",")
         for part in parts:
-            self.rights.append(Right(part))
+            if ':' in part:
+                spl = part.split(':')
+                kind = spl[0].strip()
+                delegate = bool(int(spl[1]))
+            else:
+                kind = part.strip()
+                delegate = 0
+            self.rights.append(Right(kind, bool(delegate)))
 
     ##
     # Save the rightlist object to a string. It is saved in the format of a
@@ -165,7 +186,7 @@ class RightList:
     def save_to_string(self):
         right_names = []
         for right in self.rights:
-            right_names.append(right.kind)
+            right_names.append('%s:%d' % (right.kind.strip(), right.delegate))
 
         return ",".join(right_names)
 
@@ -202,7 +223,29 @@ class RightList:
 
 
     ##
-    # Determine tje rights that an object should have. The rights are entirely
+    # set the delegate bit to 'delegate' on
+    # all privileges
+    #
+    # @param delegate boolean (True or False)
+
+    def delegate_all_privileges(self, delegate):
+        for right in self.rights:
+            right.delegate = delegate
+
+    ##
+    # true if all privileges have delegate bit set true
+    # false otherwise
+
+    def get_all_delegate(self):
+        for right in self.rights:
+            if not right.delegate:
+                return False
+        return True
+
+
+
+    ##
+    # Determine the rights that an object should have. The rights are entirely
     # dependent on the type of the object. For example, users automatically
     # get "refresh", "resolve", and "info".
     #
@@ -224,11 +267,15 @@ class RightList:
             rl.add("resolve")
             rl.add("info")
         elif type == "sa":
-            rl.add("authority,sa")
+            rl.add("authority")
+            rl.add("sa")
         elif type == "ma":
-            rl.add("authority,ma")
+            rl.add("authority")
+            rl.add("ma")
         elif type == "authority":
-            rl.add("authority,sa,ma")
+            rl.add("authority")
+            rl.add("sa")
+            rl.add("ma")
         elif type == "slice":
             rl.add("refresh")
             rl.add("embed")
