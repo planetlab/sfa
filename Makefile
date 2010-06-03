@@ -7,9 +7,11 @@ DESTDIR="/"
 ##########
 all: keyconvert python wsdl
 
-install: keyconvert-install python-install wsdl-install xmlbuilder-install
+install: keyconvert-install python-install wsdl-install xmlbuilder-install 
 
 clean: keyconvert-clean python-clean wsdl-clean
+
+uninstall: python-uninstall
 
 .PHONY: all install clean 
 
@@ -30,9 +32,9 @@ python:
 
 xmlbuilder-install:
 	cd xmlbuilder-0.9 && python setup.py install --root=$(DESTDIR) && cd -
-
+ 
 python-install:
-	python setup.py install --root=$(DESTDIR)
+	python setup.py install --root=$(DESTDIR)	
 	chmod 444 $(DESTDIR)/etc/sfa/default_config.xml
 
 python-clean:

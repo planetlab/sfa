@@ -16,14 +16,14 @@ class TestGid(unittest.TestCase):
 
    def testSetGetUuid(self):
       gid = GID(subject="test")
-      u = create_uuid()
+      u = uuid.uuid4().int
 
       gid.set_uuid(u)
       self.assertEqual(gid.get_uuid(), u)
 
    def testEncodeDecode(self):
       gid = GID(subject="test")
-      u = str(uuid.uuid4().int)
+      u = uuid.uuid4().int
       hrn = "test.hrn"
 
       gid.set_uuid(u)
@@ -38,7 +38,7 @@ class TestGid(unittest.TestCase):
    def testSaveAndLoadString(self):
       gid = GID(subject="test")
 
-      u = str(uuid.uuid4().int)
+      u = uuid.uuid4().int
       hrn = "test.hrn"
 
       gid.set_uuid(u)

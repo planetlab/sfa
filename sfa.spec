@@ -155,14 +155,17 @@ chkconfig --add sfa
 %post cm
 chkconfig --add sfa-cm
 %changelog
-* Thu Apr 08 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
+* Thu May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
 - SfaServer now uses a pool of threads to handle requests concurrently
 - sfa.util.rspec no longer used to process/manage rspecs (deprecated). This is now handled by sfa.plc.network and is not backwards compatible
 - PIs can now get a slice credential for any slice at their site without having to be a member of the slice
 - Registry records for federated peers (defined in registries.xml, aggregates.xml) updated when sfa service is started
 - Interfaces will try to fetch and install gids from peers listed in registries.xml/aggregates.xml if gid is not found in /etc/sfa/trusted_roots dir   
 - Component manager does not install gid files if slice already has them  
- 
+- Server automatically fetches and installs peer certificats (defined in registries/aggregates.xml) when service is restarted.
+- fix credential verification exploit (verify that the trusted signer is a parent of the object it it signed)
+- made it easier for root authorities to sign their sub's certifiacate using the sfa-ca.py (sfa/server/sfa-ca.py) tool
+     
 * Thu Jan 21 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-10
 - This tag is quite same as the previous one (sfa-0.9-9) except that the vini and max aggregate managers are also updated for urn support.  Other features are:
 - - sfa-config-tty now has the same features like plc-config-tty

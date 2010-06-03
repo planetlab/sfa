@@ -121,6 +121,42 @@ $URL$
       </variablelist>
 
     </category>
+    <!-- ======================================== -->
+    <category id="sfa_geni_aggregate">
+      <name>GENI Aggregate</name>
+      <description>The settings that affect the geni aggregate manager that will run
+      as part of this SFA instance.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enable GENI Aggregate</name>
+	  <value>true</value>
+	  <description>Allows this local SFA instance to run as an
+	  GENI aggregate manager.</description>
+	</variable>
+
+	<variable id="type" type="string">
+	  <name>GENI Aggregate type</name>
+	  <value>pl</value>
+	  <description>The type of backend server for this
+	  aggregate. Some aggregates may not be myplc.</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost</value>
+	  <description>The hostname where the aggregate is expected to
+	  be found.</description>
+	</variable>
+
+	<variable id="port" type="int">
+	  <name>Port number</name>
+	  <value>12348</value>
+	  <description>The port where the aggregate is to be found.</description>
+	</variable>
+      </variablelist>
+
+    </category>
 
     <!-- ======================================== -->
     <category id="sfa_sm">

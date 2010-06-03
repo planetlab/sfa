@@ -1,40 +1,48 @@
-- test rpms: build/install
+- Tag
+* test rpm build/install
+
+- Trunk
+* use PLC shell instead of xmlrpc when communicating with local plc aggregate
+
+- Client
+  * update getNodes to use lxml.etree for parsing the rspec
 
 - Stop invalid users
 * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
 
 - Component manager
+  * GetGids - make this work for peer slices
   * GetTicket - must verify_{site,slice,person,keys} on remote aggregate 
   * Redeem ticket - RedeemTicket/AdminTicket not working. Why?
   * install the slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
 
-- Protogeni
-* agree on standard set of functon calls
-* agree on standard set of privs
-* on permission error, return priv needed to make call
-* cache slice resource states (if aggregate goes down, how do we know what
-  slices were on it and recreate them? do we make some sort of transaction log)   
-
 - Registry
-* sign peer gids 
-* update call should attempt to push updates to federated peers if 
-  the peer has a record for an object that is updated locally  
-* api.update_membership() shoudl behave more like resolve when looking up records (attempt to resolve records at federated registeries) instead of only looking in the local registry
 * move db tables into db with less overhead (tokyocabinet?)
-* make resolve, fill_record_info more fault tolerent. Skip records with failures
 
-- Auth Service
+- GUI/Auth Service
   * develop a simple service where users auth using username/passord and 
     receive their cred
   * service manages users key/cert,creds
-  
-- GUI
-  * requires user's cred (depends on Auth Service above)
+  * gui requires user's cred (depends on Auth Service above)
       
 -  SM call routing
 * sfi -a option should send request to sm with an extra argument to 
   specify which am to contact instead of connecting directly to the am 
   (am may not trust client directly)
+
+- Protogeni
+* merger josh's branch with trunk
+* agree on standard set of functon calls
+* agree on standard set of privs
+* on permission error, return priv needed to make call
+* cache slice resource states (if aggregate goes down, how do we know what
+  slices were on it and recreate them? do we make some sort of transaction log)
+
+
+Questions
+=========
+- SM/Aggregate
+* should the rspec contain only the resources a slice is using or all resources availa and mark what the slice is using.
 
 -  Initscripts on sfa / geniwrapper
 * should sfa have native initscript support or should we piggyback off of myplc?
