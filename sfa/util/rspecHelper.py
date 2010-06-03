@@ -80,11 +80,72 @@ class RSpec:
         sliver = node.find("sliver")
         self.remove_attribute(sliver, name, value)
 
-    def add_vlink(self, fromhost, tohost):
-        pass
+    def get_site_nodes(self, siteid):
+        query = './/site[@id="%s"]/node/hostname/text()' % siteid
+        result = self.rspec.xpath(query)
+        return result
+        
+    def get_link_list(self):
+        linklist = []
+        links = self.rspec.iterfind(".//link")
+        for link in links:
+            (end1, end2) = link.get("endpoints").split()
+            name = link.find("description")
+            linklist.append((name.text, 
+                             self.get_site_nodes(end1), 
+                             self.get_site_nodes(end2)))
+        return linklist
 
-    def remove_vlink(self, fromhost, tohost):
-        pass
+    def get_vlink_list(self):
+        vlinklist = []
+        vlinks = self.rspec.iterfind(".//vlink")
+        for vlink in vlinks:
+            endpoints = vlink.get("endpoints")
+            (end1, end2) = endpoints.split()
+            query = './/node[@id="%s"]/hostname/text()'
+            node1 = self.rspec.xpath(query % end1)[0]
+            node2 = self.rspec.xpath(query % end2)[0]
+            desc = "%s <--> %s" % (node1, node2) 
+            kbps = vlink.find("kbps")
+            vlinklist.append((endpoints, desc, kbps.text))
+        return vlinklist
+
+    def query_links(self, fromnode, tonode):
+        fromsite = fromnode.getparent()
+        tosite = tonode.getparent()
+        fromid = fromsite.get("id")
+        toid = tosite.get("id")
+
+        query = ".//link[@endpoints = '%s %s']" % (fromid, toid)
+        results = self.rspec.xpath(query)
+        if results == None:
+            query = ".//link[@endpoints = '%s %s']" % (toid, fromid)
+            results = self.rspec.xpath(query)
+        return results
+
+    def query_vlinks(self, endpoints):
+        query = ".//vlink[@endpoints = '%s']" % endpoints
+        results = self.rspec.xpath(query)
+        return results
+            
+    
+    def add_vlink(self, fromhost, tohost, kbps):
+        fromnode = self.get_node_element(fromhost)
+        tonode = self.get_node_element(tohost)
+        links = self.query_links(fromnode, tonode)
+
+        for link in links:
+            vlink = etree.SubElement(link, "vlink")
+            fromid = fromnode.get("id")
+            toid = tonode.get("id")
+            vlink.set("endpoints", "%s %s" % (fromid, toid))
+            self.add_attribute(vlink, "kbps", kbps)
+        
+
+    def remove_vlink(self, endpoints):
+        vlinks = self.query_vlinks(endpoints)
+        for vlink in vlinks:
+            vlink.getparent().remove(vlink)
 
     def toxml(self):
         return etree.tostring(self.rspec, pretty_print=True, 
