@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 11
+%define taglevel 12
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -155,6 +155,9 @@ chkconfig --add sfa
 %post cm
 chkconfig --add sfa-cm
 %changelog
+* Mon Jun 07 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - sfa-0.9-12
+- fix parameter type
+
 * Thu May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
 - SfaServer now uses a pool of threads to handle requests concurrently
 - sfa.util.rspec no longer used to process/manage rspecs (deprecated). This is now handled by sfa.plc.network and is not backwards compatible
