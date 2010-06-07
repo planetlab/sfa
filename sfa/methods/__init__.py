@@ -26,4 +26,13 @@ start_slice
 stop_slice
 update
 remove_peer_object
+GetVersion
+ListResources
+CreateSliver
+get_geni_aggregates
+DeleteSliver
+SliverStatus
+RenewSliver
+Shutdown
+ResolveGENI
 """.split()
