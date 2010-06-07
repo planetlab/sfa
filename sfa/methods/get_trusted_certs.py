@@ -20,7 +20,7 @@ class get_trusted_certs(Method):
               Parameter(None, "Credential not specified"))
         ]
 
-    returns = Parameter([str], "List of GID strings")
+    returns = Parameter(type([str]), "List of GID strings")
     
     def call(self, cred = None):
         # If cred is not specified just return the gid for this interface.
