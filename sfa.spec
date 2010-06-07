@@ -126,11 +126,13 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/sfa/aggregates.xml
 %config (noreplace) /etc/sfa/registries.xml
 /etc/init.d/sfa
+/etc/sfa/pl.rng
 %{_bindir}/sfa-config-tty
 %{_bindir}/sfa-import-plc.py*
 %{_bindir}/sfa-clean-peer-records.py*
 %{_bindir}/sfa-nuke-plc.py*
 %{_bindir}/gen-sfa-cm-config.py*
+%{_bindir}/sfa-ca.py*
 
 %files client
 %config (noreplace) /etc/sfa/sfi_config
