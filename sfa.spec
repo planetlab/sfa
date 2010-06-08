@@ -35,7 +35,8 @@ Requires: python-ZSI
 # xmlbuilder depends on  lxml
 Requires: python-lxml
 Requires: python-setuptools
-
+Requires: python-dateutil
+ 
 # python 2.5 has uuid module added, for python 2.4 we still need it.
 # we can't really check for if we can load uuid as a python module,
 # it'll be installed by "devel.pkgs". we have the epel repository so
