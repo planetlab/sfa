@@ -16,3 +16,9 @@ SFI_REGISTRY='http://www.planet-lab.org:12345/'
 
 # where to find the slice manager
 SFI_SM='http://www.planet-lab.org:12347/'
+
+# where to find the geni aggregate manager
+# XX this should be handled by the slice manger
+# XX but we cant support it until the geni_am and sfa 
+# XX interfaces has been unified
+SFI_GENI_AM='http://www.planet-lab.org:12348'   
