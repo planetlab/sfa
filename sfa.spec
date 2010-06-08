@@ -30,6 +30,7 @@ Group: Applications/System
 BuildRequires: make
 Requires: python >= 2.5
 Requires: m2crypto
+Requires: xmlsec1-openssl-devel
 Requires: libxslt-python
 Requires: python-ZSI
 # xmlbuilder depends on  lxml
