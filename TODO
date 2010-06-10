@@ -1,5 +1,12 @@
+- Tutorial
+ * make a tutorial for sfa
+ 
 - Tag
 * test rpm build/install
+
+- Geni Aggregate
+ * are we going to deploy a geni aggregate
+ * test
 
 - Trunk
 * use PLC shell instead of xmlrpc when communicating with local plc aggregate
