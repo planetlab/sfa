@@ -465,10 +465,10 @@ class SfaAPI(BaseAPI):
             if (type == "slice"):
                 # all slice users are researchers
                 record['PI'] = []
-                record['researchers'] = []
+                record['researcher'] = []
                 for person_id in record['person_ids']:
                     hrns = [person['hrn'] for person in persons[person_id]]
-                    record['researchers'].extend(hrns)                
+                    record['researcher'].extend(hrns)                
 
                 # pis at the slice's site
                 pl_pis = site_pis[record['site_id']]
