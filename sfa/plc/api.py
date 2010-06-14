@@ -176,7 +176,8 @@ class SfaAPI(BaseAPI):
         new_cred = Credential(subject = object_gid.get_subject())
         new_cred.set_gid_caller(object_gid)
         new_cred.set_gid_object(object_gid)
-        new_cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
+        new_cred.set_issuer(key=auth_info.get_pkey_object(), subject=auth_hrn) 
+        new_cred.set_pubkey(object_gid.get_pubkey()) 
         
         r1 = determine_rights(type, hrn)
         new_cred.set_privileges(r1)
