@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 13
+%define taglevel 14
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -157,6 +157,9 @@ chkconfig --add sfa
 %post cm
 chkconfig --add sfa-cm
 %changelog
+* Wed Jun 16 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - sfa-0.9-14
+- aff sfi* commands to client package
+
 * Mon Jun 07 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - sfa-0.9-13
 - fix spec
 
