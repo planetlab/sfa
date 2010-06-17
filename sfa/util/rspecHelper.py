@@ -56,6 +56,10 @@ class RSpec:
 
     def add_default_sliver_attribute(self, name, value):
         defaults = self.rspec.find(".//sliver_defaults")
+        if defaults is None:
+            defaults = etree.Element("sliver_defaults")
+            network = self.rspec.find(".//network")
+            network.insert(0, defaults)
         self.add_attribute(defaults, name, value)
 
     def add_sliver_attribute(self, hostname, name, value):
