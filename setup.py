@@ -51,6 +51,7 @@ package_dirs = [
 
 data_files = [('/etc/sfa/', [ 'config/aggregates.xml',
                               'config/registries.xml',
+                              'config/geni_aggregates.xml',
                               'config/default_config.xml',
                               'config/sfi_config',
                               'sfa/managers/pl/pl.rng']),
