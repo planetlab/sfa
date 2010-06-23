@@ -328,6 +328,8 @@ def main():
                               help="Generate am.wsdl")
     parser.add_option("-c", "--component", action="store_true", dest="component",
                               help="Generate cm.wsdl")
+    parser.add_option("-g", "--geni-aggregate", action="store_true", dest="geni_am",
+                      help="Generate gm.wsdl")
     parser.add_option("-l", "--lite", action="store_true", dest="lite",
                               help="Generate LITE version of the interface, in which calls exclude credentials")
     (interface_options, args) = parser.parse_args()
