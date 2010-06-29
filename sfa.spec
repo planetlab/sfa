@@ -114,7 +114,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sfa-server.py*
 /etc/sfatables/*
 %{python_sitelib}/*
-%{_bindir}/keyconvert.py
+%{_bindir}/keyconvert.py*
 /var/www/html/wsdl/*.wsdl
 
 %files cm
