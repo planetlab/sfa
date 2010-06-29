@@ -5,27 +5,15 @@
 DESTDIR="/"
 
 ##########
-all: keyconvert python wsdl
+all: python wsdl
 
-install: keyconvert-install python-install wsdl-install xmlbuilder-install 
+install: python-install wsdl-install xmlbuilder-install 
 
-clean: keyconvert-clean python-clean wsdl-clean
+clean: python-clean wsdl-clean
 
 uninstall: python-uninstall
 
 .PHONY: all install clean 
-
-##########
-keyconvert:
-	$(MAKE) -C keyconvert
-
-keyconvert-install:
-	$(MAKE) -C keyconvert install
-
-keyconvert-clean:
-	$(MAKE) -C keyconvert clean
-
-.PHONY: keyconvert keyconvert-install keyconvert-clean 
 
 ##########
 python: 

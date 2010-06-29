@@ -30,6 +30,7 @@ bins = [
     'sfa/client/sfiAddAttribute.py',
     'sfa/client/sfiDeleteAttribute.py',
     'sfatables/sfatables',
+    'keyconvert/keyconvert.py'
     ]
 
 package_dirs = [
