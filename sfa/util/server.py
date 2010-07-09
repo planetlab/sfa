@@ -107,25 +107,24 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             remote_addr = (remote_ip, remote_port) = self.connection.getpeername()
             self.api.remote_addr = remote_addr            
             response = self.api.handle(remote_addr, request, self.server.method_map)
-
-        
         except Exception, fault:
             # This should only happen if the module is buggy
             # internal error, report as HTTP server error
-            self.send_response(500)
-            self.end_headers()
+            response = self.api.prepare_response(fault)
+            #self.send_response(500)
+            #self.end_headers()
             traceback.print_exc()
-        else:
-            # got a valid XML RPC response
-            self.send_response(200)
-            self.send_header("Content-type", "text/xml")
-            self.send_header("Content-length", str(len(response)))
-            self.end_headers()
-            self.wfile.write(response)
+       
+        # got a valid response
+        self.send_response(200)
+        self.send_header("Content-type", "text/xml")
+        self.send_header("Content-length", str(len(response)))
+        self.end_headers()
+        self.wfile.write(response)
 
-            # shut down the connection
-            self.wfile.flush()
-            self.connection.shutdown() # Modified here!
+        # shut down the connection
+        self.wfile.flush()
+        self.connection.shutdown() # Modified here!
 
 ##
 # Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
@@ -270,7 +269,6 @@ class SfaServer(threading.Thread):
 
     def noop(self, cred, anything):
         self.decode_authentication(cred)
-
         return anything
 
     ##
