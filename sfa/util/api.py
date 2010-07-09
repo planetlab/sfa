@@ -98,7 +98,8 @@ def import_deep(name):
 class BaseAPI:
 
     cache = None
- 
+    protocol = None
+  
     def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", 
                  methods='sfa.methods', peer_cert = None, interface = None, 
                  key_file = None, cert_file = None, cache = cache):
@@ -142,7 +143,6 @@ class BaseAPI:
         Return a new instance of the specified method.
         """
         # Look up method
-        print self.methods
         if method not in self.methods:
             raise SfaInvalidAPIMethod, method
         
@@ -173,6 +173,7 @@ class BaseAPI:
         # Parse request into method name and arguments
         try:
             interface = xmlrpclib
+            self.protocol = 'xmlrpclib'
             (args, method) = xmlrpclib.loads(data)
             if method_map.has_key(method):
                 method = method_map[method]
@@ -180,6 +181,7 @@ class BaseAPI:
             
         except Exception, e:
             if SOAPpy is not None:
+                self.protocol = 'soap'
                 interface = SOAPpy
                 (r, header, body, attrs) = parseSOAPRPC(data, header = 1, body = 1, attrs = 1)
                 method = r._name
@@ -192,24 +194,32 @@ class BaseAPI:
             result = self.call(source, method, *args)
         except Exception, fault:
             traceback.print_exc(file = log)
-            # Handle expected faults
-            if interface == xmlrpclib:
-                result = fault
-                methodresponse = None
-            elif interface == SOAPpy:
-                result = faultParameter(NS.ENV_T + ":Server", "Method Failed", method)
-                result._setDetail("Fault %d: %s" % (fault.faultCode, fault.faultString))
-            else:
-                raise
+            result = fault
 
         # Return result
-        if interface == xmlrpclib:
-            if not isinstance(result, SfaFault):
+        response = self.prepare_response(result, method)
+        return response
+
+
+    
+    def prepare_response(self, result, method=""):
+        """
+        convert result to a valid xmlrpc or soap response
+        """   
+ 
+        if self.protocol == 'xmlrpclib':
+            #if not isinstance(result, SfaFault):
+            if not isinstance(result, Exception):
                 result = (result,)
-
-            data = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
-        elif interface == SOAPpy:
-            data = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
-
-        return data
-
+            response = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
+        elif self.protocol == 'soap':
+            if isinstance(result, Exception):
+                result = faultParameter(NS.ENV_T + ":Server", "Method Failed", method)
+                result._setDetail("Fault %d: %s" % (result.faultCode, result.faultString))
+            else:
+                response = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
+        else:
+            if isinstance(result, Exception):
+                raise result 
+            
+        return response
