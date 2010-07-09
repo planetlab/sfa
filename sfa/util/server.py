@@ -110,10 +110,10 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         except Exception, fault:
             # This should only happen if the module is buggy
             # internal error, report as HTTP server error
+            traceback.print_exc()
             response = self.api.prepare_response(fault)
             #self.send_response(500)
             #self.end_headers()
-            traceback.print_exc()
        
         # got a valid response
         self.send_response(200)
