@@ -58,10 +58,7 @@ except:
         def __repr__(self):
             return 'defaultdict(%s, %s)' % (self.default_factory,
                                             dict.__repr__(self))
-
-
 ## end of http://code.activestate.com/recipes/523034/ }}}
-
 
 def list_to_dict(recs, key):
     """
@@ -85,7 +82,6 @@ class SfaAPI(BaseAPI):
                          cert_file=cert_file, cache=cache)
  
         self.encoding = encoding
-
         from sfa.util.table import SfaTable
         self.SfaTable = SfaTable
         # Better just be documenting the API
@@ -115,12 +111,16 @@ class SfaAPI(BaseAPI):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
-
-
-        self.plshell_type = 'xmlrpc' 
-        # connect via xmlrpc
-        url = self.config.SFA_PLC_URL
-        shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
+        try:
+            sys.path.append(os.path.dirname(os.path.realpath("/usr/bin/plcsh")))
+            self.plshell_type = 'direct'
+            import PLC.Shell
+            shell = PLC.Shell.Shell(globals = globals())
+        except:
+            self.plshell_type = 'xmlrpc' 
+            url = self.config.SFA_PLC_URL
+            shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
+        
         return shell
 
     def getCredential(self):
