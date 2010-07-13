@@ -27,7 +27,6 @@
 
 ### $Id$
 ### $URL$
-
 import xmlrpclib
 import uuid
 from sfa.trust.certificate import Certificate
@@ -82,7 +81,7 @@ class GID(Certificate):
         
         Certificate.__init__(self, create, subject, string, filename)
         if subject:
-            logger.info("subject: %s" % subject)
+            logger.debug("Creating GID for subject: %s" % subject)
         if uuid:
             self.uuid = int(uuid)
         if hrn:
@@ -204,22 +203,17 @@ class GID(Certificate):
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not self.get_hrn().startswith(self.parent.get_hrn()):
-                raise GidParentHrn(self.parent.get_subject())
+                #print self.get_hrn(), " ", self.parent.get_hrn()
+                raise GidParentHrn("This cert %s HRN doesnt start with parent HRN %s" % (self.get_hrn(), self.parent.get_hrn()))
         else:
             # make sure that the trusted root's hrn is a prefix of the child's
             trusted_gid = GID(string=trusted_root.save_to_string())
             trusted_type = trusted_gid.get_type()
             trusted_hrn = trusted_gid.get_hrn()
-            if trusted_type == 'authority':
-                # Could add a check for type == 'authority'
-                trusted_hrn = trusted_hrn[:trusted_hrn.rindex('.')]
+            #if trusted_type == 'authority':
+            #    trusted_hrn = trusted_hrn[:trusted_hrn.rindex('.')]
             cur_hrn = self.get_hrn()
             if not self.get_hrn().startswith(trusted_hrn):
-                raise GidParentHrn(trusted_hrn + " " + self.get_hrn())
+                raise GidParentHrn("Trusted roots HRN %s isnt start of this cert %s" % (trusted_hrn, cur_hrn))
 
         return
-
-
-
-
-

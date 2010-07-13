@@ -199,8 +199,6 @@ class BaseAPI:
         # Return result
         response = self.prepare_response(result, method)
         return response
-
-
     
     def prepare_response(self, result, method=""):
         """
@@ -208,7 +206,6 @@ class BaseAPI:
         """   
  
         if self.protocol == 'xmlrpclib':
-            #if not isinstance(result, SfaFault):
             if not isinstance(result, Exception):
                 result = (result,)
             response = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
