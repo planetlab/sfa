@@ -87,8 +87,8 @@ class Interfaces(dict):
         hrns_current = [gid.get_hrn() for gid in gids_current] 
         hrns_expected = self.interfaces.keys() 
         new_hrns = set(hrns_expected).difference(hrns_current)
-        gids = self.get_peer_gids(new_hrns)
-        # update the local db records for these registries
+        gids = self.get_peer_gids(new_hrns) + gids_current
+        # make sure there is a record for every gid
         self.update_db_records(self.type, gids)
         
     def get_peer_gids(self, new_hrns):
