@@ -18,6 +18,7 @@ from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.sfaticket import *
+from sfa.util.threadmanager import ThreadManager
 from sfa.util.debug import log
 import sfa.plc.peers as peers
 
@@ -217,36 +218,35 @@ def get_rspec(api, xrn=None, origin_hrn=None):
     hrn, type = urn_to_hrn(xrn)
     rspec = None
     aggs = api.aggregates
-    cred = api.getCredential()                                                 
+    cred = api.getCredential()
+    threads = ThreadManager()
     for agg in aggs:
         if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
-            try:
                 # get the rspec from the aggregate
-                agg_rspec = aggs[agg].get_resources(cred, xrn, origin_hrn)
-            except:
-                # XX print out to some error log
-                print >> log, "Error getting resources at aggregate %s" % agg
-                traceback.print_exc(log)
-                print >> log, "%s" % (traceback.format_exc())
-                continue
-                
-            try:
-                tree = etree.parse(StringIO(agg_rspec))
-            except etree.XMLSyntaxError:
-                message = agg + ": " + str(sys.exc_info()[1])
-                raise InvalidRSpec(message)
+                #agg_rspec = aggs[agg].get_resources(cred, xrn, origin_hrn)
+                threads.run(aggs[agg].get_resources, cred, xrn, origin_hrn)
 
-            root = tree.getroot()
-            if root.get("type") in ["SFA"]:
-                if rspec == None:
-                    rspec = root
-                else:
-                    for network in root.iterfind("./network"):
-                        rspec.append(deepcopy(network))
-                    for request in root.iterfind("./request"):
-                        rspec.append(deepcopy(request))
+    results = threads.get_results()
+    # combine the rspecs into a single rspec 
+    for agg_rspec in results:
+        try:
+            tree = etree.parse(StringIO(agg_rspec))
+        except etree.XMLSyntaxError:
+            message = agg + ": " + str(sys.exc_info()[1])
+            raise InvalidRSpec(message)
+
+        root = tree.getroot()
+        if root.get("type") in ["SFA"]:
+            if rspec == None:
+                rspec = root
+            else:
+                for network in root.iterfind("./network"):
+                    rspec.append(deepcopy(network))
+                for request in root.iterfind("./request"):
+                    rspec.append(deepcopy(request))
 
     rspec =  etree.tostring(rspec, xml_declaration=True, pretty_print=True)
+    # cache the result
     if api.cache and not xrn:
         api.cache.add('nodes', rspec)
  
