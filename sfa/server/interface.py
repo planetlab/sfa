@@ -145,11 +145,9 @@ class Interfaces(dict):
         """
         if not gids: 
             return
-        # get hrns we expect to find
-        # ignore records for local interfaces
-        ignore_interfaces = [self.api.config.SFA_INTERFACE_HRN]
-        hrns_expected = [gid.get_hrn() for gid in gids \
-                         if gid.get_hrn() not in ignore_interfaces]
+        
+        # hrns that should have a record
+        hrns_expected = [gid.get_hrn() for gid in gids]
 
         # get hrns that actually exist in the db
         table = SfaTable()
@@ -158,7 +156,8 @@ class Interfaces(dict):
       
         # remove old records
         for record in records:
-            if record['hrn'] not in hrns_expected:
+            if record['hrn'] not in hrns_expected and \
+                record['hrn'] != self.api.config.SFA_INTERFACE_HRN:
                 table.remove(record)
 
         # add new records
