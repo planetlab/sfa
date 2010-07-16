@@ -153,9 +153,9 @@ class Interfaces(dict):
 
         # get hrns that actually exist in the db
         table = SfaTable()
-        records = table.find({'type': type})
+        records = table.find({'type': type, 'pointer': -1})
         hrns_found = [record['hrn'] for record in records]
-       
+      
         # remove old records
         for record in records:
             if record['hrn'] not in hrns_expected:
