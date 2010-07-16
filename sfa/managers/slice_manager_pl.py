@@ -223,7 +223,6 @@ def get_rspec(api, xrn=None, origin_hrn=None):
     for agg in aggs:
         if agg not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
                 # get the rspec from the aggregate
-                #agg_rspec = aggs[agg].get_resources(cred, xrn, origin_hrn)
                 threads.run(aggs[agg].get_resources, cred, xrn, origin_hrn)
 
     results = threads.get_results()
