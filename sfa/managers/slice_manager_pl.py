@@ -177,7 +177,7 @@ def get_slices(api):
     # fetch from aggregates
     slices = []
     credential = api.getCredential()
-    threads = Threadmanager()
+    threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
         threads.run(server.get_slices, credential)
