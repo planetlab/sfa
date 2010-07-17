@@ -193,8 +193,9 @@ class BaseAPI:
         try:
             result = self.call(source, method, *args)
         except Exception, fault:
-            traceback.print_exc(file = log)
-            result = fault
+            #traceback.print_exc(file = log)
+            result = SfaAPIError(fault)
+
 
         # Return result
         response = self.prepare_response(result, method)
@@ -206,7 +207,7 @@ class BaseAPI:
         """   
  
         if self.protocol == 'xmlrpclib':
-            if not isinstance(result, Exception):
+            if not isinstance(result, SfaFault):
                 result = (result,)
             response = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
         elif self.protocol == 'soap':
