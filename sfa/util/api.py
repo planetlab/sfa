@@ -192,6 +192,8 @@ class BaseAPI:
 
         try:
             result = self.call(source, method, *args)
+        except SfaFault, fault:
+            result = fault 
         except Exception, fault:
             #traceback.print_exc(file = log)
             result = SfaAPIError(fault)
