@@ -1,15 +1,11 @@
 - Build/Tags
 * test rpm build/install
 
-- Geni Aggregate
- * test
-
 - Stop invalid users
 * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
 
 - Component manager
   * GetGids - make this work for peer slices
-  * GetTicket - must verify_{site,slice,person,keys} on remote aggregate 
   * Redeem ticket - RedeemTicket/AdminTicket not working. Why?
   * install the slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
 
@@ -23,11 +19,6 @@
   * service manages users key/cert,creds
   * gui requires user's cred (depends on Auth Service above)
       
--  SM 
-* sfi -a option should send request to sm with an extra argument to 
-  specify which am to contact instead of connecting directly to the am 
-  (am may not trust client directly)
-
 - Protogeni
 * agree on standard set of functon calls
 * agree on standard set of privs
