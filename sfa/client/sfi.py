@@ -9,6 +9,7 @@ import tempfile
 import traceback
 import socket
 import random
+import datetime
 from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
@@ -380,12 +381,25 @@ class Sfi:
                 print "Writing user gid to", file
             gid.save_to_file(file, save_parents=True)
             return gid       
+
+    def get_cached_credential(self, file):
+        """
+        Return a cached credential only if it hasn't expired.
+        """
+        if (os.path.isfile(file)):
+            credential = Credential(filename=file)
+            # make sure it isnt expired 
+            if not credential.get_lifetime or \
+               datetime.datetime.today() < credential.get_lifefime():
+                return credential
+        return None 
  
     def get_user_cred(self):
         #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cred")
         file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cred")
-        if (os.path.isfile(file)):
-            user_cred = Credential(filename=file)
+
+        user_cred = self.get_cached_credential(file)
+        if user_cred:
             return user_cred
         else:
             # bootstrap user credential
@@ -412,8 +426,8 @@ class Sfi:
             sys.exit(-1)
     
         file = os.path.join(self.options.sfi_dir, get_leaf("authority") + ".cred")
-        if (os.path.isfile(file)):
-            auth_cred = Credential(filename=file)
+        auth_cred = self.get_cached_credential(file)
+        if auth_cred:
             return auth_cred
         else:
             # bootstrap authority credential from user credential
@@ -431,8 +445,8 @@ class Sfi:
     
     def get_slice_cred(self, name):
         file = os.path.join(self.options.sfi_dir, "slice_" + get_leaf(name) + ".cred")
-        if (os.path.isfile(file)):
-            slice_cred = Credential(filename=file)
+        slice_cred = self.get_cached_credential(file)
+        if slice_cred:
             return slice_cred
         else:
             # bootstrap slice credential from user credential
