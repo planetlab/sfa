@@ -138,6 +138,30 @@ class BaseAPI:
         self.aggregates = Aggregates(self)
 
 
+    def get_manager(self, manager_base = 'sfa.managers'):
+        """
+        Returns the appropriate manager module for this interface.
+        Modules are usually found in sfa/managers/
+        """
+        
+        if self.interface in ['registry']:
+            mgr_type = self.api.config.SFA_REGISTRY_TYPE
+            manager_module = manager_base + ".registry_manager_%s" % mgr_type
+        elif self.interface in ['aggregate']:
+            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            manager_module = manager_base + ".aggregate_manager_%s" % mgr_type 
+        elif self.interface in ['slicemgr', 'sm']:
+            mgr_type = self.api.config.SFA_SM_TYPE
+            manager_module = manager_base + ".slice_manager_%s" % mgr_type
+        elif self.interface in ['component', 'cm']:
+            mgr_type = self.api.config.SFA_CM_TYPE
+            manager_module = manager_base + ".component_manager_%s" % mgr_type
+        else:
+            raise SfaAPIError("No manager for interface: %s" % self.interface)  
+        manager = __import__(manager_module, fromlist=[manager_base])   
+ 
+        return manager
+
     def callable(self, method):
         """
         Return a new instance of the specified method.
@@ -195,7 +219,7 @@ class BaseAPI:
         except SfaFault, fault:
             result = fault 
         except Exception, fault:
-            #traceback.print_exc(file = log)
+            traceback.print_exc(file = log)
             result = SfaAPIError(fault)
 
 
