@@ -145,16 +145,16 @@ class BaseAPI:
         """
         
         if self.interface in ['registry']:
-            mgr_type = self.api.config.SFA_REGISTRY_TYPE
+            mgr_type = self.config.SFA_REGISTRY_TYPE
             manager_module = manager_base + ".registry_manager_%s" % mgr_type
         elif self.interface in ['aggregate']:
-            mgr_type = self.api.config.SFA_AGGREGATE_TYPE
+            mgr_type = self.config.SFA_AGGREGATE_TYPE
             manager_module = manager_base + ".aggregate_manager_%s" % mgr_type 
         elif self.interface in ['slicemgr', 'sm']:
-            mgr_type = self.api.config.SFA_SM_TYPE
+            mgr_type = self.config.SFA_SM_TYPE
             manager_module = manager_base + ".slice_manager_%s" % mgr_type
         elif self.interface in ['component', 'cm']:
-            mgr_type = self.api.config.SFA_CM_TYPE
+            mgr_type = self.config.SFA_CM_TYPE
             manager_module = manager_base + ".component_manager_%s" % mgr_type
         else:
             raise SfaAPIError("No manager for interface: %s" % self.interface)  
