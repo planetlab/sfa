@@ -10,7 +10,10 @@ from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.faults import *
 
-    
+def get_version(api):
+    version = {}
+    version['geni_api'] = 1
+    return version
 
 def get_credential(api, xrn, type, is_self=False):
     # convert xrn to hrn     
