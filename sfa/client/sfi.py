@@ -50,7 +50,6 @@ def display_list(results):
     for result in results:
         print result
 
-
 def display_records(recordList, dump=False):
     ''' Print all fields in the record'''
     for record in recordList:
