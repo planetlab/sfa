@@ -23,6 +23,11 @@ import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.debug import log
 import sfa.plc.peers as peers
 
+def get_version():
+    version = {}
+    version['geni_api'] = 1
+    return version
+
 def delete_slice(api, xrn, origin_hrn=None):
     credential = api.getCredential()
     threads = ThreadManager()

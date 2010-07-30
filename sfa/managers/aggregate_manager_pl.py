@@ -22,6 +22,11 @@ from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 
+def get_version():
+    version = {}
+    version['geni_api'] = 1
+    return version
+
 def delete_slice(api, xrn):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
