@@ -390,79 +390,53 @@ class Sfi:
             credential = Credential(filename=file)
             # make sure it isnt expired 
             if not credential.get_lifetime or \
-               datetime.datetime.today() < credential.get_lifefime():
+               datetime.datetime.today() < credential.get_lifetime():
                 return credential
         return None 
  
     def get_user_cred(self):
         #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cred")
         file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cred")
+        return self.get_cred(file, 'user', self.user)
 
-        user_cred = self.get_cached_credential(file)
-        if user_cred:
-            return user_cred
-        else:
-            # bootstrap user credential
-            cert_string = self.cert.save_to_string(save_parents=True)
-            user_name = self.user.replace(self.authority + ".", '')
-            if user_name.count(".") > 0:
-                user_name = user_name.replace(".", '_')
-                self.user = self.authority + "." + user_name
-
-            user_cred = self.registry.get_self_credential(cert_string, "user", self.user)
-            if user_cred:
-               cred = Credential(string=user_cred)
-               cred.save_to_file(file, save_parents=True)
-               if self.options.verbose:
-                    print "Writing user credential to", file
-               return cred
-            else:
-               print "Failed to get user credential"
-               sys.exit(-1)
-  
     def get_auth_cred(self):
         if not self.authority:
             print "no authority specified. Use -a or set SF_AUTH"
             sys.exit(-1)
-    
         file = os.path.join(self.options.sfi_dir, get_leaf("authority") + ".cred")
-        auth_cred = self.get_cached_credential(file)
-        if auth_cred:
-            return auth_cred
-        else:
-            # bootstrap authority credential from user credential
-            user_cred = self.get_user_cred().save_to_string(save_parents=True)
-            auth_cred = self.registry.get_credential(user_cred, "authority", self.authority)
-            if auth_cred:
-                cred = Credential(string=auth_cred)
-                cred.save_to_file(file, save_parents=True)
-                if self.options.verbose:
-                    print "Writing authority credential to", file
-                return cred
-            else:
-                print "Failed to get authority credential"
-                sys.exit(-1)
-    
+        return self.get_cred(file, 'authority', name)
+
     def get_slice_cred(self, name):
         file = os.path.join(self.options.sfi_dir, "slice_" + get_leaf(name) + ".cred")
-        slice_cred = self.get_cached_credential(file)
-        if slice_cred:
-            return slice_cred
-        else:
-            # bootstrap slice credential from user credential
-            user_cred = self.get_user_cred().save_to_string(save_parents=True)
-            arg_list = [user_cred, "slice", name]
-            slice_cred_str = self.registry.get_credential(user_cred, "slice", name)
-            if slice_cred_str:
-                slice_cred = Credential(string=slice_cred_str)
-                slice_cred.save_to_file(file, save_parents=True)
-                if self.options.verbose:
-                    print "Writing slice credential to", file
-                return slice_cred
+        return self.get_cred(file, 'slice', name)
+ 
+    def get_cred(self, file, type, hrn):
+        # attempt to load a cached credential 
+        cred = self.get_cached_credential(file)    
+        if not cred:
+            if type in ['user']:
+                cert_string = self.cert.save_to_string(save_parents=True)
+                user_name = self.user.replace(self.authority + ".", '')
+                if user_name.count(".") > 0:
+                    user_name = user_name.replace(".", '_')
+                    self.user = self.authority + "." + user_name
+                cred_str = self.registry.get_self_credential(cert_string, "user", hrn)
             else:
-                print "Failed to get slice credential"
+                # bootstrap slice credential from user credential
+                user_cred = self.get_user_cred().save_to_string(save_parents=True)
+                cred_str = self.registry.get_credential(user_cred, type, hrn)
+            
+            if not cred_str:
+                print "Failed to get %s credential" % (type)
                 sys.exit(-1)
-    
+                
+            cred = Credential(string=cred_str)
+            cred.save_to_file(file, save_parents=True)
+            if self.options.verbose:
+                print "Writing %s credential to %s" %(type, file)
+
+        return cred
+ 
     def delegate_cred(self, cred, hrn, type='authority'):
         # the gid and hrn of the object we are delegating
         user_cred = Credential(string=cred)
@@ -564,7 +538,22 @@ class Sfi:
         """
         url = "http://%s:%s" % (host, port)
         return xmlrpcprotocol.get_server(url, keyfile, certfile, debug)
+
+    def get_server_from_opts(self, opts):
+        """
+        Return instance of an xmlrpc connection to a slice manager, aggregate
+        or component server depending on the specified opts
+        """
+        server = self.slicemgr
+        # direct connection to an aggregate
+        if opts.aggregate:
+            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
+                                     self.cert_file, self.options.debug)
+        # direct connection to the nodes component manager interface
+        if opts.component:
+            server = self.get_component_server_from_hrn(opts.component)    
  
+        return server
     #==========================================================================
     # Following functions implement the commands
     #
@@ -954,6 +943,7 @@ class Sfi:
 
     def GetVersion(self, opts, args):
         server = self.geni_am
+        #server = self.get_server_from_opts(opts)
         print server.GetVersion()
 
     def ListResources(self, opts, args):
