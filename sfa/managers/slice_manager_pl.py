@@ -18,6 +18,7 @@ from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.sfaticket import *
+from sfa.trust.credential import Credential
 from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
 from sfa.util.debug import log
@@ -111,7 +112,6 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
         attrs = agg_ticket.get_attributes()
         if not object_gid:
             object_gid = agg_ticket.get_gid_object()
-        print object_gid
         rspecs.append(agg_ticket.get_rspec())
         initscripts.extend(attrs.get('initscripts', [])) 
         slivers.extend(attrs.get('slivers', [])) 
@@ -183,7 +183,16 @@ def get_slices(api):
 
     return slices
  
-def get_rspec(api, xrn=None, origin_hrn=None):
+def get_rspec(api, creds, options):
+    # get slice's hrn from options
+    xrn = options.get('geni_slice_urn', None)
+    hrn, type = urn_to_hrn(xrn)
+
+    # get hrn of the original caller
+    origin_hrn = options.get('origin_hrn', None)
+    if not origin_hrn:
+        origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
+    
     # look in cache first 
     if api.cache and not xrn:
         rspec =  api.cache.get('nodes')
@@ -192,13 +201,23 @@ def get_rspec(api, xrn=None, origin_hrn=None):
 
     hrn, type = urn_to_hrn(xrn)
     rspec = None
+    # XX
+    # XX TODO: Should try to use delegated credential first 
+    # XX
     cred = api.getCredential()
     threads = ThreadManager()
+    
     for aggregate in api.aggregates:
-        if aggregate not in [api.auth.client_cred.get_gid_caller().get_hrn()]:      
+        if aggregate not in [api.auth.client_cred.get_gid_caller().get_hrn()]:   
             # get the rspec from the aggregate
             server = api.aggregates[aggregate]
+            # XX
+            # XX TODO: switch to ProtoGeni spec in next release. Give other 
+            # XX aggregtes a chacne to upgrade to this release before switching 
+            # XX 
+            # threads.run(server.ListResources, cred, options)
             threads.run(server.get_resources, cred, xrn, origin_hrn)
+                    
 
     results = threads.get_results()
     # combine the rspecs into a single rspec 
@@ -218,7 +237,8 @@ def get_rspec(api, xrn=None, origin_hrn=None):
                     rspec.append(deepcopy(network))
                 for request in root.iterfind("./request"):
                     rspec.append(deepcopy(request))
-
+    
+    print results
     rspec =  etree.tostring(rspec, xml_declaration=True, pretty_print=True)
     # cache the result
     if api.cache and not xrn:

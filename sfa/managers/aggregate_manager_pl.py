@@ -17,6 +17,7 @@ from sfa.util.record import *
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.debug import log
 from sfa.plc.slices import Slices
+from sfa.trust.credential import Credential
 import sfa.plc.peers as peers
 from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
@@ -204,14 +205,22 @@ def get_slices(api):
 
     return slice_urns
     
-def get_rspec(api, xrn=None, origin_hrn=None):
+def get_rspec(api, creds, options):
+    # get slice's hrn from options
+    xrn = options.get('geni_slice_urn', None)
+    hrn, type = urn_to_hrn(xrn)
+
+    # get hrn of the original caller
+    origin_hrn = options.get('origin_hrn', None)
+    if not origin_hrn:
+        origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
+    
     # look in cache first
     if api.cache and not xrn:
         rspec = api.cache.get('nodes')
         if rspec:
             return rspec 
 
-    hrn, type = urn_to_hrn(xrn)
     network = Network(api)
     if (hrn):
         if network.get_slice(api, hrn):
@@ -224,6 +233,7 @@ def get_rspec(api, xrn=None, origin_hrn=None):
         api.cache.add('nodes', rspec)
 
     return rspec
+
 
 """
 Returns the request context required by sfatables. At some point, this
