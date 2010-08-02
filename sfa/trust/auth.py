@@ -37,6 +37,8 @@ class Auth:
         
     def checkCredentials(self, creds, operation, hrn = None):
         valid = []
+        if not isinstance(creds, list):
+            creds = [creds]
         for cred in creds:
             try:
                 self.check(cred, operation, hrn)
