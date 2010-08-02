@@ -169,26 +169,27 @@ class Sfi:
         parser = OptionParser(usage="sfi [sfi_options] %s [options] %s" \
                                      % (command, cmdargs[command]))
 
-        if command in ("resources"):
-            parser.add_option("-f", "--format", dest="format", type="choice",
-                             help="display format ([xml]|dns|ip)", default="xml",
-                             choices=("xml", "dns", "ip"))
-                                
-        if command in ("resources", "slices", "create", "delete", "start", "stop", "get_ticket"):
+        # user specifies remote aggregate/sm/component                          
+        if command in ("resources", "slices", "create", "delete", "start", "stop", "restart", "get_ticket", "redeem_ticket"):
             parser.add_option("-a", "--aggregate", dest="aggregate",
                              default=None, help="aggregate host")
             parser.add_option("-p", "--port", dest="port",
                              default=AGGREGATE_PORT, help="aggregate port")
-
-        if command in ("start", "stop", "reset", "delete", "slices"):
             parser.add_option("-c", "--component", dest="component", default=None,
                              help="component hrn")
-            
+        
+        # registy filter option    
         if command in ("list", "show", "remove"):
             parser.add_option("-t", "--type", dest="type", type="choice",
-                            help="type filter ([all]|user|slice|sa|ma|node|aggregate)",
-                            choices=("all", "user", "slice", "sa", "ma", "node", "aggregate"),
+                            help="type filter ([all]|user|slice|authority|node|aggregate)",
+                            choices=("all", "user", "slice", "authority", "node", "aggregate"),
                             default="all")
+
+        # display formats
+        if command in ("resources"):
+            parser.add_option("-f", "--format", dest="format", type="choice",
+                             help="display format ([xml]|dns|ip)", default="xml",
+                             choices=("xml", "dns", "ip"))
 
         if command in ("resources", "show", "list"):
            parser.add_option("-o", "--output", dest="file",
@@ -545,11 +546,11 @@ class Sfi:
         """
         server = self.slicemgr
         # direct connection to an aggregate
-        if opts.aggregate:
+        if hasattr(opts, 'aggregate') and opts.aggregate:
             server = self.get_server(opts.aggregate, opts.port, self.key_file, \
                                      self.cert_file, self.options.debug)
         # direct connection to the nodes component manager interface
-        if opts.component:
+        if hasattr(opts, 'component') and opts.component:
             server = self.get_component_server_from_hrn(opts.component)    
  
         return server
@@ -941,8 +942,7 @@ class Sfi:
     # =====================================================================
 
     def GetVersion(self, opts, args):
-        server = self.geni_am
-        #server = self.get_server_from_opts(opts)
+        server = self.get_server_from_opts(opts)
         print server.GetVersion()
 
     def ListResources(self, opts, args):
