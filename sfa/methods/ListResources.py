@@ -14,45 +14,45 @@ class ListResources(Method):
     @param options dictionary
     @return string
     """
-    interfaces = ['geni_am']
+    interfaces = ['aggregate', 'slicemgr', 'geni_am']
     accepts = [
-        Parameter(type([str]), "List of credentials"),
+        Mixed(Parameter(str, "Credential string"), 
+              Parameter(type([str]), "List of credentials")),
         Parameter(dict, "Options")
         ]
     returns = Parameter(str, "List of resources")
 
     def call(self, creds, options):
         self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
-            
-        # Find the valid credentials
-        hrn = None
-        if options.has_key('geni_slice_urn'):
-            xrn = options['geni_slice_urn']
-            hrn, _ = urn_to_hrn(xrn)        
-            
-        ValidCreds = self.api.auth.checkCredentials(creds, '', hrn)
-        origin_hrn = Credential(string=ValidCreds[0]).get_gid_caller().get_hrn()
-            
-                    
-        manager_base = 'sfa.managers'
-
-        if self.api.interface in ['geni_am']:
-            mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
-            manager_module = manager_base + ".geni_am_%s" % mgr_type
-            manager = __import__(manager_module, fromlist=[manager_base])
-            rspec = manager.ListResources(self.api, ValidCreds, options)
-            outgoing_rules = SFATablesRules('OUTGOING')
-            
         
+        # get slice's hrn from options    
+        xrn = options.get('geni_slice_urn', None)
+        hrn, _ = urn_to_hrn(xrn)
+
+        # Find the valid credentials
+        valid_creds = self.api.auth.checkCredentials(creds, 'listnodes', hrn)
+
+        # get hrn of the original caller 
+        origin_hrn = options.get('origin_hrn', None)
+        if not origin_hrn:
+            origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
+            
+        manager = self.api.get_manager()
+        rspec = manager.get_rspec(self.api, valid_creds, options)
+
+        # filter rspec through sfatables 
+        if self.api.interface in ['aggregate', 'geni_am']:
+            outgoing_rules = SFATablesRules('OUTGOING')
+        elif self.api.interface in ['slicemgr']: 
+            outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
         filtered_rspec = rspec
         if outgoing_rules.sorted_rule_list:
-            context = {'sfa':{'user':{'hrn':origin_hrn}, 'slice':{'hrn':None}}}
+            context = manager.fetch_context(hrn, origin_hrn, outgoing_rules.contexts)
             outgoing_rules.set_context(context)
             filtered_rspec = outgoing_rules.apply(rspec)      
  
         if options.has_key('geni_compressed') and options['geni_compressed'] == True:
             filtered_rspec = zlib.compress(rspec).encode('base64')
-    
 
         return filtered_rspec  
     
