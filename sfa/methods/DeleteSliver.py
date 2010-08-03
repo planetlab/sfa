@@ -1,38 +1,41 @@
+### $Id: stop_slice.py 17732 2010-04-19 21:10:45Z tmack $
+### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/stop_slice.py $
+
 from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method
-from sfa.util.parameter import Parameter
+from sfa.util.parameter import Parameter, Mixed
+from sfa.trust.auth import Auth
+from sfa.trust.credential import Credential
 
 class DeleteSliver(Method):
     """
-    Delete sliver from a slice.   Callers can check on the status of
-    the resources using SliverStatus.
+    Remove the slice from all nodes and free the allocated resources        
 
-    @param slice_urn (string) URN of slice to allocate to
-    @param credentials ([string]) of credentials
-    
+    @param xrn human readable name of slice to instantiate (hrn or urn)
+    @param cred credential string specifying the rights of the caller
+    @return 1 is successful, faults otherwise  
     """
-    interfaces = ['geni_am']
-    accepts = [
-        Parameter(str, "Slice URN"),
-        Parameter(type([str]), "List of credentials"),
-        ]
-    returns = Parameter(bool, "Success or Failure")
 
-    def call(self, slice_xrn, creds):
-        hrn, type = urn_to_hrn(slice_xrn)
-        self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
-
-        # Find the valid credentials
-        ValidCreds = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)
-        
-        manager_base = 'sfa.managers'
-
-        if self.api.interface in ['geni_am']:
-            mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
-            manager_module = manager_base + ".geni_am_%s" % mgr_type
-            manager = __import__(manager_module, fromlist=[manager_base])
-            return manager.DeleteSliver(self.api, slice_xrn, ValidCreds)
-
-        return ''
+    interfaces = ['aggregate', 'slicemgr', 'component']
     
+    accepts = [
+        Parameter(str, "Human readable name of slice to delete (hrn or urn)"),
+        Mixed(Parameter(str, "Credential string"),
+              Parameter(type([str]), "List of credentials")),
+        ]
+
+    returns = Parameter(int, "1 if successful")
+    
+    def call(self, xrn, creds):
+        hrn, type = urn_to_hrn(xrn)
+        valid_creds = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)
+
+        #log the call
+        origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
+
+        manager = self.api.get_interface_manager() 
+        manager.delete_slice(self.api, xrn, valid_creds)
+ 
+        return 1 
