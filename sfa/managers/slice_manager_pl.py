@@ -29,14 +29,12 @@ def get_version():
     version['geni_api'] = 1
     return version
 
-def delete_slice(api, xrn, origin_hrn=None):
-    credential = api.getCredential()
-    threads = ThreadManager()
-    for aggregate in api.aggregates:
-        server = api.aggregates[aggregate] 
-        threads.run(server.delete_slice, credential, xrn, origin_hrn)
-    threads.get_results()
-    return 1
+def slice_status(api, slice_xrn, creds ):
+    result = {}
+    result['geni_urn'] = slice_xrn
+    result['geni_status'] = 'unknown'
+    result['geni_resources'] = {}
+    return result
 
 def create_slice(api, xrn, creds, rspec, users):
     hrn, type = urn_to_hrn(xrn)
@@ -138,26 +136,59 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
     ticket.sign()          
     return ticket.save_to_string(save_parents=True)
 
-def start_slice(api, xrn):
+
+def delete_slice(api, xrn, origin_hrn=None):
+    # XX
+    # XX TODO: Should try to use delegated credential first
+    # XX
     credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
-        threads.run(server.stop_slice, credential, xrn)
+        threads.run(server.DeleteSliver, xrn, credential)
+    threads.get_results()
+    return 1
+
+def start_slice(api, xrn, creds):
+    # XX
+    # XX TODO: Should try to use delegated credential first
+    # XX
+    credential = api.getCredential()
+    threads = ThreadManager()
+    for aggregate in api.aggregates:
+        server = api.aggregates[aggregate]
+        threads.run(server.Start, xrn, credential)
     threads.get_results()    
     return 1
  
-def stop_slice(api, xrn):
+def stop_slice(api, xrn, creds):
+    # XX
+    # XX TODO: Should try to use delegated credential first
+    # XX
     credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
-        threads.run(server.stop_slice, credential, xrn)
+        threads.run(server.Stop, xrn, credential)
     threads.get_results()    
     return 1
 
 def reset_slice(api, xrn):
-    # XX not implemented at this interface
+    """
+    Not implemented
+    """
+    return 1
+
+def shutdown(api, xrn, creds):
+    """
+    Not implemented   
+    """
+    return 1
+
+def status(api, xrn, creds):
+    """
+    Not implemented 
+    """
     return 1
 
 def get_slices(api):
@@ -244,18 +275,6 @@ def get_rspec(api, creds, options):
         api.cache.add('nodes', rspec)
  
     return rspec
-
-"""
-Returns the request context required by sfatables. At some point, this
-mechanism should be changed to refer to "contexts", which is the
-information that sfatables is requesting. But for now, we just return
-the basic information needed in a dict.
-"""
-def fetch_context(slice_hrn, user_hrn, contexts):
-    #slice_hrn = urn_to_hrn(slice_xrn)[0]
-    #user_hrn = urn_to_hrn(user_xrn)[0]
-    base_context = {'sfa':{'user':{'hrn':user_hrn}, 'slice':{'hrn':slice_hrn}}}
-    return base_context
 
 def main():
     r = RSpec()

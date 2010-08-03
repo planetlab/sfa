@@ -20,18 +20,24 @@ def get_version():
     version['geni_api'] = 1
     return version
 
+def slice_status(api, slice_xrn, creds):
+    result = {}
+    result['geni_urn'] = slice_xrn
+    result['geni_status'] = 'unknown'
+    result['geni_resources'] = {}
+    return result
            
-def start_slice(api, xrn):
+def start_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     api.nodemanger.Start(slicename)
 
-def stop_slice(api, xrn):
+def stop_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     api.nodemanager.Stop(slicename)
 
-def delete_slice(api, xrn):
+def delete_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     api.nodemanager.Destroy(slicename)

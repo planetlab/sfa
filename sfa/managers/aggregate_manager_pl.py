@@ -28,22 +28,12 @@ def get_version():
     version['geni_api'] = 1
     return version
 
-def delete_slice(api, xrn):
-    hrn, type = urn_to_hrn(xrn)
-    slicename = hrn_to_pl_slicename(hrn)
-    slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
-    if not slices:
-        return 1
-    slice = slices[0]
-
-    # determine if this is a peer slice
-    peer = peers.get_peer(api, hrn)
-    if peer:
-        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
-    api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
-    if peer:
-        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
-    return 1
+def slice_status(api, slice_xrn, creds):
+    result = {}
+    result['geni_urn'] = slice_xrn
+    result['geni_status'] = 'unknown'
+    result['geni_resources'] = {}
+    return result
 
 def __get_hostnames(nodes):
     hostnames = []
@@ -86,8 +76,6 @@ def create_slice(api, slice_xrn, creds, rspec, users):
     # add nodes from rspec
     added_nodes = list(set(request).difference(current))
     
-
-
     if peer:
         api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
 
@@ -223,7 +211,7 @@ def start_slice(api, xrn):
 
     return 1
  
-def stop_slice(api, xrn):
+def stop_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
@@ -237,6 +225,23 @@ def stop_slice(api, xrn):
 
 def reset_slice(api, xrn):
     # XX not implemented at this interface
+    return 1
+
+def delete_slice(api, xrn, creds):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
+    slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
+    if not slices:
+        return 1
+    slice = slices[0]
+
+    # determine if this is a peer slice
+    peer = peers.get_peer(api, hrn)
+    if peer:
+        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
+    api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
+    if peer:
+        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
 def get_slices(api):
@@ -286,18 +291,6 @@ def get_rspec(api, creds, options):
 
     return rspec
 
-
-"""
-Returns the request context required by sfatables. At some point, this
-mechanism should be changed to refer to "contexts", which is the
-information that sfatables is requesting. But for now, we just return
-the basic information needed in a dict.
-"""
-def fetch_context(slice_xrn, user_xrn, contexts):
-    slice_hrn, type = urn_to_hrn(slice_xrn)
-    user_hrn, type = urn_to_hrn(user_xrn)
-    base_context = {'sfa':{'user':{'hrn':user_hrn}, 'slice':{'hrn':slice_hrn}}}
-    return base_context
 
 def main():
     api = SfaAPI()
