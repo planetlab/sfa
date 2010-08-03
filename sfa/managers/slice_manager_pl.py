@@ -38,7 +38,7 @@ def delete_slice(api, xrn, origin_hrn=None):
     threads.get_results()
     return 1
 
-def create_slice(api, xrn, rspec, origin_hrn=None):
+def create_slice(api, xrn, creds, rspec, users):
     hrn, type = urn_to_hrn(xrn)
 
     # Validate the RSpec against PlanetLab's schema --disabled for now
@@ -60,13 +60,17 @@ def create_slice(api, xrn, rspec, origin_hrn=None):
             message = "%s (line %s)" % (error.message, error.line)
             raise InvalidRSpec(message)
 
+    # XX
+    # XX TODO: Should try to use delegated credential first
+    # XX
     cred = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         if aggregate not in [api.auth.client_cred.get_gid_caller().get_hrn()]:
             server = api.aggregates[aggregate]
             # Just send entire RSpec to each aggregate
-            threads.run(server.create_slice, cred, xrn, rspec, origin_hrn)
+            threads.run(server.CreateSliver, xrn, cred, rspec, users)
+            
     threads.get_results() 
     return 1
 
@@ -211,12 +215,8 @@ def get_rspec(api, creds, options):
         if aggregate not in [api.auth.client_cred.get_gid_caller().get_hrn()]:   
             # get the rspec from the aggregate
             server = api.aggregates[aggregate]
-            # XX
-            # XX TODO: switch to ProtoGeni spec in next release. Give other 
-            # XX aggregtes a chacne to upgrade to this release before switching 
-            # XX 
-            # threads.run(server.ListResources, cred, options)
-            threads.run(server.get_resources, cred, xrn, origin_hrn)
+            threads.run(server.ListResources, cred, options)
+            #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
 
     results = threads.get_results()
@@ -238,7 +238,6 @@ def get_rspec(api, creds, options):
                 for request in root.iterfind("./request"):
                     rspec.append(deepcopy(request))
     
-    print results
     rspec =  etree.tostring(rspec, xml_declaration=True, pretty_print=True)
     # cache the result
     if api.cache and not xrn:
