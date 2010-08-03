@@ -15,7 +15,7 @@ class GetVersion(Method):
 
     def call(self):
         self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
-        manager = self.api.get_manager()
+        manager = self.api.get_interface_manager()
     
         return manager.get_version()
     

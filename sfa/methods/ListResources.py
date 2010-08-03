@@ -3,7 +3,7 @@ from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.credential import Credential
-from sfatables.runtime import SFATablesRules
+from sfa.util.sfatablesRuntime import run_sfatables
 import sys
 import zlib
 
@@ -37,19 +37,16 @@ class ListResources(Method):
         if not origin_hrn:
             origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
             
-        manager = self.api.get_manager()
+        manager = self.api.get_interface_manager()
         rspec = manager.get_rspec(self.api, valid_creds, options)
 
         # filter rspec through sfatables 
         if self.api.interface in ['aggregate', 'geni_am']:
-            outgoing_rules = SFATablesRules('OUTGOING')
+            chain_name = 'OUTGOING'
         elif self.api.interface in ['slicemgr']: 
-            outgoing_rules = SFATablesRules('FORWARD-OUTGOING')
-        filtered_rspec = rspec
-        if outgoing_rules.sorted_rule_list:
-            context = manager.fetch_context(hrn, origin_hrn, outgoing_rules.contexts)
-            outgoing_rules.set_context(context)
-            filtered_rspec = outgoing_rules.apply(rspec)      
+            chain_name = 'FORWARD-OUTGOING'
+
+        filtered_rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec) 
  
         if options.has_key('geni_compressed') and options['geni_compressed'] == True:
             filtered_rspec = zlib.compress(rspec).encode('base64')

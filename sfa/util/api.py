@@ -138,7 +138,7 @@ class BaseAPI:
         self.aggregates = Aggregates(self)
 
 
-    def get_manager(self, manager_base = 'sfa.managers'):
+    def get_interface_manager(self, manager_base = 'sfa.managers'):
         """
         Returns the appropriate manager module for this interface.
         Modules are usually found in sfa/managers/
