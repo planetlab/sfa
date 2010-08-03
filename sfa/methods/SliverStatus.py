@@ -10,26 +10,22 @@ class SliverStatus(Method):
     @param slice_urn (string) URN of slice to allocate to
     
     """
-    interfaces = ['geni_am']
+    interfaces = ['aggregate', 'slicemgr', 'component', 'geni_am']
     accepts = [
         Parameter(str, "Slice URN"),
+        Mixed(Parameter(str, "Credential string"),
+              Parameter(type([str]), "List of credentials")),
         ]
-    returns = Parameter(bool, "Success or Failure")
+    returns = Parameter(dict, "Status details")
 
     def call(self, slice_xrn, creds):
         hrn, type = urn_to_hrn(slice_xrn)
-        
-        ValidCreds = self.api.auth.checkCredentials(creds, 'sliverstatus', hrn)
+        valid_creds = self.api.auth.checkCredentials(creds, 'sliverstatus', hrn)
 
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
+    
+        manager = self.api.get_interface_manager()
+        status = manager.delete_slice(self.api, xrn, valid_creds)
 
-        manager_base = 'sfa.managers'
-
-        if self.api.interface in ['geni_am']:
-            mgr_type = self.api.config.SFA_GENI_AGGREGATE_TYPE
-            manager_module = manager_base + ".geni_am_%s" % mgr_type
-            manager = __import__(manager_module, fromlist=[manager_base])
-            return manager.SliverStatus(self.api, slice_xrn, ValidCreds)
-
-        return ''
+        return status
     
