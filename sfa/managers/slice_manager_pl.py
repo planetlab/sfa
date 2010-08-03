@@ -9,7 +9,7 @@ from copy import deepcopy
 from lxml import etree
 from StringIO import StringIO
 from types import StringTypes
-from sfa.util.rspec import merge_rspecs
+from sfa.util.rspecHelper import merge_rspecs
 from sfa.util.namespace import *
 from sfa.util.rspec import *
 from sfa.util.specdict import *
