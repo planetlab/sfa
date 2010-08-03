@@ -51,12 +51,15 @@ def __get_hostnames(nodes):
         hostnames.append(node.hostname)
     return hostnames
     
-def create_slice(api, xrn, xml, reg_objects=None):
+def create_slice(api, slice_xrn, creds, rspec, users):
     """
+    Create the sliver[s] (slice) at this aggregate.    
     Verify HRN and initialize the slice record in PLC if necessary.
     """
 
-    hrn, type = urn_to_hrn(xrn)
+    reg_objects = __get_registry_objects(slice_xrn, creds, users)
+
+    hrn, type = urn_to_hrn(slice_xrn)
     peer = None
     slices = Slices(api)
     peer = slices.get_peer(hrn)
@@ -74,7 +77,7 @@ def create_slice(api, xrn, xml, reg_objects=None):
     slice = network.get_slice(api, hrn)
     current = __get_hostnames(slice.get_nodes())
     
-    network.addRSpec(xml, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
+    network.addRSpec(rspec, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
     request = __get_hostnames(network.nodesWithSlivers())
     
     # remove nodes not in rspec
@@ -101,6 +104,55 @@ def create_slice(api, xrn, xml, reg_objects=None):
 
     return True
 
+
+def __get_registry_objects(slice_xrn, creds, users):
+    """
+    
+    """
+    hrn, type = urn_to_hrn(slice_xrn)
+
+    hrn_auth = get_authority(hrn)
+
+    # Build up objects that an SFA registry would return if SFA
+    # could contact the slice's registry directly
+    reg_objects = None
+
+    if users:
+        reg_objects = {}
+
+        site = {}
+        site['site_id'] = 0
+        site['name'] = 'geni.%s' % hrn_auth
+        site['enabled'] = True
+        site['max_slices'] = 100
+
+        # Note:
+        # Is it okay if this login base is the same as one already at this myplc site?
+        # Do we need uniqueness?  Should use hrn_auth instead of just the leaf perhaps?
+        site['login_base'] = get_leaf(hrn_auth)
+        site['abbreviated_name'] = hrn
+        site['max_slivers'] = 1000
+        reg_objects['site'] = site
+
+        slice = {}
+        slice['expires'] = int(mktime(Credential(string=creds[0]).get_lifetime().timetuple()))
+        slice['hrn'] = hrn
+        slice['name'] = site['login_base'] + "_" +  get_leaf(hrn)
+        slice['url'] = hrn
+        slice['description'] = hrn
+        slice['pointer'] = 0
+        reg_objects['slice_record'] = slice
+
+        reg_objects['users'] = {}
+        for user in users:
+            user['key_ids'] = []
+            hrn, _ = urn_to_hrn(user['urn'])
+            user['email'] = hrn + "@geni.net"
+            user['first_name'] = hrn
+            user['last_name'] = hrn
+            reg_objects['users'][user['email']] = user
+
+        return reg_objects        
 
 def get_ticket(api, xrn, rspec, origin_hrn=None, reg_objects=None):
 
