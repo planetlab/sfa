@@ -29,6 +29,7 @@ remove_peer_object
 GetVersion
 ListResources
 CreateSliver
+UpdateSliver
 get_geni_aggregates
 DeleteSliver
 SliverStatus
