@@ -10,7 +10,8 @@ import sfa.rspecs.aggregates.rspec_manager_pl
 
 class get_resources(ListResources):
     """
-    This Method has been deprecated. Use ListResources instead. 
+    Deprecated. Use ListResources instead. 
+
     Get an resource specification (rspec). The rspec may describe the resources
     available at an authority or the resources being used by a slice.      
 
