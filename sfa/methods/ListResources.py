@@ -36,7 +36,7 @@ class ListResources(Method):
         origin_hrn = options.get('origin_hrn', None)
         if not origin_hrn:
             origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
-            
+        # get manager for this interface    
         manager = self.api.get_interface_manager()
         rspec = manager.get_rspec(self.api, valid_creds, options)
 
@@ -45,7 +45,6 @@ class ListResources(Method):
             chain_name = 'OUTGOING'
         elif self.api.interface in ['slicemgr']: 
             chain_name = 'FORWARD-OUTGOING'
-
         filtered_rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec) 
  
         if options.has_key('geni_compressed') and options['geni_compressed'] == True:
