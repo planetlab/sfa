@@ -23,6 +23,64 @@ from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 
+
+def __get_registry_objects(slice_xrn, creds, users):
+    """
+
+    """
+    hrn, type = urn_to_hrn(slice_xrn)
+
+    hrn_auth = get_authority(hrn)
+
+    # Build up objects that an SFA registry would return if SFA
+    # could contact the slice's registry directly
+    reg_objects = None
+
+    if users:
+        reg_objects = {}
+
+        site = {}
+        site['site_id'] = 0
+        site['name'] = 'geni.%s' % hrn_auth
+        site['enabled'] = True
+        site['max_slices'] = 100
+
+        # Note:
+        # Is it okay if this login base is the same as one already at this myplc site?
+        # Do we need uniqueness?  Should use hrn_auth instead of just the leaf perhaps?
+        site['login_base'] = get_leaf(hrn_auth)
+        site['abbreviated_name'] = hrn
+        site['max_slivers'] = 1000
+        reg_objects['site'] = site
+
+        slice = {}
+        slice['expires'] = int(mktime(Credential(string=creds[0]).get_lifetime().timetuple()))
+        slice['hrn'] = hrn
+        slice['name'] = site['login_base'] + "_" +  get_leaf(hrn)
+        slice['url'] = hrn
+        slice['description'] = hrn
+        slice['pointer'] = 0
+        reg_objects['slice_record'] = slice
+
+        reg_objects['users'] = {}
+        for user in users:
+            user['key_ids'] = []
+            hrn, _ = urn_to_hrn(user['urn'])
+            user['email'] = hrn + "@geni.net"
+            user['first_name'] = hrn
+            user['last_name'] = hrn
+            reg_objects['users'][user['email']] = user
+
+        return reg_objects
+
+def __get_hostnames(nodes):
+    hostnames = []
+    for node in nodes:
+        hostnames.append(node.hostname)
+    return hostnames
+
+
+
 def get_version():
     version = {}
     version['geni_api'] = 1
@@ -35,12 +93,6 @@ def slice_status(api, slice_xrn, creds):
     result['geni_resources'] = {}
     return result
 
-def __get_hostnames(nodes):
-    hostnames = []
-    for node in nodes:
-        hostnames.append(node.hostname)
-    return hostnames
-    
 def create_slice(api, slice_xrn, creds, rspec, users):
     """
     Create the sliver[s] (slice) at this aggregate.    
@@ -93,110 +145,16 @@ def create_slice(api, slice_xrn, creds, rspec, users):
     return True
 
 
-def __get_registry_objects(slice_xrn, creds, users):
-    """
-    
-    """
-    hrn, type = urn_to_hrn(slice_xrn)
-
-    hrn_auth = get_authority(hrn)
-
-    # Build up objects that an SFA registry would return if SFA
-    # could contact the slice's registry directly
-    reg_objects = None
-
-    if users:
-        reg_objects = {}
-
-        site = {}
-        site['site_id'] = 0
-        site['name'] = 'geni.%s' % hrn_auth
-        site['enabled'] = True
-        site['max_slices'] = 100
-
-        # Note:
-        # Is it okay if this login base is the same as one already at this myplc site?
-        # Do we need uniqueness?  Should use hrn_auth instead of just the leaf perhaps?
-        site['login_base'] = get_leaf(hrn_auth)
-        site['abbreviated_name'] = hrn
-        site['max_slivers'] = 1000
-        reg_objects['site'] = site
-
-        slice = {}
-        slice['expires'] = int(mktime(Credential(string=creds[0]).get_lifetime().timetuple()))
-        slice['hrn'] = hrn
-        slice['name'] = site['login_base'] + "_" +  get_leaf(hrn)
-        slice['url'] = hrn
-        slice['description'] = hrn
-        slice['pointer'] = 0
-        reg_objects['slice_record'] = slice
-
-        reg_objects['users'] = {}
-        for user in users:
-            user['key_ids'] = []
-            hrn, _ = urn_to_hrn(user['urn'])
-            user['email'] = hrn + "@geni.net"
-            user['first_name'] = hrn
-            user['last_name'] = hrn
-            reg_objects['users'][user['email']] = user
-
-        return reg_objects        
-
-def get_ticket(api, xrn, rspec, origin_hrn=None, reg_objects=None):
-
-    slice_hrn, type = urn_to_hrn(xrn)
-    slices = Slices(api)
-    peer = slices.get_peer(slice_hrn)
-    sfa_peer = slices.get_sfa_peer(slice_hrn)
-    
-    # get the slice record
-    registry = api.registries[api.hrn]
-    credential = api.getCredential()
-    records = registry.resolve(credential, xrn)
-
-    # similar to create_slice, we must verify that the required records exist
-    # at this aggregate before we can issue a ticket   
-    site_id, remote_site_id = slices.verify_site(registry, credential, slice_hrn,
-                                                 peer, sfa_peer, reg_objects)
-    slice = slices.verify_slice(registry, credential, slice_hrn, site_id,
-                                remote_site_id, peer, sfa_peer, reg_objects)
-
-    # make sure we get a local slice record
-    record = None  
-    for tmp_record in records:
-        if tmp_record['type'] == 'slice' and \
-           not tmp_record['peer_authority']:
-            record = SliceRecord(dict=tmp_record)
-    if not record:
-        raise RecordNotFound(slice_hrn)
-
-    # get sliver info
-    slivers = Slices(api).get_slivers(slice_hrn)
-    if not slivers:
-        raise SliverDoesNotExist(slice_hrn)
-    
-    # get initscripts
-    initscripts = []
-    data = {
-        'timestamp': int(time.time()),
-        'initscripts': initscripts,
-        'slivers': slivers
-    }
-
-    # create the ticket
-    object_gid = record.get_gid_object()
-    new_ticket = SfaTicket(subject = object_gid.get_subject())
-    new_ticket.set_gid_caller(api.auth.client_gid)
-    new_ticket.set_gid_object(object_gid)
-    new_ticket.set_issuer(key=api.key, subject=api.hrn)
-    new_ticket.set_pubkey(object_gid.get_pubkey())
-    new_ticket.set_attributes(data)
-    new_ticket.set_rspec(rspec)
-    #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
-    new_ticket.encode()
-    new_ticket.sign()
-    
-    return new_ticket.save_to_string(save_parents=True)
+def renew_slice(api, xrn, creds, exipration_time):
+    hrn, type = urn_to_hrn(xrn)
+    slicename = hrn_to_pl_slicename(hrn)
+    slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
+    if not slices:
+        raise RecordNotFound(hrn)
+    slice = slices[0]
+    slice['expires'] = expiration_time
+    api.plshell.UpdateSlice(api.plauth, slice['slice_id'], slice)
+    return 1         
 
 def start_slice(api, xrn):
     hrn, type = urn_to_hrn(xrn)
@@ -290,6 +248,64 @@ def get_rspec(api, creds, options):
         api.cache.add('nodes', rspec)
 
     return rspec
+
+
+def get_ticket(api, xrn, rspec, origin_hrn=None, reg_objects=None):
+
+    slice_hrn, type = urn_to_hrn(xrn)
+    slices = Slices(api)
+    peer = slices.get_peer(slice_hrn)
+    sfa_peer = slices.get_sfa_peer(slice_hrn)
+
+    # get the slice record
+    registry = api.registries[api.hrn]
+    credential = api.getCredential()
+    records = registry.resolve(credential, xrn)
+
+    # similar to create_slice, we must verify that the required records exist
+    # at this aggregate before we can issue a ticket
+    site_id, remote_site_id = slices.verify_site(registry, credential, slice_hrn,
+                                                 peer, sfa_peer, reg_objects)
+    slice = slices.verify_slice(registry, credential, slice_hrn, site_id,
+                                remote_site_id, peer, sfa_peer, reg_objects)
+
+    # make sure we get a local slice record
+    record = None
+    for tmp_record in records:
+        if tmp_record['type'] == 'slice' and \
+           not tmp_record['peer_authority']:
+            record = SliceRecord(dict=tmp_record)
+    if not record:
+        raise RecordNotFound(slice_hrn)
+
+    # get sliver info
+    slivers = Slices(api).get_slivers(slice_hrn)
+    if not slivers:
+        raise SliverDoesNotExist(slice_hrn)
+
+    # get initscripts
+    initscripts = []
+    data = {
+        'timestamp': int(time.time()),
+        'initscripts': initscripts,
+        'slivers': slivers
+    }
+
+    # create the ticket
+    object_gid = record.get_gid_object()
+    new_ticket = SfaTicket(subject = object_gid.get_subject())
+    new_ticket.set_gid_caller(api.auth.client_gid)
+    new_ticket.set_gid_object(object_gid)
+    new_ticket.set_issuer(key=api.key, subject=api.hrn)
+    new_ticket.set_pubkey(object_gid.get_pubkey())
+    new_ticket.set_attributes(data)
+    new_ticket.set_rspec(rspec)
+    #new_ticket.set_parent(api.auth.hierarchy.get_auth_ticket(auth_hrn))
+    new_ticket.encode()
+    new_ticket.sign()
+
+    return new_ticket.save_to_string(save_parents=True)
+
 
 
 def main():

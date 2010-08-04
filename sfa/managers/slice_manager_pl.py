@@ -72,6 +72,18 @@ def create_slice(api, xrn, creds, rspec, users):
     threads.get_results() 
     return 1
 
+def renew_slice(api, xrn, creds, expiration_time):
+    # XX
+    # XX TODO: Should try to use delegated credential first
+    # XX
+    credential = api.getCredential()
+    threads = ThreadManager()
+    for aggregate in api.aggregates:
+        server = api.aggregates[aggregate]
+        threads.run(server.RenewSliver, xrn, credential, expiration_time)
+    threads.get_results()
+    return 1
+
 def get_ticket(api, xrn, rspec, origin_hrn=None):
     slice_hrn, type = urn_to_hrn(xrn)
     # get the netspecs contained within the clients rspec
