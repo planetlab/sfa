@@ -126,8 +126,7 @@ class Sfi:
     hashrequest = False
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
-        cmdargs = {"gid": "",
-                  "list": "name",
+        cmdargs = {"list": "name",
                   "show": "name",
                   "remove": "name",
                   "add": "record",
@@ -367,21 +366,6 @@ class Sfi:
           cert.save_to_file(file)
           return file
    
-    def get_gid(self):
-        #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".gid")
-        file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".gid")
-        if (os.path.isfile(file)):
-            gid = GID(filename=file)
-            return gid
-        else:
-            cert_str = self.cert.save_to_string(save_parents=True)
-            gid_str = self.registry.get_gid(cert_str, self.user, "user")
-            gid = GID(string=gid_str)
-            if self.options.verbose:
-                print "Writing user gid to", file
-            gid.save_to_file(file, save_parents=True)
-            return gid       
-
     def get_cached_credential(self, file):
         """
         Return a cached credential only if it hasn't expired.
@@ -517,11 +501,6 @@ class Sfi:
   
     def dispatch(self, command, cmd_opts, cmd_args):
         getattr(self, command)(cmd_opts, cmd_args)
- 
-    def gid(self, opts, args):
-        gid = self.get_gid()
-        print "GID: %s" % (gid.save_to_string(save_parents=True))
-        return   
  
     # list entires in named authority registry
     def list(self, opts, args):
