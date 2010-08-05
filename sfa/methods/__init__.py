@@ -1,6 +1,5 @@
 ## Please use make index to update this file
 all = """
-create_gid
 create_slice
 delete_slice
 get_aggregates
