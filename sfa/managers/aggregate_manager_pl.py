@@ -254,7 +254,9 @@ def get_rspec(api, creds, options):
     return rspec
 
 
-def get_ticket(api, xrn, rspec, origin_hrn=None, reg_objects=None):
+def get_ticket(api, xrn, creds, rspec, users):
+
+    reg_objects = __get_registry_objects(xrn, creds, users)
 
     slice_hrn, type = urn_to_hrn(xrn)
     slices = Slices(api)

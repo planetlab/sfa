@@ -85,7 +85,7 @@ def renew_slice(api, xrn, creds, expiration_time):
     threads.get_results()
     return 1
 
-def get_ticket(api, xrn, rspec, origin_hrn=None):
+def get_ticket(api, xrn, creds, rspec, users):
     slice_hrn, type = urn_to_hrn(xrn)
     # get the netspecs contained within the clients rspec
     aggregate_rspecs = {}
@@ -114,7 +114,8 @@ def get_ticket(api, xrn, rspec, origin_hrn=None):
                     break   
         if server is None:
             continue 
-        threads.run(server.get_ticket, credential, xrn, aggregate_rspec, origin_hrn)
+        threads.run(server.GetTicket, xrn, credential, aggregate_rspec, users)
+
     results = threads.get_results()
     
     # gather information from each ticket 

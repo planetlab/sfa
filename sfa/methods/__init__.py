@@ -23,7 +23,9 @@ start_slice
 stop_slice
 update
 remove_peer_object
+GetTicket
 GetVersion
+RedeemTicket
 ListResources
 ListSlices
 CreateSliver

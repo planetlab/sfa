@@ -29,8 +29,6 @@ class CreateSliver(Method):
         ]
     returns = Parameter(str, "Allocated RSpec")
 
-
-
     def call(self, slice_xrn, creds, rspec, users):
         hrn, type = urn_to_hrn(slice_xrn)
 
