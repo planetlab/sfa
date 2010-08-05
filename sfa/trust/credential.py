@@ -33,7 +33,7 @@ import os
 import datetime
 from xml.dom.minidom import Document, parseString
 from tempfile import mkstemp
-from sfa.trust.keypair import Keypair
+from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import *
 from sfa.trust.gid import *
