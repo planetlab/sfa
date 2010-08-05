@@ -437,51 +437,6 @@ class Sfi:
 
         return cred
  
-    def delegate_cred(self, cred, hrn, type='authority'):
-        # the gid and hrn of the object we are delegating
-        user_cred = Credential(string=cred)
-        object_gid = user_cred.get_gid_object()
-        object_hrn = object_gid.get_hrn()
-        #cred.set_delegate(True)
-        #if not cred.get_delegate():
-        #    raise Exception, "Error: Object credential %(object_hrn)s does not have delegate bit set" % locals()
-           
-    
-        records = self.registry.resolve(cred, hrn)
-        records = filter_records(type, records)
-        
-        if not records:
-            raise Exception, "Error: Didn't find a %(type)s record for %(hrn)s" % locals()
-    
-        # the gid of the user who will be delegated too
-        record = SfaRecord(dict=records[0])
-        delegee_gid = record.get_gid_object()
-        delegee_hrn = delegee_gid.get_hrn()
-        
-        # the key and hrn of the user who will be delegating
-        user_key = Keypair(filename=self.get_key_file())
-        user_hrn = user_cred.get_gid_caller().get_hrn()
-    
-        dcred = Credential(subject=object_hrn + " delegated to " + delegee_hrn)
-        dcred.set_gid_caller(delegee_gid)
-        dcred.set_gid_object(object_gid)
-        dcred.set_privileges(user_cred.get_privileges())
-        dcred.get_privileges().delegate_all_privileges(True)
-        
-
-        # Save the issuer's gid to a file
-        fname = self.options.sfi_dir + os.sep + "gid_%d" % random.randint(0, 999999999)
-        f = open(fname, "w")
-        f.write(user_cred.get_gid_caller().save_to_string())
-        f.close()
-        dcred.set_issuer_keys(self.get_key_file(), fname)
-        os.remove(fname)
-        
-        dcred.set_parent(user_cred)
-        dcred.encode()
-        dcred.sign()
-    
-        return dcred.save_to_string(save_parents=True)
     
     def get_rspec_file(self, rspec):
        if (os.path.isabs(rspec)):
