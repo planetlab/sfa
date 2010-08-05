@@ -206,7 +206,7 @@ def delete_slice(api, xrn, creds):
         api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
-def get_slices(api):
+def get_slices(api, creds):
     # look in cache first
     if api.cache:
         slices = api.cache.get('slices')

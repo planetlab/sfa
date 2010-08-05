@@ -203,7 +203,7 @@ def status(api, xrn, creds):
     """
     return 1
 
-def get_slices(api):
+def get_slices(api, creds):
     # look in cache first
     if api.cache:
         slices = api.cache.get('slices')
@@ -216,7 +216,7 @@ def get_slices(api):
     threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
-        threads.run(server.get_slices, credential)
+        threads.run(server.ListSlices, credential)
 
     # combime results
     results = threads.get_results()
