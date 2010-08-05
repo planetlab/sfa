@@ -4,10 +4,13 @@ import xmlrpclib
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
+from sfa.methods.RedeemTicket import RedeemTicket
 
-class redeem_ticket(Method):
+class redeem_ticket(RedeemTicket):
     """
-    Reset the specified slice      
+    Deprecated. Use RedeemTicket instead.
+
+    Redeem a approved set of resource allocations (ticket).        
 
     @param cred credential string specifying the rights of the caller
     @param ticket 
@@ -24,13 +27,5 @@ class redeem_ticket(Method):
     returns = [Parameter(int, "1 if successful")]
     
     def call(self, cred, ticket):
-        self.api.auth.check(cred, 'redeemticket')
-        self.api.auth.check_ticket(ticket)
 
-        # send the call to the right manager
-        manager_base = 'sfa.managers'
-        mgr_type = self.api.config.SFA_CM_TYPE
-        manager_module = manager_base + ".component_manager_%s" % mgr_type
-        manager = __import__(manager_module, fromlist=[manager_base])
-        manager.redeem_ticket(self.api, ticket) 
-        return 1 
+        return RedeemTicket.call(self, ticket, cred)  
