@@ -49,8 +49,6 @@ class CreateSliver(Method):
             chain_name = 'FORWARD-OUTGOING'
         rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec)
         allocated = manager.create_slice(self.api, slice_xrn, valid_creds, rspec, users)
-        if allocated:
-            return rspec
 
-        return ''
+        return rspec 
     

@@ -69,8 +69,9 @@ def create_slice(api, xrn, creds, rspec, users):
             # Just send entire RSpec to each aggregate
             threads.run(server.CreateSliver, xrn, cred, rspec, users)
             
-    threads.get_results() 
-    return 1
+    results = threads.get_results() 
+    merged_rspec = merge_rspecs(results)
+    return merged_rspec
 
 def renew_slice(api, xrn, creds, expiration_time):
     # XX

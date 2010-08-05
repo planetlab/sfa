@@ -767,7 +767,9 @@ class Sfi:
             server = self.get_server(opts.aggregate, opts.port, self.key_file, \
                                      self.cert_file, self.options.debug)
 
-        return server.create_slice(slice_cred, slice_hrn, rspec)
+        result =  server.create_slice(slice_cred, slice_hrn, rspec)
+        print result
+        return result
 
     # get a ticket for the specified slice
     def get_ticket(self, opts, args):
