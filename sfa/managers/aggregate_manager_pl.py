@@ -156,16 +156,17 @@ def renew_slice(api, xrn, creds, exipration_time):
     api.plshell.UpdateSlice(api.plauth, slice['slice_id'], slice)
     return 1         
 
-def start_slice(api, xrn):
+def start_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
         raise RecordNotFound(hrn)
-    slice_id = slices[0]
-    attributes = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
-    attribute_id = attributes[0]['slice_attribute_id']
-    api.plshell.UpdateSliceTag(api.plauth, attribute_id, "1" )
+    slice_id = slices[0]['slice_id']
+    slice_tags = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'tagname': 'enabled'}, ['slice_tag_id'])
+    # just remove the tag if it exists
+    if slice_tags:
+        api.plshell.DeleteSliceTag(api.plauth, slice_tags[0]['slice_tag_id'])
 
     return 1
  
@@ -176,9 +177,12 @@ def stop_slice(api, xrn, creds):
     if not slices:
         raise RecordNotFound(hrn)
     slice_id = slices[0]['slice_id']
-    attributes = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'name': 'enabled'}, ['slice_attribute_id'])
-    attribute_id = attributes[0]['slice_attribute_id']
-    api.plshell.UpdateSliceTag(api.plauth, attribute_id, "0")
+    slice_tags = api.plshell.GetSliceTags(api.plauth, {'slice_id': slice_id, 'tagname': 'enabled'})
+    if not slice_tags:
+        api.plshell.AddSliceTag(api.plauth, slice_id, 'enabled', '0')
+    elif slice_tags[0]['value'] != "0":
+        tag_id = attributes[0]['slice_tag_id']
+        api.plshell.UpdateSliceTag(api.plauth, tag_id, '0')
     return 1
 
 def reset_slice(api, xrn):
