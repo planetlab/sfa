@@ -58,9 +58,6 @@ def get_slices(api):
     slices = eval(xids[1])
     return slices.keys()
 
-def reboot():
-    os.system("/sbin/reboot")        
-
 def redeem_ticket(api, ticket_string):
     ticket = SfaTicket(string=ticket_string)
     ticket.decode()

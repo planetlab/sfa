@@ -13,7 +13,6 @@ get_slices
 get_ticket
 get_trusted_certs
 list
-reboot
 redeem_ticket
 register
 register_peer_object
