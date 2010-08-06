@@ -265,7 +265,7 @@ def get_ticket(api, xrn, creds, rspec, users):
     # get the slice record
     registry = api.registries[api.hrn]
     credential = api.getCredential()
-    records = registry.resolve(credential, xrn)
+    records = registry.Resolve(xrn, credential)
 
     # similar to create_slice, we must verify that the required records exist
     # at this aggregate before we can issue a ticket
