@@ -388,7 +388,7 @@ class Sfi:
             print "no authority specified. Use -a or set SF_AUTH"
             sys.exit(-1)
         file = os.path.join(self.options.sfi_dir, get_leaf("authority") + ".cred")
-        return self.get_cred(file, 'authority', name)
+        return self.get_cred(file, 'authority', self.authority)
 
     def get_slice_cred(self, name):
         file = os.path.join(self.options.sfi_dir, "slice_" + get_leaf(name) + ".cred")
