@@ -8,7 +8,7 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.util.record import SfaRecord
 from sfa.trust.credential import Credential
 
-class list(Method):
+class List(Method):
     """
     List the records in an authority. 
 
@@ -19,28 +19,20 @@ class list(Method):
     interfaces = ['registry']
     
     accepts = [
-        Parameter(str, "Credential string"),
         Parameter(str, "Human readable name (hrn or urn)"),
-        Mixed(Parameter(str, "Human readable name of the original caller"),
-              Parameter(None, "Origin hrn not specified"))
+        Mixed(Parameter(str, "Credential string"),
+              Parameter(type([str]), "List of credentials")),
         ]
 
     returns = [SfaRecord]
     
-    def call(self, cred, xrn, origin_hrn=None):
+    def call(self, xrn, creds):
         hrn, type = urn_to_hrn(xrn)
-        user_cred = Credential(string=cred)
+        valid_creds = self.api.auth.checkCredentials(creds, 'list')
+
         #log the call
-        if not origin_hrn:
-            origin_hrn = user_cred.get_gid_caller().get_hrn()
+        origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
        
-        # validate the cred 
-        self.api.auth.check(cred, 'list')
-        
-        # send the call to the right manager    
-        manager_base = 'sfa.managers'
-        mgr_type = self.api.config.SFA_REGISTRY_TYPE
-        manager_module = manager_base + ".registry_manager_%s" % mgr_type
-        manager = __import__(manager_module, fromlist=[manager_base])
-        return manager.list(self.api, xrn, origin_hrn) 
+        manager = self.api.get_interface_manager()
+        return manager.list(self.api, xrn) 
