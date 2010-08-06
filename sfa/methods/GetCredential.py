@@ -41,7 +41,7 @@ class GetCredential(Method):
             hrn, type = urn_to_hrn(xrn)
 
         # check creds
-        valid_creds = self.api.auth.checkCredentials(creds, 'getcredential', hrn)
+        valid_creds = self.api.auth.checkCredentials(creds, 'getcredential')
         self.api.auth.verify_object_belongs_to_me(hrn)
 
         #log the call
