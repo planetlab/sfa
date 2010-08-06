@@ -79,11 +79,10 @@ def __get_hostnames(nodes):
         hostnames.append(node.hostname)
     return hostnames
 
-
-
 def get_version():
     version = {}
     version['geni_api'] = 1
+    version['sfa'] = 1
     return version
 
 def slice_status(api, slice_xrn, creds):
