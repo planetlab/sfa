@@ -12,7 +12,7 @@ from sfa.trust.auth import Auth
 from sfa.trust.gid import create_uuid
 from sfa.trust.credential import Credential
 
-class register(Method):
+class Register(Method):
     """
     Register an object with the registry. In addition to being stored in the
     SFA database, the appropriate records will also be created in the
@@ -27,29 +27,25 @@ class register(Method):
     interfaces = ['registry']
     
     accepts = [
-        Parameter(str, "Credential string"),
-        Parameter(dict, "Record dictionary containing record fields")
+        Parameter(dict, "Record dictionary containing record fields"),
+        Mixed(Parameter(str, "Credential string"),
+              Parameter(type([str]), "List of credentials")),
         ]
 
     returns = Parameter(int, "String representation of gid object")
     
-    def call(self, cred, record, origin_hrn=None):
-        user_cred = Credential(string=cred)
+    def call(self, record, creds):
+        
+        valid_creds = self.api.auth.checkCredentials(creds, 'register')
 
         #log the call
-        if not origin_hrn:
-            origin_hrn = user_cred.get_gid_caller().get_hrn()
+        origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
+
         hrn = None
         if 'hrn' in record:
             hrn = record['hrn']
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
         
-        # validate the cred
-        self.api.auth.check(cred, "register")
+        manager = self.api.get_interface_manager()
 
-        #send the call to the right manager
-        manager_base = 'sfa.managers'
-        mgr_type = self.api.config.SFA_REGISTRY_TYPE
-        manager_module = manager_base + ".registry_manager_%s" % mgr_type
-        manager = __import__(manager_module, fromlist=[manager_base])
         return manager.register(self.api, record)
