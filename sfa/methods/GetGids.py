@@ -6,7 +6,7 @@ from sfa.trust.gid import GID
 from sfa.trust.certificate import Certificate
 from sfa.trust.credential import Credential
 
-class get_gids(Method):
+class GetGids(Method):
     """
     Get a list of record information (hrn, gid and type) for 
     the specified hrns.
@@ -19,25 +19,22 @@ class get_gids(Method):
     interfaces = ['registry']
     
     accepts = [
-        Parameter(str, "Certificate string"),
         Mixed(Parameter(str, "Human readable name (hrn or xrn)"), 
-              Parameter(type([str]), "List of Human readable names (hrn or xrn)")) 
+              Parameter(type([str]), "List of Human readable names (hrn or xrn)")),
+        Mixed(Parameter(str, "Credential string"),
+              Parameter(type([str]), "List of credentials")), 
         ]
 
     returns = [Parameter(dict, "Dictionary of gids keyed on hrn")]
     
-    def call(self, cred, xrns):
+    def call(self, xrns, creds):
         # validate the credential
-        self.api.auth.check(cred, 'getgids')
-        user_cred = Credential(string=cred)
-        origin_hrn = user_cred.get_gid_caller().get_hrn()
-
+        valid_creds = self.api.auth.checkCredentials(creds, 'getgids')
+        origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
+        
         # resolve the record
-        manager_base = 'sfa.managers'
-        mgr_type = self.api.config.SFA_REGISTRY_TYPE
-        manager_module = manager_base + ".registry_manager_%s" % mgr_type
-        manager = __import__(manager_module, fromlist=[manager_base])
-        records = manager.resolve(self.api, xrns, None, origin_hrn=origin_hrn, full = False)
+        manager = self.api.get_interface_manager()
+        records = manager.resolve(self.api, xrns, full = False)
         if not records:
             raise RecordNotFound(hrns)
 
