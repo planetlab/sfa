@@ -476,6 +476,8 @@ class SfaAPI(BaseAPI):
                 for person_id in pi_ids:
                     hrns = [person['hrn'] for person in persons[person_id]]
                     record['PI'].extend(hrns)
+                record['geni_urn'] = hrn_to_urn(record['hrn'], 'slice')
+                record['geni_creator'] = record['PI'] 
                 
             elif (type == "authority"):
                 record['PI'] = []
@@ -500,6 +502,8 @@ class SfaAPI(BaseAPI):
     
             elif (type == "user"):
                 sfa_info['email'] = record.get("email", "")
+                sfa_info['geni_urn'] = hrn_to_urn(record['hrn'], 'user')
+                sfa_info['geni_certificate'] = record['gid'] 
                 # xxx TODO: PostalAddress, Phone
             record.update(sfa_info)
 
