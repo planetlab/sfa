@@ -117,7 +117,6 @@ def load_record_from_file(filename):
 
 class Sfi:
 
-    geni_am = None
     slicemgr = None
     registry = None
     user = None
@@ -144,14 +143,10 @@ class Sfi:
                   "start": "name",
                   "stop": "name",
                   "delegate": "name",
-                  "GetVersion": "name",
-                  "ListResources": "name",
-                  "CreateSliver": "name",
-                  "get_geni_aggregates": "name",
-                  "DeleteSliver": "name",
-                  "SliverStatus": "name",
-                  "RenewSliver": "name",
-                  "Shutdown": "name"
+                  "version": "",
+                  "sliverStatus": "name",
+                  "renew": "name",
+                  "shutdown": "name"
                  }
 
         if additional_cmdargs:
@@ -214,8 +209,6 @@ class Sfi:
         # Generate command line parser
         parser = OptionParser(usage="sfi [options] command [command_options] [command_args]",
                              description="Commands: gid,list,show,remove,add,update,nodes,slices,resources,create,delete,start,stop,reset")
-        parser.add_option("-g", "--geni_am", dest="geni_am",
-                          help="geni am", metavar="URL", default=None)
         parser.add_option("-r", "--registry", dest="registry",
                          help="root registry", metavar="URL", default=None)
         parser.add_option("-s", "--slicemgr", dest="sm",
@@ -281,11 +274,6 @@ class Sfi:
           errors += 1 
           
 
-       if (self.options.geni_am is not None):
-           geni_am_url = self.options.geni_am
-       elif hasattr(config, "SFI_GENI_AM"):
-           geni_am_url = config.SFI_GENI_AM
-           
        # Set user HRN
        if (self.options.user is not None):
           self.user = self.options.user
@@ -321,7 +309,6 @@ class Sfi:
        # Establish connection to server(s)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options.debug)  
        self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file, self.options.debug)
-       self.geni_am = xmlrpcprotocol.get_server(geni_am_url, key_file, cert_file, self.options.debug)
 
        return
     
@@ -679,20 +666,6 @@ class Sfi:
         result = self.registry.get_aggregates(user_cred, hrn)
         display_list(result)
         return 
-
-    def get_geni_aggregates(self, opts, args):
-        """
-        return a list of details about known aggregates
-        """
-        user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        hrn = None
-        if args:
-            hrn = args[0]
-
-        result = self.registry.get_geni_aggregates(user_cred, hrn)
-        display_list(result)
-        return 
-
 
     def registries(self, opts, args):
         """
