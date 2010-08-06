@@ -8,7 +8,7 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.util.debug import log
 from sfa.trust.credential import Credential
 
-class remove(Method):
+class Remove(Method):
     """
     Remove an object from the registry. If the object represents a PLC object,
     then the PLC records will also be removed.
@@ -23,36 +23,30 @@ class remove(Method):
     interfaces = ['registry']
     
     accepts = [
-        Parameter(str, "Credential string"),
-        Parameter(str, "Record type"),
         Parameter(str, "Human readable name of slice to instantiate (hrn or urn)"),
-        Mixed(Parameter(str, "Human readable name of the original caller"),
-              Parameter(None, "Origin hrn not specified"))
+        Mixed(Parameter(str, "Credential string"),
+              Parameter(type([str]), "List of credentials")),
+        Mixed(Parameter(str, "Record type"),
+              Parameter(None, "Type not specified")),
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, cred, type, xrn, origin_hrn=None):
-        user_cred = Credential(string=cred)
-       
-        # convert xrn to hrn     
-        if type: 
+    def call(self, xrn, creds, type):
+        if not type:
             hrn = urn_to_hrn(xrn)[0]
         else: 
             hrn, type = urn_to_hrn(xrn)
-            
+        
+        # validate the cred
+        valid_creds = self.api.auth.checkCredentials(creds, "remove")
+        self.api.auth.verify_object_permission(hrn)
+
         #log the call
-        if not origin_hrn:
-            origin_hrn = user_cred.get_gid_caller().get_hrn()
+        origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
-        # validate the cred
-        self.api.auth.check(cred, "remove")
-        self.api.auth.verify_object_permission(hrn)
-       
-        # send the call to the right manager
-        manager_base = 'sfa.managers'
-        mgr_type = self.api.config.SFA_REGISTRY_TYPE
-        manager_module = manager_base + ".registry_manager_%s" % mgr_type
-        manager = __import__(manager_module, fromlist=[manager_base])
-        return manager.remove(self.api, xrn, type, origin_hrn) 
+
+        manager = self.api.get_interface_manager()
+
+        return manager.remove(self.api, xrn, type) 

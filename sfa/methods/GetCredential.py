@@ -28,7 +28,8 @@ class GetCredential(Method):
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")), 
         Parameter(str, "Human readable name (hrn or urn)"),
-        Parameter(str, "Object type")
+        Mixed(Parameter(str, "Record type"),
+              Parameter(None, "Type not specified")),
         ]
 
     returns = Parameter(str, "String representation of a credential object")
