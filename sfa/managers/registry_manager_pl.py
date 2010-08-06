@@ -13,6 +13,7 @@ from sfa.util.faults import *
 def get_version(api):
     version = {}
     version['geni_api'] = 1
+    version['sfa'] = 1
     return version
 
 def get_credential(api, xrn, type, is_self=False):
