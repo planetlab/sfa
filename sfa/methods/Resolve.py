@@ -44,7 +44,7 @@ class Resolve(Method):
  
         # send the call to the right manager
         manager = self.api.get_interface_manager()
-        return manager.resolve(self.api, xrns, creds)
+        return manager.resolve(self.api, xrns)
 
 
             

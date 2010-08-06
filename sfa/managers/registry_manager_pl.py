@@ -80,7 +80,7 @@ def GetVersion():
     version['geni_api'] = 1
     return version
 
-def resolve(api, xrns, creds, type=None, full=True):
+def resolve(api, xrns, type=None, full=True):
 
     # load all know registry names into a prefix tree and attempt to find
     # the longest matching prefix
