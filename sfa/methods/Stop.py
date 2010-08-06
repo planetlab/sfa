@@ -29,7 +29,7 @@ class Stop(Method):
     
     def call(self, xrn, creds):
         hrn, type = urn_to_hrn(xrn)
-        valid_creds = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)
+        valid_creds = self.api.auth.checkCredentials(creds, 'stopslice', hrn)
 
         #log the call
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
