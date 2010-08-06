@@ -17,7 +17,7 @@ class UpdateSliver(CreateSliver):
     @param rspec (string) rspec to allocate
     
     """
-    interfaces = ['aggregate', 'slicemgr', 'geni_am']
+    interfaces = ['aggregate', 'slicemgr']
     accepts = [
         Parameter(str, "Slice URN"),
         Mixed(Parameter(str, "Credential string"),

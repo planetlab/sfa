@@ -19,7 +19,7 @@ class CreateSliver(Method):
     @param rspec (string) rspec to allocate
     
     """
-    interfaces = ['aggregate', 'slicemgr', 'geni_am']
+    interfaces = ['aggregate', 'slicemgr']
     accepts = [
         Parameter(str, "Slice URN"),
         Mixed(Parameter(str, "Credential string"),
@@ -41,7 +41,7 @@ class CreateSliver(Method):
         manager = self.api.get_interface_manager()
         
         # flter rspec through sfatables
-        if self.api.interface in ['aggregate', 'geni_am']:
+        if self.api.interface in ['aggregate']:
             chain_name = 'OUTGOING'
         elif self.api.interface in ['slicemgr']:
             chain_name = 'FORWARD-OUTGOING'

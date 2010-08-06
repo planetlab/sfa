@@ -12,7 +12,7 @@ class Shutdown(Stop):
     @param slice_urn (string) URN of slice to renew
     @param credentials ([string]) of credentials    
     """
-    interfaces = ['aggregate', 'slicemgr', 'geni_am']
+    interfaces = ['aggregate', 'slicemgr']
     accepts = [
         Parameter(str, "Slice URN"),
         Parameter(type([str]), "List of credentials"),

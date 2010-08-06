@@ -10,7 +10,7 @@ class SliverStatus(Method):
     @param slice_urn (string) URN of slice to allocate to
     
     """
-    interfaces = ['aggregate', 'slicemgr', 'component', 'geni_am']
+    interfaces = ['aggregate', 'slicemgr', 'component']
     accepts = [
         Parameter(str, "Slice URN"),
         Mixed(Parameter(str, "Credential string"),

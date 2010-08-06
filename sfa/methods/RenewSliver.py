@@ -13,7 +13,7 @@ class RenewSliver(Method):
     @param expiration_time (string) requested time of expiration
     
     """
-    interfaces = ['aggregate', 'slicemgr', 'geni_am']
+    interfaces = ['aggregate', 'slicemgr']
     accepts = [
         Parameter(str, "Slice URN"),
         Parameter(type([str]), "List of credentials"),
