@@ -25,7 +25,7 @@ class SliverStatus(Method):
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
     
         manager = self.api.get_interface_manager()
-        status = manager.slice_status(self.api, xrn, valid_creds)
+        status = manager.slice_status(self.api, hrn, valid_creds)
 
         return status
     
