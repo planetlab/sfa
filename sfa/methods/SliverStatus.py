@@ -1,7 +1,7 @@
 from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method
-from sfa.util.parameter import Parameter
+from sfa.util.parameter import Parameter, Mixed
 
 class SliverStatus(Method):
     """
