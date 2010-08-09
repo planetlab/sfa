@@ -34,8 +34,6 @@ class GetTicket(Method):
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
         Parameter(str, "Resource specification (rspec)"),
-        Mixed(Parameter(str, "Human readable name of the original caller"),
-              Parameter(None, "Origin hrn not specified")),
         Parameter(type([]), "List of user information")  
         ]
 
