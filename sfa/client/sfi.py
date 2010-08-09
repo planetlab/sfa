@@ -559,23 +559,20 @@ class Sfi:
             return
     
         records = self.registry.Resolve(args[0], user_cred.save_to_string(save_parents=True))
-        records = filter_records("user", records)
-    
         if not records:
-            print "Error: Didn't find a user record for", args[0]
-            return
-    
+            raise RecordNotFound(args[0])
         # the gid of the user who will be delegated to
         delegee_gid = GID(string=records[0]['gid'])
         delegee_hrn = delegee_gid.get_hrn()
-   
-        dcred = object_cred.delegate(delegee_gid, self.get_key_file())
+        delegee_gidfile = os.path.join(self.options.sfi_dir, delegee_hrn + ".gid")
+        delegee_gid.save_to_file(filename=delegee_gidfile)
+        dcred = object_cred.delegate(delegee_gidfile, self.get_key_file())
     
         if opts.delegate_user:
             dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_" 
                                   + get_leaf(object_hrn) + ".cred")
         elif opts.delegate_slice:
-            dest_fn = os.path_join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_slice_" 
+            dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_slice_" 
                                   + get_leaf(object_hrn) + ".cred")
     
         dcred.save_to_file(dest_fn, save_parents=True)
