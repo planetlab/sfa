@@ -23,10 +23,8 @@ class Update(Method):
     interfaces = ['registry']
     
     accepts = [
-        Parameter(str, "Credential string"),
         Parameter(dict, "Record dictionary to be updated"),
-        Mixed(Parameter(str, "Human readable name of the original caller"),
-              Parameter(None, "Origin hrn not specified"))
+        Parameter(str, "Credential string"),
         ]
 
     returns = Parameter(int, "1 if successful")
