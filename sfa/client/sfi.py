@@ -448,7 +448,7 @@ class Sfi:
     def get_component_server_from_hrn(self, hrn):
         # direct connection to the nodes component manager interface
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        records = self.registry.resolve(user_cred, hrn)
+        records = self.registry.Resolve(hrn, user_cred)
         records = filter_records('node', records)
         if not records:
             print "No such component:", opts.component
@@ -493,7 +493,7 @@ class Sfi:
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = args[0]
         try:
-            list = self.registry.list(user_cred, hrn)
+            list = self.registry.List(hrn, user_cred)
         except IndexError:
             raise Exception, "Not enough parameters for the 'list' command"
           
@@ -513,7 +513,7 @@ class Sfi:
     def show(self, opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         hrn = args[0]
-        records = self.registry.resolve(user_cred, hrn)
+        records = self.registry.Resolve(hrn, user_cred)
         records = filter_records(opts.type, records)
         if not records:
             print "No record of type", opts.type
@@ -541,60 +541,46 @@ class Sfi:
         return
     
     def delegate(self, opts, args):
-       user_cred = self.get_user_cred()
-       if opts.delegate_user:
-           object_cred = user_cred
-       elif opts.delegate_slice:
-           object_cred = self.get_slice_cred(opts.delegate_slice)
-       else:
-           print "Must specify either --user or --slice <hrn>"
-           return
+        user_cred = self.get_user_cred()
+        if opts.delegate_user:
+            object_cred = user_cred
+        elif opts.delegate_slice:
+            object_cred = self.get_slice_cred(opts.delegate_slice)
+        else:
+            print "Must specify either --user or --slice <hrn>"
+            return
     
-       # the gid and hrn of the object we are delegating
-       object_gid = object_cred.get_gid_object()
-       object_hrn = object_gid.get_hrn()
+        # the gid and hrn of the object we are delegating
+        object_gid = object_cred.get_gid_object()
+        object_hrn = object_gid.get_hrn()
     
-       if not object_cred.get_privileges().get_all_delegate():
-           print "Error: Object credential", object_hrn, "does not have delegate bit set"
-           return
+        if not object_cred.get_privileges().get_all_delegate():
+            print "Error: Object credential", object_hrn, "does not have delegate bit set"
+            return
     
-       records = self.registry.resolve(user_cred.save_to_string(save_parents=True), args[0])
-       records = filter_records("user", records)
+        records = self.registry.Resolve(args[0], user_cred.save_to_string(save_parents=True))
+        records = filter_records("user", records)
     
-       if not records:
-           print "Error: Didn't find a user record for", args[0]
-           return
+        if not records:
+            print "Error: Didn't find a user record for", args[0]
+            return
     
-       # the gid of the user who will be delegated to
-       delegee_gid = GID(string=records[0]['gid'])
-       delegee_hrn = delegee_gid.get_hrn()
+        # the gid of the user who will be delegated to
+        delegee_gid = GID(string=records[0]['gid'])
+        delegee_hrn = delegee_gid.get_hrn()
    
-       # the key and hrn of the user who will be delegating
-       user_key = Keypair(filename=self.get_key_file())
-       user_hrn = user_cred.get_gid_caller().get_hrn()
-       subject_string = "%s delegated to %s" % (object_hrn, delegee_hrn)
-       dcred = Credential(subject=subject_string)
-       dcred.set_gid_caller(delegee_gid)
-       dcred.set_gid_object(object_gid)
-       privs = object_cred.get_privileges()
-       dcred.set_privileges(object_cred.get_privileges())
-       dcred.get_privileges().delegate_all_privileges(True)
-       dcred.set_pubkey(object_gid.get_pubkey())
-       dcred.set_issuer(user_key, user_hrn)
-       dcred.set_parent(object_cred)
-       dcred.encode()
-       dcred.sign()
+        dcred = object_cred.delegate(delegee_gid, self.get_key_file())
     
-       if opts.delegate_user:
-           dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_" 
+        if opts.delegate_user:
+            dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_" 
                                   + get_leaf(object_hrn) + ".cred")
-       elif opts.delegate_slice:
-           dest_fn = os.path_join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_slice_" 
+        elif opts.delegate_slice:
+            dest_fn = os.path_join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_slice_" 
                                   + get_leaf(object_hrn) + ".cred")
     
-       dcred.save_to_file(dest_fn, save_parents=True)
+        dcred.save_to_file(dest_fn, save_parents=True)
     
-       print "delegated credential for", object_hrn, "to", delegee_hrn, "and wrote to", dest_fn
+        print "delegated credential for", object_hrn, "to", delegee_hrn, "and wrote to", dest_fn
     
     # removed named registry record
     #   - have to first retrieve the record to be removed
@@ -604,7 +590,7 @@ class Sfi:
         type = opts.type 
         if type in ['all']:
             type = '*'
-        return self.registry.remove(auth_cred, type, hrn)
+        return self.registry.Remove(hrn, auth_cred, type)
     
     # add named registry record
     def add(self, opts, args):
@@ -612,7 +598,7 @@ class Sfi:
         record_filepath = args[0]
         rec_file = self.get_record_file(record_filepath)
         record = load_record_from_file(rec_file).as_dict()
-        return self.registry.register(auth_cred, record)
+        return self.registry.Register(record, auth_cred)
     
     # update named registry entry
     def update(self, opts, args):
@@ -641,11 +627,11 @@ class Sfi:
         else:
             raise "unknown record type" + record.get_type()
         record = record.as_dict()
-        return self.registry.update(cred, record)
+        return self.registry.Update(record, cred)
   
     def get_trusted_certs(self, opts, args):
         """
-        return the trusted certs at this interface 
+        return uhe trusted certs at this interface 
         """ 
         trusted_certs = self.registry.get_trusted_certs()
         for trusted_cert in trusted_certs:
