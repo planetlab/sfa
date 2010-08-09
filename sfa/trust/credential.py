@@ -787,7 +787,7 @@ class Credential(object):
         """
         # get the gid of the object we are delegating
         object_gid = self.get_gid_object()
-        object_hrn = self.get_hrn()        
+        object_hrn = object_gid.get_hrn()        
  
         # the hrn of the user who will be delegated to
         if isinstance(delegee_gid, str):
