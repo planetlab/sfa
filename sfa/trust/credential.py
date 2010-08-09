@@ -780,7 +780,7 @@ class Credential(object):
             parent_cred.verify_parent(parent_cred.parent)
 
 
-    def delegate(self, delegee_gid, keyfile):
+    def delegate(self, delegee_gidfile, keyfile):
         """
         Return a delegated copy of this credential, delegated to the 
         specified gid's user.    
@@ -790,8 +790,7 @@ class Credential(object):
         object_hrn = object_gid.get_hrn()        
  
         # the hrn of the user who will be delegated to
-        if isinstance(delegee_gid, str):
-            delegee_gid = GID(string=records[0]['gid'])
+        delegee_gid = GID(filename=delegee_gidfile)
         delegee_hrn = delegee_gid.get_hrn()
    
         user_key = Keypair(filename=keyfile)
@@ -803,7 +802,7 @@ class Credential(object):
         privs = self.get_privileges()
         dcred.set_privileges(self.get_privileges())
         dcred.get_privileges().delegate_all_privileges(True)
-        dcred.set_issuer_keys(user_key, object_gid)
+        dcred.set_issuer_keys(keyfile, delegee_gidfile)
         dcred.set_parent(self)
         dcred.encode()
         dcred.sign()
