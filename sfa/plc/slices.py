@@ -175,7 +175,7 @@ class Slices:
         if reg_objects:
             site = reg_objects['site']
         else:
-            site_records = registry.Resolve([credential], authority_urn)
+            site_records = registry.Resolve(authority_urn, [credential])
             site = {}            
             for site_record in site_records:            
                 if site_record['type'] == 'authority':
