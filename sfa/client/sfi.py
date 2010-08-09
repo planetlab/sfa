@@ -132,10 +132,10 @@ class Sfi:
                   "update": "record",
                   "aggregates": "[name]",
                   "registries": "[name]",
+                  "get_trusted_certs": "cred",
                   "slices": "",
                   "resources": "[name]",
                   "create": "name rspec",
-                  "get_trusted_certs": "cred",
                   "get_ticket": "name rspec",
                   "redeem_ticket": "ticket",
                   "delete": "name",
@@ -143,10 +143,10 @@ class Sfi:
                   "start": "name",
                   "stop": "name",
                   "delegate": "name",
-                  "version": "",
-                  "sliverStatus": "name",
+                  "status": "name",
                   "renew": "name",
-                  "shutdown": "name"
+                  "shutdown": "name",
+                  "version": "",  
                  }
 
         if additional_cmdargs:
@@ -178,7 +178,6 @@ class Sfi:
                             help="type filter ([all]|user|slice|authority|node|aggregate)",
                             choices=("all", "user", "slice", "authority", "node", "aggregate"),
                             default="all")
-
         # display formats
         if command in ("resources"):
             parser.add_option("-f", "--format", dest="format", type="choice",
@@ -685,20 +684,19 @@ class Sfi:
     # ==================================================================
     
 
+    def version(self, opts, args):
+        server = self.get_server_from_opts(opts)
+        
+        print server.GetVersion()
+
     # list instantiated slices
     def slices(self, opts, args):
         """
         list instantiated slices
         """
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        server = self.slicemgr
-        if opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
-        # direct connection to the nodes component manager interface
-        if opts.component:
-            server = self.get_component_server_from_hrn(opts.component)
-        results = server.get_slices(user_cred)
+        server = self.get_server_from_opts(opts)
+        results = server.ListSlices([user_cred])
         display_list(results)
         return
     
@@ -706,19 +704,19 @@ class Sfi:
     def resources(self, opts, args):
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         server = self.slicemgr
-        if opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
+        call_options = {}
+        server = self.get_server_from_opts(opts)
+        
         if args:
             cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
             hrn = args[0]
+            call_options = {'geni_slice_urn': hrn_to_urn(hrn, 'slice')}
         else:
             cred = user_cred
             hrn = None
-
-        result = server.get_resources(cred, hrn)
+        
+        result = server.ListResources([cred], call_options)
         format = opts.format
-       
         display_rspec(result, format)
         if (opts.file is not None):
             file = opts.file
@@ -730,32 +728,26 @@ class Sfi:
     # created named slice with given rspec
     def create(self, opts, args):
         slice_hrn = args[0]
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
-        server = self.slicemgr
-
-        if opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
-
-        result =  server.create_slice(slice_cred, slice_hrn, rspec)
+        server = self.get_server_from_opts(opts)
+        result =  server.CreateSliver(slice_urn, [slice_cred], rspec, [])
         print result
         return result
 
     # get a ticket for the specified slice
     def get_ticket(self, opts, args):
         slice_hrn, rspec_path = args[0], args[1]
+        slice_urn = hrn_to_urn(slice_hrn, 'slice')
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         rspec_file = self.get_rspec_file(rspec_path) 
         rspec = open(rspec_file).read()
-        server = self.slicemgr
-        if opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
-        ticket_string = server.get_ticket(slice_cred, slice_hrn, rspec)
+        server = self.get_server_from_opts(opts)
+        ticket_string = server.GetTicket(slice_urn, [slice_cred], rspec, [])
         file = os.path.join(self.options.sfi_dir, get_leaf(slice_hrn) + ".ticket")
         print "writing ticket to ", file        
         ticket = SfaTicket(string=ticket_string)
@@ -769,6 +761,7 @@ class Sfi:
         ticket = SfaTicket(filename=ticket_file)
         ticket.decode()
         slice_hrn = ticket.gidObject.get_hrn()
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         #slice_hrn = ticket.attributes['slivers'][0]['hrn']
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
@@ -786,7 +779,7 @@ class Sfi:
                 print "Calling redeem_ticket at %(hostname)s " % locals(),
                 server = self.get_server(hostname, CM_PORT, self.key_file, \
                                          self.cert_file, self.options.debug)
-                server.redeem_ticket(slice_cred, ticket.save_to_string(save_parents=True))
+                server.RedeemTicket(ticket.save_to_string(save_parents=True), slice_cred)
                 print "Success"
             except socket.gaierror:
                 print "Failed:",
@@ -798,111 +791,58 @@ class Sfi:
     # delete named slice
     def delete(self, opts, args):
         slice_hrn = args[0]
-        server = self.slicemgr
-        if opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
-        # direct connection to the nodes component manager interface
-        if opts.component:
-            server = self.get_component_server_from_hrn(opts.component)
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
-        return server.delete_slice(slice_cred, slice_hrn)
+        server = self.get_server_from_opts(opts)
+        return server.DeleteSliver(slice_urn, [slice_cred])
     
     # start named slice
     def start(self, opts, args):
         slice_hrn = args[0]
-        server = self.slicemgr
-        # direct connection to an aggregagte
-        if opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
-        if opts.component:
-            server = self.get_component_server_from_hrn(opts.component)
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        return server.start_slice(slice_cred, slice_hrn)
+        server = self.get_server_from_opts(opts)
+        return server.Start(slice_urn, [slice_cred])
     
     # stop named slice
     def stop(self, opts, args):
         slice_hrn = args[0]
-        server = self.slicemgr
-        # direct connection to an aggregate
-        if opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
-        # direct connection to the nodes component manager interface
-        if opts.component:
-            server = self.get_component_server_from_hrn(opts.component)
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        return server.stop_slice(slice_cred, slice_hrn)
+        server = self.get_server_from_opts(opts)
+        return server.Stop(slice_urn, [slice_cred])
     
     # reset named slice
     def reset(self, opts, args):
         slice_hrn = args[0]
-        server = self.slicemgr
-        # direct connection to the nodes component manager interface
-        if opts.component:
-            server = self.get_component_server_from_hrn(opts.component)
-        slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
-        return server.reset_slice(slice_cred, slice_hrn)
-
-
-    # =====================================================================
-    # GENI AM related calls
-    # =====================================================================
-
-    def GetVersion(self, opts, args):
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         server = self.get_server_from_opts(opts)
-        print server.GetVersion()
+        slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
+        return server.reset_slice(slice_cred, slice_urn)
 
-    def ListResources(self, opts, args):
-        user_cred = self.get_user_cred().save_to_string(save_parents=True)
-        server = self.geni_am
-        call_options = {'geni_compressed': True}
-        xrn = None
-        cred = user_cred
-        if args:
-            xrn = args[0]
-            cred = self.get_slice_cred(xrn).save_to_string(save_parents=True)
-
-        if xrn:
-            call_options['geni_slice_urn'] = xrn
-            
-        rspec = server.ListResources([cred], call_options)
-        rspec = zlib.decompress(rspec.decode('base64'))
-        print rspec
-        
-    def CreateSliver(self, opts, args):
-        slice_xrn = args[0]
-        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
-        rspec_file = self.get_rspec_file(args[1])
-        rspec = open(rspec_file).read()
-        server = self.geni_am
-        return server.CreateSliver(slice_xrn, [slice_cred], rspec, [])
-    
-    def DeleteSliver(self, opts, args):
-        slice_xrn = args[0]
-        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
-        server = self.geni_am
-        return server.DeleteSliver(slice_xrn, [slice_cred])    
-
-    def SliverStatus(self, opts, args):
-        slice_xrn = args[0]
-        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
-        server = self.geni_am
-        print server.SliverStatus(slice_xrn, [slice_cred])
-    
-    def RenewSliver(self, opts, args):
-        slice_xrn = args[0]
-        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
+    def renew(self, opts, args):
+        slice_hrn = args[0]
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
+        server = self.get_server_from_opts(opts)
+        slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         time = args[1]
-        server = self.geni_am
-        return server.RenewSliver(slice_xrn, [slice_cred], time)   
+        return server.RenewSliver(slice_urn, [slice_cred], time)
 
-    def Shutdown(self, opts, args):
-        slice_xrn = args[0]
-        slice_cred = self.get_slice_cred(slice_xrn).save_to_string(save_parents=True)
-        server = self.geni_am
-        return server.Shutdown(slice_xrn, [slice_cred])         
+
+    def status(self, opts, args):
+        slice_hrn = args[0]
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
+        slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
+        server = self.get_server_from_opts(opts)
+        print server.SliverStatus(slice_urn, [slice_cred])
+
+
+    def shutdown(self, opts, args):
+        slice_hrn = args[0]
+        slice_urn = hrn_to_urn(slice_hrn, 'slice') 
+        slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
+        server = self.get_server_from_opts(opts)
+        return server.Shutdown(slice_urn, [slice_cred])         
     
     #
     # Main: parse arguments and dispatch to command
