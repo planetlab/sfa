@@ -42,7 +42,7 @@ class GetTicket(Method):
     def call(self, xrn, creds, rspec, users):
         hrn, type = urn_to_hrn(xrn)
         # Find the valid credentials
-        valid_creds = self.api.auth.checkCredentials(creds, 'createsliver', hrn)
+        valid_creds = self.api.auth.checkCredentials(creds, 'getticket', hrn)
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn() 
 
         #log the call
