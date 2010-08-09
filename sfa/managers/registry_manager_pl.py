@@ -372,7 +372,7 @@ def remove(api, xrn, type, origin_hrn=None):
 
     table = SfaTable()
     filter = {'hrn': hrn}
-    if type not in ['all', '*']:
+    if type and type not in ['all', '*']:
         filter['type'] = type
     records = table.find(filter)
     if not records:
