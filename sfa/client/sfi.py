@@ -565,16 +565,34 @@ class Sfi:
         return
     
     def delegate(self, opts, args):
-        user_cred = self.get_user_cred()
+
+        delegee_hrn = args[0]
         if opts.delegate_user:
-            object_cred = user_cred
+            user_cred = self.get_user_cred()
+            cred = delegate_cred(user_cred, delegee_hrn)
         elif opts.delegate_slice:
-            object_cred = self.get_slice_cred(opts.delegate_slice)
+            slice_cred = self.get_slice_cred(opts.delegate_slice)
+            cred = self.delegate_cred(slice_cred, delegee_hrn)
         else:
             print "Must specify either --user or --slice <hrn>"
             return
+        delegated_cred = Credential(string=cred)
+        object_hrn = delegated_cred.get_gid_object().get_hrn()
+        if opts.delegate_user:
+            dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_"
+                                  + get_leaf(object_hrn) + ".cred")
+        elif opts.delegate_slice:
+            dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_slice_"
+                                  + get_leaf(object_hrn) + ".cred")
+
+        delegated_cred.save_to_file(dest_fn, save_parents=True)
+
+        print "delegated credential for", object_hrn, "to", delegee_hrn, "and wrote to", dest_fn
     
+    def delegate_cred(self, object_cred, hrn):
         # the gid and hrn of the object we are delegating
+        if isinstance(object_cred, str):
+            object_cred = Credential(string=object_cred) 
         object_gid = object_cred.get_gid_object()
         object_hrn = object_gid.get_hrn()
     
@@ -583,23 +601,13 @@ class Sfi:
             return
     
         # the gid of the user who will be delegated to
-        delegee_gid = self.get_gid(args[0])
+        delegee_gid = self.get_gid(hrn)
         delegee_hrn = delegee_gid.get_hrn()
         delegee_gidfile = os.path.join(self.options.sfi_dir, delegee_hrn + ".gid")
         delegee_gid.save_to_file(filename=delegee_gidfile)
         dcred = object_cred.delegate(delegee_gidfile, self.get_key_file())
-    
-        if opts.delegate_user:
-            dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_" 
-                                  + get_leaf(object_hrn) + ".cred")
-        elif opts.delegate_slice:
-            dest_fn = os.path.join(self.options.sfi_dir, get_leaf(delegee_hrn) + "_slice_" 
-                                  + get_leaf(object_hrn) + ".cred")
-    
-        dcred.save_to_file(dest_fn, save_parents=True)
-    
-        print "delegated credential for", object_hrn, "to", delegee_hrn, "and wrote to", dest_fn
-    
+        return dcred.save_to_string(save_parents=True)
+     
     # removed named registry record
     #   - have to first retrieve the record to be removed
     def remove(self, opts, args):
@@ -718,8 +726,10 @@ class Sfi:
         else:
             cred = user_cred
             hrn = None
-        
-        result = server.ListResources([cred], call_options)
+      
+        delegated_cred = self.delegate_cred(cred, self.authority) 
+        creds = [cred, delegated_cred] 
+        result = server.ListResources(creds, call_options)
         format = opts.format
         display_rspec(result, format)
         if (opts.file is not None):
