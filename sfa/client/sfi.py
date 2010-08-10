@@ -351,7 +351,31 @@ class Sfi:
              print "Writing self-signed certificate to", file
           cert.save_to_file(file)
           return file
-   
+
+    def get_cached_gid(self, file):
+        """
+        Return a cached gid    
+        """
+        gid = None 
+        if (os.path.isfile(file)):
+            gid = GID(filename=file)
+        return gid
+
+    def get_gid(self, hrn):
+        gidfile = os.path.join(self.options.sfi_dir, hrn + ".gid")
+        gid = self.get_cached_gid(gidfile)
+        if not gid:
+            user_cred = self.get_user_cred()
+            records = self.registry.Resolve(hrn, user_cred.save_to_string(save_parents=True))
+            if not records:
+                raise RecordNotFound(args[0])
+            gid = GID(string=records[0]['gid'])
+            if self.options.verbose:
+                print "Writing gid to ", gidfile 
+            gid.save_to_file(filename=gidfile)
+        return gid   
+                
+     
     def get_cached_credential(self, file):
         """
         Return a cached credential only if it hasn't expired.
@@ -558,11 +582,8 @@ class Sfi:
             print "Error: Object credential", object_hrn, "does not have delegate bit set"
             return
     
-        records = self.registry.Resolve(args[0], user_cred.save_to_string(save_parents=True))
-        if not records:
-            raise RecordNotFound(args[0])
         # the gid of the user who will be delegated to
-        delegee_gid = GID(string=records[0]['gid'])
+        delegee_gid = self.get_gid(args[0])
         delegee_hrn = delegee_gid.get_hrn()
         delegee_gidfile = os.path.join(self.options.sfi_dir, delegee_hrn + ".gid")
         delegee_gid.save_to_file(filename=delegee_gidfile)
