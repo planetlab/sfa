@@ -581,7 +581,7 @@ class Sfi:
         delegee_hrn = args[0]
         if opts.delegate_user:
             user_cred = self.get_user_cred()
-            cred = delegate_cred(user_cred, delegee_hrn)
+            cred = self.delegate_cred(user_cred, delegee_hrn)
         elif opts.delegate_slice:
             slice_cred = self.get_slice_cred(opts.delegate_slice)
             cred = self.delegate_cred(slice_cred, delegee_hrn)
