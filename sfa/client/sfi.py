@@ -132,6 +132,7 @@ class Sfi:
                   "update": "record",
                   "aggregates": "[name]",
                   "registries": "[name]",
+                  "get_gid": [],  
                   "get_trusted_certs": "cred",
                   "slices": "",
                   "resources": "[name]",
@@ -361,7 +362,18 @@ class Sfi:
             gid = GID(filename=file)
         return gid
 
-    def get_gid(self, hrn):
+    def get_gid(self, opts, args):
+        hrn = None
+        if args:
+            hrn = args[0]
+        gid = self._get_gid(hrn)
+        print gid.save_to_string(save_parents=True)
+        return gid
+
+    def _get_gid(self, hrn=None):
+        if not hrn:
+            hrn = self.user
+ 
         gidfile = os.path.join(self.options.sfi_dir, hrn + ".gid")
         gid = self.get_cached_gid(gidfile)
         if not gid:
@@ -601,7 +613,7 @@ class Sfi:
             return
     
         # the gid of the user who will be delegated to
-        delegee_gid = self.get_gid(hrn)
+        delegee_gid = self._get_gid(hrn)
         delegee_hrn = delegee_gid.get_hrn()
         delegee_gidfile = os.path.join(self.options.sfi_dir, delegee_hrn + ".gid")
         delegee_gid.save_to_file(filename=delegee_gidfile)
