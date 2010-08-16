@@ -48,7 +48,7 @@ class ListResources(Method):
         filtered_rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec) 
  
         if options.has_key('geni_compressed') and options['geni_compressed'] == True:
-            filtered_rspec = zlib.compress(rspec).encode('base64')
+            filtered_rspec = zlib.compress(filtered_rspec).encode('base64')
 
         return filtered_rspec  
     
