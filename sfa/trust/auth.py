@@ -6,6 +6,7 @@
 #
 
 
+from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.trustedroot import TrustedRootList
 from sfa.util.faults import *
