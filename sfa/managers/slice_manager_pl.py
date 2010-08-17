@@ -107,12 +107,14 @@ def get_ticket(api, xrn, creds, rspec, users):
             net_urn = hrn_to_urn(aggregate, 'authority')     
             # we may have a peer that knows about this aggregate
             for agg in api.aggregates:
-                agg_info = api.aggregates[agg].get_aggregates(credential, net_urn)
-                if agg_info:
-                    # send the request to this address 
-                    url = 'http://%s:%s' % (agg_info['addr'], agg_info['port'])
-                    server = xmlrpcprotocol.get_server(url, api.key_file, api.cert_file)
-                    break   
+                target_aggs = api.aggregates[agg].get_aggregates(credential, net_urn)
+                if not target_aggs or not 'hrn' not target_aggs[0]:
+                    continue
+                # send the request to this address 
+                url = target_aggs[0]['url']
+                server = xmlrpcprotocol.get_server(url, api.key_file, api.cert_file)
+                # aggregate found, no need to keep looping
+                break   
         if server is None:
             continue 
         threads.run(server.GetTicket, xrn, credential, aggregate_rspec, users)
