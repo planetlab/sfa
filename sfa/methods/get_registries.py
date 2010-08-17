@@ -30,5 +30,7 @@ class get_registries(Method):
     def call(self, cred, xrn = None):
         hrn, type = urn_to_hrn(xrn)
         self.api.auth.check(cred, 'list')
-        registries = Registries(self.api)
-        return registries.interfaces.values()
+        registries = Registries(self.api).interfaces.values()
+        if hrn:
+            registries = [reg for reg in registries if reg['hrn'] == hrn] 
+        return registries
