@@ -738,9 +738,10 @@ class Sfi:
         else:
             cred = user_cred
             hrn = None
-      
-        delegated_cred = self.delegate_cred(cred, self.authority) 
+     
+        delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
         creds = [cred, delegated_cred] 
+        #creds = [delegated_cred] 
         result = server.ListResources(creds, call_options)
         format = opts.format
         display_rspec(result, format)
