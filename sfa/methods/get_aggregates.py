@@ -30,5 +30,7 @@ class get_aggregates(Method):
     def call(self, cred, xrn = None):
         hrn, type = urn_to_hrn(xrn)
         self.api.auth.check(cred, 'list')
-        aggregates = Aggregates(self.api)
-        return aggregates.interfaces.values()
+        aggregates = Aggregates(self.api).interfaces.values()
+        if hrn:
+            aggregates = [agg for agg in aggregates if agg['hrn'] == hrn]
+        return aggregates
