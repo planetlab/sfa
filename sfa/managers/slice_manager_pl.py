@@ -66,10 +66,9 @@ def create_slice(api, xrn, creds, rspec, users):
     cred = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
-        if aggregate not in [api.auth.client_cred.get_gid_caller().get_hrn()]:
-            server = api.aggregates[aggregate]
-            # Just send entire RSpec to each aggregate
-            threads.run(server.CreateSliver, xrn, cred, rspec, users)
+        # Just send entire RSpec to each aggregate
+        server = api.aggregates[aggregate]
+        threads.run(server.CreateSliver, xrn, cred, rspec, users)
             
     results = threads.get_results() 
     merged_rspec = merge_rspecs(results)
@@ -261,15 +260,13 @@ def get_rspec(api, creds, options):
     threads = ThreadManager()
     
     for aggregate in api.aggregates:
-        if aggregate not in [api.auth.client_cred.get_gid_caller().get_hrn()]:   
-            # get the rspec from the aggregate
-            server = api.aggregates[aggregate]
-            my_opts = copy(options)
-            my_opts['geni_compressed'] = False
-            threads.run(server.ListResources, cred, my_opts)
-            #threads.run(server.get_resources, cred, xrn, origin_hrn)
+        # get the rspec from the aggregate
+        server = api.aggregates[aggregate]
+        my_opts = copy(options)
+        my_opts['geni_compressed'] = False
+        threads.run(server.ListResources, cred, my_opts)
+        #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
-
     results = threads.get_results()
     # combine the rspecs into a single rspec 
     for agg_rspec in results:
