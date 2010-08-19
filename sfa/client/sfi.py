@@ -611,13 +611,17 @@ class Sfi:
         if not object_cred.get_privileges().get_all_delegate():
             print "Error: Object credential", object_hrn, "does not have delegate bit set"
             return
-    
+
+        # the delegating user's gid
+        caller_gid = self._get_gid(self.user)
+        caller_gidfile = os.path.join(self.options.sfi_dir, self.user + ".gid")
+  
         # the gid of the user who will be delegated to
         delegee_gid = self._get_gid(hrn)
         delegee_hrn = delegee_gid.get_hrn()
         delegee_gidfile = os.path.join(self.options.sfi_dir, delegee_hrn + ".gid")
         delegee_gid.save_to_file(filename=delegee_gidfile)
-        dcred = object_cred.delegate(delegee_gidfile, self.get_key_file())
+        dcred = object_cred.delegate(delegee_gidfile, self.get_key_file(), caller_gidfile)
         return dcred.save_to_string(save_parents=True)
      
     # removed named registry record
