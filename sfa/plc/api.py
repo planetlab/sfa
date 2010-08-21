@@ -137,8 +137,12 @@ class SfaAPI(BaseAPI):
         Attempt to find a credential delegated to us in
         the specified list of creds.
         """
-        if creds and not isinstance(creds, list): creds = [creds]
-        return filter_creds_by_caller(creds,self.hrn)
+        if creds and not isinstance(creds, list): 
+            creds = [creds]
+        delegated_creds = filter_creds_by_caller(creds,self.hrn)
+        if not delegated_creds:
+            return None
+        return delegated_creds[0]
  
     def getCredentialFromRegistry(self):
         """ 
