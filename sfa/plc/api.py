@@ -124,11 +124,22 @@ class SfaAPI(BaseAPI):
         return shell
 
     def getCredential(self):
+        """
+        Retrun a valid credential for this interface. 
+        """
         if self.interface in ['registry']:
             return self.getCredentialFromLocalRegistry()
         else:
             return self.getCredentialFromRegistry()
-    
+
+    def getDelegatedCredential(self, creds):
+        """
+        Attempt to find a credential delegated to us in
+        the specified list of creds.
+        """
+        if creds and not isinstance(creds, list): creds = [creds]
+        return filter_creds_by_caller(creds,self.hrn)
+ 
     def getCredentialFromRegistry(self):
         """ 
         Get our credential from a remote registry 
