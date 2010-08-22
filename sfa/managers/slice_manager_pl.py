@@ -60,10 +60,10 @@ def create_slice(api, xrn, creds, rspec, users):
             message = "%s (line %s)" % (error.message, error.line)
             raise InvalidRSpec(message)
 
-    # XX
-    # XX TODO: Should try to use delegated credential first
-    # XX
-    cred = api.getCredential()
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:     
+        credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         # Just send entire RSpec to each aggregate
@@ -75,10 +75,10 @@ def create_slice(api, xrn, creds, rspec, users):
     return merged_rspec
 
 def renew_slice(api, xrn, creds, expiration_time):
-    # XX
-    # XX TODO: Should try to use delegated credential first
-    # XX
-    credential = api.getCredential()
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
@@ -96,8 +96,10 @@ def get_ticket(api, xrn, creds, rspec, users):
         aggregate_hrn = element.values()[0]
         aggregate_rspecs[aggregate_hrn] = rspec 
 
-    # get a ticket from each aggregate 
-    credential = api.getCredential()
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential() 
     threads = ThreadManager()
     for aggregate, aggregate_rspec in aggregate_rspecs.items():
         server = None
@@ -155,10 +157,10 @@ def get_ticket(api, xrn, creds, rspec, users):
 
 
 def delete_slice(api, xrn, origin_hrn=None):
-    # XX
-    # XX TODO: Should try to use delegated credential first
-    # XX
-    credential = api.getCredential()
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
@@ -167,10 +169,10 @@ def delete_slice(api, xrn, origin_hrn=None):
     return 1
 
 def start_slice(api, xrn, creds):
-    # XX
-    # XX TODO: Should try to use delegated credential first
-    # XX
-    credential = api.getCredential()
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
@@ -179,10 +181,10 @@ def start_slice(api, xrn, creds):
     return 1
  
 def stop_slice(api, xrn, creds):
-    # XX
-    # XX TODO: Should try to use delegated credential first
-    # XX
-    credential = api.getCredential()
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
@@ -215,10 +217,12 @@ def get_slices(api, creds):
         if slices:
             return slices    
 
-    # fetch from aggregates
-    slices = []
-    credential = api.getCredential()
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
     threads = ThreadManager()
+    # fetch from aggregates
     for aggregate in api.aggregates:
         server = api.aggregates[aggregate]
         threads.run(server.ListSlices, credential)
@@ -253,12 +257,12 @@ def get_rspec(api, creds, options):
 
     hrn, type = urn_to_hrn(xrn)
     rspec = None
-    # XX
-    # XX TODO: Should try to use delegated credential first 
-    # XX
-    cred = api.getCredential()
-    threads = ThreadManager()
     
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
+    threads = ThreadManager()
     for aggregate in api.aggregates:
         # get the rspec from the aggregate
         server = api.aggregates[aggregate]
