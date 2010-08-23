@@ -268,7 +268,7 @@ def get_rspec(api, creds, options):
         server = api.aggregates[aggregate]
         my_opts = copy(options)
         my_opts['geni_compressed'] = False
-        threads.run(server.ListResources, cred, my_opts)
+        threads.run(server.ListResources, credential, my_opts)
         #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
     results = threads.get_results()
