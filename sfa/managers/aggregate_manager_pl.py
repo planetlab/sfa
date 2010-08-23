@@ -228,11 +228,6 @@ def get_rspec(api, creds, options):
     xrn = options.get('geni_slice_urn', None)
     hrn, type = urn_to_hrn(xrn)
 
-    # get hrn of the original caller
-    origin_hrn = options.get('origin_hrn', None)
-    if not origin_hrn:
-        origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
-    
     # look in cache first
     if api.cache and not xrn:
         rspec = api.cache.get('nodes')
