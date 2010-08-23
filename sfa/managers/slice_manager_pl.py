@@ -68,7 +68,7 @@ def create_slice(api, xrn, creds, rspec, users):
     for aggregate in api.aggregates:
         # Just send entire RSpec to each aggregate
         server = api.aggregates[aggregate]
-        threads.run(server.CreateSliver, xrn, cred, rspec, users)
+        threads.run(server.CreateSliver, xrn, credential, rspec, users)
             
     results = threads.get_results() 
     merged_rspec = merge_rspecs(results)
