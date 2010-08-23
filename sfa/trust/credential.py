@@ -171,7 +171,7 @@ class Signature(object):
 # not be changed else the signature is no longer valid.  So, once
 # you have loaded an existing signed credential, do not call encode() or sign() on it.
 
-def filter_creds_by_caller(self, creds, caller_hrn):
+def filter_creds_by_caller(creds, caller_hrn):
         """
         Returns a list of creds who's gid caller matches the
         specified caller hrn
