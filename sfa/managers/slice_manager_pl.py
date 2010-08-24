@@ -156,7 +156,7 @@ def get_ticket(api, xrn, creds, rspec, users):
     return ticket.save_to_string(save_parents=True)
 
 
-def delete_slice(api, xrn, origin_hrn=None):
+def delete_slice(api, xrn, creds):
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:
