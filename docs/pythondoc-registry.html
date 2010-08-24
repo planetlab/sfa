@@ -1,0 +1,433 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The registry Module</title>
+</head>
+<body>
+<h1>The registry Module</h1>
+<p>Geni Registry Wrapper
+
+This wrapper implements the Geni Registry.
+
+There are several items that need to be done before starting the registry.
+
+1) Update util/config.py to match the parameters of your PLC installation.
+
+2) Import the existing planetlab database, creating the
+appropriate geni records. This is done by running the &quot;import.py&quot; tool.
+
+3) Create a &quot;trusted_roots&quot; directory and place the certificate of the root
+authority in that directory. Given the defaults in import.py, this certificate
+would be named &quot;planetlab.gid&quot;. For example,
+
+   mkdir trusted_roots; cp authorities/planetlab.gid trusted_roots/</p>
+<dl>
+<dt><a id='registry.geni_fields_to_pl_fields-function' name='registry.geni_fields_to_pl_fields-function'><b>geni_fields_to_pl_fields(type, hrn, geni_fields, pl_fields)</b></a> [<a href='#registry.geni_fields_to_pl_fields-function'>#</a>]</dt>
+<dd>
+<p>Convert geni fields to PLC fields for use when registering up updating
+registry record in the PLC database</p>
+<dl>
+<dt><i>type</i></dt>
+<dd>
+type of record (user, slice, ...)</dd>
+<dt><i>hrn</i></dt>
+<dd>
+human readable name</dd>
+<dt><i>geni_fields</i></dt>
+<dd>
+dictionary of geni fields</dd>
+<dt><i>pl_fields</i></dt>
+<dd>
+dictionary of PLC fields (output)</dd>
+</dl><br />
+</dd>
+<dt><b>Registry(ip, port, key_file, cert_file)</b> (class) [<a href='#registry.Registry-class'>#</a>]</dt>
+<dd>
+<p>Registry is a GeniServer that serves registry requests.</p>
+<p>For more information about this class, see <a href='#registry.Registry-class'><i>The Registry Class</i></a>.</p>
+</dd>
+</dl>
+<h2><a id='registry.Registry-class' name='registry.Registry-class'>The Registry Class</a></h2>
+<dl>
+<dt><b>Registry(ip, port, key_file, cert_file)</b> (class) [<a href='#registry.Registry-class'>#</a>]</dt>
+<dd>
+<p>Registry is a GeniServer that serves registry requests. It also serves
+component and slice operations that are implemented on the registry
+due to SFA engineering decisions</p>
+</dd>
+<dt><a id='registry.Registry.connect_local_shell-method' name='registry.Registry.connect_local_shell-method'><b>connect_local_shell()</b></a> [<a href='#registry.Registry.connect_local_shell-method'>#</a>]</dt>
+<dd>
+<p>Connect to a local shell via local API functions</p>
+</dd>
+<dt><a id='registry.Registry.connect_remote_shell-method' name='registry.Registry.connect_remote_shell-method'><b>connect_remote_shell()</b></a> [<a href='#registry.Registry.connect_remote_shell-method'>#</a>]</dt>
+<dd>
+<p>Connect to a remote shell via XMLRPC</p>
+</dd>
+<dt><a id='registry.Registry.create_gid-method' name='registry.Registry.create_gid-method'><b>create_gid(cred, name, uuid, pubkey_str)</b></a> [<a href='#registry.Registry.create_gid-method'>#</a>]</dt>
+<dd>
+<p>GENI_API: Create_gid
+
+Create a new GID. For MAs and SAs that are physically located on the
+registry, this allows a owner/operator/PI to create a new GID and have it
+signed by his respective authority.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential of caller</dd>
+<dt><i>name</i></dt>
+<dd>
+hrn for new GID</dd>
+<dt><i>uuid</i></dt>
+<dd>
+unique identifier for new GID</dd>
+<dt><i>pkey_string</i></dt>
+<dd>
+public-key string (TODO: why is this a string and not a keypair object?)</dd>
+<dt>Returns:</dt>
+<dd>
+the string representation of a GID object</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.determine_rights-method' name='registry.Registry.determine_rights-method'><b>determine_rights(type, name)</b></a> [<a href='#registry.Registry.determine_rights-method'>#</a>]</dt>
+<dd>
+<p>Determine tje rights that an object should have. The rights are entirely
+dependent on the type of the object. For example, users automatically
+get &quot;refresh&quot;, &quot;resolve&quot;, and &quot;info&quot;.</p>
+<dl>
+<dt><i>type</i></dt>
+<dd>
+the type of the object (user | sa | ma | slice | node)</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name of the object (not used at this time)</dd>
+<dt>Returns:</dt>
+<dd>
+RightList object containing rights</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.fill_record_geni_info-method' name='registry.Registry.fill_record_geni_info-method'><b>fill_record_geni_info(record)</b></a> [<a href='#registry.Registry.fill_record_geni_info-method'>#</a>]</dt>
+<dd>
+<p>Fill in the geni-specific fields of the record.
+
+Note: It is assumed the fill_record_pl_info() has already been performed
+on the record.</p>
+</dd>
+<dt><a id='registry.Registry.fill_record_info-method' name='registry.Registry.fill_record_info-method'><b>fill_record_info(record)</b></a> [<a href='#registry.Registry.fill_record_info-method'>#</a>]</dt>
+<dd>
+<p>Given a Geni record, fill in the PLC-specific and Geni-specific fields
+in the record.</p>
+</dd>
+<dt><a id='registry.Registry.fill_record_pl_info-method' name='registry.Registry.fill_record_pl_info-method'><b>fill_record_pl_info(record)</b></a> [<a href='#registry.Registry.fill_record_pl_info-method'>#</a>]</dt>
+<dd>
+<p>Fill in the planetlab-specific fields of a Geni record. This involves
+calling the appropriate PLC methods to retrieve the database record for
+the object.
+
+PLC data is filled into the pl_info field of the record.</p>
+<dl>
+<dt><i>record</i></dt>
+<dd>
+record to fill in fields (in/out param)</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.get_auth_info-method' name='registry.Registry.get_auth_info-method'><b>get_auth_info(auth_hrn)</b></a> [<a href='#registry.Registry.get_auth_info-method'>#</a>]</dt>
+<dd>
+<p>Given an authority name, return the information for that authority. This
+is basically a stub that calls the hierarchy module.</p>
+<dl>
+<dt><i>auth_hrn</i></dt>
+<dd>
+human readable name of authority</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.get_auth_table-method' name='registry.Registry.get_auth_table-method'><b>get_auth_table(auth_name)</b></a> [<a href='#registry.Registry.get_auth_table-method'>#</a>]</dt>
+<dd>
+<p>Given an authority name, return the database table for that authority. If
+the database table does not exist, then one will be automatically
+created.</p>
+<dl>
+<dt><i>auth_name</i></dt>
+<dd>
+human readable name of authority</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.get_credential-method' name='registry.Registry.get_credential-method'><b>get_credential(cred, type, name)</b></a> [<a href='#registry.Registry.get_credential-method'>#</a>]</dt>
+<dd>
+<p>GENI API: Get_credential
+
+Retrieve a credential for an object.
+
+If cred==None, then the behavior reverts to get_self_credential()</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object specifying rights of the caller</dd>
+<dt><i>type</i></dt>
+<dd>
+type of object (user | slice | sa | ma | node)</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name of object</dd>
+<dt>Returns:</dt>
+<dd>
+the string representation of a credental object</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.get_gid-method' name='registry.Registry.get_gid-method'><b>get_gid(name)</b></a> [<a href='#registry.Registry.get_gid-method'>#</a>]</dt>
+<dd>
+<p>GENI API: get_gid
+
+Retrieve the GID for an object. This function looks up a record in the
+registry and returns the GID of the record if it exists.
+TODO: Is this function needed? It's a shortcut for Resolve()</p>
+<dl>
+<dt><i>name</i></dt>
+<dd>
+hrn to look up</dd>
+<dt>Returns:</dt>
+<dd>
+the string representation of a GID object</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.get_self_credential-method' name='registry.Registry.get_self_credential-method'><b>get_self_credential(type, name)</b></a> [<a href='#registry.Registry.get_self_credential-method'>#</a>]</dt>
+<dd>
+<p>GENI API: Get_self_credential
+
+Get_self_credential a degenerate version of get_credential used by a
+client to get his initial credential when he doesn't have one. This is
+the same as get_credential(..., cred=None,...).
+
+The registry ensures that the client is the principal that is named by
+(type, name) by comparing the public key in the record's GID to the
+private key used to encrypt the client-side of the HTTPS connection. Thus
+it is impossible for one principal to retrieve another principal's
+credential without having the appropriate private key.</p>
+<dl>
+<dt><i>type</i></dt>
+<dd>
+type of object (user | slice | sa | ma | node</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name of object</dd>
+<dt>Returns:</dt>
+<dd>
+the string representation of a credential object</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.get_ticket-method' name='registry.Registry.get_ticket-method'><b>get_ticket(cred, name, rspec)</b></a> [<a href='#registry.Registry.get_ticket-method'>#</a>]</dt>
+<dd>
+<p>GENI API: get_ticket
+
+Retrieve a ticket. This operation is currently implemented on the
+registry (see SFA, engineering decisions), and is not implemented on
+components.
+
+The ticket is filled in with information from the PLC database. This
+information includes resources, and attributes such as user keys and
+initscripts.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential string</dd>
+<dt><i>name</i></dt>
+<dd>
+name of the slice to retrieve a ticket for</dd>
+<dt><i>rspec</i></dt>
+<dd>
+resource specification dictionary</dd>
+<dt>Returns:</dt>
+<dd>
+the string representation of a ticket object</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.list-method' name='registry.Registry.list-method'><b>list(cred)</b></a> [<a href='#registry.Registry.list-method'>#</a>]</dt>
+<dd>
+<p>List the records in an authority. The objectGID in the supplied credential
+should name the authority that will be listed.
+
+TODO: List doesn't take an hrn and uses the hrn contained in the
+   objectGid of the credential. Does this mean the only way to list an
+   authority is by having a credential for that authority?</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential string specifying rights of the caller</dd>
+<dt>Returns:</dt>
+<dd>
+list of record dictionaries</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.lookup_users-method' name='registry.Registry.lookup_users-method'><b>lookup_users(auth_table, user_id_list, role=&quot;*&quot;)</b></a> [<a href='#registry.Registry.lookup_users-method'>#</a>]</dt>
+<dd>
+<p>Look up user records given PLC user-ids. This is used as part of the
+process for reverse-mapping PLC records into Geni records.</p>
+<dl>
+<dt><i>auth_table</i></dt>
+<dd>
+database table for the authority that holds the user records</dd>
+<dt><i>user_id_list</i></dt>
+<dd>
+list of user ids</dd>
+<dt><i>role</i></dt>
+<dd>
+either &quot;*&quot; or a string describing the role to look for (&quot;pi&quot;, &quot;user&quot;, ...)
+
+TODO: This function currently only searches one authority because it would
+be inefficient to brute-force search all authorities for a user id. The
+solution would likely be to implement a reverse mapping of user-id to
+(type, hrn) pairs.</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.record_to_slice_info-method' name='registry.Registry.record_to_slice_info-method'><b>record_to_slice_info(record)</b></a> [<a href='#registry.Registry.record_to_slice_info-method'>#</a>]</dt>
+<dd>
+<p>Convert a PLC record into the slice information that will be stored in
+a ticket. There are two parts to this information: attributes and
+rspec.
+
+Attributes are non-resource items, such as keys and the initscript
+RSpec is a set of resource specifications</p>
+<dl>
+<dt><i>record</i></dt>
+<dd>
+a record object</dd>
+<dt>Returns:</dt>
+<dd>
+a tuple (attrs, rspec) of dictionaries</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.register-method' name='registry.Registry.register-method'><b>register(cred, record_dict)</b></a> [<a href='#registry.Registry.register-method'>#</a>]</dt>
+<dd>
+<p>GENI API: register
+
+Register an object with the registry. In addition to being stored in the
+Geni database, the appropriate records will also be created in the
+PLC databases</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential string</dd>
+<dt><i>record_dict</i></dt>
+<dd>
+dictionary containing record fields</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.register_functions-method' name='registry.Registry.register_functions-method'><b>register_functions()</b></a> [<a href='#registry.Registry.register_functions-method'>#</a>]</dt>
+<dd>
+<p>Register the server RPCs for the registry</p>
+</dd>
+<dt><a id='registry.Registry.remove-method' name='registry.Registry.remove-method'><b>remove(cred, record_dict)</b></a> [<a href='#registry.Registry.remove-method'>#</a>]</dt>
+<dd>
+<p>GENI API: remove
+
+Remove an object from the registry. If the object represents a PLC object,
+then the PLC records will also be removed.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential string</dd>
+<dt><i>record_dict</i></dt>
+<dd>
+dictionary containing record fields. The only relevant
+    fields of the record are 'name' and 'type', which are used to lookup
+    the current copy of the record in the Geni database, to make sure
+    that the appopriate record is removed.</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.resolve-method' name='registry.Registry.resolve-method'><b>resolve(cred, name)</b></a> [<a href='#registry.Registry.resolve-method'>#</a>]</dt>
+<dd>
+<p>GENI API: Resolve
+
+This is a wrapper around resolve_raw that converts records objects into
+dictionaries before returning them to the user.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential string authorizing the caller</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name to resolve</dd>
+<dt>Returns:</dt>
+<dd>
+a list of record dictionaries, or an empty list</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.resolve_raw-method' name='registry.Registry.resolve_raw-method'><b>resolve_raw(type, name, must_exist=True)</b></a> [<a href='#registry.Registry.resolve_raw-method'>#</a>]</dt>
+<dd>
+<p>Resolve a record. This is an internal version of the Resolve API call
+and returns records in record object format rather than dictionaries
+that may be sent over XMLRPC.</p>
+<dl>
+<dt><i>type</i></dt>
+<dd>
+type of record to resolve (user | sa | ma | slice | node)</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name of object</dd>
+<dt><i>must_exist</i></dt>
+<dd>
+if True, throw an exception if no records are found</dd>
+<dt>Returns:</dt>
+<dd>
+a list of record objects, or an empty list []</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.update-method' name='registry.Registry.update-method'><b>update(cred, record_dict)</b></a> [<a href='#registry.Registry.update-method'>#</a>]</dt>
+<dd>
+<p>GENI API: Register
+
+Update an object in the registry. Currently, this only updates the
+PLC information associated with the record. The Geni fields (name, type,
+GID) are fixed.
+
+The record is expected to have the pl_info field filled in with the data
+that should be updated.
+
+TODO: The geni_info member of the record should be parsed and the pl_info
+adjusted as necessary (add/remove users from a slice, etc)</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential string specifying rights of the caller</dd>
+<dt><i>record</i></dt>
+<dd>
+a record dictionary to be updated</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.verify_auth_belongs_to_me-method' name='registry.Registry.verify_auth_belongs_to_me-method'><b>verify_auth_belongs_to_me(name)</b></a> [<a href='#registry.Registry.verify_auth_belongs_to_me-method'>#</a>]</dt>
+<dd>
+<p>Verify that an authority belongs to this registry. This is basically left
+up to the implementation of the hierarchy module. If the specified name
+does not belong to this registry, an exception is thrown indicating the
+caller should contact someone else.</p>
+<dl>
+<dt><i>auth_name</i></dt>
+<dd>
+human readable name of authority</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.verify_object_belongs_to_me-method' name='registry.Registry.verify_object_belongs_to_me-method'><b>verify_object_belongs_to_me(name)</b></a> [<a href='#registry.Registry.verify_object_belongs_to_me-method'>#</a>]</dt>
+<dd>
+<p>Verify that an object belongs to this registry. By extension, this implies
+that the authority that owns the object belongs to this registry. If the
+object does not belong to this registry, then an exception is thrown.</p>
+<dl>
+<dt><i>name</i></dt>
+<dd>
+human readable name of object</dd>
+</dl><br />
+</dd>
+<dt><a id='registry.Registry.verify_object_permission-method' name='registry.Registry.verify_object_permission-method'><b>verify_object_permission(name)</b></a> [<a href='#registry.Registry.verify_object_permission-method'>#</a>]</dt>
+<dd>
+<p>Verify that the object_gid that was specified in the credential allows
+permission to the object 'name'. This is done by a simple prefix test.
+For example, an object_gid for planetlab.us.arizona would match the
+objects planetlab.us.arizona.slice1 and planetlab.us.arizona.</p>
+<dl>
+<dt><i>name</i></dt>
+<dd>
+human readable name to test</dd>
+</dl><br />
+</dd>
+</dl>
+</body></html>

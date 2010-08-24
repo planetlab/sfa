@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- Magic sauce copied from a manual. This fragment basically copies everything except for
+    stuff that explicitly matches with the templates defined below. In the case of such a match,
+    the matched node is treated differently.-->
+    <xsl:template match="@* | node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@* | node()"/>
+        </xsl:copy>
+    </xsl:template>
+    <!-- End of magic sauce -->
+
+    <!-- Read in the value of the argument. See 'example_vini_rspec.xml' for an example of such an argument -->
+    <xsl:variable name="max-link-bandwidth" select="//rspec//rule-context/argument[name='max-link-bandwidth']/value"/>
+
+    <!-- Drop Linkspecs for which bw > max-link-bandwidth -->
+    <xsl:template match="LinkSpec">
+            <xsl:choose>
+                <xsl:when test="bw &lt; $max-link-bandwidth">
+                    <xsl:copy-of select="."/>
+                </xsl:when>
+                <xsl:otherwise/>
+            </xsl:choose> 
+    </xsl:template>
+
+    <xsl:template match="sfatables-input"/>
+</xsl:stylesheet>
+

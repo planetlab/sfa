@@ -1,0 +1,19 @@
+<!-- 
+"context" specifies the subset of the requestor context that this match needs to see. It is specified as an xpath expression.
+For this simple match, we just need to look at sfa-input. 
+
+"rule" specifies a set of arguments that the match accepts.
+-->
+
+<match name="slice">
+    <!-- Empty context. We _always_ get the hrn of the current user -->
+    <rule element='*'>
+    <context select="//sfa/current/slice@hrn"/>
+        <argument>
+            <name>hrn</name>
+            <help>HRN of the slice requesting resources</help>
+            <operand>HRN</operand>
+        </argument>
+    <processor filename="slice-hrn.xsl"/>
+    </rule>
+</match>

@@ -1,0 +1,8 @@
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+MAILTO=server-msgs@planet-lab.org
+HOME=/
+#
+# minute hour day-of-month month day-of-week user command
+0 * * * *  /usr/bin/sfa-import-plc.py > /dev/null 2>&1
+0 0 * * * /usr/bin/sfa-clean-peer-records.py > /dev/null 2>&1  

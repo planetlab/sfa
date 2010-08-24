@@ -1,0 +1,13 @@
+<!-- run "runtime.py sfarspec" to apply current rule set to this file -->
+
+<RSpec>
+     <request>
+        <nodespec name="foobar">
+            <node name="plc.princeton.planetlab-01"/>
+            <node name="plc.princeton.planetlab-02"/>
+            <node name="plc.princeton.planetlab-03"/>
+            <node name="plc.princeton.planetlab-04"/>
+            <node name="plc.tp.planetlab3"/>
+        </nodespec>
+    </request>
+</RSpec>

@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The component Module</title>
+</head>
+<body>
+<h1>The component Module</h1>
+<p>Geni Component Wrapper
+
+This wrapper implements the Geni Component Interface</p>
+<dl>
+<dt><b>ComponentManager(ip, port, key_file, cert_file)</b> (class) [<a href='#component.ComponentManager-class'>#</a>]</dt>
+<dd>
+<p>ComponentManager is a GeniServer that serves component interface requests.</p>
+<p>For more information about this class, see <a href='#component.ComponentManager-class'><i>The ComponentManager Class</i></a>.</p>
+</dd>
+</dl>
+<h2><a id='component.ComponentManager-class' name='component.ComponentManager-class'>The ComponentManager Class</a></h2>
+<dl>
+<dt><b>ComponentManager(ip, port, key_file, cert_file)</b> (class) [<a href='#component.ComponentManager-class'>#</a>]</dt>
+<dd>
+<p>ComponentManager is a GeniServer that serves component interface requests.</p>
+</dd>
+<dt><a id='component.ComponentManager.decode_ticket-method' name='component.ComponentManager.decode_ticket-method'><b>decode_ticket(ticket_string)</b></a> [<a href='#component.ComponentManager.decode_ticket-method'>#</a>]</dt>
+<dd>
+<p>Examine the ticket that was provided by the caller, check that it is
+signed and verified correctly. Throw an exception if something is
+wrong with the ticket.
+
+This is similar to geniserver.decode_authentication</p>
+<dl>
+<dt><i>ticket_string</i></dt>
+<dd>
+the string representation of the ticket</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.delete_slice-method' name='component.ComponentManager.delete_slice-method'><b>delete_slice(cred_str)</b></a> [<a href='#component.ComponentManager.delete_slice-method'>#</a>]</dt>
+<dd>
+<p>Delete a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.geni_ticket_to_plc_rec-method' name='component.ComponentManager.geni_ticket_to_plc_rec-method'><b>geni_ticket_to_plc_rec(ticket)</b></a> [<a href='#component.ComponentManager.geni_ticket_to_plc_rec-method'>#</a>]</dt>
+<dd>
+<p>Convert a geni ticket into a PLC record that can be submitted to the
+node manager. This involves some minor reformatting of the fields
+contained in the ticket.</p>
+<dl>
+<dt><i>ticket</i></dt>
+<dd>
+a ticket object</dd>
+<dt>Returns:</dt>
+<dd>
+a dictionary containing the PLC record info</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.list_slices-method' name='component.ComponentManager.list_slices-method'><b>list_slices(cred_str)</b></a> [<a href='#component.ComponentManager.list_slices-method'>#</a>]</dt>
+<dd>
+<p>List the slices on a component.</p>
+<dl>
+<dt><i>cred_str</i></dt>
+<dd>
+string representation of a credential object that
+    authorizes the caller</dd>
+<dt>Returns:</dt>
+<dd>
+a list of slice names</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.reboot-method' name='component.ComponentManager.reboot-method'><b>reboot(cred_str)</b></a> [<a href='#component.ComponentManager.reboot-method'>#</a>]</dt>
+<dd>
+<p>Reboot the component.</p>
+<dl>
+<dt><i>cred_str</i></dt>
+<dd>
+string representation of a credential object that
+    authorizes the caller</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.redeem_ticket-method' name='component.ComponentManager.redeem_ticket-method'><b>redeem_ticket(ticket_str)</b></a> [<a href='#component.ComponentManager.redeem_ticket-method'>#</a>]</dt>
+<dd>
+<p>Redeem a ticket.
+
+The ticket is submitted to the node manager, and the slice is instantiated
+or updated as appropriate.
+
+TODO: This operation should return a sliver credential and indicate
+whether or not the component will accept only sliver credentials, or
+will accept both sliver and slice credentials.</p>
+<dl>
+<dt><i>ticket_str</i></dt>
+<dd>
+the string representation of a ticket object</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.register_functions-method' name='component.ComponentManager.register_functions-method'><b>register_functions()</b></a> [<a href='#component.ComponentManager.register_functions-method'>#</a>]</dt>
+<dd>
+<p>Register the server RPCs for the component</p>
+</dd>
+<dt><a id='component.ComponentManager.reset_slice-method' name='component.ComponentManager.reset_slice-method'><b>reset_slice(cred_str)</b></a> [<a href='#component.ComponentManager.reset_slice-method'>#</a>]</dt>
+<dd>
+<p>Reset a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.start_slice-method' name='component.ComponentManager.start_slice-method'><b>start_slice(cred_str)</b></a> [<a href='#component.ComponentManager.start_slice-method'>#</a>]</dt>
+<dd>
+<p>Start a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+<dt><a id='component.ComponentManager.stop_slice-method' name='component.ComponentManager.stop_slice-method'><b>stop_slice(cred_str)</b></a> [<a href='#component.ComponentManager.stop_slice-method'>#</a>]</dt>
+<dd>
+<p>Stop a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+</dl>
+</body></html>

@@ -1,0 +1,26 @@
+<target name="RESTRICT_SLICE_PROP">
+    <!-- The context is empty, since this target does not require any input from SFA -->
+    <rule element="node">
+    <context select=""/>
+        <argument>
+            <name>max-node-kbps</name>
+            <help>Maximum node bandwidth in kilobytes per second.</help>
+            <operand>kbps</operand>
+        </argument>
+        <argument>
+            <name>on-node</name>
+            <help>Node to impose the limit on. Empty => all nodes.</help>
+            <operand>kbps</operand>
+        </argument>
+    <processor filename="max_node_kbps.xsl"/>
+    </rule>
+    <rule element="link">
+    <context select=""/>
+        <argument>
+            <name>max-link-kbps</name>
+            <help>Maximum link bandwidth in kilobytes per second.</help>
+            <operand>kbps</operand>
+        </argument>
+    <processor filename="max_link_kbps.xsl"/>
+    </rule>
+    </target>
