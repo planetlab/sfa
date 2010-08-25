@@ -636,7 +636,7 @@ class ComponentAPI(BaseAPI):
         """
         path = self.config.SFA_DATA_DIR
         config_dir = self.config.config_path
-        credfile = path + os.sep + 'node.cred'
+        cred_filename = path + os.sep + 'node.cred'
         try:
             credential = Credential(filename = cred_filename)
             return credential.save_to_string(save_parents=True)
