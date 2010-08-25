@@ -10,6 +10,7 @@ import os
 import traceback
 import string
 import xmlrpclib
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
