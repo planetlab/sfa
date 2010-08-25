@@ -1,8 +1,8 @@
 #
 # SFA XML-RPC and SOAP interfaces
 #
-### $Id: api.py 18650 2010-08-21 01:04:41Z tmack $
-### $URL: http://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/api.py $
+### $Id: api.py 18671 2010-08-25 19:35:06Z tmack $
+### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/api.py $
 #
 
 import sys
@@ -10,6 +10,7 @@ import os
 import traceback
 import string
 import xmlrpclib
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
