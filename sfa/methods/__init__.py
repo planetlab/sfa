@@ -36,7 +36,6 @@ ListResources
 ListSlices
 CreateSliver
 UpdateSliver
-get_geni_aggregates
 DeleteSliver
 SliverStatus
 RenewSliver
