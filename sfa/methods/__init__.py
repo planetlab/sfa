@@ -42,5 +42,4 @@ RenewSliver
 Start
 Stop
 Shutdown
-ResolveGENI
 """.split()
