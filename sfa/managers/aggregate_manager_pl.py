@@ -23,6 +23,41 @@ from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 
+""" 
+Create a new plauth object that the Aggregate Manager can use to execute
+plshell commands as the authenticated user.
+"""
+def __get_user_plauth(api, registry, credential, creds, operation, hrn):
+    plauth = None
+
+    user_creds = api.auth.checkCredentials(creds, operation, hrn)
+    user_cred_obj = Credential(string=user_creds[0])
+
+    # If user cred has a parent then the caller is the parent's cred.
+    # This is true for delegated creds.
+    if user_cred_obj.parent:
+        user_hrn = user_cred_obj.parent.get_gid_caller().get_hrn()
+    else:
+        user_hrn = user_cred_obj.get_gid_caller().get_hrn()
+        
+    user_record = registry.Resolve(user_hrn, [credential])[0]
+    email = user_record['email']
+
+    person = api.plshell.GetPersons(api.plauth, email)
+    if person:
+        person_id = person[0]['person_id']
+        # Get the user's session if one exists, create one otherwise
+        session = api.plshell.GetSessions(api.plauth, {'person_id': person_id})
+        if not session:
+            session = api.plshell.AddSession(api.plauth, person_id)
+        else:
+            session = session[0]['session_id']
+
+        # Create new authentication token
+        plauth = {'Username':email, 'AuthMethod':'session', 'session':session}
+
+    return plauth
+
 
 def __get_registry_objects(slice_xrn, creds, users):
     """
@@ -97,7 +132,6 @@ def create_slice(api, slice_xrn, creds, rspec, users):
     Create the sliver[s] (slice) at this aggregate.    
     Verify HRN and initialize the slice record in PLC if necessary.
     """
-
     reg_objects = __get_registry_objects(slice_xrn, creds, users)
 
     hrn, type = urn_to_hrn(slice_xrn)
@@ -112,8 +146,12 @@ def create_slice(api, slice_xrn, creds, rspec, users):
 
     slice_record = slices.verify_slice(registry, credential, hrn, site_id, 
                                 remote_site_id, peer, sfa_peer, reg_objects)
-     
-    network = Network(api)
+
+    user_plauth = __get_user_plauth(api, registry, credential, creds, 
+                                    "createsliver", hrn)
+
+    # The Network instance will use user_plauth to call the PLCAPI
+    network = Network(api, user_plauth)
 
     slice = network.get_slice(api, hrn)
     slice.peer_id = slice_record['peer_slice_id']
@@ -131,8 +169,8 @@ def create_slice(api, slice_xrn, creds, rspec, users):
     if peer:
         api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
 
-    api.plshell.AddSliceToNodes(api.plauth, slice.name, added_nodes) 
-    api.plshell.DeleteSliceFromNodes(api.plauth, slice.name, deleted_nodes)
+    api.plshell.AddSliceToNodes(user_plauth, slice.name, added_nodes) 
+    api.plshell.DeleteSliceFromNodes(user_plauth, slice.name, deleted_nodes)
 
     network.updateSliceTags()
 
@@ -141,7 +179,6 @@ def create_slice(api, slice_xrn, creds, rspec, users):
                                      slice.peer_id)
 
     # print network.toxml()
-
     return True
 
 
@@ -229,23 +266,32 @@ def get_rspec(api, creds, options):
     xrn = options.get('geni_slice_urn', None)
     hrn, type = urn_to_hrn(xrn)
 
+    """
     # look in cache first
     if api.cache and not xrn:
         rspec = api.cache.get('nodes')
         if rspec:
             return rspec 
+    """
 
-    network = Network(api)
+    registry = api.registries[api.hrn]
+    credential = api.getCredential()
+    user_plauth = __get_user_plauth(api, registry, credential, creds, 
+                                    "listnodes", hrn)
+
+    # The Network instance will use user_plauth to call the PLCAPI
+    network = Network(api, user_plauth)
     if (hrn):
         if network.get_slice(api, hrn):
             network.addSlice()
 
     rspec = network.toxml()
 
+    """
     # cache the result
     if api.cache and not xrn:
         api.cache.add('nodes', rspec)
-
+    """
     return rspec
 
 
