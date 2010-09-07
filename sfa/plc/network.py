@@ -198,6 +198,9 @@ class Slice:
 
 class Slicetag:
     newid = -1 
+    filter_fields = ['slice_tag_id','slice_id','tagname','value','node_id','category','min_role_id']
+    ignore_tags = ['hmac','ssh_key']
+
     def __init__(self, tag = None):
         if not tag:
             return
@@ -538,7 +541,7 @@ class Network:
         Create a dictionary of slicetag objects keyed by slice tag ID
         """
         tmp = []
-        for tag in api.plshell.GetSliceTags(self.user_plauth):
+        for tag in api.plshell.GetSliceTags(self.user_plauth, {'~tagname':Slicetag.ignore_tags}, Slicetag.filter_fields):
             t = tag['slice_tag_id'], Slicetag(tag)
             tmp.append(t)
         return dict(tmp)
