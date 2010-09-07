@@ -125,21 +125,31 @@ class Slice:
     def get_multi_tag(self, tagname, node = None):
         tags = []
         for i in self.slice_tag_ids:
-            tag = self.network.lookupSliceTag(i)
-            if tag.tagname == tagname:
-                if not (node and node.id != tag.node_id):
-                    tags.append(tag)
+            try:
+                tag = self.network.lookupSliceTag(i)                
+                if tag.tagname == tagname:
+                    if not (node and node.id != tag.node_id):
+                        tags.append(tag)
+            except InvalidRSpec, e:
+                # As they're not needed, we ignore some tag types from
+                # GetSliceTags call. See Slicetag.ignore_tags
+                pass
         return tags
         
     """
     Use with tags that have only one instance
     """
     def get_tag(self, tagname, node = None):
-        for i in self.slice_tag_ids:
-            tag = self.network.lookupSliceTag(i)
-            if tag.tagname == tagname:
-                if (not node) or (node.id == tag.node_id):
-                    return tag
+        try:
+            for i in self.slice_tag_ids:
+                tag = self.network.lookupSliceTag(i)
+                if tag.tagname == tagname:
+                    if (not node) or (node.id == tag.node_id):
+                        return tag
+        except InvalidRSpec, e:
+            # As they're not needed, we ignore some tag types from
+            # GetSliceTags call. See Slicetag.ignore_tags
+            pass
         return None
         
     def get_nodes(self):
@@ -265,6 +275,8 @@ class Slicetag:
 
 
 class TagType:
+    ignore_tags = ['hmac','ssh_key']
+
     def __init__(self, tagtype):
         self.id = tagtype['tag_type_id']
         self.category = tagtype['category']
@@ -551,7 +563,7 @@ class Network:
         Create a list of tagtype obects keyed by tag name
         """
         tmp = []
-        for tag in api.plshell.GetTagTypes(self.user_plauth):
+        for tag in api.plshell.GetTagTypes(self.user_plauth, {'~tagname':TagType.ignore_tags}):
             t = tag['tagname'], TagType(tag)
             tmp.append(t)
         return dict(tmp)
