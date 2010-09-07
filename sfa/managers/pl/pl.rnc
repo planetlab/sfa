@@ -1,0 +1,56 @@
+start = RSpec
+RSpec = element RSpec { 
+   attribute type { xsd:NMTOKEN },
+   ( network | request )
+}
+network = element network {
+   attribute name { xsd:NMTOKEN },
+   attribute slice { xsd:NMTOKEN }?,
+   sliver_defaults?,
+   site+
+}
+sliver_defaults = element sliver_defaults {
+   sliver_elements
+}
+site = element site { 
+   attribute id { xsd:ID },
+   element name { text },
+   node*
+}
+node = element node {
+   attribute id { xsd:ID },
+   element hostname { text },
+   element bw_limit { attribute units { xsd:NMTOKEN }, text }?,
+   sliver*
+}
+request = element request {
+   attribute name { xsd:NMTOKEN },
+   sliver_defaults?,
+   sliver*
+}
+sliver = element sliver { 
+   attribute nodeid { xsd:ID }?,
+   sliver_elements
+}
+sliver_elements = ( 
+   element capabilities { text }? 
+ & element codemux { text }* 
+ & element cpu_pct { text }?
+ & element cpu_share { text }?
+ & element delegations { text }?
+ & element disk_max { text }?
+ & element initscript { text }?
+ & element ip_addresses {text }*
+ & element net_i2_max_kbyte { text }?
+ & element net_i2_max_rate { text }?
+ & element net_i2_min_rate { text }?
+ & element net_i2_share { text }?
+ & element net_i2_thresh_kbyte { text }?
+ & element net_max_kbyte { text }?
+ & element net_max_rate { text }?
+ & element net_min_rate { text }?
+ & element net_share { text }?
+ & element net_thresh_kbyte { text }?
+ & element vsys {text}*
+ & element vsys_vnet { text }?
+)

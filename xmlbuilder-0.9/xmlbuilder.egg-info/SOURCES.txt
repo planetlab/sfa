@@ -1,0 +1,13 @@
+LICENSE
+MANIFEST.in
+PKG-INFO
+README.txt
+setup.cfg
+setup.py
+xmlbuilder/__init__.py
+xmlbuilder.egg-info/PKG-INFO
+xmlbuilder.egg-info/SOURCES.txt
+xmlbuilder.egg-info/dependency_links.txt
+xmlbuilder.egg-info/top_level.txt
+xmlbuilder/docs/long_descr.rst
+xmlbuilder/tests/__init__.py

@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The geniserver Module</title>
+</head>
+<body>
+<h1>The geniserver Module</h1>
+<p>This module implements a general-purpose server layer for geni.
+The same basic server should be usable on the registry, component, or
+other interfaces.
+
+TODO: investigate ways to combine this with existing PLC server?</p>
+<dl>
+<dt><b>GeniServer(ip, port, key_file, cert_file)</b> (class) [<a href='#geniserver.GeniServer-class'>#</a>]</dt>
+<dd>
+<p>Implements an HTTPS XML-RPC server.</p>
+<p>For more information about this class, see <a href='#geniserver.GeniServer-class'><i>The GeniServer Class</i></a>.</p>
+</dd>
+<dt><b>SecureXMLRpcRequestHandler</b> (class)  [<a href='#geniserver.SecureXMLRpcRequestHandler-class'>#</a>]</dt>
+<dd>
+<p>taken from the web (XXX find reference).</p>
+<p>For more information about this class, see <a href='#geniserver.SecureXMLRpcRequestHandler-class'><i>The SecureXMLRpcRequestHandler Class</i></a>.</p>
+</dd>
+<dt><b>SecureXMLRPCServer(server_address, HandlerClass, key_file, cert_file, logRequests=True)</b> (class) [<a href='#geniserver.SecureXMLRPCServer-class'>#</a>]</dt>
+<dd>
+<p>Taken from the web (XXX find reference).</p>
+<p>For more information about this class, see <a href='#geniserver.SecureXMLRPCServer-class'><i>The SecureXMLRPCServer Class</i></a>.</p>
+</dd>
+<dt><a id='geniserver.verify_callback-function' name='geniserver.verify_callback-function'><b>verify_callback(conn, x509, err, depth, preverify)</b></a> [<a href='#geniserver.verify_callback-function'>#</a>]</dt>
+<dd>
+<p>Verification callback for pyOpenSSL. We do our own checking of keys because
+we have our own authentication spec. Thus we disable several of the normal
+prohibitions that OpenSSL places on certificates</p>
+</dd>
+</dl>
+<h2><a id='geniserver.GeniServer-class' name='geniserver.GeniServer-class'>The GeniServer Class</a></h2>
+<dl>
+<dt><b>GeniServer(ip, port, key_file, cert_file)</b> (class) [<a href='#geniserver.GeniServer-class'>#</a>]</dt>
+<dd>
+<p>Implements an HTTPS XML-RPC server. Generally it is expected that GENI
+functions will take a credential string, which is passed to
+decode_authentication. Decode_authentication() will verify the validity of
+the credential, and verify that the user is using the key that matches the
+GID supplied in the credential.</p>
+</dd>
+<dt><a id='geniserver.GeniServer.decode_authentication-method' name='geniserver.GeniServer.decode_authentication-method'><b>decode_authentication(cred_string, operation)</b></a> [<a href='#geniserver.GeniServer.decode_authentication-method'>#</a>]</dt>
+<dd>
+<p>Decode the credential string that was submitted by the caller. Several
+checks are performed to ensure that the credential is valid, and that the
+callerGID included in the credential matches the caller that is
+connected to the HTTPS connection.</p>
+</dd>
+<dt><a id='geniserver.GeniServer.noop-method' name='geniserver.GeniServer.noop-method'><b>noop(cred, anything)</b></a> [<a href='#geniserver.GeniServer.noop-method'>#</a>]</dt>
+<dd>
+<p>Sample no-op server function. The no-op function decodes the credential
+that was passed to it.</p>
+</dd>
+<dt><a id='geniserver.GeniServer.register_functions-method' name='geniserver.GeniServer.register_functions-method'><b>register_functions()</b></a> [<a href='#geniserver.GeniServer.register_functions-method'>#</a>]</dt>
+<dd>
+<p>Register functions that will be served by the XMLRPC server. This
+function should be overrided by each descendant class.</p>
+</dd>
+<dt><a id='geniserver.GeniServer.run-method' name='geniserver.GeniServer.run-method'><b>run()</b></a> [<a href='#geniserver.GeniServer.run-method'>#</a>]</dt>
+<dd>
+<p>Execute the server, serving requests forever.</p>
+</dd>
+</dl>
+<h2><a id='geniserver.SecureXMLRpcRequestHandler-class' name='geniserver.SecureXMLRpcRequestHandler-class'>The SecureXMLRpcRequestHandler Class</a></h2>
+<dl>
+<dt><b>SecureXMLRpcRequestHandler</b> (class)  [<a href='#geniserver.SecureXMLRpcRequestHandler-class'>#</a>]</dt>
+<dd>
+<p>taken from the web (XXX find reference). Implents HTTPS xmlrpc request handler</p>
+</dd>
+</dl>
+<h2><a id='geniserver.SecureXMLRPCServer-class' name='geniserver.SecureXMLRPCServer-class'>The SecureXMLRPCServer Class</a></h2>
+<dl>
+<dt><b>SecureXMLRPCServer(server_address, HandlerClass, key_file, cert_file, logRequests=True)</b> (class) [<a href='#geniserver.SecureXMLRPCServer-class'>#</a>]</dt>
+<dd>
+<p>Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server</p>
+</dd>
+</dl>
+</body></html>

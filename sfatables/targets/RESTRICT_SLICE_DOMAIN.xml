@@ -1,0 +1,63 @@
+<target name="RESTRICT_SLICE_DOMAIN">
+    <rule element="legacy-node">
+        <!-- The context is empty, since this target does not require any input from SFA -->
+        <context select=""/>
+        <argument>
+            <name>whitelist-dns-suffix</name>
+            <help>Suffix of nodes to whitelist for this match.</help>
+            <operand>SUFFIX</operand>
+        </argument>
+        <argument>
+            <name>blacklist-dns-suffix</name>
+            <help>Suffix of nodes to blacklist for this match.</help>
+            <operand>SUFFIX</operand>
+        </argument>
+        <processor filename="legacy-restrict-to-nodes.xsl"/>
+    </rule>
+    <rule element="node">
+        <!-- The context is empty, since this target does not require any input from SFA -->
+        <context select=""/>
+        <argument>
+            <name>whitelist</name>
+            <help>Prefix of nodes to whitelist for this match.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>blacklist</name>
+            <help>Prefix of nodes to blacklist for this match.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <processor filename="restrict_to_nodes.xsl"/>
+    </rule>
+    <rule element="flowspec">
+        <context select=""/>
+        <argument>
+            <name>whitelist-switch</name>
+            <help>Switch id to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+
+        <argument>
+            <name>whitelist-tpsrc</name>
+            <help>Source port to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>whitelist-tpdst</name>
+            <help>Destination port to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>whitelist-ipdst</name>
+            <help>Destination IP to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>whitelist-ipsrc</name>
+            <help>Source IP to whitelist.</help>
+            <operand>PREFIX</operand>
+        </argument>
+
+        <processor filename="restrict_flowspec.xsl"/>
+    </rule>
+</target>

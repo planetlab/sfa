@@ -1,0 +1,1890 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<base target="_top">
+
+<style type="text/css">
+
+
+/* default css */
+
+table {
+  font-size: 1em;
+  line-height: inherit;
+}
+
+
+tr {
+  
+  text-align: left;
+  
+}
+
+
+div, address, ol, ul, li, option, select { 
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+p {
+  margin: 0px;
+}
+
+body {
+  margin: 6px;
+  padding: 0px;
+  font-family: Verdana, sans-serif;
+  font-size: 10pt;
+  background-color: #ffffff;
+}
+
+
+img {
+  -moz-force-broken-image-icon: 1;
+}
+
+@media screen {
+  html.pageview {
+    background-color: #f3f3f3 !important;
+  }
+
+  
+    
+  body { 
+    min-height: 1100px; 
+  }
+  * html body { 
+    height: 1100px; 
+  }
+  .pageview body {
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 2px solid #bbb;
+    border-bottom: 2px solid #bbb;
+    width: 648px !important;
+    margin: 15px auto 25px;
+    padding: 40px 50px; 
+  }
+  /* IE6 */
+  * html {
+    overflow-y: scroll;
+  }
+  * html.pageview body {
+    overflow-x: auto;
+  }
+  /* Prevent repaint errors when scrolling in Safari. This "Star-7" css hack
+     targets Safari 3.1, but not WebKit nightlies and presumably Safari 4.
+     That's OK because this bug is fixed in WebKit nightlies/Safari 4 :-). */
+  html*#wys_frame::before {
+    content: '\A0';
+    position: fixed;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+  }
+  
+  
+
+  
+    .writely-callout-data {
+      display: none;
+    }
+    .writely-footnote-marker {
+      background-image: url('MISSING');
+      background-color: transparent;
+      background-repeat: no-repeat;
+      width: 7px;
+      overflow: hidden;
+      height: 16px;
+      vertical-align: top;
+    }
+    .editor .writely-footnote-marker {
+      cursor: move;
+    }
+    .writely-footnote-marker-highlight {
+      background-position: -15px 0;
+    }
+    .writely-footnote-hide-selection ::-moz-selection, .writely-footnote-hide-selection::-moz-selection {
+      background: transparent;
+    }
+    .writely-footnote-hide-selection ::selection, .writely-footnote-hide-selection::selection {
+      background: transparent;
+    }
+    .writely-footnote-hide-selection {
+      cursor: move;
+    }
+
+    
+    .editor .writely-comment-yellow {
+      background-color: #FF9;
+      background-position: -240px 0;
+    }
+    .editor .writely-comment-yellow-hover {
+      background-color: #FF0;
+      background-position: -224px 0;
+    }
+    .editor .writely-comment-blue {
+      background-color: #C0D3FF;
+      background-position: -16px 0;
+    }
+    .editor .writely-comment-blue-hover {
+      background-color: #6292FE;
+      background-position: 0 0;
+    }
+    .editor .writely-comment-orange {
+      background-color: #FFDEAD;
+      background-position: -80px 0;
+    }
+    .editor .writely-comment-orange-hover {
+      background-color: #F90;
+      background-position: -64px 0;
+    }
+    .editor .writely-comment-green {
+      background-color: #99FBB3;
+      background-position: -48px 0;
+    }
+    .editor .writely-comment-green-hover {
+      background-color: #00F442;
+      background-position: -32px 0;
+    }
+    .editor .writely-comment-cyan {
+      background-color: #CFF;
+      background-position: -208px 0;
+    }
+    .editor .writely-comment-cyan-hover {
+      background-color: #0FF;
+      background-position: -192px 0;
+    }
+    .editor .writely-comment-purple {
+      background-color: #EBCCFF;
+      background-position: -144px 0;
+    }
+    .editor .writely-comment-purple-hover {
+      background-color: #90F;
+      background-position: -128px 0;
+    }
+    .editor .writely-comment-magenta {
+      background-color: #FCF;
+      background-position: -112px 0;
+    }
+    .editor .writely-comment-magenta-hover {
+      background-color: #F0F;
+      background-position: -96px 0;
+    }
+    .editor .writely-comment-red {
+      background-color: #FFCACA;
+      background-position: -176px 0;
+    }
+    .editor .writely-comment-red-hover {
+      background-color: #FF7A7A;
+      background-position: -160px 0;
+    }
+    
+    .editor .writely-comment-marker {
+      background-image: url('MISSING');
+      background-color: transparent;
+      padding-right: 11px;
+      background-repeat: no-repeat;
+      width: 16px;
+      height: 16px;
+      -moz-user-select: none;
+    }
+
+    .editor .writely-comment-hidden {
+      padding: 0;
+      background: none;
+    }
+    .editor .writely-comment-marker-hidden {
+      background: none;
+      padding: 0;
+      width: 0;
+    }
+    .editor .writely-comment-none {
+      opacity: .2;
+      filter:progid:DXImageTransform.Microsoft.Alpha(opacity=20);
+      -moz-opacity: .2;
+    }
+    .editor .writely-comment-none-hover {
+      opacity: .2;
+      filter:progid:DXImageTransform.Microsoft.Alpha(opacity=20);
+      -moz-opacity: .2;
+    }
+  
+
+
+  
+  .br_fix br:not(:-moz-last-node):not(:-moz-first-node) {
+    
+    position:relative;
+    
+    left: -1ex
+    
+  }
+  
+  .br_fix br+br {
+    position: static !important
+  }
+}
+
+h6 { font-size: 8pt }
+h5 { font-size: 8pt }
+h4 { font-size: 10pt }
+h3 { font-size: 12pt }
+h2 { font-size: 14pt }
+h1 { font-size: 18pt }
+
+blockquote {padding: 10px; border: 1px #DDD dashed }
+
+a img {border: 0}
+
+.pb {
+  border-width: 0;
+  page-break-after: always;
+  /* We don't want this to be resizeable, so enforce a width and height
+     using !important */
+  height: 1px !important;
+  width: 100% !important;
+}
+
+.editor .pb {
+  border-top: 1px dashed #C0C0C0;
+  border-bottom: 1px dashed #C0C0C0;
+}
+
+div.google_header, div.google_footer {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+
+/* Table of contents */
+.editor div.writely-toc {
+  background-color: #f3f3f3;
+  border: 1px solid #ccc;
+}
+.writely-toc > ol {
+  padding-left: 3em;
+  font-weight: bold;
+}
+ol.writely-toc-subheading {
+  padding-left: 1em;
+  font-weight: normal;
+}
+/* IE6 only */
+* html writely-toc ol {
+  list-style-position: inside;
+}
+.writely-toc-none {
+  list-style-type: none;
+}
+.writely-toc-decimal {
+  list-style-type: decimal;
+}
+.writely-toc-upper-alpha {
+  list-style-type: upper-alpha;
+}
+.writely-toc-lower-alpha {
+  list-style-type: lower-alpha;
+}
+.writely-toc-upper-roman {
+  list-style-type: upper-roman;
+}
+.writely-toc-lower-roman {
+  list-style-type: lower-roman;
+}
+.writely-toc-disc {
+  list-style-type: disc;
+}
+
+/* end default css */
+
+
+  /* default print css */
+  
+  @media print {
+    body { 
+      padding: 0; 
+      margin: 0; 
+    }
+
+    div.google_header, div.google_footer {
+      display: block;
+      min-height: 0;
+      border: none;
+    }
+
+    div.google_header {
+      flow: static(header);
+    }
+
+    /* used to insert page numbers */
+    div.google_header::before, div.google_footer::before {
+      position: absolute;
+      top: 0;
+    }
+
+    div.google_footer {
+      flow: static(footer);
+    }
+
+    /* always consider this element at the start of the doc */
+    div#google_footer {
+      flow: static(footer, start);
+    }
+
+    span.google_pagenumber {
+      content: counter(page);
+    }
+
+    span.google_pagecount {
+      content: counter(pages);
+    }
+
+
+    callout.google_footnote {
+      
+      display: prince-footnote;
+      footnote-style-position: inside;
+      /* These styles keep the footnote from taking on the style of the text
+         surrounding the footnote marker. They can be overridden in the
+         document CSS. */
+      color: #000;
+      font-family: Verdana;
+      font-size: 10.0pt;
+      font-weight: normal;
+    }
+
+    /* Table of contents */
+    #WritelyTableOfContents a::after {
+      content: leader('.') target-counter(attr(href), page);
+    }
+
+    #WritelyTableOfContents a {
+      text-decoration: none;
+      color: black;
+    }
+  }
+
+  @page {
+    @top {
+      content: flow(header);
+    }
+    @bottom {
+      content: flow(footer);
+    }
+    @footnotes {
+      border-top: solid black thin;
+      padding-top: 8pt;
+    }
+  }
+  /* end default print css */
+ 
+
+/* custom css */
+
+
+/* end custom css */
+
+
+
+  /* ui edited css */
+  
+  body {
+    font-family: Verdana;
+    
+    font-size: 10.0pt;
+    line-height: normal;
+    background-color: #ffffff;
+  }
+  /* end ui edited css */
+
+
+
+/* editor CSS */
+.editor a:visited {color: #551A8B}
+.editor table.zeroBorder {border: 1px dotted gray}
+.editor table.zeroBorder td {border: 1px dotted gray}
+.editor table.zeroBorder th {border: 1px dotted gray}
+
+
+.editor div.google_header, .editor div.google_footer {
+  border: 2px #DDDDDD dashed;
+  position: static;
+  width: 100%;
+  min-height: 2em;
+}
+
+.editor .misspell {background-color: yellow}
+
+.editor .writely-comment {
+  font-size: 9pt; 
+  line-height: 1.4; 
+  padding: 1px; 
+  border: 1px dashed #C0C0C0
+}
+
+
+/* end editor CSS */
+</style>
+
+
+</head>
+
+<body onload="DoPageLoad();"
+    
+    revision="dhkdd78p_13kvrgbnfb:273">
+
+    
+    
+    
+<div>
+  <div>
+    <b>Geniwrapper Design Document</b>
+  </div>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>1.0 High Level Overview</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The purpose of Geniwrapper is to provide a Geni-like interface around the
+  existing planetlab infrastructure. The existing infrastructure consists of two
+  parts: planetlab central (PLC) and planetlab nodes. Geni defines three 
+  interfaces: Registry, Slice, and Component Management.&nbsp; A part of the wrapper is co-located with PLC (it exports the Registry and Slice interfaces),
+  and a part of the wrapper is co-located with each node (it exports the Slice
+  and Management interfaces).
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Geniwrapper is comprised of the following logical modules: <i>utility
+  classes</i>,&nbsp;<i>plc wrapper</i>, <i>component wrapper</i>, and <i>command
+  line client</i>. Client-server communication uses a variant of XML-RPC called
+  the <i>Geni protocol</i>. Section 1 of this document presents a very brief
+  overview of each module. In-depth discussion occurs later.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Much of this design adheres to the SFA, and as such this document avoids
+  duplication of the information already presented in the SFA. For example, the
+  description of privileges, which operations are allowed by a specific
+  privileges, and how privileges are assigned to principals is described fully
+  in the SFA and is therefore not duplicated here.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  NOTE: <b>API documentation</b> is extracted from code comments automatically
+  and is maintained in separate files, one documentation file corresponding to
+  each python source file. An effort has been made to keep API documentation
+  separate from this document, so that the API documentation may be
+  self-maintaining as the code is updated.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Geniwrapper is checked into a subversion repository at
+  <a href=http://svn.planetlab.org/geniwrapper>http://svn.planetlab.org/geniwrapper</a>.
+  [TODO: verify link]
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <div>
+    <b>1.1 Utility classes</b>
+  </div>
+  <div>
+    &nbsp;
+  </div>
+  <div>
+    Utility classes include python classes that implement certificates, GIDs,
+    credentials, and tickets. There are also utility classes for implementing
+    the server and client stubs and the security protocol. The utility modules
+    are designed to be generally re-usable. For example, the credential
+    management class may be used as part of the Geni Registry, Geni Components,
+    and the end-user tools that interact with Geni.
+  </div>
+  <div>
+    &nbsp;
+  </div>
+  <div>
+    The&nbsp;utility classes&nbsp;are located in the
+    <i>util</i>&nbsp;subdirectory.
+  </div>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>1.2&nbsp;PLC wrapper</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The&nbsp;plc wrapper is intended to be colocated with PLC. All communication
+  between the&nbsp;plc wrapper and PLC uses the PLCAPI interface and as such,
+  the&nbsp;plc wrapper can be run on a separate machine for ease of development.
+  In addition to the Geni registry operations (register, update, ...),
+  the&nbsp;plc wrapper also implements slice operations, such as GetTicket.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The&nbsp;plc wrapper is located in the&nbsp;<i>plc</i> subdirectory.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  TODO: Most of the slice interface is yet to be implemented in&nbsp;plc wrapper.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>1.3&nbsp;The component wrapper</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The component wrapper is located on planetlab nodes. It implements
+  the&nbsp;slice interface, and the component management interface. Due to SFA
+  engineering decisions, some&nbsp;slice operations (i.e. GetTicket) are
+  not supported in the&nbsp;component wrapper.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The component wrapper is located in the <i>component</i> subdirectory.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>1.4 Command line client</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The command line client exports a client interface to Geni that may be used
+  for testing and demonstration purposes. It allows easy invocation of Geni api
+  functions and dumps the results in a human-readable format.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The command line client&nbsp;is located in the&nbsp;<i>cmdline</i>
+  subdirectory
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>1.5 Geni Protocol</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The Geni protocol is based on XML-RPC. It is implemented primarily in the
+  geniserver.py and geniclient.py files located with the utility classes.
+  Modifications to the XML-RPC protocol include the following:
+</div>
+<div>
+  &nbsp;
+</div>
+<ol>
+  <li>
+    The transport mechanism uses HTTPS instead of HTTP.
+  </li>
+  <li>
+    HTTPS certificate verification is disabled so that custom Geni verification
+    based on GID can be done instead.
+  </li>
+  <li>
+    When an exception occurs on the server, verbose exception information is
+    sent to the client, to assist debugging efforts
+  </li>
+</ol>
+<div>
+  &nbsp;
+</div>
+<div>
+  Authentication:
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Authentication of the client by the server is done by using Credentials/GIDs.
+  Generally, each operation contains a credential as the first argument. This
+  credential includes the GID of the caller, which in turn contains the public
+  key of the caller. The server ensures that this public key matches the public
+  key that is being used to decrypt the HTTPS connection, thus ensuring the
+  caller must posess the private key that corresponds to the GID.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Authentication of the server by the client is left as an exercise for the
+  client. It may be done easily by specifying the server's public key when the
+  client create the HTTPS connection. This presumes the client knows the public
+  key (or GID) of the server he is trying to connect to.
+</div>
+<div>
+  &nbsp;<br>
+  <b>1.6 Extending Geniwrapper to other environments</b><br>
+  <br>
+  The PLC Wrapper and Component Wrapper are implemented to work on top of the
+  Planetlab environment, but Geniwrapper was designed specifically to be easy to
+  port to other platforms or environments. The utility classes are generally
+  planetlab-independent, and the planetlab specific code is located in the
+  directories that house the PLC and Component wrappers. The utility classes
+  implement most of the complexity of the Geni wrapper, allowing the PLC and
+  Component wrappers to be relatively lightweight.<br>
+  <br>
+  For example, looking at the code for the stop_slice function implemented in
+  the component wrapper:<br>
+  <br>
+  &nbsp;&nbsp;&nbsp; def stop_slice(self, cred_str):<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  self.decode_authentication(cred_str, "stopslice")<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slicename =
+  hrn_to_pl_slicename(self.object_gid.get_hrn())<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; print "stopslice:", slicename<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; accounts.get(slicename).stop()<br>
+  <br>
+  The hrn_to_pl_slicename() function and accounts() class are planetlab-specific
+  and implement the actual stopping of the slice. The remaining code that
+  implements the Geni protocol, decodes credentials and authentication, etc., is
+  planetlab-independent, and could be easily used in a non-planetlab
+  environment.<br>
+  <br>
+</div>
+<div>
+  <b>2.0 Utility Classes</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.1 Certificates and Keys (cert.py)</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Geniwrapper uses two crypto libraries: pyOpenSSL and M2Crypto to implement the
+  necessary crypto functionality. Ideally just one of these libraries would be
+  used, but unfortunately each of these libraries is independently lacking. The
+  pyOpenSSL library is missing many necessary functions, and the M2Crypto
+  library has crashed inside of some of the functions. The design decision is to
+  use pyOpenSSL whenever possible as it seems more stable, and only use M2Crypto
+  for those functions that are not possible in pyOpenSSL.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.1.1 Keys</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Public-private key pairs are implemented by the <b>Keypair </b>class. A
+  Keypair object may represent both a public and private key pair, or it may
+  represent only a public key (this usage is consistent with OpenSSL).
+</div>
+<p>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+<div>
+  <b>2.1.2 Certificates</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The certificate class implements a general purpose X509 certificate, making
+  use of the appropriate pyOpenSSL or M2Crypto abstractions. It also adds
+  several addition features, such as the ability to maintain a chain of parent
+  certificates, and storage of application-specific data.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Certificates include the ability to maintain a chain of parents. Each
+  certificate includes a pointer to it's parent certificate. When loaded from a
+  file or a string, the parent chain will be automatically loaded. When saving a
+  certificate to a file or a string, the caller can choose whether to save the
+  parent certificates as well.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Example creation of a certificate:
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # create&nbsp;a key for an issuer<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; issuerKey = Keypair(create=True)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; issuerSubject = "testissuer"
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # create a key for the certificate
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; userKey = KeyPair(create=True)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # create the certificate, set the issuer, and
+  sign it
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cert = Certificate(subject="test")<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cert.set_issuer(issuerKey, issuerSubject)
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cert.set_pubkey(userKey)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cert.sign()
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.1.3 Certificate Verification</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <p>
+    Verification examines a chain of certificates to ensure that each parent
+    signs the child, and that some certificate in the chain is signed by a
+    trusted certificate. Verification is a basic recursion:
+  </p>
+  <pre>    if this_certificate was signed by trusted_certs:<br>        return<br>    else<br>        return verify_chain(parent, trusted_certs)</pre>
+</div>
+<div>
+  At each recursion, the parent is tested to ensure that it did sign the child.
+  If a parent did not sign a child, then an exception is thrown. If the bottom
+  of the recursion is reached and the certificate does not match a trusted root,
+  then an exception is thrown.
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+  <b>2.2 GIDS (gid.py)</b>
+</div>
+<div>
+  <b></b>&nbsp;
+</div>
+<div>
+  GIDs are a derivative class of certificates and as such the&nbsp;GID class
+  inherits all the methods of the certificate class. A&nbsp;GID includes a tuple
+  of the following fields:&nbsp;
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp;&nbsp; (uuid, hrn, public_key)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  UUID is a unique identifier and is created by the python uuid module (or the
+  utility function create_uuid() in gid.py).
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  HRN is a human readable name. It is a dotted form similar to a backward domain
+  name. For example, planetlab.us.arizona.bakers.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  PUBLIC_KEY is the public key of the principal identified by the UUID/HRN. It
+  is a Keypair object as defined in the cert.py module.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  It is expected that there is a one-to-one pairing between UUIDs and HRN, but
+  it is uncertain how this would be inforced or if it needs to be enforced.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.2.1 Encoding and Decoding</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The 5 fields of the&nbsp;GID tuple are stored in the subject-alt-name field of
+  the X509 certificate. Two routines are included to package and unpackage these
+  fields: Encode() and Decode(). Encode should be called prior to signing the
+  GID. Decode is automatically called on demand by the various get_*()
+  functions.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.2.2 Verification of GIDs</b>
+</div>
+<div>
+  &nbsp;
+</div>
+Verification first performs the checks of the certificate class (verifying that
+each parent signs the child, etc). In addition, GIDs also confirm that the
+parent's HRN is a prefix of the child's HRN. Verifying these prefixes prevents a
+rogue authority from signing a GID for a principal that is not a member of that
+authority. For example, planetlab.us.arizona cannot sign a GID for
+planetlab.us.princeton.foo.
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.3 Credentials (credential.py)</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Credentials are a derivative class of certificates and as such the credential
+  class inherits all the methods of the certificate class. A credential includes
+  a tuple of the following fields:
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp; (GIDCaller, GIDObject, LifeTime, Privileges, Delegate)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  GIDCaller identifies the holder of the credential. When a credential is
+  presented to a component, the security layer ensures that the client matches
+  the public key that is contained in GIDCaller.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  GIDObject identifies the object of the credential. This object depends upon
+  the type of the credential. For example, the credential for a user likely has
+  GIDObject == GIDCaller. Credentials for slices would include the GID of the
+  slice in the GIDObject field. Credentials for authorities include the GID of
+  the authority in the GIDObject field.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  LifeTime is the lifetime of the credential. Currently not implemented; expect
+  to implement it as an expiration date, and refuse credentials beyond that
+  date.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Privileges is a Rights object that describes the rights that are granted to
+  the holder of the credential.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Delegate is a True/False bit that indicates whether or not a credential can be
+  delegated to a different caller.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.3.1 Encoding and Decoding</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The 5 fields of the credential tuple are stored in the subject-alt-name field
+  of the X509 certificate. Two routines are included to package and unpackage
+  these fields: Encode() and Decode(). Encode should be called prior to signing
+  the credential. Decode is automatically called on demand by the various
+  get_*() functions.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.3.2 Verification of Credentials</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  In addition to the checks for ordinary certificates, verification of
+  credentials also ensures that the delegate bit was set by each parent in the
+  chain. If a delegate bit was not set, then an exception is thrown.&nbsp;Each
+  credential must also contain a subset of the rights of the parent credential
+  (i.e. a user credential cannot delegate authority rights).<br>
+  <br>
+  <b>2.4 Rights (rights.py)<br>
+  <br>
+  </b>Rights are implemented by two classes:<br>
+  <br>
+  Right - represents a single right<br>
+  RightList - represents a list of rights A right may allow several different
+  operations.<br>
+  <br>
+  For example, the "info" right allows "listslices", "listcomponentresources",
+  etc.<br>
+  <br>
+  <b>2.5 Records (record.py)</b><br>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The GeniRecord class implements a Geni Record. The GeniRecord class implements
+  an abstract interface for the record, so that a client may use records without
+  having to understant the underlying implementation details, such as whether
+  the record is realized in the registry database, a local cache, or has been
+  transmitted over the wire by an interface. A GeniRecord is a tuple (Name, GID,
+  Type, Info).
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp; Name specifies the HRN of the object GID is the GID of the object
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp; Type is user | sa | ma | slice | component Info is comprised of the
+  following sub-fields
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp; Pointer&nbsp;is a pointer to the record in the PL database
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp; pl_info&nbsp;is planetlab-specific info (when talking to client)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp; geni_info = geni-specific info (when talking to client)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The pointer is interpreted depending on the type of the record. For example,
+  if the type=="user", then pointer is assumed to be a person_id that indexes
+  into the persons table.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  A given HRN may have more than one record, provided that the records are of
+  different types. For example, planetlab.us.arizona may have both an SA and a
+  MA record, but cannot have two SA records.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.6 Tickets (geniticket.py)</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Similar to GIDs and Credentials, tickets also leverage the certificate object.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  A Ticket is tuple:<br>
+  &nbsp;&nbsp; (gidCaller, gidObject, attributes, rspec, delegate)<br>
+  <br>
+  &nbsp;&nbsp;&nbsp; gidCaller = GID of the caller performing the operation<br>
+  &nbsp;&nbsp;&nbsp; gidObject = GID of the slice<br>
+  &nbsp;&nbsp;&nbsp; attributes = slice attributes (keys, vref, instantiation,
+  etc)<br>
+  &nbsp;&nbsp;&nbsp; rspec = resources
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Tickets are created by invoking GetTicket() on the plc wrapper. The slice
+  attributes and rspec are taken from the planetlab slice database and represent
+  the current state of the slice. As of yet, tickets do not include any concept
+  of time -- a ticket represents the state of the slice at the current time
+  only.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Tickets are redeemed by invoking RedeemTicket() on the slice interface. The
+  attributes and spec are combined back into a planetlab slice record and handed
+  off to the node manager.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Tickets are signed by an authority and include parentage information that
+  traces the chain of authorities back to a trusted root.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.6.1 rspecs</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The rspec is currently a dictionary of {name: value} pairs. These pairs are
+  taken verbatim from the planetlab slice database.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The general rule that is used is that things in the slice record that do not
+  specifically imply a tangible resource (initscripts, keys, etc) are treated as
+  attributes and things that do specify a tangible resource (disk, network, etc)
+  are treated as the rspec.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  TODO: The definition of an rspec is evolving. It remains to reconcile the
+  eclipse schema with Geniwrapper. Gacks is also using another rspec format,
+  which may be need to be reconciled with the eclipse schema and/or geniwrapper.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <div>
+    <b>2.6.2 Encoding and Decoding</b>
+  </div>
+  <div>
+    &nbsp;
+  </div>
+  <div>
+    The 5 fields of the credential tuple are stored in the subject-alt-name
+    field of the X509 certificate. Two routines are included to package and
+    unpackage these fields: Encode() and Decode(). Encode should be called prior
+    to signing the ticket. Decode is automatically called on demand by the
+    various get_*() functions.
+  </div>
+  <div>
+    &nbsp;
+  </div>
+  <div>
+    <b>2.6.3 Verification of Tickets</b>
+  </div>
+  <div>
+    &nbsp;
+  </div>
+  <div>
+    Verification uses the standard parentage verification provided by the
+    certificate class. Specifically, each certificate is signed by a parent, and
+    some certificate must resolve to the trusted root set that is specified on
+    the component.
+  </div>
+  <div>
+    &nbsp;
+  </div>
+  <div>
+    Unlike credentials and GIDs, the parent of a ticket may be a degenerate
+    ticket that does not include the full 5-tuple (caller, object, attributes,
+    rspec, delegate). In such a case, the parent is just a placeholder in the
+    chain of authority used to convey the parentage information.
+  </div>
+  <div>
+    &nbsp;
+  </div>
+  <div>
+    Delegation of tickets is not something that is discussed in the SFA, but it
+    is supported in the ticket class and may be a useful feature. For example,
+    Alice may hold a ticket for a particular component, and delegate that ticket
+    to Bob. Bob could then instantiate a slice for Alice. This may be one way to
+    implement a slice manager.<br>
+    <br>
+    <b>2.7 Hierarchy of Authorities (hierarchy.py)</b><br>
+    <br>
+    This module implements a hierarchy of authorities and performs a similar
+    function as the "tree" module of the original geniwrapper prototype. An HRN
+    is assumed to be a string of authorities separated by dots. For example,
+    "planetlab.us.arizona.bakers". Each component of the HRN is a different
+    authority, with the last component being a leaf in the tree. Each authority
+    is stored in a subdirectory on the registry.<br>
+    <br>
+    Inside this subdirectory are several files:<br>
+    *.GID - GID file<br>
+    *.PKEY - private key file<br>
+    *.DBINFO - database info<br>
+    <br>
+    The hierarchy class can be used to create GIDs, Credentials, and Tickets for
+    a given authority.
+  </div>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The default behavior is that all authorities contained in the hierarchy will
+  be located together in a single physical registry. However, this is not
+  strictly necessary. The *.DBINFO files contain the database information for an
+  authority and can easily be configured to point to other machines. How an
+  authority would cause the DBINFO files to be installed in the correct places
+  is left as a separate exercise, possibly via an out-of-band management
+  interface or a web page.
+</div>
+<div>
+  <br>
+  <b>2.8 Configuration Information (config.py)</b><br>
+  <br>
+  This module holds configuration parameters for geniwrapper. There are two main
+  pieces of information that are used: the database connection and the PLCAPI
+  connection.<br>
+  <br>
+  Geniwrapper uses a MYSQL database to store records. This database may be
+  co-located with the PLC database, or it may be a separate database. The
+  following parameters define the connection to the database. Note that
+  Geniwrapper does not access any of the PLC databases directly via a mysql
+  connection; All PLC databases are accessed via PLCAPI.<br>
+</div>
+<p>
+  Geniwrapper uses a PLCAPI connection to perform operations on the registry,
+  such as creating and deleting slices. This connection requires an account on
+  the PLC server with full administrator access. The Url parameter controls
+  whether the connection uses PLCAPI directly (i.e. Geniwrapper is located on
+  the same machine as PLC), or uses a XMLRPC connection to the PLC machine. If
+  you wish to use the API directly, then remove the Url field from the
+  dictionary.
+</p>
+<div>
+  <br>
+  <b>2.8.1 Database Configuration</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Below is an example database configuration from config.py:
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  def get_default_dbinfo():<br>
+  &nbsp;&nbsp;&nbsp; dbinfo={}<br>
+  &nbsp;&nbsp;&nbsp; dbinfo['dbname'] = 'planetlab4'<br>
+  &nbsp;&nbsp;&nbsp; dbinfo['address'] = 'localhost'<br>
+  &nbsp;&nbsp;&nbsp; dbinfo['port'] = 5432<br>
+  &nbsp;&nbsp;&nbsp; dbinfo['user'] = 'pgsqluser'<br>
+  &nbsp;&nbsp;&nbsp; dbinfo['password'] = '4c77b272-c892-4bdf-a833-dddeeee1a2ed'
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp; return dbinfo
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  This identifies several important pieces of the database configuration. The
+  name specifies the database name as used by pgsql. The address is the hostname
+  (or ip-address) of the machine that is hosting the database. It is most likely
+  the local machine. Port specifies the socket port where the pgsql is
+  listening. The user and password authenticate Geniwrapper to the pgsql
+  database. In this example, an existing PLC database was used. This is not
+  strictly necessary as only Geni-specific information is stored in this
+  database. A separate database could be used, on a separate machine than PLC if
+  desired.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.8.2 PLCAPI Configuration</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Blow is an example PLCAPI configuration from config.py:
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  def get_pl_auth():<br>
+  &nbsp;&nbsp;&nbsp; pl_auth = {'Username':
+  <a href=mailto:%27root@198.0.0.132%27>'root@198.0.0.132'</a>,<br>
+  &nbsp;&nbsp;&nbsp; 'AuthMethod': 'password',<br>
+  &nbsp;&nbsp;&nbsp; 'AuthString':&nbsp; 'root',<br>
+  &nbsp;&nbsp;&nbsp; "Url":
+  "<a href=https://localhost/PLCAPI/>https://localhost:443/PLCAPI/</a>"<br>
+  &nbsp;&nbsp;&nbsp; }
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp; return pl_auth
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The PLCAPI configuration tells Geniwrapper how to connect to PLC. There are
+  two options: a local connection or a remote connection. If the Url field is
+  defined, then a remote connection is assumed, and Geniwrapper will attempt to
+  connect via XMLRPC to a remote PLCAPI server. If the Url field is not defined,
+  then Geniwrapper will assume that PYTHONPATH includes the relevant PLCAPI
+  classes to use PLCAPI directly.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Username specifies the name of the PLCAPI user. It is suggested that a user
+  with full administrative authority be allowed. Otherwise, Geniwrapper will be
+  unable to lookup public keys and other information that PLC does not make
+  available publicly. Administrative permission is also required to create PLC
+  sites, users, etc. Authmethod and AuthString specify the password require to
+  use this account.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>2.9 GeniServer and GeniClient</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Two files, geniserver.py and geniclient.py implement a basic Geni server and
+  client.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Geniserver forms the basis of any server that exports a Geni interface.
+  Examples include the PLC and Component wrappers. The Geniserver class itself
+  does not export any useful API functions other than a "noop" function that can
+  be used to test the server interface. Descendant classes register additional
+  API functions by overriding the register_function() member of the geniserver
+  object.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Geniserver provides a function, decode_authentication, that decodes
+  credentials. Credentials are supplied as the first parameter to many registry
+  and slice interface API functions. This function converts the credential
+  string supplied by the user into a credential object, checks to see that the
+  key the caller is using to encrypt the SSL connection matches the public key
+  in the caller GID of the credential, checks to see that the credential allows
+  the operation the caller is attempting to do, and finally verifies that the
+  parentage of the credential traces back to a trusted root.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Geniclient provides a variety of client-side stubs for invoking operations on
+  Geni interfaces. These stubs convert objects into strings that may be encoded
+  by XMLRPC, call the associated XMLRPC function, and convert the results back
+  into objects. Use of the Geniclient class is optional, but it makes a
+  convenient mechanism to execute API calls.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>3.0 The&nbsp;PLC Wrapper</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  This wrapper implements the Registry and Slice interfaces. According to the
+  SFA, the basic functionality of a registry is to map HRNs into records.
+  However, because of the interactions between Geniwrapper and PLC, the registry
+  does more than act as a simple database. The registry performs API calls on
+  PLC that create slices, sites, users, etc., and as such may indirectly cause
+  slices to be instantiated on components, because components are also linked to
+  PLC.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The mapping of Geni objects to planetlab objects is relatively
+  straightforward:
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp; slice&nbsp;= slice
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp; user&nbsp;= person
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp;&nbsp;component = node
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp; sa = site
+</div>
+<div>
+  &nbsp;&nbsp;&nbsp; ma = site
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The one part that is slightly counterintuitive is SA and MA, which both map to
+  the planetlab site object. In a unified registry (a registry that serves as
+  both slice and component registry), these will map to the same site record in
+  the PLC database. However, there are two distinct Geni records, one&nbsp;for
+  the SA and one for the MA.&nbsp;
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Registry and slice&nbsp;operations generally authenticate the&nbsp;caller by
+  credential. There are a few exceptions, and the registry API&nbsp;documents
+  should note those exceptions.&nbsp;
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>3.1&nbsp;PLC&nbsp;Wrapper&nbsp;Tools</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The registry include several additional tools that are used to manage it.
+  These include:
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  import.py - imports existing PLC records into the registry
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  nuke.py - deletes all Geni records
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>3.1 Bootstrapping&nbsp;the PLC Wrapper</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  There are several items that need to be done before starting the plc wrapper.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  1) Update util/config.py to match the parameters of your PLC installation.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  2) Import the existing planetlab database, creating the appropriate geni
+  records. This is done by running the "import.py" tool.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  3) Create a "trusted_roots" directory and place the certificate of the root
+  authority in that directory. Given the defaults in import.py, this certificate
+  would be named "planetlab.gid". For example, mkdir trusted_roots; cp
+  authorities/planetlab.gid trusted_roots/
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>4.0 The Component Wrapper</b>
+</div>
+<div>
+  <br>
+  The Geni Component Wrapper implements the Geni Slice and Component Management
+  interfaces. It includes functions for redeeming tickets,
+  starting/stopping/resetting/deleting slices, and management such as rebooting
+  the component.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The design of the component differs from the plc wrapper in the respect that
+  the component wrapper must be run in the same domain (VM) as the NM for the
+  node it is responsible for. That is, the component wrapper directly calls
+  the local node manager.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>4.1 Component Authentication of Credentials</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The component authenticates credentials the same way that the plc wrapper
+  does. Specifically, there is a directory of trusted_root certificates (or
+  GIDs) on the component. Any credential presented to the component must include
+  in it's parentage some certificate in the set of trusted roots. Otherwise, and
+  exception is thrown.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>4.2 The Ticket interface</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Mainpulating tickets is split between the PLC wrapper and the Component wrapper.
+  Specifically,&nbsp;the authoritative copy of planetlab state is stored on PLC and only cached on
+  the components. Thus, GetTicket() is implemented by the plc wrapper, and
+  RedeemTicket() is implemented by the component wrapper. Attempting to call GetTicket()
+  on a component will fail.<br>
+  <br>
+  InstantiateSlice is not implemented, as that operation is a combination of
+  GetTicket/RedeemTicket and would therefore span the PLC and Component
+  wrappers.<br>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>4.3 Sliver Credentials</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  A recent Geni Architecture call mentioned the need for sliver credentials. A
+  sliver credential would be identical to a slice credential, but would 1) only
+  be redeemable on a particular component, and 2) would resolve to a
+  trusted_root unique to that component (likely the component's GID
+  certificate). Sliver credentials would be returned by the RedeemTicket call
+  and would give the caller the permission required to start and stop the
+  sliver, etc.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Sliver credentials are not yet implemented, but their implementation would be
+  straightforward.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>4.4 Bootstrapping the Component Wrapper</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The first step is to install some required libraries on the component. These
+  include the m2crypto and pyopenssl libraries. Installing the actual RPMs for
+  these libaries on a running component proved difficult due to additional
+  support packages that require installation (python-devel, etc). For
+  development purposes, it was sufficient to copy the installed/compiled version
+  of the libraries from the development machine to the component.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The&nbsp;second step is to copy the files required by the component wrapper to
+  the node manager. They are copied to the /usr/share/Nodemanager directory. A
+  list of the files is contained in the copynode.sh script in the component
+  subdirectory.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The third step is to copy the trusted root certificates to the component. They
+  are stored in /usr/share/Nodemanager/trusted_roots. This should include the
+  certificate for the registry.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The&nbsp;fourth step is to start the component manager. This is done by
+  connecting to the component via SSH and running
+  /usr/share/Nodemanager/component.py.
+</div>
+<div>
+  <br>
+  In a production environment, all of these steps would be integrated into the
+  DVD boot image for the planetlab node.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>5.0 Command-Line Interface</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  A command-line interface is provided that allows a user to interact with the
+  Geni Registry and Component. This command line interface is located in the
+  cmdline directory and can be invoked by running genicli.py. Specifying
+  "genicli.py help" will display a list of available commands.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>5.1 Examples</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Several examples of using the CLI are presented in the form of shell scripts
+  in the cmdline directory. These scripts demonstrate creating slices,
+  authorities, users, nodes, and getting tickets and redeeming tickets. Rather
+  than duplicating all of those examples here, a few short examples are
+  presented below.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>5.1.1 Getting a Credential</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  python ./genicli.py --username&nbsp;root --credfile None --outfile test.cred
+  getCredential user planetlab.us.pl.account_test
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The credential for planetlab.us.pl.account_test is retrieved and stored in the
+  local file test.cred. The private ket test.pkey is used when opening the
+  XMLRPC connection and authenticates the client. test.pkey must match the
+  public key that is in the GID for the user record for
+  planetlab.us.pl.account_test.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Sample output: (in human-readable summary)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  CREDENTIAL planetlab.us.pl.account_test<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; privs: refresh,resolve,info<br>
+  &nbsp; gidCaller:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn:
+  planetlab.us.pl.account_test<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid:
+  276262316202422735940395896620385479122<br>
+  &nbsp; gidObject:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn:
+  planetlab.us.pl.account_test<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid:
+  276262316202422735940395896620385479122<br>
+  &nbsp;&nbsp; delegate: False
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>5.1.2 Resolving a record</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  python ./genicli.py --username test resolve planetlab.us.pl.account_test
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The record for planetlab.us.pl.account_test is retrieved and printed to
+  stdout. The credential used comes from the local file test.cred.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Sample output: (in human-readable summary)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  RECORD planetlab.us.pl.account_test<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn: planetlab.us.pl.account_test<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; type: user<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; gid:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn:
+  planetlab.us.pl.account_test<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid:
+  276262316202422735940395896620385479122<br>
+  &nbsp;&nbsp;&nbsp; pointer: 6<br>
+  &nbsp; geni_info:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; email :
+  <a href=mailto:test@test.com>test@test.com</a><br>
+  &nbsp;&nbsp;&nbsp; pl_info:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bio : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; first_name : test<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; last_name : account<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; last_updated : 1222497672<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; roles : ['user']<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; title : None<br>
+  &nbsp;&amp;nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; url : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; key_ids : [1]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; enabled : True<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slice_ids : [24]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; phone : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; peer_person_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; role_ids : [30]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; person_id : 6<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; date_created : 1219083140<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; site_ids : [1]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; peer_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; email :
+  <a href=mailto:test@test.com>test@test.com</a>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>5.1.3 Updating a record</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  python ./genicli.py --username test update user planetlab.us.pl.account_test
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  The record for planetlab.us.pl.account_test is updated. The credential used
+  comes from the local file test.cred. No changes are specified, so the only
+  thing that should be updated is the expiration time.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  <b>5.1.4 Resolving an authority</b>
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  An authority is an example of an HRN that might resolve to two different
+  records, an SA and a MA record.
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  python ./genicli.py --username test resolve planetlab.us.pl
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  Sample Output: (in human readable summary)
+</div>
+<div>
+  &nbsp;
+</div>
+<div>
+  RECORD planetlab.us.pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn: planetlab.us.pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; type: sa<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; gid:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn: planetlab.us.pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid:
+  294786197975089072547582920862317666209<br>
+  &nbsp;&nbsp;&nbsp; pointer: 1<br>
+  &nbsp; geni_info:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pi :
+  ['planetlab.us.pl.Administrator_Default']<br>
+  &nbsp;&nbsp;&nbsp; pl_info:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; last_updated : 1224136003<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; node_ids : [1]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; site_id : 1<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pcu_ids : []<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; max_slices : 100<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ext_consortium_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; peer_site_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; abbreviated_name : plctest<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid :
+  230749975723590978208303655640765327534<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; person_ids : [2, 4, 6]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slice_ids : [24, 1, 2]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; latitude : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; peer_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; max_slivers : 1000<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; is_public : False<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; address_ids : []<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name : plctest Central<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; url :
+  <a href=http://198.0.0.132/>http://198.0.0.132/</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; enabled : True<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; longitude : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; login_base : pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; date_created : 1209428329<br>
+  RESULT:<br>
+  RECORD planetlab.us.pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn: planetlab.us.pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; type: ma<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; gid:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hrn: planetlab.us.pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid:
+  294786197975089072547582920862317666209<br>
+  &nbsp;&nbsp;&nbsp; pointer: 1<br>
+  &nbsp; geni_info:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; operator : []<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; owner :
+  ['planetlab.us.pl.Administrator_Default']<br>
+  &nbsp;&nbsp;&nbsp; pl_info:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; last_updated : 1224136003<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; node_ids : [1]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; site_id : 1<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pcu_ids : []<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; max_slices : 100<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ext_consortium_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; peer_site_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; abbreviated_name : plctest<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; uuid :
+  230749975723590978208303655640765327534<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; person_ids : [2, 4, 6]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; slice_ids : [24, 1, 2]<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; latitude : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; peer_id : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; max_slivers : 1000<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; is_public : False<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; address_ids : []<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name : plctest Central<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; url :
+  <a href=http://198.0.0.132/>http://198.0.0.132/</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; enabled : True<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; longitude : None<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; login_base : pl<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; date_created : 1209428329
+</div>
+<br>

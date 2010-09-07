@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The config Module</title>
+</head>
+<body>
+<h1>The config Module</h1>
+<p>Geniwrapper Configuration Info
+
+This module holds configuration parameters for geniwrapper. There are two
+main pieces of information that are used: the database connection and
+the PLCAPI connection</p>
+<dl>
+<dt><a id='config.get_default_dbinfo-function' name='config.get_default_dbinfo-function'><b>get_default_dbinfo()</b></a> [<a href='#config.get_default_dbinfo-function'>#</a>]</dt>
+<dd>
+<p>Geniwrapper uses a MYSQL database to store records. This database may be
+co-located with the PLC database, or it may be a separate database. The
+following parameters define the connection to the database.
+
+Note that Geniwrapper does not access any of the PLC databases directly via
+a mysql connection; All PLC databases are accessed via PLCAPI.</p>
+</dd>
+<dt><a id='config.get_pl_auth-function' name='config.get_pl_auth-function'><b>get_pl_auth()</b></a> [<a href='#config.get_pl_auth-function'>#</a>]</dt>
+<dd>
+<p>Geniwrapper uses a PLCAPI connection to perform operations on the registry,
+such as creating and deleting slices. This connection requires an account
+on the PLC server with full administrator access.
+
+The Url parameter controls whether the connection uses PLCAPI directly (i.e.
+Geniwrapper is located on the same machine as PLC), or uses a XMLRPC connection
+to the PLC machine. If you wish to use the API directly, then remove the Url
+field from the dictionary.</p>
+</dd>
+</dl>
+</body></html>

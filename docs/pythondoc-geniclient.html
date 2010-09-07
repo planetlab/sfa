@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The geniclient Module</title>
+</head>
+<body>
+<h1>The geniclient Module</h1>
+<p>This module implements the client-side of the Geni API. Stubs are provided
+that convert the supplied parameters to the necessary format and send them
+via XMLRPC to a Geni Server.
+
+TODO: Investigate ways to combine this with existing PLC API?</p>
+<dl>
+<dt><b>GeniClient(url, key_file, cert_file)</b> (class) [<a href='#geniclient.GeniClient-class'>#</a>]</dt>
+<dd>
+<p>The GeniClient class provides stubs for executing Geni operations.</p>
+<p>For more information about this class, see <a href='#geniclient.GeniClient-class'><i>The GeniClient Class</i></a>.</p>
+</dd>
+<dt><b>GeniTransport</b> (class)  [<a href='#geniclient.GeniTransport-class'>#</a>]</dt>
+<dd>
+<p>For more information about this class, see <a href='#geniclient.GeniTransport-class'><i>The GeniTransport Class</i></a>.</p>
+</dd>
+<dt><b>ServerException</b> (class)  [<a href='#geniclient.ServerException-class'>#</a>]</dt>
+<dd>
+<p>ServerException, ExceptionUnmarshaller
+
+Used to convert server exception strings back to an exception.</p>
+<p>For more information about this class, see <a href='#geniclient.ServerException-class'><i>The ServerException Class</i></a>.</p>
+</dd>
+</dl>
+<h2><a id='geniclient.GeniClient-class' name='geniclient.GeniClient-class'>The GeniClient Class</a></h2>
+<dl>
+<dt><b>GeniClient(url, key_file, cert_file)</b> (class) [<a href='#geniclient.GeniClient-class'>#</a>]</dt>
+<dd>
+<p>The GeniClient class provides stubs for executing Geni operations. A given
+client object connects to one server. To connect to multiple servers, create
+multiple GeniClient objects.
+
+The Geni protocol uses an HTTPS connection, and the client's side of the
+connection uses his private key. Generally, this private key must match the
+public key that is containing in the GID that the client is providing for
+those functions that take a GID.</p>
+</dd>
+<dt><a id='geniclient.GeniClient.create_gid-method' name='geniclient.GeniClient.create_gid-method'><b>create_gid(cred, name, uuid, pkey_string)</b></a> [<a href='#geniclient.GeniClient.create_gid-method'>#</a>]</dt>
+<dd>
+<p>Create a new GID. For MAs and SAs that are physically located on the
+registry, this allows a owner/operator/PI to create a new GID and have it
+signed by his respective authority.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential of caller</dd>
+<dt><i>name</i></dt>
+<dd>
+hrn for new GID</dd>
+<dt><i>uuid</i></dt>
+<dd>
+unique identifier for new GID</dd>
+<dt><i>pkey_string</i></dt>
+<dd>
+public-key string (TODO: why is this a string and not a keypair object?)</dd>
+<dt>Returns:</dt>
+<dd>
+a GID object</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.delete_slice-method' name='geniclient.GeniClient.delete_slice-method'><b>delete_slice(cred)</b></a> [<a href='#geniclient.GeniClient.delete_slice-method'>#</a>]</dt>
+<dd>
+<p>Delete a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.get_credential-method' name='geniclient.GeniClient.get_credential-method'><b>get_credential(cred, type, name)</b></a> [<a href='#geniclient.GeniClient.get_credential-method'>#</a>]</dt>
+<dd>
+<p>Retrieve a credential for an object.
+
+If cred==None, then the behavior reverts to get_self_credential()</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object specifying rights of the caller</dd>
+<dt><i>type</i></dt>
+<dd>
+type of object (user | slice | sa | ma | node)</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name of object</dd>
+<dt>Returns:</dt>
+<dd>
+a credental object</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.get_gid-method' name='geniclient.GeniClient.get_gid-method'><b>get_gid(name)</b></a> [<a href='#geniclient.GeniClient.get_gid-method'>#</a>]</dt>
+<dd>
+<p>Retrieve the GID for an object. This function looks up a record in the
+registry and returns the GID of the record if it exists.
+TODO: Is this function needed? It's a shortcut for Resolve()</p>
+<dl>
+<dt><i>name</i></dt>
+<dd>
+hrn to look up</dd>
+<dt>Returns:</dt>
+<dd>
+a GID object</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.get_self_credential-method' name='geniclient.GeniClient.get_self_credential-method'><b>get_self_credential(type, name)</b></a> [<a href='#geniclient.GeniClient.get_self_credential-method'>#</a>]</dt>
+<dd>
+<p>Get_self_credential a degenerate version of get_credential used by a
+client to get his initial credential when he doesn't have one. This is
+the same as get_credential(..., cred=None,...).
+
+The registry ensures that the client is the principal that is named by
+(type, name) by comparing the public key in the record's GID to the
+private key used to encrypt the client-side of the HTTPS connection. Thus
+it is impossible for one principal to retrieve another principal's
+credential without having the appropriate private key.</p>
+<dl>
+<dt><i>type</i></dt>
+<dd>
+type of object (user | slice | sa | ma | node</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name of object</dd>
+<dt>Returns:</dt>
+<dd>
+a credential object</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.get_ticket-method' name='geniclient.GeniClient.get_ticket-method'><b>get_ticket(cred, name, rspec)</b></a> [<a href='#geniclient.GeniClient.get_ticket-method'>#</a>]</dt>
+<dd>
+<p>Retrieve a ticket. This operation is currently implemented on the
+registry (see SFA, engineering decisions), and is not implemented on
+components.
+
+The ticket is filled in with information from the PLC database. This
+information includes resources, and attributes such as user keys and
+initscripts.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object</dd>
+<dt><i>name</i></dt>
+<dd>
+name of the slice to retrieve a ticket for</dd>
+<dt><i>rspec</i></dt>
+<dd>
+resource specification dictionary</dd>
+<dt>Returns:</dt>
+<dd>
+a ticket object</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.list-method' name='geniclient.GeniClient.list-method'><b>list(cred)</b></a> [<a href='#geniclient.GeniClient.list-method'>#</a>]</dt>
+<dd>
+<p>List the records in an authority. The objectGID in the supplied credential
+should name the authority that will be listed.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object specifying rights of the caller</dd>
+<dt>Returns:</dt>
+<dd>
+list of record objects</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.list_slices-method' name='geniclient.GeniClient.list_slices-method'><b>list_slices(cred)</b></a> [<a href='#geniclient.GeniClient.list_slices-method'>#</a>]</dt>
+<dd>
+<p>List the slices on a component.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object that authorizes the caller</dd>
+<dt>Returns:</dt>
+<dd>
+a list of slice names</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.redeem_ticket-method' name='geniclient.GeniClient.redeem_ticket-method'><b>redeem_ticket(ticket)</b></a> [<a href='#geniclient.GeniClient.redeem_ticket-method'>#</a>]</dt>
+<dd>
+<p>Redeem a ticket. This operation is currently implemented on the
+component.
+
+The ticket is submitted to the node manager, and the slice is instantiated
+or updated as appropriate.
+
+TODO: This operation should return a sliver credential and indicate
+whether or not the component will accept only sliver credentials, or
+will accept both sliver and slice credentials.</p>
+<dl>
+<dt><i>ticket</i></dt>
+<dd>
+a ticket object containing the ticket</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.register-method' name='geniclient.GeniClient.register-method'><b>register(cred, record)</b></a> [<a href='#geniclient.GeniClient.register-method'>#</a>]</dt>
+<dd>
+<p>Register an object with the registry. In addition to being stored in the
+Geni database, the appropriate records will also be created in the
+PLC databases.
+
+The geni_info and/or pl_info fields must in the record must be filled
+out correctly depending on the type of record that is being registered.
+
+TODO: The geni_info member of the record should be parsed and the pl_info
+adjusted as necessary (add/remove users from a slice, etc)</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object specifying rights of the caller</dd>
+<dt>Returns:</dt>
+<dd>
+record to register</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.remove-method' name='geniclient.GeniClient.remove-method'><b>remove(cred, record)</b></a> [<a href='#geniclient.GeniClient.remove-method'>#</a>]</dt>
+<dd>
+<p>Remove an object from the registry. If the object represents a PLC object,
+then the PLC records will also be removed.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object specifying rights of the caller</dd>
+<dt><i>record</i></dt>
+<dd>
+record to register. The only relevant
+    fields of the record are 'name' and 'type', which are used to lookup
+    the current copy of the record in the Geni database, to make sure
+    that the appopriate record is removed.</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.reset_slice-method' name='geniclient.GeniClient.reset_slice-method'><b>reset_slice(cred)</b></a> [<a href='#geniclient.GeniClient.reset_slice-method'>#</a>]</dt>
+<dd>
+<p>Reset a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.resolve-method' name='geniclient.GeniClient.resolve-method'><b>resolve(cred, name)</b></a> [<a href='#geniclient.GeniClient.resolve-method'>#</a>]</dt>
+<dd>
+<p>Resolve an object in the registry. A given HRN may have multiple records
+associated with it, and therefore multiple records may be returned. The
+caller should check the type fields of the records to find the one that
+he is interested in.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object specifying rights of the caller</dd>
+<dt><i>name</i></dt>
+<dd>
+human readable name of object</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.start_slice-method' name='geniclient.GeniClient.start_slice-method'><b>start_slice(cred)</b></a> [<a href='#geniclient.GeniClient.start_slice-method'>#</a>]</dt>
+<dd>
+<p>Start a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.stop_slice-method' name='geniclient.GeniClient.stop_slice-method'><b>stop_slice(cred)</b></a> [<a href='#geniclient.GeniClient.stop_slice-method'>#</a>]</dt>
+<dd>
+<p>Stop a slice.</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+a credential identifying the caller (callerGID) and the slice
+    (objectGID)</dd>
+</dl><br />
+</dd>
+<dt><a id='geniclient.GeniClient.update-method' name='geniclient.GeniClient.update-method'><b>update(cred, record)</b></a> [<a href='#geniclient.GeniClient.update-method'>#</a>]</dt>
+<dd>
+<p>Update an object in the registry. Currently, this only updates the
+PLC information associated with the record. The Geni fields (name, type,
+GID) are fixed.
+
+The record is expected to have the pl_info field filled in with the data
+that should be updated.
+
+TODO: The geni_info member of the record should be parsed and the pl_info
+adjusted as necessary (add/remove users from a slice, etc)</p>
+<dl>
+<dt><i>cred</i></dt>
+<dd>
+credential object specifying rights of the caller</dd>
+<dt><i>record</i></dt>
+<dd>
+a record object to be updated</dd>
+</dl><br />
+</dd>
+</dl>
+<h2><a id='geniclient.GeniTransport-class' name='geniclient.GeniTransport-class'>The GeniTransport Class</a></h2>
+<dl>
+<dt><b>GeniTransport</b> (class)  [<a href='#geniclient.GeniTransport-class'>#</a>]</dt>
+<dd>
+<p>GeniTransport
+
+A transport for XMLRPC that works on top of HTTPS</p>
+</dd>
+</dl>
+<h2><a id='geniclient.ServerException-class' name='geniclient.ServerException-class'>The ServerException Class</a></h2>
+<dl>
+<dt><b>ServerException</b> (class)  [<a href='#geniclient.ServerException-class'>#</a>]</dt>
+<dd>
+<p>ServerException, ExceptionUnmarshaller
+
+Used to convert server exception strings back to an exception.
+   from usenet, Raghuram Devarakonda</p>
+</dd>
+</dl>
+</body></html>
