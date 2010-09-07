@@ -643,6 +643,7 @@ class ComponentAPI(BaseAPI):
         except IOError:
             node_pkey_file = config_dir + os.sep + "node.key"
             node_gid_file = config_dir + os.sep + "node.gid"
+            cert_filename = path + os.sep + 'server.cert'
             if not os.path.exists(node_pkey_file) or \
                not os.path.exists(node_gid_file):
                 self.get_node_key()
@@ -651,6 +652,7 @@ class ComponentAPI(BaseAPI):
             gid = GID(filename=node_gid_file)
             hrn = gid.get_hrn()
             # get credential from registry
+            cert_str = Certificate(filename=cert_filename).save_to_string(save_parents=True)
             registry = self.get_registry()
             cred = registry.get_self_credential(cert_str, 'node', hrn)
             Credential(string=cred).save_to_file(credfile, save_parents=True)            
