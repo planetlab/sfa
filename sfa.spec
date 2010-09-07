@@ -47,9 +47,9 @@ Requires: python-dateutil
 # %if %has_py24
 #
 # this also didn't work very well. I'll just check for distroname - baris
-%if %{distroname} == "centos5"
-Requires: python-uuid
-%endif
+#%if %{distroname} == "centos5"
+#Requires: python-uuid
+#%endif
 
 %package cm
 Summary: the SFA wrapper around MyPLC's NodeManager
