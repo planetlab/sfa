@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 0.9
-%define taglevel 15
+%define taglevel 16
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -158,6 +158,39 @@ chkconfig --add sfa
 
 %post cm
 chkconfig --add sfa-cm
+
+%changelog
+* Tue Sep 07 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-16
+- truncate login base of external (ProtoGeni, etc) slices to 20 characters
+  to avoid returning a PLCAPI exception that might confuse users.
+- Enhance PLC aggregate performace by using a better filter when querying SliceTags.      
+- fix build errors.  
+
+* Tue Aug 24 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-15
+- (Architecture) Credential format changed to match ProtoGENI xml format
+- (Architecture) All interfaces export a new set of methods that are compatible
+   with the ProtoGeni Aggregate spec. These new methods are considered a 
+   replacement  for the pervious methods exported by the interfaces. All 
+   previous methods are still exported and work as normal, but they are 
+   considered deprecated and will not be supported in future releases.  
+- (Architecture) SFI has been updated to use the new interface methods.
+- (Architecture) Changed keyconvet implementation from c to python.
+- (Architecture) Slice Manager now attempts looks for a delegated credential
+  provided by the client before using its own server credential.
+- (Archiceture) Slice Interface no longers stores cache of resources on disk. 
+  This cache now exists only in memory and is cleared when service is restarted
+  or cache lifetime is exceeded.  
+- (Performance) SliceManager sends request to Aggregates in parallel instead 
+  of sequentially.
+- (Bug fix) SFA tickets now support the new rspec format.
+- (Bug fix) SFI only uses cahced credential if they aren't expired.
+- (Bug fix) Cerdential delegation modified to work with new credential format.
+- (Enhancement) SFI -a --aggregatge option now sends requests directly to the
+  Aggregate instead of relaying through the Slice Manager.
+- (Enhancement) Simplified caching. Accociated a global cache instance with
+  the api handler on every new server request, making it easier to access the 
+  cache and use in more general ways.     
+
 %changelog
 * Thu May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
 - SfaServer now uses a pool of threads to handle requests concurrently
