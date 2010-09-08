@@ -52,6 +52,12 @@ class RSpec:
         result = self.rspec.xpath("./network/site/node/hostname/text()")
         return result
 
+    def get_network_list(self):
+        return self.rspec.xpath("./network[@name]/@name")
+
+    def get_nodes_from_network(self, network):
+        return self.rspec.xpath("./network[@name='%s']/site/node/hostname/text()" % network)
+
     def get_sliver_list(self):
         result = self.rspec.xpath("./network/site/node[sliver]/hostname/text()")
         return result
