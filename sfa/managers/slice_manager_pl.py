@@ -60,12 +60,21 @@ def create_slice(api, xrn, creds, rspec, users):
             message = "%s (line %s)" % (error.message, error.line)
             raise InvalidRSpec(message)
 
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'createsliver', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()
+
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:     
         credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM 
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
+            
         # Just send entire RSpec to each aggregate
         server = api.aggregates[aggregate]
         threads.run(server.CreateSliver, xrn, credential, rspec, users)
@@ -75,12 +84,21 @@ def create_slice(api, xrn, creds, rspec, users):
     return merged_rspec
 
 def renew_slice(api, xrn, creds, expiration_time):
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'renewesliver', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()
+
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:
         credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
+
         server = api.aggregates[aggregate]
         threads.run(server.RenewSliver, xrn, credential, expiration_time)
     threads.get_results()
@@ -96,12 +114,20 @@ def get_ticket(api, xrn, creds, rspec, users):
         aggregate_hrn = element.values()[0]
         aggregate_rspecs[aggregate_hrn] = rspec 
 
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'getticket', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()
+
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:
         credential = api.getCredential() 
     threads = ThreadManager()
     for aggregate, aggregate_rspec in aggregate_rspecs.items():
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
         server = None
         if aggregate in api.aggregates:
             server = api.aggregates[aggregate]
@@ -157,36 +183,60 @@ def get_ticket(api, xrn, creds, rspec, users):
 
 
 def delete_slice(api, xrn, creds):
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()    
+
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:
         credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
         server = api.aggregates[aggregate]
         threads.run(server.DeleteSliver, xrn, credential)
     threads.get_results()
     return 1
 
 def start_slice(api, xrn, creds):
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'startslice', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()    
+
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:
         credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
         server = api.aggregates[aggregate]
         threads.run(server.Start, xrn, credential)
     threads.get_results()    
     return 1
  
 def stop_slice(api, xrn, creds):
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'stopslice', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()    
+
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:
         credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
         server = api.aggregates[aggregate]
         threads.run(server.Stop, xrn, credential)
     threads.get_results()    
@@ -211,11 +261,16 @@ def status(api, xrn, creds):
     return 1
 
 def get_slices(api, creds):
+
     # look in cache first
     if api.cache:
         slices = api.cache.get('slices')
         if slices:
             return slices    
+
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'listslices', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
@@ -224,6 +279,10 @@ def get_slices(api, creds):
     threads = ThreadManager()
     # fetch from aggregates
     for aggregate in api.aggregates:
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
         server = api.aggregates[aggregate]
         threads.run(server.ListSlices, credential)
 
@@ -240,6 +299,7 @@ def get_slices(api, creds):
     return slices
  
 def get_rspec(api, creds, options):
+    
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', None)
     hrn, type = urn_to_hrn(xrn)
@@ -257,13 +317,21 @@ def get_rspec(api, creds, options):
 
     hrn, type = urn_to_hrn(xrn)
     rspec = None
-    
+
+    # get the callers hrn
+    valid_cred = self.api.auth.checkCredentials(creds, 'listnodes', hrn)[0]
+    caller_hrn = valid_cred.get_gid_caller().get_hrn()
+
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
     if not credential:
         credential = api.getCredential()
     threads = ThreadManager()
     for aggregate in api.aggregates:
+        # prevent infinite loop. Dont send request back to caller
+        # unless the caller is the aggregate's SM
+        if caller_hrn == aggrgate and aggregate =! api.hrn:
+            continue
         # get the rspec from the aggregate
         server = api.aggregates[aggregate]
         my_opts = copy(options)
