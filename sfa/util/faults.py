@@ -288,3 +288,10 @@ class CredentialNotVerifiable(SfaFault):
         SfaFault.__init__(self, 115, faultString, extra)
     def __str__(self):
         return repr(self.value)
+
+class CertExpired(SfaFault):
+    def __init__(self, value, extra=None):
+        self.value = value
+        faultString = "%s cert is expired" % value
+        SfaFault.__init__(self, 102, faultString, extra)
+   
