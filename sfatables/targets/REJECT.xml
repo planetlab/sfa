@@ -1,0 +1,10 @@
+<target name="REJECT">
+    <!-- The context is empty, since this target does not require any input from SFA -->
+    <rule element="*">
+        <context select=""/>
+        <attributes>
+            <attribute terminal="yes"/>
+        </attributes>
+        <processor filename="reject.xsl"/>
+    </rule>
+</target>

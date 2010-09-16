@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=us-ascii' />
+<title>The cert Module</title>
+</head>
+<body>
+<h1>The cert Module</h1>
+<p>Geniwrapper uses two crypto libraries: pyOpenSSL and M2Crypto to implement
+the necessary crypto functionality. Ideally just one of these libraries
+would be used, but unfortunately each of these libraries is independently
+lacking. The pyOpenSSL library is missing many necessary functions, and
+the M2Crypto library has crashed inside of some of the functions. The
+design decision is to use pyOpenSSL whenever possible as it seems more
+stable, and only use M2Crypto for those functions that are not possible
+in pyOpenSSL.
+
+This module exports two classes: Keypair and Certificate.</p>
+<dl>
+<dt><b>Certificate(create=False, subject=None, string=None, filename=None)</b> (class) [<a href='#cert.Certificate-class'>#</a>]</dt>
+<dd>
+<p>The certificate class implements a general purpose X509 certificate, making
+use of the appropriate pyOpenSSL or M2Crypto abstractions.</p>
+<p>For more information about this class, see <a href='#cert.Certificate-class'><i>The Certificate Class</i></a>.</p>
+</dd>
+<dt><b>Keypair(create=False, string=None, filename=None)</b> (class) [<a href='#cert.Keypair-class'>#</a>]</dt>
+<dd>
+<p>Public-private key pairs are implemented by the Keypair class.</p>
+<p>For more information about this class, see <a href='#cert.Keypair-class'><i>The Keypair Class</i></a>.</p>
+</dd>
+</dl>
+<h2><a id='cert.Certificate-class' name='cert.Certificate-class'>The Certificate Class</a></h2>
+<dl>
+<dt><b>Certificate(create=False, subject=None, string=None, filename=None)</b> (class) [<a href='#cert.Certificate-class'>#</a>]</dt>
+<dd>
+<p>The certificate class implements a general purpose X509 certificate, making
+use of the appropriate pyOpenSSL or M2Crypto abstractions. It also adds
+several addition features, such as the ability to maintain a chain of
+parent certificates, and storage of application-specific data.
+
+Certificates include the ability to maintain a chain of parents. Each
+certificate includes a pointer to it's parent certificate. When loaded
+from a file or a string, the parent chain will be automatically loaded.
+When saving a certificate to a file or a string, the caller can choose
+whether to save the parent certificates as well.</p>
+</dd>
+<dt><a id='cert.Certificate.__init__-method' name='cert.Certificate.__init__-method'><b>__init__(create=False, subject=None, string=None, filename=None)</b></a> [<a href='#cert.Certificate.__init__-method'>#</a>]</dt>
+<dd>
+<p>Create a certificate object.</p>
+<dl>
+<dt><i>create</i></dt>
+<dd>
+If create==True, then also create a blank X509 certificate.</dd>
+<dt><i>subject</i></dt>
+<dd>
+If subject!=None, then create a blank certificate and set
+    it's subject name.</dd>
+<dt><i>string</i></dt>
+<dd>
+If string!=None, load the certficate from the string.</dd>
+<dt><i>filename</i></dt>
+<dd>
+If filename!=None, load the certficiate from the file.</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.add_extension-method' name='cert.Certificate.add_extension-method'><b>add_extension(name, critical, value)</b></a> [<a href='#cert.Certificate.add_extension-method'>#</a>]</dt>
+<dd>
+<p>Add an X509 extension to the certificate. Add_extension can only be called
+once for a particular extension name, due to limitations in the underlying
+library.</p>
+<dl>
+<dt><i>name</i></dt>
+<dd>
+string containing name of extension</dd>
+<dt><i>value</i></dt>
+<dd>
+string containing value of the extension</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.create-method' name='cert.Certificate.create-method'><b>create()</b></a> [<a href='#cert.Certificate.create-method'>#</a>]</dt>
+<dd>
+<p>Create a blank X509 certificate and store it in this object.</p>
+</dd>
+<dt><a id='cert.Certificate.get_data-method' name='cert.Certificate.get_data-method'><b>get_data()</b></a> [<a href='#cert.Certificate.get_data-method'>#</a>]</dt>
+<dd>
+<p>Return the data string that was previously set with set_data</p>
+</dd>
+<dt><a id='cert.Certificate.get_extension-method' name='cert.Certificate.get_extension-method'><b>get_extension(name)</b></a> [<a href='#cert.Certificate.get_extension-method'>#</a>]</dt>
+<dd>
+<p>Get an X509 extension from the certificate</p>
+</dd>
+<dt><a id='cert.Certificate.get_issuer-method' name='cert.Certificate.get_issuer-method'><b>get_issuer(which=&quot;CN&quot;)</b></a> [<a href='#cert.Certificate.get_issuer-method'>#</a>]</dt>
+<dd>
+<p>Get the issuer name</p>
+</dd>
+<dt><a id='cert.Certificate.get_parent-method' name='cert.Certificate.get_parent-method'><b>get_parent()</b></a> [<a href='#cert.Certificate.get_parent-method'>#</a>]</dt>
+<dd>
+<p>Return the certificate object of the parent of this certificate.</p>
+</dd>
+<dt><a id='cert.Certificate.get_pubkey-method' name='cert.Certificate.get_pubkey-method'><b>get_pubkey()</b></a> [<a href='#cert.Certificate.get_pubkey-method'>#</a>]</dt>
+<dd>
+<p>Get the public key of the certificate.
+It is returned in the form of a Keypair object.</p>
+</dd>
+<dt><a id='cert.Certificate.get_subject-method' name='cert.Certificate.get_subject-method'><b>get_subject(which=&quot;CN&quot;)</b></a> [<a href='#cert.Certificate.get_subject-method'>#</a>]</dt>
+<dd>
+<p>Get the subject name of the certificate</p>
+</dd>
+<dt><a id='cert.Certificate.is_pubkey-method' name='cert.Certificate.is_pubkey-method'><b>is_pubkey(pkey)</b></a> [<a href='#cert.Certificate.is_pubkey-method'>#</a>]</dt>
+<dd>
+<p>Return True if pkey is identical to the public key that is contained in the certificate.</p>
+<dl>
+<dt><i>pkey</i></dt>
+<dd>
+Keypair object</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.is_signed_by_cert-method' name='cert.Certificate.is_signed_by_cert-method'><b>is_signed_by_cert(cert)</b></a> [<a href='#cert.Certificate.is_signed_by_cert-method'>#</a>]</dt>
+<dd>
+<p>Given a certificate cert, verify that this certificate was signed by the
+public key contained in cert. Throw an exception otherwise.</p>
+<dl>
+<dt><i>cert</i></dt>
+<dd>
+certificate object</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.load_from_file-method' name='cert.Certificate.load_from_file-method'><b>load_from_file(filename)</b></a> [<a href='#cert.Certificate.load_from_file-method'>#</a>]</dt>
+<dd>
+<p>Load the certificate from a file</p>
+</dd>
+<dt><a id='cert.Certificate.load_from_pyopenssl_x509-method' name='cert.Certificate.load_from_pyopenssl_x509-method'><b>load_from_pyopenssl_x509(x509)</b></a> [<a href='#cert.Certificate.load_from_pyopenssl_x509-method'>#</a>]</dt>
+<dd>
+<p>Given a pyOpenSSL X509 object, store that object inside of this
+certificate object.</p>
+</dd>
+<dt><a id='cert.Certificate.load_from_string-method' name='cert.Certificate.load_from_string-method'><b>load_from_string(string)</b></a> [<a href='#cert.Certificate.load_from_string-method'>#</a>]</dt>
+<dd>
+<p>Load the certificate from a string</p>
+</dd>
+<dt><a id='cert.Certificate.save_to_file-method' name='cert.Certificate.save_to_file-method'><b>save_to_file(filename, save_parents=False)</b></a> [<a href='#cert.Certificate.save_to_file-method'>#</a>]</dt>
+<dd>
+<p>Save the certificate to a file.</p>
+<dl>
+<dt><i>save_parents</i></dt>
+<dd>
+If save_parents==True, then also save the parent certificates.</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.save_to_string-method' name='cert.Certificate.save_to_string-method'><b>save_to_string(save_parents=False)</b></a> [<a href='#cert.Certificate.save_to_string-method'>#</a>]</dt>
+<dd>
+<p>Save the certificate to a string.</p>
+<dl>
+<dt><i>save_parents</i></dt>
+<dd>
+If save_parents==True, then also save the parent certificates.</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.set_data-method' name='cert.Certificate.set_data-method'><b>set_data(str)</b></a> [<a href='#cert.Certificate.set_data-method'>#</a>]</dt>
+<dd>
+<p>Set_data is a wrapper around add_extension. It stores the parameter str in
+the X509 subject_alt_name extension. Set_data can only be called once, due
+to limitations in the underlying library.</p>
+</dd>
+<dt><a id='cert.Certificate.set_issuer-method' name='cert.Certificate.set_issuer-method'><b>set_issuer(key, subject=None, cert=None)</b></a> [<a href='#cert.Certificate.set_issuer-method'>#</a>]</dt>
+<dd>
+<p>Sets the issuer private key and name</p>
+<dl>
+<dt><i>key</i></dt>
+<dd>
+Keypair object containing the private key of the issuer</dd>
+<dt><i>subject</i></dt>
+<dd>
+String containing the name of the issuer</dd>
+<dt><i>cert</i></dt>
+<dd>
+(optional) Certificate object containing the name of the issuer</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.set_parent-method' name='cert.Certificate.set_parent-method'><b>set_parent(p)</b></a> [<a href='#cert.Certificate.set_parent-method'>#</a>]</dt>
+<dd>
+<p>Set the parent certficiate.</p>
+<dl>
+<dt><i>p</i></dt>
+<dd>
+certificate object.</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.set_pubkey-method' name='cert.Certificate.set_pubkey-method'><b>set_pubkey(key)</b></a> [<a href='#cert.Certificate.set_pubkey-method'>#</a>]</dt>
+<dd>
+<p>Get the public key of the certificate.</p>
+<dl>
+<dt><i>key</i></dt>
+<dd>
+Keypair object containing the public key</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.set_subject-method' name='cert.Certificate.set_subject-method'><b>set_subject(name)</b></a> [<a href='#cert.Certificate.set_subject-method'>#</a>]</dt>
+<dd>
+<p>Set the subject name of the certificate</p>
+</dd>
+<dt><a id='cert.Certificate.sign-method' name='cert.Certificate.sign-method'><b>sign()</b></a> [<a href='#cert.Certificate.sign-method'>#</a>]</dt>
+<dd>
+<p>Sign the certificate using the issuer private key and issuer subject previous set with set_issuer().</p>
+</dd>
+<dt><a id='cert.Certificate.verify-method' name='cert.Certificate.verify-method'><b>verify(pkey)</b></a> [<a href='#cert.Certificate.verify-method'>#</a>]</dt>
+<dd>
+<p>Verify the authenticity of a certificate.</p>
+<dl>
+<dt><i>pkey</i></dt>
+<dd>
+is a Keypair object representing a public key. If Pkey
+    did not sign the certificate, then an exception will be thrown.</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Certificate.verify_chain-method' name='cert.Certificate.verify_chain-method'><b>verify_chain(trusted_certs=None)</b></a> [<a href='#cert.Certificate.verify_chain-method'>#</a>]</dt>
+<dd>
+<p>Verification examines a chain of certificates to ensure that each parent
+signs the child, and that some certificate in the chain is signed by a
+trusted certificate.
+
+Verification is a basic recursion: <pre>
+    if this_certificate was signed by trusted_certs:
+        return
+    else
+        return verify_chain(parent, trusted_certs)
+</pre>
+
+At each recursion, the parent is tested to ensure that it did sign the
+child. If a parent did not sign a child, then an exception is thrown. If
+the bottom of the recursion is reached and the certificate does not match
+a trusted root, then an exception is thrown.
+
+</p><dl>
+<dt><i>Trusted_certs</i></dt>
+<dd>
+is a list of certificates that are trusted.</dd>
+</dl><br />
+</dd>
+</dl>
+<h2><a id='cert.Keypair-class' name='cert.Keypair-class'>The Keypair Class</a></h2>
+<dl>
+<dt><b>Keypair(create=False, string=None, filename=None)</b> (class) [<a href='#cert.Keypair-class'>#</a>]</dt>
+<dd>
+<p>Public-private key pairs are implemented by the Keypair class.
+A Keypair object may represent both a public and private key pair, or it
+may represent only a public key (this usage is consistent with OpenSSL).</p>
+</dd>
+<dt><a id='cert.Keypair.__init__-method' name='cert.Keypair.__init__-method'><b>__init__(create=False, string=None, filename=None)</b></a> [<a href='#cert.Keypair.__init__-method'>#</a>]</dt>
+<dd>
+<p>Creates a Keypair object</p>
+<dl>
+<dt><i>create</i></dt>
+<dd>
+If create==True, creates a new public/private key and
+    stores it in the object</dd>
+<dt><i>string</i></dt>
+<dd>
+If string!=None, load the keypair from the string (PEM)</dd>
+<dt><i>filename</i></dt>
+<dd>
+If filename!=None, load the keypair from the file</dd>
+</dl><br />
+</dd>
+<dt><a id='cert.Keypair.as_pem-method' name='cert.Keypair.as_pem-method'><b>as_pem()</b></a> [<a href='#cert.Keypair.as_pem-method'>#</a>]</dt>
+<dd>
+<p>Return the private key in PEM format.</p>
+</dd>
+<dt><a id='cert.Keypair.create-method' name='cert.Keypair.create-method'><b>create()</b></a> [<a href='#cert.Keypair.create-method'>#</a>]</dt>
+<dd>
+<p>Create a RSA public/private key pair and store it inside the keypair object</p>
+</dd>
+<dt><a id='cert.Keypair.get_m2_pkey-method' name='cert.Keypair.get_m2_pkey-method'><b>get_m2_pkey()</b></a> [<a href='#cert.Keypair.get_m2_pkey-method'>#</a>]</dt>
+<dd>
+<p>Return an OpenSSL pkey object</p>
+</dd>
+<dt><a id='cert.Keypair.get_openssl_pkey-method' name='cert.Keypair.get_openssl_pkey-method'><b>get_openssl_pkey()</b></a> [<a href='#cert.Keypair.get_openssl_pkey-method'>#</a>]</dt>
+<dd>
+<p>Given another Keypair object, return TRUE if the two keys are the same.</p>
+</dd>
+<dt><a id='cert.Keypair.load_from_file-method' name='cert.Keypair.load_from_file-method'><b>load_from_file(filename)</b></a> [<a href='#cert.Keypair.load_from_file-method'>#</a>]</dt>
+<dd>
+<p>Load the private key from a file. Implicity the private key includes the public key.</p>
+</dd>
+<dt><a id='cert.Keypair.load_from_string-method' name='cert.Keypair.load_from_string-method'><b>load_from_string(string)</b></a> [<a href='#cert.Keypair.load_from_string-method'>#</a>]</dt>
+<dd>
+<p>Load the private key from a string. Implicitly the private key includes the public key.</p>
+</dd>
+<dt><a id='cert.Keypair.load_pubkey_from_file-method' name='cert.Keypair.load_pubkey_from_file-method'><b>load_pubkey_from_file(filename)</b></a> [<a href='#cert.Keypair.load_pubkey_from_file-method'>#</a>]</dt>
+<dd>
+<p>Load the public key from a string. No private key is loaded.</p>
+</dd>
+<dt><a id='cert.Keypair.load_pubkey_from_string-method' name='cert.Keypair.load_pubkey_from_string-method'><b>load_pubkey_from_string(string)</b></a> [<a href='#cert.Keypair.load_pubkey_from_string-method'>#</a>]</dt>
+<dd>
+<p>Load the public key from a string. No private key is loaded.</p>
+</dd>
+<dt><a id='cert.Keypair.save_to_file-method' name='cert.Keypair.save_to_file-method'><b>save_to_file(filename)</b></a> [<a href='#cert.Keypair.save_to_file-method'>#</a>]</dt>
+<dd>
+<p>Save the private key to a file</p>
+<dl>
+<dt><i>filename</i></dt>
+<dd>
+name of file to store the keypair in</dd>
+</dl><br />
+</dd>
+</dl>
+</body></html>

@@ -1,0 +1,41 @@
+#!/bin/env python
+
+import sys
+import readline
+import plc_config
+
+def validator(validated_variables):
+    pass
+#    maint_user = validated_variables["PLC_API_MAINTENANCE_USER"]
+#    root_user = validated_variables["PLC_ROOT_USER"]
+#    if maint_user == root_user:
+#        errStr="PLC_API_MAINTENANCE_USER=%s cannot be the same as PLC_ROOT_USER=%s"%(maint_user,root_user)
+#        raise plc_config.ConfigurationException(errStr)
+
+usual_variables = [
+    "SFA_INTERFACE_HRN",
+    "SFA_REGISTRY_ROOT_AUTH",
+    "SFA_REGISTRY_HOST", 
+    "SFA_AGGREGATE_HOST",
+    "SFA_SM_HOST",
+    "SFA_PLC_USER",
+    "SFA_PLC_PASSWORD",
+    "SFA_PLC_DB_HOST",
+    "SFA_PLC_DB_USER",
+    "SFA_PLC_DB_PASSWORD",
+    "SFA_PLC_URL",
+    ]
+
+configuration={ \
+    'name':'sfa',
+    'service':"sfa",
+    'usual_variables':usual_variables,
+    'config_dir':"/etc/sfa",
+    'validate_variables':{},
+    'validator':validator,
+    }
+
+if __name__ == '__main__':
+    command=sys.argv[0]
+    argv = sys.argv[1:]
+    plc_config.main(command,argv,configuration)

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rspec id="max_rspec_slice1" xmlns="http://geni.maxgigapop.net/aggregate/rspec/20100412/" schemaLocation="http://geni.dragon.maxgigapop.net/max-rspec.xsd" 
+  xmlns:CtrlPlane="http://ogf.org/schema/network/topology/ctrlPlane/20080828/" CtrlPlane:schemaLocation="http://www.controlplane.net/idcp-v1.1/nmtopo-ctrlp.xsd">
+    <aggregate>geni.maxgigapop.net</aggregate>
+    <description>Example MAX RSpec</description>
+    <lifetime id="time-1271533930-1271563981">
+        <CtrlPlane:start type="CtrlPlane:TimeContent">1279848020</CtrlPlane:start>
+        <CtrlPlane:end type="CtrlPlane:TimeContent">1280712039</CtrlPlane:end>
+    </lifetime>
+    <computeResource id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1">
+        <planetlabNodeSliver id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab3">
+            <address>206.196.176.55</address>
+            <computeCapacity>
+                <cpuType>generic</cpuType>
+                <cpuSpeed>2.0GHz</cpuSpeed>
+                <numCpuCores>1</numCpuCores>
+                <memorySize>256MB</memorySize>
+                <diskSize>16GB</diskSize>
+            </computeCapacity>
+            <networkInterface id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab3:interface=eth1.any_1">
+                <deviceType>Ethernet</deviceType>
+                <deviceName>eth1</deviceName>
+                <capacity>100Mbps</capacity>
+                <ipAddress>10.10.10.2/24</ipAddress>
+                <vlanRange>any</vlanRange>
+                <peerNetworkInterface>urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab2:interface=eth1.any_1</peerNetworkInterface>
+            </networkInterface>
+            <networkInterface id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab3:interface=eth1.any_2">
+                <deviceType>Ethernet</deviceType>
+                <deviceName>eth1</deviceName>
+                <capacity>100Mbps</capacity>
+                <ipAddress>10.10.30.1/24</ipAddress>
+                <vlanRange>any</vlanRange>
+                <peerNetworkInterface>urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab5:interface=eth1.any_2</peerNetworkInterface>
+            </networkInterface>
+        </planetlabNodeSliver>
+        <planetlabNodeSliver id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab5">
+            <address>206.196.176.138</address>
+            <computeCapacity>
+                <cpuType>generic</cpuType>
+                <cpuSpeed>2.0GHz</cpuSpeed>
+                <numCpuCores>1</numCpuCores>
+                <memorySize>256MB</memorySize>
+                <diskSize>16GB</diskSize>
+            </computeCapacity>
+            <networkInterface id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab5:interface=eth1.any_3">
+                <deviceType>Ethernet</deviceType>
+                <deviceName>eth1</deviceName>
+                <capacity>100Mbps</capacity>
+                <ipAddress>10.10.20.2/24</ipAddress>
+                <vlanRange>any</vlanRange>
+                <peerNetworkInterface>urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab2:interface=eth1.any_3</peerNetworkInterface>
+            </networkInterface>
+            <networkInterface id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab5:interface=eth1.any_2">
+                <deviceType>Ethernet</deviceType>
+                <deviceName>eth1</deviceName>
+                <capacity>100Mbps</capacity>
+                <ipAddress>10.10.30.2/24</ipAddress>
+                <vlanRange>any</vlanRange>
+                <peerNetworkInterface>urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab3:interface=eth1.any_2</peerNetworkInterface>
+            </networkInterface>
+        </planetlabNodeSliver>
+        <planetlabNodeSliver id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab2">
+            <address>206.196.176.133</address>
+            <computeCapacity>
+                <cpuType>generic</cpuType>
+                <cpuSpeed>2.0GHz</cpuSpeed>
+                <numCpuCores>1</numCpuCores>
+                <memorySize>256MB</memorySize>
+                <diskSize>16GB</diskSize>
+            </computeCapacity>
+            <networkInterface id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab2:interface=eth1.any_1">
+                <deviceType>Ethernet</deviceType>
+                <deviceName>eth1</deviceName>
+                <capacity>100Mbps</capacity>
+                <ipAddress>10.10.10.1/24</ipAddress>
+                <vlanRange>any</vlanRange>
+                <peerNetworkInterface>urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab3:interface=eth1.any_1</peerNetworkInterface>
+            </networkInterface>
+            <networkInterface id="urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab2:interface=eth1.any_3">
+                <deviceType>Ethernet</deviceType>
+                <deviceName>eth1</deviceName>
+                <capacity>100Mbps</capacity>
+                <ipAddress>10.10.20.1/24</ipAddress>
+                <vlanRange>any</vlanRange>
+                <peerNetworkInterface>urn:aggregate=geni.maxgigapop.net:rspec=my-test-max-rspec-slice1:domain=dragon.maxgigapop.net:node=planetlab5:interface=eth1.any_3</peerNetworkInterface>
+            </networkInterface>
+        </planetlabNodeSliver>
+    </computeResource>
+</rspec>

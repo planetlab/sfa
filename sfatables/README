@@ -1,0 +1,265 @@
+sfatables is a tool for defining access and admission control policies
+in an SFA network, in much the same way as iptables is for ip
+networks. This file gives an overview of the tool and then describes
+its design and implementation.
+
+Example command
+---------------
+
+An sfatables configuration consists of lists of rules that are applied
+to incoming and outgoing rspecs. Each rule consists of a 'match', to
+evaluate a given request against a certain set of criteria and a
+'target', to perform a corresponding action. Rules are manipulated by
+using the 'sfatables' command.
+
+Consider the following example:
+
+sfatables -A INCOMING -- -m hrn --user-hrn plc.princeton -- -j RESTRICT_TO_NODES --blacklist plc.mit
+
+The statement in this example has three parts: the command, the match
+and the target, separated by the token '--'.
+
+* The command is '-A', which means 'Add rule.' 
+
+* The match is defined in the segment '-m hrn --user-hrn
+  plc.princeton.' Here, '-m hrn' specifies the 'match type', and
+  '--user-hrn' provides an argument specific to the match type.
+
+* The target is defined by the segment '-j RESTRICT_TO_NODES
+  --blacklist plc.princeton.' '-j RESTRICT_TO_NODES' defines the
+  target type (RESTRICT_TO_NODES) and '--blacklist' defines a
+  parameter specific to this type.
+
+sfatables comes with a default set of matches and targets, which can
+be extended using a simple interface.
+
+When you execute this command, you should see it in your current
+configuration by running 'sfatables -L INCOMING'
+
+# ./sfatables -L INCOMING
+
+# Rule  Match Arguments                Target            Arguments        
+# 1     hrn   user-hrn=plc.princeton.* RESTRICT_TO_NODES blacklist=plc.mit
+
+With this configuration, every time a request is received from
+plc.princeton.*, nodes matching the blacklist prefix (plc.mit) are
+dropped from the rspec.
+
+The basis for deploying rules using sfatables is the library of
+matches and targets. A set of such rules constitutes a 'policy', which
+as we will see is a portable piece of information that can be
+exchanged with users, peers, and policy makers to make resource
+allocation and peering a more effective process.
+
+XPath crash course -- read this now, or deal with frustration in the
+remainder of the document
+-----------------------------------------------------
+
+XPath is used to select sets of nodes in an XML file. It is like the
+'SELECT' command in SQL, but has the advantage of applying to tree
+structures, which are more general than relations. That is, while a
+relation (a table) has a depth = 2, a tree can have an arbitrary
+depth. This property allows us to consicely refer to criteria such as 'the nodes in the
+site corresponding to a user named Alice.' This particular command
+might look like: '/user[name='Alice']/site/node.'
+
+An XPath expression is like a directory path, with the following key
+differences.
+
+* In a directory path the relationship between X/Y is a parent-child
+  relationship. In XPath, this can be one of a large number of
+  relationships, including 'sibling', 'parent', 'ancestor',
+  'descendant' etc. The most frequently used relationships are:
+
+    child - e.g. site/node
+
+  and
+
+    descendant - e.g. user//node
+
+* Each level can be filtered with a predicate; e.g.,
+  'site[startswith(@hrn,'plc')]/nodes' means all nodes in sites that
+  have the prefix 'plc'.
+
+* Some terms have an '@' in them, meaning that they are attributes;
+  e.g., to retrieve the value of p in the following data, we would use
+  the expression "/x/y/@p"
+
+   <x>
+   <y p="q"/>
+   </x>
+
+Example match
+-------------
+
+A match specification consists of a 'context', a set of arguments, and
+a 'processor.' The context defines the information associated with a
+request that this match operates on. Think of it as the input
+parameters to the match. The arguments define values specific to the
+rule. The processor refers to the program that actually evaluates the
+match.
+
+<match name="hrn">
+    <context select="//sfa/current/user@hrn"/>
+    <rule>
+        <argument>
+            <name>user-hrn</name>
+            <help>HRN of the user requesting resouces</help>
+            <operand>HRN</operand>
+        </argument>
+    </rule>
+    <processor filename="hrn.xsl"/>
+</match>
+
+Now, when we run the command in the previous example:
+
+sfatables -A INCOMING -- -m hrn --user-hrn plc.princeton -- -j RESTRICT_TO_NODES --blacklist plc.mit
+
+... this match specification is parameterized and dropped in the
+sfatables configuration directory. The paramterized version of the
+match is given below:
+
+<match name="hrn">
+    <!-- Empty context. We _always_ get the hrn of the current user -->
+    <context select="//sfa/current/user@hrn"/>
+    <rule>
+        <argument>
+            <name>user-hrn</name>
+            <help>HRN of the user requesting resouces</help>
+            <operand>HRN</operand>
+        <value>plc.princeton</value>   <------------------
+    </argument>
+    </rule>
+    <processor filename="hrn.xsl"/>
+</match>
+
+Notice the additional 'value' tag. Let's list the entries in the
+configuration directory.
+
+# ls -l /etc/sfatables/INCOMING
+
+sapan@joyce ~/Projects/planetlab/sfa/sfatables/targets $ 
+total 16
+-rw-r--r-- 1 sapan sapan 671 Sep 11 12:13 sfatables-1-match
+-rw-r--r-- 1 sapan sapan 646 Sep 11 12:13 sfatables-1-target
+
+As you can see, a configuration is simply a set of match-target pairs.
+
+Finally, this is what the match processor looks like:
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xsl:stylesheet version="1.0"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:variable name="context-hrn" select="hrn"/>
+    <xsl:template match="user">
+                    <xsl:choose>
+                    <xsl:when test="starts-with($context-hrn, hrn)">
+                        True <!--Match -->
+                    </xsl:when>
+                    <xsl:otherwise>
+                        False <!-- No match -->
+                    </xsl:otherwise>
+                </xsl:choose>
+        <xsl:value-of select="$result"/>
+    </xsl:template>
+        
+</xsl:stylesheet>
+
+It is written in XSLT. If the syntax of XSLT were not XML-based, then
+it might have looked as follows:
+
+context-hrn = //sfa/user/hrn 
+request-hrn = //request/user/hrn
+
+result = 
+  if (starts_with(context-hrn,request-hrn)) then
+    True
+  else
+    False
+  return result
+
+This is exactly what the previous fragment of code says, albeit in a
+different format.
+
+Example target
+--------------
+
+Targets are specified just like matches. If you haven't read the match
+example, then now is a good time to do that. Here's an example target:
+
+<target name="RESTRICT_TO_NODES">
+    <!-- The context is empty, since this target does not require any input from SFA -->
+    <context select=""/>
+    <rule>
+        <argument>
+            <name>whitelist</name>
+            <help>Prefix of nodes to whitelist for this match.</help>
+            <operand>PREFIX</operand>
+        </argument>
+        <argument>
+            <name>blacklist</name>
+            <help>Prefix of nodes to blacklist for this match.</help>
+            <operand>PREFIX</operand>
+        </argument>
+    </rule>
+    <processor filename="restrict_to_nodes.xsl"/>
+</target>
+
+and the corresponding target processor:
+
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- Magic sauce copied from a manual. This fragment basically copies everything except for
+    stuff that explicitly matches with the templates defined below. In the case of such a match,
+    the matched node is treated differently.-->
+    <xsl:template match="@* | node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@* | node()"/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:variable name="whitelist_prefix" select="//rspec//rule/argument[name='whitelist']/value"/>
+    <xsl:variable name="blacklist_prefix" select="//rspec//rule/argument[name='blacklist']/value"/>
+
+    <!-- Drop nodes that are not in the whitelist -->
+    <xsl:template match="node">
+            <xsl:choose>
+                <xsl:when test="starts-with(@name,$whitelist_prefix) and not($blacklist_prefix and starts-with(@name,$blacklist_prefix))">
+                    <xsl:copy-of select="."/>
+                </xsl:when>
+                <xsl:otherwise/>
+            </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="sfatables-input"/>
+</xsl:stylesheet>
+
+[TODO: explain this target]
+
+
+Contexts
+--------
+
+Matches and targets are associated with specific contexts. A target may use a
+variety of criteria to process a request, and may need to look them up in the
+SFA database. The 'context' contains an xpath expression that isolates the
+items that a match or target may refer to. For example, if a match needs access
+to the nodes corresponding to a slice's site, then the context may be '/sfa/slice[@name=/context/slice/@name]/nodes'.
+
+
+Here's a summary of the model:
+-----------------------------
+
+An AM can inherit from a set of elements (E).
+
+Each element in E is associated with three things:
+
+    * A er... 'micro-rspec'
+
+    * an abstract database schema - S, which the AM is expected to be
+      able to generate on the fly.
+
+    * a set of matches and targets. 
+
+Matches and targets may use pieces of information from S by specifying
+them in their context (see the 'context' part of matches and targets
+above).

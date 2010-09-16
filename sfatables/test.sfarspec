@@ -1,0 +1,16 @@
+<!-- run "runtime.py sfarspec" to apply current rule set to this file -->
+
+<RSpec>
+     <request-context><sfa><user><hrn>plc.princeton.sapanb</hrn></user></sfa></request-context>
+     <match-context><argument><name>user-hrn</name><value>plc.princeton.sapanb</value></argument></match-context>
+     <target-context><argument><name>blacklist-dns-suffix</name><value>bing</value></argument></target-context>
+     <request>
+        <NodeSpec name="boobar">
+            <node name="plc.princeton.planetlab-01"/>
+            <node name="plc.princeton.planetlab-02"/>
+            <node name="plc.princeton.planetlab-03"/>
+            <node name="plc.princeton.planetlab-04"/>
+            <node name="plc.tp.planetlab3"/>
+        </NodeSpec>
+    </request>
+</RSpec>

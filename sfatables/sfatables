@@ -1,0 +1,138 @@
+#!/usr/bin/python 
+
+# This file parses an sfatables command and generates XML files that parameterize
+# matches and targets. Each such XML file defines a rule. Rules are dropped in directories
+# that represent 'chains.' SFA loads rules from various chains and invokes them at certain
+# 'hook points.' For example, it invokes rules in the 'OUTGOING' chain before returning
+# the output of 'get_resources.'
+
+import sys
+import os
+import pdb
+import glob
+import libxml2
+
+from optparse import OptionParser
+from sfatables import commands
+from sfatables.xmlextension import Xmlextension
+from sfatables.globals import *
+
+def load_commands(module, list):
+    command_dict={}
+
+    for command_name in list:
+        command_module = __import__(".".join([module,command_name]),fromlist=[module])
+        command = getattr(command_module, command_name)
+        command_dict[command_name]=command()
+
+    return command_dict
+
+def load_xml_extensions(module, ext_dir):
+    ext_dict={}
+
+    exts = glob.glob(ext_dir + os.path.sep + "*")
+    for ext in exts:
+        module = Xmlextension(ext)
+        # get the filename and get rid of the ".xml" extension
+        ext_name = os.path.extsep.join(os.path.splitext(os.path.basename(ext))[:-1])
+        ext_dict[ext_name]=module
+
+    return ext_dict
+
+
+def create_parser(command_dict):
+    parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
+                             description='See "man sfatables" for more detail.')
+    
+    for k in command_dict.keys():
+        command = command_dict[k]
+        for (short_option,long_option) in command.options:
+            parser.add_option(short_option,long_option,dest=command.type,action=command.action,const=k,help=command.help,metavar="CHAIN")
+
+    return parser
+
+def create_parser_xml_ext(ext_dict):
+    parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
+                             description='See "man sfatables" for more detail.')
+    
+    for k in ext_dict.keys():
+        command = ext_dict[k]
+        for arg in command.arguments:
+            parser.add_option('',"--"+arg['name'],dest=arg['name'],help=arg['help'],metavar=arg['target'])
+
+    return parser
+
+
+def partition(sep, lst):
+    ret = []
+    curpart = []
+    for item in lst:
+        if (item==sep):
+            ret.append(curpart)
+            curpart=[]
+        else:
+            curpart.append(item)
+    ret.append(curpart)
+
+    return ret
+
+
+def main():
+    # sfatables <command> -- <match> -- <target>
+    pargs = partition('--', sys.argv[1:])
+
+    command_dict = load_commands("sfatables.commands",commands.all)
+    command_parser = create_parser(command_dict)
+    (options, args) = command_parser.parse_args(pargs[0])
+    setattr(options, 'args', args)
+
+    command = command_dict[options.command]
+
+    if (command.matches):
+        if (len(pargs)<2):
+            raise Exception("Must specify match for this command")
+        match_dict = load_xml_extensions("sfatables.matches",match_dir)
+        match_parser = create_parser_xml_ext(match_dict)
+        matches_str = ",".join(match_dict.keys())
+        match_parser.add_option('-m','--match',dest='name',help='Match name (one of %s)'%matches_str, metavar = 'MATCH')
+        match_parser.add_option('-n','--negate',dest='negate',help='Negate result',action='store_true')
+        (match_options, args) = match_parser.parse_args(pargs[1])
+        try:
+            name = match_options.name
+        except Exception:
+            print "Must specify match name with -m"
+
+        if (match_dict.has_key(name)):
+            setattr(match_options, 'arguments', match_dict[name].arguments)
+        else:
+            raise Exception('Match %s not found'%name)
+
+    else:
+        match_options=None
+
+    if (command.targets):
+        if (len(pargs)<3):
+            raise Exception("Must specify a target for this command")
+        target_dict = load_xml_extensions("sfatables.targets",target_dir)
+        target_parser = create_parser_xml_ext(target_dict)
+        targets_str = ",".join(target_dict.keys())
+        target_parser.add_option('-j','--jump',dest='name',help='Target name (one of %s)'%targets_str, metavar = 'TARGET')
+        target_parser.add_option('-e','--element',dest='element',help='Element name', metavar = 'ELEMENT')
+        (target_options, args) = target_parser.parse_args(pargs[2])
+        try:
+            name = target_options.name
+        except Exception:
+            print "Must specify target name with -j"
+
+        if (target_dict.has_key(name)):
+            setattr(target_options, 'arguments', target_dict[name].arguments)
+        else:
+            raise Exception('Target %s not found'%name)
+
+    else:
+        target_options = None
+
+    command(options, match_options, target_options)
+
+if __name__=='__main__':
+    main()
