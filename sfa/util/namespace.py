@@ -76,7 +76,7 @@ def urn_to_hrn(urn):
     
     # Remove the authority name (e.g. '.sa')
     if type == 'authority':
-        hrn = hrn[:hrn.rindex('.')]        
+        hrn = hrn.replace ('.sa', '')        
    
     return str(hrn), str(type) 
     
