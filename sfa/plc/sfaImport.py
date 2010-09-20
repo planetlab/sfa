@@ -202,7 +202,6 @@ class sfaImport:
         sitename = cleanup_string(sitename)
         print 'importing site %s' % sitename
         hrn = parent_hrn + "." + sitename
-        urn = hrn_to_urn(hrn, 'authority')
         # Hardcode 'internet2' into the hrn for sites hosting
         # internet2 nodes. This is a special operation for some vini
         # sites only
@@ -214,6 +213,7 @@ class sfaImport:
                 #sitename = sitename.replace("nlr", "")
                 hrn = ".".join([parent_hrn, "internet2", sitename])
 
+        urn = hrn_to_urn(hrn, 'authority')
         trace("Import: importing site " + hrn, self.logger)
 
         # create the authority
