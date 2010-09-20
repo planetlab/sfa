@@ -65,8 +65,11 @@ def urn_to_hrn(urn):
 
     name = urn[len(URN_PREFIX):]
     hrn_parts = name.split("+")
-    
     type = hrn_parts.pop(2)
+
+    # Remove the authority name (e.g. '.sa')
+    if type == 'authority':
+        hrn_parts = hrn_parts[:-1]
 
     # convert hrn_parts (list) into hrn (str) by doing the following    
     # remove blank elements
@@ -74,10 +77,6 @@ def urn_to_hrn(urn):
     # join list elements using '.'
     hrn = '.'.join([part.replace(':', '.') for part in hrn_parts if part]) 
     
-    # Remove the authority name (e.g. '.sa')
-    if type == 'authority':
-        hrn = hrn.replace ('.sa', '')        
-   
     return str(hrn), str(type) 
     
     
