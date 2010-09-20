@@ -270,13 +270,11 @@ def get_rspec(api, creds, options):
     xrn = options.get('geni_slice_urn', None)
     hrn, type = urn_to_hrn(xrn)
 
-    """
     # look in cache first
     if api.cache and not xrn:
         rspec = api.cache.get('nodes')
         if rspec:
             return rspec 
-    """
 
     registry = api.registries[api.hrn]
     credential = api.getCredential()
@@ -291,11 +289,10 @@ def get_rspec(api, creds, options):
 
     rspec = network.toxml()
 
-    """
     # cache the result
     if api.cache and not xrn:
         api.cache.add('nodes', rspec)
-    """
+    
     return rspec
 
 
