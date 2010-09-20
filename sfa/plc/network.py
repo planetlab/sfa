@@ -125,31 +125,31 @@ class Slice:
     def get_multi_tag(self, tagname, node = None):
         tags = []
         for i in self.slice_tag_ids:
-            try:
-                tag = self.network.lookupSliceTag(i)                
-                if tag.tagname == tagname:
-                    if not (node and node.id != tag.node_id):
-                        tags.append(tag)
-            except InvalidRSpec, e:
-                # As they're not needed, we ignore some tag types from
-                # GetSliceTags call. See Slicetag.ignore_tags
-                pass
+            try: 
+                tag = self.network.lookupSliceTag(i)                 
+                if tag.tagname == tagname: 
+                    if not (node and node.id != tag.node_id): 
+                        tags.append(tag) 
+            except InvalidRSpec, e: 
+                # As they're not needed, we ignore some tag types from 
+                # GetSliceTags call. See Slicetag.ignore_tags 
+                pass 
         return tags
         
     """
     Use with tags that have only one instance
     """
     def get_tag(self, tagname, node = None):
-        try:
-            for i in self.slice_tag_ids:
-                tag = self.network.lookupSliceTag(i)
-                if tag.tagname == tagname:
-                    if (not node) or (node.id == tag.node_id):
-                        return tag
-        except InvalidRSpec, e:
-            # As they're not needed, we ignore some tag types from
-            # GetSliceTags call. See Slicetag.ignore_tags
-            pass
+        try: 
+            for i in self.slice_tag_ids: 
+                tag = self.network.lookupSliceTag(i) 
+                if tag.tagname == tagname: 
+                    if (not node) or (node.id == tag.node_id): 
+                        return tag 
+        except InvalidRSpec, e: 
+            # As they're not needed, we ignore some tag types from 
+            # GetSliceTags call. See Slicetag.ignore_tags 
+            pass 
         return None
         
     def get_nodes(self):
@@ -160,8 +160,10 @@ class Slice:
         return n
 
     # Add a new slice tag   
-    def add_tag(self, tagname, value, node = None):
+    def add_tag(self, tagname, value, node = None, role_id = 40):
         tt = self.network.lookupTagType(tagname)
+        if not tt.permit_update(role_id):
+            raise InvalidRSpec("permission denied to modify '%s' tag" % tagname)
         tag = Slicetag()
         tag.initialize(tagname, value, node, self.network)
         self.network.tags[tag.id] = tag
@@ -169,21 +171,23 @@ class Slice:
         return tag
     
     # Update a slice tag if it exists, else add it             
-    def update_tag(self, tagname, value, node = None):
+    def update_tag(self, tagname, value, node = None, role_id = 40):
         tag = self.get_tag(tagname, node)
         if tag:
+            if not tag.permit_update(role_id, value):
+                raise InvalidRSpec("permission denied to modify '%s' tag" % tagname)
             tag.change(value)
         else:
-            tag = self.add_tag(tagname, value, node)
+            tag = self.add_tag(tagname, value, node, role_id)
         return tag
             
-    def update_multi_tag(self, tagname, value, node = None):
+    def update_multi_tag(self, tagname, value, node = None, role_id = 40):
         tags = self.get_multi_tag(tagname, node)
         for tag in tags:
             if tag and tag.value == value:
                 break
         else:
-            tag = self.add_tag(tagname, value, node)
+            tag = self.add_tag(tagname, value, node, role_id)
         return tag
             
     def tags_to_xml(self, xml, node = None):
@@ -208,9 +212,8 @@ class Slice:
 
 class Slicetag:
     newid = -1 
-    filter_fields = ['slice_tag_id','slice_id','tagname','value','node_id','category','min_role_id']
+    filter_fields = ['slice_tag_id','slice_id','tagname','value','node_id','category','min_role_id'] 
     ignore_tags = ['hmac','ssh_key']
-
     def __init__(self, tag = None):
         if not tag:
             return
@@ -220,6 +223,7 @@ class Slicetag:
         self.value = tag['value']
         self.node_id = tag['node_id']
         self.category = tag['category']
+        self.min_role_id = tag['min_role_id']
         self.status = None
 
     # Create a new slicetag that will be written to the DB later
@@ -235,8 +239,16 @@ class Slicetag:
         else:
             self.node_id = None
         self.category = tt.category
+        self.min_role_id = tt.min_role_id
         self.status = "new"
 
+    def permit_update(self, role_id, value = None):
+        if value and self.value == value:
+            return True
+        if role_id > self.min_role_id:
+            return False
+        return True
+        
     def change(self, value):
         if self.value != value:
             self.value = value
@@ -260,27 +272,23 @@ class Slicetag:
     def was_updated(self):
         return (self.status != None)
     
-    def write(self, api, user_plauth):
-        try:
-            if self.was_added():
-                api.plshell.AddSliceTag(user_plauth, self.slice_id, 
-                                        self.tagname, self.value, self.node_id)
-            elif self.was_changed():
-                api.plshell.UpdateSliceTag(user_plauth, self.id, self.value)
-            elif self.was_deleted():
-                api.plshell.DeleteSliceTag(user_plauth, self.id)
-        except:
-            raise InvalidRSpec("user cannot modify '%s' tag" % self.tagname)
-
+    def write(self, api):
+        if self.was_added():
+            api.plshell.AddSliceTag(api.plauth, self.slice_id, 
+                                    self.tagname, self.value, self.node_id)
+        elif self.was_changed():
+            api.plshell.UpdateSliceTag(api.plauth, self.id, self.value)
+        elif self.was_deleted():
+            api.plshell.DeleteSliceTag(api.plauth, self.id)
 
 
 class TagType:
     ignore_tags = ['hmac','ssh_key']
-
     def __init__(self, tagtype):
         self.id = tagtype['tag_type_id']
         self.category = tagtype['category']
         self.tagname = tagtype['tagname']
+        self.min_role_id = tagtype['min_role_id']
         self.multi = False
         self.in_rspec = False
         if self.category == 'slice/rspec':
@@ -288,6 +296,11 @@ class TagType:
         if self.tagname in ['codemux', 'ip_addresses', 'vsys']:
             self.multi = True
 
+    def permit_update(self, role_id):
+        if role_id > self.min_role_id:
+            return False
+        return True
+        
 
 class Network:
     """
@@ -296,9 +309,8 @@ class Network:
     * a dictionary mapping node IDs to Node objects
     * a dictionary mapping interface IDs to Iface objects
     """
-    def __init__(self, api, user_plauth, type = "SFA"):
+    def __init__(self, api, type = "SFA"):
         self.api = api
-        self.user_plauth = user_plauth
         self.type = type
         self.sites = self.get_sites(api)
         self.nodes = self.get_nodes(api)
@@ -400,7 +412,7 @@ class Network:
         """
         if element is None:
             return 
-        
+
         tagtypes = self.getTagTypes()
         for tt in tagtypes:
             if tt.in_rspec:
@@ -487,14 +499,14 @@ class Network:
         Write any slice tags that have been added or modified back to the DB
         """
         for tag in self.getSliceTags():
-            if tag.category == 'slice/rspec' and not tag.was_updated():
+            if tag.category == 'slice/rspec' and not tag.was_updated() and tag.permit_update(None, 40):
                 # The user wants to delete this tag
                 tag.delete()
 
         # Update slice tags in database
         for tag in self.getSliceTags():
             if tag.slice_id == self.slice.id:
-                tag.write(self.api, self.user_plauth) 
+                tag.write(self.api) 
 
     def toxml(self):
         """
@@ -521,10 +533,9 @@ class Network:
         Create a dictionary of site objects keyed by site ID
         """
         tmp = []
-        for site in api.plshell.GetSites(self.user_plauth, {'peer_id': None}):
+        for site in api.plshell.GetSites(api.plauth, {'peer_id': None}):
             t = site['site_id'], Site(self, site)
             tmp.append(t)
-            
         return dict(tmp)
 
 
@@ -533,7 +544,7 @@ class Network:
         Create a dictionary of node objects keyed by node ID
         """
         tmp = []
-        for node in api.plshell.GetNodes(self.user_plauth, {'peer_id': None}):
+        for node in api.plshell.GetNodes(api.plauth, {'peer_id': None}):
             t = node['node_id'], Node(self, node)
             tmp.append(t)
         return dict(tmp)
@@ -543,7 +554,7 @@ class Network:
         Create a dictionary of node objects keyed by node ID
         """
         tmp = []
-        for iface in api.plshell.GetInterfaces(self.user_plauth):
+        for iface in api.plshell.GetInterfaces(api.plauth):
             t = iface['interface_id'], Iface(self, iface)
             tmp.append(t)
         return dict(tmp)
@@ -553,7 +564,7 @@ class Network:
         Create a dictionary of slicetag objects keyed by slice tag ID
         """
         tmp = []
-        for tag in api.plshell.GetSliceTags(self.user_plauth, {'~tagname':Slicetag.ignore_tags}, Slicetag.filter_fields):
+        for tag in api.plshell.GetSliceTags(api.plauth, {'~tagname':Slicetag.ignore_tags}, Slicetag.filter_fields): 
             t = tag['slice_tag_id'], Slicetag(tag)
             tmp.append(t)
         return dict(tmp)
@@ -563,7 +574,7 @@ class Network:
         Create a list of tagtype obects keyed by tag name
         """
         tmp = []
-        for tag in api.plshell.GetTagTypes(self.user_plauth, {'~tagname':TagType.ignore_tags}):
+        for tag in api.plshell.GetTagTypes(api.plauth, {'~tagname':TagType.ignore_tags}):
             t = tag['tagname'], TagType(tag)
             tmp.append(t)
         return dict(tmp)
@@ -573,7 +584,7 @@ class Network:
         Return a Slice object for a single slice
         """
         slicename = hrn_to_pl_slicename(hrn)
-        slice = api.plshell.GetSlices(self.user_plauth, [slicename])
+        slice = api.plshell.GetSlices(api.plauth, [slicename])
         if len(slice):
             self.slice = Slice(self, slicename, slice[0])
             return self.slice
