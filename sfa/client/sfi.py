@@ -724,7 +724,9 @@ class Sfi:
         """
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(user_cred, get_authority(self.authority))
-        creds = [user_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [user_cred, delegated_cred]
+        creds = [user_cred]
         server = self.get_server_from_opts(opts)
         results = server.ListSlices(creds)
         display_list(results)
@@ -746,7 +748,9 @@ class Sfi:
             hrn = None
      
         delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
-        creds = [cred, delegated_cred] 
+# as per tony's (tmp)
+#        creds = [cred, delegated_cred] 
+        creds = [cred] 
         result = server.ListResources(creds, call_options)
         format = opts.format
         display_rspec(result, format)
@@ -764,7 +768,9 @@ class Sfi:
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
         server = self.get_server_from_opts(opts)
@@ -779,7 +785,9 @@ class Sfi:
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         rspec_file = self.get_rspec_file(rspec_path) 
         rspec = open(rspec_file).read()
         server = self.get_server_from_opts(opts)
@@ -830,7 +838,9 @@ class Sfi:
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         server = self.get_server_from_opts(opts)
         return server.DeleteSliver(slice_urn, creds)
     
@@ -840,7 +850,9 @@ class Sfi:
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         server = self.get_server_from_opts(opts)
         return server.Start(slice_urn, creds)
     
@@ -850,7 +862,9 @@ class Sfi:
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         server = self.get_server_from_opts(opts)
         return server.Stop(slice_urn, creds)
     
@@ -861,7 +875,9 @@ class Sfi:
         server = self.get_server_from_opts(opts)
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         return server.reset_slice(creds, slice_urn)
 
     def renew(self, opts, args):
@@ -870,7 +886,9 @@ class Sfi:
         server = self.get_server_from_opts(opts)
         slice_cred = self.get_slice_cred(args[0]).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         time = args[1]
         return server.RenewSliver(slice_urn, creds, time)
 
@@ -880,7 +898,9 @@ class Sfi:
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-        creds = [slice_cred, delegated_cred]
+# as per tony's (tmp)
+#        creds = [slice_cred, delegated_cred]
+        creds = [slice_cred]
         server = self.get_server_from_opts(opts)
         print server.SliverStatus(slice_urn, creds)
 
