@@ -53,13 +53,7 @@ def delete_slice(api, xrn, creds):
         return 1
     slice = slices[0]
 
-    # determine if this is a peer slice
-    peer = peers.get_peer(api, hrn)
-    if peer:
-        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
     api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
-    if peer:
-        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
 def create_slice(api, xrn, creds, xml, users):
@@ -96,30 +90,37 @@ def create_slice(api, xrn, creds, xml, users):
     # add nodes from rspec
     added_nodes = list(set(request).difference(current))
 
-    if peer:
-        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
-
     api.plshell.AddSliceToNodes(api.plauth, slice.name, added_nodes) 
     api.plshell.DeleteSliceFromNodes(api.plauth, slice.name, deleted_nodes)
-
     network.updateSliceTags()
-
-    if peer:
-        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
-                                     slice.peer_id)
 
     # print network.toxml()
 
     return True
 
-def get_rspec(api, xrn=None, origin_hrn=None):
+def get_rspec(api, creds, options):
+    # get slice's hrn from options
+    xrn = options.get('geni_slice_urn', None)
     hrn, type = urn_to_hrn(xrn)
+    
+    # look in cache first
+    if api.cache and not xrn:
+        rspec = api.cache.get('nodes')
+        if rspec:
+            return rspec
+
     network = ViniNetwork(api)
     if (hrn):
         if network.get_slice(api, hrn):
             network.addSlice()
 
-    return network.toxml()
+    rspec =  network.toxml()
+
+    # cache the result
+    if api.cache and not xrn:
+        api.cache.add('nodes', rspec)
+
+    return rspec
 
 def main():
     api = SfaAPI()
