@@ -165,18 +165,20 @@ def create_slice(api, slice_xrn, creds, rspec, users):
 
     # add nodes from rspec
     added_nodes = list(set(request).difference(current))
-    
-    if peer:
-        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
 
-    api.plshell.AddSliceToNodes(user_plauth, slice.name, added_nodes) 
-    api.plshell.DeleteSliceFromNodes(user_plauth, slice.name, deleted_nodes)
+    try:
+        if peer:
+            api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
 
-    network.updateSliceTags()
+        api.plshell.AddSliceToNodes(user_plauth, slice.name, added_nodes) 
+        api.plshell.DeleteSliceFromNodes(user_plauth, slice.name, deleted_nodes)
 
-    if peer:
-        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
-                                     slice.peer_id)
+        network.updateSliceTags()
+
+    finally:
+        if peer:
+            api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
+                                         slice.peer_id)
 
     # print network.toxml()
     return True
@@ -236,11 +238,13 @@ def delete_slice(api, xrn, creds):
 
     # determine if this is a peer slice
     peer = peers.get_peer(api, hrn)
-    if peer:
-        api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
-    api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
-    if peer:
-        api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
+    try:
+        if peer:
+            api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
+        api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
+    finally:
+        if peer:
+            api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
 def get_slices(api, creds):
