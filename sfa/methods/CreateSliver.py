@@ -42,9 +42,9 @@ class CreateSliver(Method):
         
         # flter rspec through sfatables
         if self.api.interface in ['aggregate']:
-            chain_name = 'OUTGOING'
+            chain_name = 'INCOMING'
         elif self.api.interface in ['slicemgr']:
-            chain_name = 'FORWARD-OUTGOING'
+            chain_name = 'FORWARD-INCOMING'
         rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec)
         allocated = manager.create_slice(self.api, slice_xrn, creds, rspec, users)
 
