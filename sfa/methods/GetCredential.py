@@ -13,7 +13,7 @@ from sfa.trust.credential import Credential
 class GetCredential(Method):
     """
     Retrive a credential for an object
-    If cred == Nonee then the behavior reverts to get_self_credential
+    If cred == None then the behavior reverts to get_self_credential
 
     @param hrn human readable name of object (hrn or urn)
     @param cred credential object specifying rights of the caller
