@@ -61,7 +61,7 @@ def create_slice(api, xrn, creds, rspec, users):
             raise InvalidRSpec(message)
 
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'createsliver', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'createsliver', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
@@ -85,7 +85,7 @@ def create_slice(api, xrn, creds, rspec, users):
 
 def renew_slice(api, xrn, creds, expiration_time):
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'renewesliver', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'renewesliver', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
@@ -115,7 +115,7 @@ def get_ticket(api, xrn, creds, rspec, users):
         aggregate_rspecs[aggregate_hrn] = rspec 
 
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'getticket', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'getticket', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
@@ -184,7 +184,7 @@ def get_ticket(api, xrn, creds, rspec, users):
 
 def delete_slice(api, xrn, creds):
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'deletesliver', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()    
 
     # attempt to use delegated credential first
@@ -204,7 +204,7 @@ def delete_slice(api, xrn, creds):
 
 def start_slice(api, xrn, creds):
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'startslice', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'startslice', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()    
 
     # attempt to use delegated credential first
@@ -224,7 +224,7 @@ def start_slice(api, xrn, creds):
  
 def stop_slice(api, xrn, creds):
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'stopslice', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'stopslice', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()    
 
     # attempt to use delegated credential first
@@ -269,7 +269,7 @@ def get_slices(api, creds):
             return slices    
 
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'listslices', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'listslices', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
@@ -319,7 +319,7 @@ def get_rspec(api, creds, options):
     rspec = None
 
     # get the callers hrn
-    valid_cred = self.api.auth.checkCredentials(creds, 'listnodes', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'listnodes', hrn)[0]
     caller_hrn = valid_cred.get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
