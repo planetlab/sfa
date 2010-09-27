@@ -333,10 +333,12 @@ class Slices:
                 self.api.plshell.AddPersonToSlice(self.api.plauth, person_dict['email'], slicename)
                 self.api.plshell.AddPersonToSite(self.api.plauth, person_dict['email'], site_id)
             finally:
-                if peer and not local_person:
-                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
                 if peer:
-                    self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
+                    try: self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', site_id, peer, remote_site_id)
+                    except: pass
+                if peer and not local_person:
+                    try: self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person_id, peer, person_dict['pointer'])
+                    except: pass
             
             self.verify_keys(registry, credential, person_dict, key_ids, person_id, peer, local_person)
 

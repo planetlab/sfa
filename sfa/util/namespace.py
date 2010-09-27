@@ -57,6 +57,9 @@ def urn_to_hrn(urn):
     """
     convert a urn to hrn
     return a tuple (hrn, type)
+    Warning: urn_to_hrn() replces some special characters that 
+    are not replaced in hrn_to_urn(). Due to this, 
+    urn_to_hrn() -> hrn_to_urn() may not return the original urn
     """
 
     # if this is already a hrn dont do anything

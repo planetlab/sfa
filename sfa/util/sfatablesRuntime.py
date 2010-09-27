@@ -7,8 +7,6 @@ def fetch_context(slice_hrn, user_hrn, contexts):
     information that sfatables is requesting. But for now, we just return
     the basic information needed in a dict.
     """
-    slice_hrn = urn_to_hrn(slice_xrn)[0]
-    user_hrn = urn_to_hrn(user_xrn)[0]
     base_context = {'sfa':{'user':{'hrn':user_hrn}, 'slice':{'hrn':slice_hrn}}}
     return base_context
 
