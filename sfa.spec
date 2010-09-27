@@ -147,17 +147,32 @@ rm -rf $RPM_BUILD_ROOT
 %files sfatables
 %{_bindir}/sfatables
 
-%pre plc
-[ -f %{_sysconfdir}/init.d/sfa ] && service sfa stop ||:
-
-%pre cm
-[ -f %{_sysconfdir}/init.d/sfa-cm ] && service sfa-cm stop ||:
-
+### sfa-plc installs the 'sfa' service
 %post plc
 chkconfig --add sfa
 
+%preun plc
+if [ "$1" = 0 ] ; then
+  /sbin/service sfa stop 
+  /sbin/chkconfig --del sfa
+fi
+
+%postun plc
+[ "$1" -ge "1" ] && service sfa restart
+
+### sfa-cm installs the 'sfa-cm' service
 %post cm
 chkconfig --add sfa-cm
+
+%preun cm
+if [ "$1" = 0 ] ; then
+   /sbin/service sfa-cm stop
+   /sbin/chkconfig --del sfa-cm
+fi
+
+%postun cm
+[ "$1" -ge "1" ] && service sfa-cm restart
+
 
 %changelog
 * Tue Sep 07 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-16
