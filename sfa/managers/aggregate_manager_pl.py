@@ -5,7 +5,7 @@ import datetime
 import time
 import traceback
 import sys
-
+import re
 from types import StringTypes
 from sfa.util.namespace import *
 from sfa.util.rspec import *
@@ -37,19 +37,23 @@ def __get_registry_objects(slice_xrn, creds, users):
     reg_objects = None
 
     if users:
+        # dont allow special characters in the site login base
+        only_alphanumeric = re.compile('[^a-zA-Z0-9]+')
+        login_base = only_alphanumeric.sub('', hrn_auth[:20]).lower()
+  
         reg_objects = {}
 
         site = {}
         site['site_id'] = 0
-        site['name'] = 'geni.%s' % hrn_auth[:20]
+        site['name'] = 'geni.%s' % login_base 
         site['enabled'] = True
         site['max_slices'] = 100
 
         # Note:
         # Is it okay if this login base is the same as one already at this myplc site?
         # Do we need uniqueness?  Should use hrn_auth instead of just the leaf perhaps?
-        site['login_base'] = hrn_auth[:20]
-        site['abbreviated_name'] = hrn_auth[:20]
+        site['login_base'] = login_base
+        site['abbreviated_name'] = login_base
         site['max_slivers'] = 1000
         reg_objects['site'] = site
 

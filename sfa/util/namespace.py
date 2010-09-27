@@ -1,6 +1,6 @@
 ### $Id$
 ### $URL$
-
+import re
 from sfa.util.faults import *
 URN_PREFIX = "urn:publicid:IDN"
 
@@ -66,16 +66,20 @@ def urn_to_hrn(urn):
     name = urn[len(URN_PREFIX):]
     hrn_parts = name.split("+")
     type = hrn_parts.pop(2)
-
+    
+         
     # Remove the authority name (e.g. '.sa')
     if type == 'authority':
         hrn_parts = hrn_parts[:-1]
 
     # convert hrn_parts (list) into hrn (str) by doing the following    
+    # dont allow special characters (except ':') in the site login base
     # remove blank elements
     # replace ':' with '.'
     # join list elements using '.'
-    hrn = '.'.join([part.replace(':', '.') for part in hrn_parts if part]) 
+    only_alphanum = re.compile('[^a-zA-Z0-9:]+')
+    valid_chars = lambda x: only_alphanum.sub('', x).replace(':', '.')
+    hrn = '.'.join([valid_chars(part) for part in hrn_parts if part]) 
     
     return str(hrn), str(type) 
     
