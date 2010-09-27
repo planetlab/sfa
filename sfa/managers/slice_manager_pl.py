@@ -72,7 +72,7 @@ def create_slice(api, xrn, creds, rspec, users):
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM 
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
             
         # Just send entire RSpec to each aggregate
@@ -96,7 +96,7 @@ def renew_slice(api, xrn, creds, expiration_time):
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
 
         server = api.aggregates[aggregate]
@@ -126,7 +126,7 @@ def get_ticket(api, xrn, creds, rspec, users):
     for aggregate, aggregate_rspec in aggregate_rspecs.items():
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
         server = None
         if aggregate in api.aggregates:
@@ -195,7 +195,7 @@ def delete_slice(api, xrn, creds):
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
         threads.run(server.DeleteSliver, xrn, credential)
@@ -215,7 +215,7 @@ def start_slice(api, xrn, creds):
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
         threads.run(server.Start, xrn, credential)
@@ -235,7 +235,7 @@ def stop_slice(api, xrn, creds):
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
         threads.run(server.Stop, xrn, credential)
@@ -281,7 +281,7 @@ def get_slices(api, creds):
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
         threads.run(server.ListSlices, credential)
@@ -330,7 +330,7 @@ def get_rspec(api, creds, options):
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
-        if caller_hrn == aggrgate and aggregate =! api.hrn:
+        if caller_hrn == aggrgate and aggregate != api.hrn:
             continue
         # get the rspec from the aggregate
         server = api.aggregates[aggregate]
