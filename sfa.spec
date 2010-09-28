@@ -153,8 +153,8 @@ chkconfig --add sfa
 
 %preun plc
 if [ "$1" = 0 ] ; then
-  /sbin/service sfa stop 
-  /sbin/chkconfig --del sfa
+  /sbin/service sfa stop || :
+  /sbin/chkconfig --del sfa || :
 fi
 
 %postun plc
@@ -166,8 +166,8 @@ chkconfig --add sfa-cm
 
 %preun cm
 if [ "$1" = 0 ] ; then
-   /sbin/service sfa-cm stop
-   /sbin/chkconfig --del sfa-cm
+   /sbin/service sfa-cm stop || :
+   /sbin/chkconfig --del sfa-cm || :
 fi
 
 %postun cm
