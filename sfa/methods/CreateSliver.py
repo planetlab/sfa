@@ -5,7 +5,6 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.util.sfatablesRuntime import run_sfatables
 import sys
 from sfa.trust.credential import Credential
-from sfa.util.sfalogging import logger
 
 class CreateSliver(Method):
     """

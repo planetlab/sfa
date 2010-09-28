@@ -10,6 +10,8 @@ import os
 import traceback
 import string
 import xmlrpclib
+
+import sfa.util.sfalogging
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
@@ -20,7 +22,6 @@ from sfa.trust.certificate import *
 from sfa.util.namespace import *
 from sfa.util.api import *
 from sfa.util.nodemanager import NodeManager
-from sfa.util.sfalogging import *
 from collections import defaultdict
 
 
@@ -324,7 +325,7 @@ class SfaAPI(BaseAPI):
 
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
-        self.logger=get_sfa_logger()
+        self.logger=sfa.util.sfalogging.logger
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,

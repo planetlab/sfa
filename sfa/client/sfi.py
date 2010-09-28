@@ -300,9 +300,6 @@ class Sfi:
        if errors:
           sys.exit(1)
     
-       if self.options.verbose :
-          print "Contacting Slice Manager at:", sm_url
-          print "Contacting Registry at:", reg_url
     
        # Get key and certificate
        key_file = self.get_key_file()
@@ -312,7 +309,9 @@ class Sfi:
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
+       if self.options.verbose : print "Contacting Registry at:", reg_url
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options.debug)  
+       if self.options.verbose : print "Contacting Slice Manager at:", sm_url
        self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file, self.options.debug)
 
        return

@@ -14,7 +14,6 @@ from sfa.trust.certificate import Certificate
 from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
-from sfa.util.sfalogging import *
 
 ##
 # Credential is a tuple:
