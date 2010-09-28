@@ -29,9 +29,10 @@
 ### $URL$
 import xmlrpclib
 import uuid
+
+import sfa.util.sfalogging
 from sfa.trust.certificate import Certificate
 from sfa.util.namespace import *
-from sfa.util.sfalogging import logger
 
 ##
 # Create a new uuid. Returns the UUID as a string.
@@ -81,7 +82,7 @@ class GID(Certificate):
         
         Certificate.__init__(self, create, subject, string, filename)
         if subject:
-            logger.debug("Creating GID for subject: %s" % subject)
+            sfa.util.sfalogging.logger.debug("Creating GID for subject: %s" % subject)
         if uuid:
             self.uuid = int(uuid)
         if hrn:

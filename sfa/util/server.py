@@ -19,13 +19,14 @@ import SimpleHTTPServer
 import SimpleXMLRPCServer
 from OpenSSL import SSL
 from Queue import Queue
+
+#import sfa.util.sfalogging
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
 from sfa.util.faults import *
 from sfa.plc.api import SfaAPI
 from sfa.util.cache import Cache 
-from sfa.util.debug import log
-from sfa.util.sfalogging import logger
+#from sfa.util.debug import log
 ##
 # Verification callback for pyOpenSSL. We do our own checking of keys because
 # we have our own authentication spec. Thus we disable several of the normal

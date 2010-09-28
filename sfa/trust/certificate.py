@@ -42,11 +42,13 @@ import os
 import tempfile
 import base64
 import traceback
+from tempfile import mkstemp
+
 from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
-from tempfile import mkstemp
-from sfa.util.sfalogging import logger
+
+import sfa.util.sfalogging
 from sfa.util.namespace import urn_to_hrn
 from sfa.util.faults import *
 
@@ -583,12 +585,12 @@ class Certificate:
         # if this cert is signed by a trusted_cert, then we are set
         for trusted_cert in trusted_certs:
             if self.is_signed_by_cert(trusted_cert):
-                logger.debug("Cert %s signed by trusted cert %s", self.get_subject(), trusted_cert.get_subject())
+                sfa.util.sfalogging.logger.debug("Cert %s signed by trusted cert %s", self.get_subject(), trusted_cert.get_subject())
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.cert.has_expired():
                     return trusted_cert
                 else:
-                    logger.debug("Trusted cert %s is expired", trusted_cert.get_subject())       
+                    sfa.util.sfalogging.logger.debug("Trusted cert %s is expired", trusted_cert.get_subject())       
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
