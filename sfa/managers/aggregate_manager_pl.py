@@ -38,9 +38,10 @@ def __get_registry_objects(slice_xrn, creds, users):
 
     if users:
         # dont allow special characters in the site login base
-        only_alphanumeric = re.compile('[^a-zA-Z0-9]+')
-        login_base = only_alphanumeric.sub('', hrn_auth[:20]).lower()
-  
+        #only_alphanumeric = re.compile('[^a-zA-Z0-9]+')
+        #login_base = only_alphanumeric.sub('', hrn_auth[:20]).lower()
+        slicename = hrn_to_pl_slicename(hrn)
+        login_base = slicename.split('_')[0]
         reg_objects = {}
 
         site = {}
@@ -60,7 +61,7 @@ def __get_registry_objects(slice_xrn, creds, users):
         slice = {}
         slice['expires'] = int(time.mktime(Credential(string=creds[0]).get_lifetime().timetuple()))
         slice['hrn'] = hrn
-        slice['name'] = site['login_base'] + "_" +  get_leaf(hrn)
+        slice['name'] = hrn_to_pl_slicename(hrn)
         slice['url'] = hrn
         slice['description'] = hrn
         slice['pointer'] = 0
