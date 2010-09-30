@@ -18,7 +18,6 @@
 import os
 
 from sfa.util.sfalogging import sfa_logger
-from sfa.util.report import *
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import *
 from sfa.trust.gid import GID, create_uuid
@@ -162,7 +161,7 @@ class Hierarchy:
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(xrn)
-        trace("Hierarchy: creating authority: " + hrn)
+        sfaImporter.logger.info("Hierarchy: creating authority: " + hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
@@ -207,7 +206,7 @@ class Hierarchy:
 
     def get_auth_info(self, xrn):
         
-        #trace("Hierarchy: getting authority: " + hrn)
+        sfaImporter.logger.info("Hierarchy: getting authority: " + hrn)
         hrn, type = urn_to_hrn(xrn)
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
