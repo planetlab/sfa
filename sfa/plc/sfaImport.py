@@ -61,7 +61,7 @@ class sfaImport:
         self.shell = None
         if "Url" in self.plc_auth:
             from sfa.plc.remoteshell import RemoteShell
-            self.shell = RemoteShell()
+            self.shell = RemoteShell(self.logger)
         else:
             import PLC.Shell
             self.shell = PLC.Shell.Shell(globals = globals())        

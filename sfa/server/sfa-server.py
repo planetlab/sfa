@@ -188,6 +188,7 @@ def main():
     if options.verbose: sfa_logger.setLevel(logging.DEBUG)
 
     config = Config()
+    if config.SFA_API_DEBUG: sfa_logger.setLevel(logging.DEBUG)
     hierarchy = Hierarchy()
     server_key_file = os.path.join(hierarchy.basedir, "server.key")
     server_cert_file = os.path.join(hierarchy.basedir, "server.cert")

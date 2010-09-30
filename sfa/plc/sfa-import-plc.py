@@ -1,8 +1,5 @@
 #!/usr/bin/python
 #
-### $Id$
-### $URL$
-#
 ##
 # Import PLC records into the SFA database. It is indended that this tool be
 # run once to create SFA records that reflect the current state of the
@@ -20,6 +17,7 @@
 import getopt
 import sys
 import tempfile
+import logging
 
 from sfa.util.record import *
 from sfa.util.table import SfaTable
@@ -67,6 +65,7 @@ def main():
     interface_hrn = config.SFA_INTERFACE_HRN
     keys_filename = config.config_path + os.sep + 'person_keys.py' 
     sfaImporter = sfaImport()
+    if config.SFA_API_DEBUG: sfaImporter.logger.setLevel(logging.DEBUG)
     shell = sfaImporter.shell
     plc_auth = sfaImporter.plc_auth 
     AuthHierarchy = sfaImporter.AuthHierarchy
