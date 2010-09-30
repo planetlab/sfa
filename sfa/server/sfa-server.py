@@ -37,6 +37,7 @@ component_port=12346
 import os, os.path
 import sys
 from optparse import OptionParser
+from sfa.util.sfalogging import sfa_logger
 from sfa.trust.trustedroot import TrustedRootList
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
@@ -56,7 +57,7 @@ def daemon():
     devnull = os.open(os.devnull, os.O_RDWR)
     os.dup2(devnull, 0)
     # xxx fixme - this is just to make sure that nothing gets stupidly lost - should use devnull
-    crashlog = os.open('/var/log/sfa.daemon', os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
+    crashlog = os.open('/var/log/httpd/sfa_access_log', os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
     os.dup2(crashlog, 1)
     os.dup2(crashlog, 2)
 
@@ -218,4 +219,7 @@ def main():
         c.start()
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except:
+        sfa_logger.log_exc_critical("SFA server is exiting")

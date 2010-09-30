@@ -57,6 +57,8 @@ tags:
 # (*) otherwise, entering through the root context
 # make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr
 
+PLCHOST ?= testplc.onelab.eu
+
 ifdef GUEST
 ifdef PLCHOST
 SSHURL:=root@$(PLCHOST):/vservers/$(GUEST)

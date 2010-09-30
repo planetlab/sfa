@@ -17,6 +17,7 @@
 
 import os
 
+from sfa.util.sfalogging import sfa_logger
 from sfa.util.report import *
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import *
@@ -181,7 +182,7 @@ class Hierarchy:
                 pass
 
         if os.path.exists(privkey_filename):
-            print "using existing key", privkey_filename, "for authority", hrn
+            sfa_logger.debug("using existing key %r for authority %r"%(privkey_filename,hrn))
             pkey = Keypair(filename = privkey_filename)
         else:
             pkey = Keypair(create = True)

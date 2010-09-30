@@ -14,11 +14,10 @@ import textwrap
 import xmlrpclib
 
 
-import sfa.util.sfalogging
+from sfa.util.sfalogging import sfa_logger
 from sfa.util.faults import * 
 from sfa.util.parameter import Parameter, Mixed, python_type, xmlrpc_type
 from sfa.trust.auth import Auth
-#from sfa.util.debug import profile, log
 
 # we inherit object because we use new-style classes for legacy methods
 class Method (object):
@@ -93,9 +92,7 @@ class Method (object):
 
             if self.api.config.SFA_API_DEBUG or hasattr(self, 'message'):
                 msg=getattr(self,'message',"method %s completed"%methodname)
-                sfa.util.sfalogging.logger.info(msg)
-                # XX print to some log file
-                # print >> log, "some output"
+                sfa_logger.info(msg)
 
             return result
 
@@ -106,9 +103,7 @@ class Method (object):
             # Prepend caller and method name to expected faults
             fault.faultString = caller + ": " +  self.name + ": " + fault.faultString
             runtime = time.time() - start
-#            if self.api.config.SFA_API_DEBUG:
-#                traceback.print_exc()
-            sfa.util.sfalogging.log_exc("Method %s raised an exception"%self.name) 
+            sfa_logger.log_exc("Method %s raised an exception"%self.name) 
             raise fault
 
 

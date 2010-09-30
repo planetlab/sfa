@@ -20,13 +20,11 @@ import SimpleXMLRPCServer
 from OpenSSL import SSL
 from Queue import Queue
 
-#import sfa.util.sfalogging
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
 from sfa.util.faults import *
 from sfa.plc.api import SfaAPI
 from sfa.util.cache import Cache 
-#from sfa.util.debug import log
 ##
 # Verification callback for pyOpenSSL. We do our own checking of keys because
 # we have our own authentication spec. Thus we disable several of the normal
@@ -111,7 +109,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         except Exception, fault:
             # This should only happen if the module is buggy
             # internal error, report as HTTP server error
-            traceback.print_exc()
+            sfa_error.log_exc("server.do_POST")
             response = self.api.prepare_response(fault)
             #self.send_response(500)
             #self.end_headers()

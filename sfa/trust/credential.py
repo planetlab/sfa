@@ -35,7 +35,7 @@ from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 from dateutil.parser import parse
 
-import sfa.util.sfalogging
+from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import *
@@ -662,7 +662,7 @@ class Credential(object):
                 trusted_cert_objects.append(GID(filename=f))
                 ok_trusted_certs.append(f)
             except Exception, exc:
-                sfa.util.sfalogging.logger.error("Failed to load trusted cert from %s: %r", f, exc)
+                sfa_logger.error("Failed to load trusted cert from %s: %r", f, exc)
         trusted_certs = ok_trusted_certs
 
         # Use legacy verification if this is a legacy credential
@@ -745,7 +745,7 @@ class Credential(object):
         # Maybe should be (hrn, type) = urn_to_hrn(root_cred_signer.get_urn())
         root_cred_signer_type = root_cred_signer.get_type()
         if (root_cred_signer_type == 'authority'):
-            #sfa.util.sfalogging.logger.debug('Cred signer is an authority')
+            #sfa_logger.debug('Cred signer is an authority')
             # signer is an authority, see if target is in authority's domain
             hrn = root_cred_signer.get_hrn()
             if root_target_gid.get_hrn().startswith(hrn):

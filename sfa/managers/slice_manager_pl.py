@@ -21,7 +21,6 @@ from sfa.util.sfaticket import *
 from sfa.trust.credential import Credential
 from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
-from sfa.util.debug import log
 import sfa.plc.peers as peers
 from copy import copy
 

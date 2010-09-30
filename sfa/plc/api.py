@@ -11,12 +11,11 @@ import traceback
 import string
 import xmlrpclib
 
-import sfa.util.sfalogging
+from sfa.util.sfalogging import sfa_logger
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
-from sfa.util.debug import *
 from sfa.trust.rights import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
@@ -107,7 +106,7 @@ class SfaAPI(BaseAPI):
 
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
-        self.logger=sfa.util.sfalogging.logger
+        self.logger=sfa_logger
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
@@ -127,7 +126,7 @@ class SfaAPI(BaseAPI):
 
     def getCredential(self):
         """
-        Retrun a valid credential for this interface. 
+        Return a valid credential for this interface. 
         """
         if self.interface in ['registry']:
             return self.getCredentialFromLocalRegistry()

@@ -20,8 +20,6 @@
 import os.path
 import traceback
 
-from sfa.util.debug import log
-
 class Config:
     """
     Parse the bash/Python/PHP version of the configuration file. Very

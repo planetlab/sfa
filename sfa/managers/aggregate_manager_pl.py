@@ -15,7 +15,6 @@ from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.record import *
 from sfa.util.sfaticket import SfaTicket
-from sfa.util.debug import log
 from sfa.plc.slices import Slices
 from sfa.trust.credential import Credential
 import sfa.plc.peers as peers

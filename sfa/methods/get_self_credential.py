@@ -8,7 +8,6 @@ from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.record import SfaRecord
-from sfa.util.debug import log
 from sfa.methods.GetSelfCredential import GetSelfCredential
 
 class get_self_credential(GetSelfCredential):

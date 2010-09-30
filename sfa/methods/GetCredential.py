@@ -7,7 +7,6 @@ from sfa.util.faults import *
 from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-from sfa.util.debug import log
 from sfa.trust.credential import Credential
 
 class GetCredential(Method):

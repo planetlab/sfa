@@ -18,7 +18,7 @@ import re
 from pprint import pformat
 
 from sfa.util.faults import *
-from sfa.util.debug import *
+from sfa.util.sfalogging import sfa_logger
 
 if not psycopg2:
     is8bit = re.compile("[\x80-\xff]").search
@@ -179,21 +179,21 @@ class PostgreSQL:
 
             if not params:
                 if self.debug:
-                    print >> log,'execute0',query
+                    sfa_logger.debug('execute0 %r'%query)
                 cursor.execute(query)
             elif isinstance(params,dict):
                 if self.debug:
-                    print >> log,'execute-dict: params',params,'query',query%params
+                    sfa_logger.debug('execute-dict: params=[%r] query=[%r]'%(params,query%params))
                 cursor.execute(query,params)
             elif isinstance(params,tuple) and len(params)==1:
                 if self.debug:
-                    print >> log,'execute-tuple',query%params[0]
+                    sfa_logger.debug('execute-tuple %r'%(query%params[0]))
                 cursor.execute(query,params[0])
             else:
                 param_seq=(params,)
                 if self.debug:
                     for params in param_seq:
-                        print >> log,'executemany',query%params
+                        sfa_logger.debug('executemany %r'%(query%params))
                 cursor.executemany(query, param_seq)
             (self.rowcount, self.description, self.lastrowid) = \
                             (cursor.rowcount, cursor.description, cursor.lastrowid)
@@ -203,12 +203,11 @@ class PostgreSQL:
             except:
                 pass
             uuid = commands.getoutput("uuidgen")
-            print >> log, "Database error %s:" % uuid
-            print >> log, e
-            print >> log, "Query:"
-            print >> log, query
-            print >> log, "Params:"
-            print >> log, pformat(params)
+            sfa_logger.error("Database error %s:" % uuid)
+            sfa_logger.error("Exception=%r"%e)
+            sfa_logger.error("Query=%r"%query)
+            sfa_logger.error("Params=%r"%pformat(params))
+            sfa_logger.log_exc("PostgreSQL.execute caught exception")
             raise SfaDBError("Please contact support: %s" % str(e))
 
         return cursor
