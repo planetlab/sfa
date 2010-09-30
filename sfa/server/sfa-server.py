@@ -37,6 +37,8 @@ component_port=12346
 import os, os.path
 import sys
 from optparse import OptionParser
+import logging
+
 from sfa.util.sfalogging import sfa_logger
 from sfa.trust.trustedroot import TrustedRootList
 from sfa.trust.certificate import Keypair, Certificate
@@ -183,7 +185,7 @@ def main():
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
-
+    if options.verbose: sfa_logger.setLevel(logging.DEBUG)
 
     config = Config()
     hierarchy = Hierarchy()
