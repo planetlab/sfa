@@ -161,7 +161,7 @@ class Hierarchy:
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(xrn)
-        sfaImporter.logger.info("Hierarchy: creating authority: " + hrn)
+        sfa_logger.debug("Hierarchy: creating authority: " + hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
@@ -206,7 +206,7 @@ class Hierarchy:
 
     def get_auth_info(self, xrn):
         
-        sfaImporter.logger.info("Hierarchy: getting authority: " + hrn)
+        sfa_logger.debug("Hierarchy: getting authority: " + hrn)
         hrn, type = urn_to_hrn(xrn)
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
