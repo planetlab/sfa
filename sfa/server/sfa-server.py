@@ -44,7 +44,6 @@ from sfa.trust.trustedroot import TrustedRootList
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import Config
-from sfa.util.report import trace
 from sfa.plc.api import SfaAPI
 from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
@@ -85,8 +84,8 @@ def init_server_key(server_key_file, server_cert_file, config, hierarchy):
         if not os.path.exists(key_file):
             # if it doesnt exist then this is probably a fresh interface
             # with no records. Generate a random keypair for now
-            trace("server's public key not found in %s" % key_file)
-            trace("generating a random server key pair")
+            sfa_logger.debug("server's public key not found in %s" % key_file)
+            sfa_logger.debug("generating a random server key pair")
             key = Keypair(create=True)
             key.save_to_file(server_key_file)
             cert = Certificate(subject=subject)

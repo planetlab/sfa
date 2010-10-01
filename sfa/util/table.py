@@ -5,7 +5,6 @@
 #
 # TODO: Use existing PLC database methods? or keep this separate?
 
-import report
 import pgdb
 
 from sfa.util.PostgreSQL import *
