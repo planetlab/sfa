@@ -205,9 +205,8 @@ class Hierarchy:
     # @param xrn the human readable name of the authority to create (urn will be converted to hrn).
 
     def get_auth_info(self, xrn):
-        
-        sfa_logger.debug("Hierarchy: getting authority: " + hrn)
         hrn, type = urn_to_hrn(xrn)
+        sfa_logger.debug("Hierarchy: getting authority: " + hrn)
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
 
