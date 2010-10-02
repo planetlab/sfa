@@ -268,8 +268,8 @@ def get_slices(api, creds):
             return slices    
 
     # get the callers hrn
-    valid_cred = api.auth.checkCredentials(creds, 'listslices', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
+    valid_cred = api.auth.checkCredentials(creds, 'listslices', caller_hrn)[0]
 
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)

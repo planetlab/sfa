@@ -23,7 +23,7 @@ class get_trusted_certs(Method):
         # If cred is not specified just return the gid for this interface.
         # This is true when when a peer is attempting to initiate federation
         # with this interface 
-        sfaloging.logger.debug("get_trusted_certs: %r"%cred)
+        sfalogging.logger.debug("get_trusted_certs: %r"%cred)
         if not cred:
             gid_strings = []
             for gid in self.api.auth.trusted_cert_list:
