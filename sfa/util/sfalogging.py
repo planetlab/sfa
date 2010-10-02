@@ -11,6 +11,7 @@ class _SfaLogger:
         if not logfile:
             loggername='console'
             handler=logging.StreamHandler()
+            handler.setFormatter(logging.Formatter("%(message)s"))
         else:
             if not loggername:
                 loggername=os.path.basename(logfile)
@@ -21,9 +22,9 @@ class _SfaLogger:
                 # owned by root, but httpd is trying to access it.
                 tmplogfile=os.getenv("TMPDIR", "/tmp") + os.path.sep + os.path.basename(logfile)
                 handler=logging.handlers.RotatingFileHandler(tmplogfile,maxBytes=1000000, backupCount=5) 
+            handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
         self.logger=logging.getLogger(loggername)
-        handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.logger.setLevel(level)
         self.logger.addHandler(handler)
 
