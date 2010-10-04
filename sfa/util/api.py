@@ -11,11 +11,10 @@ import traceback
 import string
 import xmlrpclib
 
-import sfa.util.sfalogging
+from sfa.util.sfalogging import sfa_logger
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
-from sfa.util.debug import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.namespace import *
@@ -148,7 +147,7 @@ class BaseAPI:
         self.credential = None
         self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"
-        self.logger=sfa.util.sfalogging.logger
+        self.logger=sfa_logger
         
         # load registries
         from sfa.server.registry import Registries
@@ -243,7 +242,7 @@ class BaseAPI:
         except SfaFault, fault:
             result = fault 
         except Exception, fault:
-            traceback.print_exc(file = log)
+            sfa_logger.log_exc("BaseAPI.handle has caught Exception")
             result = SfaAPIError(fault)
 
 

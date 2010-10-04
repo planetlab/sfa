@@ -12,14 +12,16 @@
 import xmlrpclib
 
 class RemoteShell:
-    def __init__(self):
+    def __init__(self,logger):
         self.servers = {}
+        self.logger=logger
 
     def call(self, name, pl_auth, *args):
 
         key = pl_auth["Url"] + "#" + pl_auth["Username"]
 
         if not (key in self.servers):
+            self.logger.info("Connecting to PLCAPI at url %s"%pl_auth['Url'])
             server = xmlrpclib.Server(pl_auth["Url"], verbose = 0, allow_none=True)
             #server.AdmAuthCheck(pl_auth)
             server.AuthCheck(pl_auth)

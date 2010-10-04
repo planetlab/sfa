@@ -12,24 +12,24 @@ import getopt
 import sys
 import tempfile
 
+from sfa.util.sfalogging import sfa_import_logger
 from sfa.util.record import *
 from sfa.util.table import SfaTable
 from sfa.util.namespace import *
 from sfa.util.config import Config
-from sfa.util.report import trace, error
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
 from sfa.trust.gid import create_uuid
 
 
-def un_unicode(str):
+def _un_unicode(str):
    if isinstance(str, unicode):
        return str.encode("ascii", "ignore")
    else:
        return str
 
-def cleanup_string(str):
+def _cleanup_string(str):
     # pgsql has a fit with strings that have high ascii in them, so filter it
     # out when generating the hrns.
     tmp = ""
@@ -38,7 +38,7 @@ def cleanup_string(str):
             tmp = tmp + c
     str = tmp
 
-    str = un_unicode(str)
+    str = _un_unicode(str)
     str = str.replace(" ", "_")
     str = str.replace(".", "_")
     str = str.replace("(", "_")
@@ -49,8 +49,8 @@ def cleanup_string(str):
 
 class sfaImport:
 
-    def __init__(self, logger=None):
-        self.logger = logger
+    def __init__(self):
+        self.logger = sfa_import_logger
         self.AuthHierarchy = Hierarchy()
         self.config = Config()
         self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))
@@ -61,14 +61,13 @@ class sfaImport:
         self.shell = None
         if "Url" in self.plc_auth:
             from sfa.plc.remoteshell import RemoteShell
-            self.shell = RemoteShell()
+            self.shell = RemoteShell(self.logger)
         else:
             import PLC.Shell
             self.shell = PLC.Shell.Shell(globals = globals())        
 
 
     def create_top_level_auth_records(self, hrn):
-        AuthHierarchy = self.AuthHierarchy
         urn = hrn_to_urn(hrn, 'authority')
         # make sure parent exists
         parent_hrn = get_authority(hrn)
@@ -78,31 +77,30 @@ class sfaImport:
             self.create_top_level_auth_records(parent_hrn)
 
         # create the authority if it doesnt already exist 
-        if not AuthHierarchy.auth_exists(urn):
-            trace("Import: creating top level authorites", self.logger)
-            AuthHierarchy.create_auth(urn)
+        if not self.AuthHierarchy.auth_exists(urn):
+            self.logger.info("Import: creating top level authorites")
+            self.AuthHierarchy.create_auth(urn)
         
         # create the db record if it doesnt already exist    
-        auth_info = AuthHierarchy.get_auth_info(hrn)
+        auth_info = self.AuthHierarchy.get_auth_info(hrn)
         table = SfaTable()
         auth_record = table.find({'type': 'authority', 'hrn': hrn})
 
         if not auth_record:
             auth_record = SfaRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
             auth_record['authority'] = get_authority(auth_record['hrn'])
-            trace("Import: inserting authority record for " + hrn, self.logger)
+            self.logger.info("Import: inserting authority record for " + hrn)
             table.insert(auth_record)
 
 
     def import_person(self, parent_hrn, person):
-        AuthHierarchy = self.AuthHierarchy
         hrn = email_to_hrn(parent_hrn, person['email'])
 
         # ASN.1 will have problems with hrn's longer than 64 characters
         if len(hrn) > 64:
             hrn = hrn[:64]
 
-        trace("Import: importing person " + hrn, self.logger)
+        self.logger.info("Import: importing person " + hrn)
         key_ids = []
         if 'key_ids' in person and person['key_ids']:
             key_ids = person["key_ids"]
@@ -115,14 +113,14 @@ class sfaImport:
                 pkey = Keypair(create=True)
         else:
             # the user has no keys
-            trace("   person " + hrn + " does not have a PL public key", self.logger)
+            self.logger.info("   person " + hrn + " does not have a PL public key")
             # if a key is unavailable, then we still need to put something in the
             # user's GID. So make one up.
             pkey = Keypair(create=True)
 
         # create the gid
         urn = hrn_to_urn(hrn, 'user')
-        person_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
+        person_gid = self.AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         table = SfaTable()
         person_record = SfaRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         person_record['authority'] = get_authority(person_record['hrn'])
@@ -130,26 +128,25 @@ class sfaImport:
         if not existing_records:
             table.insert(person_record)
         else:
-            trace("Import: %s exists, updating " % hrn, self.logger)
+            self.logger.info("Import: %s exists, updating " % hrn)
             existing_record = existing_records[0]
             person_record['record_id'] = existing_record['record_id']
             table.update(person_record)
 
     def import_slice(self, parent_hrn, slice):
-        AuthHierarchy = self.AuthHierarchy
         slicename = slice['name'].split("_",1)[-1]
-        slicename = cleanup_string(slicename)
+        slicename = _cleanup_string(slicename)
 
         if not slicename:
-            error("Import_Slice: failed to parse slice name " + slice['name'], self.logger)
+            self.logger.error("Import_Slice: failed to parse slice name " + slice['name'])
             return
 
         hrn = parent_hrn + "." + slicename
-        trace("Import: importing slice " + hrn, self.logger)
+        self.logger.info("Import: importing slice " + hrn)
 
         pkey = Keypair(create=True)
         urn = hrn_to_urn(hrn, 'slice')
-        slice_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
+        slice_gid = self.AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         slice_record = SfaRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
         slice_record['authority'] = get_authority(slice_record['hrn'])
         table = SfaTable()
@@ -157,22 +154,21 @@ class sfaImport:
         if not existing_records:
             table.insert(slice_record)
         else:
-            trace("Import: %s exists, updating " % hrn, self.logger)
+            self.logger.info("Import: %s exists, updating " % hrn)
             existing_record = existing_records[0]
             slice_record['record_id'] = existing_record['record_id']
             table.update(slice_record)
 
     def import_node(self, parent_hrn, node):
-        AuthHierarchy = self.AuthHierarchy
         nodename = node['hostname'].split(".")[0]
-        nodename = cleanup_string(nodename)
+        nodename = _cleanup_string(nodename)
         
         if not nodename:
-            error("Import_node: failed to parse node name " + node['hostname'], self.logger)
+            self.logger.error("Import_node: failed to parse node name " + node['hostname'])
             return
 
         hrn = parent_hrn + "." + nodename
-        trace("Import: importing node " + hrn, self.logger)
+        self.logger.info("Import: importing node " + hrn)
         # ASN.1 will have problems with hrn's longer than 64 characters
         if len(hrn) > 64:
             hrn = hrn[:64]
@@ -181,25 +177,24 @@ class sfaImport:
         node_record = table.find({'type': 'node', 'hrn': hrn})
         pkey = Keypair(create=True)
         urn = hrn_to_urn(hrn, 'node')
-        node_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
+        node_gid = self.AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         node_record = SfaRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
         node_record['authority'] = get_authority(node_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'node', 'pointer': node['node_id']})
         if not existing_records:
             table.insert(node_record)
         else:
-            trace("Import: %s exists, updating " % hrn, self.logger)
+            self.logger.info("Import: %s exists, updating " % hrn)
             existing_record = existing_records[0]
             node_record['record_id'] = existing_record['record_id']
             table.update(node_record)
 
     
     def import_site(self, parent_hrn, site):
-        AuthHierarchy = self.AuthHierarchy
         shell = self.shell
         plc_auth = self.plc_auth
         sitename = site['login_base']
-        sitename = cleanup_string(sitename)
+        sitename = _cleanup_string(sitename)
         print 'importing site %s' % sitename
         hrn = parent_hrn + "." + sitename
         # Hardcode 'internet2' into the hrn for sites hosting
@@ -214,13 +209,13 @@ class sfaImport:
                 hrn = ".".join([parent_hrn, "internet2", sitename])
 
         urn = hrn_to_urn(hrn, 'authority')
-        trace("Import: importing site " + hrn, self.logger)
+        self.logger.info("Import: importing site " + hrn)
 
         # create the authority
-        if not AuthHierarchy.auth_exists(urn):
-            AuthHierarchy.create_auth(urn)
+        if not self.AuthHierarchy.auth_exists(urn):
+            self.AuthHierarchy.create_auth(urn)
 
-        auth_info = AuthHierarchy.get_auth_info(urn)
+        auth_info = self.AuthHierarchy.get_auth_info(urn)
 
         table = SfaTable()
         auth_record = SfaRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
@@ -229,7 +224,7 @@ class sfaImport:
         if not existing_records:
             table.insert(auth_record)
         else:
-            trace("Import: %s exists, updating " % hrn, self.logger)
+            self.logger.info("Import: %s exists, updating " % hrn)
             existing_record = existing_records[0]
             auth_record['record_id'] = existing_record['record_id']
             table.update(auth_record)
@@ -242,5 +237,5 @@ class sfaImport:
         table = SfaTable()
         record_list = table.find({'type': type, 'hrn': hrn})
         for record in record_list:
-            trace("Import: Removing record %s %s" % (type, hrn), self.logger)
+            self.logger.info("Import: Removing record %s %s" % (type, hrn))
             table.remove(record)        

@@ -4,7 +4,6 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.util.record import SfaRecord
 from sfa.util.table import SfaTable
-from sfa.util.debug import log
 from sfa.trust.credential import Credential
 from types import StringTypes
 

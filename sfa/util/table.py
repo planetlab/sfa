@@ -5,13 +5,11 @@
 #
 # TODO: Use existing PLC database methods? or keep this separate?
 
-import report
 import pgdb
 
 from sfa.util.PostgreSQL import *
 from sfa.trust.gid import *
 from sfa.util.record import *
-from sfa.util.debug import *
 from sfa.util.config import *
 from sfa.util.filter import *
 

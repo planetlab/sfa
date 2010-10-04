@@ -1,11 +1,9 @@
-
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/reset_slices.py $
-
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.trust.credential import Credential
+
 
 class get_trusted_certs(Method):
     """
@@ -26,7 +24,7 @@ class get_trusted_certs(Method):
         # If cred is not specified just return the gid for this interface.
         # This is true when when a peer is attempting to initiate federation
         # with this interface 
-        print cred
+        self.api.logger.debug("get_trusted_certs: %r"%cred)
         if not cred:
             gid_strings = []
             for gid in self.api.auth.trusted_cert_list:

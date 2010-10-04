@@ -4,7 +4,6 @@
 import os
 
 from sfa.util.storage import *
-from sfa.util.debug import log
 
 class Policy(SimpleStorage):
 

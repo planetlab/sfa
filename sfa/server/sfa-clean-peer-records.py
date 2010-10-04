@@ -10,7 +10,6 @@ from sfa.plc.api import SfaAPI
 from sfa.util.config import Config
 from sfa.trust.certificate import Keypair
 from sfa.trust.hierarchy import Hierarchy
-from sfa.util.report import trace, error
 from sfa.server.registry import Registries
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol 
 import socket

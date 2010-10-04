@@ -17,7 +17,7 @@
 
 import os
 
-from sfa.util.report import *
+from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import *
 from sfa.trust.gid import GID, create_uuid
@@ -161,7 +161,7 @@ class Hierarchy:
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(xrn)
-        trace("Hierarchy: creating authority: " + hrn)
+        sfa_logger.debug("Hierarchy: creating authority: " + hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
@@ -181,7 +181,7 @@ class Hierarchy:
                 pass
 
         if os.path.exists(privkey_filename):
-            print "using existing key", privkey_filename, "for authority", hrn
+            sfa_logger.debug("using existing key %r for authority %r"%(privkey_filename,hrn))
             pkey = Keypair(filename = privkey_filename)
         else:
             pkey = Keypair(create = True)
@@ -205,9 +205,8 @@ class Hierarchy:
     # @param xrn the human readable name of the authority to create (urn will be converted to hrn).
 
     def get_auth_info(self, xrn):
-        
-        #trace("Hierarchy: getting authority: " + hrn)
         hrn, type = urn_to_hrn(xrn)
+        sfa_logger.debug("Hierarchy: getting authority: " + hrn)
         if not self.auth_exists(hrn):
             raise MissingAuthority(hrn)
 

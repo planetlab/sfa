@@ -16,7 +16,6 @@ from sfa.util.policy import Policy
 from sfa.util.record import *
 from sfa.util.sfaticket import SfaTicket
 from sfa.server.registry import Registries
-from sfa.util.debug import log
 from sfa.plc.slices import Slices
 import sfa.plc.peers as peers
 from sfa.managers.vini.vini_network import *
