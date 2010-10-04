@@ -68,7 +68,6 @@ class sfaImport:
 
 
     def create_top_level_auth_records(self, hrn):
-        AuthHierarchy = self.AuthHierarchy
         urn = hrn_to_urn(hrn, 'authority')
         # make sure parent exists
         parent_hrn = get_authority(hrn)
@@ -78,12 +77,12 @@ class sfaImport:
             self.create_top_level_auth_records(parent_hrn)
 
         # create the authority if it doesnt already exist 
-        if not AuthHierarchy.auth_exists(urn):
+        if not self.AuthHierarchy.auth_exists(urn):
             self.logger.info("Import: creating top level authorites")
-            AuthHierarchy.create_auth(urn)
+            self.AuthHierarchy.create_auth(urn)
         
         # create the db record if it doesnt already exist    
-        auth_info = AuthHierarchy.get_auth_info(hrn)
+        auth_info = self.AuthHierarchy.get_auth_info(hrn)
         table = SfaTable()
         auth_record = table.find({'type': 'authority', 'hrn': hrn})
 
@@ -95,7 +94,6 @@ class sfaImport:
 
 
     def import_person(self, parent_hrn, person):
-        AuthHierarchy = self.AuthHierarchy
         hrn = email_to_hrn(parent_hrn, person['email'])
 
         # ASN.1 will have problems with hrn's longer than 64 characters
@@ -122,7 +120,7 @@ class sfaImport:
 
         # create the gid
         urn = hrn_to_urn(hrn, 'user')
-        person_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
+        person_gid = self.AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         table = SfaTable()
         person_record = SfaRecord(hrn=hrn, gid=person_gid, type="user", pointer=person['person_id'])
         person_record['authority'] = get_authority(person_record['hrn'])
@@ -136,7 +134,6 @@ class sfaImport:
             table.update(person_record)
 
     def import_slice(self, parent_hrn, slice):
-        AuthHierarchy = self.AuthHierarchy
         slicename = slice['name'].split("_",1)[-1]
         slicename = _cleanup_string(slicename)
 
@@ -149,7 +146,7 @@ class sfaImport:
 
         pkey = Keypair(create=True)
         urn = hrn_to_urn(hrn, 'slice')
-        slice_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
+        slice_gid = self.AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         slice_record = SfaRecord(hrn=hrn, gid=slice_gid, type="slice", pointer=slice['slice_id'])
         slice_record['authority'] = get_authority(slice_record['hrn'])
         table = SfaTable()
@@ -163,7 +160,6 @@ class sfaImport:
             table.update(slice_record)
 
     def import_node(self, parent_hrn, node):
-        AuthHierarchy = self.AuthHierarchy
         nodename = node['hostname'].split(".")[0]
         nodename = _cleanup_string(nodename)
         
@@ -181,7 +177,7 @@ class sfaImport:
         node_record = table.find({'type': 'node', 'hrn': hrn})
         pkey = Keypair(create=True)
         urn = hrn_to_urn(hrn, 'node')
-        node_gid = AuthHierarchy.create_gid(urn, create_uuid(), pkey)
+        node_gid = self.AuthHierarchy.create_gid(urn, create_uuid(), pkey)
         node_record = SfaRecord(hrn=hrn, gid=node_gid, type="node", pointer=node['node_id'])
         node_record['authority'] = get_authority(node_record['hrn'])
         existing_records = table.find({'hrn': hrn, 'type': 'node', 'pointer': node['node_id']})
@@ -195,7 +191,6 @@ class sfaImport:
 
     
     def import_site(self, parent_hrn, site):
-        AuthHierarchy = self.AuthHierarchy
         shell = self.shell
         plc_auth = self.plc_auth
         sitename = site['login_base']
@@ -217,10 +212,10 @@ class sfaImport:
         self.logger.info("Import: importing site " + hrn)
 
         # create the authority
-        if not AuthHierarchy.auth_exists(urn):
-            AuthHierarchy.create_auth(urn)
+        if not self.AuthHierarchy.auth_exists(urn):
+            self.AuthHierarchy.create_auth(urn)
 
-        auth_info = AuthHierarchy.get_auth_info(urn)
+        auth_info = self.AuthHierarchy.get_auth_info(urn)
 
         table = SfaTable()
         auth_record = SfaRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=site['site_id'])
