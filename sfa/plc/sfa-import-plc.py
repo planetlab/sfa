@@ -31,7 +31,6 @@ from sfa.trust.gid import create_uuid
 from sfa.plc.sfaImport import sfaImport
 
 def process_options():
-   global hrn
 
    (options, args) = getopt.getopt(sys.argv[1:], '', [])
    for opt in options:
@@ -68,8 +67,6 @@ def main():
     if config.SFA_API_DEBUG: sfaImporter.logger.setLevel(logging.DEBUG)
     shell = sfaImporter.shell
     plc_auth = sfaImporter.plc_auth 
-    AuthHierarchy = sfaImporter.AuthHierarchy
-    TrustedRoots = sfaImporter.TrustedRoots
     table = SfaTable()
 
     if not table.exists():
@@ -81,8 +78,8 @@ def main():
         sfaImporter.create_top_level_auth_records(interface_hrn)
 
     sfaImporter.logger.info("Import: adding " + interface_hrn + " to trusted list")
-    authority = AuthHierarchy.get_auth_info(interface_hrn)
-    TrustedRoots.add_gid(authority.get_gid_object())
+    authority = sfaImporter.AuthHierarchy.get_auth_info(interface_hrn)
+    sfaImporter.TrustedRoots.add_gid(authority.get_gid_object())
 
     if ".vini" in interface_hrn and interface_hrn.endswith('vini'):
         # create a fake internet2 site first

@@ -91,7 +91,7 @@ class Method (object):
             runtime = time.time() - start
 
             if self.api.config.SFA_API_DEBUG or hasattr(self, 'message'):
-                msg=getattr(self,'message',"method %s completed"%methodname)
+                msg=getattr(self,'message',"method %s completed in %02f s"%(methodname,runtime))
                 sfa_logger.info(msg)
 
             return result

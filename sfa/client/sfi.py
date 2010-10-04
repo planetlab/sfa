@@ -14,15 +14,19 @@ from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
+import zlib
+import logging
+
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
-from sfa.util.record import *
-from sfa.util.namespace import *
+from sfa.util.record import SfaRecord, UserRecord, SliceRecord, NodeRecord, AuthorityRecord
+from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
-import zlib
+from sfa.util.sfalogging import console_logger
+
 
 AGGREGATE_PORT=12346
 CM_PORT=12346
@@ -117,12 +121,14 @@ def load_record_from_file(filename):
 
 class Sfi:
 
-    slicemgr = None
-    registry = None
-    user = None
-    authority = None
-    options = None
-    hashrequest = False
+    def __init__ (self):
+        self.slicemgr = None
+        self.registry = None
+        self.user = None
+        self.authority = None
+        self.options = None
+        self.hashrequest = False
+        self.logger=console_logger
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
         cmdargs = {"list": "name",
@@ -154,11 +160,10 @@ class Sfi:
             cmdargs.update(additional_cmdargs)
 
         if command not in cmdargs:
-            print "Invalid command\n"
-            print "Commands: ",
-            for key in cmdargs.keys():
-                print key + ",",
-            print ""
+            msg="Invalid command\n"
+            msg+="Commands: "
+            msg += ','.join(cmdargs.keys())            
+            self.logger.critical(msg)
             sys.exit(2)
 
         parser = OptionParser(usage="sfi [sfi_options] %s [options] %s" \
@@ -251,12 +256,12 @@ class Sfi:
        try:
           config = Config (config_file)
        except:
-          print "Failed to read configuration file", config_file
-          print "Make sure to remove the export clauses and to add quotes"
+          self.logger.critical("Failed to read configuration file %s"%config_file)
+          self.logger.info("Make sure to remove the export clauses and to add quotes")
           if not self.options.verbose:
-             print "Re-run with -v for more details"
+              self.logger.info("Re-run with -v for more details")
           else:
-             traceback.print_exc()
+              self.logger.log_exc("Could not read config file %s"%config_file)
           sys.exit(1)
     
        errors = 0
@@ -266,7 +271,7 @@ class Sfi:
        elif hasattr(config, "SFI_SM"):
           sm_url = config.SFI_SM
        else:
-          print "You need to set e.g. SFI_SM='http://your.slicemanager.url:12347/' in %s" % config_file
+          self.logger.error("You need to set e.g. SFI_SM='http://your.slicemanager.url:12347/' in %s" % config_file)
           errors += 1 
     
        # Set Registry URL
@@ -275,7 +280,7 @@ class Sfi:
        elif hasattr(config, "SFI_REGISTRY"):
           reg_url = config.SFI_REGISTRY
        else:
-          print "You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in %s" % config_file
+          self.logger.errors("You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in %s" % config_file)
           errors += 1 
           
 
@@ -285,7 +290,7 @@ class Sfi:
        elif hasattr(config, "SFI_USER"):
           self.user = config.SFI_USER
        else:
-          print "You need to set e.g. SFI_USER='plc.princeton.username' in %s" % config_file
+          self.logger.errors("You need to set e.g. SFI_USER='plc.princeton.username' in %s" % config_file)
           errors += 1 
     
        # Set authority HRN
@@ -294,7 +299,7 @@ class Sfi:
        elif hasattr(config, "SFI_AUTH"):
           self.authority = config.SFI_AUTH
        else:
-          print "You need to set e.g. SFI_AUTH='plc.princeton' in %s" % config_file
+          self.logger.error("You need to set e.g. SFI_AUTH='plc.princeton' in %s" % config_file)
           errors += 1 
     
        if errors:
@@ -309,9 +314,9 @@ class Sfi:
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
-       if self.options.verbose : print "Contacting Registry at:", reg_url
+       self.logger.info("Contacting Registry at: %s"%reg_url)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options)  
-       if self.options.verbose : print "Contacting Slice Manager at:", sm_url
+       self.logger.info("Contacting Slice Manager at: %s"%sm_url)
        self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file, self.options)
 
        return
@@ -336,7 +341,7 @@ class Sfi:
        if (os.path.isfile(file)):
           return file
        else:
-          print "Key file", file, "does not exist"
+          self.logger.error("Key file %s does not exist"%file)
           sys.exit(-1)
        return
     
@@ -352,8 +357,7 @@ class Sfi:
           cert.set_pubkey(k)
           cert.set_issuer(k, self.user)
           cert.sign()
-          if self.options.verbose :
-             print "Writing self-signed certificate to", file
+          self.logger.info("Writing self-signed certificate to %s"%file)
           cert.save_to_file(file)
           return file
 
@@ -371,7 +375,7 @@ class Sfi:
         if args:
             hrn = args[0]
         gid = self._get_gid(hrn)
-        print gid.save_to_string(save_parents=True)
+        self.logger.debug("Sfi.get_gid-> %s",gid.save_to_string(save_parents=True))
         return gid
 
     def _get_gid(self, hrn=None):
@@ -386,8 +390,7 @@ class Sfi:
             if not records:
                 raise RecordNotFound(args[0])
             gid = GID(string=records[0]['gid'])
-            if self.options.verbose:
-                print "Writing gid to ", gidfile 
+            self.logger.info("Writing gid to %s"%gidfile)
             gid.save_to_file(filename=gidfile)
         return gid   
                 
@@ -411,7 +414,7 @@ class Sfi:
 
     def get_auth_cred(self):
         if not self.authority:
-            print "no authority specified. Use -a or set SF_AUTH"
+            self.logger.critical("no authority specified. Use -a or set SF_AUTH")
             sys.exit(-1)
         file = os.path.join(self.options.sfi_dir, get_leaf("authority") + ".cred")
         return self.get_cred(file, 'authority', self.authority)
@@ -437,13 +440,12 @@ class Sfi:
                 cred_str = self.registry.get_credential(user_cred, type, hrn)
             
             if not cred_str:
-                print "Failed to get %s credential" % (type)
+                self.logger.critical("Failed to get %s credential" % type)
                 sys.exit(-1)
                 
             cred = Credential(string=cred_str)
             cred.save_to_file(file, save_parents=True)
-            if self.options.verbose:
-                print "Writing %s credential to %s" %(type, file)
+            self.logger.info("Writing %s credential to %s" %(type, file))
 
         return cred
  
@@ -456,7 +458,7 @@ class Sfi:
        if (os.path.isfile(file)):
           return file
        else:
-          print "No such rspec file", rspec
+          self.logger.critical("No such rspec file"%rspec)
           sys.exit(1)
     
     def get_record_file(self, record):
@@ -467,7 +469,7 @@ class Sfi:
        if (os.path.isfile(file)):
           return file
        else:
-          print "No such registry record file", record
+          self.logger.critical("No such registry record file %s"%record)
           sys.exit(1)
     
     def load_publickey_string(self, fn):
@@ -491,7 +493,7 @@ class Sfi:
         records = self.registry.Resolve(hrn, user_cred)
         records = filter_records('node', records)
         if not records:
-            print "No such component:", opts.component
+            self.logger.warning("No such component:%r"% opts.component)
         record = records[0]
   
         return self.get_server(record['hostname'], CM_PORT, self.key_file, \
@@ -525,7 +527,7 @@ class Sfi:
     #==========================================================================
   
     def dispatch(self, command, cmd_opts, cmd_args):
-        getattr(self, command)(cmd_opts, cmd_args)
+        return getattr(self, command)(cmd_opts, cmd_args)
  
     # list entires in named authority registry
     def list(self, opts, args):
@@ -589,7 +591,7 @@ class Sfi:
             slice_cred = self.get_slice_cred(opts.delegate_slice)
             cred = self.delegate_cred(slice_cred, delegee_hrn)
         else:
-            print "Must specify either --user or --slice <hrn>"
+            self.logger.warning("Must specify either --user or --slice <hrn>")
             return
         delegated_cred = Credential(string=cred)
         object_hrn = delegated_cred.get_gid_object().get_hrn()
@@ -602,7 +604,7 @@ class Sfi:
 
         delegated_cred.save_to_file(dest_fn, save_parents=True)
 
-        print "delegated credential for", object_hrn, "to", delegee_hrn, "and wrote to", dest_fn
+        self.logger.info("delegated credential for %s to %s and wrote to %s"%(object_hrn, delegee_hrn,dest_fn))
     
     def delegate_cred(self, object_cred, hrn):
         # the gid and hrn of the object we are delegating
@@ -612,7 +614,7 @@ class Sfi:
         object_hrn = object_gid.get_hrn()
     
         if not object_cred.get_privileges().get_all_delegate():
-            print "Error: Object credential", object_hrn, "does not have delegate bit set"
+            self.logger.error("Object credential %s does not have delegate bit set"%object_hrn)
             return
 
         # the delegating user's gid
@@ -681,7 +683,7 @@ class Sfi:
         trusted_certs = self.registry.get_trusted_certs()
         for trusted_cert in trusted_certs:
             cert = Certificate(string=trusted_cert)
-            print cert.get_subject()
+            self.logger.debug('Sfi.get_trusted_certs -> %r'%cert.get_subject())
         return 
 
     def aggregates(self, opts, args):
@@ -796,7 +798,7 @@ class Sfi:
         server = self.get_server_from_opts(opts)
         ticket_string = server.GetTicket(slice_urn, creds, rspec, [])
         file = os.path.join(self.options.sfi_dir, get_leaf(slice_hrn) + ".ticket")
-        print "writing ticket to ", file        
+        self.logger.info("writing ticket to %s"%file)
         ticket = SfaTicket(string=ticket_string)
         ticket.save_to_file(filename=file, save_parents=True)
 
@@ -823,16 +825,15 @@ class Sfi:
         connections = {}
         for hostname in hostnames:
             try:
-                print "Calling redeem_ticket at %(hostname)s " % locals(),
+                self.logger.info("Calling redeem_ticket at %(hostname)s " % locals())
                 server = self.get_server(hostname, CM_PORT, self.key_file, \
                                          self.cert_file, self.options.debug)
                 server.RedeemTicket(ticket.save_to_string(save_parents=True), slice_cred)
-                print "Success"
+                self.logger.info("Success")
             except socket.gaierror:
-                print "Failed:",
-                print "Componet Manager not accepting requests" 
+                self.logger.error("redeem_ticket failed: Component Manager not accepting requests")
             except Exception, e:
-                print "Failed:", e.message
+                self.logger.log_exc(e.message)
         return
  
     # delete named slice
@@ -919,6 +920,7 @@ class Sfi:
         server = self.get_server_from_opts(opts)
         return server.Shutdown(slice_urn, creds)         
     
+
     #
     # Main: parse arguments and dispatch to command
     #
@@ -926,34 +928,34 @@ class Sfi:
         parser = self.create_parser()
         (options, args) = parser.parse_args()
         self.options = options
-   
+
+        if self.options.verbose: self.logger.setLevel(logging.DEBUG)
         if options.hashrequest:
             self.hashrequest = True
  
         if len(args) <= 0:
-            print "No command given. Use -h for help."
-            return - 1
+            self.logger.critical("No command given. Use -h for help.")
+            return -1
     
         command = args[0]
         (cmd_opts, cmd_args) = self.create_cmd_parser(command).parse_args(args[1:])
-        if self.options.verbose :
-            print "Registry %s, sm %s, dir %s, user %s, auth %s" % (options.registry, options.sm,
-                                                                   options.sfi_dir, options.user,
-                                                                   options.auth)
-            print "Command %s" % command
-            if command in ("resources"):
-                print "resources cmd_opts %s" % cmd_opts.format
-            elif command in ("list", "show", "remove"):
-                print "cmd_opts.type %s" % cmd_opts.type
-            print "cmd_args %s" % cmd_args
-    
+
         self.set_servers()
     
+        self.logger.info("Command %s" % command)
+        self.logger.info("dir %s, user %s, auth %s, reg %s, sm %s" % (
+                self. options.sfi_dir, self.options.user,self.options.auth,
+                self.options.registry, self.options.sm))
+        if command in ("resources"):
+            self.logger.debug("resources cmd_opts %s" % cmd_opts.format)
+        elif command in ("list", "show", "remove"):
+            self.logger.debug("cmd_opts.type %s" % cmd_opts.type)
+        self.logger.debug('cmd_args %s',cmd_args)
+
         try:
             self.dispatch(command, cmd_opts, cmd_args)
         except KeyError:
-            raise 
-            print "Command not found:", command
+            self.logger.critical ("Unknown command %s"%command)
             sys.exit(1)
     
         return

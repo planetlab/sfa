@@ -4,6 +4,7 @@ from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth
 from sfa.trust.credential import Credential
 
+
 class get_trusted_certs(Method):
     """
     @param cred credential string specifying the rights of the caller
@@ -23,7 +24,7 @@ class get_trusted_certs(Method):
         # If cred is not specified just return the gid for this interface.
         # This is true when when a peer is attempting to initiate federation
         # with this interface 
-        sfalogging.logger.debug("get_trusted_certs: %r"%cred)
+        self.api.logger.debug("get_trusted_certs: %r"%cred)
         if not cred:
             gid_strings = []
             for gid in self.api.auth.trusted_cert_list:

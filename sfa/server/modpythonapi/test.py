@@ -1,10 +1,10 @@
 import sys
 import traceback
 
-from BaseClient import BaseClient, EnableVerboseExceptions
+from BaseClient import BaseClient
 from AuthenticatedClient import AuthenticatedClient
 
-EnableVerboseExceptions(True)
+BaseClient.EnableVerboseExceptions(True)
 
 HOST = "localhost"
 URL = "http://" + HOST + "/TESTAPI/"

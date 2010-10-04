@@ -30,9 +30,10 @@
 ##
 
 # TCP ports for the three servers
-registry_port=12345
-aggregate_port=12346
-slicemgr_port=12347
+#registry_port=12345
+#aggregate_port=12346
+#slicemgr_port=12347
+### xxx todo not in the config yet
 component_port=12346
 import os, os.path
 import sys
@@ -162,13 +163,6 @@ def sync_interfaces(server_key_file, server_cert_file):
     aggregates.sync_interfaces()
 
 def main():
-    # xxx get rid of globals - name consistently CamelCase or under_score
-    global AuthHierarchy
-    global TrustedRoots
-    global registry_port
-    global aggregate_port
-    global slicemgr_port
-
     # Generate command line parser
     parser = OptionParser(usage="sfa-server [options]")
     parser.add_option("-r", "--registry", dest="registry", action="store_true",
@@ -200,24 +194,25 @@ def main():
     # start registry server
     if (options.registry):
         from sfa.server.registry import Registry
-        r = Registry("", registry_port, server_key_file, server_cert_file)
+        r = Registry("", config.SFA_REGISTRY_PORT, server_key_file, server_cert_file)
         r.start()
 
     # start aggregate manager
     if (options.am):
         from sfa.server.aggregate import Aggregate
-        a = Aggregate("", aggregate_port, server_key_file, server_cert_file)
+        a = Aggregate("", config.SFA_AGGREGATE_PORT, server_key_file, server_cert_file)
         a.start()
 
     # start slice manager
     if (options.sm):
         from sfa.server.slicemgr import SliceMgr
-        s = SliceMgr("", slicemgr_port, server_key_file, server_cert_file)
+        s = SliceMgr("", config.SFA_SM_PORT, server_key_file, server_cert_file)
         s.start()
 
     if (options.cm):
         from sfa.server.component import Component
-        c = Component("", component_port, server_key_file, server_cert_file)
+        c = Component("", config.component_port, server_key_file, server_cert_file)
+#        c = Component("", config.SFA_COMPONENT_PORT, server_key_file, server_cert_file)
         c.start()
 
 if __name__ == "__main__":
