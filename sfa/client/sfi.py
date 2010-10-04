@@ -310,9 +310,9 @@ class Sfi:
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
        if self.options.verbose : print "Contacting Registry at:", reg_url
-       self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options.debug)  
+       self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options)  
        if self.options.verbose : print "Contacting Slice Manager at:", sm_url
-       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file, self.options.debug)
+       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file, self.options)
 
        return
     
@@ -495,14 +495,14 @@ class Sfi:
         record = records[0]
   
         return self.get_server(record['hostname'], CM_PORT, self.key_file, \
-                               self.cert_file, self.options.debug)
+                               self.cert_file, self.options)
  
-    def get_server(self, host, port, keyfile, certfile, debug):
+    def get_server(self, host, port, keyfile, certfile):
         """
         Return an instnace of an xmlrpc server connection    
         """
         url = "http://%s:%s" % (host, port)
-        return xmlrpcprotocol.get_server(url, keyfile, certfile, debug)
+        return xmlrpcprotocol.get_server(url, keyfile, certfile, self.options)
 
     def get_server_from_opts(self, opts):
         """
@@ -512,8 +512,7 @@ class Sfi:
         server = self.slicemgr
         # direct connection to an aggregate
         if hasattr(opts, 'aggregate') and opts.aggregate:
-            server = self.get_server(opts.aggregate, opts.port, self.key_file, \
-                                     self.cert_file, self.options.debug)
+            server = self.get_server(opts.aggregate, opts.port, self.key_file, self.cert_file)
         # direct connection to the nodes component manager interface
         if hasattr(opts, 'component') and opts.component:
             server = self.get_component_server_from_hrn(opts.component)    
