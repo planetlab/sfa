@@ -83,6 +83,8 @@ def create_slice(api, xrn, creds, rspec, users):
     return merged_rspec
 
 def renew_slice(api, xrn, creds, expiration_time):
+    hrn, type = urn_to_hrn(xrn)
+
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'renewesliver', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -114,7 +116,7 @@ def get_ticket(api, xrn, creds, rspec, users):
         aggregate_rspecs[aggregate_hrn] = rspec 
 
     # get the callers hrn
-    valid_cred = api.auth.checkCredentials(creds, 'getticket', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'getticket', slice_hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
@@ -182,6 +184,8 @@ def get_ticket(api, xrn, creds, rspec, users):
 
 
 def delete_slice(api, xrn, creds):
+    hrn, type = urn_to_hrn(xrn)
+
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'deletesliver', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -202,6 +206,8 @@ def delete_slice(api, xrn, creds):
     return 1
 
 def start_slice(api, xrn, creds):
+    hrn, type = urn_to_hrn(xrn)
+
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'startslice', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -222,6 +228,8 @@ def start_slice(api, xrn, creds):
     return 1
  
 def stop_slice(api, xrn, creds):
+    hrn, type = urn_to_hrn(xrn)
+
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'stopslice', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -268,6 +276,7 @@ def get_slices(api, creds):
             return slices    
 
     # get the callers hrn
+    hrn = cred.get_gid_object().get_hrn()
     valid_cred = api.auth.checkCredentials(creds, 'listslices', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
 
