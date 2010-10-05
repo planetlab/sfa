@@ -45,10 +45,24 @@ class XMLRPCTransport(xmlrpclib.Transport):
         parser = xmlrpclib.ExpatParser(unmarshaller)
         return parser, unmarshaller
 
-def get_server(url, key_file, cert_file, debug=False):
+class XMLRPCServerProxy(xmlrpclib.ServerProxy):
+    def __init__(self, url, transport, allow_none=True, options=None):
+        self.options = options
+        verbose = False
+        if self.options and self.options.debug:
+            verbose = True
+        xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none, verbose=verbose)
+
+    def __getattr__(self, attr):
+        if self.options and self.options.verbose:
+            print "Calling xml-rpc method:", attr
+        return xmlrpclib.ServerProxy.__getattr__(self, attr)
+
+
+def get_server(url, key_file, cert_file, options=None):
     transport = XMLRPCTransport()
     transport.key_file = key_file
     transport.cert_file = cert_file
 
-    return xmlrpclib.ServerProxy(url, transport, allow_none=True, verbose=debug)
+    return XMLRPCServerProxy(url, transport, allow_none=True, options=options)
 

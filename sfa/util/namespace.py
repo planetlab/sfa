@@ -20,21 +20,21 @@ def hrn_to_pl_slicename(hrn):
     # remove any escaped no alpah numeric characters
     #hrn = re.sub('\\\[^a-zA-Z0-9]', '', hrn)
     # remove any escaped '.' (i.e. '\.')
-    hrn.replace('\\.', '')
+    hrn = hrn.replace('\\.', '')
     parts = hrn.split(".")
     return parts[-2] + "_" + parts[-1]
 
 # assuming hrn is the hrn of an authority, return the plc authority name
 def hrn_to_pl_authname(hrn):
     # remove any escaped '.' (i.e. '\.')
-    hrn.replace('\\.', '')
+    hrn = hrn.replace('\\.', '')
     parts = hrn.split(".")
     return parts[-1]
 
 # assuming hrn is the hrn of an authority, return the plc login_base
 def hrn_to_pl_login_base(hrn):
     # remove any escaped '.' (i.e. '\.')
-    hrn.replace('\\.', '')
+    hrn = hrn.replace('\\.', '')
     return hrn_to_pl_authname(hrn)
 
 def hostname_to_hrn(auth_hrn, login_base, hostname):
