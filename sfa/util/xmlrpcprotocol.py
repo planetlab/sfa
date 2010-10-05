@@ -54,7 +54,7 @@ class XMLRPCServerProxy(xmlrpclib.ServerProxy):
         xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none, verbose=verbose)
 
     def __getattr__(self, attr):
-        if self.options.verbose:
+        if self.options and self.options.verbose:
             print "Calling xml-rpc method:", attr
         return xmlrpclib.ServerProxy.__getattr__(self, attr)
 
