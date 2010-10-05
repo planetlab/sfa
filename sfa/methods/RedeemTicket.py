@@ -7,7 +7,6 @@ from sfa.util.parameter import Parameter, Mixed
 
 class RedeemTicket(Method):
     """
-    Deprecated. Use RedeemTicket instead.
 
     @param cred credential string specifying the rights of the caller
     @param ticket 
