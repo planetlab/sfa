@@ -41,6 +41,7 @@ from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import Right, Rights
 from sfa.trust.gid import GID
+from sfa.util.namespace import *
 
 # Two years, in seconds 
 DEFAULT_CREDENTIAL_LIFETIME = 60 * 60 * 24 * 365 * 2
