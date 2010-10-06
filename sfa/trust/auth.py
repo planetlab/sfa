@@ -237,7 +237,7 @@ class Auth:
         verify_cancreate_credential()
         """
 
-        rl = RightList()
+        rl = Rights()
         type = record['type']
 
 

@@ -2,6 +2,8 @@
 
 import xmlrpclib
 
+from sfa.util.sfalogging import sfa_logger, console_logger
+
 ##
 # ServerException, ExceptionUnmarshaller
 #
@@ -51,11 +53,14 @@ class XMLRPCServerProxy(xmlrpclib.ServerProxy):
         verbose = False
         if self.options and self.options.debug:
             verbose = True
+        if self.options and hasattr(self.options,'client'):
+            XMLRPCServerProxy.logger=console_logger
+        else:
+            XMLRPCServerProxy.logger=sfa_logger
         xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none, verbose=verbose)
 
     def __getattr__(self, attr):
-        if self.options and self.options.verbose:
-            print "Calling xml-rpc method:", attr
+        XMLRPCServerProxy.logger.debug("Calling xml-rpc method:%s"%attr)
         return xmlrpclib.ServerProxy.__getattr__(self, attr)
 
 

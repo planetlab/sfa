@@ -162,9 +162,9 @@ class SfaAPI(BaseAPI):
             registry = registries[self.hrn]
             cert_string=self.cert.save_to_string(save_parents=True)
             # get self credential
-            self_cred = registry.get_self_credential(cert_string, type, self.hrn)
+            self_cred = registry.GetSelfCredential(cert_string, self.hrn, type)
             # get credential
-            cred = registry.get_credential(self_cred, type, self.hrn)
+            cred = registry.GetCredential(self_cred, self.hrn, type)
             
             # save cred to file
             Credential(string=cred).save_to_file(cred_filename, save_parents=True)
@@ -654,7 +654,7 @@ class ComponentAPI(BaseAPI):
             # get credential from registry
             cert_str = Certificate(filename=cert_filename).save_to_string(save_parents=True)
             registry = self.get_registry()
-            cred = registry.get_self_credential(cert_str, 'node', hrn)
+            cred = registry.GetSelfCredential(cert_str, hrn, 'node')
             Credential(string=cred).save_to_file(credfile, save_parents=True)            
 
             return cred
@@ -670,7 +670,7 @@ class ComponentAPI(BaseAPI):
                 os.unlink(f)
 
         # install the new key pair
-        # get_credential will take care of generating the new keypair
+        # GetCredential will take care of generating the new keypair
         # and credential
         self.get_node_key()
         self.getCredential()

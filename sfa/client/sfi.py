@@ -313,6 +313,8 @@ class Sfi:
        self.key_file = key_file
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
+       # instruct xmlrpcprotocol to redirect logs to console_logger
+       self.options.client=True
        # Establish connection to server(s)
        self.logger.info("Contacting Registry at: %s"%reg_url)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options)  
@@ -433,11 +435,11 @@ class Sfi:
                 if user_name.count(".") > 0:
                     user_name = user_name.replace(".", '_')
                     self.user = self.authority + "." + user_name
-                cred_str = self.registry.get_self_credential(cert_string, "user", hrn)
+                cred_str = self.registry.GetSelfCredential(cert_string, hrn, "user")
             else:
                 # bootstrap slice credential from user credential
                 user_cred = self.get_user_cred().save_to_string(save_parents=True)
-                cred_str = self.registry.get_credential(user_cred, type, hrn)
+                cred_str = self.registry.GetCredential(user_cred, hrn, type)
             
             if not cred_str:
                 self.logger.critical("Failed to get %s credential" % type)

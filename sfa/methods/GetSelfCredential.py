@@ -1,5 +1,3 @@
-### $Id: get_credential.py 15321 2009-10-15 05:01:21Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/get_credential.py $
 
 from sfa.trust.credential import *
 from sfa.trust.rights import *
@@ -33,7 +31,7 @@ class GetSelfCredential(Method):
 
     def call(self, cert, xrn, type):
         """
-        get_self_credential a degenerate version of get_credential used by a client
+        GetSelfCredential a degenerate version of GetCredential used by a client
         to get his initial credential when de doesnt have one. This is the same as
         get_credetial(..., cred = None, ...)
 
