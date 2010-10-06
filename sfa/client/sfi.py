@@ -313,6 +313,8 @@ class Sfi:
        self.key_file = key_file
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
+       # instruct xmlrpcprotocol to redirect logs to console_logger
+       self.options.client=True
        # Establish connection to server(s)
        self.logger.info("Contacting Registry at: %s"%reg_url)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options)  
