@@ -170,9 +170,10 @@ class Slices:
     def verify_site(self, registry, credential, slice_hrn, peer, sfa_peer, reg_objects=None):
         authority = get_authority(slice_hrn)
         authority_urn = hrn_to_urn(authority, 'authority')
-        
+        login_base = None
         if reg_objects:
             site = reg_objects['site']
+            login_base = site['login_base']
         else:
             site_records = registry.Resolve(authority_urn, [credential])
             site = {}            
@@ -183,8 +184,9 @@ class Slices:
                 raise RecordNotFound(authority)
             
         remote_site_id = site.pop('site_id')    
-                
-        login_base = get_leaf(authority)
+        
+        if login_base is None:
+            login_base = get_leaf(authority)
         sites = self.api.plshell.GetSites(self.api.plauth, login_base)
 
         if not sites:
@@ -237,8 +239,7 @@ class Slices:
             for key in slice_keys:
                 if key in slice_record and slice_record[key]:
                     slice_fields[key] = slice_record[key]
-
-            # add the slice  
+            # add the slice                          
             slice_id = self.api.plshell.AddSlice(self.api.plauth, slice_fields)
             slice = slice_fields
             slice['slice_id'] = slice_id

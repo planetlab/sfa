@@ -85,7 +85,7 @@ def urn_to_hrn(urn):
     # 2. escape '.'            # '.' exists in protogeni object names and are not delimiters
     # 3. replace ':' with '.'  # ':' is the urn hierarchy delimiter
     # 4. join list elements using '.' 
-    hrn = '.'.join([part.replace('.', '\.').replace(':', '.') for part in hrn_parts if part]) 
+    hrn = '.'.join([part.replace('.', '\\.').replace(':', '.') for part in hrn_parts if part]) 
     
     return str(hrn), str(type) 
     
