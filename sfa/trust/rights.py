@@ -4,7 +4,7 @@
 #
 # Right - represents a single right
 #
-# RightList - represents a list of rights
+# Rights - represents a list of rights
 #
 # A right may allow several different operations. For example, the "info" right
 # allows "listslices", "listcomponentresources", etc.
@@ -42,10 +42,10 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
 # @param type the type of the object (user | sa | ma | slice | node)
 # @param name human readable name of the object (not used at this time)
 #
-# @return RightList object containing rights
+# @return Rights object containing rights
 
 def determine_rights(type, name):
-    rl = RightList()
+    rl = Rights()
 
     # rights seem to be somewhat redundant with the type of the credential.
     # For example, a "sa" credential implies the authority right, because
@@ -132,9 +132,9 @@ class Right:
         return True
 
 ##
-# A RightList object represents a list of privileges.
+# A Rights object represents a list of privileges.
 
-class RightList:
+class Rights:
     ##
     # Create a new rightlist object, containing no rights.
     #
@@ -252,10 +252,10 @@ class RightList:
     # @param type the type of the object (user | sa | ma | slice | node)
     # @param name human readable name of the object (not used at this time)
     #
-    # @return RightList object containing rights
+    # @return Rights object containing rights
 
     def determine_rights(self, type, name):
-        rl = RightList()
+        rl = Rights()
 
         # rights seem to be somewhat redundant with the type of the credential.
         # For example, a "sa" credential implies the authority right, because

@@ -1,4 +1,7 @@
 all = """
+GetCredential
+GetSelfCredential
+GetGids
 get_aggregates
 get_key
 get_registries

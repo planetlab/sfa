@@ -1,6 +1,4 @@
-### $Id: get_credential.py 17576 2010-04-05 20:56:15Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/get_credential.py $
-
+#
 from sfa.trust.credential import *
 from sfa.trust.rights import *
 from sfa.util.faults import *
@@ -12,7 +10,7 @@ from sfa.trust.credential import Credential
 class GetCredential(Method):
     """
     Retrive a credential for an object
-    If cred == None then the behavior reverts to get_self_credential
+    If cred == None then the behavior reverts to GetSelfCredential
 
     @param hrn human readable name of object (hrn or urn)
     @param cred credential object specifying rights of the caller

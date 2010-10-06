@@ -360,9 +360,9 @@ class SfaAPI(BaseAPI):
             registry = registries[self.hrn]
             cert_string=self.cert.save_to_string(save_parents=True)
             # get self credential
-            self_cred = registry.get_self_credential(cert_string, type, self.hrn)
+            self_cred = registry.GetSelfCredential(cert_string, self.hrn, type)
             # get credential
-            cred = registry.get_credential(self_cred, type, self.hrn)
+            cred = registry.GetCredential(self_cred, type, self.hrn)
             
             # save cred to file
             Credential(string=cred).save_to_file(cred_filename, save_parents=True)
