@@ -13,6 +13,7 @@ import sys
 from sfa.trust.hierarchy import *
 from sfa.util.record import *
 from sfa.util.table import SfaTable
+from sfa.util.sfalogging import sfa_import_logger
 
 def process_options():
 
@@ -24,7 +25,7 @@ def process_options():
 def main():
     process_options()
 
-    print "Purging SFA records from database"
+    sfa_import_logger.info("Purging SFA records from database")
     table = SfaTable()
     table.sfa_records_purge()
 

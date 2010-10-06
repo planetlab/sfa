@@ -31,6 +31,3 @@ for name in attrs:
                     print >> sys.stderr, "FAILED: on node %s: %s=%s" % (node, name, value)
 
 print command.rspec
-    
-
-    

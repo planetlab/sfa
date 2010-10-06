@@ -30,10 +30,10 @@ class Iface:
         self.hostname = iface['hostname']
         self.primary = iface['is_primary']
 
-    """
-    Just print out bwlimit right now
-    """
     def toxml(self, xml):
+        """
+        Just print out bwlimit right now
+        """
         if self.bwlimit:
             with xml.bw_limit(units="kbps"):
                 xml << str(self.bwlimit / 1000)

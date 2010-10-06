@@ -146,7 +146,7 @@ def get_credential(registry=None, force=False, verbose=False):
         registry = get_server(url=registry, keyfile=keyfile, certfile=certfile)
         cert = Certificate(filename=certfile)
         cert_str = cert.save_to_string(save_parents=True)
-        cred = registry.GetSelfCredential(cert_str, hrn, 'node')    
+        cred = registry.GetSelfCredential(cert_str, 'node', hrn)
         Credential(string=cred).save_to_file(credfile, save_parents=True)
     
     return cred

@@ -6,7 +6,6 @@
 #
 
 
-#import sfa.util.sfalogging
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.trustedroot import TrustedRootList
@@ -238,7 +237,7 @@ class Auth:
         verify_cancreate_credential()
         """
 
-        rl = RightList()
+        rl = Rights()
         type = record['type']
 
 

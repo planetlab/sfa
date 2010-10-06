@@ -12,21 +12,9 @@ import traceback
 import xmlrpclib
 from mod_python import apache
 
+from sfa.util.logging import sfa_logger
 from API import RemoteApi
 api = RemoteApi()
-
-class unbuffered:
-    """
-    Write to /var/log/httpd/error_log. See
-
-    http://www.modpython.org/FAQ/faqw.py?req=edit&file=faq02.003.htp
-    """
-
-    def write(self, data):
-        sys.stderr.write(data)
-        sys.stderr.flush()
-
-#log = unbuffered()
 
 def handler(req):
     try:
@@ -64,5 +52,5 @@ def handler(req):
 
     except Exception, err:
         # Log error in /var/log/httpd/(ssl_)?error_log
-        print >> log, err, traceback.format_exc()
+        sfa_logger.log_exc("%r"%e)
         return apache.HTTP_INTERNAL_SERVER_ERROR

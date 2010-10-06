@@ -57,6 +57,8 @@ tags:
 # (*) otherwise, entering through the root context
 # make sync PLCHOST=testbox1.inria.fr GUEST=vplc03.inria.fr
 
+PLCHOST ?= testplc.onelab.eu
+
 ifdef GUEST
 ifdef PLCHOST
 SSHURL:=root@$(PLCHOST):/vservers/$(GUEST)
@@ -86,6 +88,7 @@ ifeq (,$(SSHURL))
 	@exit 1
 else
 	+$(RSYNC) ./sfa/ $(SSHURL)/usr/lib/python2.5/site-packages/sfa/
+	+$(RSYNC) ./tests/ $(SSHURL)/root/tests-sfa
 	+$(RSYNC)  $(BINS) $(SSHURL)/usr/bin
 	$(SSHCOMMAND) exec service sfa restart
 endif

@@ -35,15 +35,12 @@ from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 from dateutil.parser import parse
 
-import sfa.util.sfalogging
+from sfa.util.faults import *
+from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
-from sfa.trust.rights import *
-from sfa.trust.gid import *
-from sfa.util.faults import *
-
-
-
+from sfa.trust.rights import Right, Rights
+from sfa.trust.gid import GID
 
 # Two years, in seconds 
 DEFAULT_CREDENTIAL_LIFETIME = 60 * 60 * 24 * 365 * 2
@@ -342,17 +339,17 @@ class Credential(object):
     ##
     # set the privileges
     #
-    # @param privs either a comma-separated list of privileges of a RightList object
+    # @param privs either a comma-separated list of privileges of a Rights object
 
     def set_privileges(self, privs):
         if isinstance(privs, str):
-            self.privileges = RightList(string = privs)
+            self.privileges = Rights(string = privs)
         else:
             self.privileges = privs
         
 
     ##
-    # return the privileges as a RightList object
+    # return the privileges as a Rights object
 
     def get_privileges(self):
         if not self.privileges:
@@ -590,7 +587,7 @@ class Credential(object):
 
         # Process privileges
         privs = cred.getElementsByTagName("privileges")[0]
-        rlist = RightList()
+        rlist = Rights()
         for priv in privs.getElementsByTagName("privilege"):
             kind = getTextNode(priv, "name")
             deleg = str2bool(getTextNode(priv, "can_delegate"))
@@ -662,7 +659,7 @@ class Credential(object):
                 trusted_cert_objects.append(GID(filename=f))
                 ok_trusted_certs.append(f)
             except Exception, exc:
-                sfa.util.sfalogging.logger.error("Failed to load trusted cert from %s: %r", f, exc)
+                sfa_logger.error("Failed to load trusted cert from %s: %r", f, exc)
         trusted_certs = ok_trusted_certs
 
         # Use legacy verification if this is a legacy credential
@@ -745,7 +742,7 @@ class Credential(object):
         # Maybe should be (hrn, type) = urn_to_hrn(root_cred_signer.get_urn())
         root_cred_signer_type = root_cred_signer.get_type()
         if (root_cred_signer_type == 'authority'):
-            #sfa.util.sfalogging.logger.debug('Cred signer is an authority')
+            #sfa_logger.debug('Cred signer is an authority')
             # signer is an authority, see if target is in authority's domain
             hrn = root_cred_signer.get_hrn()
             if root_target_gid.get_hrn().startswith(hrn):

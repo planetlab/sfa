@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 1.0
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -175,6 +175,9 @@ fi
 
 
 %changelog
+* Mon Oct 04 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-1
+- various bugfixes and cleanup, improved/harmonized logging
+
 * Tue Sep 07 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-16
 - truncate login base of external (ProtoGeni, etc) slices to 20 characters
   to avoid returning a PLCAPI exception that might confuse users.
@@ -207,6 +210,9 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Mon Oct 04 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-1
+- various bugfixes and cleanup, improved/harmonized logging
+
 * Thu May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
 - SfaServer now uses a pool of threads to handle requests concurrently
 - sfa.util.rspec no longer used to process/manage rspecs (deprecated). This is now handled by sfa.plc.network and is not backwards compatible

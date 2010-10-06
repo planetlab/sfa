@@ -48,7 +48,7 @@ from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
 
-import sfa.util.sfalogging
+from sfa.util.sfalogging import sfa_logger
 from sfa.util.namespace import urn_to_hrn
 from sfa.util.faults import *
 
@@ -79,7 +79,7 @@ def convert_public_key(key):
     try:
         k.load_pubkey_from_file(ssl_fn)
     except:
-        traceback.print_exc()
+        sfa_logger.log_exc("convert_public_key caught exception")
         k = None
 
     # remove the temporary files
@@ -585,21 +585,21 @@ class Certificate:
         # if this cert is signed by a trusted_cert, then we are set
         for trusted_cert in trusted_certs:
             if self.is_signed_by_cert(trusted_cert):
-                sfa.util.sfalogging.logger.debug("Cert %s signed by trusted cert %s", self.get_subject(), trusted_cert.get_subject())
+                sfa_logger.debug("Cert %s signed by trusted cert %s", self.get_subject(), trusted_cert.get_subject())
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.cert.has_expired():
                     return trusted_cert
                 else:
-                    sfa.util.sfalogging.logger.debug("Trusted cert %s is expired", trusted_cert.get_subject())       
+                    sfa_logger.debug("Trusted cert %s is expired", trusted_cert.get_subject())       
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
-            #print self.get_subject(), "has no parent"
+            sfa_logger.debug("%r has no parent"%self.get_subject())
             raise CertMissingParent(self.get_subject())
 
         # if it wasn't signed by the parent...
         if not self.is_signed_by_cert(self.parent):
-            #print self.get_subject(), "is not signed by parent"
+            sfa_logger.debug("%r is not signed by parent"%self.get_subject())
             return CertNotSignedByParent(self.get_subject())
 
         # if the parent isn't verified...

@@ -11,12 +11,11 @@ import traceback
 import string
 import xmlrpclib
 
-import sfa.util.sfalogging
+from sfa.util.sfalogging import sfa_logger
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
-from sfa.util.debug import *
 from sfa.trust.rights import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
@@ -107,7 +106,7 @@ class SfaAPI(BaseAPI):
 
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
-        self.logger=sfa.util.sfalogging.logger
+        self.logger=sfa_logger
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
@@ -127,7 +126,7 @@ class SfaAPI(BaseAPI):
 
     def getCredential(self):
         """
-        Retrun a valid credential for this interface. 
+        Return a valid credential for this interface. 
         """
         if self.interface in ['registry']:
             return self.getCredentialFromLocalRegistry()
@@ -163,9 +162,9 @@ class SfaAPI(BaseAPI):
             registry = registries[self.hrn]
             cert_string=self.cert.save_to_string(save_parents=True)
             # get self credential
-            self_cred = registry.get_self_credential(cert_string, type, self.hrn)
+            self_cred = registry.GetSelfCredential(cert_string, self.hrn, type)
             # get credential
-            cred = registry.get_credential(self_cred, type, self.hrn)
+            cred = registry.GetCredential(self_cred, self.hrn, type)
             
             # save cred to file
             Credential(string=cred).save_to_file(cred_filename, save_parents=True)
@@ -655,7 +654,7 @@ class ComponentAPI(BaseAPI):
             # get credential from registry
             cert_str = Certificate(filename=cert_filename).save_to_string(save_parents=True)
             registry = self.get_registry()
-            cred = registry.get_self_credential(cert_str, 'node', hrn)
+            cred = registry.GetSelfCredential(cert_str, hrn, 'node')
             Credential(string=cred).save_to_file(credfile, save_parents=True)            
 
             return cred
@@ -671,7 +670,7 @@ class ComponentAPI(BaseAPI):
                 os.unlink(f)
 
         # install the new key pair
-        # get_credential will take care of generating the new keypair
+        # GetCredential will take care of generating the new keypair
         # and credential
         self.get_node_key()
         self.getCredential()

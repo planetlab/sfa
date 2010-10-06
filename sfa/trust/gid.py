@@ -30,7 +30,7 @@
 import xmlrpclib
 import uuid
 
-import sfa.util.sfalogging
+from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Certificate
 from sfa.util.namespace import *
 
@@ -82,7 +82,7 @@ class GID(Certificate):
         
         Certificate.__init__(self, create, subject, string, filename)
         if subject:
-            sfa.util.sfalogging.logger.debug("Creating GID for subject: %s" % subject)
+            sfa_logger.debug("Creating GID for subject: %s" % subject)
         if uuid:
             self.uuid = int(uuid)
         if hrn:
@@ -204,8 +204,7 @@ class GID(Certificate):
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not self.get_hrn().startswith(self.parent.get_hrn()):
-                #print self.get_hrn(), " ", self.parent.get_hrn()
-                raise GidParentHrn("This cert %s HRN doesnt start with parent HRN %s" % (self.get_hrn(), self.parent.get_hrn()))
+                raise GidParentHrn("This cert HRN %s doesnt start with parent HRN %s" % (self.get_hrn(), self.parent.get_hrn()))
         else:
             # make sure that the trusted root's hrn is a prefix of the child's
             trusted_gid = GID(string=trusted_root.save_to_string())

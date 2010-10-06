@@ -9,6 +9,7 @@ from sfa.util.namespace import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.faults import *
+from sfa.trust.gid import create_uuid
 
 def get_version(api):
     version = {}

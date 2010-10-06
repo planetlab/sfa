@@ -12,7 +12,6 @@ import traceback
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
 
-
 # GeniLight client support is optional
 try:
     from egeni.geniLight_client import *
@@ -136,8 +135,7 @@ class Interfaces(dict):
             except:
                 message = "interface: %s\tunable to install trusted gid for %s" % \
                             (self.api.interface, new_hrn) 
-                self.api.logger.info(message)
-                traceback.print_exc()
+                self.api.logger.log_exc(message)
         
         # reload the trusted certs list
         self.api.auth.load_trusted_certs()
@@ -149,7 +147,7 @@ class Interfaces(dict):
         defined in the config file (registries.xml). Removes old records from
         the db.         
         """
-        # import SfaTable here so this module can be loaded by CompoenetAPI 
+        # import SfaTable here so this module can be loaded by ComponentAPI 
         from sfa.util.table import SfaTable
         if not gids: 
             return

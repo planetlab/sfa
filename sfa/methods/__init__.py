@@ -1,32 +1,18 @@
-## Please use make index to update this file
 all = """
-create_slice
-delete_slice
+GetCredential
+GetSelfCredential
+GetGids
 get_aggregates
-get_credential
-get_gids
 get_key
 get_registries
-get_resources
-get_self_credential
-get_slices
-get_ticket
 get_trusted_certs
-list
 List
-redeem_ticket
 RedeemTicket
-register
 Register
 register_peer_object
-remove
 Remove
 reset_slice
-resolve
 Resolve
-start_slice
-stop_slice
-update
 Update
 remove_peer_object
 GetTicket

@@ -1,8 +1,5 @@
 #!/usr/bin/python
 #
-### $Id$
-### $URL$
-#
 # SFA PLC Wrapper
 #
 # This wrapper implements the SFA Registry and Slice Interfaces on PLC.
@@ -30,18 +27,21 @@
 ##
 
 # TCP ports for the three servers
-registry_port=12345
-aggregate_port=12346
-slicemgr_port=12347
+#registry_port=12345
+#aggregate_port=12346
+#slicemgr_port=12347
+### xxx todo not in the config yet
 component_port=12346
 import os, os.path
 import sys
 from optparse import OptionParser
+import logging
+
+from sfa.util.sfalogging import sfa_logger
 from sfa.trust.trustedroot import TrustedRootList
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import Config
-from sfa.util.report import trace
 from sfa.plc.api import SfaAPI
 from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
@@ -56,7 +56,7 @@ def daemon():
     devnull = os.open(os.devnull, os.O_RDWR)
     os.dup2(devnull, 0)
     # xxx fixme - this is just to make sure that nothing gets stupidly lost - should use devnull
-    crashlog = os.open('/var/log/sfa.daemon', os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
+    crashlog = os.open('/var/log/httpd/sfa_access_log', os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
     os.dup2(crashlog, 1)
     os.dup2(crashlog, 2)
 
@@ -82,8 +82,8 @@ def init_server_key(server_key_file, server_cert_file, config, hierarchy):
         if not os.path.exists(key_file):
             # if it doesnt exist then this is probably a fresh interface
             # with no records. Generate a random keypair for now
-            trace("server's public key not found in %s" % key_file)
-            trace("generating a random server key pair")
+            sfa_logger.debug("server's public key not found in %s" % key_file)
+            sfa_logger.debug("generating a random server key pair")
             key = Keypair(create=True)
             key.save_to_file(server_key_file)
             cert = Certificate(subject=subject)
@@ -160,13 +160,6 @@ def sync_interfaces(server_key_file, server_cert_file):
     aggregates.sync_interfaces()
 
 def main():
-    # xxx get rid of globals - name consistently CamelCase or under_score
-    global AuthHierarchy
-    global TrustedRoots
-    global registry_port
-    global aggregate_port
-    global slicemgr_port
-
     # Generate command line parser
     parser = OptionParser(usage="sfa-server [options]")
     parser.add_option("-r", "--registry", dest="registry", action="store_true",
@@ -182,9 +175,10 @@ def main():
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
-
+    if options.verbose: sfa_logger.setLevel(logging.DEBUG)
 
     config = Config()
+    if config.SFA_API_DEBUG: sfa_logger.setLevel(logging.DEBUG)
     hierarchy = Hierarchy()
     server_key_file = os.path.join(hierarchy.basedir, "server.key")
     server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
@@ -197,25 +191,29 @@ def main():
     # start registry server
     if (options.registry):
         from sfa.server.registry import Registry
-        r = Registry("", registry_port, server_key_file, server_cert_file)
+        r = Registry("", config.SFA_REGISTRY_PORT, server_key_file, server_cert_file)
         r.start()
 
     # start aggregate manager
     if (options.am):
         from sfa.server.aggregate import Aggregate
-        a = Aggregate("", aggregate_port, server_key_file, server_cert_file)
+        a = Aggregate("", config.SFA_AGGREGATE_PORT, server_key_file, server_cert_file)
         a.start()
 
     # start slice manager
     if (options.sm):
         from sfa.server.slicemgr import SliceMgr
-        s = SliceMgr("", slicemgr_port, server_key_file, server_cert_file)
+        s = SliceMgr("", config.SFA_SM_PORT, server_key_file, server_cert_file)
         s.start()
 
     if (options.cm):
         from sfa.server.component import Component
-        c = Component("", component_port, server_key_file, server_cert_file)
+        c = Component("", config.component_port, server_key_file, server_cert_file)
+#        c = Component("", config.SFA_COMPONENT_PORT, server_key_file, server_cert_file)
         c.start()
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except:
+        sfa_logger.log_exc_critical("SFA server is exiting")

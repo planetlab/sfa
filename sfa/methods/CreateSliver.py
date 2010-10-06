@@ -3,7 +3,6 @@ from sfa.util.namespace import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.sfatablesRuntime import run_sfatables
-import sys
 from sfa.trust.credential import Credential
 
 class CreateSliver(Method):
@@ -48,4 +47,3 @@ class CreateSliver(Method):
         allocated = manager.create_slice(self.api, slice_xrn, creds, rspec, users)
 
         return rspec 
-    

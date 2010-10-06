@@ -1,8 +1,5 @@
 #!/usr/bin/python
 #
-### $Id$
-### $URL$
-#
 ##
 # Import PLC records into the SFA database. It is indended that this tool be
 # run once to create SFA records that reflect the current state of the
@@ -20,8 +17,8 @@
 import getopt
 import sys
 import tempfile
-import logging.handlers
 import logging
+
 from sfa.util.record import *
 from sfa.util.table import SfaTable
 from sfa.util.namespace import *
@@ -31,11 +28,9 @@ from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
 from sfa.plc.api import *
 from sfa.trust.gid import create_uuid
-from sfa.plc.sfaImport import *
-from sfa.util.report import trace, error
+from sfa.plc.sfaImport import sfaImport
 
 def process_options():
-   global hrn
 
    (options, args) = getopt.getopt(sys.argv[1:], '', [])
    for opt in options:
@@ -60,15 +55,7 @@ def save_keys(filename, keys):
     f.close()
 
 def main():
-    # setup the logger
-    LOGFILE='/var/log/sfa_import_plc.log'
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(message)s',
-                        filename=LOGFILE)
-    rotate_handler = logging.handlers.RotatingFileHandler(LOGFILE, maxBytes=1000000, backupCount=5) 
-    logger = logging.getLogger()
-    logger.addHandler(rotate_handler)
-    
+
     process_options()
     config = Config()
     if not config.SFA_REGISTRY_ENABLED:
@@ -76,11 +63,10 @@ def main():
     root_auth = config.SFA_REGISTRY_ROOT_AUTH
     interface_hrn = config.SFA_INTERFACE_HRN
     keys_filename = config.config_path + os.sep + 'person_keys.py' 
-    sfaImporter = sfaImport(logger)
+    sfaImporter = sfaImport()
+    if config.SFA_API_DEBUG: sfaImporter.logger.setLevel(logging.DEBUG)
     shell = sfaImporter.shell
     plc_auth = sfaImporter.plc_auth 
-    AuthHierarchy = sfaImporter.AuthHierarchy
-    TrustedRoots = sfaImporter.TrustedRoots
     table = SfaTable()
 
     if not table.exists():
@@ -91,9 +77,9 @@ def main():
     if not root_auth == interface_hrn:
         sfaImporter.create_top_level_auth_records(interface_hrn)
 
-    trace("Import: adding " + interface_hrn + " to trusted list", logger)
-    authority = AuthHierarchy.get_auth_info(interface_hrn)
-    TrustedRoots.add_gid(authority.get_gid_object())
+    sfaImporter.logger.info("Import: adding " + interface_hrn + " to trusted list")
+    authority = sfaImporter.AuthHierarchy.get_auth_info(interface_hrn)
+    sfaImporter.TrustedRoots.add_gid(authority.get_gid_object())
 
     if ".vini" in interface_hrn and interface_hrn.endswith('vini'):
         # create a fake internet2 site first
@@ -266,7 +252,7 @@ def main():
             sfaImporter.delete_record(record_hrn, type) 
                                    
     # save pub keys
-    trace('Import: saving current pub keys', logger)
+    sfaImporter.logger.info('Import: saving current pub keys')
     save_keys(keys_filename, person_keys)                
         
 if __name__ == "__main__":

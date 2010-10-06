@@ -10,6 +10,7 @@ from types import StringTypes, ListType
 from lxml import etree
 from StringIO import StringIO
 
+from sfa.util.sfalogging import sfa_logger
 
 class RSpec:
 
@@ -234,15 +235,14 @@ class RSpec:
             except Exception, e:
                 # logging.debug("%s: web file not found" % xsdURI)
                 # logging.debug("Using local file %s" % self.xsd")
-                print e
-                print "Can't find %s on the web. Continuing." % xsdURI
+                sfa_logger.log_exc("rspec.parseXSD: can't find %s on the web. Continuing." % xsdURI)
         if not schemaDom:
             if os.path.exists(xsdURI):
                 # logging.debug("using local copy.")
-                print "Using local %s" % xsdURI
+                sfa_logger.debug("rspec.parseXSD: Using local %s" % xsdURI)
                 schemaDom = minidom.parse(xsdURI)
             else:
-                raise Exception("Can't find xsd locally")
+                raise Exception("rspec.parseXSD: can't find xsd locally")
         self.schemaDict = self.toDict(schemaDom.childNodes[0])
 
 

@@ -2,12 +2,6 @@ import xmlrpclib
 
 from ApiExceptionCodes import *
 
-VerboseExceptions = False
-
-def EnableVerboseExceptions(x=True):
-    global VerboseExceptions
-    VerboseExceptions = x
-
 class ExceptionUnmarshaller(xmlrpclib.Unmarshaller):
     def close(self):
         try:
@@ -19,7 +13,7 @@ class ExceptionUnmarshaller(xmlrpclib.Unmarshaller):
             if "\nFAULT_TRACEBACK:" in e.faultString:
                 parts = e.faultString.split("\nFAULT_TRACEBACK:")
                 e.faultString = parts[0]
-                if VerboseExceptions:
+                if BaseClient.VerboseExceptions:
                     print "\n|Server Traceback:", "\n|".join(parts[1].split("\n"))
 
             raise e
@@ -38,9 +32,17 @@ class ExceptionReportingTransport(xmlrpclib.Transport):
         return parser, unmarshaller
 
 class BaseClient():
+    
+    VerboseExceptions = False
+
     def __init__(self, url):
         self.url = url
         self.server = xmlrpclib.ServerProxy(self.url, ExceptionReportingTransport())
 
     def noop(self, value):
         return self.server.noop(value)
+
+    @staticmethod
+    def EnableVerboseExceptions(x=True):
+        BaseClient.VerboseExceptions = x
+
