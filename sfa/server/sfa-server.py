@@ -1,8 +1,5 @@
 #!/usr/bin/python
 #
-### $Id$
-### $URL$
-#
 # SFA PLC Wrapper
 #
 # This wrapper implements the SFA Registry and Slice Interfaces on PLC.

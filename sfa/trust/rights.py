@@ -24,9 +24,11 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                    "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "deleteslice", "deletesliver", "updateslice",
                           "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "renewsliver",
                           "deleteslice", "deletesliver", "resetslice", "listslices", "listnodes", "getpolicy", "sliverstatus"],
-                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "renewsliver", "deleteslice", "deletesliver", "updateslice", "sliverstatus", "getsliceresources", "shutdown"],
+                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "renewsliver", "deleteslice", 
+                             "deletesliver", "updateslice", "sliverstatus", "getsliceresources", "shutdown"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
-                   "control": ["updateslice", "createslice", "createsliver", "renewsliver", "sliverstatus", "stopslice", "startslice", "deleteslice", "deletesliver", "resetslice", "getsliceresources", "getgids"],
+                   "control": ["updateslice", "createslice", "createsliver", "renewsliver", "sliverstatus", "stopslice", "startslice", 
+                               "deleteslice", "deletesliver", "resetslice", "getsliceresources", "getgids"],
                    "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
                    "operator": ["gettrustedcerts", "getgids"],                   
@@ -35,7 +37,7 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
 
 
 ##
-# Determine tje rights that an object should have. The rights are entirely
+# Determine the rights that an object should have. The rights are entirely
 # dependent on the type of the object. For example, users automatically
 # get "refresh", "resolve", and "info".
 #

@@ -1,7 +1,7 @@
 import unittest
 import xmlrpclib
 from sfa.trust.gid import *
-from sfa.trust.config import *
+from sfa.util.config import *
 from sfa.util.record import *
 
 class TestRecord(unittest.TestCase):
