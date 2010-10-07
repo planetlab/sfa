@@ -151,7 +151,7 @@ def create_slice(api, slice_xrn, creds, rspec, users):
     return True
 
 
-def renew_slice(api, xrn, creds, exipration_time):
+def renew_slice(api, xrn, creds, expiration_time):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
