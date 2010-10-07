@@ -25,9 +25,7 @@ class Registry(SfaServer):
     # @param cert_file certificate filename containing public key (could be a GID file)
     
     def __init__(self, ip, port, key_file, cert_file):
-        SfaServer.__init__(self, ip, port, key_file, cert_file)
-        self.server.interface = 'registry' 
-
+        SfaServer.__init__(self, ip, port, key_file, cert_file,'registry')
 
 ##
 # Registries is a dictionary of registry connections keyed on the registry

@@ -74,7 +74,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             # internal error, report as HTTP server error
             self.send_response(500)
             self.end_headers()
-            sfa_logger.log_exc("componentserver.SecureXMLRpcRequestHandler.do_POST")
+            sfa_logger().log_exc("componentserver.SecureXMLRpcRequestHandler.do_POST")
         else:
             # got a valid XML RPC response
             self.send_response(200)

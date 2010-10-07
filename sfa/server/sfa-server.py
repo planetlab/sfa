@@ -35,7 +35,6 @@ component_port=12346
 import os, os.path
 import sys
 from optparse import OptionParser
-import logging
 
 from sfa.util.sfalogging import sfa_logger
 from sfa.trust.trustedroot import TrustedRootList
@@ -82,8 +81,8 @@ def init_server_key(server_key_file, server_cert_file, config, hierarchy):
         if not os.path.exists(key_file):
             # if it doesnt exist then this is probably a fresh interface
             # with no records. Generate a random keypair for now
-            sfa_logger.debug("server's public key not found in %s" % key_file)
-            sfa_logger.debug("generating a random server key pair")
+            sfa_logger().debug("server's public key not found in %s" % key_file)
+            sfa_logger().debug("generating a random server key pair")
             key = Keypair(create=True)
             key.save_to_file(server_key_file)
             cert = Certificate(subject=subject)
@@ -170,15 +169,15 @@ def main():
          help="run aggregate manager", default=False)
     parser.add_option("-c", "--component", dest="cm", action="store_true",
          help="run component server", default=False)
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", 
-         help="verbose mode", default=False)
+    parser.add_option("-v", "--verbose", action="count", dest="verbose", default=0,
+         help="verbose mode - cumulative")
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
-    if options.verbose: sfa_logger.setLevel(logging.DEBUG)
+    sfa_logger().setLevelFromOptVerbose(options.verbose)
 
     config = Config()
-    if config.SFA_API_DEBUG: sfa_logger.setLevel(logging.DEBUG)
+    if config.SFA_API_DEBUG: sfa_logger().setLevelDebug()
     hierarchy = Hierarchy()
     server_key_file = os.path.join(hierarchy.basedir, "server.key")
     server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
@@ -216,4 +215,4 @@ if __name__ == "__main__":
     try:
         main()
     except:
-        sfa_logger.log_exc_critical("SFA server is exiting")
+        sfa_logger().log_exc_critical("SFA server is exiting")

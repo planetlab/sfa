@@ -242,7 +242,7 @@ class BaseAPI:
         except SfaFault, fault:
             result = fault 
         except Exception, fault:
-            sfa_logger.log_exc("BaseAPI.handle has caught Exception")
+            sfa_logger().log_exc("BaseAPI.handle has caught Exception")
             result = SfaAPIError(fault)
 
 

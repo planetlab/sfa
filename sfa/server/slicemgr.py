@@ -19,5 +19,4 @@ class SliceMgr(SfaServer):
     # @param cert_file certificate filename containing public key (could be a GID file)     
 
     def __init__(self, ip, port, key_file, cert_file, config = "/etc/sfa/sfa_config"):
-        SfaServer.__init__(self, ip, port, key_file, cert_file)
-        self.server.interface = 'slicemgr'      
+        SfaServer.__init__(self, ip, port, key_file, cert_file,'slicemgr')

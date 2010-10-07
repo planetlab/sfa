@@ -17,7 +17,6 @@
 import getopt
 import sys
 import tempfile
-import logging
 
 from sfa.util.record import *
 from sfa.util.table import SfaTable
@@ -64,7 +63,7 @@ def main():
     interface_hrn = config.SFA_INTERFACE_HRN
     keys_filename = config.config_path + os.sep + 'person_keys.py' 
     sfaImporter = sfaImport()
-    if config.SFA_API_DEBUG: sfaImporter.logger.setLevel(logging.DEBUG)
+    if config.SFA_API_DEBUG: sfaImporter.logger.setLevelDebug()
     shell = sfaImporter.shell
     plc_auth = sfaImporter.plc_auth 
     table = SfaTable()

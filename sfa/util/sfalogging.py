@@ -1,8 +1,14 @@
 #!/usr/bin/python
 
-import os
+import os, sys
 import traceback
 import logging, logging.handlers
+
+CRITICAL=logging.CRITICAL
+ERROR=logging.ERROR
+WARNING=logging.WARNING
+INFO=logging.INFO
+DEBUG=logging.DEBUG
 
 # a logger that can handle tracebacks 
 class _SfaLogger:
@@ -11,7 +17,7 @@ class _SfaLogger:
         if not logfile:
             loggername='console'
             handler=logging.StreamHandler()
-            handler.setFormatter(logging.Formatter("%(message)s"))
+            handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
         else:
             if not loggername:
                 loggername=os.path.basename(logfile)
@@ -27,9 +33,25 @@ class _SfaLogger:
         self.logger=logging.getLogger(loggername)
         self.logger.setLevel(level)
         self.logger.addHandler(handler)
+        self.loggername=loggername
 
     def setLevel(self,level):
         self.logger.setLevel(level)
+
+    # shorthand to avoid having to import logging all over the place
+    def setLevelDebug(self):
+        self.logger.setLevel(logging.DEBUG)
+
+    # define a verbose option with s/t like
+    # parser.add_option("-v", "--verbose", action="count", dest="verbose", default=0)
+    # and pass the coresponding options.verbose to this method to adjust level
+    def setLevelFromOptVerbose(self,verbose):
+        if verbose==0:
+            self.logger.setLevel(logging.WARNING)
+        elif verbose==1:
+            self.logger.setLevel(logging.INFO)
+        elif verbose==2:
+            self.logger.setLevel(logging.DEBUG)
 
     ####################
     def wrap(fun):
@@ -65,9 +87,30 @@ class _SfaLogger:
         self.debug("%s BEG STACK"%message+"\n"+to_log)
         self.debug("%s END STACK"%message)
 
-sfa_logger=_SfaLogger(logfile='/var/log/sfa.log')
-sfa_import_logger=_SfaLogger(logfile='/var/log/sfa_import.log')
-console_logger=_SfaLogger()
+####################
+# import-related operations go in this file
+_import_logger=_SfaLogger(logfile='/var/log/sfa_import.log')
+# servers log into /var/log/sfa.log
+_server_logger=_SfaLogger(logfile='/var/log/sfa.log')
+# clients use the console
+_console_logger=_SfaLogger()
+
+# default is to use the server-side logger
+_the_logger=_server_logger
+
+# clients would change the default by issuing one of these call
+def sfa_logger_goes_to_console():
+    current_module=sys.modules[globals()['__name__']]
+    current_module._the_logger=_console_logger
+
+# clients would change the default by issuing one of these call
+def sfa_logger_goes_to_import():
+    current_module=sys.modules[globals()['__name__']]
+    current_module._logger=_sfa_import_logger
+
+# this is how to retrieve the 'right' logger
+def sfa_logger():
+    return _the_logger
 
 ########################################
 import time
@@ -105,12 +148,16 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.debug("logger.debug again")
     
-    @profile(console_logger)
+    sfa_logger_goes_to_console()
+    my_logger=sfa_logger()
+    my_logger.info("redirected to console")
+
+    @profile(my_logger)
     def sleep(seconds = 1):
         time.sleep(seconds)
 
-    
-    console_logger.info('console.info')
+    my_logger.info('console.info')
     sleep(0.5)
-    console_logger.setLevel(logging.DEBUG)
+    my_logger.setLevel(logging.DEBUG)
     sleep(0.25)
+

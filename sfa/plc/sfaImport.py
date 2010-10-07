@@ -12,7 +12,8 @@ import getopt
 import sys
 import tempfile
 
-from sfa.util.sfalogging import sfa_import_logger
+from sfa.util.sfalogging import sfa_logger_goes_to_import,sfa_logger
+
 from sfa.util.record import *
 from sfa.util.table import SfaTable
 from sfa.util.namespace import *
@@ -50,21 +51,22 @@ def _cleanup_string(str):
 class sfaImport:
 
     def __init__(self):
-        self.logger = sfa_import_logger
-        self.AuthHierarchy = Hierarchy()
-        self.config = Config()
-        self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))
-        self.plc_auth = self.config.get_plc_auth()
-        self.root_auth = self.config.SFA_REGISTRY_ROOT_AUTH
+       sfa_logger_goes_to_import()
+       self.logger = sfa_logger()
+       self.AuthHierarchy = Hierarchy()
+       self.config = Config()
+       self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))
+       self.plc_auth = self.config.get_plc_auth()
+       self.root_auth = self.config.SFA_REGISTRY_ROOT_AUTH
         
-        # connect to planetlab
-        self.shell = None
-        if "Url" in self.plc_auth:
-            from sfa.plc.remoteshell import RemoteShell
-            self.shell = RemoteShell(self.logger)
-        else:
-            import PLC.Shell
-            self.shell = PLC.Shell.Shell(globals = globals())        
+       # connect to planetlab
+       self.shell = None
+       if "Url" in self.plc_auth:
+          from sfa.plc.remoteshell import RemoteShell
+          self.shell = RemoteShell(self.logger)
+       else:
+          import PLC.Shell
+          self.shell = PLC.Shell.Shell(globals = globals())        
 
 
     def create_top_level_auth_records(self, hrn):

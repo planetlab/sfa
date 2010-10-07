@@ -106,7 +106,7 @@ class SfaAPI(BaseAPI):
 
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
-        self.logger=sfa_logger
+        self.logger=sfa_logger()
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,

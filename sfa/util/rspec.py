@@ -235,11 +235,11 @@ class RSpec:
             except Exception, e:
                 # logging.debug("%s: web file not found" % xsdURI)
                 # logging.debug("Using local file %s" % self.xsd")
-                sfa_logger.log_exc("rspec.parseXSD: can't find %s on the web. Continuing." % xsdURI)
+                sfa_logger().log_exc("rspec.parseXSD: can't find %s on the web. Continuing." % xsdURI)
         if not schemaDom:
             if os.path.exists(xsdURI):
                 # logging.debug("using local copy.")
-                sfa_logger.debug("rspec.parseXSD: Using local %s" % xsdURI)
+                sfa_logger().debug("rspec.parseXSD: Using local %s" % xsdURI)
                 schemaDom = minidom.parse(xsdURI)
             else:
                 raise Exception("rspec.parseXSD: can't find xsd locally")

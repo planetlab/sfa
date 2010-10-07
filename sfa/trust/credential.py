@@ -660,7 +660,7 @@ class Credential(object):
                 trusted_cert_objects.append(GID(filename=f))
                 ok_trusted_certs.append(f)
             except Exception, exc:
-                sfa_logger.error("Failed to load trusted cert from %s: %r", f, exc)
+                sfa_logger().error("Failed to load trusted cert from %s: %r", f, exc)
         trusted_certs = ok_trusted_certs
 
         # Use legacy verification if this is a legacy credential
@@ -743,7 +743,7 @@ class Credential(object):
         # Maybe should be (hrn, type) = urn_to_hrn(root_cred_signer.get_urn())
         root_cred_signer_type = root_cred_signer.get_type()
         if (root_cred_signer_type == 'authority'):
-            #sfa_logger.debug('Cred signer is an authority')
+            #sfa_logger().debug('Cred signer is an authority')
             # signer is an authority, see if target is in authority's domain
             hrn = root_cred_signer.get_hrn()
             if root_target_gid.get_hrn().startswith(hrn):

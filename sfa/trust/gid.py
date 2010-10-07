@@ -82,7 +82,7 @@ class GID(Certificate):
         
         Certificate.__init__(self, create, subject, string, filename)
         if subject:
-            sfa_logger.debug("Creating GID for subject: %s" % subject)
+            sfa_logger().debug("Creating GID for subject: %s" % subject)
         if uuid:
             self.uuid = int(uuid)
         if hrn:

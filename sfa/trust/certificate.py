@@ -79,7 +79,7 @@ def convert_public_key(key):
     try:
         k.load_pubkey_from_file(ssl_fn)
     except:
-        sfa_logger.log_exc("convert_public_key caught exception")
+        sfa_logger().log_exc("convert_public_key caught exception")
         k = None
 
     # remove the temporary files
@@ -496,6 +496,7 @@ class Certificate:
     # Sign the certificate using the issuer private key and issuer subject previous set with set_issuer().
 
     def sign(self):
+        sfa_logger().debug('certificate.sign')
         assert self.cert != None
         assert self.issuerSubject != None
         assert self.issuerKey != None
@@ -535,6 +536,7 @@ class Certificate:
     # @param cert certificate object
 
     def is_signed_by_cert(self, cert):
+        print 'is_signed_by_cert'
         k = cert.get_pubkey()
         result = self.verify(k)
         return result
@@ -580,29 +582,33 @@ class Certificate:
 
         # verify expiration time
         if self.cert.has_expired():
+            sfa_logger().debug("verify_chain: our certificate has expired")
             raise CertExpired(self.get_subject(), "client cert")   
         
         # if this cert is signed by a trusted_cert, then we are set
         for trusted_cert in trusted_certs:
             if self.is_signed_by_cert(trusted_cert):
-                sfa_logger.debug("Cert %s signed by trusted cert %s", self.get_subject(), trusted_cert.get_subject())
+                sfa_logger().debug("verify_chain: cert %s signed by trusted cert %s"%(
+                        self.get_subject(), trusted_cert.get_subject()))
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.cert.has_expired():
                     return trusted_cert
                 else:
-                    sfa_logger.debug("Trusted cert %s is expired", trusted_cert.get_subject())       
+                    sfa_logger().debug("verify_chain: cert %s is signed by trusted_cert %s, but this is expired..."%(
+                            self.get_subject(),trusted_cert.get_subject()))
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
-            sfa_logger.debug("%r has no parent"%self.get_subject())
+            sfa_logger().debug("verify_chain: %r has no parent"%self.get_subject())
             raise CertMissingParent(self.get_subject())
 
         # if it wasn't signed by the parent...
         if not self.is_signed_by_cert(self.parent):
-            sfa_logger.debug("%r is not signed by parent"%self.get_subject())
+            sfa_logger().debug("verify_chain: %r is not signed by parent"%self.get_subject())
             return CertNotSignedByParent(self.get_subject())
 
         # if the parent isn't verified...
+        sfa_logger().debug("verify_chain: with subject=%r, referring to parent, subj=%r",self.get_subject(),self.parent.get_subject())
         self.parent.verify_chain(trusted_certs)
 
         return

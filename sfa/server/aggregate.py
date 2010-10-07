@@ -2,8 +2,8 @@
 ### $URL$
 
 
-from sfa.util.server import SfaServer
 from sfa.util.faults import *
+from sfa.util.server import SfaServer
 from sfa.util.namespace import hrn_to_urn
 from sfa.server.interface import Interfaces
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
@@ -20,8 +20,7 @@ class Aggregate(SfaServer):
     # @param key_file private key filename of registry
     # @param cert_file certificate filename containing public key (could be a GID file)     
     def __init__(self, ip, port, key_file, cert_file):
-        SfaServer.__init__(self, ip, port, key_file, cert_file)
-        self.server.interface = 'aggregate'
+        SfaServer.__init__(self, ip, port, key_file, cert_file,'aggregate')
 
 ##
 # Aggregates is a dictionary of aggregate connections keyed on the aggregate hrn

@@ -92,7 +92,7 @@ class Method (object):
 
             if self.api.config.SFA_API_DEBUG or hasattr(self, 'message'):
                 msg=getattr(self,'message',"method %s completed in %02f s"%(methodname,runtime))
-                sfa_logger.info(msg)
+                sfa_logger().debug(msg)
 
             return result
 
@@ -103,7 +103,7 @@ class Method (object):
             # Prepend caller and method name to expected faults
             fault.faultString = caller + ": " +  self.name + ": " + fault.faultString
             runtime = time.time() - start
-            sfa_logger.log_exc("Method %s raised an exception"%self.name) 
+            sfa_logger().log_exc("Method %s raised an exception"%self.name) 
             raise fault
 
 

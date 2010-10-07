@@ -15,8 +15,8 @@ from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
 import zlib
-import logging
 
+from sfa.util.sfalogging import sfa_logger,sfa_logger_goes_to_console
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
@@ -25,7 +25,6 @@ from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
-from sfa.util.sfalogging import console_logger
 
 
 AGGREGATE_PORT=12346
@@ -128,7 +127,8 @@ class Sfi:
         self.authority = None
         self.options = None
         self.hashrequest = False
-        self.logger=console_logger
+        sfa_logger_goes_to_console()
+        self.logger=sfa_logger()
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
         cmdargs = {"list": "name",
@@ -231,14 +231,12 @@ class Sfi:
                          help="user name", metavar="HRN", default=None)
         parser.add_option("-a", "--auth", dest="auth",
                          help="authority name", metavar="HRN", default=None)
-        parser.add_option("-v", "--verbose",
-                         action="store_true", dest="verbose", default=False,
-                         help="verbose mode")
+        parser.add_option("-v", "--verbose", action="count", dest="verbose", default=0,
+                         help="verbose mode - cumulative")
         parser.add_option("-D", "--debug",
                           action="store_true", dest="debug", default=False,
                           help="Debug (xml-rpc) protocol messages")
-        parser.add_option("-p", "--protocol",
-                         dest="protocol", default="xmlrpc",
+        parser.add_option("-p", "--protocol", dest="protocol", default="xmlrpc",
                          help="RPC protocol (xmlrpc or soap)")
         parser.add_option("-k", "--hashrequest",
                          action="store_true", dest="hashrequest", default=False,
@@ -258,7 +256,7 @@ class Sfi:
        except:
           self.logger.critical("Failed to read configuration file %s"%config_file)
           self.logger.info("Make sure to remove the export clauses and to add quotes")
-          if not self.options.verbose:
+          if self.options.verbose==0:
               self.logger.info("Re-run with -v for more details")
           else:
               self.logger.log_exc("Could not read config file %s"%config_file)
@@ -313,8 +311,6 @@ class Sfi:
        self.key_file = key_file
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
-       # instruct xmlrpcprotocol to redirect logs to console_logger
-       self.options.client=True
        # Establish connection to server(s)
        self.logger.info("Contacting Registry at: %s"%reg_url)
        self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options)  
@@ -931,7 +927,7 @@ class Sfi:
         (options, args) = parser.parse_args()
         self.options = options
 
-        if self.options.verbose: self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevelFromOptVerbose(self.options.verbose)
         if options.hashrequest:
             self.hashrequest = True
  
@@ -963,4 +959,4 @@ class Sfi:
         return
     
 if __name__ == "__main__":
-   Sfi().main()
+    Sfi().main()
