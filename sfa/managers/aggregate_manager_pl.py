@@ -90,10 +90,41 @@ def get_version():
     return version
 
 def slice_status(api, slice_xrn, creds):
+    hrn, type = urn_to_hrn(slice_xrn)
+    # find out where this slice is currently running
+    api.logger.info(hrn)
+    slicename = hrn_to_pl_slicename(hrn)
+    
+    slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids','person_ids','name','expires'])
+    if len(slices) == 0:        
+        raise Exception("Slice %s not found (used %s as slicename internally)" % slice_xrn, slicename)
+    slice = slices[0]
+    
+    nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'],
+                                    ['hostname', 'boot_state', 'last_contact'])
+    api.logger.info(slice)
+    api.logger.info(nodes)
+    
     result = {}
     result['geni_urn'] = slice_xrn
     result['geni_status'] = 'unknown'
-    result['geni_resources'] = {}
+    result['pl_login'] = slice['name']
+    result['pl_expires'] = slice['expires']
+    
+    resources = []
+    
+    for node in nodes:
+        res = {}
+        res['pl_hostname'] = node['hostname']
+        res['pl_boot_state'] = node['boot_state']
+        res['pl_last_contact'] = node['last_contact']
+        res['geni_urn'] = ''
+        res['geni_status'] = 'unknown'
+        res['geni_error'] = ''
+
+        resources.append(res)
+        
+    result['geni_resources'] = resources
     return result
 
 def create_slice(api, slice_xrn, creds, rspec, users):
