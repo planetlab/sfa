@@ -32,7 +32,7 @@ class TestCred(unittest.TestCase):
       cred.set_gid_object(gidObject)
       self.assertEqual(cred.get_gid_object().get_subject(), gidObject.get_subject())
 
-      cred.set_lifetime(lifeTime)
+      cred.set_expiration(datetime.datetime.utcnow() + datetime.timedelta(seconds=lifeTime))
       
       cred.set_privileges(rights)
       self.assertEqual(cred.get_privileges().save_to_string(), rights)
@@ -81,7 +81,7 @@ class TestCred(unittest.TestCase):
       cred = Credential()
       cred.set_gid_caller(gidCaller)
       cred.set_gid_object(gidObject)
-      cred.set_lifetime(3600)
+      cred.set_expiration(datetime.datetime.utcnow() + datetime.timedelta(seconds=3600))
       cred.set_privileges("embed:1, bind:1")
       cred.encode()
 
@@ -103,7 +103,7 @@ class TestCred(unittest.TestCase):
       delegated.set_gid_caller(gidDelegatee)
       delegated.set_gid_object(gidObject)      
       delegated.set_parent(cred)
-      delegated.set_lifetime(600)
+      delegated.set_expiration(datetime.datetime.utcnow() + datetime.timedelta(seconds=600))
       delegated.set_privileges("embed:1, bind:1")
       gidCaller.save_to_file("/tmp/caller_gid")
       ckeys.save_to_file("/tmp/caller_pkey")      
@@ -120,7 +120,7 @@ class TestCred(unittest.TestCase):
       backup = Credential(string=delegated.get_xml())
 
       # Test that verify catches an incorrect lifetime      
-      delegated.set_lifetime(6000)
+      delegated.set_expiration(datetime.datetime.utcnow() + datetime.timedelta(seconds=6000))
       delegated.encode()
       delegated.sign()
       try:

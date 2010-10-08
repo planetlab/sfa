@@ -404,8 +404,8 @@ class Sfi:
         if (os.path.isfile(file)):
             credential = Credential(filename=file)
             # make sure it isnt expired 
-            if not credential.get_lifetime or \
-               datetime.datetime.today() < credential.get_lifetime():
+            if not credential.get_expiration or \
+               datetime.datetime.today() < credential.get_expiration():
                 return credential
         return None 
  
