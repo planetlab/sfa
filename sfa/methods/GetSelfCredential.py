@@ -67,6 +67,8 @@ class GetSelfCredential(Method):
         # authenticate the certificate against the gid in the db
         certificate = Certificate(string=cert)
         if not certificate.is_pubkey(gid.get_pubkey()):
+            self.api.logger.info("ConnectionKeyGIDMismatch, CERT: %s"%certificate.get_pubkey().get_pubkey_string())
+            self.api.logger.info("ConnectionKeyGIDMismatch, GID: %s"%gid.get_pubkey().get_pubkey_string())
             raise ConnectionKeyGIDMismatch(gid.get_subject())
         
         return manager.get_credential(self.api, xrn, type, is_self=True)

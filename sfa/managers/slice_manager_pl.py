@@ -1,14 +1,15 @@
 ### $Id: slices.py 15842 2009-11-22 09:56:13Z anil $
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/slices.py $
 
-import datetime
-import time
-import traceback
 import sys
-from copy import deepcopy
-from lxml import etree
+import time,datetime
 from StringIO import StringIO
 from types import StringTypes
+from copy import deepcopy
+from copy import copy
+from lxml import etree
+
+from sfa.util.sfalogging import sfa_logger
 from sfa.util.rspecHelper import merge_rspecs
 from sfa.util.namespace import *
 from sfa.util.rspec import *
@@ -22,7 +23,6 @@ from sfa.trust.credential import Credential
 from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
 import sfa.plc.peers as peers
-from copy import copy
 
 def get_version():
     version = {}
@@ -365,6 +365,7 @@ def get_rspec(api, creds, options):
                 for request in root.iterfind("./request"):
                     rspec.append(deepcopy(request))
     
+    sfa_logger().debug('get_rspec: rspec=%r'%rspec)
     rspec =  etree.tostring(rspec, xml_declaration=True, pretty_print=True)
     # cache the result
     if api.cache and not xrn:

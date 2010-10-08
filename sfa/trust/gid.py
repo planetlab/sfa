@@ -178,14 +178,19 @@ class GID(Certificate):
     # @param indent specifies a number of spaces to indent the output
     # @param dump_parents If true, also dump the parents of the GID
 
-    def dump(self, indent=0, dump_parents=False):
-        print " "*indent, " hrn:", self.get_hrn()
-        print " "*indent, " urn:", self.get_urn()
-        print " "*indent, "uuid:", self.get_uuid()
+    def dump(self, *args, **kwargs):
+        print self.dump_string(*args,**kwargs)
+
+    def dump_string(self, indent=0, dump_parents=False):
+        result=""
+        result += " "*indent + "hrn:" + self.get_hrn() +"\n"
+        result += " "*indent + "urn:" + self.get_urn() +"\n"
+        result += " "*indent + "uuid:" + str(self.get_uuid()) + "\n"
 
         if self.parent and dump_parents:
-            print " "*indent, "parent:"
-            self.parent.dump(indent+4, dump_parents)
+            result += " "*indent + "parent:\n"
+            result += self.parent.dump_string(indent+4, dump_parents)
+        return result
 
     ##
     # Verify the chain of authenticity of the GID. First perform the checks

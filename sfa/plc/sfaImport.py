@@ -80,7 +80,7 @@ class sfaImport:
 
         # create the authority if it doesnt already exist 
         if not self.AuthHierarchy.auth_exists(urn):
-            self.logger.info("Import: creating top level authorites")
+            self.logger.info("Import: creating top level authorities")
             self.AuthHierarchy.create_auth(urn)
         
         # create the db record if it doesnt already exist    
@@ -102,7 +102,7 @@ class sfaImport:
         if len(hrn) > 64:
             hrn = hrn[:64]
 
-        self.logger.info("Import: importing person " + hrn)
+        self.logger.info("Import: person " + hrn)
         key_ids = []
         if 'key_ids' in person and person['key_ids']:
             key_ids = person["key_ids"]
@@ -115,7 +115,7 @@ class sfaImport:
                 pkey = Keypair(create=True)
         else:
             # the user has no keys
-            self.logger.info("   person " + hrn + " does not have a PL public key")
+            self.logger.warning("Import: person %s does not have a PL public key"%hrn)
             # if a key is unavailable, then we still need to put something in the
             # user's GID. So make one up.
             pkey = Keypair(create=True)
@@ -140,11 +140,11 @@ class sfaImport:
         slicename = _cleanup_string(slicename)
 
         if not slicename:
-            self.logger.error("Import_Slice: failed to parse slice name " + slice['name'])
+            self.logger.error("Import: failed to parse slice name " + slice['name'])
             return
 
         hrn = parent_hrn + "." + slicename
-        self.logger.info("Import: importing slice " + hrn)
+        self.logger.info("Import: slice " + hrn)
 
         pkey = Keypair(create=True)
         urn = hrn_to_urn(hrn, 'slice')
@@ -166,11 +166,11 @@ class sfaImport:
         nodename = _cleanup_string(nodename)
         
         if not nodename:
-            self.logger.error("Import_node: failed to parse node name " + node['hostname'])
+            self.logger.error("Import: failed to parse node name " + node['hostname'])
             return
 
         hrn = parent_hrn + "." + nodename
-        self.logger.info("Import: importing node " + hrn)
+        self.logger.info("Import: node %s" % hrn)
         # ASN.1 will have problems with hrn's longer than 64 characters
         if len(hrn) > 64:
             hrn = hrn[:64]
@@ -210,7 +210,7 @@ class sfaImport:
                 hrn = ".".join([parent_hrn, "internet2", sitename])
 
         urn = hrn_to_urn(hrn, 'authority')
-        self.logger.info("Import: importing site " + hrn)
+        self.logger.info("Import: site " + hrn)
 
         # create the authority
         if not self.AuthHierarchy.auth_exists(urn):
@@ -238,5 +238,5 @@ class sfaImport:
         table = SfaTable()
         record_list = table.find({'type': type, 'hrn': hrn})
         for record in record_list:
-            self.logger.info("Import: Removing record %s %s" % (type, hrn))
+            self.logger.info("Import: removing record %s %s" % (type, hrn))
             table.remove(record)        

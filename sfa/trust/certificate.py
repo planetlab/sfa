@@ -459,9 +459,11 @@ class Certificate:
     # Get an X509 extension from the certificate
 
     def get_extension(self, name):
+
         # pyOpenSSL does not have a way to get extensions
         m2x509 = X509.load_cert_string(self.save_to_string())
         value = m2x509.get_ext(name).get_value()
+        
         return value
 
     ##
@@ -582,33 +584,69 @@ class Certificate:
 
         # verify expiration time
         if self.cert.has_expired():
-            sfa_logger().debug("verify_chain: our certificate has expired")
+            sfa_logger().debug("verify_chain: NO our certificate has expired")
             raise CertExpired(self.get_subject(), "client cert")   
         
         # if this cert is signed by a trusted_cert, then we are set
         for trusted_cert in trusted_certs:
             if self.is_signed_by_cert(trusted_cert):
-                sfa_logger().debug("verify_chain: cert %s signed by trusted cert %s"%(
-                        self.get_subject(), trusted_cert.get_subject()))
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.cert.has_expired():
+                    sfa_logger().debug("verify_chain: YES cert %s signed by trusted cert %s"%(
+                            self.get_subject(), trusted_cert.get_subject()))
                     return trusted_cert
                 else:
-                    sfa_logger().debug("verify_chain: cert %s is signed by trusted_cert %s, but this is expired..."%(
+                    sfa_logger().debug("verify_chain: NO cert %s is signed by trusted_cert %s, but this is expired..."%(
                             self.get_subject(),trusted_cert.get_subject()))
+                    raise CertExpired(self.get_subject(),"trusted_cert %s"%trusted_cert.get_subject())
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
-            sfa_logger().debug("verify_chain: %r has no parent"%self.get_subject())
+            sfa_logger().debug("verify_chain: NO %s has no parent and is not in trusted roots"%self.get_subject())
             raise CertMissingParent(self.get_subject())
 
         # if it wasn't signed by the parent...
         if not self.is_signed_by_cert(self.parent):
-            sfa_logger().debug("verify_chain: %r is not signed by parent"%self.get_subject())
+            sfa_logger().debug("verify_chain: NO %s is not signed by parent"%self.get_subject())
             return CertNotSignedByParent(self.get_subject())
 
         # if the parent isn't verified...
-        sfa_logger().debug("verify_chain: with subject=%r, referring to parent, subj=%r",self.get_subject(),self.parent.get_subject())
+        sfa_logger().debug("verify_chain: .. %s, -> verifying parent %s",self.get_subject(),self.parent.get_subject())
         self.parent.verify_chain(trusted_certs)
 
         return
+
+    ### more introspection
+    def get_extensions(self):
+        # pyOpenSSL does not have a way to get extensions
+        triples=[]
+        m2x509 = X509.load_cert_string(self.save_to_string())
+        nb_extensions=m2x509.get_ext_count()
+        sfa_logger().debug("X509 had %d extensions"%nb_extensions)
+        for i in range(nb_extensions):
+            ext=m2x509.get_ext_at(i)
+            triples.append( (ext.get_name(), ext.get_value(), ext.get_critical(),) )
+        return triples
+
+    def get_data_names(self):
+        return self.data.keys()
+
+    def get_all_datas (self):
+        triples=self.get_extensions()
+        for name in self.get_data_names(): 
+            triples.append( (name,self.get_data(name),'data',) )
+        return triples
+
+    def dump (self, *args, **kwargs):
+        print self.dump_string(*args, **kwargs)
+
+    def dump_string (self):
+        result = ""
+        result += "Certificate for %s\n"%self.get_subject()
+        result += "Issued by %s\n"%self.get_issuer()
+        for (n,v,c) in self.get_all_datas():
+            if c=='data':
+                result += "   data: %s=%s\n"%(n,v)
+            else:
+                result += "    ext: %s=%s (%s)\n"%(n,v,c)
+        return result

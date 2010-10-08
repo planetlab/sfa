@@ -111,7 +111,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         except Exception, fault:
             # This should only happen if the module is buggy
             # internal error, report as HTTP server error
-            sfa_error.log_exc("server.do_POST")
+            sfa_logger().log_exc("server.do_POST")
             response = self.api.prepare_response(fault)
             #self.send_response(500)
             #self.end_headers()

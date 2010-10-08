@@ -1,6 +1,4 @@
 #! /usr/bin/env python
-# $Id$
-# $URL$
 from __future__ import with_statement
 
 import sys
@@ -14,21 +12,27 @@ from sfa.trust.certificate import Certificate
 from sfa.trust.credential import Credential
 from sfa.util.record import SfaRecord
 from sfa.util.rspec import RSpec
+from sfa.util.sfalogging import sfa_logger, sfa_logger_goes_to_console
 
 def determine_sfa_filekind(fn):
-    cert = Certificate(filename = fn)
+    try:
+        cert = Certificate(filename = fn)
+        return 'certificate'
+    except:
+        pass
 
-    data = cert.get_data()
-    if data:
-        dict = xmlrpclib.loads(data)[0][0]
-    else:
-        dict = {}
+    try:
+        cred=Credential(filename=fn)
+        return 'credential'
+    except:
+        pass
 
-    if "gidCaller" in dict:
-        return "credential"
-
-    if "uuid" in dict:
-        return "gid"
+    # to be completed
+#    if "gidCaller" in dict:
+#        return "credential"
+#
+#    if "uuid" in dict:
+#        return "gid"
 
     return "unknown"
 
@@ -54,41 +58,48 @@ def extract_gids(cred, extract_parents):
    if gidObject and ((gidCaller == None) or (gidCaller.get_hrn() != gidObject.get_hrn())):
        save_gid(gidObject)
 
-   if extract_parents:
-       parent = cred.get_parent()
-       if parent:
-           extract_gids(parent, extract_parents)
+   # no such method Credential.get_parent
+#   if extract_parents:
+#       parent = cred.get_parent()
+#       if parent:
+#           extract_gids(parent, extract_parents)
 
-def create_parser():
-   # Generate command line parser
-   parser = OptionParser(usage="%prog [options] filename")
+def handle_input (filename, options):
+    
+    kind = determine_sfa_filekind(filename)
 
-   parser.add_option("-e", "--extractgids", action="store_true", dest="extract_gids", default=False, help="Extract GIDs from credentials")
-   parser.add_option("-p", "--dumpparents", action="store_true", dest="dump_parents", default=False, help="Show parents")
-
-   return parser
+    if kind=="certificate":
+        cert=Certificate (filename=filename)
+#        cert.dump(dump_parents=options.dump_parents)
+        cert.dump()
+    elif kind=="credential":
+        cred = Credential(filename = filename)
+        cred.dump(dump_parents = options.dump_parents)
+        if options.extract_gids:
+            extract_gids(cred, extract_parents = options.dump_parents)
+    elif kind=="gid":
+        gid = Gid(filename = filename)
+        gid.dump(dump_parents = options.dump_parents)
+    else:
+        print "%s: unknown filekind '%s'"% (filename,kind)
 
 def main():
-   parser = create_parser()
-   (options, args) = parser.parse_args()
+    sfa_logger_goes_to_console()
+    usage = """%prog file1 [ .. filen]
+display info on input files"""
+    parser = OptionParser(usage=usage)
 
-   if len(args) <= 0:
-        print "No filename given. Use -h for help."
-        return -1
+    parser.add_option("-e", "--extractgids", action="store_true", dest="extract_gids", default=False, help="Extract GIDs from credentials")
+    parser.add_option("-p", "--dumpparents", action="store_true", dest="dump_parents", default=False, help="Show parents")
+    parser.add_option("-v", "--verbose", action='count', dest='verbose', default=0)
+    (options, args) = parser.parse_args()
 
-   filename = args[0]
-   kind = determine_sfa_filekind(filename)
-
-   if kind=="credential":
-       cred = Credential(filename = filename)
-       cred.dump(dump_parents = options.dump_parents)
-       if options.extract_gids:
-           extract_gids(cred, extract_parents = options.dump_parents)
-   elif kind=="gid":
-       gid = Gid(filename = filename)
-       gid.dump(dump_parents = options.dump_parents)
-   else:
-       print "unknown filekind", kind
+    sfa_logger().setLevelFromOptVerbose(options.verbose)
+    if len(args) <= 0:
+        parser.print_help()
+        sys.exit(1)
+    for f in args: 
+        handle_input(f,options)
 
 if __name__=="__main__":
    main()

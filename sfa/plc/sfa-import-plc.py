@@ -137,7 +137,7 @@ def main():
     # start importing 
     for site in sites:
         site_hrn = interface_hrn + "." + site['login_base']
-        print "Importing site: %s" % site_hrn
+        sfa_logger().info("Importing site: %s" % site_hrn)
 
         # import if hrn is not in list of existing hrns or if the hrn exists
         # but its not a site record

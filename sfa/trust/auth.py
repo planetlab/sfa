@@ -1,10 +1,7 @@
 #
 # SfaAPI authentication 
 #
-### $Id$
-### $URL$
-#
-
+import sys
 
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
@@ -14,7 +11,8 @@ from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
 from sfa.util.namespace import *
 from sfa.util.sfaticket import *
-import sys
+
+from sfa.util.sfalogging import sfa_logger
 
 class Auth:
     """
@@ -38,11 +36,14 @@ class Auth:
         valid = []
         if not isinstance(creds, list):
             creds = [creds]
+        sfa_logger().debug("Auth.checkCredentials with %d creds"%len(creds))
         for cred in creds:
             try:
                 self.check(cred, operation, hrn)
                 valid.append(cred)
             except:
+                cred_obj=Credential(string=cred)
+                sfa_logger().debug("failed to validate credential - dump="+cred_obj.dump_string(dump_parents=True))
                 error = sys.exc_info()[:2]
                 continue
             
@@ -57,7 +58,7 @@ class Auth:
         Check the credential against the peer cert (callerGID included 
         in the credential matches the caller that is connected to the 
         HTTPS connection, check if the credential was signed by a 
-        trusted cert and check if the credential is allowd to perform 
+        trusted cert and check if the credential is allowed to perform 
         the specified operation.    
         """
         self.client_cred = Credential(string = cred)

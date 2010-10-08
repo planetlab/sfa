@@ -206,8 +206,8 @@ class Hierarchy:
 
     def get_auth_info(self, xrn):
         hrn, type = urn_to_hrn(xrn)
-        sfa_logger().debug("Hierarchy: xrn=%s, getting authority for hrn=%s"%(xrn,hrn))
         if not self.auth_exists(hrn):
+            sfa_logger().warning("Hierarchy: mising authority - xrn=%s, hrn=%s"%(xrn,hrn))
             raise MissingAuthority(hrn)
 
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \

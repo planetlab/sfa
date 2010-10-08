@@ -940,10 +940,7 @@ class Sfi:
 
         self.set_servers()
     
-        self.logger.info("Command %s" % command)
-        self.logger.info("dir %s, user %s, auth %s, reg %s, sm %s" % (
-                self. options.sfi_dir, self.options.user,self.options.auth,
-                self.options.registry, self.options.sm))
+        self.logger.info("Command=%s" % command)
         if command in ("resources"):
             self.logger.debug("resources cmd_opts %s" % cmd_opts.format)
         elif command in ("list", "show", "remove"):
