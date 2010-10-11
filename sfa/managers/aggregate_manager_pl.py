@@ -189,7 +189,7 @@ def renew_slice(api, xrn, creds, expiration_time):
     if not slices:
         raise RecordNotFound(hrn)
     slice = slices[0]
-    slice['expires'] = expiration_time
+    slice['expires'] = int(time.mktime(expiration_time.timetuple()))
     api.plshell.UpdateSlice(api.plauth, slice['slice_id'], slice)
     return 1         
 

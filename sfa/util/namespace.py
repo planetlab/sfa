@@ -94,7 +94,7 @@ def urn_to_hrn(urn):
          
     # Remove the authority name (e.g. '.sa')
     if type == 'authority':
-        urn_parts = hrn_parts[:-1]
+        urn_parts = urn_parts[:-1]
 
     # convert hrn_parts (list) into hrn (str) by doing the following
     # 1. remove blank elements
