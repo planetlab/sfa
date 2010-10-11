@@ -21,6 +21,7 @@ import sfa.plc.peers as peers
 from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
+from dateutil.parser import parse
 
 
 def __get_registry_objects(slice_xrn, creds, users):
@@ -189,7 +190,8 @@ def renew_slice(api, xrn, creds, expiration_time):
     if not slices:
         raise RecordNotFound(hrn)
     slice = slices[0]
-    slice['expires'] = int(time.mktime(expiration_time.timetuple()))
+    requested_time = parse(expiration_time)
+    slice['expires'] = int(time.mktime(requested_time.timetuple()))
     api.plshell.UpdateSlice(api.plauth, slice['slice_id'], slice)
     return 1         
 
