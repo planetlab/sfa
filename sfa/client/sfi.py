@@ -223,7 +223,7 @@ class Sfi:
                          help="root registry", metavar="URL", default=None)
         parser.add_option("-s", "--slicemgr", dest="sm",
                          help="slice manager", metavar="URL", default=None)
-        default_sfi_dir = os.path.expanduser("~/.sfi")
+        default_sfi_dir = os.path.expanduser("~/.sfi/")
         parser.add_option("-d", "--dir", dest="sfi_dir",
                          help="config & working directory - default is " + default_sfi_dir,
                          metavar="PATH", default=default_sfi_dir)
