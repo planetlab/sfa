@@ -18,6 +18,7 @@ import zlib
 import logging
 
 from sfa.trust.certificate import Keypair, Certificate
+from sfa.trust.gid import GID
 from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import SfaRecord, UserRecord, SliceRecord, NodeRecord, AuthorityRecord
@@ -26,7 +27,6 @@ from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.sfalogging import console_logger
-
 
 AGGREGATE_PORT=12346
 CM_PORT=12346
