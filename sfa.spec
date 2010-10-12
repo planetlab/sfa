@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 1.0
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -175,6 +175,19 @@ fi
 
 
 %changelog
+* Mon Oct 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-2
+- deprecated old methods (e.g. List/list, and GetCredential/get_credential)
+- NOTE:  get_(self_)credential both have type and hrn swapped when moving to Get(Self)Credential
+- hrn-urn translations tweaked
+- fixed 'service sfa status'
+- sfa-nuke-plc has a -f/--file-system option to clean up /var/lib/authorities (exp.)
+- started to repair sfadump - although not usable yet
+- trust objects now have dump_string method that dump() actually prints
+- unit tests under review
+- logging cleanup ongoing (always safe to use sfalogging.sfa_logger())
+- binaries now support -v or -vv to increase loglevel
+- trashed obsolete sfa.util.client
+
 * Mon Oct 04 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-1
 - various bugfixes and cleanup, improved/harmonized logging
 
@@ -210,6 +223,19 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Mon Oct 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-2
+- deprecated old methods (e.g. List/list, and GetCredential/get_credential)
+- NOTE:  get_(self_)credential both have type and hrn swapped when moving to Get(Self)Credential
+- hrn-urn translations tweaked
+- fixed 'service sfa status'
+- sfa-nuke-plc has a -f/--file-system option to clean up /var/lib/authorities (exp.)
+- started to repair sfadump - although not usable yet
+- trust objects now have dump_string method that dump() actually prints
+- unit tests under review
+- logging cleanup ongoing (always safe to use sfalogging.sfa_logger())
+- binaries now support -v or -vv to increase loglevel
+- trashed obsolete sfa.util.client
+
 * Mon Oct 04 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-1
 - various bugfixes and cleanup, improved/harmonized logging
 
