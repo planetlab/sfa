@@ -35,10 +35,10 @@ def slice_status(api, slice_xrn, creds ):
     # find out where this slice is currently running
     api.logger.info(hrn)
     slicename = hrn_to_pl_slicename(hrn)
-    
+    api.logger.info("Checking status for %s" % slicename)
     slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids','person_ids','name','expires'])
     if len(slices) == 0:        
-        raise Exception("Slice %s not found (used %s as slicename internally)" % slice_xrn, slicename)
+        raise Exception("Slice %s not found (used %s as slicename internally)" % (slice_xrn, slicename))
     slice = slices[0]
     
     nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'],
