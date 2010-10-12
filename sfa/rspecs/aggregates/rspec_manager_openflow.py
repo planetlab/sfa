@@ -1,9 +1,3 @@
-from sfa.util.faults import *
-from sfa.util.namespace import *
-from sfa.util.rspec import RSpec
-from sfa.server.registry import Registries
-from sfa.util.config import Config
-from sfa.plc.nodes import *
 import sys
 
 #The following is not essential
@@ -13,6 +7,12 @@ import sys
 
 import socket
 import struct
+
+from sfa.util.faults import *
+from sfa.util.rspec import RSpec
+from sfa.server.registry import Registries
+from sfa.util.config import Config
+from sfa.plc.nodes import *
 
 # Message IDs for all the SFA light calls
 # This will be used by the aggrMgr controller

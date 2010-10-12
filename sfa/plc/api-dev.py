@@ -16,7 +16,7 @@ from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
 from sfa.trust.rights import *
-from sfa.trust.credential import *
+from sfa.trust.credential import Credential
 from sfa.trust.certificate import *
 from sfa.util.namespace import *
 from sfa.util.api import *

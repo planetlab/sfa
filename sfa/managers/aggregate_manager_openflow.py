@@ -1,18 +1,19 @@
-from sfa.util.faults import *
-from sfa.util.namespace import *
-from sfa.util.rspec import RSpec
-from sfa.server.registry import Registries
-from sfa.util.config import Config
-from sfa.plc.nodes import *
 import sys
+
+import socket
+import struct
 
 #The following is not essential
 #from soaplib.wsgi_soap import SimpleWSGISoapApp
 #from soaplib.serializers.primitive import *
 #from soaplib.serializers.clazz import *
 
-import socket
-import struct
+from sfa.util.faults import *
+from sfa.util.namespace import urn_to_hrn
+from sfa.util.rspec import RSpec
+from sfa.server.registry import Registries
+from sfa.util.config import Config
+from sfa.plc.nodes import *
 
 # Message IDs for all the SFA light calls
 # This will be used by the aggrMgr controller

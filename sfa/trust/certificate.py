@@ -34,9 +34,6 @@
 # This module exports two classes: Keypair and Certificate.
 ##
 #
-### $Id$
-### $URL$
-#
 
 import os
 import tempfile
@@ -125,6 +122,7 @@ class Keypair:
 
     def save_to_file(self, filename):
         open(filename, 'w').write(self.as_pem())
+        self.filename=filename
 
     ##
     # Load the private key from a file. Implicity the private key includes the public key.
@@ -132,6 +130,7 @@ class Keypair:
     def load_from_file(self, filename):
         buffer = open(filename, 'r').read()
         self.load_from_string(buffer)
+        self.filename=filename
 
     ##
     # Load the private key from a string. Implicitly the private key includes the public key.
@@ -170,6 +169,7 @@ class Keypair:
 
         # get the pyopenssl pkey from the pyopenssl x509
         self.key = pyx509.get_pubkey()
+        self.filename=filename
 
     ##
     # Load the public key from a string. No private key is loaded.
@@ -208,7 +208,6 @@ class Keypair:
     def get_openssl_pkey(self):
         return self.key
 
-
     ##
     # Given another Keypair object, return TRUE if the two keys are the same.
 
@@ -230,6 +229,20 @@ class Keypair:
     def compute_hash(self, value):
         return self.sign_string(str(value))
 
+    # only informative
+    def get_filename(self):
+        return getattr(self,'filename',None)
+
+    def dump (self, *args, **kwargs):
+        print self.dump_string(*args, **kwargs)
+
+    def dump_string (self):
+        result=""
+        result += "KEYPAIR: pubkey=%40s..."%self.get_pubkey_string()
+        filename=self.get_filename()
+        if filename: result += "Filename %s\n"%filename
+        return result
+    
 ##
 # The certificate class implements a general purpose X509 certificate, making
 # use of the appropriate pyOpenSSL or M2Crypto abstractions. It also adds
@@ -328,6 +341,7 @@ class Certificate:
         file = open(filename)
         string = file.read()
         self.load_from_string(string)
+        self.filename=filename
 
     ##
     # Save the certificate to a string.
@@ -352,6 +366,7 @@ class Certificate:
             f = open(filename, 'w')
         f.write(string)
         f.close()
+        self.filename=filename
 
     ##
     # Save the certificate to a random file in /tmp/
@@ -637,16 +652,25 @@ class Certificate:
             triples.append( (name,self.get_data(name),'data',) )
         return triples
 
+    # only informative
+    def get_filename(self):
+        return getattr(self,'filename',None)
+
     def dump (self, *args, **kwargs):
         print self.dump_string(*args, **kwargs)
 
-    def dump_string (self):
+    def dump_string (self,show_extensions=False):
         result = ""
-        result += "Certificate for %s\n"%self.get_subject()
+        result += "CERTIFICATE for %s\n"%self.get_subject()
         result += "Issued by %s\n"%self.get_issuer()
-        for (n,v,c) in self.get_all_datas():
-            if c=='data':
-                result += "   data: %s=%s\n"%(n,v)
-            else:
-                result += "    ext: %s=%s (%s)\n"%(n,v,c)
+        filename=self.get_filename()
+        if filename: result += "Filename %s\n"%filename
+        if show_extensions:
+            all_datas=self.get_all_datas()
+            result += " has %d extensions/data attached"%len(all_datas)
+            for (n,v,c) in all_datas:
+                if c=='data':
+                    result += "   data: %s=%s\n"%(n,v)
+                else:
+                    result += "    ext: %s (crit=%s)=<<<%s>>>\n"%(n,c,v)
         return result

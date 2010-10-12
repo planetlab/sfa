@@ -5,7 +5,7 @@
 
 from sfa.util.faults import *
 from sfa.util.storage import *
-from sfa.util.namespace import *
+from sfa.util.namespace import get_authority, hrn_to_urn
 from sfa.trust.gid import GID
 from sfa.util.record import SfaRecord
 import traceback

@@ -108,7 +108,6 @@ SFA_CM_PORT=12346
 
 
 # Directory internal data gets stored
-# using /etc/sfa until gec5 but /var/lib/sfa would be a more reasonable choice
 SFA_CONFIG_DIR="/etc/sfa"
 
 # Directory internal data gets stored

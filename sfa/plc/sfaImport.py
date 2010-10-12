@@ -16,7 +16,7 @@ from sfa.util.sfalogging import sfa_logger_goes_to_import,sfa_logger
 
 from sfa.util.record import *
 from sfa.util.table import SfaTable
-from sfa.util.namespace import *
+from sfa.util.namespace import get_authority, hrn_to_urn, email_to_hrn
 from sfa.util.config import Config
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *

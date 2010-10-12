@@ -5,7 +5,7 @@ import tempfile
 from optparse import OptionParser
 from sfa.util.config import Config
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
-from sfa.util.namespace import *
+from sfa.util.namespace import hrn_to_pl_slicename, slicename_to_hrn
 from sfa.util.faults import *
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential

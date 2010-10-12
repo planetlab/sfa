@@ -7,8 +7,6 @@ Updates record objects
 faiyaza at cs dot princeton dot edu
 Copyright (c) 2009 Board of Trustees, Princeton University
 
-$Id$
-$HeadURL$
 """
 
 import sys

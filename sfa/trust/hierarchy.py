@@ -12,16 +12,13 @@
 #      *.DBINFO - database info
 ##
 
-### $Id$
-### $URL$
-
 import os
 
 from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import *
 from sfa.trust.gid import GID, create_uuid
-from sfa.util.namespace import *
+from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
 from sfa.util.config import Config
 from sfa.util.sfaticket import SfaTicket
 

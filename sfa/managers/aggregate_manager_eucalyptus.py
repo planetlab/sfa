@@ -1,8 +1,7 @@
 from __future__ import with_statement 
-from sfa.util.faults import *
-from sfa.util.namespace import *
-from sfa.util.rspec import RSpec
-from sfa.server.registry import Registries
+
+import sys
+import os
 
 import boto
 from boto.ec2.regioninfo import RegionInfo
@@ -12,8 +11,10 @@ from xmlbuilder import XMLBuilder
 from lxml import etree as ET
 from sqlobject import *
 
-import sys
-import os
+from sfa.util.faults import *
+from sfa.util.namespace import urn_to_hrn
+from sfa.util.rspec import RSpec
+from sfa.server.registry import Registries
 
 ##
 # The data structure used to represent a cloud.

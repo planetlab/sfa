@@ -41,7 +41,7 @@ from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import Right, Rights
 from sfa.trust.gid import GID
-from sfa.util.namespace import *
+from sfa.util.namespace import urn_to_hrn
 
 # Two years, in seconds 
 DEFAULT_CREDENTIAL_LIFETIME = 60 * 60 * 24 * 365 * 2
@@ -215,6 +215,7 @@ class Credential(object):
                 str = string
             elif filename:
                 str = file(filename).read()
+                self.filename=filename
                 
             if str.strip().startswith("-----"):
                 self.legacy = CredentialLegacy(False,string=str)
@@ -451,6 +452,7 @@ class Credential(object):
             f = open(filename, "w")
         f.write(self.xml)
         f.close()
+        self.filename=filename
 
     def save_to_string(self, save_parents=True):
         if not self.xml:
@@ -823,17 +825,20 @@ class Credential(object):
         dcred.sign()
 
         return dcred 
-    ##
-    # Dump the contents of a credential to stdout in human-readable format
-    #
-    # @param dump_parents If true, also dump the parent certificates
 
+    # only informative
+    def get_filename(self):
+        return getattr(self,'filename',None)
+
+    # @param dump_parents If true, also dump the parent certificates
     def dump (self, *args, **kwargs):
         print self.dump_string(*args, **kwargs)
 
     def dump_string(self, dump_parents=False):
         result=""
         result += "CREDENTIAL %s\n" % self.get_subject() 
+        filename=self.get_filename()
+        if filename: result += "Filename %s\n"%filename
         result += "      privs: %s\n" % self.get_privileges().save_to_string()
         gidCaller = self.get_gid_caller()
         if gidCaller:

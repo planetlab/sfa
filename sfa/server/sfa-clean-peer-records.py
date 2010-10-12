@@ -3,7 +3,6 @@
 import sys
 import os
 import traceback
-from sfa.util.namespace import *
 from sfa.util.table import SfaTable
 from sfa.util.prefixTree import prefixTree
 from sfa.plc.api import SfaAPI

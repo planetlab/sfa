@@ -4,7 +4,7 @@ import os
 import tempfile
 import commands
 from sfa.util.faults import *
-from sfa.util.namespace import *
+from sfa.util.namespace import hrn_to_urn
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth

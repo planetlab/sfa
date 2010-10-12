@@ -10,22 +10,31 @@ from optparse import OptionParser
 
 from sfa.trust.certificate import Certificate
 from sfa.trust.credential import Credential
+from sfa.trust.gid import GID
 from sfa.util.record import SfaRecord
 from sfa.util.rspec import RSpec
 from sfa.util.sfalogging import sfa_logger, sfa_logger_goes_to_console
 
 def determine_sfa_filekind(fn):
-    try:
-        cert = Certificate(filename = fn)
-        return 'certificate'
-    except:
-        pass
+
+    if fn.endswith('.gid'): return 'gid'
+    elif fn.endswith('.cert'): return 'certificate'
+    elif fn.endswith('cred'): return 'credential'
 
     try:
         cred=Credential(filename=fn)
         return 'credential'
-    except:
-        pass
+    except: pass
+
+    try: 
+        gid=GID(filename=fn)
+        if gid.uuid: return 'gid'
+    except: pass
+
+    try:
+        cert = Certificate(filename = fn)
+        return 'certificate'
+    except: pass
 
     # to be completed
 #    if "gidCaller" in dict:
@@ -65,20 +74,27 @@ def extract_gids(cred, extract_parents):
 #           extract_gids(parent, extract_parents)
 
 def handle_input (filename, options):
-    
     kind = determine_sfa_filekind(filename)
+    handle_input_kind (filename,options,kind)
 
+def handle_input_kind (filename, options, kind):
+    
+
+# dump methods current do 'print' so let's go this road for now
     if kind=="certificate":
         cert=Certificate (filename=filename)
-#        cert.dump(dump_parents=options.dump_parents)
-        cert.dump()
+        print '--------------------',filename,'IS A',kind
+        cert.dump(show_extensions=options.show_extensions)
     elif kind=="credential":
         cred = Credential(filename = filename)
+        print '--------------------',filename,'IS A',kind
         cred.dump(dump_parents = options.dump_parents)
         if options.extract_gids:
+            print '--------------------',filename,'embedded GIDS'
             extract_gids(cred, extract_parents = options.dump_parents)
     elif kind=="gid":
-        gid = Gid(filename = filename)
+        gid = GID(filename = filename)
+        print '--------------------',filename,'IS A',kind
         gid.dump(dump_parents = options.dump_parents)
     else:
         print "%s: unknown filekind '%s'"% (filename,kind)
@@ -89,8 +105,9 @@ def main():
 display info on input files"""
     parser = OptionParser(usage=usage)
 
-    parser.add_option("-e", "--extractgids", action="store_true", dest="extract_gids", default=False, help="Extract GIDs from credentials")
-    parser.add_option("-p", "--dumpparents", action="store_true", dest="dump_parents", default=False, help="Show parents")
+    parser.add_option("-g", "--extract-gids", action="store_true", dest="extract_gids", default=False, help="Extract GIDs from credentials")
+    parser.add_option("-p", "--dump-parents", action="store_true", dest="dump_parents", default=False, help="Show parents")
+    parser.add_option("-e", "--extensions", action="store_true", dest="show_extensions", default="False", help="Show certificate extensions")
     parser.add_option("-v", "--verbose", action='count', dest='verbose', default=0)
     (options, args) = parser.parse_args()
 

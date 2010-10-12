@@ -1,12 +1,12 @@
 
-from sfa.trust.credential import *
-from sfa.trust.rights import *
 from sfa.util.faults import *
-from sfa.util.namespace import *
+from sfa.util.namespace import urn_to_hrn
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.record import SfaRecord
+from sfa.trust.credential import Credential
 from sfa.trust.certificate import Certificate
+from sfa.trust.rights import Right, Rights
 
 class GetSelfCredential(Method):
     """
@@ -33,12 +33,12 @@ class GetSelfCredential(Method):
         """
         GetSelfCredential a degenerate version of GetCredential used by a client
         to get his initial credential when de doesnt have one. This is the same as
-        get_credetial(..., cred = None, ...)
+        GetCredential(..., cred = None, ...)
 
         The registry ensures that the client is the principal that is named by
         (type, name) by comparing the public key in the record's  GID to the
         private key used to encrypt the client side of the HTTPS connection. Thus
-        it is impossible for one principal to retrive another principal's
+        it is impossible for one principal to retrieve another principal's
         credential without having the appropriate private key.
 
         @param type type of object (user | slice | sa | ma | node)
@@ -67,8 +67,11 @@ class GetSelfCredential(Method):
         # authenticate the certificate against the gid in the db
         certificate = Certificate(string=cert)
         if not certificate.is_pubkey(gid.get_pubkey()):
-            self.api.logger.info("ConnectionKeyGIDMismatch, CERT: %s"%certificate.get_pubkey().get_pubkey_string())
-            self.api.logger.info("ConnectionKeyGIDMismatch, GID: %s"%gid.get_pubkey().get_pubkey_string())
+            for (obj,name) in [ (certificate,"CERT"), (gid,"GID"), ]:
+                self.api.logger.debug("ConnectionKeyGIDMismatch, %s pubkey: %s"%(name,obj.get_pubkey().get_pubkey_string()))
+                self.api.logger.debug("ConnectionKeyGIDMismatch, %s dump: %s"%(name,obj.dump_string()))
+                if hasattr (obj,'filename'): 
+                    self.api.logger.debug("ConnectionKeyGIDMismatch, %s filename: %s"%(name,obj.filename))
             raise ConnectionKeyGIDMismatch(gid.get_subject())
         
         return manager.get_credential(self.api, xrn, type, is_self=True)

@@ -32,7 +32,7 @@ import uuid
 
 from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Certificate
-from sfa.util.namespace import *
+from sfa.util.namespace import hrn_to_urn, urn_to_hrn
 
 ##
 # Create a new uuid. Returns the UUID as a string.
@@ -182,10 +182,12 @@ class GID(Certificate):
         print self.dump_string(*args,**kwargs)
 
     def dump_string(self, indent=0, dump_parents=False):
-        result=""
-        result += " "*indent + "hrn:" + self.get_hrn() +"\n"
-        result += " "*indent + "urn:" + self.get_urn() +"\n"
+        result="GID\n"
+        result += " "*indent + "hrn:" + str(self.get_hrn()) +"\n"
+        result += " "*indent + "urn:" + str(self.get_urn()) +"\n"
         result += " "*indent + "uuid:" + str(self.get_uuid()) + "\n"
+        filename=self.get_filename()
+        if filename: result += "Filename %s\n"%filename
 
         if self.parent and dump_parents:
             result += " "*indent + "parent:\n"

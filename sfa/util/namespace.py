@@ -1,5 +1,3 @@
-### $Id$
-### $URL$
 import re
 from sfa.util.faults import *
 URN_PREFIX = "urn:publicid:IDN"

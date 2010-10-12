@@ -1,13 +1,10 @@
-### $Id$
-### $URL$
-
 import datetime
 import time
 import traceback
 import sys
 
 from types import StringTypes
-from sfa.util.namespace import *
+from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn, hrn_to_pl_slicename, urn_to_hrn
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *

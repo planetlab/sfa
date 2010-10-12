@@ -1,13 +1,10 @@
-### $Id: slices.py 15842 2009-11-22 09:56:13Z anil $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/slices.py $
-
 import datetime
 import time
 import traceback
 import sys
 
 from types import StringTypes
-from sfa.util.namespace import *
+from sfa.util.namespace import hrn_to_pl_slicename, urn_to_hrn
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *

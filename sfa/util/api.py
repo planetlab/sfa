@@ -1,9 +1,6 @@
 #
 # SFA XML-RPC and SOAP interfaces
 #
-### $Id$
-### $URL$
-#
 
 import sys
 import os
@@ -17,7 +14,6 @@ from sfa.util.config import *
 from sfa.util.faults import *
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
-from sfa.util.namespace import *
 
 # See "2.2 Characters" in the XML specification:
 #

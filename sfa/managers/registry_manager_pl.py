@@ -5,7 +5,7 @@ from sfa.util.record import SfaRecord
 from sfa.util.table import SfaTable
 from sfa.util.record import SfaRecord
 from sfa.trust.gid import GID 
-from sfa.util.namespace import *
+from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn, hrn_to_pl_login_base, urn_to_hrn
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
 from sfa.util.faults import *
