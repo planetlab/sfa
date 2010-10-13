@@ -31,11 +31,11 @@ class RenewSliver(Method):
 
         # Validate that the time does not go beyond the credential's expiration time
         requested_time = parse(expiration_time)
-        if requested_time > Credential(string=valid_creds[0]).get_lifetime():
+        if requested_time > Credential(string=valid_creds[0]).get_expiration():
             raise InsufficientRights('SliverStatus: Credential expires before requested expiration time')
        
         manager = self.api.get_interface_manager()
-        manager.renew_slice(self.api, xrn, valid_creds, requested_time)    
+        manager.renew_slice(self.api, slice_xrn, valid_creds, expiration_time)    
  
         return 1
     

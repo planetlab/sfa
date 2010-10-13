@@ -312,10 +312,17 @@ class Certificate:
         # load it (support for the ---parent--- tag as well as normal chained certs)
 
         string = string.strip()
-
-
-        if not string.startswith('-----'):
+        
+        # If it's not in proper PEM format, wrap it
+        if string.count('-----BEGIN CERTIFICATE') == 0:
             string = '-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----' % string
+
+        # If there is a PEM cert in there, but there is some other text first
+        # such as the text of the certificate, skip the text
+        beg = string.find('-----BEGIN CERTIFICATE')
+        if beg > 0:
+            # skipping over non cert beginning                                                                                                              
+            string = string[beg:]
 
         parts = []
 

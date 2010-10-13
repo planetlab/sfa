@@ -19,6 +19,7 @@ import sfa.plc.peers as peers
 from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
+from dateutil.parser import parse
 
 
 def __get_registry_objects(slice_xrn, creds, users):
@@ -56,7 +57,7 @@ def __get_registry_objects(slice_xrn, creds, users):
         reg_objects['site'] = site
 
         slice = {}
-        slice['expires'] = int(time.mktime(Credential(string=creds[0]).get_lifetime().timetuple()))
+        slice['expires'] = int(time.mktime(Credential(string=creds[0]).get_expiration().timetuple()))
         slice['hrn'] = hrn
         slice['name'] = hrn_to_pl_slicename(hrn)
         slice['url'] = hrn
@@ -88,10 +89,41 @@ def get_version():
     return version
 
 def slice_status(api, slice_xrn, creds):
+    hrn, type = urn_to_hrn(slice_xrn)
+    # find out where this slice is currently running
+    api.logger.info(hrn)
+    slicename = hrn_to_pl_slicename(hrn)
+    
+    slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids','person_ids','name','expires'])
+    if len(slices) == 0:        
+        raise Exception("Slice %s not found (used %s as slicename internally)" % slice_xrn, slicename)
+    slice = slices[0]
+    
+    nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'],
+                                    ['hostname', 'boot_state', 'last_contact'])
+    api.logger.info(slice)
+    api.logger.info(nodes)
+    
     result = {}
     result['geni_urn'] = slice_xrn
     result['geni_status'] = 'unknown'
-    result['geni_resources'] = {}
+    result['pl_login'] = slice['name']
+    result['pl_expires'] = slice['expires']
+    
+    resources = []
+    
+    for node in nodes:
+        res = {}
+        res['pl_hostname'] = node['hostname']
+        res['pl_boot_state'] = node['boot_state']
+        res['pl_last_contact'] = node['last_contact']
+        res['geni_urn'] = ''
+        res['geni_status'] = 'unknown'
+        res['geni_error'] = ''
+
+        resources.append(res)
+        
+    result['geni_resources'] = resources
     return result
 
 def create_slice(api, slice_xrn, creds, rspec, users):
@@ -149,15 +181,16 @@ def create_slice(api, slice_xrn, creds, rspec, users):
     return True
 
 
-def renew_slice(api, xrn, creds, exipration_time):
+def renew_slice(api, xrn, creds, expiration_time):
     hrn, type = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
         raise RecordNotFound(hrn)
     slice = slices[0]
-    slice['expires'] = expiration_time
-    api.plshell.UpdateSlice(api.plauth, slice['slice_id'], slice)
+    requested_time = parse(expiration_time)
+    record = {'expires': int(time.mktime(requested_time.timetuple()))}
+    api.plshell.UpdateSlice(api.plauth, slice['slice_id'], record)
     return 1         
 
 def start_slice(api, xrn, creds):

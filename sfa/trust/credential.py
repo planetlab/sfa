@@ -43,8 +43,8 @@ from sfa.trust.rights import Right, Rights
 from sfa.trust.gid import GID
 from sfa.util.namespace import urn_to_hrn
 
-# Two years, in seconds 
-DEFAULT_CREDENTIAL_LIFETIME = 60 * 60 * 24 * 365 * 2
+# 2 weeks, in seconds 
+DEFAULT_CREDENTIAL_LIFETIME = 86400 * 14
 
 
 # TODO:
@@ -257,10 +257,9 @@ class Credential(object):
         self.gidObject = legacy.get_gid_object()
         lifetime = legacy.get_lifetime()
         if not lifetime:
-            # Default to two years
-            self.set_lifetime(DEFAULT_CREDENTIAL_LIFETIME)
+            self.set_expiration(datetime.datetime.utcnow() + datetime.timedelta(seconds=DEFAULT_CREDENTIAL_LIFETIME))
         else:
-            self.set_lifetime(int(lifetime))
+            self.set_expiration(int(lifetime))
         self.lifeTime = legacy.get_lifetime()
         self.set_privileges(legacy.get_privileges())
         self.get_privileges().delegate_all_privileges(legacy.get_delegate())
@@ -315,28 +314,30 @@ class Credential(object):
             self.decode()
         return self.gidObject
 
-    ##
-    # set the lifetime of this credential
-    #
-    # @param lifetime lifetime of credential
-    # . if lifeTime is a datetime object, it is used for the expiration time
-    # . if lifeTime is an integer value, it is considered the number of seconds
-    #   remaining before expiration
 
-    def set_lifetime(self, lifeTime):
-        if isinstance(lifeTime, int):
-            self.expiration = datetime.timedelta(seconds=lifeTime) + datetime.datetime.utcnow()
+            
+    ##
+    # Expiration: an absolute UTC time of expiration (as either an int or datetime)
+    # 
+    def set_expiration(self, expiration):
+        if isinstance(expiration, int):
+            self.expiration = datetime.datetime.fromtimestamp(expiration)
         else:
-            self.expiration = lifeTime
+            self.expiration = expiration
+            
 
     ##
     # get the lifetime of the credential (in datetime format)
 
-    def get_lifetime(self):
+    def get_expiration(self):
         if not self.expiration:
             self.decode()
         return self.expiration
 
+    ##
+    # For legacy sake
+    def get_lifetime(self):
+        return self.get_expiration()
  
     ##
     # set the privileges
@@ -399,7 +400,7 @@ class Credential(object):
         append_sub(doc, cred, "target_urn", self.gidObject.get_urn())
         append_sub(doc, cred, "uuid", "")
         if not self.expiration:
-            self.set_lifetime(DEFAULT_CREDENTIAL_LIFETIME)
+            self.set_expiration(datetime.datetime.utcnow() + datetime.timedelta(seconds=DEFAULT_CREDENTIAL_LIFETIME))
         self.expiration = self.expiration.replace(microsecond=0)
         append_sub(doc, cred, "expires", self.expiration.isoformat())
         privileges = doc.createElement("privileges")
@@ -583,7 +584,7 @@ class Credential(object):
         
 
         self.set_refid(cred.getAttribute("xml:id"))
-        self.set_lifetime(parse(getTextNode(cred, "expires")))
+        self.set_expiration(parse(getTextNode(cred, "expires")))
         self.gidCaller = GID(string=getTextNode(cred, "owner_gid"))
         self.gidObject = GID(string=getTextNode(cred, "target_gid"))   
 
@@ -675,7 +676,7 @@ class Credential(object):
             return True
         
         # make sure it is not expired
-        if self.get_lifetime() < datetime.datetime.utcnow():
+        if self.get_expiration() < datetime.datetime.utcnow():
             raise CredentialNotVerifiable("Credential expired at %s" % self.expiration.isoformat())
 
         # Verify the signatures
@@ -783,7 +784,7 @@ class Credential(object):
             raise CredentialNotVerifiable("Target gid not equal between parent and child")
 
         # make sure my expiry time is <= my parent's
-        if not parent_cred.get_lifetime() >= self.get_lifetime():
+        if not parent_cred.get_expiration() >= self.get_expiration():
             raise CredentialNotVerifiable("Delegated credential expires after parent")
 
         # make sure my signer is the parent's caller
@@ -816,7 +817,7 @@ class Credential(object):
         dcred.set_gid_caller(delegee_gid)
         dcred.set_gid_object(object_gid)
         dcred.set_parent(self)
-        dcred.set_lifetime(self.get_lifetime())
+        dcred.set_expiration(self.get_expiration())
         dcred.set_privileges(self.get_privileges())
         dcred.get_privileges().delegate_all_privileges(True)
         #dcred.set_issuer_keys(keyfile, delegee_gidfile)
