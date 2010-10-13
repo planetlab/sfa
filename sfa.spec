@@ -6,7 +6,7 @@
 
 %define name sfa
 %define version 1.0
-%define taglevel 2
+%define taglevel 3
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -175,6 +175,10 @@ fi
 
 
 %changelog
+* Wed Oct 13 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - sfa-1.0-3
+- various cleanups.
+- tagging the commit before merge.
+
 * Mon Oct 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-2
 - deprecated old methods (e.g. List/list, and GetCredential/get_credential)
 - NOTE:  get_(self_)credential both have type and hrn swapped when moving to Get(Self)Credential
@@ -223,6 +227,10 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Wed Oct 13 2010 Baris Metin <Talip-Baris.Metin@sophia.inria.fr> - sfa-1.0-3
+- various cleanups.
+- tagging the commit before merge.
+
 * Mon Oct 11 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-2
 - deprecated old methods (e.g. List/list, and GetCredential/get_credential)
 - NOTE:  get_(self_)credential both have type and hrn swapped when moving to Get(Self)Credential
