@@ -20,7 +20,7 @@ import tempfile
 
 from sfa.util.record import *
 from sfa.util.table import SfaTable
-from sfa.util.namespace import get_leaf, get_auth_info, hostname_to_hrn, slicename_to_hrn, email_to_hrn, hrn_to_pl_slicename
+from sfa.util.namespace import get_leaf, get_authority, hostname_to_hrn, slicename_to_hrn, email_to_hrn, hrn_to_pl_slicename
 from sfa.util.config import Config
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
