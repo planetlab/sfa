@@ -8,6 +8,7 @@ class TestNamespace(unittest.TestCase):
 
     hrns=[
         ('plc.princeton.tmack','user'),
+        ('fake-pi1@onelab.eu','user'),
         ('ple.inria.baris','user'),
         ('emulab\.net.slice.jktest','slice'),
         ]
