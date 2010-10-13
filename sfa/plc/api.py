@@ -14,7 +14,7 @@ from sfa.util.config import *
 from sfa.util.sfalogging import sfa_logger
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.trust.auth import Auth
-from sfa.trust.rights import Right, Rights
+from sfa.trust.rights import Right, Rights, determine_rights
 from sfa.trust.credential import Credential,Keypair
 from sfa.trust.certificate import Certificate
 from sfa.util.namespace import get_authority, hrn_to_pl_slicename, hrn_to_pl_slicename, hrn_to_urn, slicename_to_hrn, hostname_to_hrn
