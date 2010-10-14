@@ -160,7 +160,7 @@ def list(api, xrn, origin_hrn=None):
         record_list = registries[registry_hrn].list(credential, xrn, origin_hrn)
         records = [SfaRecord(dict=record).as_dict() for record in record_list]
     
-    # if we still havnt found the record yet, try the local registry
+    # if we still have not found the record yet, try the local registry
     if not records:
         if not api.auth.hierarchy.auth_exists(hrn):
             raise MissingAuthority(hrn)
