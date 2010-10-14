@@ -1,3 +1,21 @@
+#
+#  WARNING - This file should be soon deprecated in favor of sfa.util.xrn
+#
+#
+#  WARNING - This file should be soon deprecated in favor of sfa.util.xrn
+#
+#
+#  WARNING - This file should be soon deprecated in favor of sfa.util.xrn
+#
+#
+#  WARNING - This file should be soon deprecated in favor of sfa.util.xrn
+#
+#
+#  WARNING - This file should be soon deprecated in favor of sfa.util.xrn
+#
+#
+#  WARNING - This file should be soon deprecated in favor of sfa.util.xrn
+#
 import re
 from sfa.util.faults import *
 URN_PREFIX = "urn:publicid:IDN"

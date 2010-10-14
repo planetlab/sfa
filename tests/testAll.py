@@ -1,5 +1,6 @@
 #!/usr/bin/python
-from testNamespace import *
+from testXrn import *
+#from testNamespace import *
 # xxx broken-test
 #from testRights import *
 # xxx broken-test
