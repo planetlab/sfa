@@ -1,10 +1,6 @@
 #
 # SFA API faults
 #
-#
-
-### $Id$
-### $URL$
 
 import xmlrpclib
 
