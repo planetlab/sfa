@@ -131,7 +131,7 @@ class Sfi:
         self.logger=sfa_logger()
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
-        cmdargs = {"list": "name",
+        cmdargs = {"list": "authority",
                   "show": "name",
                   "remove": "name",
                   "add": "record",
@@ -414,6 +414,8 @@ class Sfi:
         if not self.authority:
             self.logger.critical("no authority specified. Use -a or set SF_AUTH")
             sys.exit(-1)
+        ### xxx get_leaf('authority') always returns 'authority'
+        # are we not meaning get_leaf(self.authority) instead ?
         file = os.path.join(self.options.sfi_dir, get_leaf("authority") + ".cred")
         return self.get_cred(file, 'authority', self.authority)
 
@@ -529,8 +531,11 @@ class Sfi:
  
     # list entires in named authority registry
     def list(self, opts, args):
-        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        if len(args)!= 1:
+            self.parser.print_help()
+            sys.exit(1)
         hrn = args[0]
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
         try:
             list = self.registry.List(hrn, user_cred)
         except IndexError:
@@ -550,8 +555,11 @@ class Sfi:
     
     # show named registry record
     def show(self, opts, args):
-        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        if len(args)!= 1:
+            self.parser.print_help()
+            sys.exit(1)
         hrn = args[0]
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
         records = self.registry.Resolve(hrn, user_cred)
         records = filter_records(opts.type, records)
         if not records:
@@ -936,7 +944,8 @@ class Sfi:
             return -1
     
         command = args[0]
-        (cmd_opts, cmd_args) = self.create_cmd_parser(command).parse_args(args[1:])
+        self.parser = self.create_cmd_parser(command)
+        (cmd_opts, cmd_args) = self.parser.parse_args(args[1:])
 
         self.set_servers()
     
