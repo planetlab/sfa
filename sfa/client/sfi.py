@@ -22,7 +22,7 @@ from sfa.trust.gid import GID
 from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import SfaRecord, UserRecord, SliceRecord, NodeRecord, AuthorityRecord
-from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn
+from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
@@ -335,7 +335,6 @@ class Sfi:
     
     def get_key_file(self):
        file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".pkey")
-       #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".pkey")
        if (os.path.isfile(file)):
           return file
        else:
@@ -345,7 +344,6 @@ class Sfi:
     
     def get_cert_file(self, key_file):
     
-       #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cert")
        file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cert")
        if (os.path.isfile(file)):
           return file
@@ -406,7 +404,6 @@ class Sfi:
         return None 
  
     def get_user_cred(self):
-        #file = os.path.join(self.options.sfi_dir, get_leaf(self.user) + ".cred")
         file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cred")
         return self.get_cred(file, 'user', self.user)
 
@@ -414,9 +411,7 @@ class Sfi:
         if not self.authority:
             self.logger.critical("no authority specified. Use -a or set SF_AUTH")
             sys.exit(-1)
-        ### xxx get_leaf('authority') always returns 'authority'
-        # are we not meaning get_leaf(self.authority) instead ?
-        file = os.path.join(self.options.sfi_dir, get_leaf("authority") + ".cred")
+        file = os.path.join(self.options.sfi_dir, self.authority + ".cred")
         return self.get_cred(file, 'authority', self.authority)
 
     def get_slice_cred(self, name):
@@ -639,6 +634,9 @@ class Sfi:
     #   - have to first retrieve the record to be removed
     def remove(self, opts, args):
         auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
+        if len(args)!=1:
+            self.parser.print_help()
+            sys.exit(1)
         hrn = args[0]
         type = opts.type 
         if type in ['all']:
@@ -648,6 +646,9 @@ class Sfi:
     # add named registry record
     def add(self, opts, args):
         auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
+        if len(args)!=1:
+            self.parser.print_help()
+            sys.exit(1)
         record_filepath = args[0]
         rec_file = self.get_record_file(record_filepath)
         record = load_record_from_file(rec_file).as_dict()
@@ -656,6 +657,9 @@ class Sfi:
     # update named registry entry
     def update(self, opts, args):
         user_cred = self.get_user_cred()
+        if len(args)!=1:
+            self.parser.print_help()
+            sys.exit(1)
         rec_file = self.get_record_file(args[0])
         record = load_record_from_file(rec_file)
         if record['type'] == "user":

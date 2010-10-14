@@ -118,7 +118,8 @@ def urn_to_hrn(urn):
     # 3. replace ':' with '.'  (':' is the urn hierarchy delimiter)
     # 4. join list elements using '.' 
     #hrn = '.'.join([part.replace('.', '\\.').replace(':', '.') for part in hrn_parts if part]) 
-    hrn = '.'.join([re.sub(r'([^a-zA-Z0-9\:])', r'\\\1', part).replace(':', '.') for part in urn_parts if part]) 
+#    hrn = '.'.join([re.sub(r'([^a-zA-Z0-9\:])', r'\\\1', part).replace(':', '.') for part in urn_parts if part]) 
+    hrn = '.'.join([re.sub(r'\\.', r'\\.', part).replace(':', '.') for part in urn_parts if part]) 
     
     return str(hrn), str(type) 
     

@@ -3,7 +3,8 @@
 from sfa.util.rspec import RSpec
 import sys
 import pdb
-from sfa.util.namespace import hrn_to_pl_slicename, urn_to_hrn, get_authority
+from sfa.util.namespace import hrn_to_pl_slicename
+from sfa.util.xrn import urn_to_hrn, get_authority
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *

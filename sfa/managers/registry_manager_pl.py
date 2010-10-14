@@ -1,14 +1,16 @@
 import types
 import time 
+
+from sfa.util.faults import *
 from sfa.util.prefixTree import prefixTree
 from sfa.util.record import SfaRecord
 from sfa.util.table import SfaTable
 from sfa.util.record import SfaRecord
 from sfa.trust.gid import GID 
-from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn, hrn_to_pl_login_base, urn_to_hrn
-from sfa.trust.credential import *
-from sfa.trust.certificate import *
-from sfa.util.faults import *
+from sfa.util.namespace import hrn_to_pl_login_base
+from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn, urn_to_hrn
+from sfa.trust.credential import Credential
+from sfa.trust.certificate import Certificate, Keypair
 from sfa.trust.gid import create_uuid
 
 def get_version(api):
@@ -366,12 +368,13 @@ def update(api, record_dict):
     
     return 1 
 
-def remove(api, xrn, type, origin_hrn=None):
-    # convert xrn to hrn     
-    if type:
-        hrn = urn_to_hrn(xrn)[0]
-    else:
-        hrn, type = urn_to_hrn(xrn)    
+# being PL specific it sounds right to expect a hrn+type (not a xrn)
+def remove(api, hrn, type, origin_hrn=None):
+#    # convert xrn to hrn     
+#    if type:
+#        hrn = urn_to_hrn(xrn)[0]
+#    else:
+#        hrn, type = urn_to_hrn(xrn)    
 
     table = SfaTable()
     filter = {'hrn': hrn}

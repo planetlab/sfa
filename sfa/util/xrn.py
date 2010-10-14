@@ -3,6 +3,12 @@ import re
 from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger
 
+# for convenience and smoother translation
+def get_leaf(hrn): return Xrn(hrn=hrn,type='any').get_leaf()
+def get_authority(hrn): return Xrn(hrn=hrn,type='any').get_authority_hrn()
+def urn_to_hrn(urn): xrn=Xrn(urn=urn); return (xrn.hrn, xrn.type)
+def hrn_to_urn(hrn,type): return Xrn(hrn=hrn, type=type).urn
+
 class Xrn:
 
     ########## basic tools on HRNs
@@ -57,26 +63,26 @@ class Xrn:
             self.type=type
             self.hrn_to_urn()
         else:
-            raise SfaAPIError,"Xrn"
+            raise SfaAPIError,"Xrn.__init__"
 
     def get_urn(self): return self.urn
     def get_hrn(self): return (self.hrn, self.type)
 
     def get_leaf(self):
-        if not self.hrn: raise SfaAPIError, "Xrn"
+        if not self.hrn: raise SfaAPIError, "Xrn.get_leaf"
         if not hasattr(self,'leaf'): 
             self.leaf=Xrn.hrn_split(self.hrn)[-1]
         return self.leaf
 
     def get_authority_hrn(self): 
-        if not self.hrn: raise SfaAPIError, "Xrn"
+        if not self.hrn: raise SfaAPIError, "Xrn.get_authority_hrn"
         # self.authority keeps a list
         if not hasattr(self,'authority'): 
             self.authority=Xrn.hrn_path_list(self.hrn)
         return '.'.join( self.authority )
     
     def get_authority_urn(self): 
-        if not self.hrn: raise SfaAPIError, "Xrn"
+        if not self.hrn: raise SfaAPIError, "Xrn.get_authority_urn"
         # self.authority keeps a list
         if not hasattr(self,'authority'): 
             self.authority=Xrn.hrn_path_list(self.hrn)
@@ -88,7 +94,7 @@ class Xrn:
         """
         
         if not self.urn or not self.urn.startswith(Xrn.URN_PREFIX):
-            raise SfaAPIError, "Xrn"
+            raise SfaAPIError, "Xrn.urn_to_hrn"
 
         parts = Xrn.urn_split(self.urn)
         type=parts.pop(2)
@@ -111,7 +117,7 @@ class Xrn:
         """
 
         if not self.hrn or self.hrn.startswith(Xrn.URN_PREFIX):
-            raise SfaAPIError, "Xrn"
+            raise SfaAPIError, "Xrn.hrn_to_urn"
 
         if self.type == 'authority':
             self.authority = Xrn.hrn_split(self.hrn)

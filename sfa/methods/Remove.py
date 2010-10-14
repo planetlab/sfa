@@ -31,11 +31,11 @@ class Remove(Method):
 
     returns = Parameter(int, "1 if successful")
     
+# this does not sound quite right, but the best I could come up with is:
+# if type is not specified then we expect a URN
     def call(self, xrn, creds, type):
-        if not type:
-            hrn = urn_to_hrn(xrn)[0]
-        else: 
-            hrn, type = urn_to_hrn(xrn)
+        if type: hrn=xrn
+        else:    (hrn,type) = urn_to_hrn(xrn)
         
         # validate the cred
         valid_creds = self.api.auth.checkCredentials(creds, "remove")
@@ -43,9 +43,9 @@ class Remove(Method):
 
         #log the call
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
-
+        self.api.logger.info("interface: %s\tmethod-name: %s\tcaller-hrn: %s\ttarget-hrn: %s\ttype: %s"%(
+                self.api.interface, self.name, origin_hrn, hrn, type))
 
         manager = self.api.get_interface_manager()
 
-        return manager.remove(self.api, xrn, type) 
+        return manager.remove(self.api, hrn, type) 
