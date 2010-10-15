@@ -1,5 +1,5 @@
 #
-## (Re)builds Python metafile (__init__.py) and documentation
+## (Re)builds Python metafile (__init__.py) 
 # 
 # overwritten by the specfile
 DESTDIR="/"
@@ -42,13 +42,36 @@ wsdl-clean:
 	$(MAKE) -C wsdl clean
 
 .PHONY: wsdl wsdl-install wsdl-clean
-##########
 
-# are the .java files used ?
+########## refreshing methods package metafile
+# Metafiles - manage Legacy/ and Accessors by hand
+init := sfa/methods/__init__.py 
+
+index: $(init)
+
+index-clean:
+	rm $(init)
+
+methods_now := $(sort $(shell fgrep -v '"' sfa/methods/__init__.py 2>/dev/null))
+# what should be declared
+methods_paths := $(filter-out %/__init__.py, $(wildcard sfa/methods/*.py))
+methods_files := $(sort $(notdir $(methods_paths:.py=)))
+
+ifneq ($(methods_now),$(methods_files))
+sfa/methods/__init__.py: force
+endif
+sfa/methods/__init__.py: 
+	(echo '## Please use make index to update this file' ; echo 'all = """' ; cd sfa/methods; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' ; echo '""".split()') > $@
+
+force:
+
+##########
 tags:	
 	find . -type f | egrep -v '/\.git/|/\.svn/|TAGS|\.py[co]$$|\.doc$$|\.html$$|\.pdf$$' | xargs etags
 .PHONY: tags
 
+signatures:
+	grep 'def.*call' sfa/methods/*.py > sfa/methods/SIGNATURES
 
 ########## sync
 # 2 forms are supported
