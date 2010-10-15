@@ -67,11 +67,12 @@ force:
 
 ##########
 tags:	
-	find . -type f | egrep -v '/\.git/|/\.svn/|TAGS|\.py[co]$$|\.doc$$|\.html$$|\.pdf$$' | xargs etags
+	find . -type f | egrep -v '/\.git/|/\.svn/|TAGS|\.py[co]$$|\.doc$$|\.html$$|\.pdf$$|~$$' | xargs etags
 .PHONY: tags
 
 signatures:
-	grep 'def.*call' sfa/methods/*.py > sfa/methods/SIGNATURES
+	(cd sfa/methods; grep 'def.*call' *.py > SIGNATURES)
+.PHONY: signatures
 
 ########## sync
 # 2 forms are supported
