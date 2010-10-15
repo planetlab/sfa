@@ -17,7 +17,6 @@ Update
 remove_peer_object
 GetTicket
 GetVersion
-RedeemTicket
 ListResources
 ListSlices
 CreateSliver
