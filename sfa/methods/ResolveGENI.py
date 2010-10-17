@@ -3,7 +3,7 @@ from sfa.util.method import Method
 from sfa.util.parameter import Parameter
 from sfa.trust.credential import Credential
 
-class Resolve(Method):
+class ResolveGENI(Method):
     """
     Lookup a URN and return information about the corresponding object.
     @param urn
