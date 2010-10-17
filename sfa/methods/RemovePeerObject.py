@@ -7,7 +7,7 @@ from sfa.util.table import SfaTable
 from sfa.trust.credential import Credential
 from types import StringTypes
 
-class remove_peer_object(Method):
+class RemovePeerObject(Method):
     """
     Remove an peer object from the PLC records of a local aggregate. 
     This method will be called by registry.remove() while removing 

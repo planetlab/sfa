@@ -9,7 +9,7 @@ from types import StringTypes
 
 class remove_peer_object(Method):
     """
-    Remove an peer object from the PLC records of a local aggregate. 
+    Remove a peer object from the PLC records of a local aggregate. 
     This method will be called by registry.remove() while removing 
     a record from the local aggreage's PLCDB and sfa table. This 
     method need not be directly called by end-user.

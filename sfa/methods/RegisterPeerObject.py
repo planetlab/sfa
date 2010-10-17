@@ -14,7 +14,7 @@ from sfa.trust.auth import Auth
 from sfa.trust.gid import create_uuid
 from sfa.trust.credential import Credential
 
-class register_peer_object(Method):
+class RegisterPeerObject(Method):
     """
     Register a peer object with the registry. In addition to being stored in the
     SFA database, the appropriate records will also be created in the
