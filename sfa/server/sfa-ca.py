@@ -1,8 +1,20 @@
 #!/usr/bin/python
 
 #
-# SFA Certificate Signing and management 
-#   
+# SFA Certificate Signing and management. Root authorities can use this script to sign
+# the certificate of another authority and become its parent.     
+# 
+# Example usage: 
+#
+## sign a peer cert
+# sfa-ca.py --sign PEER_CERT_FILENAME -o OUTPUT_FILENAME 
+#
+## import a cert and update the registry hierarchy
+# sfa-ca.py --import CERT_FILENAME   
+#
+## display a cert
+# sfa-ca.py --display CERT_FILENAME
+
 
 import os
 import sys
@@ -64,6 +76,8 @@ def display(options):
 def sign_gid(gid, parent_key, parent_gid):
     gid.set_issuer(parent_key, parent_gid.get_hrn())
     gid.set_parent(parent_gid)
+    gid.set_intermediate_ca(True)
+    gid.set_pubkey(gid.get_pubkey())
     gid.sign()
     return gid 
 
