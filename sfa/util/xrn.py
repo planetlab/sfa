@@ -56,23 +56,22 @@ class Xrn:
 
     # provide either urn, or (hrn + type)
     def __init__ (self, xrn=None, urn=None, hrn=None, type=None):
-        if xrn:
-            if xrn.startswith(Xrn.URN_PREFIX):
-                self.urn=xrn
-                self.urn_to_hrn()
+        if not xrn:
+            if urn:
+                xrn = urn
+            elif hrn:
+                xrn = hrn
             else:
-                self.hrn=xrn
-                self.type=type
-                self.hrn_to_urn()
-        elif urn: 
-            self.urn=urn
+                raise SfaAPIError,"Xrn.__init__"
+
+        if xrn.startswith(Xrn.URN_PREFIX):
+            self.urn=xrn
             self.urn_to_hrn()
-        elif hrn and type: 
-            self.hrn=hrn
+        else:
+            self.hrn=xrn
             self.type=type
             self.hrn_to_urn()
-        else:
-            raise SfaAPIError,"Xrn.__init__"
+
         if not type:
             sfa_logger().debug("type-less Xrn's are not safe")
 
