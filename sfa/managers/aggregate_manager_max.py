@@ -3,7 +3,7 @@
 from sfa.util.rspec import RSpec
 import sys
 import pdb
-from sfa.util.namespace import hrn_to_pl_slicename
+from sfa.util.namespace import hrn_to_pl_slicename, hrn_to_urn
 from sfa.util.xrn import urn_to_hrn, get_authority
 from sfa.util.rspec import *
 from sfa.util.specdict import *
@@ -147,7 +147,8 @@ def create_slice_max_aggregate(api, hrn, nodes):
     registries = Registries(api)
     registry = registries[api.hrn]
     credential = api.getCredential()
-    records = registry.resolve(credential, hrn)
+    urn = hrn_to_urn(hrn, 'slice')
+    records = registry.Resolve(urn, credential)
     for record in records:
         if record.get_type() in ['slice']:
             slice = record.as_dict()
@@ -164,7 +165,8 @@ def create_slice_max_aggregate(api, hrn, nodes):
         sites = api.plshell.GetSites(api.plauth, [login_base])
         if not sites:
             authority = get_authority(hrn)
-            site_records = registry.resolve(credential, authority)
+            authority_urn = hrn_to_urn(authority, 'authority')
+            site_records = registry.Resolve(authority_urn, credential)
             site_record = {}
             if not site_records:
                 raise RecordNotFound(authority)
@@ -193,7 +195,8 @@ def create_slice_max_aggregate(api, hrn, nodes):
     researchers = record.get('researcher', [])
     for researcher in researchers:
         person_record = {}
-        person_records = registry.resolve(credential, researcher)
+        researcher_urn = hrn_to_urn(researcher, 'user')
+        person_records = registry.Resolve(researcher_urn, credential)
         for record in person_records:
             if record.get_type() in ['user']:
                 person_record = record
