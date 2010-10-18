@@ -4,9 +4,10 @@ from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger
 
 # for convenience and smoother translation
-def get_leaf(hrn): return Xrn(hrn=hrn,type='any').get_leaf()
-def get_authority(hrn): return Xrn(hrn=hrn,type='any').get_authority_hrn()
-def urn_to_hrn(urn): xrn=Xrn(urn=urn); return (xrn.hrn, xrn.type)
+def get_leaf(hrn): return Xrn(hrn=hrn).get_leaf()
+def get_authority(hrn): return Xrn(hrn=hrn).get_authority_hrn()
+# these methods we should get rid of eventually
+def urn_to_hrn(urn): xrn=Xrn(xrn=urn); return (xrn.hrn, xrn.type)
 def hrn_to_urn(hrn,type): return Xrn(hrn=hrn, type=type).urn
 
 class Xrn:
@@ -54,8 +55,16 @@ class Xrn:
         return Xrn.urn_meaningful(urn).split('+')
 
     # provide either urn, or (hrn + type)
-    def __init__ (self, urn=None, hrn=None, type=None):
-        if urn: 
+    def __init__ (self, xrn=None, urn=None, hrn=None, type=None):
+        if xrn:
+            if xrn.startswith(Xrn.URN_PREFIX):
+                self.urn=xrn
+                self.urn_to_hrn()
+            else:
+                self.hrn=xrn
+                self.type=type
+                self.hrn_to_urn()
+        elif urn: 
             self.urn=urn
             self.urn_to_hrn()
         elif hrn and type: 
@@ -64,6 +73,8 @@ class Xrn:
             self.hrn_to_urn()
         else:
             raise SfaAPIError,"Xrn.__init__"
+        if not type:
+            sfa_logger().debug("type-less Xrn's are not safe")
 
     def get_urn(self): return self.urn
     def get_hrn(self): return (self.hrn, self.type)
