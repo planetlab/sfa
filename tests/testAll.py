@@ -10,7 +10,6 @@ from testXrn import *
 # xxx broken-test
 #from testCred import *
 from testKeypair import *
-from testMisc import *
 # xxx broken-test
 #from testHierarchy import *
 from testRecord import *
