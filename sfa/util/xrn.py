@@ -4,10 +4,10 @@ from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger
 
 # for convenience and smoother translation - we should get rid of these functions eventually 
-def get_leaf(hrn): return Xrn(xrn=hrn).get_leaf()
-def get_authority(hrn): return Xrn(xrn=hrn).get_authority_hrn()
-def urn_to_hrn(urn): xrn=Xrn(xrn=urn); return (xrn.hrn, xrn.type)
-def hrn_to_urn(hrn,type): return Xrn(hrn=hrn, type=type).urn
+def get_leaf(hrn): return Xrn(hrn).get_leaf()
+def get_authority(hrn): return Xrn(hrn).get_authority_hrn()
+def urn_to_hrn(urn): xrn=Xrn(urn); return (xrn.hrn, xrn.type)
+def hrn_to_urn(hrn,type): return Xrn(hrn, type=type).urn
 
 class Xrn:
 
@@ -60,26 +60,18 @@ class Xrn:
     # self.type
     # self.path
     # provide either urn, or (hrn + type)
-    def __init__ (self, xrn=None, urn=None, hrn=None, type=None):
+    def __init__ (self, xrn, type=None):
         # user has specified xrn : guess if urn or hrn
         if xrn is not None:
             if xrn.startswith(Xrn.URN_PREFIX):
+                self.hrn=None
                 self.urn=xrn
                 self.urn_to_hrn()
             else:
+                self.urn=None
                 self.hrn=xrn
                 self.type=type
                 self.hrn_to_urn()
-        # user has specified urn, let's use it
-        elif urn is not None: 
-            self.urn=urn
-            self.urn_to_hrn()
-        # user has specified hrn and type
-        elif hrn is not None and type is not None: 
-            self.hrn=hrn
-            self.type=type
-            self.hrn_to_urn()
-        # what should we do ?
         else:
             raise SfaAPIError,"Xrn.__init__"
 # happens all the time ..

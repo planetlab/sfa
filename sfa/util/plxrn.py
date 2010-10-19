@@ -9,11 +9,11 @@ def slicename_to_hrn (auth_hrn, slicename):
 def email_to_hrn (auth_hrn, email):
     return PlXrn(auth=auth_hrn, email=email).get_hrn()
 def hrn_to_pl_slicename (hrn):
-    return PlXrn(hrn=hrn,type='slice').pl_slicename()
+    return PlXrn(xrn=hrn,type='slice').pl_slicename()
 def hrn_to_pl_login_base (hrn):
-    return PlXrn(hrn=hrn,type='slice').pl_login_base()
+    return PlXrn(xrn=hrn,type='slice').pl_login_base()
 def hrn_to_pl_authname (hrn):
-    return PlXrn(hrn=hrn,type='any').pl_authname()
+    return PlXrn(xrn=hrn,type='any').pl_authname()
 
 
 class PlXrn (Xrn):
