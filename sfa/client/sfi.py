@@ -344,18 +344,27 @@ class Sfi:
     
     def get_cert_file(self, key_file):
     
-       file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cert")
-       if (os.path.isfile(file)):
-          return file
-       else:
-          k = Keypair(filename=key_file)
-          cert = Certificate(subject=self.user)
-          cert.set_pubkey(k)
-          cert.set_issuer(k, self.user)
-          cert.sign()
-          self.logger.info("Writing self-signed certificate to %s"%file)
-          cert.save_to_file(file)
-          return file
+        file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cert")
+        if (os.path.isfile(file)):
+            # use existing cert if it exists                     
+            return file
+        else:
+            try:
+                # attempt to use gid as the cert.  
+                gid = self._get_gid()
+                self.logger.info("Writing certificate to %s"%file)
+                gid.save_to_file(file) 
+            except:
+                # generate self signed certificate
+                k = Keypair(filename=key_file)
+                cert = Certificate(subject=self.user)
+                cert.set_pubkey(k)
+                cert.set_issuer(k, self.user)
+                cert.sign()
+                self.logger.info("Writing self-signed certificate to %s"%file)
+                cert.save_to_file(file)
+            
+            return file
 
     def get_cached_gid(self, file):
         """
@@ -367,6 +376,9 @@ class Sfi:
         return gid
 
     def get_gid(self, opts, args):
+        """
+        Get the specify gid and save it to file
+        """
         hrn = None
         if args:
             hrn = args[0]
@@ -375,6 +387,10 @@ class Sfi:
         return gid
 
     def _get_gid(self, hrn=None):
+        """
+        git_gid helper. Retrive the gid from the registry and save it to file.
+        """
+        
         if not hrn:
             hrn = self.user
  
