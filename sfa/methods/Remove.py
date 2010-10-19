@@ -29,7 +29,7 @@ class Remove(Method):
     returns = Parameter(int, "1 if successful")
     
     def call(self, xrn, creds, type):
-        xrn=Xrn(xrn=xrn,type=type)
+        xrn=Xrn(xrn,type=type)
         
         # validate the cred
         valid_creds = self.api.auth.checkCredentials(creds, "remove")

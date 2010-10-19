@@ -13,10 +13,10 @@ class TestXrn(unittest.TestCase):
     def __hrn(self,h,t,exp_urn):
         if verbose: print 'testing (',h,t,') expecting',exp_urn
         if exp_urn:
-            xrn=Xrn(hrn=h,type=t)
+            xrn=Xrn(h,type=t)
             if verbose: print xrn.dump_string()
             urn=xrn.get_urn()
-            (h1,t1) = Xrn(urn=urn).get_hrn_type()
+            (h1,t1) = Xrn(urn).get_hrn_type()
             if h1!=h or t1!=t or urn!=exp_urn:
                 print "hrn->urn->hrn : MISMATCH with in=(%s,%s) -- out=(%s,%s) -- urn=%s"%(h,t,h1,t1,urn)
             self.assertEqual(h1,h)
@@ -25,9 +25,9 @@ class TestXrn(unittest.TestCase):
         else:
             # could not figure how to use assertFails on object construction..
             # with self.assertRaises(SfaAPIError):
-            #    Xrn(hrn=h,type=t).get_urn()
+            #    Xrn(h,type=t).get_urn()
             try:
-                Xrn(hrn=h,type=t).get_urn()
+                Xrn(h,type=t).get_urn()
                 failure="Unexpectedly created Xrn object"
             except SfaAPIError:
                 failure=False
@@ -105,15 +105,15 @@ class TestXrn(unittest.TestCase):
 
 
     def test_login_base_001 (self):
-        xrn=PlXrn(hrn='ple.inria.omftest',type='slice')
+        xrn=PlXrn(xrn='ple.inria.omftest',type='slice')
         self.assertEqual(xrn.pl_login_base(),'inria')
 
     def test_slicename_001 (self):
-        xrn=PlXrn(hrn='ple.inria.omftest',type='slice')
+        xrn=PlXrn(xrn='ple.inria.omftest',type='slice')
         self.assertEqual(xrn.pl_slicename(),'inria_omftest')
 
     def test_authname_001 (self):
-        xrn=PlXrn(hrn='ple.inria.omftest',type='slice')
+        xrn=PlXrn(xrn='ple.inria.omftest',type='slice')
         self.assertEqual(xrn.pl_authname(),'inria')
 
 
