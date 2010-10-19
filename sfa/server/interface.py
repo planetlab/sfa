@@ -60,8 +60,12 @@ class Interfaces(dict):
             interfaces = [self.interfaces]
         # set the url and urn 
         for interface in interfaces:
+            # port is appended onto the domain, before the path. Should look like:
+            # http://domain:port/path
             hrn, address, port = interface['hrn'], interface['addr'], interface['port']
-            url = 'http://%(address)s:%(port)s' % locals()
+            address_parts = address.split('/')
+            address_parts[0] = address_parts[0] + ":" + str(port)
+            url =  "http://%s" %  "/".join(address_parts)
             interface['url'] = url
             interface['urn'] = hrn_to_urn(hrn, 'authority')
     
