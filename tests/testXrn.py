@@ -12,31 +12,15 @@ class TestXrn(unittest.TestCase):
 
     def __hrn(self,h,t,exp_urn):
         if verbose: print 'testing (',h,t,') expecting',exp_urn
-        if exp_urn:
-            xrn=Xrn(h,type=t)
-            if verbose: print xrn.dump_string()
-            urn=xrn.get_urn()
-            (h1,t1) = Xrn(urn).get_hrn_type()
-            if h1!=h or t1!=t or urn!=exp_urn:
-                print "hrn->urn->hrn : MISMATCH with in=(%s,%s) -- out=(%s,%s) -- urn=%s"%(h,t,h1,t1,urn)
-            self.assertEqual(h1,h)
-            self.assertEqual(t1,t)
-            self.assertEqual(urn,exp_urn)
-        else:
-            # could not figure how to use assertFails on object construction..
-            # with self.assertRaises(SfaAPIError):
-            #    Xrn(h,type=t).get_urn()
-            try:
-                Xrn(h,type=t).get_urn()
-                failure="Unexpectedly created Xrn object"
-            except SfaAPIError:
-                failure=False
-            except Exception,e:
-                failure="Xrn creation raised unexpected exception %r"%e
-            if failure: 
-                print "hrn->urn->hrn - %s with HRN=%s TYPE=%s"%(failure,h,t)
-                self.assertFalse(True)
-
+        xrn=Xrn(h,type=t)
+        if verbose: print xrn.dump_string()
+        urn=xrn.get_urn()
+        (h1,t1) = Xrn(urn).get_hrn_type()
+        if h1!=h or t1!=t or urn!=exp_urn:
+            print "hrn->urn->hrn : MISMATCH with in=(%s,%s) -- out=(%s,%s) -- urn=%s"%(h,t,h1,t1,urn)
+        self.assertEqual(h1,h)
+        self.assertEqual(t1,t)
+        self.assertEqual(urn,exp_urn)
 
     def test_hrn001 (self): 
         self.__hrn("ple.inria.baris",'user',
@@ -56,6 +40,7 @@ class TestXrn(unittest.TestCase):
     def test_hrn006(self):
         self.__hrn("plc.princeton.tmack", 'user',
                    "urn:publicid:IDN+plc:princeton+user+tmack" )
+# not specifying a type ... this gives weird result - xxx todo
 #     def test_hrn007(self):
 #         # not providing a type is currently not supporte
 #         self.__hrn("fake-pi1@onelab.eu",None,
@@ -83,7 +68,6 @@ class TestXrn(unittest.TestCase):
         # xxx - this is not quite right as the first object has type None
         self.assertEqual(loop.get_type(),'')        
 
-    
     def test_host001 (self):
         xrn=PlXrn (auth="ple.inria",hostname="onelab09.pl.sophia.inria.fr")
         self.assertEqual (xrn.get_hrn_type(), ("ple.inria.onelab09",'node'))
