@@ -61,6 +61,7 @@ class Xrn:
     # self.path
     # provide either urn, or (hrn + type)
     def __init__ (self, xrn=None, urn=None, hrn=None, type=None):
+        # user has specified xrn : guess if urn or hrn
         if xrn is not None:
             if xrn.startswith(Xrn.URN_PREFIX):
                 self.urn=xrn
@@ -69,13 +70,16 @@ class Xrn:
                 self.hrn=xrn
                 self.type=type
                 self.hrn_to_urn()
+        # user has specified urn, let's use it
         elif urn is not None: 
             self.urn=urn
             self.urn_to_hrn()
+        # user has specified hrn and type
         elif hrn is not None and type is not None: 
             self.hrn=hrn
             self.type=type
             self.hrn_to_urn()
+        # what should we do ?
         else:
             raise SfaAPIError,"Xrn.__init__"
 # happens all the time ..

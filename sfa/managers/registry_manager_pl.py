@@ -159,7 +159,7 @@ def list(api, xrn, origin_hrn=None):
     records = []    
     if registry_hrn != api.hrn:
         credential = api.getCredential()
-        record_list = registries[registry_hrn].list(credential, xrn, origin_hrn)
+        record_list = registries[registry_hrn].List(xrn, credential)
         records = [SfaRecord(dict=record).as_dict() for record in record_list]
     
     # if we still have not found the record yet, try the local registry
