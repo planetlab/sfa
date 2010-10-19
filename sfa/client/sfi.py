@@ -514,7 +514,11 @@ class Sfi:
         """
         Return an instnace of an xmlrpc server connection    
         """
-        url = "http://%s:%s" % (host, port)
+        # port is appended onto the domain, before the path. Should look like:
+        # http://domain:port/path
+        host_parts = host.split('/')
+        host_parts[0] = host_parts[0] + ":" + str(port)
+        url =  "http://%s" %  "/".join(host_parts)    
         return xmlrpcprotocol.get_server(url, keyfile, certfile, self.options)
 
     def get_server_from_opts(self, opts):
