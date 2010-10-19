@@ -78,7 +78,7 @@ class TestXrn(unittest.TestCase):
         self.assertEqual(void.get_hrn(),'')
         self.assertEqual(void.get_type(),None)
         self.assertEqual(void.get_urn(),expected)
-        loop=Xrn(urn=expected)
+        loop=Xrn(xrn=expected)
         self.assertEqual(loop.get_hrn(),'')
         # xxx - this is not quite right as the first object has type None
         self.assertEqual(loop.get_type(),'')        
