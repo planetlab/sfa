@@ -1,11 +1,12 @@
+import sys
+import zlib
+
 from sfa.util.faults import *
-from sfa.util.namespace import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.credential import Credential
 from sfa.util.sfatablesRuntime import run_sfatables
-import sys
-import zlib
 
 class ListResources(Method):
     """
@@ -26,7 +27,7 @@ class ListResources(Method):
         self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
         
         # get slice's hrn from options    
-        xrn = options.get('geni_slice_urn', None)
+        xrn = options.get('geni_slice_urn', '')
         hrn, _ = urn_to_hrn(xrn)
 
         # Find the valid credentials

@@ -4,7 +4,8 @@ import traceback
 import sys
 
 from types import StringTypes
-from sfa.util.namespace import hrn_to_pl_slicename, urn_to_hrn
+from sfa.util.xrn import urn_to_hrn
+from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
@@ -96,7 +97,7 @@ def create_slice(api, xrn, creds, xml, users):
 
 def get_rspec(api, creds, options):
     # get slice's hrn from options
-    xrn = options.get('geni_slice_urn', None)
+    xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
     
     # look in cache first

@@ -2,7 +2,8 @@ import os
 import xmlrpclib
 
 from sfa.util.faults import *
-from sfa.util.namespace import urn_to_hrn, hrn_to_pl_slicename
+from sfa.util.xrn import urn_to_hrn
+from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.sfaticket import SfaTicket
 
 def init_server():

@@ -2,7 +2,7 @@
 ### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/stop_slice.py $
 
 from sfa.util.faults import *
-from sfa.util.namespace import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.auth import Auth

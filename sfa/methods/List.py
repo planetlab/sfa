@@ -1,8 +1,6 @@
-### $Id: list.py 16588 2010-01-13 17:53:44Z anil $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/list.py $
 
 from sfa.util.faults import *
-from sfa.util.namespace import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.record import SfaRecord

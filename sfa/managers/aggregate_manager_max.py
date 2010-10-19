@@ -3,8 +3,8 @@
 from sfa.util.rspec import RSpec
 import sys
 import pdb
-from sfa.util.namespace import hrn_to_pl_slicename
 from sfa.util.xrn import urn_to_hrn, get_authority
+from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
@@ -250,7 +250,7 @@ def create_slice_max_aggregate(api, hrn, nodes):
 
 def get_rspec(api, creds, options):
     # get slice's hrn from options
-    xrn = options.get('geni_slice_urn', None)
+    xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
     # Eg. config line:
     # plc.princeton.sapan vlan23,vlan45

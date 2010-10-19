@@ -4,11 +4,13 @@ import traceback
 import sys
 import re
 from types import StringTypes
+from dateutil.parser import parse
 
-from sfa.util.namespace import get_authority, urn_to_hrn, slicename_to_hrn, hrn_to_pl_slicename, hrn_to_urn
+from sfa.util.faults import *
+from sfa.util.xrn import get_authority, hrn_to_urn, urn_to_hrn
+from sfa.util.plxrn import slicename_to_hrn, hrn_to_pl_slicename
 from sfa.util.rspec import *
 from sfa.util.specdict import *
-from sfa.util.faults import *
 from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.record import *
@@ -19,7 +21,6 @@ import sfa.plc.peers as peers
 from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
-from dateutil.parser import parse
 
 
 def __get_registry_objects(slice_xrn, creds, users):
@@ -265,7 +266,7 @@ def get_slices(api, creds):
     
 def get_rspec(api, creds, options):
     # get slice's hrn from options
-    xrn = options.get('geni_slice_urn', None)
+    xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
 
     # look in cache first

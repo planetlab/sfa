@@ -3,10 +3,9 @@ import re
 from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger
 
-# for convenience and smoother translation
-def get_leaf(hrn): return Xrn(hrn=hrn).get_leaf()
-def get_authority(hrn): return Xrn(hrn=hrn).get_authority_hrn()
-# these methods we should get rid of eventually
+# for convenience and smoother translation - we should get rid of these functions eventually 
+def get_leaf(hrn): return Xrn(xrn=hrn).get_leaf()
+def get_authority(hrn): return Xrn(xrn=hrn).get_authority_hrn()
 def urn_to_hrn(urn): xrn=Xrn(xrn=urn); return (xrn.hrn, xrn.type)
 def hrn_to_urn(hrn,type): return Xrn(hrn=hrn, type=type).urn
 
@@ -24,13 +23,13 @@ class Xrn:
     @staticmethod
     def hrn_leaf(hrn): return Xrn.hrn_split(hrn)[-1]
 
-    # e.g. hrn_path_list ('a\.b.c.d') -> ['a\.b', 'c']
+    # e.g. hrn_auth_list ('a\.b.c.d') -> ['a\.b', 'c']
     @staticmethod
-    def hrn_path_list(hrn): return Xrn.hrn_split(hrn)[0:-1]
+    def hrn_auth_list(hrn): return Xrn.hrn_split(hrn)[0:-1]
     
-    # e.g. hrn_path ('a\.b.c.d') -> 'a\.b.c'
+    # e.g. hrn_auth ('a\.b.c.d') -> 'a\.b.c'
     @staticmethod
-    def hrn_path(hrn): return '.'.join(Xrn.hrn_path_list(hrn))
+    def hrn_auth(hrn): return '.'.join(Xrn.hrn_auth_list(hrn))
     
     # e.g. escape ('a.b') -> 'a\.b'
     @staticmethod
@@ -54,9 +53,15 @@ class Xrn:
     def urn_split (urn):
         return Xrn.urn_meaningful(urn).split('+')
 
+    ####################
+    # the local fields that are kept consistent
+    # self.urn
+    # self.hrn
+    # self.type
+    # self.path
     # provide either urn, or (hrn + type)
     def __init__ (self, xrn=None, urn=None, hrn=None, type=None):
-        if xrn:
+        if xrn is not None:
             if xrn.startswith(Xrn.URN_PREFIX):
                 self.urn=xrn
                 self.urn_to_hrn()
@@ -64,39 +69,42 @@ class Xrn:
                 self.hrn=xrn
                 self.type=type
                 self.hrn_to_urn()
-        elif urn: 
+        elif urn is not None: 
             self.urn=urn
             self.urn_to_hrn()
-        elif hrn and type: 
+        elif hrn is not None and type is not None: 
             self.hrn=hrn
             self.type=type
             self.hrn_to_urn()
         else:
             raise SfaAPIError,"Xrn.__init__"
-        if not type:
-            sfa_logger().debug("type-less Xrn's are not safe")
+# happens all the time ..
+#        if not type:
+#            sfa_logger().debug("type-less Xrn's are not safe")
 
     def get_urn(self): return self.urn
-    def get_hrn(self): return (self.hrn, self.type)
+    def get_hrn(self): return self.hrn
+    def get_type(self): return self.type
+    def get_hrn_type(self): return (self.hrn, self.type)
 
-    def get_leaf(self):
-        if not self.hrn: raise SfaAPIError, "Xrn.get_leaf"
+    def _normalize(self):
+        if self.hrn is None: raise SfaAPIError, "Xrn._normalize"
         if not hasattr(self,'leaf'): 
             self.leaf=Xrn.hrn_split(self.hrn)[-1]
+        # self.authority keeps a list
+        if not hasattr(self,'authority'): 
+            self.authority=Xrn.hrn_auth_list(self.hrn)
+
+    def get_leaf(self):
+        self._normalize()
         return self.leaf
 
     def get_authority_hrn(self): 
-        if not self.hrn: raise SfaAPIError, "Xrn.get_authority_hrn"
-        # self.authority keeps a list
-        if not hasattr(self,'authority'): 
-            self.authority=Xrn.hrn_path_list(self.hrn)
+        self._normalize()
         return '.'.join( self.authority )
     
     def get_authority_urn(self): 
-        if not self.hrn: raise SfaAPIError, "Xrn.get_authority_urn"
-        # self.authority keeps a list
-        if not hasattr(self,'authority'): 
-            self.authority=Xrn.hrn_path_list(self.hrn)
+        self._normalize()
         return ':'.join( [Xrn.unescape(x) for x in self.authority] )
     
     def urn_to_hrn(self):
@@ -104,7 +112,8 @@ class Xrn:
         compute tuple (hrn, type) from urn
         """
         
-        if not self.urn or not self.urn.startswith(Xrn.URN_PREFIX):
+#        if not self.urn or not self.urn.startswith(Xrn.URN_PREFIX):
+        if not self.urn.startswith(Xrn.URN_PREFIX):
             raise SfaAPIError, "Xrn.urn_to_hrn"
 
         parts = Xrn.urn_split(self.urn)
@@ -127,14 +136,15 @@ class Xrn:
         compute urn from (hrn, type)
         """
 
-        if not self.hrn or self.hrn.startswith(Xrn.URN_PREFIX):
-            raise SfaAPIError, "Xrn.hrn_to_urn"
+#        if not self.hrn or self.hrn.startswith(Xrn.URN_PREFIX):
+        if self.hrn.startswith(Xrn.URN_PREFIX):
+            raise SfaAPIError, "Xrn.hrn_to_urn, hrn=%s"%self.hrn
 
         if self.type == 'authority':
             self.authority = Xrn.hrn_split(self.hrn)
             name = 'sa'   
         else:
-            self.authority = Xrn.hrn_path_list(self.hrn)
+            self.authority = Xrn.hrn_auth_list(self.hrn)
             name = Xrn.hrn_leaf(self.hrn)
 
         authority_string = self.get_authority_urn()

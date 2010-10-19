@@ -5,7 +5,7 @@ from sfa.trust.certificate import Keypair, convert_public_key
 from sfa.trust.gid import *
 
 from sfa.util.faults import *
-from sfa.util.namespace import get_authority
+from sfa.util.xrn import get_authority
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.util.record import SfaRecord

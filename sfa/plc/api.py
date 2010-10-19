@@ -17,7 +17,8 @@ from sfa.trust.auth import Auth
 from sfa.trust.rights import Right, Rights, determine_rights
 from sfa.trust.credential import Credential,Keypair
 from sfa.trust.certificate import Certificate
-from sfa.util.namespace import get_authority, hrn_to_pl_slicename, hrn_to_pl_slicename, hrn_to_urn, slicename_to_hrn, hostname_to_hrn
+from sfa.util.xrn import get_authority, hrn_to_urn
+from sfa.util.plxrn import hostname_to_hrn, hrn_to_pl_slicename, hrn_to_pl_slicename, slicename_to_hrn
 from sfa.util.nodemanager import NodeManager
 try:
     from collections import defaultdict

@@ -1,8 +1,5 @@
-### $Id: remove.py 16497 2010-01-07 03:33:24Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/remove.py $
-
 from sfa.util.faults import *
-from sfa.util.namespace import urn_to_hrn
+from sfa.util.xrn import Xrn
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
 from sfa.trust.credential import Credential
@@ -31,21 +28,18 @@ class Remove(Method):
 
     returns = Parameter(int, "1 if successful")
     
-# this does not sound quite right, but the best I could come up with is:
-# if type is not specified then we expect a URN
     def call(self, xrn, creds, type):
-        if type: hrn=xrn
-        else:    (hrn,type) = urn_to_hrn(xrn)
+        xrn=Xrn(xrn=xrn,type=type)
         
         # validate the cred
         valid_creds = self.api.auth.checkCredentials(creds, "remove")
-        self.api.auth.verify_object_permission(hrn)
+        self.api.auth.verify_object_permission(xrn.get_hrn())
 
         #log the call
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tmethod-name: %s\tcaller-hrn: %s\ttarget-hrn: %s\ttype: %s"%(
-                self.api.interface, self.name, origin_hrn, hrn, type))
+        self.api.logger.info("interface: %s\tmethod-name: %s\tcaller-hrn: %s\ttarget-urn: %s"%(
+                self.api.interface, self.name, origin_hrn, xrn.get_urn()))
 
         manager = self.api.get_interface_manager()
 
-        return manager.remove(self.api, hrn, type) 
+        return manager.remove(self.api, xrn) 

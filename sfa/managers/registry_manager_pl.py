@@ -7,8 +7,8 @@ from sfa.util.record import SfaRecord
 from sfa.util.table import SfaTable
 from sfa.util.record import SfaRecord
 from sfa.trust.gid import GID 
-from sfa.util.namespace import hrn_to_pl_login_base
 from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn, urn_to_hrn
+from sfa.util.plxrn import hrn_to_pl_login_base
 from sfa.trust.credential import Credential
 from sfa.trust.certificate import Certificate, Keypair
 from sfa.trust.gid import create_uuid
@@ -368,21 +368,18 @@ def update(api, record_dict):
     
     return 1 
 
-# being PL specific it sounds right to expect a hrn+type (not a xrn)
-def remove(api, hrn, type, origin_hrn=None):
-#    # convert xrn to hrn     
-#    if type:
-#        hrn = urn_to_hrn(xrn)[0]
-#    else:
-#        hrn, type = urn_to_hrn(xrn)    
+# expecting an Xrn instance
+def remove(api, xrn, origin_hrn=None):
 
     table = SfaTable()
-    filter = {'hrn': hrn}
+    filter = {'hrn': xrn.get_hrn()}
+    hrn=xrn.get_hrn()
+    type=xrn.get_type()
     if type and type not in ['all', '*']:
         filter['type'] = type
+
     records = table.find(filter)
-    if not records:
-        raise RecordNotFound(hrn)
+    if not records: raise RecordNotFound(hrn)
     record = records[0]
     type = record['type']
 

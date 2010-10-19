@@ -46,7 +46,7 @@ import M2Crypto
 from M2Crypto import X509
 
 from sfa.util.sfalogging import sfa_logger
-from sfa.util.namespace import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn
 from sfa.util.faults import *
 
 def convert_public_key(key):

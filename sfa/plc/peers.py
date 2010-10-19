@@ -1,4 +1,4 @@
-from sfa.util.namespace import *
+from sfa.util.xrn import get_authority
 from types import StringTypes
 
 def get_peer(api, hrn):

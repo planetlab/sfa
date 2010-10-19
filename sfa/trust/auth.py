@@ -9,7 +9,7 @@ from sfa.trust.trustedroot import TrustedRootList
 from sfa.util.faults import *
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
-from sfa.util.namespace import get_authority
+from sfa.util.xrn import get_authority
 from sfa.util.sfaticket import *
 
 from sfa.util.sfalogging import sfa_logger

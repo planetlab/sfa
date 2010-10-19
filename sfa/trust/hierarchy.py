@@ -15,7 +15,7 @@
 import os
 
 from sfa.util.sfalogging import sfa_logger
-from sfa.util.namespace import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
+from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import Credential
 from sfa.trust.gid import GID, create_uuid

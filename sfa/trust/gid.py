@@ -25,14 +25,12 @@
 # descendant of the certificate class.
 ##
 
-### $Id$
-### $URL$
 import xmlrpclib
 import uuid
 
 from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Certificate
-from sfa.util.namespace import hrn_to_urn, urn_to_hrn
+from sfa.util.xrn import hrn_to_urn, urn_to_hrn
 
 ##
 # Create a new uuid. Returns the UUID as a string.

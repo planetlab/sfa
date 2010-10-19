@@ -9,7 +9,7 @@ import struct
 #from soaplib.serializers.clazz import *
 
 from sfa.util.faults import *
-from sfa.util.namespace import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn
 from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.util.config import Config

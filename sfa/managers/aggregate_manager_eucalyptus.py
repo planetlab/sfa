@@ -337,7 +337,7 @@ class ZoneResultParser(object):
 def get_rspec(api, creds, options): 
     global cloud
     # get slice's hrn from options
-    xrn = options.get('geni_slice_urn', None)
+    xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
 
     # get hrn of the original caller

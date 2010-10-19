@@ -8,7 +8,7 @@ import sfa.util.xmlrpcprotocol as xmlrpc
 from unittest import TestCase
 from optparse import OptionParser
 from sfa.util.xmlrpcprotocol import ServerException
-from sfa.util.namespace import *
+from sfa.util.xrn import get_authority
 from sfa.util.config import *
 from sfa.trust.certificate import *
 from sfa.trust.credential import *

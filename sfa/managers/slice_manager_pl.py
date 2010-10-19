@@ -11,7 +11,7 @@ from lxml import etree
 
 from sfa.util.sfalogging import sfa_logger
 from sfa.util.rspecHelper import merge_rspecs
-from sfa.util.namespace import urn_to_hrn, hrn_to_urn
+from sfa.util.xrn import urn_to_hrn, hrn_to_urn
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
@@ -339,7 +339,7 @@ def get_slices(api, creds):
 def get_rspec(api, creds, options):
     
     # get slice's hrn from options
-    xrn = options.get('geni_slice_urn', None)
+    xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
 
     # get hrn of the original caller

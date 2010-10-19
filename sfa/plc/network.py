@@ -1,7 +1,8 @@
 from __future__ import with_statement
 import re
 import socket
-from sfa.util.namespace import get_authority, hrn_to_pl_slicename
+from sfa.util.xrn import get_authority
+from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.faults import *
 from xmlbuilder import XMLBuilder
 from lxml import etree

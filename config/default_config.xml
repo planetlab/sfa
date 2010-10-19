@@ -5,8 +5,6 @@ Default SFA configuration file
 
 Thierry Parmentelat 
 
-$Id$
-$URL$
 -->
 
 <!DOCTYPE configuration PUBLIC "-//PlanetLab Central//DTD PLC configuration//EN" "plc_config.dtd">
