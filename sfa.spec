@@ -52,7 +52,7 @@ Requires: python-dateutil
 #%endif
 
 %package cm
-Summary: the SFA wrapper around MyPLC's NodeManager
+Summary: the SFA wrapper around MyPLC NodeManager
 Group: Applications/System
 Requires: sfa
 Requires: pyOpenSSL >= 0.6
@@ -76,6 +76,11 @@ Summary: sfatables policy tool for SFA
 Group: Applications/System
 Requires: sfa
 
+%Package tests
+Summary: unit tests suite for SFA
+Group: Applications/System
+Requires: sfa
+
 %description
 This package provides the python libraries that the SFA implementation requires
 
@@ -95,6 +100,9 @@ sfi.py, together with other utilities.
 sfatables is a tool for defining access and admission control policies
 in an SFA network, in much the same way as iptables is for ip
 networks. This is the command line interface to manage sfatables
+
+%description tests
+Provides some binary unit tests in /usr/share/sfa/tests
 
 %prep
 %setup -q
@@ -146,6 +154,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files sfatables
 %{_bindir}/sfatables
+
+%files tests
+%{_datadir}/sfa/tests
 
 ### sfa-plc installs the 'sfa' service
 %post plc

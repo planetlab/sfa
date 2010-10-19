@@ -69,7 +69,19 @@ class TestXrn(unittest.TestCase):
     def test_hrn010(self):
         self.__hrn("plc.vini.site", 'authority',
                    "urn:publicid:IDN+plc:vini:site+authority+sa" )
-        
+
+    # this one is a bit off limits but it's used in some places
+    # like .e.g when running sfi.py resources
+    def test_void(self):
+        void=Xrn(xrn='',type=None)
+        expected='urn:publicid:IDN++'
+        self.assertEqual(void.get_hrn(),'')
+        self.assertEqual(void.get_type(),None)
+        self.assertEqual(void.get_urn(),expected)
+        loop=Xrn(urn=expected)
+        self.assertEqual(loop.get_hrn(),'')
+        # xxx - this is not quite right as the first object has type None
+        self.assertEqual(loop.get_type(),'')        
 
     
     def test_host001 (self):
@@ -94,14 +106,14 @@ class TestXrn(unittest.TestCase):
 
     def test_login_base_001 (self):
         xrn=PlXrn(hrn='ple.inria.omftest',type='slice')
-        self.assertEqual(xrn.login_base(),'inria')
+        self.assertEqual(xrn.pl_login_base(),'inria')
 
     def test_slicename_001 (self):
         xrn=PlXrn(hrn='ple.inria.omftest',type='slice')
-        self.assertEqual(xrn.slicename(),'inria_omftest')
+        self.assertEqual(xrn.pl_slicename(),'inria_omftest')
 
     def test_authname_001 (self):
         xrn=PlXrn(hrn='ple.inria.omftest',type='slice')
-        self.assertEqual(xrn.authname(),'inria')
+        self.assertEqual(xrn.pl_authname(),'inria')
 
 

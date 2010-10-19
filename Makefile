@@ -5,15 +5,15 @@
 DESTDIR="/"
 
 ##########
-all: python wsdl
+all: python wsdl 
 
-install: python-install wsdl-install xmlbuilder-install 
+install: python-install wsdl-install xmlbuilder-install tests-install
 
-clean: python-clean wsdl-clean
+clean: python-clean wsdl-clean 
 
-uninstall: python-uninstall
+uninstall: python-uninstall tests-uninstall
 
-.PHONY: all install clean 
+.PHONY: all install clean uninstall
 
 ##########
 python: 
@@ -42,6 +42,17 @@ wsdl-clean:
 	$(MAKE) -C wsdl clean
 
 .PHONY: wsdl wsdl-install wsdl-clean
+
+
+##########
+tests-install:
+	mkdir -p $(DESTDIR)/usr/share/sfa/tests
+	install -m 755 tests/*.py $(DESTDIR)/usr/share/sfa/tests/
+
+tests-uninstall:
+	rm -rf $(DESTDIR)/usr/share/sfa/tests
+
+.PHONY: tests-install tests-uninstall
 
 ########## refreshing methods package metafile
 # Metafiles - manage Legacy/ and Accessors by hand
