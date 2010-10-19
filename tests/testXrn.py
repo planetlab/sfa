@@ -56,10 +56,10 @@ class TestXrn(unittest.TestCase):
     def test_hrn006(self):
         self.__hrn("plc.princeton.tmack", 'user',
                    "urn:publicid:IDN+plc:princeton+user+tmack" )
-    def test_hrn007(self):
-        # not providing a type is currently not supporte
-        self.__hrn("fake-pi1@onelab.eu",None,
-                   None)
+#     def test_hrn007(self):
+#         # not providing a type is currently not supporte
+#         self.__hrn("fake-pi1@onelab.eu",None,
+#                    None)
     def test_hrn008(self):
         self.__hrn("plc.princeton.planetlab1", 'node',
                    "urn:publicid:IDN+plc:princeton+node+planetlab1" )
