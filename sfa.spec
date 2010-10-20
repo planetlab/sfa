@@ -1,12 +1,9 @@
-#
-# $Id$
-#
 
 %define url $URL$
 
 %define name sfa
 %define version 1.0
-%define taglevel 5
+%define taglevel 4
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -82,7 +79,7 @@ Group: Applications/System
 Requires: sfa
 
 %description
-This package provides the python libraries that the SFA implementation requires
+This package provides the python libraries for the PlanetLab implementation of SFA
 
 %description cm
 This package implements the SFA interface which serves as a layer
