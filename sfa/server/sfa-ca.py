@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
 #
-# SFA Certificate Signing and management. Root authorities can use this script to sign
-# the certificate of another authority and become its parent.     
+# SFA Certificate Signing and management. Root authorities can use this script 
+# to sign  the certificate of another authority and become its parent. Sub 
+# authorities (authorities that have had their cert signed by another authority) 
+# can use this script to update their registry hierarchy with the new cert    
 # 
 # Example usage: 
 #
