@@ -60,7 +60,7 @@ def create_slice(api, xrn, creds, xml, users):
 
     hrn, type = urn_to_hrn(xrn)
     peer = None
-    reg_objects = __get_registry_objects(slice_xrn, creds, users)
+    reg_objects = __get_registry_objects(xrn, creds, users)
     slices = Slices(api)
     peer = slices.get_peer(hrn)
     sfa_peer = slices.get_sfa_peer(hrn)
