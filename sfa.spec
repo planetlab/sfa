@@ -3,7 +3,7 @@
 
 %define name sfa
 %define version 1.0
-%define taglevel 5
+%define taglevel 6
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -183,6 +183,9 @@ fi
 
 
 %changelog
+* Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-6
+- extend GetVersion towards minimum federation introspection, and expose local tag
+
 * Wed Oct 20 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-5
 - fixed some legacy issues (list vs List)
 - deprecated sfa.util.namespace for xrn and plxrn
@@ -236,6 +239,9 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-6
+- extend GetVersion towards minimum federation introspection, and expose local tag
+
 * Wed Oct 20 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-5
 - fixed some legacy issues (list vs List)
 - deprecated sfa.util.namespace for xrn and plxrn
