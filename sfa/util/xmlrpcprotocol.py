@@ -49,14 +49,14 @@ class XMLRPCTransport(xmlrpclib.Transport):
 
 class XMLRPCServerProxy(xmlrpclib.ServerProxy):
     def __init__(self, url, transport, allow_none=True, options=None):
-        self.options = options
         verbose = False
-        if self.options and self.options.debug:
+        if options and options.debug:
             verbose = True
+        sfa_logger().info ("Connecting to xmlrpcserver at %s (with verbose=%s)"%(url,verbose))
         xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none, verbose=verbose)
 
     def __getattr__(self, attr):
-        sfa_logger().debug("Calling xml-rpc method:%s"%attr)
+        sfa_logger().info ("Calling xml-rpc method:%s"%attr)
         return xmlrpclib.ServerProxy.__getattr__(self, attr)
 
 

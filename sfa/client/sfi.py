@@ -375,6 +375,7 @@ class Sfi:
             gid = GID(filename=file)
         return gid
 
+    # xxx opts unused
     def get_gid(self, opts, args):
         """
         Get the specify gid and save it to file
@@ -498,6 +499,7 @@ class Sfi:
     
        return key_string
 
+    # xxx opts undefined
     def get_component_server_from_hrn(self, hrn):
         # direct connection to the nodes component manager interface
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
@@ -507,12 +509,11 @@ class Sfi:
             self.logger.warning("No such component:%r"% opts.component)
         record = records[0]
   
-        return self.get_server(record['hostname'], CM_PORT, self.key_file, \
-                               self.cert_file, self.options)
+        return self.get_server(record['hostname'], CM_PORT, self.key_file, self.cert_file)
  
     def get_server(self, host, port, keyfile, certfile):
         """
-        Return an instnace of an xmlrpc server connection    
+        Return an instance of an xmlrpc server connection    
         """
         # port is appended onto the domain, before the path. Should look like:
         # http://domain:port/path
@@ -521,6 +522,7 @@ class Sfi:
         url =  "http://%s" %  "/".join(host_parts)    
         return xmlrpcprotocol.get_server(url, keyfile, certfile, self.options)
 
+    # xxx opts could be retrieved in self.options
     def get_server_from_opts(self, opts):
         """
         Return instance of an xmlrpc connection to a slice manager, aggregate
