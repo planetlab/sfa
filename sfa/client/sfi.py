@@ -798,8 +798,9 @@ class Sfi:
             creds.append(delegated_cred) 
         result = server.ListResources(creds, call_options)
         format = opts.format
-        display_rspec(result, format)
-        if (opts.file is not None):
+        if opts.file is None:
+            display_rspec(result, format)
+        else:
             file = opts.file
             if not file.startswith(os.sep):
                 file = os.path.join(self.options.sfi_dir, file)
