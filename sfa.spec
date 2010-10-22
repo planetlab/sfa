@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 6
+%define taglevel 7
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -180,6 +180,9 @@ fi
 
 
 %changelog
+* Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-7
+- fix GetVersion code_tag and add code_url
+
 * Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-6
 - extend GetVersion towards minimum federation introspection, and expose local tag
 
@@ -236,6 +239,9 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-7
+- fix GetVersion code_tag and add code_url
+
 * Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-6
 - extend GetVersion towards minimum federation introspection, and expose local tag
 
