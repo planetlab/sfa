@@ -1,6 +1,3 @@
-
-%define url $URL$
-
 %define name sfa
 %define version 1.0
 %define taglevel 5
@@ -20,7 +17,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Vendor: PlanetLab
 Packager: PlanetLab Central <support@planet-lab.org>
 Distribution: PlanetLab %{plrelease}
-URL: %(echo %{url} | cut -d ' ' -f 2)
+URL: %SCMURL}
 Summary: the SFA python libraries
 Group: Applications/System
 
