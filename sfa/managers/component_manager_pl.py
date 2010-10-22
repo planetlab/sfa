@@ -5,6 +5,11 @@ from sfa.util.faults import *
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.sfaticket import SfaTicket
+from sfa.util.version import version_core
+
+def GetVersion(api):
+    return version_core({'interface':'component',
+                         'testbed':'myplc'})
 
 def init_server():
     from sfa.server import sfa_component_setup
@@ -16,11 +21,6 @@ def init_server():
         sfa_component_setup.get_node_key()
         sfa_component_setup.get_credential(force=True)
         sfa_component_setup.get_trusted_certs()
-
-def get_version():
-    version = {}
-    version['geni_api'] = 1
-    return version
 
 def slice_status(api, slice_xrn, creds):
     result = {}

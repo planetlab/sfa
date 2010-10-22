@@ -1,6 +1,4 @@
-### $Id: slices.py 15842 2009-11-22 09:56:13Z anil $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/plc/slices.py $
-
+# 
 import sys
 import time,datetime
 from StringIO import StringIO
@@ -23,12 +21,15 @@ from sfa.trust.credential import Credential
 from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
 import sfa.plc.peers as peers
+from sfa.util.version import version_core
 
-def get_version():
-    version = {}
-    version['geni_api'] = 1
-    version['sfa'] = 1
-    return version
+def GetVersion(api):
+    peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.aggregates.items() 
+                   if peername != api.hrn])
+    return version_core({'interface':'slicemgr',
+                         'hrn' : api.hrn,
+                         'peers': peers,
+                         })
 
 def slice_status(api, slice_xrn, creds ):
     hrn, type = urn_to_hrn(slice_xrn)

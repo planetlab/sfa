@@ -1,0 +1,12 @@
+### updated by the toplevel Makefile
+version_tag="@VERSIONTAG@"
+import socket
+
+def version_core (more):
+    core = { 'geni_api':1,
+             'sfa' : 1,
+             'tag' : version_tag,
+             'hostname' : socket.gethostname(),
+             }
+    core.update(more)
+    return core

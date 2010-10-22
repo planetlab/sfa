@@ -12,12 +12,15 @@ from sfa.util.plxrn import hrn_to_pl_login_base
 from sfa.trust.credential import Credential
 from sfa.trust.certificate import Certificate, Keypair
 from sfa.trust.gid import create_uuid
+from sfa.util.version import version_core
 
-def get_version(api):
-    version = {}
-    version['geni_api'] = 1
-    version['sfa'] = 1
-    return version
+# The GENI GetVersion call
+def GetVersion(api):
+    peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.registries.items() 
+                   if peername != api.hrn])
+    return version_core({'interface':'registry',
+                         'hrn':api.hrn,
+                         'peers':peers})
 
 def get_credential(api, xrn, type, is_self=False):
     # convert xrn to hrn     
@@ -78,12 +81,6 @@ def get_credential(api, xrn, type, is_self=False):
 
     return new_cred.save_to_string(save_parents=True)
 
-
-# The GENI GetVersion call
-def GetVersion():
-    version = {}
-    version['geni_api'] = 1
-    return version
 
 def resolve(api, xrns, type=None, full=True):
 

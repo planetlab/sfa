@@ -21,7 +21,11 @@ import sfa.plc.peers as peers
 from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
+from sfa.util.version import version_core
 
+def GetVersion(api):
+    return version_core({'interface':'aggregate',
+                         'testbed':'myplc'})
 
 def __get_registry_objects(slice_xrn, creds, users):
     """
@@ -82,12 +86,6 @@ def __get_hostnames(nodes):
     for node in nodes:
         hostnames.append(node.hostname)
     return hostnames
-
-def get_version():
-    version = {}
-    version['geni_api'] = 1
-    version['sfa'] = 1
-    return version
 
 def slice_status(api, slice_xrn, creds):
     hrn, type = urn_to_hrn(slice_xrn)

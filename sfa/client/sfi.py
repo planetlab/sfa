@@ -211,6 +211,11 @@ class Sfi:
            parser.add_option("-s", "--slice", dest="delegate_slice",
                             help="delegate slice credential", metavar="HRN", default=None)
         
+        if command in ("version"):
+            parser.add_option("-R","--registry-version",
+                              action="store_true", dest="probe_registry", default=False,
+                              help="probe registry version instead of slicemgr")
+
         return parser
 
         
@@ -750,9 +755,12 @@ class Sfi:
     
 
     def version(self, opts, args):
-        server = self.get_server_from_opts(opts)
-        
-        print server.GetVersion()
+        if opts.probe_registry:
+            server=self.registry
+        else:
+            server = self.get_server_from_opts(opts)
+        for (k,v) in server.GetVersion().items():
+            print "%-20s: %s"%(k,v)
 
     # list instantiated slices
     def slices(self, opts, args):

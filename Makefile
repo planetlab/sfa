@@ -15,8 +15,14 @@ uninstall: python-uninstall tests-uninstall
 
 .PHONY: all install clean uninstall
 
+VERSIONTAG=should-be-redefined-by-specfile
+
 ##########
-python: 
+python: version
+
+version: sfa/util/version.py
+sfa/util/version.py: sfa/util/version.py.in
+	sed -e "s,@VERSIONTAG@,$(VERSIONTAG),g" sfa/util/version.py.in > $@
 
 xmlbuilder-install:
 	cd xmlbuilder-0.9 && python setup.py install --root=$(DESTDIR) && cd -
@@ -25,11 +31,14 @@ python-install:
 	python setup.py install --root=$(DESTDIR)	
 	chmod 444 $(DESTDIR)/etc/sfa/default_config.xml
 
-python-clean:
+python-clean: version-clean
 	python setup.py clean
-	rm $(init)
+#	rm $(init)
 
-.PHONY: python python-install python-clean xmlbuilder-install
+version-clean:
+	rm -f sfa/util/version.py
+
+.PHONY: python version python-install python-clean version-clean xmlbuilder-install 
 ##########
 wsdl: 
 	$(MAKE) -C wsdl 
@@ -42,7 +51,6 @@ wsdl-clean:
 	$(MAKE) -C wsdl clean
 
 .PHONY: wsdl wsdl-install wsdl-clean
-
 
 ##########
 tests-install:
