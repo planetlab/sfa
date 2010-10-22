@@ -16,13 +16,14 @@ uninstall: python-uninstall tests-uninstall
 .PHONY: all install clean uninstall
 
 VERSIONTAG=should-be-redefined-by-specfile
+SCMURL=should-be-redefined-by-specfile
 
 ##########
 python: version
 
 version: sfa/util/version.py
 sfa/util/version.py: sfa/util/version.py.in
-	sed -e "s,@VERSIONTAG@,$(VERSIONTAG),g" sfa/util/version.py.in > $@
+	sed -e "s,@VERSIONTAG@,$(VERSIONTAG),g" -e "s,@SCMURL@,$(SCMURL),g" sfa/util/version.py.in > $@
 
 xmlbuilder-install:
 	cd xmlbuilder-0.9 && python setup.py install --root=$(DESTDIR) && cd -

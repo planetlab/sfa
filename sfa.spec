@@ -102,11 +102,11 @@ Provides some binary unit tests in /usr/share/sfa/tests
 %setup -q
 
 %build
-make VERSION=%{version}-%{taglevel}
+make VERSIONTAG="%{version}-%{taglevel}" SCMURL="%{SCMURL}"
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install VERSION=%{version}-%{taglevel} DESTDIR="$RPM_BUILD_ROOT"
+make VERSIONTAG="%{version}-%{taglevel}" SCMURL="%{SCMURL}" install DESTDIR="$RPM_BUILD_ROOT"
 
 %clean
 rm -rf $RPM_BUILD_ROOT

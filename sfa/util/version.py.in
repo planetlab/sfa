@@ -1,11 +1,13 @@
 ### updated by the toplevel Makefile
 version_tag="@VERSIONTAG@"
+scm_url="@SCMURL@"
 import socket
 
 def version_core (more):
     core = { 'geni_api':1,
              'sfa' : 1,
-             'tag' : version_tag,
+             'code_tag' : version_tag,
+             'code_url' : scm_url,
              'hostname' : socket.gethostname(),
              }
     core.update(more)
