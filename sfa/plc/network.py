@@ -161,7 +161,7 @@ class Slice:
         return n
 
     # Add a new slice tag   
-    def add_tag(self, tagname, value, node = None, role_id = 40):
+    def add_tag(self, tagname, value, node = None, role_id = 30):
         tt = self.network.lookupTagType(tagname)
         if not tt.permit_update(role_id):
             raise InvalidRSpec("permission denied to modify '%s' tag" % tagname)
@@ -172,7 +172,7 @@ class Slice:
         return tag
     
     # Update a slice tag if it exists, else add it             
-    def update_tag(self, tagname, value, node = None, role_id = 40):
+    def update_tag(self, tagname, value, node = None, role_id = 30):
         tag = self.get_tag(tagname, node)
         if tag:
             if not tag.permit_update(role_id, value):
@@ -182,7 +182,7 @@ class Slice:
             tag = self.add_tag(tagname, value, node, role_id)
         return tag
             
-    def update_multi_tag(self, tagname, value, node = None, role_id = 40):
+    def update_multi_tag(self, tagname, value, node = None, role_id = 30):
         tags = self.get_multi_tag(tagname, node)
         for tag in tags:
             if tag and tag.value == value:
@@ -500,7 +500,7 @@ class Network:
         Write any slice tags that have been added or modified back to the DB
         """
         for tag in self.getSliceTags():
-            if tag.category == 'slice/rspec' and not tag.was_updated() and tag.permit_update(None, 40):
+            if tag.category == 'slice/rspec' and not tag.was_updated() and tag.permit_update(None, 30):
                 # The user wants to delete this tag
                 tag.delete()
 
