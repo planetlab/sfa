@@ -6,6 +6,7 @@ import sys
 import os
 import traceback
 import string
+import datetime
 import xmlrpclib
 
 from sfa.util.faults import *
@@ -126,10 +127,27 @@ class SfaAPI(BaseAPI):
         """
         Return a valid credential for this interface. 
         """
+        type = 'authority'
+        path = self.config.SFA_DATA_DIR
+        filename = ".".join([self.interface, self.hrn, type, "cred"])
+        cred_filename = path + os.sep + filename
+        cred = None
+        if os.path.isfile(cred_filename):
+            cred = Credential(filename = cred_filename)
+            # make sure cred isnt expired
+            if not cred.get_expiration or \
+               datetime.datetime.today() < cred.get_expiration():    
+                return cred.save_to_string(save_parents=True)
+
+        # get a new credential
         if self.interface in ['registry']:
-            return self.getCredentialFromLocalRegistry()
+            cred =  self.__getCredentialRaw()
         else:
-            return self.getCredentialFromRegistry()
+            cred =  self.__getCredential()
+        cred.save_to_file(cred_filename, save_parents=True)
+
+        return cred.save_to_string(save_parents=True)
+
 
     def getDelegatedCredential(self, creds):
         """
@@ -143,32 +161,21 @@ class SfaAPI(BaseAPI):
             return None
         return delegated_creds[0]
  
-    def getCredentialFromRegistry(self):
+    def __getCredential(self):
         """ 
         Get our credential from a remote registry 
         """
-        type = 'authority'
-        path = self.config.SFA_DATA_DIR
-        filename = ".".join([self.interface, self.hrn, type, "cred"])
-        cred_filename = path + os.sep + filename
-        try:
-            credential = Credential(filename = cred_filename)
-            return credential.save_to_string(save_parents=True)
-        except IOError:
-            from sfa.server.registry import Registries
-            registries = Registries(self)
-            registry = registries[self.hrn]
-            cert_string=self.cert.save_to_string(save_parents=True)
-            # get self credential
-            self_cred = registry.GetSelfCredential(cert_string, self.hrn, type)
-            # get credential
-            cred = registry.GetCredential(self_cred, self.hrn, type)
-            
-            # save cred to file
-            Credential(string=cred).save_to_file(cred_filename, save_parents=True)
-            return cred
+        from sfa.server.registry import Registries
+        registries = Registries(self)
+        registry = registries[self.hrn]
+        cert_string=self.cert.save_to_string(save_parents=True)
+        # get self credential
+        self_cred = registry.GetSelfCredential(cert_string, self.hrn, type)
+        # get credential
+        cred = registry.GetCredential(self_cred, self.hrn, type)
+        return Credential(string=cred)
 
-    def getCredentialFromLocalRegistry(self):
+    def __getCredentialRaw(self):
         """
         Get our current credential directly from the local registry.
         """
@@ -194,15 +201,10 @@ class SfaAPI(BaseAPI):
         
         r1 = determine_rights(type, hrn)
         new_cred.set_privileges(r1)
-
-        auth_kind = "authority,ma,sa"
-
-        new_cred.set_parent(self.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
-
         new_cred.encode()
         new_cred.sign()
 
-        return new_cred.save_to_string(save_parents=True)
+        return new_cred
    
 
     def loadCredential (self):
