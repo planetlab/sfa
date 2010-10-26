@@ -1,23 +1,32 @@
-- Build/Tags
-* test rpm build/install
+SM
+  * connect SM to ProtoGeni Aggregates
+SFACE
+  * attribute management
+  * aggregate manager checks role of user managing attributes
 
-- Stop invalid users
-* a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
+Unit Tests
+  * fix tests in tests/ directory
+ 
+Build/Tags
+  * test rpm build/install
 
-- NM Plugin
+Stop invalid users
+  * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
+
+NM Plugin
   * install the slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
   * test
  
-- Component manager
+Component manager
   * install trusted certs when interface starts (component_manager_pl.init_server())
   * Redeem ticket - RedeemTicket/AdminTicket not working. Why?
   ** This may be replaced by sfa + credentials  
 
-- Registry
+Registry
 * fix legacy credential support
 * move db tables into db with less overhead (tokyocabinet?)
 
-- GUI/Auth Service
+GUI/Auth Service
   * develop a simple service where users auth using username/passord and 
     receive their cred
   * service manages users key/cert,creds
