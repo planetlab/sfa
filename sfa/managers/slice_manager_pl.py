@@ -9,7 +9,7 @@ from lxml import etree
 
 from sfa.util.sfalogging import sfa_logger
 from sfa.util.rspecHelper import merge_rspecs
-from sfa.util.xrn import urn_to_hrn, hrn_to_urn
+from sfa.util.xrn import Xrn, urn_to_hrn, hrn_to_urn
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
@@ -26,8 +26,10 @@ from sfa.util.version import version_core
 def GetVersion(api):
     peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.aggregates.items() 
                    if peername != api.hrn])
+    xrn=Xrn (api.hrn)
     return version_core({'interface':'slicemgr',
-                         'hrn' : api.hrn,
+                         'hrn' : xrn.get_hrn(),
+                         'urn' : xrn.get_urn(),
                          'peers': peers,
                          })
 

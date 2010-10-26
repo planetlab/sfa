@@ -18,8 +18,10 @@ from sfa.util.version import version_core
 def GetVersion(api):
     peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.registries.items() 
                    if peername != api.hrn])
+    xrn=Xrn(api.hrn)
     return version_core({'interface':'registry',
-                         'hrn':api.hrn,
+                         'hrn':xrn.get_hrn(),
+                         'urn':xrn.get_urn(),
                          'peers':peers})
 
 def get_credential(api, xrn, type, is_self=False):
