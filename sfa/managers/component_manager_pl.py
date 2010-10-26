@@ -2,8 +2,7 @@ import os
 import xmlrpclib
 
 from sfa.util.faults import *
-from sfa.util.xrn import urn_to_hrn
-from sfa.util.plxrn import hrn_to_pl_slicename
+from sfa.util.plxrn import PlXrn
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.version import version_core
 
@@ -30,23 +29,19 @@ def slice_status(api, slice_xrn, creds):
     return result
            
 def start_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
-    slicename = hrn_to_pl_slicename(hrn)
+    slicename = PlXrn(xrn, type='slice').pl_slicename()
     api.nodemanger.Start(slicename)
 
 def stop_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
-    slicename = hrn_to_pl_slicename(hrn)
+    slicename = PlXrn(xrn, type='slice').pl_slicename()
     api.nodemanager.Stop(slicename)
 
 def delete_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
-    slicename = hrn_to_pl_slicename(hrn)
+    slicename = PlXrn(xrn, type='slice').pl_slicename()
     api.nodemanager.Destroy(slicename)
 
 def reset_slice(api, xrn):
-    hrn, type = urn_to_hrn(xrn)
-    slicename = hrn_to_pl_slicename(hrn)
+    slicename = PlXrn(xrn, type='slice').pl_slicename()
     if not api.sliver_exists(slicename):
         raise SliverDoesNotExist(slicename)
     api.nodemanager.ReCreate(slicename)
@@ -64,7 +59,7 @@ def redeem_ticket(api, ticket_string):
     ticket = SfaTicket(string=ticket_string)
     ticket.decode()
     hrn = ticket.attributes['slivers'][0]['hrn']
-    slicename = hrn_to_pl_slicename(hrn)
+    slicename = PlXrn (hrn).pl_slicename()
     if not api.sliver_exists(slicename):
         raise SliverDoesNotExist(slicename)
 
