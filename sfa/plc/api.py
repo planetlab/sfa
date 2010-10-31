@@ -172,7 +172,7 @@ class SfaAPI(BaseAPI):
         # get self credential
         self_cred = registry.GetSelfCredential(cert_string, self.hrn, 'authority')
         # get credential
-        cred = registry.GetCredential(self_cred, self.hrn, type)
+        cred = registry.GetCredential(self_cred, self.hrn, 'authority')
         return Credential(string=cred)
 
     def __getCredentialRaw(self):
