@@ -26,6 +26,7 @@ from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn
 from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
+from sfa.util.version import version_core
 
 AGGREGATE_PORT=12346
 CM_PORT=12346
@@ -213,8 +214,11 @@ class Sfi:
         
         if command in ("version"):
             parser.add_option("-R","--registry-version",
-                              action="store_true", dest="probe_registry", default=False,
+                              action="store_true", dest="version_registry", default=False,
                               help="probe registry version instead of slicemgr")
+            parser.add_option("-l","--local",
+                              action="store_true", dest="version_local", default=False,
+                              help="display version of the local client")
 
         return parser
 
@@ -554,7 +558,7 @@ class Sfi:
     # list entires in named authority registry
     def list(self, opts, args):
         if len(args)!= 1:
-            self.parser.print_help()
+            self.print_help()
             sys.exit(1)
         hrn = args[0]
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
@@ -578,7 +582,7 @@ class Sfi:
     # show named registry record
     def show(self, opts, args):
         if len(args)!= 1:
-            self.parser.print_help()
+            self.print_help()
             sys.exit(1)
         hrn = args[0]
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
@@ -662,7 +666,7 @@ class Sfi:
     def remove(self, opts, args):
         auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
         if len(args)!=1:
-            self.parser.print_help()
+            self.print_help()
             sys.exit(1)
         hrn = args[0]
         type = opts.type 
@@ -674,7 +678,7 @@ class Sfi:
     def add(self, opts, args):
         auth_cred = self.get_auth_cred().save_to_string(save_parents=True)
         if len(args)!=1:
-            self.parser.print_help()
+            self.print_help()
             sys.exit(1)
         record_filepath = args[0]
         rec_file = self.get_record_file(record_filepath)
@@ -685,7 +689,7 @@ class Sfi:
     def update(self, opts, args):
         user_cred = self.get_user_cred()
         if len(args)!=1:
-            self.parser.print_help()
+            self.print_help()
             sys.exit(1)
         rec_file = self.get_record_file(args[0])
         record = load_record_from_file(rec_file)
@@ -755,11 +759,15 @@ class Sfi:
     
 
     def version(self, opts, args):
-        if opts.probe_registry:
-            server=self.registry
+        if opts.version_local:
+            version=version_core()
         else:
-            server = self.get_server_from_opts(opts)
-        for (k,v) in server.GetVersion().items():
+            if opts.version_registry:
+                server=self.registry
+            else:
+                server = self.get_server_from_opts(opts)
+            version=server.GetVersion()
+        for (k,v) in version.items():
             print "%-20s: %s"%(k,v)
 
     # list instantiated slices
@@ -961,13 +969,16 @@ class Sfi:
         server = self.get_server_from_opts(opts)
         return server.Shutdown(slice_urn, creds)         
     
+    def print_help (self):
+        self.sfi_parser.print_help()
+        self.cmd_parser.print_help()
 
     #
     # Main: parse arguments and dispatch to command
     #
     def main(self):
-        parser = self.create_parser()
-        (options, args) = parser.parse_args()
+        self.sfi_parser = self.create_parser()
+        (options, args) = self.sfi_parser.parse_args()
         self.options = options
 
         self.logger.setLevelFromOptVerbose(self.options.verbose)
@@ -979,8 +990,8 @@ class Sfi:
             return -1
     
         command = args[0]
-        self.parser = self.create_cmd_parser(command)
-        (cmd_opts, cmd_args) = self.parser.parse_args(args[1:])
+        self.cmd_parser = self.create_cmd_parser(command)
+        (cmd_opts, cmd_args) = self.cmd_parser.parse_args(args[1:])
 
         self.set_servers()
     
