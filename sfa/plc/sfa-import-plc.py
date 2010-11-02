@@ -217,7 +217,7 @@ def main():
                 site = sites_dict[login_base]
                 for person in persons:
                     tmp_username = person['email'].split("@")[0]
-                    alt_username = person['email'].split("@")[0].replace(".", "_")
+                    alt_username = person['email'].split("@")[0].replace(".", "_").replace("+", "_")
                     if username in [tmp_username, alt_username] and \
                        site['site_id'] in person['site_ids'] and \
                        person['person_id'] == record['pointer']:
