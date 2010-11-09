@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 7
+%define taglevel 8
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -180,6 +180,14 @@ fi
 
 
 %changelog
+* Tue Nov 09 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-8
+- fix registry credential regeneration and handle expiration
+- support for setting slice tags (min_role=user)
+- client can display its own version: sfi.py version --local
+- GetVersion to provide urn in addition to hrn
+- more code uses plxrn vs previous helper functions
+- import replaces '+' in email addresses with '_'
+
 * Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-7
 - fix GetVersion code_tag and add code_url
 
@@ -239,6 +247,14 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Tue Nov 09 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-8
+- fix registry credential regeneration and handle expiration
+- support for setting slice tags (min_role=user)
+- client can display its own version: sfi.py version --local
+- GetVersion to provide urn in addition to hrn
+- more code uses plxrn vs previous helper functions
+- import replaces '+' in email addresses with '_'
+
 * Fri Oct 22 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-7
 - fix GetVersion code_tag and add code_url
 
