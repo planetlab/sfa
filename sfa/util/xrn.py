@@ -61,19 +61,17 @@ class Xrn:
     # self.path
     # provide either urn, or (hrn + type)
     def __init__ (self, xrn, type=None):
+        if not xrn: xrn = ""
         # user has specified xrn : guess if urn or hrn
-        if xrn is not None:
-            if xrn.startswith(Xrn.URN_PREFIX):
-                self.hrn=None
-                self.urn=xrn
-                self.urn_to_hrn()
-            else:
-                self.urn=None
-                self.hrn=xrn
-                self.type=type
-                self.hrn_to_urn()
+        if xrn.startswith(Xrn.URN_PREFIX):
+            self.hrn=None
+            self.urn=xrn
+            self.urn_to_hrn()
         else:
-            raise SfaAPIError,"Xrn.__init__"
+            self.urn=None
+            self.hrn=xrn
+            self.type=type
+            self.hrn_to_urn()
 # happens all the time ..
 #        if not type:
 #            sfa_logger().debug("type-less Xrn's are not safe")
