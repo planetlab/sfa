@@ -79,7 +79,7 @@ class Auth:
                 raise InsufficientRights(operation)
 
         if self.trusted_cert_list:
-            self.client_cred.verify(self.trusted_cert_file_list)
+            self.client_cred.verify(self.trusted_cert_file_list, self.config.SFA_CREDENTIAL_SCHEMA)
         else:
            raise MissingTrustedRoots(self.config.get_trustedroots_dir())
        

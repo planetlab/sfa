@@ -131,6 +131,7 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/sfa/registries.xml
 /etc/init.d/sfa
 /etc/sfa/pl.rng
+/etc/sfa/credential.rng
 %{_bindir}/sfa-config-tty
 %{_bindir}/sfa-import-plc.py*
 %{_bindir}/sfa-clean-peer-records.py*

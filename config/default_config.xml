@@ -24,6 +24,12 @@ Thierry Parmentelat
 	  <description>The human readable name for this interface.</description>
 	</variable>
 
+    <variable id="credential_schema" type="string">
+      <name>Credential Schema</name>
+      <value>/etc/sfa/credential.rng</value>
+      <description>The path to the default credential schema</description>
+    </variable>
+
 	<variable id="api_debug" type="boolean">
 	  <name>Debug</name>
 	  <value>false</value>

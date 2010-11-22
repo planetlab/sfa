@@ -34,7 +34,8 @@ import datetime
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 from dateutil.parser import parse
-
+from lxml import etree
+from StringIO import StringIO 
 from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Keypair
@@ -649,11 +650,24 @@ class Credential(object):
     #   must be done elsewhere
     #
     # @param trusted_certs: The certificates of trusted CA certificates
-    def verify(self, trusted_certs):
+    # @param schema: The RelaxNG schema to validate the credential against 
+    def verify(self, trusted_certs, schema=None):
         if not self.xml:
             self.decode()        
+        
+        # validate against RelaxNG schema
+        if not self.legacy:
+            if schema and os.path.exists(schema):
+                tree = etree.parse(StringIO(self.xml))
+                schema_doc = etree.parse(schema)
+                relaxng = etree.RelaxNG(schema_doc)
+                if not relaxng(tree):
+                    error = relaxng.error_log.last_error
+                    message = "%s (line %s)" % (error.message, error.line)
+                    raise CredentialNotVerifiable(message) 
+            
 
-#        trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
+#       trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
         trusted_cert_objects = []
         ok_trusted_certs = []
         for f in trusted_certs:
@@ -674,6 +688,7 @@ class Credential(object):
             if self.legacy.object_gid:
                 self.legacy.object_gid.verify_chain(trusted_cert_objects)
             return True
+
         
         # make sure it is not expired
         if self.get_expiration() < datetime.datetime.utcnow():
