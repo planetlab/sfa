@@ -1,4 +1,5 @@
 # specialized Xrn class for PlanetLab
+import re
 from sfa.util.xrn import Xrn
 
 # temporary helper functions to use this module instead of namespace
@@ -48,7 +49,9 @@ class PlXrn (Xrn):
     #def hrn_to_pl_slicename(hrn):
     def pl_slicename (self):
         self._normalize()
-        return self.authority[-1] + '_' + self.leaf
+        leaf = self.leaf
+        leaf = re.sub('[^a-zA-Z0-9]', '', leaf)
+        return self.pl_login_base() + '_' + leaf
 
     #def hrn_to_pl_authname(hrn):
     def pl_authname (self):
@@ -58,4 +61,13 @@ class PlXrn (Xrn):
     #def hrn_to_pl_login_base(hrn):
     def pl_login_base (self):
         self._normalize()
-        return self.authority[-1]
+        base = self.authority[-1]
+        
+        # Fix up names of GENI Federates
+        base = base.lower()
+        base = re.sub('\\\[^a-zA-Z0-9]', '', base)
+
+        if len(base) > 20:
+            base = base[len(base)-20:]
+        
+        return base

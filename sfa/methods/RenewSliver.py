@@ -3,7 +3,8 @@ from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter
 from sfa.trust.credential import Credential
-from dateutil.parser import parse
+from sfa.util.sfatime import utcparse
+import datetime
 
 class RenewSliver(Method):
     """
@@ -30,10 +31,11 @@ class RenewSliver(Method):
         valid_creds = self.api.auth.checkCredentials(creds, 'renewsliver', hrn)
 
         # Validate that the time does not go beyond the credential's expiration time
-        requested_time = parse(expiration_time)
+        requested_time = utcparse(expiration_time)
         if requested_time > Credential(string=valid_creds[0]).get_expiration():
             raise InsufficientRights('SliverStatus: Credential expires before requested expiration time')
-       
+        if requested_time > datetime.datetime.utcnow() + datetime.timedelta(days=60):
+            raise Exception('Cannot renew > 60 days from now')
         manager = self.api.get_interface_manager()
         manager.renew_slice(self.api, slice_xrn, valid_creds, expiration_time)    
  

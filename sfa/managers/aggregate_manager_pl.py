@@ -4,7 +4,6 @@ import traceback
 import sys
 import re
 from types import StringTypes
-from dateutil.parser import parse
 
 from sfa.util.faults import *
 from sfa.util.xrn import get_authority, hrn_to_urn, urn_to_hrn
@@ -22,6 +21,7 @@ from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 from sfa.util.version import version_core
+from sfa.util.sfatime import utcparse
 
 def GetVersion(api):
     return version_core({'interface':'aggregate',
@@ -46,7 +46,6 @@ def __get_registry_objects(slice_xrn, creds, users):
         slicename = hrn_to_pl_slicename(hrn)
         login_base = slicename.split('_')[0]
         reg_objects = {}
-
         site = {}
         site['site_id'] = 0
         site['name'] = 'geni.%s' % login_base 
@@ -62,7 +61,12 @@ def __get_registry_objects(slice_xrn, creds, users):
         reg_objects['site'] = site
 
         slice = {}
-        slice['expires'] = int(time.mktime(Credential(string=creds[0]).get_expiration().timetuple()))
+        
+        extime = Credential(string=creds[0]).get_expiration()
+        # If the expiration time is > 60 days from now, set the expiration time to 60 days from now
+        if extime > datetime.datetime.utcnow() + datetime.timedelta(days=60):
+            extime = datetime.datetime.utcnow() + datetime.timedelta(days=60)
+        slice['expires'] = int(time.mktime(extime.timetuple()))
         slice['hrn'] = hrn
         slice['name'] = hrn_to_pl_slicename(hrn)
         slice['url'] = hrn
@@ -74,7 +78,7 @@ def __get_registry_objects(slice_xrn, creds, users):
         for user in users:
             user['key_ids'] = []
             hrn, _ = urn_to_hrn(user['urn'])
-            user['email'] = hrn_to_pl_slicename(hrn) + "@geni.net"
+            user['email'] = "geniuser@geni.net"
             user['first_name'] = hrn
             user['last_name'] = hrn
             reg_objects['users'][user['email']] = user
@@ -107,7 +111,7 @@ def slice_status(api, slice_xrn, creds):
     result['geni_urn'] = slice_xrn
     result['geni_status'] = 'unknown'
     result['pl_login'] = slice['name']
-    result['pl_expires'] = slice['expires']
+    result['pl_expires'] = datetime.datetime.fromtimestamp(slice['expires']).ctime()
     
     resources = []
     
@@ -116,6 +120,8 @@ def slice_status(api, slice_xrn, creds):
         res['pl_hostname'] = node['hostname']
         res['pl_boot_state'] = node['boot_state']
         res['pl_last_contact'] = node['last_contact']
+        if not node['last_contact'] is None:
+            res['pl_last_contact'] = datetime.datetime.fromtimestamp(node['last_contact']).ctime()
         res['geni_urn'] = ''
         res['geni_status'] = 'unknown'
         res['geni_error'] = ''
@@ -187,7 +193,7 @@ def renew_slice(api, xrn, creds, expiration_time):
     if not slices:
         raise RecordNotFound(hrn)
     slice = slices[0]
-    requested_time = parse(expiration_time)
+    requested_time = utcparse(expiration_time)
     record = {'expires': int(time.mktime(requested_time.timetuple()))}
     api.plshell.UpdateSlice(api.plauth, slice['slice_id'], record)
     return 1         

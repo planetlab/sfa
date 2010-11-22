@@ -10,6 +10,7 @@ from lxml import etree
 from sfa.util.sfalogging import sfa_logger
 from sfa.util.rspecHelper import merge_rspecs
 from sfa.util.xrn import Xrn, urn_to_hrn, hrn_to_urn
+from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
@@ -53,7 +54,7 @@ def slice_status(api, slice_xrn, creds ):
     result['geni_urn'] = slice_xrn
     result['geni_status'] = 'unknown'
     result['pl_login'] = slice['name']
-    result['pl_expires'] = slice['expires']
+    result['pl_expires'] = datetime.datetime.fromtimestamp(slice['expires']).ctime()
     
     resources = []
     
@@ -62,6 +63,8 @@ def slice_status(api, slice_xrn, creds ):
         res['pl_hostname'] = node['hostname']
         res['pl_boot_state'] = node['boot_state']
         res['pl_last_contact'] = node['last_contact']
+        if not node['last_contact'] is None:
+            res['pl_last_contact'] = datetime.datetime.fromtimestamp(node['last_contact']).ctime()
         res['geni_urn'] = ''
         res['geni_status'] = 'unknown'
         res['geni_error'] = ''
@@ -120,7 +123,7 @@ def renew_slice(api, xrn, creds, expiration_time):
     hrn, type = urn_to_hrn(xrn)
 
     # get the callers hrn
-    valid_cred = api.auth.checkCredentials(creds, 'renewesliver', hrn)[0]
+    valid_cred = api.auth.checkCredentials(creds, 'renewsliver', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
 
     # attempt to use delegated credential first
@@ -135,7 +138,7 @@ def renew_slice(api, xrn, creds, expiration_time):
             continue
 
         server = api.aggregates[aggregate]
-        threads.run(server.RenewSliver, xrn, credential, expiration_time)
+        threads.run(server.RenewSliver, xrn, [credential], expiration_time)
     threads.get_results()
     return 1
 
