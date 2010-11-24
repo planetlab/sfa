@@ -560,7 +560,6 @@ class Certificate:
     # @param cert certificate object
 
     def is_signed_by_cert(self, cert):
-        print 'is_signed_by_cert'
         k = cert.get_pubkey()
         result = self.verify(k)
         return result
