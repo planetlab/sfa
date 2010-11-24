@@ -14,6 +14,7 @@
 
 import os
 
+from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger
 from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
 from sfa.trust.certificate import Keypair
