@@ -351,7 +351,10 @@ def get_rspec(api, creds, options):
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
     if not origin_hrn:
-        origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
+        if isinstance(creds, list):
+            origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
+        else:
+            origin_hrn = Credential(string=creds).get_gid_caller().get_hrn()
     
     # look in cache first 
     if api.cache and not xrn:
