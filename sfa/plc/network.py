@@ -213,7 +213,8 @@ class Slice:
 
 class Slicetag:
     newid = -1 
-    filter_fields = ['slice_tag_id','slice_id','tagname','value','node_id','category','min_role_id'] 
+#    filter_fields = ['slice_tag_id','slice_id','tagname','value','node_id','category','min_role_id'] 
+    filter_fields = ['slice_tag_id','slice_id','tagname','value','node_id','category'] 
     ignore_tags = ['hmac','ssh_key']
     def __init__(self, tag = None):
         if not tag:
@@ -224,7 +225,7 @@ class Slicetag:
         self.value = tag['value']
         self.node_id = tag['node_id']
         self.category = tag['category']
-        self.min_role_id = tag['min_role_id']
+#        self.min_role_id = tag['min_role_id']
         self.status = None
 
     # Create a new slicetag that will be written to the DB later
@@ -240,14 +241,15 @@ class Slicetag:
         else:
             self.node_id = None
         self.category = tt.category
-        self.min_role_id = tt.min_role_id
+#        self.min_role_id = tt.min_role_id
         self.status = "new"
 
     def permit_update(self, role_id, value = None):
         if value and self.value == value:
             return True
-        if role_id > self.min_role_id:
-            return False
+        # xxx FIXME - the new model in PLCAPI has roles and not min_role_id
+        #if role_id > self.min_role_id:
+        #    return False
         return True
         
     def change(self, value):
@@ -289,7 +291,7 @@ class TagType:
         self.id = tagtype['tag_type_id']
         self.category = tagtype['category']
         self.tagname = tagtype['tagname']
-        self.min_role_id = tagtype['min_role_id']
+#        self.min_role_id = tagtype['min_role_id']
         self.multi = False
         self.in_rspec = False
         if self.category == 'slice/rspec':
@@ -298,8 +300,9 @@ class TagType:
             self.multi = True
 
     def permit_update(self, role_id):
-        if role_id > self.min_role_id:
-            return False
+        # XXX FIXME ditto
+        #if role_id > self.min_role_id:
+        #    return False
         return True
         
 
