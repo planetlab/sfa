@@ -660,9 +660,9 @@ class Credential(object):
             if schema and os.path.exists(schema):
                 tree = etree.parse(StringIO(self.xml))
                 schema_doc = etree.parse(schema)
-                relaxng = etree.RelaxNG(schema_doc)
-                if not relaxng(tree):
-                    error = relaxng.error_log.last_error
+                xmlschema = etree.XMLSchema(schema_doc)
+                if not xmlschema.validate(tree):
+                    error = xmlschema.error_log.last_error
                     message = "%s (line %s)" % (error.message, error.line)
                     raise CredentialNotVerifiable(message) 
             

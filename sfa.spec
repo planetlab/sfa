@@ -131,9 +131,10 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/sfa/registries.xml
 /etc/init.d/sfa
 /etc/sfa/pl.rng
-/etc/sfa/credential.rng
-/etc/sfa/top.rng
-/etc/sfa/protogeni-rspec-common.rng
+/etc/sfa/credential.xsd
+/etc/sfa/top.xsd
+/etc/sfa/xml.xsd
+/etc/sfa/protogeni-rspec-common.xsd
 %{_bindir}/sfa-config-tty
 %{_bindir}/sfa-import-plc.py*
 %{_bindir}/sfa-clean-peer-records.py*
