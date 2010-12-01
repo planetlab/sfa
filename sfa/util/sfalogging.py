@@ -106,7 +106,7 @@ def sfa_logger_goes_to_console():
 # clients would change the default by issuing one of these call
 def sfa_logger_goes_to_import():
     current_module=sys.modules[globals()['__name__']]
-    current_module._logger=_import_logger
+    current_module._the_logger=_import_logger
 
 # this is how to retrieve the 'right' logger
 def sfa_logger():
