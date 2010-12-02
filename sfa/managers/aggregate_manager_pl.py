@@ -79,7 +79,6 @@ def __get_registry_objects(slice_xrn, creds, users):
             user['key_ids'] = []
             hrn, _ = urn_to_hrn(user['urn'])
             user['email'] = hrn_to_pl_slicename(hrn) + "@geni.net"
-            user
             user['first_name'] = hrn
             user['last_name'] = hrn
             reg_objects['users'][user['email']] = user
