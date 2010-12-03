@@ -18,24 +18,34 @@ Thierry Parmentelat
       <description>Basic system variables.</description>
 
       <variablelist>
-	<variable id="interface_hrn" type="string">
-	  <name>Human readable name</name>
-	  <value>plc</value>
-	  <description>The human readable name for this interface.</description>
-	</variable>
+        <variable id="interface_hrn" type="string">
+          <name>Human readable name</name>
+          <value>plc</value>
+          <description>The human readable name for this interface.</description>
+        </variable>
 
-    <variable id="credential_schema" type="string">
-      <name>Credential Schema</name>
-      <value>/etc/sfa/credential.rng</value>
-      <description>The path to the default credential schema</description>
-    </variable>
+        <variable id="credential_schema" type="string">
+          <name>Credential Schema</name>
+          <value>/etc/sfa/credential.rng</value>
+          <description>The path to the default credential schema</description>
+        </variable>
 
-	<variable id="api_debug" type="boolean">
-	  <name>Debug</name>
-	  <value>false</value>
-	  <description>Flag to turn debug on.</description>
-	</variable>
+        <variable id="api_debug" type="boolean">
+          <name>Debug</name>
+          <value>false</value>
+          <description>Flag to turn debug on.</description>
+        </variable>
 
+        <variable id="session_key_path" type="string">
+            <name>User Session Keys Path </name>
+            <value>/var/lib/sfa/session_keys</value>
+            <description>Some services will peform operations on behalf of a user, but make
+            it look like the user is the one performing the operation. Doing this requires a 
+            valid key pair and credential for the user. This option defines the path where 
+            key pairs and credentials are generated and stored.
+            This functionality is used by the SFA web gui 
+            </description> 
+        </variable>
       </variablelist>
     </category>
 
