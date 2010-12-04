@@ -26,7 +26,7 @@ Thierry Parmentelat
 
         <variable id="credential_schema" type="string">
           <name>Credential Schema</name>
-          <value>/etc/sfa/credential.rng</value>
+          <value>/etc/sfa/credential.xsd</value>
           <description>The path to the default credential schema</description>
         </variable>
 
