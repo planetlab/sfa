@@ -250,7 +250,7 @@ class Slicetag:
         # xxx FIXME - the new model in PLCAPI has roles and not min_role_id
         #if role_id > self.min_role_id:
         #    return False
-        return True
+        return False
         
     def change(self, value):
         if self.value != value:
@@ -303,7 +303,7 @@ class TagType:
         # XXX FIXME ditto
         #if role_id > self.min_role_id:
         #    return False
-        return True
+        return False
         
 
 class Network:
