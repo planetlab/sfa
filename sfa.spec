@@ -133,6 +133,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sfa/pl.rng
 /etc/sfa/credential.xsd
 /etc/sfa/top.xsd
+/etc/sfa/sig.xsd
 /etc/sfa/xml.xsd
 /etc/sfa/protogeni-rspec-common.xsd
 %{_bindir}/sfa-config-tty
