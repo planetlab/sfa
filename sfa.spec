@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 8
+%define taglevel 9
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -185,6 +185,12 @@ fi
 
 
 %changelog
+* Tue Dec 07 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-9
+- verify credentials against xsd schema
+- Fix SM to SM communication
+- Fix bug in sfa.util.sfalogging, sfa-import.py now logs to sfa_import.log
+- new setting session_key_path
+
 * Tue Nov 09 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-8
 - fix registry credential regeneration and handle expiration
 - support for setting slice tags (min_role=user)
@@ -252,6 +258,12 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Tue Dec 07 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-9
+- verify credentials against xsd schema
+- Fix SM to SM communication
+- Fix bug in sfa.util.sfalogging, sfa-import.py now logs to sfa_import.log
+- new setting session_key_path
+
 * Tue Nov 09 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-8
 - fix registry credential regeneration and handle expiration
 - support for setting slice tags (min_role=user)
