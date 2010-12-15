@@ -363,7 +363,6 @@ def get_rspec(api, creds, options):
             return rspec
 
     hrn, type = urn_to_hrn(xrn)
-    rspec = None
 
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'listnodes', hrn)[0]
@@ -387,31 +386,13 @@ def get_rspec(api, creds, options):
         #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
     results = threads.get_results()
-    # combine the rspecs into a single rspec 
-    for agg_rspec in results:
-        try:
-            tree = etree.parse(StringIO(agg_rspec))
-        except etree.XMLSyntaxError:
-            message = str(agg_rspec) + ": " + str(sys.exc_info()[1])
-            raise InvalidRSpec(message)
+    merged_rspec = merge_rspecs(results)
 
-        root = tree.getroot()
-        if root.get("type") in ["SFA"]:
-            if rspec == None:
-                rspec = root
-            else:
-                for network in root.iterfind("./network"):
-                    rspec.append(deepcopy(network))
-                for request in root.iterfind("./request"):
-                    rspec.append(deepcopy(request))
-    
-    sfa_logger().debug('get_rspec: rspec=%r'%rspec)
-    rspec =  etree.tostring(rspec, xml_declaration=True, pretty_print=True)
     # cache the result
     if api.cache and not xrn:
-        api.cache.add('nodes', rspec)
+        api.cache.add('nodes', merged_rspec)
  
-    return rspec
+    return merged_rspec
 
 def main():
     r = RSpec()

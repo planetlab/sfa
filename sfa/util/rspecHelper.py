@@ -1,11 +1,14 @@
 #! /usr/bin/env python
 
 import sys
+
 from copy import deepcopy
 from lxml import etree
 from StringIO import StringIO
 from optparse import OptionParser
 
+from sfa.util.faults import *
+from sfa.util.sfalogging import sfa_logger
 
 def merge_rspecs(rspecs):
     """
@@ -15,24 +18,53 @@ def merge_rspecs(rspecs):
     if not rspecs or not isinstance(rspecs, list):
         return rspecs
 
-    rspec = None
-    for tmp_rspec in rspecs:
+    # ugly hack to avoid sending the same info twice, when the call graph has dags
+    known_networks={}
+    def register_network (network):
         try:
-            tree = etree.parse(StringIO(tmp_rspec))
+            known_networks[network.get('name')]=True
+        except:
+            sfa_logger().error("merge_rspecs: cannot register network with no name in rspec")
+            pass
+    def is_registered_network (network):
+        try:
+            return network.get('name') in known_networks
+        except:
+            sfa_logger().error("merge_rspecs: cannot retrieve network with no name in rspec")
+            return False
+
+    # the resulting tree
+    rspec = None
+    for input_rspec in rspecs:
+        try:
+            tree = etree.parse(StringIO(input_rspec))
         except etree.XMLSyntaxError:
             # consider failing silently here
-            message = str(agg_rspec) + ": " + str(sys.exc_info()[1])
+            sfa_logger().log_exc("merge_rspecs, parse error")
+            message = str(sys.exc_info()[1]) + ' with ' + input_rspec
             raise InvalidRSpec(message)
 
         root = tree.getroot()
-        if root.get("type") in ["SFA"]:
-            if rspec == None:
-                rspec = root
-            else:
-                for network in root.iterfind("./network"):
+        if not root.get("type") in ["SFA"]:
+            sfa_logger().error("merge_rspecs: unexpected type for rspec root, %s"%root.get('type'))
+            continue
+        if rspec == None:
+            # we scan the first input, register all networks
+            # in addition we remove duplicates - needed until everyone runs 1.0-10
+            rspec = root
+            for network in root.iterfind("./network"):
+                if not is_registered_network(network):
+                    register_network(network)
+                else:
+                    # duplicate in the first input - trash it
+                    root.remove(network)
+        else:
+            for network in root.iterfind("./network"):
+                if not is_registered_network(network):
                     rspec.append(deepcopy(network))
-                for request in root.iterfind("./request"):
-                    rspec.append(deepcopy(request))
+                    register_network(network)
+            for request in root.iterfind("./request"):
+                rspec.append(deepcopy(request))
     return etree.tostring(rspec, xml_declaration=True, pretty_print=True)
 
 class RSpec:
