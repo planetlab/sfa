@@ -113,7 +113,7 @@ def init_server_cert(hrn, key, server_cert_file, self_signed=False):
     else:
         try:
             # look for gid file
-            sfa_logger().debug("generating server cert from gid: ", hrn)
+            sfa_logger().debug("generating server cert from gid: %s"% hrn)
             hierarchy = Hierarchy()
             auth_info = hierarchy.get_auth_info(hrn)
             gid = GID(filename=auth_info.gid_filename)

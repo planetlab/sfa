@@ -632,7 +632,7 @@ class Certificate:
             return CertNotSignedByParent(self.get_subject())
 
         # if the parent isn't verified...
-        sfa_logger().debug("verify_chain: .. %s, -> verifying parent %s",self.get_subject(),self.parent.get_subject())
+        sfa_logger().debug("verify_chain: .. %s, -> verifying parent %s"%(self.get_subject(),self.parent.get_subject()))
         self.parent.verify_chain(trusted_certs)
 
         return

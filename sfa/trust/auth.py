@@ -43,7 +43,7 @@ class Auth:
                 valid.append(cred)
             except:
                 cred_obj=Credential(string=cred)
-                sfa_logger().debug("failed to validate credential - dump="+cred_obj.dump_string(dump_parents=True))
+                sfa_logger().debug("failed to validate credential - dump=%s"%cred_obj.dump_string(dump_parents=True))
                 error = sys.exc_info()[:2]
                 continue
             

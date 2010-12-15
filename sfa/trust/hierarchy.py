@@ -159,7 +159,7 @@ class Hierarchy:
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(xrn)
-        sfa_logger().debug("Hierarchy: creating authority: " + hrn)
+        sfa_logger().debug("Hierarchy: creating authority: %s"% hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)

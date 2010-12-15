@@ -92,7 +92,7 @@ class sfaImport:
         if not auth_record:
             auth_record = SfaRecord(hrn=hrn, gid=auth_info.get_gid_object(), type="authority", pointer=-1)
             auth_record['authority'] = get_authority(auth_record['hrn'])
-            self.logger.info("Import: inserting authority record for " + hrn)
+            self.logger.info("Import: inserting authority record for %s"%hrn)
             table.insert(auth_record)
 
 
@@ -103,7 +103,7 @@ class sfaImport:
         if len(hrn) > 64:
             hrn = hrn[:64]
 
-        self.logger.info("Import: person " + hrn)
+        self.logger.info("Import: person %s"%hrn)
         key_ids = []
         if 'key_ids' in person and person['key_ids']:
             key_ids = person["key_ids"]
@@ -141,11 +141,11 @@ class sfaImport:
         slicename = _cleanup_string(slicename)
 
         if not slicename:
-            self.logger.error("Import: failed to parse slice name " + slice['name'])
+            self.logger.error("Import: failed to parse slice name %s" %slice['name'])
             return
 
         hrn = parent_hrn + "." + slicename
-        self.logger.info("Import: slice " + hrn)
+        self.logger.info("Import: slice %s"%hrn)
 
         pkey = Keypair(create=True)
         urn = hrn_to_urn(hrn, 'slice')
@@ -167,7 +167,7 @@ class sfaImport:
         nodename = _cleanup_string(nodename)
         
         if not nodename:
-            self.logger.error("Import: failed to parse node name " + node['hostname'])
+            self.logger.error("Import: failed to parse node %s" %node['hostname'])
             return
 
         hrn = parent_hrn + "." + nodename
@@ -211,7 +211,7 @@ class sfaImport:
                 hrn = ".".join([parent_hrn, "internet2", sitename])
 
         urn = hrn_to_urn(hrn, 'authority')
-        self.logger.info("Import: site " + hrn)
+        self.logger.info("Import: site %s"%hrn)
 
         # create the authority
         if not self.AuthHierarchy.auth_exists(urn):
