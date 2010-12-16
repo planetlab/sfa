@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 9
+%define taglevel 10
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -185,6 +185,13 @@ fi
 
 
 %changelog
+* Wed Dec 15 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-10
+- SMs avoid duplicates for when call graph has dags;
+- just based on network's name, when a duplicate occurs, one is just dropped
+- does not try to merge/aggregate 2 networks
+- also reviewed logging with the hope to fix the sfa startup msg:
+- TypeError: not all arguments converted during string formatting
+
 * Tue Dec 07 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-9
 - verify credentials against xsd schema
 - Fix SM to SM communication
@@ -258,6 +265,13 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Wed Dec 15 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-10
+- SMs avoid duplicates for when call graph has dags;
+- just based on network's name, when a duplicate occurs, one is just dropped
+- does not try to merge/aggregate 2 networks
+- also reviewed logging with the hope to fix the sfa startup msg:
+- TypeError: not all arguments converted during string formatting
+
 * Tue Dec 07 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-9
 - verify credentials against xsd schema
 - Fix SM to SM communication
