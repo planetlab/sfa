@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 10
+%define taglevel 11
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -185,6 +185,9 @@ fi
 
 
 %changelog
+* Thu Dec 16 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-11
+- undo broken attempt for python-2.7
+
 * Wed Dec 15 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-10
 - SMs avoid duplicates for when call graph has dags;
 - just based on network's name, when a duplicate occurs, one is just dropped
@@ -265,6 +268,9 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Thu Dec 16 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-11
+- undo broken attempt for python-2.7
+
 * Wed Dec 15 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-10
 - SMs avoid duplicates for when call graph has dags;
 - just based on network's name, when a duplicate occurs, one is just dropped
