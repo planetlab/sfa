@@ -123,7 +123,13 @@ class Sfi:
     
     required_options=['verbose',  'debug',  'registry',  'sm',  'auth',  'user']
 
+    # dummy to meet Sfi's expectations for its 'options' field
+    # i.e. s/t we can do setattr on
+    class DummyOptions:
+        pass
+
     def __init__ (self,options=None):
+        if options is None: options=Sfi.DummyOptions()
         for opt in Sfi.required_options:
             if not hasattr(options,opt): setattr(options,opt,None)
         if not hasattr(options,'sfi_dir'): options.sfi_dir=os.path.expanduser("~/.sfi/")
