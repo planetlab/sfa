@@ -120,13 +120,18 @@ def load_record_from_file(filename):
 
 
 class Sfi:
+    
+    required_options=['verbose',  'debug',  'registry',  'sm',  'auth',  'user']
 
-    def __init__ (self):
+    def __init__ (self,options=None):
+        for opt in Sfi.required_options:
+            if not hasattr(options,opt): setattr(options,opt,None)
+        if not hasattr(options,'sfi_dir'): options.sfi_dir=os.path.expanduser("~/.sfi/")
+        self.options = options
         self.slicemgr = None
         self.registry = None
         self.user = None
         self.authority = None
-        self.options = None
         self.hashrequest = False
         sfa_logger_goes_to_console()
         self.logger=sfa_logger()
@@ -255,10 +260,7 @@ class Sfi:
         return parser
         
  
-    #
-    # Establish Connection to SliceMgr and Registry Servers
-    #
-    def set_servers(self):
+    def read_config(self):
        config_file = self.options.sfi_dir + os.sep + "sfi_config"
        try:
           config = Config (config_file)
@@ -274,18 +276,18 @@ class Sfi:
        errors = 0
        # Set SliceMgr URL
        if (self.options.sm is not None):
-          sm_url = self.options.sm
+          self.sm_url = self.options.sm
        elif hasattr(config, "SFI_SM"):
-          sm_url = config.SFI_SM
+          self.sm_url = config.SFI_SM
        else:
           self.logger.error("You need to set e.g. SFI_SM='http://your.slicemanager.url:12347/' in %s" % config_file)
           errors += 1 
     
        # Set Registry URL
        if (self.options.registry is not None):
-          reg_url = self.options.registry
+          self.reg_url = self.options.registry
        elif hasattr(config, "SFI_REGISTRY"):
-          reg_url = config.SFI_REGISTRY
+          self.reg_url = config.SFI_REGISTRY
        else:
           self.logger.errors("You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in %s" % config_file)
           errors += 1 
@@ -311,8 +313,14 @@ class Sfi:
     
        if errors:
           sys.exit(1)
-    
-    
+
+
+    #
+    # Establish Connection to SliceMgr and Registry Servers
+    #
+    def set_servers(self):
+
+       self.read_config() 
        # Get key and certificate
        key_file = self.get_key_file()
        cert_file = self.get_cert_file(key_file)
@@ -321,10 +329,10 @@ class Sfi:
        self.cert_file = cert_file
        self.cert = Certificate(filename=cert_file) 
        # Establish connection to server(s)
-       self.logger.info("Contacting Registry at: %s"%reg_url)
-       self.registry = xmlrpcprotocol.get_server(reg_url, key_file, cert_file, self.options)  
-       self.logger.info("Contacting Slice Manager at: %s"%sm_url)
-       self.slicemgr = xmlrpcprotocol.get_server(sm_url, key_file, cert_file, self.options)
+       self.logger.info("Contacting Registry at: %s"%self.reg_url)
+       self.registry = xmlrpcprotocol.get_server(self.reg_url, key_file, cert_file, self.options)  
+       self.logger.info("Contacting Slice Manager at: %s"%self.sm_url)
+       self.slicemgr = xmlrpcprotocol.get_server(self.sm_url, key_file, cert_file, self.options)
 
        return
     
