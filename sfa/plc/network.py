@@ -2,7 +2,7 @@ from __future__ import with_statement
 import re
 import socket
 from sfa.util.xrn import get_authority
-from sfa.util.plxrn import hrn_to_pl_slicename
+from sfa.util.plxrn import hrn_to_pl_slicename, hostname_to_urn
 from sfa.util.faults import *
 from xmlbuilder import XMLBuilder
 from lxml import etree
@@ -50,6 +50,9 @@ class Node:
         self.iface_ids = node['interface_ids']
         self.sliver = None
         self.whitelist = node['slice_ids_whitelist']
+        auth = self.network.api.hrn
+        login_base = self.get_site().idtag
+        self.urn = hostname_to_urn(auth, login_base, self.hostname)
 
     def get_primary_iface(self):
         for id in self.iface_ids:
@@ -73,6 +76,8 @@ class Node:
         with xml.node(id = self.idtag):
             with xml.hostname:
                 xml << self.hostname
+            with xml.urn:
+                xml << self.urn
             iface = self.get_primary_iface()
             if iface:
                 iface.toxml(xml)
@@ -84,11 +89,11 @@ class Site:
     def __init__(self, network, site):
         self.network = network
         self.id = site['site_id']
-        self.idtag = "s%s" % self.id
         self.node_ids = site['node_ids']
         self.node_ids.sort()
         self.name = site['abbreviated_name']
         self.tag = site['login_base']
+        self.idtag = site['login_base']
         self.public = site['is_public']
         self.enabled = site['enabled']
         self.links = set()
