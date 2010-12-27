@@ -65,6 +65,9 @@
           </attribute>
           <text/>
         </element>
+        <element name="urn">
+            <text/>
+        </element>
       </optional>
       <zeroOrMore>
         <ref name="sliver"/>
