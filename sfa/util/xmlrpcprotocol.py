@@ -1,5 +1,6 @@
 # XMLRPC-specific code for SFA Client
 
+import httplib
 import xmlrpclib
 
 from sfa.util.sfalogging import sfa_logger
@@ -31,16 +32,12 @@ class XMLRPCTransport(xmlrpclib.Transport):
     def make_connection(self, host):
         # create a HTTPS connection object from a host descriptor
         # host may be a string, or a (host, x509-dict) tuple
-        import httplib
         host, extra_headers, x509 = self.get_host_info(host)
         try:
-#            HTTPS = httplib.HTTPS()
-            HTTPS = httplib.HTTPSConnection(host, None)
-        except AttributeError:
-            raise NotImplementedError("your version of httplib doesn't support HTTPSConnection")
-        else:
 #            return httplib.HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
             return httplib.HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
+        except AttributeError:
+            raise NotImplementedError("your version of httplib doesn't support HTTPSConnection")
 
     def getparser(self):
         unmarshaller = ExceptionUnmarshaller()
