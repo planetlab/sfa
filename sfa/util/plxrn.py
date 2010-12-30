@@ -5,6 +5,8 @@ from sfa.util.xrn import Xrn
 # temporary helper functions to use this module instead of namespace
 def hostname_to_hrn (auth, login_base, hostname):
     return PlXrn(auth=auth+'.'+login_base,hostname=hostname).get_hrn()
+def hostname_to_urn(auth, login_base, hostname):
+    return PlXrn(auth=auth+'.'+login_base,hostname=hostname).get_urn()
 def slicename_to_hrn (auth_hrn, slicename):
     return PlXrn(auth=auth_hrn,slicename=slicename).get_hrn()
 def email_to_hrn (auth_hrn, email):
