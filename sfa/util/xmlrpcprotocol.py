@@ -34,17 +34,13 @@ class XMLRPCTransport(xmlrpclib.Transport):
         import httplib
         host, extra_headers, x509 = self.get_host_info(host)
         try:
-            HTTPS = httplib.HTTPS()
-# xxx sfa-1.0-10-broken - non-working attempt for python-2.7
-#            HTTPS = httplib.HTTPSConnection(host, None)
+#            HTTPS = httplib.HTTPS()
+            HTTPS = httplib.HTTPSConnection(host, None)
         except AttributeError:
-            raise NotImplementedError(
-                "your version of httplib doesn't support HTTPS"
-                )
+            raise NotImplementedError("your version of httplib doesn't support HTTPSConnection")
         else:
-            return httplib.HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
-# xxx sfa-1.0-10-broken - non-working attempt for python-2.7
-#            return httplib.HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
+#            return httplib.HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
+            return httplib.HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
 
     def getparser(self):
         unmarshaller = ExceptionUnmarshaller()
