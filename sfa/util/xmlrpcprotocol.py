@@ -26,6 +26,14 @@ class ExceptionUnmarshaller(xmlrpclib.Unmarshaller):
 #
 # A transport for XMLRPC that works on top of HTTPS
 
+# python 2.7 xmlrpclib has changed its internal code
+# it now calls 'getresponse' on the obj returned by make_connection
+# while it used to call 'getreply'
+# regardless of the version, httplib.HTTPS does implement getreply, 
+# while httplib.HTTPSConnection has getresponse
+# so we create a dummy instance to check what's expected
+need_HTTPSConnection=hasattr(xmlrpclib.Transport().make_connection('localhost'),'getresponse')
+
 class XMLRPCTransport(xmlrpclib.Transport):
     key_file = None
     cert_file = None
@@ -33,11 +41,10 @@ class XMLRPCTransport(xmlrpclib.Transport):
         # create a HTTPS connection object from a host descriptor
         # host may be a string, or a (host, x509-dict) tuple
         host, extra_headers, x509 = self.get_host_info(host)
-        try:
-#            return httplib.HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
+        if need_HTTPSConnection:
             return httplib.HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
-        except AttributeError:
-            raise NotImplementedError("your version of httplib doesn't support HTTPSConnection")
+        else:
+            return httplib.HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
 
     def getparser(self):
         unmarshaller = ExceptionUnmarshaller()
