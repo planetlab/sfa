@@ -65,6 +65,8 @@
           </attribute>
           <text/>
         </element>
+      </optional>
+      <optional>
         <element name="urn">
             <text/>
         </element>
