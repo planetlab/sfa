@@ -199,12 +199,15 @@ class Slices:
             if sfa_peer and not reg_objects:
                 peer_dict = {'type': 'authority', 'hrn': authority, 'peer_authority': sfa_peer, 'pointer': site_id}
                 registry.register_peer_object(credential, peer_dict)
+
+            # exempt federated sites from monitor policies
+            self.api.plshell.AddSiteTag(site_id, 'exempt_site_until', "20200101")
+             
         else:
             site_id = sites[0]['site_id']
             remote_site_id = sites[0]['peer_site_id']
-            
-	    old_site = sites[0]
-	    #the site is already on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
+            old_site = sites[0]
+            #the site is already on the remote agg. Let us update(e.g. max_slices field) it with the latest info.
             self.sync_site(old_site, site, peer)
 
 
