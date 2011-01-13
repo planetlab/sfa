@@ -50,13 +50,21 @@ class ThreadManager:
         for thread in self.threads:
             thread.join()
 
-    def get_results(self):
+    def get_results(self, lenient=True):
         """
         Return a list of all the results so far. Blocks until 
         all threads are finished. 
+        If lienent is set to false the error queue will be checked before 
+        the response is returned. If there are errors in the queue an SFA Fault will 
+        be raised.   
         """
         self.join()
         results = []
+        if not lenient:
+            errors = self.get_errors()
+            if errors: 
+                raise Exception(errors[0])
+
         while not self.results.empty():
             results.append(self.results.get())  
         return results
@@ -70,6 +78,12 @@ class ThreadManager:
         while not self.errors.empty():
             errors.append(self.errors.get())
         return errors
+
+    def get_return_value(self):
+        """
+        Get the value that should be returuned to the client. If there are errors then the
+        first error is returned. If there are no errors, then the first result is returned  
+        """
     
            
 if __name__ == '__main__':
@@ -94,7 +108,9 @@ if __name__ == '__main__':
     threads.run(f, "Thread2", -10, 1)
     threads.run(e, "Thread3", 19, 1)
 
-    results = threads.get_results()
-    errors = threads.get_errors()
-    print "Results:", results
-    print "Errors:", errors
+    #results = threads.get_results()
+    #errors = threads.get_errors()
+    #print "Results:", results
+    #print "Errors:", errors
+    results_xlenient = threads.get_results(lenient=False)
+
