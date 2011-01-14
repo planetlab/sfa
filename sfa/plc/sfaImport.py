@@ -69,8 +69,10 @@ class sfaImport:
           import PLC.Shell
           self.shell = PLC.Shell.Shell(globals = globals())        
 
-
     def create_top_level_auth_records(self, hrn):
+        """
+        Create top level records (includes root and sub authorities (local/remote)
+        """
         urn = hrn_to_urn(hrn, 'authority')
         # make sure parent exists
         parent_hrn = get_authority(hrn)
@@ -95,8 +97,31 @@ class sfaImport:
             self.logger.info("Import: inserting authority record for %s"%hrn)
             table.insert(auth_record)
 
+    def create_interface_records(self):
+        """
+        Create a record for each SFA interface
+        """
+        # just create certs for all sfa interfaces even if they
+        # arent enabled
+        interface_hrn = config.SFA_INTERFACE_HRN
+        interfaces = ['sa', 'am', 'sm']
+        table = SfaTable()
+        auth_info = self.AuthHierarchy.get_auth_info(interface_hrn)
+        pkey = auth_info.get_pkey_object()
+        for interface in interfaces:
+            interface_record = table.find({'type': interface, 'hrn': interface_hrn})
+            if not interface_record:
+                self.logger.info("Import: interface %s %s " % (interface_hrn, interface))
+                urn = hrn_to_urn(interface_hrn, interface)
+                gid = self.AuthHierarchy.create_gid(urn, create_uuid(), pkey)
+                record = SfaRecord(hrn=interface_hrn, gid=gid, type=interface, pointer=-1)  
+                record['authority'] = get_authority(interface_hrn)
+                table.insert(record) 
 
     def import_person(self, parent_hrn, person):
+        """
+        Register a user record 
+        """
         hrn = email_to_hrn(parent_hrn, person['email'])
 
         # ASN.1 will have problems with hrn's longer than 64 characters
