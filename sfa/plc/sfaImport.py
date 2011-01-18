@@ -103,7 +103,7 @@ class sfaImport:
         """
         # just create certs for all sfa interfaces even if they
         # arent enabled
-        interface_hrn = config.SFA_INTERFACE_HRN
+        interface_hrn = self.config.SFA_INTERFACE_HRN
         interfaces = ['sa', 'am', 'sm']
         table = SfaTable()
         auth_info = self.AuthHierarchy.get_auth_info(interface_hrn)
