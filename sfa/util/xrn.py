@@ -113,7 +113,12 @@ class Xrn:
         parts = Xrn.urn_split(self.urn)
         type=parts.pop(2)
         # Remove the authority name (e.g. '.sa')
-        if type == 'authority': parts.pop()
+        if type == 'authority':
+            name = parts.pop()
+            # Drop the sa. This is a bad hack, but its either this
+            # or completely change how record types are generated/stored   
+            if name != 'sa':
+                type = type + "+" + name
 
         # convert parts (list) into hrn (str) by doing the following
         # 1. remove blank parts
@@ -134,9 +139,13 @@ class Xrn:
         if self.hrn.startswith(Xrn.URN_PREFIX):
             raise SfaAPIError, "Xrn.hrn_to_urn, hrn=%s"%self.hrn
 
-        if self.type == 'authority':
+        if self.type.startswith('authority'):
             self.authority = Xrn.hrn_split(self.hrn)
-            name = 'sa'   
+            type_parts = self.type.split("+")
+            self.type = type_parts[0]
+            name = 'sa'
+            if len(type_parts) > 1:
+                name = type_parts[1]
         else:
             self.authority = Xrn.hrn_auth_list(self.hrn)
             name = Xrn.hrn_leaf(self.hrn)
