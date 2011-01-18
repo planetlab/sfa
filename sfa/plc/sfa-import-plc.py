@@ -67,8 +67,9 @@ def main():
     if config.SFA_API_DEBUG: sfaImporter.logger.setLevelDebug()
     shell = sfaImporter.shell
     plc_auth = sfaImporter.plc_auth 
+    
+    # initialize registry db table
     table = SfaTable()
-
     if not table.exists():
        table.create()
 
@@ -77,10 +78,16 @@ def main():
     if not root_auth == interface_hrn:
         sfaImporter.create_top_level_auth_records(interface_hrn)
 
+    # create interface records
+    sfaImporter.logger.info("Import: creating interface records")
+    sfaImporter.create_interface_records()
+
+    # add local root authority's cert  to trusted list
     sfaImporter.logger.info("Import: adding " + interface_hrn + " to trusted list")
     authority = sfaImporter.AuthHierarchy.get_auth_info(interface_hrn)
     sfaImporter.TrustedRoots.add_gid(authority.get_gid_object())
 
+    # special case for vini
     if ".vini" in interface_hrn and interface_hrn.endswith('vini'):
         # create a fake internet2 site first
         i2site = {'name': 'Internet2', 'abbreviated_name': 'I2',
