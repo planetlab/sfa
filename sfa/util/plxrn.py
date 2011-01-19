@@ -30,7 +30,9 @@ class PlXrn (Xrn):
         if hostname is not None:
             self.type='node'
             # keep only the first part of the DNS name
-            self.hrn='.'.join( [auth,hostname.split(".")[0] ] )
+            #self.hrn='.'.join( [auth,hostname.split(".")[0] ] )
+            # escape the '.' in the hostname
+            self.hrn='.'.join( [auth,Xrn.escape(hostname)] )
             self.hrn_to_urn()
         #def slicename_to_hrn(auth_hrn, slicename):
         elif slicename is not None:

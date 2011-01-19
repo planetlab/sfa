@@ -153,9 +153,9 @@ class Xrn:
         authority_string = self.get_authority_urn()
 
         if self.type == None:
-            urn = "+".join(['',authority_string,name])
+            urn = "+".join(['',authority_string,Xrn.unescape(name)])
         else:
-            urn = "+".join(['',authority_string,self.type,name])
+            urn = "+".join(['',authority_string,self.type,Xrn.unescape(name)])
         
         self.urn = Xrn.URN_PREFIX + urn
 
