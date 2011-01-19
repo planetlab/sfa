@@ -35,6 +35,7 @@ class Resolve(Method):
         hrns = [urn_to_hrn(xrn)[0] for xrn in xrns]
         #test
         #test2
+        #test tmack  
         #find valid credentials
         valid_creds = self.api.auth.checkCredentials(creds, 'resolve')
 
