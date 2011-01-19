@@ -139,7 +139,7 @@ class Xrn:
         if self.hrn.startswith(Xrn.URN_PREFIX):
             raise SfaAPIError, "Xrn.hrn_to_urn, hrn=%s"%self.hrn
 
-        if self.type.startswith('authority'):
+        if self.type and self.type.startswith('authority'):
             self.authority = Xrn.hrn_split(self.hrn)
             type_parts = self.type.split("+")
             self.type = type_parts[0]
