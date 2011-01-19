@@ -15,6 +15,9 @@ from sfa.util.faults import *
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
+from sfa.trust.credential import Credential
+from sfa.plc.api import SfaAPI
+from sfa.util.plxrn import hrn_to_pl_slicename, slicename_to_hrn
 
 ##
 # The data structure used to represent a cloud.
@@ -27,6 +30,10 @@ cloud = {}
 # The location of the RelaxNG schema.
 #
 EUCALYPTUS_RSPEC_SCHEMA='/etc/sfa/eucalyptus.rng'
+
+# Quick hack
+sys.stderr = file('/var/log/euca_agg.log', 'a+')
+api = SfaAPI()
 
 ##
 # A representation of an Eucalyptus instance. This is a support class
@@ -45,8 +52,9 @@ class EucaInstance(SQLObject):
     # Contacts Eucalyptus and tries to reserve this instance.
     # 
     # @param botoConn A connection to Eucalyptus.
+    # @param pubKeys A list of public keys for the instance.
     #
-    def reserveInstance(self, botoConn):
+    def reserveInstance(self, botoConn, pubKeys):
         print >>sys.stderr, 'Reserving an instance: image: %s, kernel: ' \
                             '%s, ramdisk: %s, type: %s, key: %s' % \
                             (self.image_id, self.kernel_id, self.ramdisk_id, 
@@ -60,7 +68,8 @@ class EucaInstance(SQLObject):
                                                  kernel_id = self.kernel_id,
                                                  ramdisk_id = self.ramdisk_id,
                                                  instance_type = self.inst_type,
-                                                 key_name  = self.key_pair)
+                                                 key_name  = self.key_pair,
+                                                 user_data = pubKeys)
             for instance in reservation.instances:
                 self.instance_id = instance.id
 
@@ -162,6 +171,42 @@ def getEucaConnection():
                             region=RegionInfo(None, 'eucalyptus', eucaHost), 
                             port=eucaPort,
                             path=srvPath)
+
+##
+# Returns a string of keys that belong to the users of the given slice.
+# @param sliceHRN The hunman readable name of the slice.
+# @return sting()
+#
+def getKeysForSlice(sliceHRN):
+    try:
+        # convert hrn to slice name
+        plSliceName = hrn_to_pl_slicename(sliceHRN)
+    except IndexError, e:
+        print >>sys.stderr, 'Invalid slice name (%s)' % sliceHRN
+        return []
+
+    # Get the slice's information
+    sliceData = api.plshell.GetSlices(api.plauth, {'name':plSliceName})
+    if not sliceData:
+        print >>sys.stderr, 'Cannot get any data for slice %s' % plSliceName
+        return []
+
+    # It should only return a list with len = 1
+    sliceData = sliceData[0]
+
+    keys = []
+    person_ids = sliceData['person_ids']
+    if not person_ids: 
+        print >>sys.stderr, 'No users in slice %s' % sliceHRN
+        return []
+
+    persons = api.plshell.GetPersons(api.plauth, person_ids)
+    for person in persons:
+        pkeys = api.plshell.GetKeys(api.plauth, person['key_ids'])
+        for key in pkeys:
+            keys.append(key['key'])
+ 
+    return ''.join(keys)
 
 ##
 # A class that builds the RSpec for Eucalyptus.
@@ -465,6 +510,10 @@ def create_slice(api, xrn, creds, xml, users):
 
     # Process new instance requests
     requests = rspecXML.findall('.//request')
+    if requests:
+        # Get all the public keys associate with slice.
+        pubKeys = getKeysForSlice(s.slice_hrn)
+        print sys.stderr, "Passing the following keys to the instance:\n%s" % pubKeys
     for req in requests:
         vmTypeElement = req.getparent()
         instType = vmTypeElement.get('name')
@@ -488,20 +537,21 @@ def create_slice(api, xrn, creds, xml, users):
                                     ramdisk_id = instRamDisk,
                                     key_pair = instKey,
                                     inst_type = instType)
-            eucaInst.reserveInstance(conn)
+            eucaInst.reserveInstance(conn, pubKeys)
 
     return True
 
 def main():
     init_server()
 
-    theRSpec = None
-    with open(sys.argv[1]) as xml:
-        theRSpec = xml.read()
-    create_slice(None, 'planetcloud.pc.test', theRSpec)
+    #theRSpec = None
+    #with open(sys.argv[1]) as xml:
+    #    theRSpec = xml.read()
+    #create_slice(None, 'planetcloud.pc.test', theRSpec)
 
     #rspec = get_rspec('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy')
     #print rspec
+    print getKeysForSlice('gc.gc.test1')
 
 if __name__ == "__main__":
     main()
