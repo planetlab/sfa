@@ -70,10 +70,10 @@ class TestXrn(unittest.TestCase):
 
     def test_host001 (self):
         xrn=PlXrn (auth="ple.inria",hostname="onelab09.pl.sophia.inria.fr")
-        self.assertEqual (xrn.get_hrn_type(), ("ple.inria.onelab09",'node'))
+        self.assertEqual (xrn.get_hrn_type(), ("ple.inria.onelab09\\.pl\\.sophia\\.inria\\.fr",'node'))
     def test_host002 (self):
         xrn=PlXrn (auth="ple\\.inria",hostname="onelab09.pl.sophia.inria.fr")
-        self.assertEqual (xrn.get_hrn_type(), ("ple\\.inria.onelab09",'node'))
+        self.assertEqual (xrn.get_hrn_type(), ("ple\\.inria.onelab09\\.pl\\.sophia\\.inria\\.fr",'node'))
 
     def test_slice001  (self):
         xrn=PlXrn (auth="ple",slicename="inria_omftest")
