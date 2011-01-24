@@ -89,6 +89,8 @@ def resolve(api, xrns, type=None, full=True):
     # load all know registry names into a prefix tree and attempt to find
     # the longest matching prefix
     if not isinstance(xrns, types.ListType):
+        if not type:
+            type = Xrn(xrns).get_type()
         xrns = [xrns]
     hrns = [urn_to_hrn(xrn)[0] for xrn in xrns] 
     # create a dict whre key is an registry hrn and its value is a
