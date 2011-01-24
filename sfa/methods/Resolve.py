@@ -33,9 +33,6 @@ class Resolve(Method):
         if not isinstance(xrns, types.ListType):
             xrns=[xrns]
         hrns = [urn_to_hrn(xrn)[0] for xrn in xrns]
-        #test
-        #test2
-        #test tmack  
         #find valid credentials
         valid_creds = self.api.auth.checkCredentials(creds, 'resolve')
 
