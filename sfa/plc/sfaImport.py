@@ -187,15 +187,7 @@ class sfaImport:
             slice_record['record_id'] = existing_record['record_id']
             table.update(slice_record)
 
-    def import_node(self, parent_hrn, node):
-        nodename = node['hostname'].split(".")[0]
-        nodename = _cleanup_string(nodename)
-        
-        if not nodename:
-            self.logger.error("Import: failed to parse node %s" %node['hostname'])
-            return
-
-        hrn = parent_hrn + "." + nodename
+    def import_node(self, hrn, node):
         self.logger.info("Import: node %s" % hrn)
         # ASN.1 will have problems with hrn's longer than 64 characters
         if len(hrn) > 64:

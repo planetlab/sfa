@@ -26,6 +26,7 @@ from sfa.util.config import Config
 from sfa.trust.certificate import convert_public_key, Keypair
 from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
+from sfa.util.xrn import Xrn
 from sfa.plc.api import *
 from sfa.trust.gid import create_uuid
 from sfa.plc.sfaImport import sfaImport
@@ -161,7 +162,7 @@ def main():
             hrn =  hostname_to_hrn(interface_hrn, site['login_base'], node['hostname'])
             if hrn not in existing_hrns or \
                (hrn, 'node') not in existing_records:
-                sfaImporter.import_node(site_hrn, node)
+                sfaImporter.import_node(hrn, node)
 
         # import slices
         for slice_id in site['slice_ids']:
@@ -241,11 +242,11 @@ def main():
  
         elif type == 'node':
             login_base = get_leaf(get_authority(record_hrn))
-            nodename = get_leaf(record_hrn)
+            nodename = Xrn.unescape(get_leaf(record_hrn))
             if login_base in sites_dict:
                 site = sites_dict[login_base]
                 for node in nodes:
-                    tmp_nodename = node['hostname'].split(".")[0]
+                    tmp_nodename = node['hostname']
                     if tmp_nodename == nodename and \
                        node['site_id'] == site['site_id'] and \
                        node['node_id'] == record['pointer']:
