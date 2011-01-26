@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 11
+%define taglevel 12
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -185,6 +185,11 @@ fi
 
 
 %changelog
+* Wed Jan 26 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-12
+- added urn to the node area in rspecs
+- conversion to urn now exports fqdn
+- sfa-import-plc.py now creates a unique registry record for each SFA interface
+
 * Thu Dec 16 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-11
 - undo broken attempt for python-2.7
 
@@ -268,6 +273,11 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Wed Jan 26 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-12
+- added urn to the node area in rspecs
+- conversion to urn now exports fqdn
+- sfa-import-plc.py now creates a unique registry record for each SFA interface
+
 * Thu Dec 16 2010 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-11
 - undo broken attempt for python-2.7
 
