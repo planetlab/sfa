@@ -112,6 +112,18 @@ def init_server():
         cloudURL = cloudURL.replace('http://', '')
     (cloud['ip'], parts) = cloudURL.split(':')
 
+    # Read the bundle images config file.
+    if not os.path.exists('/etc/sfa/bundle_image.conf') and \
+       not os.path.exists('bundle_image.conf'):
+        print >>sys.stderr, 'Could not find bundle_image.conf'
+        raise Exception('Could not find bundle_image.conf')
+    imageBundleParser = ConfigParser()
+    imageBundleParser.read(['/etc/sfa/bundle_image.conf', 'bundle_image.conf'])
+    cloud['imageBundles'] = {}
+    for bundle in imageBundleParser.sections():
+        info = dict(imageBundleParser.items(bundle))
+        cloud['imageBundles'][bundle] = info
+
     # Initialize sqlite3 database.
     dbPath = '/etc/sfa/db'
     dbName = 'euca_aggregate.db'
@@ -275,8 +287,6 @@ class EucaRSpecBuilder(object):
                                 xml << str(inst[4])
                             with xml.disk_space(unit='GB'):
                                 xml << str(inst[5])
-                            if inst[0] == 'm1.small':
-                                self.__requestXML(1, 'emi-88760F45', 'eki-F26610C6', 'cortex')
                             if 'instances' in cloud and inst[0] in cloud['instances']:
                                 existingEucaInstances = cloud['instances'][inst[0]]
                                 with xml.euca_instances:
@@ -288,6 +298,16 @@ class EucaRSpecBuilder(object):
                                                 xml << eucaInst['public_dns']
                                             with xml.keypair:
                                                 xml << eucaInst['key']
+
+    def __imageBundleXML(self, bundles):
+        xml = self.eucaRSpec
+        with xml.bundles:
+            for bundle in bundles.keys():
+                print >>sys.stderr, 'bundle: %r' % bundle
+                sys.stderr.flush()
+                with xml.bundle(id=bundle):
+                    with xml.description:
+                        xml << bundles[bundle]['description']
 
     ##
     # Creates the Images stanza.
@@ -336,6 +356,7 @@ class EucaRSpecBuilder(object):
                     xml << cloud['ip']
                 self.__keyPairsXML(cloud['keypairs'])
                 self.__imagesXML(cloud['images'])
+                self.__imageBundleXML(cloud['imageBundles'])
                 self.__clustersXML(cloud['clusters'])
         return str(xml)
 
@@ -437,7 +458,7 @@ def get_rspec(api, creds, options):
                 for instance in reservation.instances:
                     instances.append(instance)
 
-            # Construct a dictory for the EucaRSpecBuilder
+            # Construct a dictionary for the EucaRSpecBuilder
             instancesDict = {}
             for instance in instances:
                 instList = instancesDict.setdefault(instance.instance_type, [])
