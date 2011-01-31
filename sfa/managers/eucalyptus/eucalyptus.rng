@@ -20,22 +20,44 @@
         <ref name="user_info"/>
       </optional>
       <ref name="ipv4"/>
-      <ref name="keypairs"/>
-      <ref name="images"/>
+      <ref name="bundles"/>
       <oneOrMore>
+        <!--
+          keypairs,
+          images,
+        -->
         <ref name="cluster"/>
       </oneOrMore>
     </element>
   </define>
   <define name="user_info">
     <element name="user_info">
-      <ref name="credential"/>
+      <element name="credential">
+        <text/>
+      </element>
     </element>
   </define>
   <define name="keypairs">
     <element name="keypairs">
       <oneOrMore>
         <ref name="keypair"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="keypair">
+    <element name="keypair">
+      <text/>
+    </element>
+  </define>
+  <define name="bundles">
+    <element name="bundles">
+      <oneOrMore>
+        <element name="bundle">
+          <attribute name="id">
+            <data type="ID"/>
+          </attribute>
+          <empty/>
+        </element>
       </oneOrMore>
     </element>
   </define>
@@ -94,6 +116,14 @@
   <define name="request">
     <element name="request">
       <ref name="instances"/>
+      <element name="bundle">
+        <data type="IDREF"/>
+      </element>
+    </element>
+  </define>
+  <define name="oldrequest">
+    <element name="oldrequest">
+      <ref name="instances"/>
       <ref name="kernel_image"/>
       <ref name="ramdisk"/>
       <ref name="disk_image"/>
@@ -117,18 +147,8 @@
       <ref name="keypair"/>
     </element>
   </define>
-  <define name="credential">
-    <element name="credential">
-      <text/>
-    </element>
-  </define>
   <define name="ipv4">
     <element name="ipv4">
-      <text/>
-    </element>
-  </define>
-  <define name="keypair">
-    <element name="keypair">
       <text/>
     </element>
   </define>

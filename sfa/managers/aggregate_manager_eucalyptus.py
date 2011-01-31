@@ -112,17 +112,15 @@ def init_server():
         cloudURL = cloudURL.replace('http://', '')
     (cloud['ip'], parts) = cloudURL.split(':')
 
-    # Read the bundle images config file.
-    if not os.path.exists('/etc/sfa/bundle_image.conf') and \
-       not os.path.exists('bundle_image.conf'):
-        print >>sys.stderr, 'Could not find bundle_image.conf'
-        raise Exception('Could not find bundle_image.conf')
-    imageBundleParser = ConfigParser()
-    imageBundleParser.read(['/etc/sfa/bundle_image.conf', 'bundle_image.conf'])
+    # Create image bundles
+    images = getEucaConnection().get_all_images()
+    cloud['images'] = images
     cloud['imageBundles'] = {}
-    for bundle in imageBundleParser.sections():
-        info = dict(imageBundleParser.items(bundle))
-        cloud['imageBundles'][bundle] = info
+    for i in images:
+        if i.type != 'machine' or i.kernel_id is None: continue
+        name = os.path.dirname(i.location)
+        detail = {'imageID' : i.id, 'kernelID' : i.kernel_id, 'ramdiskID' : i.ramdisk_id}
+        cloud['imageBundles'][name] = detail
 
     # Initialize sqlite3 database.
     dbPath = '/etc/sfa/db'
@@ -296,8 +294,6 @@ class EucaRSpecBuilder(object):
                                                 xml << eucaInst['state']
                                             with xml.public_dns:
                                                 xml << eucaInst['public_dns']
-                                            with xml.keypair:
-                                                xml << eucaInst['key']
 
     def __imageBundleXML(self, bundles):
         xml = self.eucaRSpec
@@ -306,8 +302,7 @@ class EucaRSpecBuilder(object):
                 print >>sys.stderr, 'bundle: %r' % bundle
                 sys.stderr.flush()
                 with xml.bundle(id=bundle):
-                    with xml.description:
-                        xml << bundles[bundle]['description']
+                    xml << ''
 
     ##
     # Creates the Images stanza.
@@ -354,8 +349,8 @@ class EucaRSpecBuilder(object):
             with xml.cloud(id=cloud['name']):
                 with xml.ipv4:
                     xml << cloud['ip']
-                self.__keyPairsXML(cloud['keypairs'])
-                self.__imagesXML(cloud['images'])
+                #self.__keyPairsXML(cloud['keypairs'])
+                #self.__imagesXML(cloud['images'])
                 self.__imageBundleXML(cloud['imageBundles'])
                 self.__clustersXML(cloud['clusters'])
         return str(xml)
@@ -427,6 +422,12 @@ def get_rspec(api, creds, options):
         # Images
         images = conn.get_all_images()
         cloud['images'] = images
+        cloud['imageBundles'] = {}
+        for i in images:
+            if i.type != 'machine' or i.kernel_id is None: continue
+            name = os.path.dirname(i.location)
+            detail = {'imageID' : i.id, 'kernelID' : i.kernel_id, 'ramdiskID' : i.ramdisk_id}
+            cloud['imageBundles'][name] = detail
 
         # Key Pairs
         keyPairs = conn.get_all_key_pairs()
@@ -534,21 +535,20 @@ def create_slice(api, xrn, creds, xml, users):
     if requests:
         # Get all the public keys associate with slice.
         pubKeys = getKeysForSlice(s.slice_hrn)
-        print sys.stderr, "Passing the following keys to the instance:\n%s" % pubKeys
+        print >>sys.stderr, "Passing the following keys to the instance:\n%s" % pubKeys
     for req in requests:
         vmTypeElement = req.getparent()
         instType = vmTypeElement.get('name')
         numInst  = int(req.find('instances').text)
-        instKernel  = req.find('kernel_image').get('id')
-        instDiskImg = req.find('disk_image').get('id')
-        instKey     = req.find('keypair').text
         
-        ramDiskElement = req.find('ramdisk')
-        ramDiskAttr    = ramDiskElement.attrib
-        if 'id' in ramDiskAttr:
-            instRamDisk = ramDiskAttr['id']
-        else:
-            instRamDisk = None
+        bundleName = req.find('bundle').text
+        if not cloud['imageBundles'][bundleName]:
+            print >>sys.stderr, 'Cannot find bundle %s' % bundleName
+        bundleInfo = cloud['imageBundles'][bundleName]
+        instKernel  = bundleInfo['kernelID']
+        instDiskImg = bundleInfo['imageID']
+        instRamDisk = bundleInfo['ramdiskID']
+        instKey     = None
 
         # Create the instances
         for i in range(0, numInst):

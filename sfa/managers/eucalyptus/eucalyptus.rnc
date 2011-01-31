@@ -1,20 +1,32 @@
 start = RSpec
 RSpec = element RSpec {
-   attribute type { xsd:NMTOKEN },
-   cloud
+    attribute type { xsd:NMTOKEN },
+    cloud
 }
 cloud = element cloud {
-   attribute id { xsd:NMTOKEN },
-   user_info?,
-   ipv4,
-   keypairs,
-   images,
-   cluster+
+    attribute id { xsd:NMTOKEN },
+    user_info?,
+    ipv4,
+    bundles,
+    #keypairs,
+    #images,
+    cluster+
 }
+
 user_info = element user_info { 
-   credential 
+    element credential { text }
 }
+
 keypairs = element keypairs { keypair+ }
+keypair = element keypair { text }
+
+bundles = element bundles {
+    element bundle {
+        attribute id { xsd:ID },
+        empty
+    }+
+}
+
 images = element images { image+ }
 image = element image {
    attribute id { xsd:ID },
@@ -39,13 +51,22 @@ vm_type = element vm_type {
    request?,
    euca_instances?
 }
+
 request = element request {
+    instances,
+    element bundle {
+        xsd:IDREF
+    }
+}
+
+oldrequest = element oldrequest {
    instances,
    kernel_image,
    ramdisk,
    disk_image,
    keypair
 }
+
 euca_instances = element euca_instances {
    euca_instance+
 }
@@ -55,9 +76,7 @@ euca_instance = element euca_instance {
    public_dns,
    keypair
 }
-credential = element credential { text }
 ipv4 = element ipv4 { text }
-keypair = element keypair { text }
 type = element type { text }
 arch = element arch { text }
 state = element state { text }
