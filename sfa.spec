@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 12
+%define taglevel 13
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -185,6 +185,9 @@ fi
 
 
 %changelog
+* Tue Feb 01 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-13
+- just set x509 version to 2
+
 * Wed Jan 26 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-12
 - added urn to the node area in rspecs
 - conversion to urn now exports fqdn
@@ -273,6 +276,9 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Tue Feb 01 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-13
+- just set x509 version to 2
+
 * Wed Jan 26 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-12
 - added urn to the node area in rspecs
 - conversion to urn now exports fqdn
