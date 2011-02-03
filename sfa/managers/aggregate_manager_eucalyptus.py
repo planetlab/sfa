@@ -299,8 +299,6 @@ class EucaRSpecBuilder(object):
         xml = self.eucaRSpec
         with xml.bundles:
             for bundle in bundles.keys():
-                print >>sys.stderr, 'bundle: %r' % bundle
-                sys.stderr.flush()
                 with xml.bundle(id=bundle):
                     xml << ''
 
@@ -536,6 +534,7 @@ def create_slice(api, xrn, creds, xml, users):
         # Get all the public keys associate with slice.
         pubKeys = getKeysForSlice(s.slice_hrn)
         print >>sys.stderr, "Passing the following keys to the instance:\n%s" % pubKeys
+        sys.stderr.flush()
     for req in requests:
         vmTypeElement = req.getparent()
         instType = vmTypeElement.get('name')
