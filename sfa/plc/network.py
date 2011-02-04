@@ -327,12 +327,25 @@ class Network:
         self.tags = self.get_slice_tags(api)
         self.tagtypes = self.get_tag_types(api)
         self.slice = None
+        self.sitemap = {}
+        for s in self.sites:
+            site = self.sites[s]
+            self.sitemap[site.idtag] = site.id
+
+    def lookupSiteIdtag(self, name):
+        """ Lookup site id from name """
+        val = None
+        try:
+            val = self.sitemap[name]
+        except:
+            raise InvalidRSpec("site name '%s' not found" % name)
+        return val
     
     def lookupSite(self, id):
         """ Lookup site based on id or idtag value """
         val = None
         if isinstance(id, basestring):
-            id = int(id.lstrip('s'))
+            id = self.lookupSiteIdtag(id)
         try:
             val = self.sites[id]
         except:
