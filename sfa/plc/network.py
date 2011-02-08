@@ -133,9 +133,12 @@ class Slice:
         for i in self.slice_tag_ids:
             try: 
                 tag = self.network.lookupSliceTag(i)                 
-                if tag.tagname == tagname: 
-                    if not (node and node.id != tag.node_id): 
-                        tags.append(tag) 
+                if tag.tagname == tagname:
+                    if node:
+                        if node.id == tag.node_id:
+                            tags.append(tag)
+                    elif not tag.node_id:
+                        tags.append(tag)
             except InvalidRSpec, e: 
                 # As they're not needed, we ignore some tag types from 
                 # GetSliceTags call. See Slicetag.ignore_tags 
@@ -150,7 +153,10 @@ class Slice:
             for i in self.slice_tag_ids: 
                 tag = self.network.lookupSliceTag(i) 
                 if tag.tagname == tagname: 
-                    if (not node) or (node.id == tag.node_id): 
+                    if node:
+                        if node.id == tag.node_id:
+                            return tag
+                    elif not tag.node_id:
                         return tag 
         except InvalidRSpec, e: 
             # As they're not needed, we ignore some tag types from 
