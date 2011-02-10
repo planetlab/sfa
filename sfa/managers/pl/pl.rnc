@@ -20,6 +20,7 @@ site = element site {
 node = element node {
    attribute id { xsd:ID },
    element hostname { text },
+   element urn { text },
    element bw_limit { attribute units { xsd:NMTOKEN }, text }?,
    sliver*
 }

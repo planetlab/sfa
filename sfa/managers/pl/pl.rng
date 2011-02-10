@@ -59,16 +59,16 @@
         <text/>
       </element>
       <optional>
+        <element name="urn">
+            <text/>
+        </element>
+      </optional>
+      <optional>
         <element name="bw_limit">
           <attribute name="units">
             <data type="NMTOKEN"/>
           </attribute>
           <text/>
-        </element>
-      </optional>
-      <optional>
-        <element name="urn">
-            <text/>
         </element>
       </optional>
       <zeroOrMore>
