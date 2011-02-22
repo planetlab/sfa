@@ -48,8 +48,8 @@ vm_type = element vm_type {
    cores,
    memory,
    disk_space,
-   request?,
-   euca_instances?
+   euca_instances?,
+   request?
 }
 
 request = element request {
@@ -74,7 +74,7 @@ euca_instance = element euca_instance {
    attribute id { xsd:ID },
    state,
    public_dns,
-   keypair
+   keypair?
 }
 ipv4 = element ipv4 { text }
 type = element type { text }
