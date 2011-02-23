@@ -106,10 +106,10 @@
       <ref name="memory"/>
       <ref name="disk_space"/>
       <optional>
-        <ref name="request"/>
+        <ref name="euca_instances"/>
       </optional>
       <optional>
-        <ref name="euca_instances"/>
+        <ref name="request"/>
       </optional>
     </element>
   </define>
@@ -144,7 +144,9 @@
       </attribute>
       <ref name="state"/>
       <ref name="public_dns"/>
-      <ref name="keypair"/>
+      <optional>
+        <ref name="keypair"/>
+      </optional>
     </element>
   </define>
   <define name="ipv4">
