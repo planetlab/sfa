@@ -5,20 +5,9 @@
 
 #
 # Links in the physical topology, gleaned from looking at the Internet2
-# and NLR topology maps.  Link (a, b) connects sites with IDs a and b.
+# topology map.  Link (a, b) connects sites with IDs a and b.
 #
 PhysicalLinks = [(2, 12),  # I2 Princeton - New York 
-         (4, 5),   # NLR Chicago - Houston
-         (4, 6),   # NLR Chicago - Atlanta
-         (4, 7),   # NLR Chicago - Seattle
-         (4, 9),   # NLR Chicago - New York
-         (4, 10),  # NLR Chicago - Wash DC
-         (5, 6),   # NLR Houston - Atlanta
-         (5, 8),   # NLR Houston - Los Angeles
-         (6, 10),  # NLR Atlanta - Wash DC
-         (6, 14),  # NLR Atlanta - Ga Tech
-         (7, 8),   # NLR Seattle - Los Angeles
-         (9, 10),  # NLR New York - Wash DC
          (11, 13), # I2 Chicago - Wash DC
          (11, 15), # I2 Chicago - Atlanta
          (11, 16), # I2 Chicago - CESNET
