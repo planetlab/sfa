@@ -51,7 +51,7 @@ def slice_status(api, slice_xrn, creds ):
     api.logger.info(nodes)
     
     result = {}
-    result['geni_urn'] = slice_xrn
+    result['geni_urn'] = Xrn(slice_xrn, 'slice').get_urn()
     result['geni_status'] = 'unknown'
     result['pl_login'] = slice['name']
     result['pl_expires'] = datetime.datetime.fromtimestamp(slice['expires']).ctime()

@@ -6,7 +6,7 @@ import re
 from types import StringTypes
 
 from sfa.util.faults import *
-from sfa.util.xrn import get_authority, hrn_to_urn, urn_to_hrn
+from sfa.util.xrn import get_authority, hrn_to_urn, urn_to_hrn, Xrn
 from sfa.util.plxrn import slicename_to_hrn, hrn_to_pl_slicename
 from sfa.util.rspec import *
 from sfa.util.specdict import *
@@ -108,7 +108,7 @@ def slice_status(api, slice_xrn, creds):
     api.logger.info(nodes)
     
     result = {}
-    result['geni_urn'] = slice_xrn
+    result['geni_urn'] = Xrn(slice_xrn, 'slice').get_urn()
     result['geni_status'] = 'unknown'
     result['pl_login'] = slice['name']
     result['pl_expires'] = datetime.datetime.fromtimestamp(slice['expires']).ctime()
