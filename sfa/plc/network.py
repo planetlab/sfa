@@ -148,8 +148,8 @@ class Slice:
     Use with tags that have only one instance
     """
     def get_tag(self, tagname, node = None):
-        try: 
-            for i in self.slice_tag_ids: 
+        for i in self.slice_tag_ids:
+            try:
                 tag = self.network.lookupSliceTag(i) 
                 if tag.tagname == tagname: 
                     if node:
@@ -157,10 +157,10 @@ class Slice:
                             return tag
                     elif not tag.node_id:
                         return tag 
-        except InvalidRSpec, e: 
-            # As they're not needed, we ignore some tag types from 
-            # GetSliceTags call. See Slicetag.ignore_tags 
-            pass 
+            except InvalidRSpec, e:
+                # As they're not needed, we ignore some tag types from
+                # GetSliceTags call. See Slicetag.ignore_tags
+                pass
         return None
         
     def get_nodes(self):
