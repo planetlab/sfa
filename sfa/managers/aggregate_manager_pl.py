@@ -7,7 +7,7 @@ from types import StringTypes
 
 from sfa.util.faults import *
 from sfa.util.xrn import get_authority, hrn_to_urn, urn_to_hrn, Xrn
-from sfa.util.plxrn import slicename_to_hrn, hrn_to_pl_slicename
+from sfa.util.plxrn import slicename_to_hrn, hrn_to_pl_slicename, hostname_to_urn
 from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.record import SfaRecord
@@ -103,18 +103,28 @@ def slice_status(api, slice_xrn, creds):
     slice = slices[0]
     
     nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'],
-                                    ['hostname', 'boot_state', 'last_contact'])
-    api.logger.info(slice)
-    api.logger.info(nodes)
-    
+                                    ['hostname', 'site_id', 'boot_state', 'last_contact'])
+    site_ids = [node['site_id'] for node in nodes]
+    sites = api.plshell.GetSites(api.plauth, site_ids, ['site_id', 'login_base'])
+    sites_dict = {}
+    for site in sites:
+        sites_dict[site['site_id']] = site['login_base']
+
+    # XX remove me
+    #api.logger.info(slice_xrn)
+    #api.logger.info(slice)
+    #api.logger.info(nodes)
+    # XX remove me
+
     result = {}
+    top_level_status = 'unknown'
+    if nodes:
+        top_level_status = 'ready'
     result['geni_urn'] = Xrn(slice_xrn, 'slice').get_urn()
-    result['geni_status'] = 'unknown'
     result['pl_login'] = slice['name']
     result['pl_expires'] = datetime.datetime.fromtimestamp(slice['expires']).ctime()
     
     resources = []
-    
     for node in nodes:
         res = {}
         res['pl_hostname'] = node['hostname']
@@ -122,13 +132,22 @@ def slice_status(api, slice_xrn, creds):
         res['pl_last_contact'] = node['last_contact']
         if not node['last_contact'] is None:
             res['pl_last_contact'] = datetime.datetime.fromtimestamp(node['last_contact']).ctime()
-        res['geni_urn'] = ''
-        res['geni_status'] = 'unknown'
+        res['geni_urn'] = hostname_to_urn(api.hrn, sites_dict[node['site_id']], node['hostname'])
+        if node['boot_state'] == 'boot':
+            res['geni_status'] = 'ready'
+        else:
+            res['geni_status'] = 'failed'
+            top_level_staus = failed 
+            
         res['geni_error'] = ''
 
         resources.append(res)
         
+    result['geni_status'] = top_level_status
     result['geni_resources'] = resources
+    # XX remove me
+    #api.logger.info(result)
+    # XX remove me
     return result
 
 def create_slice(api, slice_xrn, creds, rspec, users):
