@@ -31,6 +31,7 @@ bins = [
     'sfa/client/sfiDeleteAttribute.py',
     'sfatables/sfatables',
     'keyconvert/keyconvert.py'
+    'flashpolicy/sfa_flashpolicy.py',
     ]
 
 package_dirs = [
@@ -47,6 +48,7 @@ package_dirs = [
     'sfatables',
     'sfatables/commands',
     'sfatables/processors',
+    'flashpolicy',
     ]
 
 
@@ -60,6 +62,7 @@ data_files = [('/etc/sfa/', [ 'config/aggregates.xml',
                               'sfa/trust/sig.xsd',
                               'sfa/trust/xml.xsd',
                               'sfa/trust/protogeni-rspec-common.xsd',
+                              'flash_policy/flashpolicy_config.xml',
                             ]),
               ('/etc/sfatables/matches/', glob('sfatables/matches/*.xml')),
               ('/etc/sfatables/targets/', glob('sfatables/targets/*.xml')),
