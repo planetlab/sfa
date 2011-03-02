@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 13
+%define taglevel 14
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -185,6 +185,12 @@ fi
 
 
 %changelog
+* Wed Mar 02 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-14
+- Modifications to the Eucalyptus Aggregate Manager
+- Fixes for VINI RSpec
+- Fix tag handling for PL RSpec
+- Fix XML Schema ordering for <urn> element
+
 * Tue Feb 01 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-13
 - just set x509 version to 2
 
@@ -276,6 +282,12 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Wed Mar 02 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-14
+- Modifications to the Eucalyptus Aggregate Manager
+- Fixes for VINI RSpec
+- Fix tag handling for PL RSpec
+- Fix XML Schema ordering for <urn> element
+
 * Tue Feb 01 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-13
 - just set x509 version to 2
 
