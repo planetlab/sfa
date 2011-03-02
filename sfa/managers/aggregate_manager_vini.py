@@ -25,20 +25,12 @@ from sfa.util.version import version_core
 # VINI aggregate is almost identical to PLC aggregate for many operations, 
 # so lets just import the methods form the PLC manager
 from sfa.managers.aggregate_manager_pl import (
-start_slice, stop_slice, renew_slice, reset_slice, get_slices, get_ticket)
+start_slice, stop_slice, renew_slice, reset_slice, get_slices, get_ticket, slice_status)
 
 
 def GetVersion(api):
     return version_core({'interface':'aggregate',
                          'testbed':'myplc.vini'})
-
-def slice_status(api, slice_xrn, creds):
-    result = {}
-    result['geni_urn'] = slice_xrn
-    result['geni_status'] = 'unknown'
-    result['geni_resources'] = {}
-    return result
-
 
 def delete_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)

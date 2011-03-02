@@ -13,6 +13,7 @@ from sfa.trust.credential import Credential
 from sfa.trust.certificate import Certificate, Keypair
 from sfa.trust.gid import create_uuid
 from sfa.util.version import version_core
+from sfa.managers.aggregate_manager_pl import slice_status
 
 # The GENI GetVersion call
 def GetVersion(api):
