@@ -73,9 +73,9 @@ class policy_server(object):
                 # It's possible that we won't get the entire request in
                 # a single recv, but very unlikely.
                 request = conn.recv(1024).strip()
-                if request != '<policy-file-request/>\0':
-                    self.log('Unrecognized request from %s: %s' % (addrstr, request))
-                    return
+                #if request != '<policy-file-request/>\0':
+                #    self.log('Unrecognized request from %s: %s' % (addrstr, request))
+                #    return
                 self.log('Valid request received from %s' % (addrstr,))
                 conn.sendall(self.policy)
                 self.log('Sent policy file to %s' % (addrstr,))
