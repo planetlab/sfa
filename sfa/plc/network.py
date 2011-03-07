@@ -183,10 +183,14 @@ class Slice:
     
     # Update a slice tag if it exists, else add it             
     def update_tag(self, tagname, value, node = None, role = "user"):
+        tag = self.get_tag(tagname, node)
+        if tag and tag.value == value:
+            return tag
+
         tt = self.network.lookupTagType(tagname)
         if not tt.permit_update(role):
             raise InvalidRSpec("permission denied to modify '%s' tag" % tagname)
-        tag = self.get_tag(tagname, node)
+
         if tag:
             tag.change(value)
         else:
