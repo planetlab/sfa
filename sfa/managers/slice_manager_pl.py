@@ -24,6 +24,10 @@ import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.plc.peers as peers
 from sfa.util.version import version_core
 
+# XX FIX ME:  should merge result from multiple aggregates instead of 
+# calling aggregate implementation
+from sfa.managers.aggregate_manager_pl import slice_status
+
 def GetVersion(api):
     peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.aggregates.items() 
                    if peername != api.hrn])
@@ -33,46 +37,6 @@ def GetVersion(api):
                          'urn' : xrn.get_urn(),
                          'peers': peers,
                          })
-
-def slice_status(api, slice_xrn, creds ):
-    hrn, type = urn_to_hrn(slice_xrn)
-    # find out where this slice is currently running
-    api.logger.info(hrn)
-    slicename = hrn_to_pl_slicename(hrn)
-    api.logger.info("Checking status for %s" % slicename)
-    slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids','person_ids','name','expires'])
-    if len(slices) == 0:        
-        raise Exception("Slice %s not found (used %s as slicename internally)" % (slice_xrn, slicename))
-    slice = slices[0]
-    
-    nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'],
-                                    ['hostname', 'boot_state', 'last_contact'])
-    api.logger.info(slice)
-    api.logger.info(nodes)
-    
-    result = {}
-    result['geni_urn'] = Xrn(slice_xrn, 'slice').get_urn()
-    result['geni_status'] = 'unknown'
-    result['pl_login'] = slice['name']
-    result['pl_expires'] = datetime.datetime.fromtimestamp(slice['expires']).ctime()
-    
-    resources = []
-    
-    for node in nodes:
-        res = {}
-        res['pl_hostname'] = node['hostname']
-        res['pl_boot_state'] = node['boot_state']
-        res['pl_last_contact'] = node['last_contact']
-        if not node['last_contact'] is None:
-            res['pl_last_contact'] = datetime.datetime.fromtimestamp(node['last_contact']).ctime()
-        res['geni_urn'] = ''
-        res['geni_status'] = 'unknown'
-        res['geni_error'] = ''
-
-        resources.append(res)
-        
-    result['geni_resources'] = resources
-    return result
 
 def create_slice(api, xrn, creds, rspec, users):
     hrn, type = urn_to_hrn(xrn)

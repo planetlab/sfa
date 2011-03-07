@@ -265,6 +265,31 @@ Thierry Parmentelat
       </variablelist>
     </category>
 
+    <category id="sfa_flashpolicy">
+      <name>SFA Flash Policy</name>
+      <description>The settings that affect the flash policy server that will run
+      as part of this SFA instance.</description>
+
+      <variablelist>
+        <variable id="enabled" type="boolean">
+          <name>Enable Flash Policy Server</name>
+          <value>false</value>
+          <description>Allows this local SFA instance to run a
+          flash policy server.</description>
+        </variable>
+        <variable id="config_file" type="string">
+          <name>Flash policy config file</name>
+          <value>/etc/sfa/sfa_flashpolicy_config.xml</value>
+          <description>The path to where the flash policy config file can be reached.</description>
+        </variable>
+        <variable id="port" type="int">
+          <name>Flash policy port</name>
+          <value>843</value>
+          <description>The flash policy server port.</description>
+        </variable>
+      </variablelist>
+    </category>
+
   </variables>
 
   <comps>

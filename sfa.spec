@@ -70,6 +70,11 @@ Summary: sfatables policy tool for SFA
 Group: Applications/System
 Requires: sfa
 
+%package flashpolicy
+Summary: SFA support for flash clients
+Group: Applications/System
+Requires: sfa
+
 %Package tests
 Summary: unit tests suite for SFA
 Group: Applications/System
@@ -95,6 +100,9 @@ sfatables is a tool for defining access and admission control policies
 in an SFA network, in much the same way as iptables is for ip
 networks. This is the command line interface to manage sfatables
 
+%description flashpolicy
+This package provides support for adobe flash client applications.  
+ 
 %description tests
 Provides some binary unit tests in /usr/share/sfa/tests
 
@@ -153,6 +161,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %files sfatables
 %{_bindir}/sfatables
+
+%files flashpolicy
+%{_bindir}/sfa_flashpolicy.py
+/etc/sfa/flashpolicy_config.xml
 
 %files tests
 %{_datadir}/sfa/tests
