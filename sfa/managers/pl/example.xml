@@ -1,0 +1,3882 @@
+<?xml version="1.0"?>
+<RSpec type="SFA">
+  <network name="plc">
+    <site id="huberlin">
+      <name>HU Berlin - IWI</name>
+      <node id="n10855">
+        <hostname>planetlab1.wiwi.hu-berlin.de</hostname>
+        <urn>urn:publicid:IDN+plc:huberlin+node+planetlab1.wiwi.hu-berlin.de</urn>
+      </node>
+      <node id="n10856">
+        <hostname>planetlab2.wiwi.hu-berlin.de</hostname>
+        <urn>urn:publicid:IDN+plc:huberlin+node+planetlab2.wiwi.hu-berlin.de</urn>
+      </node>
+    </site>
+    <site id="williams">
+      <name>Williams College</name>
+      <node id="n10858">
+        <hostname>planetlab1.williams.edu</hostname>
+        <urn>urn:publicid:IDN+plc:williams+node+planetlab1.williams.edu</urn>
+	<sliver />
+      </node>
+      <node id="n10859">
+        <hostname>planetlab2.williams.edu</hostname>
+        <urn>urn:publicid:IDN+plc:williams+node+planetlab2.williams.edu</urn>
+	<sliver />
+      </node>
+      <node id="n10860">
+        <hostname>planetlab3.williams.edu</hostname>
+        <urn>urn:publicid:IDN+plc:williams+node+planetlab3.williams.edu</urn>
+	<sliver />
+      </node>
+      <node id="n11059">
+        <hostname>planetlab4.williams.edu</hostname>
+        <urn>urn:publicid:IDN+plc:williams+node+planetlab4.williams.edu</urn>
+	<sliver />
+      </node>
+      <node id="n11060">
+        <hostname>planetlab5.williams.edu</hostname>
+        <urn>urn:publicid:IDN+plc:williams+node+planetlab5.williams.edu</urn>
+	<sliver />
+      </node>
+    </site>
+    <site id="kentucky">
+      <name>Kentucky</name>
+      <node id="n73">
+        <hostname>planetlab1.netlab.uky.edu</hostname>
+        <urn>urn:publicid:IDN+plc:kentucky+node+planetlab1.netlab.uky.edu</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n74">
+        <hostname>planetlab2.netlab.uky.edu</hostname>
+        <urn>urn:publicid:IDN+plc:kentucky+node+planetlab2.netlab.uky.edu</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="nyu">
+      <name>NYU</name>
+      <node id="n2">
+        <hostname>planet1.scs.cs.nyu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:nyu+node+planet1.scs.cs.nyu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3">
+        <hostname>planet2.scs.cs.nyu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:nyu+node+planet2.scs.cs.nyu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8314">
+        <hostname>planetx.scs.cs.nyu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:nyu+node+planetx.scs.cs.nyu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ucsd">
+      <name>UCSD</name>
+      <node id="n10544">
+        <hostname>planetlab1.ucsd.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsd+node+planetlab1.ucsd.edu</urn>
+      </node>
+      <node id="n10545">
+        <hostname>planetlab2.ucsd.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsd+node+planetlab2.ucsd.edu</urn>
+      </node>
+      <node id="n10546">
+        <hostname>planetlab3.ucsd.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsd+node+planetlab3.ucsd.edu</urn>
+      </node>
+    </site>
+    <site id="arizona">
+      <name>Arizona</name>
+      <node id="n10746">
+        <hostname>planetlab1.arizona-gigapop.net</hostname>
+        <urn>urn:publicid:IDN+plc:arizona+node+planetlab1.arizona-gigapop.net</urn>
+      </node>
+      <node id="n11076">
+        <hostname>planetlab2.arizona-gigapop.net</hostname>
+        <urn>urn:publicid:IDN+plc:arizona+node+planetlab2.arizona-gigapop.net</urn>
+      </node>
+      <node id="n13633">
+        <hostname>planetlab3.arizona-gigapop.net</hostname>
+        <urn>urn:publicid:IDN+plc:arizona+node+planetlab3.arizona-gigapop.net</urn>
+      </node>
+    </site>
+    <site id="lbl">
+      <name>LBL</name>
+      <node id="n8159">
+        <hostname>node1.lbnl.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:lbl+node+node1.lbnl.nodes.planet-lab.org</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8160">
+        <hostname>node2.lbnl.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:lbl+node+node2.lbnl.nodes.planet-lab.org</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="rit">
+      <name>RIT</name>
+      <node id="n11502">
+        <hostname>planet1.cs.rit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rit+node+planet1.cs.rit.edu</urn>
+      </node>
+      <node id="n11503">
+        <hostname>planet2.cs.rit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rit+node+planet2.cs.rit.edu</urn>
+      </node>
+    </site>
+    <site id="irp">
+      <name>IRP</name>
+      <node id="n30">
+        <hostname>planet1.pittsburgh.intel-research.net</hostname>
+        <urn>urn:publicid:IDN+plc:irp+node+planet1.pittsburgh.intel-research.net</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n31">
+        <hostname>planet2.pittsburgh.intel-research.net</hostname>
+        <urn>urn:publicid:IDN+plc:irp+node+planet2.pittsburgh.intel-research.net</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n32">
+        <hostname>planet3.pittsburgh.intel-research.net</hostname>
+        <urn>urn:publicid:IDN+plc:irp+node+planet3.pittsburgh.intel-research.net</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="harvard">
+      <name>Harvard</name>
+      <node id="n77">
+        <hostname>lefthand.eecs.harvard.edu</hostname>
+        <urn>urn:publicid:IDN+plc:harvard+node+lefthand.eecs.harvard.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n78">
+        <hostname>righthand.eecs.harvard.edu</hostname>
+        <urn>urn:publicid:IDN+plc:harvard+node+righthand.eecs.harvard.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="uw">
+      <name>Wash</name>
+      <node id="n34">
+        <hostname>planetlab01.cs.washington.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uw+node+planetlab01.cs.washington.edu</urn>
+      </node>
+      <node id="n35">
+        <hostname>planetlab02.cs.washington.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uw+node+planetlab02.cs.washington.edu</urn>
+      </node>
+      <node id="n36">
+        <hostname>planetlab03.cs.washington.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uw+node+planetlab03.cs.washington.edu</urn>
+      </node>
+      <node id="n10525">
+        <hostname>planetlab04.cs.washington.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uw+node+planetlab04.cs.washington.edu</urn>
+      </node>
+      <node id="n13513">
+        <hostname>planetlab05.cs.washington.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uw+node+planetlab05.cs.washington.edu</urn>
+      </node>
+      <node id="n13514">
+        <hostname>planetlab06.cs.washington.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uw+node+planetlab06.cs.washington.edu</urn>
+      </node>
+    </site>
+    <site id="cmu">
+      <name>CarnegieMellon</name>
+      <node id="n40">
+        <hostname>planetlab-1.cmcl.cs.cmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cmu+node+planetlab-1.cmcl.cs.cmu.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n41">
+        <hostname>planetlab-2.cmcl.cs.cmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cmu+node+planetlab-2.cmcl.cs.cmu.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n42">
+        <hostname>planetlab-3.cmcl.cs.cmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cmu+node+planetlab-3.cmcl.cs.cmu.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="mtu">
+      <name>Michigan Technological University</name>
+      <node id="n10944">
+        <hostname>mtuplanetlab1.cs.mtu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mtu+node+mtuplanetlab1.cs.mtu.edu</urn>
+        <bw_limit units="kbps">500000</bw_limit>
+      </node>
+      <node id="n13125">
+        <hostname>mtuplanetlab2.cs.mtu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mtu+node+mtuplanetlab2.cs.mtu.edu</urn>
+      </node>
+    </site>
+    <site id="duke">
+      <name>Duke</name>
+      <node id="n46">
+        <hostname>planetlab1.cs.duke.edu</hostname>
+        <urn>urn:publicid:IDN+plc:duke+node+planetlab1.cs.duke.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n47">
+        <hostname>planetlab2.cs.duke.edu</hostname>
+        <urn>urn:publicid:IDN+plc:duke+node+planetlab2.cs.duke.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n48">
+        <hostname>planetlab3.cs.duke.edu</hostname>
+        <urn>urn:publicid:IDN+plc:duke+node+planetlab3.cs.duke.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10646">
+        <hostname>planetlab4.cs.duke.edu</hostname>
+        <urn>urn:publicid:IDN+plc:duke+node+planetlab4.cs.duke.edu</urn>
+      </node>
+      <node id="n10647">
+        <hostname>planetlab5.cs.duke.edu</hostname>
+        <urn>urn:publicid:IDN+plc:duke+node+planetlab5.cs.duke.edu</urn>
+      </node>
+      <node id="n13481">
+        <hostname>planetlab6.cs.duke.edu</hostname>
+        <urn>urn:publicid:IDN+plc:duke+node+planetlab6.cs.duke.edu</urn>
+      </node>
+      <node id="n13483">
+        <hostname>planetlab7.cs.duke.edu</hostname>
+        <urn>urn:publicid:IDN+plc:duke+node+planetlab7.cs.duke.edu</urn>
+      </node>
+    </site>
+    <site id="isi">
+      <name>ISI</name>
+      <node id="n33">
+        <hostname>planetlab1.postel.org</hostname>
+        <urn>urn:publicid:IDN+plc:isi+node+planetlab1.postel.org</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n86">
+        <hostname>planetlab2.postel.org</hostname>
+        <urn>urn:publicid:IDN+plc:isi+node+planetlab2.postel.org</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11104">
+        <hostname>planetlab3.postel.org</hostname>
+        <urn>urn:publicid:IDN+plc:isi+node+planetlab3.postel.org</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n11105">
+        <hostname>planetlab4.postel.org</hostname>
+        <urn>urn:publicid:IDN+plc:isi+node+planetlab4.postel.org</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="kansas">
+      <name>Kansas</name>
+      <node id="n92">
+        <hostname>kupl1.ittc.ku.edu</hostname>
+        <urn>urn:publicid:IDN+plc:kansas+node+kupl1.ittc.ku.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n93">
+        <hostname>kupl2.ittc.ku.edu</hostname>
+        <urn>urn:publicid:IDN+plc:kansas+node+kupl2.ittc.ku.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="washu">
+      <name>WashU</name>
+      <node id="n11462">
+        <hostname>vn4.cse.wustl.edu</hostname>
+        <urn>urn:publicid:IDN+plc:washu+node+vn4.cse.wustl.edu</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n13116">
+        <hostname>vn5.cse.wustl.edu</hostname>
+        <urn>urn:publicid:IDN+plc:washu+node+vn5.cse.wustl.edu</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="michigan">
+      <name>Michigan</name>
+      <node id="n90">
+        <hostname>planetlab1.eecs.umich.edu</hostname>
+        <urn>urn:publicid:IDN+plc:michigan+node+planetlab1.eecs.umich.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n91">
+        <hostname>planetlab2.eecs.umich.edu</hostname>
+        <urn>urn:publicid:IDN+plc:michigan+node+planetlab2.eecs.umich.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11077">
+        <hostname>planetlab3.eecs.umich.edu</hostname>
+        <urn>urn:publicid:IDN+plc:michigan+node+planetlab3.eecs.umich.edu</urn>
+      </node>
+      <node id="n11078">
+        <hostname>planetlab4.eecs.umich.edu</hostname>
+        <urn>urn:publicid:IDN+plc:michigan+node+planetlab4.eecs.umich.edu</urn>
+      </node>
+      <node id="n13487">
+        <hostname>planetlab5.eecs.umich.edu</hostname>
+        <urn>urn:publicid:IDN+plc:michigan+node+planetlab5.eecs.umich.edu</urn>
+      </node>
+    </site>
+    <site id="ucsb">
+      <name>UCSB</name>
+      <node id="n89">
+        <hostname>planet2.cs.ucsb.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsb+node+planet2.cs.ucsb.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11382">
+        <hostname>planet3.cs.ucsb.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsb+node+planet3.cs.ucsb.edu</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n11383">
+        <hostname>planet4.cs.ucsb.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsb+node+planet4.cs.ucsb.edu</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n13625">
+        <hostname>planet5.cs.ucsb.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsb+node+planet5.cs.ucsb.edu</urn>
+      </node>
+      <node id="n13626">
+        <hostname>planet6.cs.ucsb.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsb+node+planet6.cs.ucsb.edu</urn>
+      </node>
+    </site>
+    <site id="mit">
+      <name>MIT</name>
+      <node id="n49">
+        <hostname>planetlab1.csail.mit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mit+node+planetlab1.csail.mit.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n50">
+        <hostname>planetlab3.csail.mit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mit+node+planetlab3.csail.mit.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n51">
+        <hostname>planetlab2.csail.mit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mit+node+planetlab2.csail.mit.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n360">
+        <hostname>planetlab6.csail.mit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mit+node+planetlab6.csail.mit.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n361">
+        <hostname>planetlab5.csail.mit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mit+node+planetlab5.csail.mit.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n362">
+        <hostname>planetlab7.csail.mit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mit+node+planetlab7.csail.mit.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n363">
+        <hostname>planetlab4.csail.mit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:mit+node+planetlab4.csail.mit.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ucb">
+      <name>UCB</name>
+      <node id="n3214">
+        <hostname>planetlab4.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab4.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3215">
+        <hostname>planetlab12.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab12.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3216">
+        <hostname>planetlab5.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab5.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3217">
+        <hostname>planetlab13.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab13.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3218">
+        <hostname>planetlab14.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab14.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3220">
+        <hostname>planetlab6.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab6.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3221">
+        <hostname>planetlab7.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab7.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3222">
+        <hostname>planetlab10.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab10.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3223">
+        <hostname>planetlab11.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab11.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3224">
+        <hostname>planetlab9.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab9.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3225">
+        <hostname>planetlab8.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab8.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8181">
+        <hostname>planetlab3.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab3.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8182">
+        <hostname>planetlab1.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab1.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8183">
+        <hostname>planetlab2.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab2.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10976">
+        <hostname>planetlab15.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab15.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10977">
+        <hostname>planetlab16.millennium.berkeley.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucb+node+planetlab16.millennium.berkeley.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="stanford">
+      <name>Stanford</name>
+      <node id="n4">
+        <hostname>planet1.scs.stanford.edu</hostname>
+        <urn>urn:publicid:IDN+plc:stanford+node+planet1.scs.stanford.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n45">
+        <hostname>planet2.scs.stanford.edu</hostname>
+        <urn>urn:publicid:IDN+plc:stanford+node+planet2.scs.stanford.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="rice">
+      <name>Rice</name>
+      <node id="n7">
+        <hostname>ricepl-1.cs.rice.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rice+node+ricepl-1.cs.rice.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n87">
+        <hostname>ricepl-2.cs.rice.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rice+node+ricepl-2.cs.rice.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n88">
+        <hostname>ricepl-3.cs.rice.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rice+node+ricepl-3.cs.rice.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13565">
+        <hostname>ricepl-4.cs.rice.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rice+node+ricepl-4.cs.rice.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13566">
+        <hostname>ricepl-5.cs.rice.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rice+node+ricepl-5.cs.rice.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="kentsu">
+      <name>Kent State University</name>
+      <node id="n11488">
+        <hostname>pl1.planet.cs.kent.edu</hostname>
+        <urn>urn:publicid:IDN+plc:kentsu+node+pl1.planet.cs.kent.edu</urn>
+      </node>
+      <node id="n11489">
+        <hostname>pl2.planet.cs.kent.edu</hostname>
+        <urn>urn:publicid:IDN+plc:kentsu+node+pl2.planet.cs.kent.edu</urn>
+      </node>
+      <node id="n11490">
+        <hostname>pl3.planet.cs.kent.edu</hostname>
+        <urn>urn:publicid:IDN+plc:kentsu+node+pl3.planet.cs.kent.edu</urn>
+      </node>
+    </site>
+    <site id="utexas">
+      <name>Austin</name>
+      <node id="n55">
+        <hostname>planetlab2.csres.utexas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utexas+node+planetlab2.csres.utexas.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n79">
+        <hostname>planetlab1.csres.utexas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utexas+node+planetlab1.csres.utexas.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n80">
+        <hostname>planetlab3.csres.utexas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utexas+node+planetlab3.csres.utexas.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n11024">
+        <hostname>planetlab4.csres.utexas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utexas+node+planetlab4.csres.utexas.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n11039">
+        <hostname>planetlab5.csres.utexas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utexas+node+planetlab5.csres.utexas.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n13562">
+        <hostname>planetlab6.csres.utexas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utexas+node+planetlab6.csres.utexas.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n13563">
+        <hostname>planetlab7.csres.utexas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utexas+node+planetlab7.csres.utexas.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+    </site>
+    <site id="utah">
+      <name>Utah</name>
+      <node id="n10712">
+        <hostname>planetlab4.flux.utah.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utah+node+planetlab4.flux.utah.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10713">
+        <hostname>planetlab5.flux.utah.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utah+node+planetlab5.flux.utah.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11074">
+        <hostname>planetlab6.flux.utah.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utah+node+planetlab6.flux.utah.edu</urn>
+      </node>
+      <node id="n11075">
+        <hostname>planetlab7.flux.utah.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utah+node+planetlab7.flux.utah.edu</urn>
+      </node>
+    </site>
+    <site id="ucla">
+      <name>UCLA</name>
+      <node id="n11403">
+        <hostname>planetlab1.cs.ucla.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucla+node+planetlab1.cs.ucla.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11404">
+        <hostname>planetlab2.cs.ucla.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucla+node+planetlab2.cs.ucla.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="cornell">
+      <name>Cornell</name>
+      <node id="n39">
+        <hostname>planetlab2.cs.cornell.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cornell+node+planetlab2.cs.cornell.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n67">
+        <hostname>planetlab1.cs.cornell.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cornell+node+planetlab1.cs.cornell.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10239">
+        <hostname>planetlab3-dsl.cs.cornell.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cornell+node+planetlab3-dsl.cs.cornell.edu</urn>
+      </node>
+      <node id="n10240">
+        <hostname>planetlab4-dsl.cs.cornell.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cornell+node+planetlab4-dsl.cs.cornell.edu</urn>
+      </node>
+      <node id="n10648">
+        <hostname>planetlab5.cs.cornell.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cornell+node+planetlab5.cs.cornell.edu</urn>
+      </node>
+      <node id="n10649">
+        <hostname>planetlab6.cs.cornell.edu</hostname>
+        <urn>urn:publicid:IDN+plc:cornell+node+planetlab6.cs.cornell.edu</urn>
+      </node>
+    </site>
+    <site id="tennessee">
+      <name>Tennessee</name>
+      <node id="n11">
+        <hostname>pl1.eecs.utk.edu</hostname>
+        <urn>urn:publicid:IDN+plc:tennessee+node+pl1.eecs.utk.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n12">
+        <hostname>pl2.eecs.utk.edu</hostname>
+        <urn>urn:publicid:IDN+plc:tennessee+node+pl2.eecs.utk.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="caltech">
+      <name>CalTech</name>
+      <node id="n16">
+        <hostname>planlab1.cs.caltech.edu</hostname>
+        <urn>urn:publicid:IDN+plc:caltech+node+planlab1.cs.caltech.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n21">
+        <hostname>planlab2.cs.caltech.edu</hostname>
+        <urn>urn:publicid:IDN+plc:caltech+node+planlab2.cs.caltech.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="umass">
+      <name>UMass</name>
+      <node id="n19">
+        <hostname>planetlab1.cs.umass.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umass+node+planetlab1.cs.umass.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n20">
+        <hostname>planetlab2.cs.umass.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umass+node+planetlab2.cs.umass.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="emory">
+      <name>Emory University</name>
+      <node id="n11057">
+        <hostname>node1.planetlab.mathcs.emory.edu</hostname>
+        <urn>urn:publicid:IDN+plc:emory+node+node1.planetlab.mathcs.emory.edu</urn>
+      </node>
+      <node id="n11072">
+        <hostname>node2.planetlab.mathcs.emory.edu</hostname>
+        <urn>urn:publicid:IDN+plc:emory+node+node2.planetlab.mathcs.emory.edu</urn>
+      </node>
+    </site>
+    <site id="uba">
+      <name>Universidad de Buenos Aires</name>
+      <node id="n13157">
+        <hostname>planet-lab1.uba.ar</hostname>
+        <urn>urn:publicid:IDN+plc:uba+node+planet-lab1.uba.ar</urn>
+      </node>
+      <node id="n13266">
+        <hostname>planet-lab2.uba.ar</hostname>
+        <urn>urn:publicid:IDN+plc:uba+node+planet-lab2.uba.ar</urn>
+      </node>
+    </site>
+    <site id="kookmin">
+      <name>Kookmin University</name>
+      <node id="n11043">
+        <hostname>netapp6.cs.kookmin.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kookmin+node+netapp6.cs.kookmin.ac.kr</urn>
+      </node>
+      <node id="n11044">
+        <hostname>netapp7.cs.kookmin.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kookmin+node+netapp7.cs.kookmin.ac.kr</urn>
+      </node>
+      <node id="n11466">
+        <hostname>dplab03.kookmin.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kookmin+node+dplab03.kookmin.ac.kr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="canterbury">
+      <name>Canterbury</name>
+      <node id="n13635">
+        <hostname>planetlab3.canterbury.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:canterbury+node+planetlab3.canterbury.ac.nz</urn>
+      </node>
+      <node id="n13636">
+        <hostname>planetlab4.canterbury.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:canterbury+node+planetlab4.canterbury.ac.nz</urn>
+      </node>
+    </site>
+    <site id="utdallas">
+      <name>UT Dallas</name>
+      <node id="n11090">
+        <hostname>planetlab1.utdallas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utdallas+node+planetlab1.utdallas.edu</urn>
+      </node>
+      <node id="n11091">
+        <hostname>planetlab2.utdallas.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utdallas+node+planetlab2.utdallas.edu</urn>
+      </node>
+    </site>
+    <site id="cuhk">
+      <name>CUHK</name>
+      <node id="n10154">
+        <hostname>planetlab1.ie.cuhk.edu.hk</hostname>
+        <urn>urn:publicid:IDN+plc:cuhk+node+planetlab1.ie.cuhk.edu.hk</urn>
+      </node>
+      <node id="n10185">
+        <hostname>planetlab2.ie.cuhk.edu.hk</hostname>
+        <urn>urn:publicid:IDN+plc:cuhk+node+planetlab2.ie.cuhk.edu.hk</urn>
+      </node>
+      <node id="n10655">
+        <hostname>planetlab3.ie.cuhk.edu.hk</hostname>
+        <urn>urn:publicid:IDN+plc:cuhk+node+planetlab3.ie.cuhk.edu.hk</urn>
+      </node>
+      <node id="n10656">
+        <hostname>planetlab4.ie.cuhk.edu.hk</hostname>
+        <urn>urn:publicid:IDN+plc:cuhk+node+planetlab4.ie.cuhk.edu.hk</urn>
+      </node>
+      <node id="n10658">
+        <hostname>planetlab5.ie.cuhk.edu.hk</hostname>
+        <urn>urn:publicid:IDN+plc:cuhk+node+planetlab5.ie.cuhk.edu.hk</urn>
+      </node>
+    </site>
+    <site id="osakacu">
+      <name>Osaka City University</name>
+      <node id="n11019">
+        <hostname>planetlab1.n.info.eng.osaka-cu.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osakacu+node+planetlab1.n.info.eng.osaka-cu.ac.jp</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n11058">
+        <hostname>planetlab2.n.info.eng.osaka-cu.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osakacu+node+planetlab2.n.info.eng.osaka-cu.ac.jp</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n13323">
+        <hostname>planetlab3.n.info.eng.osaka-cu.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osakacu+node+planetlab3.n.info.eng.osaka-cu.ac.jp</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n13342">
+        <hostname>planetlab4.n.info.eng.osaka-cu.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osakacu+node+planetlab4.n.info.eng.osaka-cu.ac.jp</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="umd">
+      <name>Maryland</name>
+      <node id="n10425">
+        <hostname>salt.planetlab.cs.umd.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umd+node+salt.planetlab.cs.umd.edu</urn>
+      </node>
+      <node id="n13231">
+        <hostname>osiris.planetlab.cs.umd.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umd+node+osiris.planetlab.cs.umd.edu</urn>
+      </node>
+      <node id="n13232">
+        <hostname>whitefall.planetlab.cs.umd.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umd+node+whitefall.planetlab.cs.umd.edu</urn>
+      </node>
+      <node id="n13586">
+        <hostname>miranda.planetlab.cs.umd.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umd+node+miranda.planetlab.cs.umd.edu</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+    </site>
+    <site id="uva">
+      <name>UVA</name>
+      <node id="n10883">
+        <hostname>planetlab01.sys.virginia.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uva+node+planetlab01.sys.virginia.edu</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10884">
+        <hostname>planetlab02.sys.virginia.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uva+node+planetlab02.sys.virginia.edu</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="ku">
+      <name>Koc University</name>
+      <node id="n10999">
+        <hostname>planet1.ku.edu.tr</hostname>
+        <urn>urn:publicid:IDN+plc:ku+node+planet1.ku.edu.tr</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n11000">
+        <hostname>planet2.ku.edu.tr</hostname>
+        <urn>urn:publicid:IDN+plc:ku+node+planet2.ku.edu.tr</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+    </site>
+    <site id="upenn">
+      <name>UPenn</name>
+      <node id="n84">
+        <hostname>planetlab1.cis.upenn.edu</hostname>
+        <urn>urn:publicid:IDN+plc:upenn+node+planetlab1.cis.upenn.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n85">
+        <hostname>planetlab2.cis.upenn.edu</hostname>
+        <urn>urn:publicid:IDN+plc:upenn+node+planetlab2.cis.upenn.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="northwestern">
+      <name>Northwestern</name>
+      <node id="n8224">
+        <hostname>planetlab1.eecs.northwestern.edu</hostname>
+        <urn>urn:publicid:IDN+plc:northwestern+node+planetlab1.eecs.northwestern.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8226">
+        <hostname>planetlab2.eecs.northwestern.edu</hostname>
+        <urn>urn:publicid:IDN+plc:northwestern+node+planetlab2.eecs.northwestern.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11048">
+        <hostname>planetlab3.eecs.northwestern.edu</hostname>
+        <urn>urn:publicid:IDN+plc:northwestern+node+planetlab3.eecs.northwestern.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="unc">
+      <name>ChapelHill</name>
+      <node id="n10096">
+        <hostname>planetlab1.cs.unc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:unc+node+planetlab1.cs.unc.edu</urn>
+      </node>
+      <node id="n10932">
+        <hostname>planetlab2.cs.unc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:unc+node+planetlab2.cs.unc.edu</urn>
+      </node>
+    </site>
+    <site id="uiuc">
+      <name>Illinois</name>
+      <node id="n107">
+        <hostname>planetlab2.cs.uiuc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uiuc+node+planetlab2.cs.uiuc.edu</urn>
+      </node>
+      <node id="n108">
+        <hostname>planetlab1.cs.uiuc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uiuc+node+planetlab1.cs.uiuc.edu</urn>
+      </node>
+      <node id="n10424">
+        <hostname>planetlab3.cs.uiuc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uiuc+node+planetlab3.cs.uiuc.edu</urn>
+      </node>
+      <node id="n10431">
+        <hostname>planetlab4.cs.uiuc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uiuc+node+planetlab4.cs.uiuc.edu</urn>
+      </node>
+      <node id="n13493">
+        <hostname>planetlab5.cs.uiuc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uiuc+node+planetlab5.cs.uiuc.edu</urn>
+      </node>
+      <node id="n13494">
+        <hostname>planetlab6.cs.uiuc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uiuc+node+planetlab6.cs.uiuc.edu</urn>
+      </node>
+    </site>
+    <site id="ucl">
+      <name>London</name>
+      <node id="n13179">
+        <hostname>planetlab1.cs.ucl.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:ucl+node+planetlab1.cs.ucl.ac.uk</urn>
+      </node>
+      <node id="n13180">
+        <hostname>planetlab2.cs.ucl.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:ucl+node+planetlab2.cs.ucl.ac.uk</urn>
+      </node>
+    </site>
+    <site id="upatras">
+      <name>University of Patras</name>
+      <node id="n11079">
+        <hostname>planetlab1.ceid.upatras.gr</hostname>
+        <urn>urn:publicid:IDN+plc:upatras+node+planetlab1.ceid.upatras.gr</urn>
+      </node>
+      <node id="n11080">
+        <hostname>planetlab2.ceid.upatras.gr</hostname>
+        <urn>urn:publicid:IDN+plc:upatras+node+planetlab2.ceid.upatras.gr</urn>
+      </node>
+    </site>
+    <site id="tut">
+      <name>Toyohashi Univ of Tech</name>
+      <node id="n10881">
+        <hostname>pl1.planetlab.ics.tut.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:tut+node+pl1.planetlab.ics.tut.ac.jp</urn>
+      </node>
+      <node id="n10882">
+        <hostname>pl2.planetlab.ics.tut.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:tut+node+pl2.planetlab.ics.tut.ac.jp</urn>
+      </node>
+    </site>
+    <site id="nthu">
+      <name>NTHU</name>
+      <node id="n152">
+        <hostname>pads23.cs.nthu.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:nthu+node+pads23.cs.nthu.edu.tw</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n155">
+        <hostname>pads21.cs.nthu.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:nthu+node+pads21.cs.nthu.edu.tw</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="urochester">
+      <name>Rochester</name>
+      <node id="n3395">
+        <hostname>planet1.cs.rochester.edu</hostname>
+        <urn>urn:publicid:IDN+plc:urochester+node+planet1.cs.rochester.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13758">
+        <hostname>planet2.cs.rochester.edu</hostname>
+        <urn>urn:publicid:IDN+plc:urochester+node+planet2.cs.rochester.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="purdue">
+      <name>Purdue</name>
+      <node id="n159">
+        <hostname>planetlab1.cs.purdue.edu</hostname>
+        <urn>urn:publicid:IDN+plc:purdue+node+planetlab1.cs.purdue.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n160">
+        <hostname>planetlab2.cs.purdue.edu</hostname>
+        <urn>urn:publicid:IDN+plc:purdue+node+planetlab2.cs.purdue.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="rutgers">
+      <name>Rutgers</name>
+      <node id="n10203">
+        <hostname>planetlab2.rutgers.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rutgers+node+planetlab2.rutgers.edu</urn>
+      </node>
+      <node id="n10236">
+        <hostname>planetlab1.rutgers.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rutgers+node+planetlab1.rutgers.edu</urn>
+      </node>
+      <node id="n13667">
+        <hostname>planetlab3.rutgers.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rutgers+node+planetlab3.rutgers.edu</urn>
+      </node>
+      <node id="n13668">
+        <hostname>planetlab4.rutgers.edu</hostname>
+        <urn>urn:publicid:IDN+plc:rutgers+node+planetlab4.rutgers.edu</urn>
+      </node>
+    </site>
+    <site id="hplabs">
+      <name>HPLabs</name>
+      <node id="n3412">
+        <hostname>pli1-pa-4.hpl.hp.com</hostname>
+        <urn>urn:publicid:IDN+plc:hplabs+node+pli1-pa-4.hpl.hp.com</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n8290">
+        <hostname>pli1-pa-5.hpl.hp.com</hostname>
+        <urn>urn:publicid:IDN+plc:hplabs+node+pli1-pa-5.hpl.hp.com</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n11511">
+        <hostname>pli1-pa-6.hpl.hp.com</hostname>
+        <urn>urn:publicid:IDN+plc:hplabs+node+pli1-pa-6.hpl.hp.com</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="jhu">
+      <name>Hopkins</name>
+      <node id="n164">
+        <hostname>planetlab1.cnds.jhu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:jhu+node+planetlab1.cnds.jhu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n165">
+        <hostname>planetlab2.cnds.jhu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:jhu+node+planetlab2.cnds.jhu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11486">
+        <hostname>planetlab3.cnds.jhu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:jhu+node+planetlab3.cnds.jhu.edu</urn>
+      </node>
+      <node id="n11487">
+        <hostname>planetlab4.cnds.jhu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:jhu+node+planetlab4.cnds.jhu.edu</urn>
+      </node>
+    </site>
+    <site id="sri">
+      <name>SRI International</name>
+      <node id="n11498">
+        <hostname>pl-node-0.csl.sri.com</hostname>
+        <urn>urn:publicid:IDN+plc:sri+node+pl-node-0.csl.sri.com</urn>
+        <bw_limit units="kbps">524</bw_limit>
+      </node>
+      <node id="n11499">
+        <hostname>pl-node-1.csl.sri.com</hostname>
+        <urn>urn:publicid:IDN+plc:sri+node+pl-node-1.csl.sri.com</urn>
+        <bw_limit units="kbps">524</bw_limit>
+      </node>
+    </site>
+    <site id="uottawa">
+      <name>University of Ottawa</name>
+      <node id="n13334">
+        <hostname>pl1.rcc.uottawa.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uottawa+node+pl1.rcc.uottawa.ca</urn>
+      </node>
+      <node id="n13335">
+        <hostname>pl2.rcc.uottawa.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uottawa+node+pl2.rcc.uottawa.ca</urn>
+      </node>
+    </site>
+    <site id="gt">
+      <name>GT</name>
+      <node id="n83">
+        <hostname>planet1.cc.gt.atl.ga.us</hostname>
+        <urn>urn:publicid:IDN+plc:gt+node+planet1.cc.gt.atl.ga.us</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10589">
+        <hostname>planet2.cc.gt.atl.ga.us</hostname>
+        <urn>urn:publicid:IDN+plc:gt+node+planet2.cc.gt.atl.ga.us</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10590">
+        <hostname>planet3.cc.gt.atl.ga.us</hostname>
+        <urn>urn:publicid:IDN+plc:gt+node+planet3.cc.gt.atl.ga.us</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10591">
+        <hostname>planet4.cc.gt.atl.ga.us</hostname>
+        <urn>urn:publicid:IDN+plc:gt+node+planet4.cc.gt.atl.ga.us</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="stony">
+      <name>SBU</name>
+      <node id="n13273">
+        <hostname>pl1.cewit.stonybrook.edu</hostname>
+        <urn>urn:publicid:IDN+plc:stony+node+pl1.cewit.stonybrook.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n13274">
+        <hostname>pl2.cewit.stonybrook.edu</hostname>
+        <urn>urn:publicid:IDN+plc:stony+node+pl2.cewit.stonybrook.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="ufmg">
+      <name>UFMG</name>
+      <node id="n201">
+        <hostname>planetlab1.pop-mg.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:ufmg+node+planetlab1.pop-mg.rnp.br</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+      <node id="n202">
+        <hostname>planetlab2.pop-mg.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:ufmg+node+planetlab2.pop-mg.rnp.br</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+    </site>
+    <site id="tsinghua">
+      <name>Tsinghua</name>
+      <node id="n13664">
+        <hostname>pl1.6test.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:tsinghua+node+pl1.6test.edu.cn</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n13666">
+        <hostname>pl2.6test.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:tsinghua+node+pl2.6test.edu.cn</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="vrije">
+      <name>Vrije</name>
+      <node id="n204">
+        <hostname>planetlab2.cs.vu.nl</hostname>
+        <urn>urn:publicid:IDN+plc:vrije+node+planetlab2.cs.vu.nl</urn>
+      </node>
+      <node id="n205">
+        <hostname>planetlab1.cs.vu.nl</hostname>
+        <urn>urn:publicid:IDN+plc:vrije+node+planetlab1.cs.vu.nl</urn>
+      </node>
+    </site>
+    <site id="columbia">
+      <name>Columbia</name>
+      <node id="n94">
+        <hostname>planetlab1.cs.columbia.edu</hostname>
+        <urn>urn:publicid:IDN+plc:columbia+node+planetlab1.cs.columbia.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n95">
+        <hostname>planetlab2.cs.columbia.edu</hostname>
+        <urn>urn:publicid:IDN+plc:columbia+node+planetlab2.cs.columbia.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n96">
+        <hostname>planetlab3.cs.columbia.edu</hostname>
+        <urn>urn:publicid:IDN+plc:columbia+node+planetlab3.cs.columbia.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="mcgill">
+      <name>McGill</name>
+      <node id="n13123">
+        <hostname>node-1.mcgillplanetlab.org</hostname>
+        <urn>urn:publicid:IDN+plc:mcgill+node+node-1.mcgillplanetlab.org</urn>
+      </node>
+      <node id="n13124">
+        <hostname>node-2.mcgillplanetlab.org</hostname>
+        <urn>urn:publicid:IDN+plc:mcgill+node+node-2.mcgillplanetlab.org</urn>
+      </node>
+    </site>
+    <site id="nict">
+      <name>NICT</name>
+      <node id="n13126">
+        <hostname>planetlab1.koganei.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:nict+node+planetlab1.koganei.wide.ad.jp</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13127">
+        <hostname>planetlab2.koganei.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:nict+node+planetlab2.koganei.wide.ad.jp</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13128">
+        <hostname>planetlab1.nvlab.org</hostname>
+        <urn>urn:publicid:IDN+plc:nict+node+planetlab1.nvlab.org</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="depaul">
+      <name>DePaul</name>
+      <node id="n8185">
+        <hostname>planetlab2.mnlab.cti.depaul.edu</hostname>
+        <urn>urn:publicid:IDN+plc:depaul+node+planetlab2.mnlab.cti.depaul.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10093">
+        <hostname>planetlab1.mnlab.cti.depaul.edu</hostname>
+        <urn>urn:publicid:IDN+plc:depaul+node+planetlab1.mnlab.cti.depaul.edu</urn>
+      </node>
+    </site>
+    <site id="ufabc">
+      <name>Universidade Federal do ABC</name>
+      <node id="n10926">
+        <hostname>planet-lab1.ufabc.edu.br</hostname>
+        <urn>urn:publicid:IDN+plc:ufabc+node+planet-lab1.ufabc.edu.br</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n10927">
+        <hostname>planet-lab2.ufabc.edu.br</hostname>
+        <urn>urn:publicid:IDN+plc:ufabc+node+planet-lab2.ufabc.edu.br</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="hplabsi2">
+      <name>HPLabsI2</name>
+      <node id="n183">
+        <hostname>pli2-pa-1.hpl.hp.com</hostname>
+        <urn>urn:publicid:IDN+plc:hplabsi2+node+pli2-pa-1.hpl.hp.com</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n237">
+        <hostname>pli2-pa-2.hpl.hp.com</hostname>
+        <urn>urn:publicid:IDN+plc:hplabsi2+node+pli2-pa-2.hpl.hp.com</urn>
+      </node>
+      <node id="n238">
+        <hostname>pli2-pa-3.hpl.hp.com</hostname>
+        <urn>urn:publicid:IDN+plc:hplabsi2+node+pli2-pa-3.hpl.hp.com</urn>
+      </node>
+    </site>
+    <site id="ucd">
+      <name>UCD</name>
+      <node id="n3206">
+        <hostname>planetlab2.ece.ucdavis.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucd+node+planetlab2.ece.ucdavis.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3408">
+        <hostname>planetlab1.ece.ucdavis.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucd+node+planetlab1.ece.ucdavis.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="kaist">
+      <name>kaist</name>
+      <node id="n329">
+        <hostname>csplanetlab2.kaist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kaist+node+csplanetlab2.kaist.ac.kr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n330">
+        <hostname>csplanetlab4.kaist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kaist+node+csplanetlab4.kaist.ac.kr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n331">
+        <hostname>csplanetlab3.kaist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kaist+node+csplanetlab3.kaist.ac.kr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13690">
+        <hostname>csplanetlab5.kaist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kaist+node+csplanetlab5.kaist.ac.kr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13691">
+        <hostname>csplanetlab6.kaist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kaist+node+csplanetlab6.kaist.ac.kr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="utokyo">
+      <name>UTokyo</name>
+      <node id="n10262">
+        <hostname>planetlab1.iii.u-tokyo.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:utokyo+node+planetlab1.iii.u-tokyo.ac.jp</urn>
+      </node>
+      <node id="n10263">
+        <hostname>planetlab2.iii.u-tokyo.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:utokyo+node+planetlab2.iii.u-tokyo.ac.jp</urn>
+      </node>
+    </site>
+    <site id="uoregon">
+      <name>UOregon</name>
+      <node id="n13428">
+        <hostname>planetlab4.cs.uoregon.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uoregon+node+planetlab4.cs.uoregon.edu</urn>
+      </node>
+      <node id="n13429">
+        <hostname>planetlab2.cs.uoregon.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uoregon+node+planetlab2.cs.uoregon.edu</urn>
+      </node>
+      <node id="n13430">
+        <hostname>planetlab3.cs.uoregon.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uoregon+node+planetlab3.cs.uoregon.edu</urn>
+      </node>
+      <node id="n13431">
+        <hostname>planetlab1.cs.uoregon.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uoregon+node+planetlab1.cs.uoregon.edu</urn>
+      </node>
+    </site>
+    <site id="eurecom">
+      <name>Eurecom</name>
+      <node id="n10015">
+        <hostname>planetlab2.eurecom.fr</hostname>
+        <urn>urn:publicid:IDN+plc:eurecom+node+planetlab2.eurecom.fr</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10016">
+        <hostname>planetlab1.eurecom.fr</hostname>
+        <urn>urn:publicid:IDN+plc:eurecom+node+planetlab1.eurecom.fr</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="technion">
+      <name>Technion</name>
+      <node id="n3209">
+        <hostname>ds-pl3.technion.ac.il</hostname>
+        <urn>urn:publicid:IDN+plc:technion+node+ds-pl3.technion.ac.il</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n3424">
+        <hostname>ds-pl1.technion.ac.il</hostname>
+        <urn>urn:publicid:IDN+plc:technion+node+ds-pl1.technion.ac.il</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n10170">
+        <hostname>ds-pl2.technion.ac.il</hostname>
+        <urn>urn:publicid:IDN+plc:technion+node+ds-pl2.technion.ac.il</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+    </site>
+    <site id="bgu">
+      <name>Ben-Gurion</name>
+      <node id="n3230">
+        <hostname>planetlab1.bgu.ac.il</hostname>
+        <urn>urn:publicid:IDN+plc:bgu+node+planetlab1.bgu.ac.il</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3231">
+        <hostname>planetlab2.bgu.ac.il</hostname>
+        <urn>urn:publicid:IDN+plc:bgu+node+planetlab2.bgu.ac.il</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ntu">
+      <name>National Taiwan</name>
+      <node id="n3241">
+        <hostname>planetlab1.ntu.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:ntu+node+planetlab1.ntu.nodes.planet-lab.org</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n3242">
+        <hostname>planetlab2.ntu.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:ntu+node+planetlab2.ntu.nodes.planet-lab.org</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+    </site>
+    <site id="snu">
+      <name>SNU</name>
+      <node id="n13764">
+        <hostname>recall.snu.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:snu+node+recall.snu.ac.kr</urn>
+      </node>
+      <node id="n13765">
+        <hostname>arari.snu.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:snu+node+arari.snu.ac.kr</urn>
+      </node>
+      <node id="n13768">
+        <hostname>lover.snu.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:snu+node+lover.snu.ac.kr</urn>
+      </node>
+    </site>
+    <site id="ncsu">
+      <name>NCSU</name>
+      <node id="n3306">
+        <hostname>planet02.csc.ncsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ncsu+node+planet02.csc.ncsu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3307">
+        <hostname>planet03.csc.ncsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ncsu+node+planet03.csc.ncsu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13486">
+        <hostname>planet11.csc.ncsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ncsu+node+planet11.csc.ncsu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13488">
+        <hostname>planet12.csc.ncsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ncsu+node+planet12.csc.ncsu.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ucsc">
+      <name>UCSC</name>
+      <node id="n3303">
+        <hostname>planetslug3.cse.ucsc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsc+node+planetslug3.cse.ucsc.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11064">
+        <hostname>planetslug4.cse.ucsc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsc+node+planetslug4.cse.ucsc.edu</urn>
+      </node>
+      <node id="n11065">
+        <hostname>planetslug5.cse.ucsc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsc+node+planetslug5.cse.ucsc.edu</urn>
+      </node>
+      <node id="n13519">
+        <hostname>planetslug6.cse.ucsc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsc+node+planetslug6.cse.ucsc.edu</urn>
+      </node>
+      <node id="n13520">
+        <hostname>planetslug7.cse.ucsc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucsc+node+planetslug7.cse.ucsc.edu</urn>
+      </node>
+    </site>
+    <site id="unl">
+      <name>Nebraska</name>
+      <node id="n11087">
+        <hostname>planetlab1.unl.edu</hostname>
+        <urn>urn:publicid:IDN+plc:unl+node+planetlab1.unl.edu</urn>
+      </node>
+      <node id="n11088">
+        <hostname>planetlab2.unl.edu</hostname>
+        <urn>urn:publicid:IDN+plc:unl+node+planetlab2.unl.edu</urn>
+      </node>
+    </site>
+    <site id="sics">
+      <name>SICS</name>
+      <node id="n3349">
+        <hostname>planetlab1.sics.se</hostname>
+        <urn>urn:publicid:IDN+plc:sics+node+planetlab1.sics.se</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3350">
+        <hostname>planetlab2.sics.se</hostname>
+        <urn>urn:publicid:IDN+plc:sics+node+planetlab2.sics.se</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="dartmouth">
+      <name>Dartmouth</name>
+      <node id="n3320">
+        <hostname>planetlab1.cs.dartmouth.edu</hostname>
+        <urn>urn:publicid:IDN+plc:dartmouth+node+planetlab1.cs.dartmouth.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3321">
+        <hostname>planetlab2.cs.dartmouth.edu</hostname>
+        <urn>urn:publicid:IDN+plc:dartmouth+node+planetlab2.cs.dartmouth.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="warsaw">
+      <name>Warsaw</name>
+      <node id="n10699">
+        <hostname>planetlab3.mini.pw.edu.pl</hostname>
+        <urn>urn:publicid:IDN+plc:warsaw+node+planetlab3.mini.pw.edu.pl</urn>
+      </node>
+      <node id="n10700">
+        <hostname>planetlab4.mini.pw.edu.pl</hostname>
+        <urn>urn:publicid:IDN+plc:warsaw+node+planetlab4.mini.pw.edu.pl</urn>
+      </node>
+    </site>
+    <site id="stevens">
+      <name>StevensTech</name>
+      <node id="n3397">
+        <hostname>planetlab2.cs.stevens-tech.edu</hostname>
+        <urn>urn:publicid:IDN+plc:stevens+node+planetlab2.cs.stevens-tech.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n3398">
+        <hostname>planetlab1.cs.stevens-tech.edu</hostname>
+        <urn>urn:publicid:IDN+plc:stevens+node+planetlab1.cs.stevens-tech.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="forth">
+      <name>ICS-Forth</name>
+      <node id="n11095">
+        <hostname>planetlab1.ics.forth.gr</hostname>
+        <urn>urn:publicid:IDN+plc:forth+node+planetlab1.ics.forth.gr</urn>
+        <bw_limit units="kbps">104857</bw_limit>
+      </node>
+      <node id="n11099">
+        <hostname>planetlab2.ics.forth.gr</hostname>
+        <urn>urn:publicid:IDN+plc:forth+node+planetlab2.ics.forth.gr</urn>
+        <bw_limit units="kbps">104857</bw_limit>
+      </node>
+    </site>
+    <site id="passau">
+      <name>Passau</name>
+      <node id="n10129">
+        <hostname>dschinni.planetlab.extranet.uni-passau.de</hostname>
+        <urn>urn:publicid:IDN+plc:passau+node+dschinni.planetlab.extranet.uni-passau.de</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10130">
+        <hostname>aladdin.planetlab.extranet.uni-passau.de</hostname>
+        <urn>urn:publicid:IDN+plc:passau+node+aladdin.planetlab.extranet.uni-passau.de</urn>
+      </node>
+    </site>
+    <site id="polito">
+      <name>Polito</name>
+      <node id="n3396">
+        <hostname>planetlab1.polito.it</hostname>
+        <urn>urn:publicid:IDN+plc:polito+node+planetlab1.polito.it</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n3402">
+        <hostname>planetlab2.polito.it</hostname>
+        <urn>urn:publicid:IDN+plc:polito+node+planetlab2.polito.it</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="howard">
+      <name>Howard</name>
+      <node id="n13613">
+        <hostname>nodea.howard.edu</hostname>
+        <urn>urn:publicid:IDN+plc:howard+node+nodea.howard.edu</urn>
+      </node>
+      <node id="n13615">
+        <hostname>nodeb.howard.edu</hostname>
+        <urn>urn:publicid:IDN+plc:howard+node+nodeb.howard.edu</urn>
+      </node>
+    </site>
+    <site id="torino">
+      <name>Torino</name>
+      <node id="n10698">
+        <hostname>planetlab1.di.unito.it</hostname>
+        <urn>urn:publicid:IDN+plc:torino+node+planetlab1.di.unito.it</urn>
+      </node>
+      <node id="n10724">
+        <hostname>planetlab2.di.unito.it</hostname>
+        <urn>urn:publicid:IDN+plc:torino+node+planetlab2.di.unito.it</urn>
+      </node>
+      <node id="n13679">
+        <hostname>planetlab3.di.unito.it</hostname>
+        <urn>urn:publicid:IDN+plc:torino+node+planetlab3.di.unito.it</urn>
+      </node>
+    </site>
+    <site id="delft">
+      <name>Delft</name>
+      <node id="n8161">
+        <hostname>planetlab1.ewi.tudelft.nl</hostname>
+        <urn>urn:publicid:IDN+plc:delft+node+planetlab1.ewi.tudelft.nl</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n8162">
+        <hostname>planetlab2.ewi.tudelft.nl</hostname>
+        <urn>urn:publicid:IDN+plc:delft+node+planetlab2.ewi.tudelft.nl</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="ntua">
+      <name>CSLAB-ICCS at NTUA</name>
+      <node id="n10851">
+        <hostname>planetlab1.cslab.ece.ntua.gr</hostname>
+        <urn>urn:publicid:IDN+plc:ntua+node+planetlab1.cslab.ece.ntua.gr</urn>
+        <bw_limit units="kbps">104857</bw_limit>
+      </node>
+      <node id="n10852">
+        <hostname>planetlab2.cslab.ece.ntua.gr</hostname>
+        <urn>urn:publicid:IDN+plc:ntua+node+planetlab2.cslab.ece.ntua.gr</urn>
+        <bw_limit units="kbps">104857</bw_limit>
+      </node>
+      <node id="n10853">
+        <hostname>planetlab3.cslab.ece.ntua.gr</hostname>
+        <urn>urn:publicid:IDN+plc:ntua+node+planetlab3.cslab.ece.ntua.gr</urn>
+        <bw_limit units="kbps">104857</bw_limit>
+      </node>
+      <node id="n13115">
+        <hostname>planetlab4.cslab.ece.ntua.gr</hostname>
+        <urn>urn:publicid:IDN+plc:ntua+node+planetlab4.cslab.ece.ntua.gr</urn>
+        <bw_limit units="kbps">104857</bw_limit>
+      </node>
+    </site>
+    <site id="unikl">
+      <name>Kaiserslautern</name>
+      <node id="n8238">
+        <hostname>planetlab1.informatik.uni-kl.de</hostname>
+        <urn>urn:publicid:IDN+plc:unikl+node+planetlab1.informatik.uni-kl.de</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8239">
+        <hostname>planetlab2.informatik.uni-kl.de</hostname>
+        <urn>urn:publicid:IDN+plc:unikl+node+planetlab2.informatik.uni-kl.de</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="uvic">
+      <name>Victoria</name>
+      <node id="n10890">
+        <hostname>pl1.planetlab.uvic.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uvic+node+pl1.planetlab.uvic.ca</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+      <node id="n10891">
+        <hostname>pl2.planetlab.uvic.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uvic+node+pl2.planetlab.uvic.ca</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+      <node id="n10892">
+        <hostname>pl3.planetlab.uvic.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uvic+node+pl3.planetlab.uvic.ca</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+      <node id="n10893">
+        <hostname>pl4.planetlab.uvic.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uvic+node+pl4.planetlab.uvic.ca</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+      <node id="n10894">
+        <hostname>pl5.planetlab.uvic.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uvic+node+pl5.planetlab.uvic.ca</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+    </site>
+    <site id="nus">
+      <name>nus</name>
+      <node id="n10904">
+        <hostname>planetlab1.comp.nus.edu.sg</hostname>
+        <urn>urn:publicid:IDN+plc:nus+node+planetlab1.comp.nus.edu.sg</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10905">
+        <hostname>planetlab2.comp.nus.edu.sg</hostname>
+        <urn>urn:publicid:IDN+plc:nus+node+planetlab2.comp.nus.edu.sg</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11089">
+        <hostname>planetlab3.comp.nus.edu.sg</hostname>
+        <urn>urn:publicid:IDN+plc:nus+node+planetlab3.comp.nus.edu.sg</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="kit">
+      <name>KIT</name>
+      <node id="n11093">
+        <hostname>iraplab1.iralab.uni-karlsruhe.de</hostname>
+        <urn>urn:publicid:IDN+plc:kit+node+iraplab1.iralab.uni-karlsruhe.de</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n11094">
+        <hostname>iraplab2.iralab.uni-karlsruhe.de</hostname>
+        <urn>urn:publicid:IDN+plc:kit+node+iraplab2.iralab.uni-karlsruhe.de</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="usthk">
+      <name>UST-HK</name>
+      <node id="n8207">
+        <hostname>plab1.cs.ust.hk</hostname>
+        <urn>urn:publicid:IDN+plc:usthk+node+plab1.cs.ust.hk</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n8214">
+        <hostname>plab2.cs.ust.hk</hostname>
+        <urn>urn:publicid:IDN+plc:usthk+node+plab2.cs.ust.hk</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="uit">
+      <name>Tromso</name>
+      <node id="n10949">
+        <hostname>planetlab1.cs.uit.no</hostname>
+        <urn>urn:publicid:IDN+plc:uit+node+planetlab1.cs.uit.no</urn>
+      </node>
+      <node id="n10950">
+        <hostname>planetlab2.cs.uit.no</hostname>
+        <urn>urn:publicid:IDN+plc:uit+node+planetlab2.cs.uit.no</urn>
+      </node>
+    </site>
+    <site id="kjist">
+      <name>KJIST</name>
+      <node id="n10397">
+        <hostname>planetlab1.netmedia.gist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kjist+node+planetlab1.netmedia.gist.ac.kr</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10406">
+        <hostname>planetlab2.netmedia.gist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kjist+node+planetlab2.netmedia.gist.ac.kr</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10540">
+        <hostname>planetlab3.netmedia.gist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kjist+node+planetlab3.netmedia.gist.ac.kr</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n13680">
+        <hostname>planetlab4.netmedia.gist.ac.kr</hostname>
+        <urn>urn:publicid:IDN+plc:kjist+node+planetlab4.netmedia.gist.ac.kr</urn>
+      </node>
+    </site>
+    <site id="umn">
+      <name>University of Minnesota</name>
+      <node id="n8254">
+        <hostname>planetlab1.dtc.umn.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umn+node+planetlab1.dtc.umn.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8255">
+        <hostname>planetlab2.dtc.umn.edu</hostname>
+        <urn>urn:publicid:IDN+plc:umn+node+planetlab2.dtc.umn.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="att">
+      <name>ATT</name>
+      <node id="n8235">
+        <hostname>planet2.att.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:att+node+planet2.att.nodes.planet-lab.org</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8236">
+        <hostname>planet1.att.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:att+node+planet1.att.nodes.planet-lab.org</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="trlabs">
+      <name>TRLabs</name>
+      <node id="n8248">
+        <hostname>planetlab1.win.trlabs.ca</hostname>
+        <urn>urn:publicid:IDN+plc:trlabs+node+planetlab1.win.trlabs.ca</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8249">
+        <hostname>planetlab2.win.trlabs.ca</hostname>
+        <urn>urn:publicid:IDN+plc:trlabs+node+planetlab2.win.trlabs.ca</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="epfl">
+      <name>EPFL</name>
+      <node id="n10205">
+        <hostname>lsirextpc01.epfl.ch</hostname>
+        <urn>urn:publicid:IDN+plc:epfl+node+lsirextpc01.epfl.ch</urn>
+      </node>
+      <node id="n10206">
+        <hostname>lsirextpc02.epfl.ch</hostname>
+        <urn>urn:publicid:IDN+plc:epfl+node+lsirextpc02.epfl.ch</urn>
+      </node>
+    </site>
+    <site id="brown">
+      <name>Brown</name>
+      <node id="n10909">
+        <hostname>saturn.cs.brown.edu</hostname>
+        <urn>urn:publicid:IDN+plc:brown+node+saturn.cs.brown.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10910">
+        <hostname>jupiter.cs.brown.edu</hostname>
+        <urn>urn:publicid:IDN+plc:brown+node+jupiter.cs.brown.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10911">
+        <hostname>pluto.cs.brown.edu</hostname>
+        <urn>urn:publicid:IDN+plc:brown+node+pluto.cs.brown.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10912">
+        <hostname>earth.cs.brown.edu</hostname>
+        <urn>urn:publicid:IDN+plc:brown+node+earth.cs.brown.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="unimelb">
+      <name>University of Melbourne - CSSE</name>
+      <node id="n8261">
+        <hostname>plnode01.cs.mu.oz.au</hostname>
+        <urn>urn:publicid:IDN+plc:unimelb+node+plnode01.cs.mu.oz.au</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n8262">
+        <hostname>plnode02.cs.mu.oz.au</hostname>
+        <urn>urn:publicid:IDN+plc:unimelb+node+plnode02.cs.mu.oz.au</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="unioslo">
+      <name>UiO</name>
+      <node id="n8289">
+        <hostname>planetlab2.ifi.uio.no</hostname>
+        <urn>urn:publicid:IDN+plc:unioslo+node+planetlab2.ifi.uio.no</urn>
+      </node>
+      <node id="n10981">
+        <hostname>planetlab1.ifi.uio.no</hostname>
+        <urn>urn:publicid:IDN+plc:unioslo+node+planetlab1.ifi.uio.no</urn>
+      </node>
+    </site>
+    <site id="rnprj">
+      <name>RNP - RJ</name>
+      <node id="n10022">
+        <hostname>planetlab1.pop-rj.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:rnprj+node+planetlab1.pop-rj.rnp.br</urn>
+      </node>
+      <node id="n10023">
+        <hostname>planetlab2.pop-rj.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:rnprj+node+planetlab2.pop-rj.rnp.br</urn>
+      </node>
+    </site>
+    <site id="rnprs">
+      <name>RNP - RS</name>
+      <node id="n8320">
+        <hostname>planetlab1.pop-rs.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:rnprs+node+planetlab1.pop-rs.rnp.br</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n8321">
+        <hostname>planetlab2.pop-rs.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:rnprs+node+planetlab2.pop-rs.rnp.br</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="l3s">
+      <name>Hannover L3S</name>
+      <node id="n8335">
+        <hostname>planet1.l3s.uni-hannover.de</hostname>
+        <urn>urn:publicid:IDN+plc:l3s+node+planet1.l3s.uni-hannover.de</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10149">
+        <hostname>planet2.l3s.uni-hannover.de</hostname>
+        <urn>urn:publicid:IDN+plc:l3s+node+planet2.l3s.uni-hannover.de</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="wisconsin">
+      <name>Wisconsin</name>
+      <node id="n11083">
+        <hostname>planetlab3.wail.wisc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:wisconsin+node+planetlab3.wail.wisc.edu</urn>
+      </node>
+      <node id="n11084">
+        <hostname>planetlab4.wail.wisc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:wisconsin+node+planetlab4.wail.wisc.edu</urn>
+      </node>
+    </site>
+    <site id="uchicago">
+      <name>UChicago</name>
+      <node id="n27">
+        <hostname>planetlab1.cs.uchicago.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uchicago+node+planetlab1.cs.uchicago.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n28">
+        <hostname>planetlab2.cs.uchicago.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uchicago+node+planetlab2.cs.uchicago.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n29">
+        <hostname>planetlab3.cs.uchicago.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uchicago+node+planetlab3.cs.uchicago.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13537">
+        <hostname>planetlab4.cs.uchicago.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uchicago+node+planetlab4.cs.uchicago.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="nuk">
+      <name>National University of Kaohsiung</name>
+      <node id="n11004">
+        <hostname>planetlab1.csie.nuk.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:nuk+node+planetlab1.csie.nuk.edu.tw</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n11005">
+        <hostname>planetlab2.csie.nuk.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:nuk+node+planetlab2.csie.nuk.edu.tw</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="utoronto">
+      <name>Toronto</name>
+      <node id="n10277">
+        <hostname>pl2.csl.utoronto.ca</hostname>
+        <urn>urn:publicid:IDN+plc:utoronto+node+pl2.csl.utoronto.ca</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n10278">
+        <hostname>pl1.csl.utoronto.ca</hostname>
+        <urn>urn:publicid:IDN+plc:utoronto+node+pl1.csl.utoronto.ca</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="ast">
+      <name>Taiwan</name>
+      <node id="n150">
+        <hostname>planetlab1.iis.sinica.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:ast+node+planetlab1.iis.sinica.edu.tw</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n151">
+        <hostname>planetlab2.iis.sinica.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:ast+node+planetlab2.iis.sinica.edu.tw</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="bu">
+      <name>BostonU</name>
+      <node id="n10803">
+        <hostname>planetlab-01.bu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:bu+node+planetlab-01.bu.edu</urn>
+      </node>
+      <node id="n10815">
+        <hostname>planetlab-02.bu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:bu+node+planetlab-02.bu.edu</urn>
+      </node>
+    </site>
+    <site id="princeton">
+      <name>Princeton</name>
+      <node id="n10025">
+        <hostname>alice.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+alice.cs.princeton.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10328">
+        <hostname>planetlab-9.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+planetlab-9.cs.princeton.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10845">
+        <hostname>delta.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+delta.cs.princeton.edu</urn>
+      </node>
+      <node id="n10846">
+        <hostname>echo.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+echo.cs.princeton.edu</urn>
+      </node>
+      <node id="n13254">
+        <hostname>hptest-1.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+hptest-1.cs.princeton.edu</urn>
+      </node>
+      <node id="n13293">
+        <hostname>planetlab-01.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+planetlab-01.cs.princeton.edu</urn>
+      </node>
+      <node id="n13294">
+        <hostname>planetlab-02.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+planetlab-02.cs.princeton.edu</urn>
+      </node>
+      <node id="n13295">
+        <hostname>planetlab-03.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+planetlab-03.cs.princeton.edu</urn>
+      </node>
+      <node id="n13296">
+        <hostname>planetlab-04.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+planetlab-04.cs.princeton.edu</urn>
+      </node>
+      <node id="n13297">
+        <hostname>planetlab-05.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+planetlab-05.cs.princeton.edu</urn>
+      </node>
+      <node id="n13298">
+        <hostname>planetlab-06.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+planetlab-06.cs.princeton.edu</urn>
+      </node>
+      <node id="n13754">
+        <hostname>dell-r410.cs.princeton.edu</hostname>
+        <urn>urn:publicid:IDN+plc:princeton+node+dell-r410.cs.princeton.edu</urn>
+      </node>
+    </site>
+    <site id="neclabs">
+      <name>NECLabs</name>
+      <node id="n10234">
+        <hostname>plab2.nec-labs.com</hostname>
+        <urn>urn:publicid:IDN+plc:neclabs+node+plab2.nec-labs.com</urn>
+      </node>
+      <node id="n10235">
+        <hostname>plab1.nec-labs.com</hostname>
+        <urn>urn:publicid:IDN+plc:neclabs+node+plab1.nec-labs.com</urn>
+      </node>
+    </site>
+    <site id="jhuis">
+      <name>JHU Info Security</name>
+      <node id="n13677">
+        <hostname>planetlab1.jhu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:jhuis+node+planetlab1.jhu.edu</urn>
+      </node>
+      <node id="n13678">
+        <hostname>planetlab2.jhu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:jhuis+node+planetlab2.jhu.edu</urn>
+      </node>
+    </site>
+    <site id="itba">
+      <name>Instituto Tecnologico Buenos Aires</name>
+      <node id="n13134">
+        <hostname>planet-lab1.itba.edu.ar</hostname>
+        <urn>urn:publicid:IDN+plc:itba+node+planet-lab1.itba.edu.ar</urn>
+        <bw_limit units="kbps">256000</bw_limit>
+      </node>
+      <node id="n13158">
+        <hostname>planet-lab2.itba.edu.ar</hostname>
+        <urn>urn:publicid:IDN+plc:itba+node+planet-lab2.itba.edu.ar</urn>
+        <bw_limit units="kbps">256000</bw_limit>
+      </node>
+    </site>
+    <site id="calpolyslo">
+      <name>Cal Poly SLO</name>
+      <node id="n13149">
+        <hostname>planetlab-1.calpoly-netlab.net</hostname>
+        <urn>urn:publicid:IDN+plc:calpolyslo+node+planetlab-1.calpoly-netlab.net</urn>
+      </node>
+      <node id="n13150">
+        <hostname>planetlab-2.calpoly-netlab.net</hostname>
+        <urn>urn:publicid:IDN+plc:calpolyslo+node+planetlab-2.calpoly-netlab.net</urn>
+      </node>
+    </site>
+    <site id="doshisha">
+      <name>Doshisha University</name>
+      <node id="n13145">
+        <hostname>nis-planet1.doshisha.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:doshisha+node+nis-planet1.doshisha.ac.jp</urn>
+      </node>
+      <node id="n13146">
+        <hostname>nis-planet2.doshisha.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:doshisha+node+nis-planet2.doshisha.ac.jp</urn>
+      </node>
+    </site>
+    <site id="uwaterloo">
+      <name>University of Waterloo</name>
+      <node id="n13165">
+        <hostname>plink.cs.uwaterloo.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uwaterloo+node+plink.cs.uwaterloo.ca</urn>
+      </node>
+      <node id="n13166">
+        <hostname>plonk.cs.uwaterloo.ca</hostname>
+        <urn>urn:publicid:IDN+plc:uwaterloo+node+plonk.cs.uwaterloo.ca</urn>
+      </node>
+    </site>
+    <site id="ufpr">
+      <name>UFPR/C3SL</name>
+      <node id="n13167">
+        <hostname>planetlab1.c3sl.ufpr.br</hostname>
+        <urn>urn:publicid:IDN+plc:ufpr+node+planetlab1.c3sl.ufpr.br</urn>
+      </node>
+      <node id="n13168">
+        <hostname>planetlab2.c3sl.ufpr.br</hostname>
+        <urn>urn:publicid:IDN+plc:ufpr+node+planetlab2.c3sl.ufpr.br</urn>
+      </node>
+    </site>
+    <site id="otago">
+      <name>University of Otago</name>
+      <node id="n13169">
+        <hostname>planetlab1.cs.otago.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:otago+node+planetlab1.cs.otago.ac.nz</urn>
+      </node>
+      <node id="n13170">
+        <hostname>planetlab2.cs.otago.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:otago+node+planetlab2.cs.otago.ac.nz</urn>
+      </node>
+    </site>
+    <site id="ou">
+      <name>University of Oklahoma</name>
+      <node id="n13211">
+        <hostname>roam1.cs.ou.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ou+node+roam1.cs.ou.edu</urn>
+      </node>
+      <node id="n13212">
+        <hostname>roam2.cs.ou.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ou+node+roam2.cs.ou.edu</urn>
+      </node>
+    </site>
+    <site id="mlabnuq01">
+      <name>MLab - NUQ01</name>
+    </site>
+    <site id="mlabord01">
+      <name>MLab - ORD01</name>
+    </site>
+    <site id="mlabmia01">
+      <name>MLab - MIA01</name>
+    </site>
+    <site id="mlablax01">
+      <name>MLab - LAX01</name>
+    </site>
+    <site id="mlablga01">
+      <name>MLab - LGA01</name>
+    </site>
+    <site id="mlabdfw01">
+      <name>MLab - DFW01</name>
+    </site>
+    <site id="mlabatl01">
+      <name>MLab - ATL01</name>
+    </site>
+    <site id="albany">
+      <name>SUNY Albany</name>
+      <node id="n13204">
+        <hostname>node1.planetlab.albany.edu</hostname>
+        <urn>urn:publicid:IDN+plc:albany+node+node1.planetlab.albany.edu</urn>
+        <bw_limit units="kbps">6291</bw_limit>
+      </node>
+      <node id="n13205">
+        <hostname>node2.planetlab.albany.edu</hostname>
+        <urn>urn:publicid:IDN+plc:albany+node+node2.planetlab.albany.edu</urn>
+        <bw_limit units="kbps">6291</bw_limit>
+      </node>
+    </site>
+    <site id="unr">
+      <name>University of Nevada, Reno</name>
+      <node id="n13351">
+        <hostname>planetlab1.scsr.nevada.edu</hostname>
+        <urn>urn:publicid:IDN+plc:unr+node+planetlab1.scsr.nevada.edu</urn>
+      </node>
+      <node id="n13352">
+        <hostname>planetlab2.scsr.nevada.edu</hostname>
+        <urn>urn:publicid:IDN+plc:unr+node+planetlab2.scsr.nevada.edu</urn>
+      </node>
+    </site>
+    <site id="csuohio">
+      <name>Cleveland State University</name>
+      <node id="n13400">
+        <hostname>planetlab2.csuohio.edu</hostname>
+        <urn>urn:publicid:IDN+plc:csuohio+node+planetlab2.csuohio.edu</urn>
+      </node>
+      <node id="n13405">
+        <hostname>planetlab1.csuohio.edu</hostname>
+        <urn>urn:publicid:IDN+plc:csuohio+node+planetlab1.csuohio.edu</urn>
+      </node>
+    </site>
+    <site id="colgate">
+      <name>Colgate University</name>
+      <node id="n13413">
+        <hostname>flow.colgate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:colgate+node+flow.colgate.edu</urn>
+      </node>
+      <node id="n13489">
+        <hostname>ebb.colgate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:colgate+node+ebb.colgate.edu</urn>
+      </node>
+    </site>
+    <site id="ege">
+      <name>Ege University</name>
+      <node id="n13502">
+        <hostname>planetlab1.plab.ege.edu.tr</hostname>
+        <urn>urn:publicid:IDN+plc:ege+node+planetlab1.plab.ege.edu.tr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13510">
+        <hostname>planetlab2.plab.ege.edu.tr</hostname>
+        <urn>urn:publicid:IDN+plc:ege+node+planetlab2.plab.ege.edu.tr</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="mlablga02">
+      <name>MLab - LGA02</name>
+    </site>
+    <site id="mlabsea01">
+      <name>MLab - SEA01</name>
+    </site>
+    <site id="pku">
+      <name>Peking University</name>
+      <node id="n13498">
+        <hostname>pl1.pku.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:pku+node+pl1.pku.edu.cn</urn>
+      </node>
+      <node id="n13582">
+        <hostname>pl3.pku.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:pku+node+pl3.pku.edu.cn</urn>
+      </node>
+      <node id="n13583">
+        <hostname>pl2.pku.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:pku+node+pl2.pku.edu.cn</urn>
+      </node>
+    </site>
+    <site id="auckland">
+      <name>University of Auckland</name>
+      <node id="n13319">
+        <hostname>planetlab-1.cs.auckland.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:auckland+node+planetlab-1.cs.auckland.ac.nz</urn>
+      </node>
+      <node id="n13320">
+        <hostname>planetlab-2.cs.auckland.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:auckland+node+planetlab-2.cs.auckland.ac.nz</urn>
+      </node>
+    </site>
+    <site id="mlabams01">
+      <name>MLab - AMS01</name>
+    </site>
+    <site id="mlabams02">
+      <name>MLab - AMS02</name>
+    </site>
+    <site id="mlablhr01">
+      <name>MLab - LHR01</name>
+    </site>
+    <site id="mlabpar01">
+      <name>MLab - PAR01</name>
+    </site>
+    <site id="mlabham01">
+      <name>MLab - HAM01</name>
+    </site>
+    <site id="uic">
+      <name>University of Illinois at Chicago</name>
+      <node id="n13409">
+        <hostname>planetlab-1.cs.uic.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uic+node+planetlab-1.cs.uic.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n13410">
+        <hostname>planetlab-2.cs.uic.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uic+node+planetlab-2.cs.uic.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="suffolk">
+      <name>Suffolk University</name>
+      <node id="n13422">
+        <hostname>metis.mcs.suffolk.edu</hostname>
+        <urn>urn:publicid:IDN+plc:suffolk+node+metis.mcs.suffolk.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n13423">
+        <hostname>adrastea.mcs.suffolk.edu</hostname>
+        <urn>urn:publicid:IDN+plc:suffolk+node+adrastea.mcs.suffolk.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ccu">
+      <name>National Chung Cheng University</name>
+      <node id="n13416">
+        <hostname>planetlab-1.webedu.ccu.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:ccu+node+planetlab-1.webedu.ccu.edu.tw</urn>
+      </node>
+      <node id="n13417">
+        <hostname>planetlab-2.webedu.ccu.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:ccu+node+planetlab-2.webedu.ccu.edu.tw</urn>
+      </node>
+    </site>
+    <site id="sjtu">
+      <name>Shanghai Jiaotong University</name>
+      <node id="n13458">
+        <hostname>planetlab-1.sjtu.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:sjtu+node+planetlab-1.sjtu.edu.cn</urn>
+      </node>
+      <node id="n13459">
+        <hostname>planetlab-2.sjtu.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:sjtu+node+planetlab-2.sjtu.edu.cn</urn>
+      </node>
+    </site>
+    <site id="just">
+      <name>Jordan University of Science and Technology</name>
+      <node id="n13464">
+        <hostname>planetlab1.just.edu.jo</hostname>
+        <urn>urn:publicid:IDN+plc:just+node+planetlab1.just.edu.jo</urn>
+      </node>
+      <node id="n13619">
+        <hostname>planetlab02.just.edu.jo</hostname>
+        <urn>urn:publicid:IDN+plc:just+node+planetlab02.just.edu.jo</urn>
+      </node>
+    </site>
+    <site id="eett">
+      <name>Hellenic Telecommunications and Post Commission</name>
+      <node id="n13434">
+        <hostname>mlab1.gr-ix.gr</hostname>
+        <urn>urn:publicid:IDN+plc:eett+node+mlab1.gr-ix.gr</urn>
+      </node>
+      <node id="n13435">
+        <hostname>mlab2.gr-ix.gr</hostname>
+        <urn>urn:publicid:IDN+plc:eett+node+mlab2.gr-ix.gr</urn>
+      </node>
+      <node id="n13437">
+        <hostname>mlab3.gr-ix.gr</hostname>
+        <urn>urn:publicid:IDN+plc:eett+node+mlab3.gr-ix.gr</urn>
+      </node>
+    </site>
+    <site id="ntusg">
+      <name>Nanyang Technological University</name>
+      <node id="n13581">
+        <hostname>pnode2.pdcc-ntu.singaren.net.sg</hostname>
+        <urn>urn:publicid:IDN+plc:ntusg+node+pnode2.pdcc-ntu.singaren.net.sg</urn>
+      </node>
+      <node id="n13587">
+        <hostname>pnode1.pdcc-ntu.singaren.net.sg</hostname>
+        <urn>urn:publicid:IDN+plc:ntusg+node+pnode1.pdcc-ntu.singaren.net.sg</urn>
+      </node>
+    </site>
+    <site id="mlabath01">
+      <name>MLab - ATH01</name>
+    </site>
+    <site id="openflow">
+      <name>Stanford OpenFlow</name>
+      <node id="n13762">
+        <hostname>of-planet5.stanford.edu</hostname>
+        <urn>urn:publicid:IDN+plc:openflow+node+of-planet5.stanford.edu</urn>
+      </node>
+    </site>
+    <site id="monash">
+      <name>Monash University</name>
+      <node id="n13533">
+        <hostname>pl1.eng.monash.edu.au</hostname>
+        <urn>urn:publicid:IDN+plc:monash+node+pl1.eng.monash.edu.au</urn>
+      </node>
+      <node id="n13536">
+        <hostname>pl2.eng.monash.edu.au</hostname>
+        <urn>urn:publicid:IDN+plc:monash+node+pl2.eng.monash.edu.au</urn>
+      </node>
+    </site>
+    <site id="bbn">
+      <name>BBN Technologies</name>
+      <node id="n13627">
+        <hostname>plnode-03.gpolab.bbn.com</hostname>
+        <urn>urn:publicid:IDN+plc:bbn+node+plnode-03.gpolab.bbn.com</urn>
+      </node>
+      <node id="n13628">
+        <hostname>plnode-04.gpolab.bbn.com</hostname>
+        <urn>urn:publicid:IDN+plc:bbn+node+plnode-04.gpolab.bbn.com</urn>
+      </node>
+    </site>
+    <site id="hcu">
+      <name>Hiroshima City University</name>
+      <node id="n13545">
+        <hostname>pl1.sos.info.hiroshima-cu.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:hcu+node+pl1.sos.info.hiroshima-cu.ac.jp</urn>
+      </node>
+      <node id="n13546">
+        <hostname>pl2.sos.info.hiroshima-cu.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:hcu+node+pl2.sos.info.hiroshima-cu.ac.jp</urn>
+      </node>
+    </site>
+    <site id="nudt">
+      <name>National University of Defense Technology</name>
+      <node id="n13549">
+        <hostname>planetlab-2.pdl.nudt.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:nudt+node+planetlab-2.pdl.nudt.edu.cn</urn>
+      </node>
+      <node id="n13550">
+        <hostname>planetlab-1.pdl.nudt.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:nudt+node+planetlab-1.pdl.nudt.edu.cn</urn>
+      </node>
+    </site>
+    <site id="mlabsyd01">
+      <name>MLab - SYD01</name>
+    </site>
+    <site id="ttu">
+      <name>Texas Tech Univ</name>
+      <node id="n13683">
+        <hostname>ttu1-1.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:ttu+node+ttu1-1.nodes.planet-lab.org</urn>
+      </node>
+      <node id="n13684">
+        <hostname>ttu2-1.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:ttu+node+ttu2-1.nodes.planet-lab.org</urn>
+      </node>
+    </site>
+    <site id="clemson">
+      <name>Clemson</name>
+      <node id="n13652">
+        <hostname>planetlab2.clemson.edu</hostname>
+        <urn>urn:publicid:IDN+plc:clemson+node+planetlab2.clemson.edu</urn>
+      </node>
+      <node id="n13654">
+        <hostname>planetlab1.clemson.edu</hostname>
+        <urn>urn:publicid:IDN+plc:clemson+node+planetlab1.clemson.edu</urn>
+      </node>
+    </site>
+    <site id="vuw">
+      <name>Victoria U Wellington</name>
+      <node id="n13623">
+        <hostname>planetlab1.ecs.vuw.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:vuw+node+planetlab1.ecs.vuw.ac.nz</urn>
+      </node>
+      <node id="n13624">
+        <hostname>planetlab2.ecs.vuw.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:vuw+node+planetlab2.ecs.vuw.ac.nz</urn>
+      </node>
+    </site>
+    <site id="rnppa">
+      <name>RNP - PA</name>
+      <node id="n13634">
+        <hostname>planetlab2.pop-pa.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:rnppa+node+planetlab2.pop-pa.rnp.br</urn>
+      </node>
+      <node id="n13640">
+        <hostname>planetlab1.pop-pa.rnp.br</hostname>
+        <urn>urn:publicid:IDN+plc:rnppa+node+planetlab1.pop-pa.rnp.br</urn>
+      </node>
+    </site>
+    <site id="du">
+      <name>University of Denver</name>
+      <node id="n13637">
+        <hostname>planetlab1.cs.du.edu</hostname>
+        <urn>urn:publicid:IDN+plc:du+node+planetlab1.cs.du.edu</urn>
+      </node>
+      <node id="n13638">
+        <hostname>planetlab2.cs.du.edu</hostname>
+        <urn>urn:publicid:IDN+plc:du+node+planetlab2.cs.du.edu</urn>
+      </node>
+    </site>
+    <site id="waikato">
+      <name>University of Waikato</name>
+      <node id="n13645">
+        <hostname>planetlab-n1.wand.net.nz</hostname>
+        <urn>urn:publicid:IDN+plc:waikato+node+planetlab-n1.wand.net.nz</urn>
+      </node>
+      <node id="n13646">
+        <hostname>planetlab-n2.wand.net.nz</hostname>
+        <urn>urn:publicid:IDN+plc:waikato+node+planetlab-n2.wand.net.nz</urn>
+      </node>
+    </site>
+    <site id="ucalgary">
+      <name>UCalgary</name>
+      <node id="n13639">
+        <hostname>planetlab-1.elisa.cpsc.ucalgary.ca</hostname>
+        <urn>urn:publicid:IDN+plc:ucalgary+node+planetlab-1.elisa.cpsc.ucalgary.ca</urn>
+      </node>
+      <node id="n13661">
+        <hostname>planetlab-2.elisa.cpsc.ucalgary.ca</hostname>
+        <urn>urn:publicid:IDN+plc:ucalgary+node+planetlab-2.elisa.cpsc.ucalgary.ca</urn>
+      </node>
+    </site>
+    <site id="uml">
+      <name>UMass Lowell</name>
+      <node id="n13643">
+        <hostname>planetlab2.cs.uml.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uml+node+planetlab2.cs.uml.edu</urn>
+        <bw_limit units="kbps">3000</bw_limit>
+      </node>
+      <node id="n13644">
+        <hostname>planetlab1.cs.uml.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uml+node+planetlab1.cs.uml.edu</urn>
+        <bw_limit units="kbps">3000</bw_limit>
+      </node>
+    </site>
+    <site id="aut">
+      <name>AUT University</name>
+      <node id="n13738">
+        <hostname>planetlab1.aut.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:aut+node+planetlab1.aut.ac.nz</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n13739">
+        <hostname>planetlab2.aut.ac.nz</hostname>
+        <urn>urn:publicid:IDN+plc:aut+node+planetlab2.aut.ac.nz</urn>
+      </node>
+    </site>
+    <site id="nitech">
+      <name>Nagoya Institute of Technology</name>
+      <node id="n13719">
+        <hostname>planet1.pnl.nitech.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:nitech+node+planet1.pnl.nitech.ac.jp</urn>
+      </node>
+      <node id="n13720">
+        <hostname>planet2.pnl.nitech.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:nitech+node+planet2.pnl.nitech.ac.jp</urn>
+      </node>
+    </site>
+    <site id="bupt">
+      <name>BUPT</name>
+      <node id="n13688">
+        <hostname>planetlab1.bupt.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:bupt+node+planetlab1.bupt.edu.cn</urn>
+      </node>
+      <node id="n13689">
+        <hostname>planetlab2.bupt.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:bupt+node+planetlab2.bupt.edu.cn</urn>
+      </node>
+    </site>
+    <site id="nnnmedia">
+      <name>3N Media ERC</name>
+      <node id="n13734">
+        <hostname>planet1.dsp.ac.cn</hostname>
+        <urn>urn:publicid:IDN+plc:nnnmedia+node+planet1.dsp.ac.cn</urn>
+      </node>
+      <node id="n13735">
+        <hostname>planet2.dsp.ac.cn</hostname>
+        <urn>urn:publicid:IDN+plc:nnnmedia+node+planet2.dsp.ac.cn</urn>
+      </node>
+    </site>
+    <site id="sysu">
+      <name>Sun Yat-Sen University</name>
+      <node id="n13756">
+        <hostname>planetlab-1.sysu.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:sysu+node+planetlab-1.sysu.edu.cn</urn>
+      </node>
+      <node id="n13757">
+        <hostname>planetlab-2.sysu.edu.cn</hostname>
+        <urn>urn:publicid:IDN+plc:sysu+node+planetlab-2.sysu.edu.cn</urn>
+      </node>
+    </site>
+    <site id="uab">
+      <name>U of Alabama at Birmingham</name>
+      <node id="n13755">
+        <hostname>pl1.cis.uab.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uab+node+pl1.cis.uab.edu</urn>
+      </node>
+      <node id="n13761">
+        <hostname>pl2.cis.uab.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uab+node+pl2.cis.uab.edu</urn>
+      </node>
+    </site>
+    <site id="yale">
+      <name>Yale University</name>
+      <node id="n13747">
+        <hostname>pl2.cs.yale.edu</hostname>
+        <urn>urn:publicid:IDN+plc:yale+node+pl2.cs.yale.edu</urn>
+      </node>
+      <node id="n13748">
+        <hostname>pl1.cs.yale.edu</hostname>
+        <urn>urn:publicid:IDN+plc:yale+node+pl1.cs.yale.edu</urn>
+      </node>
+    </site>
+    <site id="nyit">
+      <name>NY Institute of Technology</name>
+      <node id="n13766">
+        <hostname>planetlab1.cnis.nyit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:nyit+node+planetlab1.cnis.nyit.edu</urn>
+      </node>
+      <node id="n13767">
+        <hostname>planetlab2.cnis.nyit.edu</hostname>
+        <urn>urn:publicid:IDN+plc:nyit+node+planetlab2.cnis.nyit.edu</urn>
+      </node>
+    </site>
+    <site id="cwru">
+      <name>CWRU</name>
+      <node id="n11484">
+        <hostname>planetlab-4.EECS.CWRU.Edu</hostname>
+        <urn>urn:publicid:IDN+plc:cwru+node+planetlab-4.EECS.CWRU.Edu</urn>
+      </node>
+      <node id="n11485">
+        <hostname>planetlab-5.EECS.CWRU.Edu</hostname>
+        <urn>urn:publicid:IDN+plc:cwru+node+planetlab-5.EECS.CWRU.Edu</urn>
+      </node>
+    </site>
+    <site id="neu">
+      <name>NEU</name>
+      <node id="n10918">
+        <hostname>planetlabone.ccs.neu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:neu+node+planetlabone.ccs.neu.edu</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+      <node id="n10919">
+        <hostname>planetlabtwo.ccs.neu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:neu+node+planetlabtwo.ccs.neu.edu</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+    </site>
+    <site id="intelfolsom">
+      <name>Intel IT - Folsom</name>
+      <node id="n10740">
+        <hostname>planetdev02.fm.intel.com</hostname>
+        <urn>urn:publicid:IDN+plc:intelfolsom+node+planetdev02.fm.intel.com</urn>
+      </node>
+      <node id="n10741">
+        <hostname>planetdev01.fm.intel.com</hostname>
+        <urn>urn:publicid:IDN+plc:intelfolsom+node+planetdev01.fm.intel.com</urn>
+      </node>
+      <node id="n10837">
+        <hostname>planetdev04.fm.intel.com</hostname>
+        <urn>urn:publicid:IDN+plc:intelfolsom+node+planetdev04.fm.intel.com</urn>
+      </node>
+      <node id="n10838">
+        <hostname>planetdev05.fm.intel.com</hostname>
+        <urn>urn:publicid:IDN+plc:intelfolsom+node+planetdev05.fm.intel.com</urn>
+      </node>
+    </site>
+    <site id="colorado">
+      <name>University of Colorado</name>
+      <node id="n10112">
+        <hostname>planetlab1.cs.colorado.edu</hostname>
+        <urn>urn:publicid:IDN+plc:colorado+node+planetlab1.cs.colorado.edu</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n13524">
+        <hostname>planetlab2.cs.colorado.edu</hostname>
+        <urn>urn:publicid:IDN+plc:colorado+node+planetlab2.cs.colorado.edu</urn>
+      </node>
+    </site>
+    <site id="hiit">
+      <name>HIIT</name>
+      <node id="n10106">
+        <hostname>planetlab1.hiit.fi</hostname>
+        <urn>urn:publicid:IDN+plc:hiit+node+planetlab1.hiit.fi</urn>
+      </node>
+      <node id="n10107">
+        <hostname>planetlab2.hiit.fi</hostname>
+        <urn>urn:publicid:IDN+plc:hiit+node+planetlab2.hiit.fi</urn>
+      </node>
+      <node id="n11020">
+        <hostname>planetlab3.hiit.fi</hostname>
+        <urn>urn:publicid:IDN+plc:hiit+node+planetlab3.hiit.fi</urn>
+      </node>
+      <node id="n11021">
+        <hostname>planetlab4.hiit.fi</hostname>
+        <urn>urn:publicid:IDN+plc:hiit+node+planetlab4.hiit.fi</urn>
+      </node>
+    </site>
+    <site id="georgetown">
+      <name>Georgetown</name>
+      <node id="n10117">
+        <hostname>planetlab1.georgetown.edu</hostname>
+        <urn>urn:publicid:IDN+plc:georgetown+node+planetlab1.georgetown.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10118">
+        <hostname>planetlab2.georgetown.edu</hostname>
+        <urn>urn:publicid:IDN+plc:georgetown+node+planetlab2.georgetown.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="unine">
+      <name>Neuchatel</name>
+      <node id="n10119">
+        <hostname>planetlab1.unineuchatel.ch</hostname>
+        <urn>urn:publicid:IDN+plc:unine+node+planetlab1.unineuchatel.ch</urn>
+      </node>
+      <node id="n10120">
+        <hostname>planetlab2.unineuchatel.ch</hostname>
+        <urn>urn:publicid:IDN+plc:unine+node+planetlab2.unineuchatel.ch</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="uzh">
+      <name>University of Zurich</name>
+      <node id="n10388">
+        <hostname>planetlab1.csg.uzh.ch</hostname>
+        <urn>urn:publicid:IDN+plc:uzh+node+planetlab1.csg.uzh.ch</urn>
+      </node>
+      <node id="n10389">
+        <hostname>planetlab2.csg.uzh.ch</hostname>
+        <urn>urn:publicid:IDN+plc:uzh+node+planetlab2.csg.uzh.ch</urn>
+      </node>
+    </site>
+    <site id="fraunhofer">
+      <name>Fraunhofer Institut</name>
+      <node id="n10242">
+        <hostname>planetlab2.itwm.fhg.de</hostname>
+        <urn>urn:publicid:IDN+plc:fraunhofer+node+planetlab2.itwm.fhg.de</urn>
+      </node>
+      <node id="n10518">
+        <hostname>planetlab1.itwm.fhg.de</hostname>
+        <urn>urn:publicid:IDN+plc:fraunhofer+node+planetlab1.itwm.fhg.de</urn>
+      </node>
+      <node id="n13541">
+        <hostname>planetlab3.itwm.fraunhofer.de</hostname>
+        <urn>urn:publicid:IDN+plc:fraunhofer+node+planetlab3.itwm.fraunhofer.de</urn>
+      </node>
+      <node id="n13542">
+        <hostname>planetlab4.itwm.fraunhofer.de</hostname>
+        <urn>urn:publicid:IDN+plc:fraunhofer+node+planetlab4.itwm.fraunhofer.de</urn>
+      </node>
+      <node id="n13543">
+        <hostname>planetlab5.itwm.fraunhofer.de</hostname>
+        <urn>urn:publicid:IDN+plc:fraunhofer+node+planetlab5.itwm.fraunhofer.de</urn>
+      </node>
+    </site>
+    <site id="iastateece">
+      <name>Iowa State ECE</name>
+      <node id="n10125">
+        <hostname>planetlab-1.ece.iastate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iastateece+node+planetlab-1.ece.iastate.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n10126">
+        <hostname>planetlab-2.ece.iastate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iastateece+node+planetlab-2.ece.iastate.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n10163">
+        <hostname>planetlab-3.ece.iastate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iastateece+node+planetlab-3.ece.iastate.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n10165">
+        <hostname>planetlab-4.ece.iastate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iastateece+node+planetlab-4.ece.iastate.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n11494">
+        <hostname>Planetlab-6.ece.iastate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iastateece+node+Planetlab-6.ece.iastate.edu</urn>
+      </node>
+      <node id="n11514">
+        <hostname>planetlab-5.ece.iastate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iastateece+node+planetlab-5.ece.iastate.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="darmstadt">
+      <name>TUD</name>
+      <node id="n10415">
+        <hostname>host1.planetlab.informatik.tu-darmstadt.de</hostname>
+        <urn>urn:publicid:IDN+plc:darmstadt+node+host1.planetlab.informatik.tu-darmstadt.de</urn>
+      </node>
+      <node id="n10416">
+        <hostname>host2.planetlab.informatik.tu-darmstadt.de</hostname>
+        <urn>urn:publicid:IDN+plc:darmstadt+node+host2.planetlab.informatik.tu-darmstadt.de</urn>
+      </node>
+      <node id="n10417">
+        <hostname>host3.planetlab.informatik.tu-darmstadt.de</hostname>
+        <urn>urn:publicid:IDN+plc:darmstadt+node+host3.planetlab.informatik.tu-darmstadt.de</urn>
+      </node>
+    </site>
+    <site id="sfu">
+      <name>Simon Fraser University</name>
+      <node id="n11003">
+        <hostname>cs-planetlab3.cs.surrey.sfu.ca</hostname>
+        <urn>urn:publicid:IDN+plc:sfu+node+cs-planetlab3.cs.surrey.sfu.ca</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n11038">
+        <hostname>cs-planetlab4.cs.surrey.sfu.ca</hostname>
+        <urn>urn:publicid:IDN+plc:sfu+node+cs-planetlab4.cs.surrey.sfu.ca</urn>
+      </node>
+    </site>
+    <site id="uconn">
+      <name>UConn</name>
+      <node id="n10157">
+        <hostname>planetlab1.engr.uconn.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uconn+node+planetlab1.engr.uconn.edu</urn>
+      </node>
+      <node id="n10353">
+        <hostname>planetlab2.engr.uconn.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uconn+node+planetlab2.engr.uconn.edu</urn>
+      </node>
+    </site>
+    <site id="tum">
+      <name>TUM</name>
+      <node id="n10160">
+        <hostname>planetlab2.lkn.ei.tum.de</hostname>
+        <urn>urn:publicid:IDN+plc:tum+node+planetlab2.lkn.ei.tum.de</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10161">
+        <hostname>planetlab1.lkn.ei.tum.de</hostname>
+        <urn>urn:publicid:IDN+plc:tum+node+planetlab1.lkn.ei.tum.de</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ufl">
+      <name>University of Florida</name>
+      <node id="n10172">
+        <hostname>planetlab1.acis.ufl.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ufl+node+planetlab1.acis.ufl.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10173">
+        <hostname>planetlab2.acis.ufl.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ufl+node+planetlab2.acis.ufl.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="gmu">
+      <name>GMU</name>
+      <node id="n10195">
+        <hostname>plgmu1.ite.gmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:gmu+node+plgmu1.ite.gmu.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n10254">
+        <hostname>plgmu2.ite.gmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:gmu+node+plgmu2.ite.gmu.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n11504">
+        <hostname>plgmu3.ite.gmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:gmu+node+plgmu3.ite.gmu.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n11505">
+        <hostname>plgmu4.ite.gmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:gmu+node+plgmu4.ite.gmu.edu</urn>
+        <bw_limit units="kbps">2000</bw_limit>
+      </node>
+      <node id="n13621">
+        <hostname>plgmu5.ite.gmu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:gmu+node+plgmu5.ite.gmu.edu</urn>
+      </node>
+    </site>
+    <site id="urv">
+      <name>Universitat Rovira i Virgili</name>
+      <node id="n10179">
+        <hostname>planetlab.urv.net</hostname>
+        <urn>urn:publicid:IDN+plc:urv+node+planetlab.urv.net</urn>
+      </node>
+      <node id="n10184">
+        <hostname>planetlab2.urv.net</hostname>
+        <urn>urn:publicid:IDN+plc:urv+node+planetlab2.urv.net</urn>
+      </node>
+    </site>
+    <site id="pitt">
+      <name>University of Pittsburgh</name>
+      <node id="n10175">
+        <hostname>planetlab1.cs.pitt.edu</hostname>
+        <urn>urn:publicid:IDN+plc:pitt+node+planetlab1.cs.pitt.edu</urn>
+      </node>
+      <node id="n10176">
+        <hostname>planetlab2.cs.pitt.edu</hostname>
+        <urn>urn:publicid:IDN+plc:pitt+node+planetlab2.cs.pitt.edu</urn>
+      </node>
+    </site>
+    <site id="uncc">
+      <name>UNC Charlotte</name>
+      <node id="n10177">
+        <hostname>planetlab02.uncc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uncc+node+planetlab02.uncc.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10326">
+        <hostname>planetlab01.uncc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uncc+node+planetlab01.uncc.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n13135">
+        <hostname>planetlab03.uncc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uncc+node+planetlab03.uncc.edu</urn>
+      </node>
+      <node id="n13136">
+        <hostname>planetlab04.uncc.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uncc+node+planetlab04.uncc.edu</urn>
+      </node>
+    </site>
+    <site id="tp">
+      <name>Telekomunikacja Polska</name>
+      <node id="n10201">
+        <hostname>planetlab1.warsaw.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:tp+node+planetlab1.warsaw.rd.tp.pl</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10848">
+        <hostname>planetlab4.warsaw.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:tp+node+planetlab4.warsaw.rd.tp.pl</urn>
+      </node>
+      <node id="n13391">
+        <hostname>planetlab2.warsaw.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:tp+node+planetlab2.warsaw.rd.tp.pl</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="imperial">
+      <name>Imperial College London</name>
+      <node id="n10310">
+        <hostname>planetlab-1.imperial.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:imperial+node+planetlab-1.imperial.ac.uk</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10311">
+        <hostname>planetlab-2.imperial.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:imperial+node+planetlab-2.imperial.ac.uk</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10765">
+        <hostname>planetlab-3.imperial.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:imperial+node+planetlab-3.imperial.ac.uk</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10782">
+        <hostname>planetlab-4.imperial.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:imperial+node+planetlab-4.imperial.ac.uk</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="erlangen">
+      <name>FAU Erlangen</name>
+      <node id="n10212">
+        <hostname>planetlab1.informatik.uni-erlangen.de</hostname>
+        <urn>urn:publicid:IDN+plc:erlangen+node+planetlab1.informatik.uni-erlangen.de</urn>
+      </node>
+      <node id="n13418">
+        <hostname>planetlab2.informatik.uni-erlangen.de</hostname>
+        <urn>urn:publicid:IDN+plc:erlangen+node+planetlab2.informatik.uni-erlangen.de</urn>
+      </node>
+      <node id="n13771">
+        <hostname>planetlab3.informatik.uni-erlangen.de</hostname>
+        <urn>urn:publicid:IDN+plc:erlangen+node+planetlab3.informatik.uni-erlangen.de</urn>
+      </node>
+    </site>
+    <site id="kth">
+      <name>KTH</name>
+      <node id="n10208">
+        <hostname>planetlab-1.ssvl.kth.se</hostname>
+        <urn>urn:publicid:IDN+plc:kth+node+planetlab-1.ssvl.kth.se</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10222">
+        <hostname>planetlab-2.ssvl.kth.se</hostname>
+        <urn>urn:publicid:IDN+plc:kth+node+planetlab-2.ssvl.kth.se</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="naist">
+      <name>NAIST</name>
+      <node id="n10226">
+        <hostname>planetlab-01.naist.jp</hostname>
+        <urn>urn:publicid:IDN+plc:naist+node+planetlab-01.naist.jp</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10227">
+        <hostname>planetlab-02.naist.jp</hostname>
+        <urn>urn:publicid:IDN+plc:naist+node+planetlab-02.naist.jp</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10313">
+        <hostname>planetlab-03.naist.jp</hostname>
+        <urn>urn:publicid:IDN+plc:naist+node+planetlab-03.naist.jp</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10691">
+        <hostname>planetlab-04.naist.jp</hostname>
+        <urn>urn:publicid:IDN+plc:naist+node+planetlab-04.naist.jp</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="tpswidnik">
+      <name>Telekomunikacja Polska - Swidnik</name>
+      <node id="n10604">
+        <hostname>planetlab1.swidnik.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:tpswidnik+node+planetlab1.swidnik.rd.tp.pl</urn>
+      </node>
+      <node id="n10887">
+        <hostname>planetlab2.lublin.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:tpswidnik+node+planetlab2.lublin.rd.tp.pl</urn>
+      </node>
+      <node id="n10888">
+        <hostname>planetlab1.lublin.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:tpswidnik+node+planetlab1.lublin.rd.tp.pl</urn>
+      </node>
+    </site>
+    <site id="due">
+      <name>Duisburg-Essen</name>
+      <node id="n10251">
+        <hostname>planetlab1.exp-math.uni-essen.de</hostname>
+        <urn>urn:publicid:IDN+plc:due+node+planetlab1.exp-math.uni-essen.de</urn>
+        <bw_limit units="kbps">25000</bw_limit>
+      </node>
+      <node id="n10252">
+        <hostname>planetlab2.exp-math.uni-essen.de</hostname>
+        <urn>urn:publicid:IDN+plc:due+node+planetlab2.exp-math.uni-essen.de</urn>
+        <bw_limit units="kbps">25000</bw_limit>
+      </node>
+    </site>
+    <site id="colostate">
+      <name>Colorado State University</name>
+      <node id="n10267">
+        <hostname>planetlab-1.cs.colostate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:colostate+node+planetlab-1.cs.colostate.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10268">
+        <hostname>planetlab-2.cs.colostate.edu</hostname>
+        <urn>urn:publicid:IDN+plc:colostate+node+planetlab-2.cs.colostate.edu</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ioannina">
+      <name>UOI</name>
+      <node id="n10315">
+        <hostname>planetlab2.cs.uoi.gr</hostname>
+        <urn>urn:publicid:IDN+plc:ioannina+node+planetlab2.cs.uoi.gr</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10376">
+        <hostname>planetlab1.cs.uoi.gr</hostname>
+        <urn>urn:publicid:IDN+plc:ioannina+node+planetlab1.cs.uoi.gr</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="ilmenau">
+      <name>Technical University Ilmenau</name>
+      <node id="n10316">
+        <hostname>planet1.prakinf.tu-ilmenau.de</hostname>
+        <urn>urn:publicid:IDN+plc:ilmenau+node+planet1.prakinf.tu-ilmenau.de</urn>
+      </node>
+      <node id="n10317">
+        <hostname>planet2.prakinf.tu-ilmenau.de</hostname>
+        <urn>urn:publicid:IDN+plc:ilmenau+node+planet2.prakinf.tu-ilmenau.de</urn>
+      </node>
+      <node id="n10633">
+        <hostname>planet3.prakinf.tu-ilmenau.de</hostname>
+        <urn>urn:publicid:IDN+plc:ilmenau+node+planet3.prakinf.tu-ilmenau.de</urn>
+      </node>
+    </site>
+    <site id="iscte">
+      <name>ADETTI/ISCTE</name>
+      <node id="n10324">
+        <hostname>planetlab-1.iscte.pt</hostname>
+        <urn>urn:publicid:IDN+plc:iscte+node+planetlab-1.iscte.pt</urn>
+      </node>
+      <node id="n10325">
+        <hostname>planetlab-2.iscte.pt</hostname>
+        <urn>urn:publicid:IDN+plc:iscte+node+planetlab-2.iscte.pt</urn>
+      </node>
+    </site>
+    <site id="byu">
+      <name>Brigham Young University</name>
+      <node id="n10329">
+        <hostname>planetlab1.byu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:byu+node+planetlab1.byu.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n10330">
+        <hostname>planetlab2.byu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:byu+node+planetlab2.byu.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="mpisws">
+      <name>MPISWS</name>
+      <node id="n10331">
+        <hostname>planetlab01.mpi-sws.mpg.de</hostname>
+        <urn>urn:publicid:IDN+plc:mpisws+node+planetlab01.mpi-sws.mpg.de</urn>
+      </node>
+      <node id="n10332">
+        <hostname>planetlab02.mpi-sws.mpg.de</hostname>
+        <urn>urn:publicid:IDN+plc:mpisws+node+planetlab02.mpi-sws.mpg.de</urn>
+      </node>
+      <node id="n10333">
+        <hostname>planetlab03.mpi-sws.mpg.de</hostname>
+        <urn>urn:publicid:IDN+plc:mpisws+node+planetlab03.mpi-sws.mpg.de</urn>
+      </node>
+      <node id="n10334">
+        <hostname>planetlab04.mpi-sws.mpg.de</hostname>
+        <urn>urn:publicid:IDN+plc:mpisws+node+planetlab04.mpi-sws.mpg.de</urn>
+      </node>
+      <node id="n10335">
+        <hostname>planetlab05.mpi-sws.mpg.de</hostname>
+        <urn>urn:publicid:IDN+plc:mpisws+node+planetlab05.mpi-sws.mpg.de</urn>
+      </node>
+      <node id="n10336">
+        <hostname>planetlab06.mpi-sws.mpg.de</hostname>
+        <urn>urn:publicid:IDN+plc:mpisws+node+planetlab06.mpi-sws.mpg.de</urn>
+      </node>
+    </site>
+    <site id="toronto">
+      <name>University of Toronto</name>
+      <node id="n10337">
+        <hostname>planetlab01.erin.utoronto.ca</hostname>
+        <urn>urn:publicid:IDN+plc:toronto+node+planetlab01.erin.utoronto.ca</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10338">
+        <hostname>planetlab02.erin.utoronto.ca</hostname>
+        <urn>urn:publicid:IDN+plc:toronto+node+planetlab02.erin.utoronto.ca</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="iub">
+      <name>Indiana</name>
+      <node id="n11014">
+        <hostname>pl1.ucs.indiana.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iub+node+pl1.ucs.indiana.edu</urn>
+      </node>
+      <node id="n11015">
+        <hostname>pl2.ucs.indiana.edu</hostname>
+        <urn>urn:publicid:IDN+plc:iub+node+pl2.ucs.indiana.edu</urn>
+      </node>
+    </site>
+    <site id="unibe">
+      <name>University of Bern, IAM</name>
+      <node id="n10344">
+        <hostname>planetlab02.cnds.unibe.ch</hostname>
+        <urn>urn:publicid:IDN+plc:unibe+node+planetlab02.cnds.unibe.ch</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n11374">
+        <hostname>planetlab03.cnds.unibe.ch</hostname>
+        <urn>urn:publicid:IDN+plc:unibe+node+planetlab03.cnds.unibe.ch</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n11395">
+        <hostname>planetlab04.cnds.unibe.ch</hostname>
+        <urn>urn:publicid:IDN+plc:unibe+node+planetlab04.cnds.unibe.ch</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+    </site>
+    <site id="iubremen">
+      <name>Jacobs University Bremen</name>
+      <node id="n10831">
+        <hostname>planetlab1.eecs.jacobs-university.de</hostname>
+        <urn>urn:publicid:IDN+plc:iubremen+node+planetlab1.eecs.jacobs-university.de</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10832">
+        <hostname>planetlab2.eecs.jacobs-university.de</hostname>
+        <urn>urn:publicid:IDN+plc:iubremen+node+planetlab2.eecs.jacobs-university.de</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="usf">
+      <name>University of South Florida</name>
+      <node id="n10383">
+        <hostname>planetlab1.csee.usf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:usf+node+planetlab1.csee.usf.edu</urn>
+      </node>
+      <node id="n10390">
+        <hostname>planetlab2.csee.usf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:usf+node+planetlab2.csee.usf.edu</urn>
+      </node>
+      <node id="n11011">
+        <hostname>planetlab3.csee.usf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:usf+node+planetlab3.csee.usf.edu</urn>
+      </node>
+      <node id="n11042">
+        <hostname>planetlab4.csee.usf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:usf+node+planetlab4.csee.usf.edu</urn>
+      </node>
+      <node id="n13529">
+        <hostname>planetlab5.csee.usf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:usf+node+planetlab5.csee.usf.edu</urn>
+      </node>
+      <node id="n13538">
+        <hostname>planetlab6.csee.usf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:usf+node+planetlab6.csee.usf.edu</urn>
+      </node>
+    </site>
+    <site id="orbit">
+      <name>Orbit</name>
+      <node id="n10378">
+        <hostname>orbpl1.rutgers.edu</hostname>
+        <urn>urn:publicid:IDN+plc:orbit+node+orbpl1.rutgers.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n10379">
+        <hostname>orbpl2.rutgers.edu</hostname>
+        <urn>urn:publicid:IDN+plc:orbit+node+orbpl2.rutgers.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="ucr">
+      <name>UC Riverside</name>
+      <node id="n10381">
+        <hostname>planet-lab1.cs.ucr.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucr+node+planet-lab1.cs.ucr.edu</urn>
+      </node>
+      <node id="n10382">
+        <hostname>planet-lab2.cs.ucr.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucr+node+planet-lab2.cs.ucr.edu</urn>
+      </node>
+    </site>
+    <site id="ohiostate">
+      <name>Ohio State University</name>
+      <node id="n10395">
+        <hostname>planetlab-1.cse.ohio-state.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ohiostate+node+planetlab-1.cse.ohio-state.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10396">
+        <hostname>planetlab-2.cse.ohio-state.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ohiostate+node+planetlab-2.cse.ohio-state.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="goettingen">
+      <name>University of Goettingen</name>
+      <node id="n10393">
+        <hostname>planetlab1.informatik.uni-goettingen.de</hostname>
+        <urn>urn:publicid:IDN+plc:goettingen+node+planetlab1.informatik.uni-goettingen.de</urn>
+      </node>
+      <node id="n10394">
+        <hostname>planetlab2.informatik.uni-goettingen.de</hostname>
+        <urn>urn:publicid:IDN+plc:goettingen+node+planetlab2.informatik.uni-goettingen.de</urn>
+      </node>
+    </site>
+    <site id="cyprus">
+      <name>University of Cyprus</name>
+      <node id="n10408">
+        <hostname>planetlab-1.cs.ucy.ac.cy</hostname>
+        <urn>urn:publicid:IDN+plc:cyprus+node+planetlab-1.cs.ucy.ac.cy</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10409">
+        <hostname>planetlab-2.cs.ucy.ac.cy</hostname>
+        <urn>urn:publicid:IDN+plc:cyprus+node+planetlab-2.cs.ucy.ac.cy</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="uprm">
+      <name>University of Puerto Rico at Mayaguez</name>
+      <node id="n10428">
+        <hostname>planetlab-01.ece.uprm.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uprm+node+planetlab-01.ece.uprm.edu</urn>
+      </node>
+      <node id="n10429">
+        <hostname>planetlab-02.ece.uprm.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uprm+node+planetlab-02.ece.uprm.edu</urn>
+      </node>
+    </site>
+    <site id="utep">
+      <name>University of Texas at El Paso</name>
+      <node id="n10418">
+        <hostname>planetlab1.utep.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utep+node+planetlab1.utep.edu</urn>
+      </node>
+      <node id="n10419">
+        <hostname>planetlab2.utep.edu</hostname>
+        <urn>urn:publicid:IDN+plc:utep+node+planetlab2.utep.edu</urn>
+      </node>
+    </site>
+    <site id="osaka">
+      <name>Osaka University</name>
+      <node id="n10422">
+        <hostname>pl2-higashi.ics.es.osaka-u.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osaka+node+pl2-higashi.ics.es.osaka-u.ac.jp</urn>
+      </node>
+      <node id="n10423">
+        <hostname>pl1-higashi.ics.es.osaka-u.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osaka+node+pl1-higashi.ics.es.osaka-u.ac.jp</urn>
+      </node>
+      <node id="n10719">
+        <hostname>pub1-s.ane.cmc.osaka-u.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osaka+node+pub1-s.ane.cmc.osaka-u.ac.jp</urn>
+      </node>
+      <node id="n10720">
+        <hostname>pub2-s.ane.cmc.osaka-u.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osaka+node+pub2-s.ane.cmc.osaka-u.ac.jp</urn>
+      </node>
+      <node id="n13119">
+        <hostname>int-pl1.ise.eng.osaka-u.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osaka+node+int-pl1.ise.eng.osaka-u.ac.jp</urn>
+      </node>
+      <node id="n13120">
+        <hostname>int-pl2.ise.eng.osaka-u.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:osaka+node+int-pl2.ise.eng.osaka-u.ac.jp</urn>
+      </node>
+    </site>
+    <site id="fhhi">
+      <name>Fraunhofer HHI</name>
+      <node id="n10474">
+        <hostname>planet01.hhi.fraunhofer.de</hostname>
+        <urn>urn:publicid:IDN+plc:fhhi+node+planet01.hhi.fraunhofer.de</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10475">
+        <hostname>planet02.hhi.fraunhofer.de</hostname>
+        <urn>urn:publicid:IDN+plc:fhhi+node+planet02.hhi.fraunhofer.de</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="tcd">
+      <name>Trinity College Dublin</name>
+      <node id="n10441">
+        <hostname>planetlab01.cs.tcd.ie</hostname>
+        <urn>urn:publicid:IDN+plc:tcd+node+planetlab01.cs.tcd.ie</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10442">
+        <hostname>planetlab02.cs.tcd.ie</hostname>
+        <urn>urn:publicid:IDN+plc:tcd+node+planetlab02.cs.tcd.ie</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="jaist">
+      <name>JAIST</name>
+      <node id="n10446">
+        <hostname>planet0.jaist.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:jaist+node+planet0.jaist.ac.jp</urn>
+      </node>
+      <node id="n10447">
+        <hostname>planet1.jaist.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:jaist+node+planet1.jaist.ac.jp</urn>
+      </node>
+    </site>
+    <site id="usask">
+      <name>University of Saskatchewan</name>
+      <node id="n10469">
+        <hostname>planetlab-1.usask.ca</hostname>
+        <urn>urn:publicid:IDN+plc:usask+node+planetlab-1.usask.ca</urn>
+      </node>
+      <node id="n10470">
+        <hostname>planetlab-2.usask.ca</hostname>
+        <urn>urn:publicid:IDN+plc:usask+node+planetlab-2.usask.ca</urn>
+      </node>
+    </site>
+    <site id="sjsu">
+      <name>San Jose State University</name>
+      <node id="n10580">
+        <hostname>plab1.engr.sjsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:sjsu+node+plab1.engr.sjsu.edu</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10581">
+        <hostname>plab2.engr.sjsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:sjsu+node+plab2.engr.sjsu.edu</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="iit">
+      <name>IIT-Chicago</name>
+      <node id="n10464">
+        <hostname>server1.planetlab.iit-tech.net</hostname>
+        <urn>urn:publicid:IDN+plc:iit+node+server1.planetlab.iit-tech.net</urn>
+        <bw_limit units="kbps">10485</bw_limit>
+      </node>
+      <node id="n10465">
+        <hostname>server2.planetlab.iit-tech.net</hostname>
+        <urn>urn:publicid:IDN+plc:iit+node+server2.planetlab.iit-tech.net</urn>
+        <bw_limit units="kbps">10485</bw_limit>
+      </node>
+      <node id="n11096">
+        <hostname>server3.planetlab.iit-tech.net</hostname>
+        <urn>urn:publicid:IDN+plc:iit+node+server3.planetlab.iit-tech.net</urn>
+        <bw_limit units="kbps">10485</bw_limit>
+      </node>
+      <node id="n11097">
+        <hostname>server4.planetlab.iit-tech.net</hostname>
+        <urn>urn:publicid:IDN+plc:iit+node+server4.planetlab.iit-tech.net</urn>
+        <bw_limit units="kbps">10485</bw_limit>
+      </node>
+    </site>
+    <site id="wroc">
+      <name>Wroclaw University of Technology</name>
+      <node id="n10472">
+        <hostname>planetlab2.ci.pwr.wroc.pl</hostname>
+        <urn>urn:publicid:IDN+plc:wroc+node+planetlab2.ci.pwr.wroc.pl</urn>
+      </node>
+      <node id="n10478">
+        <hostname>planetlab1.ci.pwr.wroc.pl</hostname>
+        <urn>urn:publicid:IDN+plc:wroc+node+planetlab1.ci.pwr.wroc.pl</urn>
+      </node>
+    </site>
+    <site id="usp">
+      <name>LARC - University of Sao Paulo</name>
+      <node id="n11068">
+        <hostname>plab1.larc.usp.br</hostname>
+        <urn>urn:publicid:IDN+plc:usp+node+plab1.larc.usp.br</urn>
+      </node>
+      <node id="n11069">
+        <hostname>plab2.larc.usp.br</hostname>
+        <urn>urn:publicid:IDN+plc:usp+node+plab2.larc.usp.br</urn>
+      </node>
+    </site>
+    <site id="washstu">
+      <name>Washington State University</name>
+      <node id="n10484">
+        <hostname>planetlab1.eecs.wsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:washstu+node+planetlab1.eecs.wsu.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+      <node id="n10485">
+        <hostname>planetlab2.eecs.wsu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:washstu+node+planetlab2.eecs.wsu.edu</urn>
+        <bw_limit units="kbps">5000</bw_limit>
+      </node>
+    </site>
+    <site id="ksu">
+      <name>Kansas State University</name>
+      <node id="n11101">
+        <hostname>plab4.eece.ksu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ksu+node+plab4.eece.ksu.edu</urn>
+      </node>
+      <node id="n11106">
+        <hostname>plab3.eece.ksu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ksu+node+plab3.eece.ksu.edu</urn>
+      </node>
+    </site>
+    <site id="uniroma">
+      <name>Universita</name>
+      <node id="n10494">
+        <hostname>planetlab-1.dis.uniroma1.it</hostname>
+        <urn>urn:publicid:IDN+plc:uniroma+node+planetlab-1.dis.uniroma1.it</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10495">
+        <hostname>planetlab-2.dis.uniroma1.it</hostname>
+        <urn>urn:publicid:IDN+plc:uniroma+node+planetlab-2.dis.uniroma1.it</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="fem">
+      <name>FeM TU-Ilmenau</name>
+      <node id="n10498">
+        <hostname>planetlab1.fem.tu-ilmenau.de</hostname>
+        <urn>urn:publicid:IDN+plc:fem+node+planetlab1.fem.tu-ilmenau.de</urn>
+      </node>
+      <node id="n10499">
+        <hostname>planetlab2.fem.tu-ilmenau.de</hostname>
+        <urn>urn:publicid:IDN+plc:fem+node+planetlab2.fem.tu-ilmenau.de</urn>
+      </node>
+    </site>
+    <site id="keio">
+      <name>Keio University</name>
+      <node id="n10505">
+        <hostname>planetlab1.sfc.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:keio+node+planetlab1.sfc.wide.ad.jp</urn>
+      </node>
+      <node id="n10506">
+        <hostname>planetlab2.sfc.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:keio+node+planetlab2.sfc.wide.ad.jp</urn>
+      </node>
+    </site>
+    <site id="uniklu">
+      <name>Klagenfurt University</name>
+      <node id="n10509">
+        <hostname>plab1-itec.uni-klu.ac.at</hostname>
+        <urn>urn:publicid:IDN+plc:uniklu+node+plab1-itec.uni-klu.ac.at</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10510">
+        <hostname>plab2-itec.uni-klu.ac.at</hostname>
+        <urn>urn:publicid:IDN+plc:uniklu+node+plab2-itec.uni-klu.ac.at</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="ucf">
+      <name>University of Central Florida</name>
+      <node id="n10841">
+        <hostname>planetlab1.eecs.ucf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucf+node+planetlab1.eecs.ucf.edu</urn>
+      </node>
+      <node id="n10842">
+        <hostname>planetlab2.eecs.ucf.edu</hostname>
+        <urn>urn:publicid:IDN+plc:ucf+node+planetlab2.eecs.ucf.edu</urn>
+      </node>
+    </site>
+    <site id="tudresden">
+      <name>Technische Universitaet Dresden</name>
+      <node id="n10516">
+        <hostname>planet1.inf.tu-dresden.de</hostname>
+        <urn>urn:publicid:IDN+plc:tudresden+node+planet1.inf.tu-dresden.de</urn>
+      </node>
+      <node id="n10517">
+        <hostname>planet2.inf.tu-dresden.de</hostname>
+        <urn>urn:publicid:IDN+plc:tudresden+node+planet2.inf.tu-dresden.de</urn>
+      </node>
+    </site>
+    <site id="cesnet">
+      <name>CESNET</name>
+      <node id="n10524">
+        <hostname>planetlab1.cesnet.cz</hostname>
+        <urn>urn:publicid:IDN+plc:cesnet+node+planetlab1.cesnet.cz</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10527">
+        <hostname>planetlab2.cesnet.cz</hostname>
+        <urn>urn:publicid:IDN+plc:cesnet+node+planetlab2.cesnet.cz</urn>
+      </node>
+      <node id="n10692">
+        <hostname>planetlab1.fit.vutbr.cz</hostname>
+        <urn>urn:publicid:IDN+plc:cesnet+node+planetlab1.fit.vutbr.cz</urn>
+      </node>
+    </site>
+    <site id="lisbon">
+      <name>University of Lisbon</name>
+      <node id="n10535">
+        <hostname>planetlab-1.di.fc.ul.pt</hostname>
+        <urn>urn:publicid:IDN+plc:lisbon+node+planetlab-1.di.fc.ul.pt</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10536">
+        <hostname>planetlab-2.di.fc.ul.pt</hostname>
+        <urn>urn:publicid:IDN+plc:lisbon+node+planetlab-2.di.fc.ul.pt</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="singaren">
+      <name>Singapore AREN</name>
+      <node id="n10599">
+        <hostname>planetlab1.singaren.net.sg</hostname>
+        <urn>urn:publicid:IDN+plc:singaren+node+planetlab1.singaren.net.sg</urn>
+      </node>
+      <node id="n10600">
+        <hostname>planetlab2.singaren.net.sg</hostname>
+        <urn>urn:publicid:IDN+plc:singaren+node+planetlab2.singaren.net.sg</urn>
+      </node>
+      <node id="n10601">
+        <hostname>planetlab3.singaren.net.sg</hostname>
+        <urn>urn:publicid:IDN+plc:singaren+node+planetlab3.singaren.net.sg</urn>
+      </node>
+      <node id="n13343">
+        <hostname>planetlab4.singaren.net.sg</hostname>
+        <urn>urn:publicid:IDN+plc:singaren+node+planetlab4.singaren.net.sg</urn>
+      </node>
+    </site>
+    <site id="wide">
+      <name>WIDE Project</name>
+      <node id="n10595">
+        <hostname>planetlab0.otemachi.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:wide+node+planetlab0.otemachi.wide.ad.jp</urn>
+      </node>
+      <node id="n10596">
+        <hostname>planetlab1.otemachi.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:wide+node+planetlab1.otemachi.wide.ad.jp</urn>
+      </node>
+      <node id="n10597">
+        <hostname>planetlab0.dojima.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:wide+node+planetlab0.dojima.wide.ad.jp</urn>
+      </node>
+      <node id="n10598">
+        <hostname>planetlab1.dojima.wide.ad.jp</hostname>
+        <urn>urn:publicid:IDN+plc:wide+node+planetlab1.dojima.wide.ad.jp</urn>
+      </node>
+    </site>
+    <site id="plcolotpwarsaw">
+      <name>PL Colo - TP Warsaw</name>
+      <node id="n10638">
+        <hostname>planetlab1.nowogrodzka.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:plcolotpwarsaw+node+planetlab1.nowogrodzka.rd.tp.pl</urn>
+      </node>
+      <node id="n10673">
+        <hostname>planetlab2.nowogrodzka.rd.tp.pl</hostname>
+        <urn>urn:publicid:IDN+plc:plcolotpwarsaw+node+planetlab2.nowogrodzka.rd.tp.pl</urn>
+      </node>
+    </site>
+    <site id="ist">
+      <name>IST</name>
+      <node id="n10621">
+        <hostname>planetlab-1.tagus.ist.utl.pt</hostname>
+        <urn>urn:publicid:IDN+plc:ist+node+planetlab-1.tagus.ist.utl.pt</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+      <node id="n10622">
+        <hostname>planetlab-2.tagus.ist.utl.pt</hostname>
+        <urn>urn:publicid:IDN+plc:ist+node+planetlab-2.tagus.ist.utl.pt</urn>
+        <bw_limit units="kbps">10000</bw_limit>
+      </node>
+    </site>
+    <site id="ula">
+      <name>CeCalCULA</name>
+      <node id="n10632">
+        <hostname>fobos.cecalc.ula.ve</hostname>
+        <urn>urn:publicid:IDN+plc:ula+node+fobos.cecalc.ula.ve</urn>
+      </node>
+      <node id="n10652">
+        <hostname>deimos.cecalc.ula.ve</hostname>
+        <urn>urn:publicid:IDN+plc:ula+node+deimos.cecalc.ula.ve</urn>
+      </node>
+    </site>
+    <site id="ntuee">
+      <name>National Taiwan University EE</name>
+      <node id="n10669">
+        <hostname>adam.ee.ntu.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:ntuee+node+adam.ee.ntu.edu.tw</urn>
+      </node>
+      <node id="n10670">
+        <hostname>eve.ee.ntu.edu.tw</hostname>
+        <urn>urn:publicid:IDN+plc:ntuee+node+eve.ee.ntu.edu.tw</urn>
+      </node>
+    </site>
+    <site id="rwtha">
+      <name>RWTH Aachen</name>
+      <node id="n10671">
+        <hostname>freedom.informatik.rwth-aachen.de</hostname>
+        <urn>urn:publicid:IDN+plc:rwtha+node+freedom.informatik.rwth-aachen.de</urn>
+      </node>
+      <node id="n10672">
+        <hostname>peace.informatik.rwth-aachen.de</hostname>
+        <urn>urn:publicid:IDN+plc:rwtha+node+peace.informatik.rwth-aachen.de</urn>
+      </node>
+    </site>
+    <site id="wpi">
+      <name>Worcester Polytechnic Institute</name>
+      <node id="n10626">
+        <hostname>75-130-96-12.static.oxfr.ma.charter.com</hostname>
+        <urn>urn:publicid:IDN+plc:wpi+node+75-130-96-12.static.oxfr.ma.charter.com</urn>
+      </node>
+      <node id="n10627">
+        <hostname>75-130-96-13.static.oxfr.ma.charter.com</hostname>
+        <urn>urn:publicid:IDN+plc:wpi+node+75-130-96-13.static.oxfr.ma.charter.com</urn>
+      </node>
+    </site>
+    <site id="aston">
+      <name>Aston University</name>
+      <node id="n10650">
+        <hostname>planetlab1.aston.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:aston+node+planetlab1.aston.ac.uk</urn>
+      </node>
+      <node id="n10651">
+        <hostname>planetlab2.aston.ac.uk</hostname>
+        <urn>urn:publicid:IDN+plc:aston+node+planetlab2.aston.ac.uk</urn>
+      </node>
+    </site>
+    <site id="zib">
+      <name>Zuse Institute Berlin</name>
+      <node id="n10641">
+        <hostname>planet1.zib.de</hostname>
+        <urn>urn:publicid:IDN+plc:zib+node+planet1.zib.de</urn>
+      </node>
+      <node id="n10643">
+        <hostname>planet2.zib.de</hostname>
+        <urn>urn:publicid:IDN+plc:zib+node+planet2.zib.de</urn>
+      </node>
+    </site>
+    <site id="uibk">
+      <name>University of Innsbruck, Austria.</name>
+      <node id="n10644">
+        <hostname>plab1-c703.uibk.ac.at</hostname>
+        <urn>urn:publicid:IDN+plc:uibk+node+plab1-c703.uibk.ac.at</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10645">
+        <hostname>plab2-c703.uibk.ac.at</hostname>
+        <urn>urn:publicid:IDN+plc:uibk+node+plab2-c703.uibk.ac.at</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="stuttgart">
+      <name>University of Stuttgart</name>
+      <node id="n10640">
+        <hostname>planetvs1.informatik.uni-stuttgart.de</hostname>
+        <urn>urn:publicid:IDN+plc:stuttgart+node+planetvs1.informatik.uni-stuttgart.de</urn>
+        <bw_limit units="kbps">550</bw_limit>
+      </node>
+      <node id="n10642">
+        <hostname>planetvs2.informatik.uni-stuttgart.de</hostname>
+        <urn>urn:publicid:IDN+plc:stuttgart+node+planetvs2.informatik.uni-stuttgart.de</urn>
+        <bw_limit units="kbps">550</bw_limit>
+      </node>
+    </site>
+    <site id="konstanz">
+      <name>University of Konstanz</name>
+      <node id="n10716">
+        <hostname>dannan.disy.inf.uni-konstanz.de</hostname>
+        <urn>urn:publicid:IDN+plc:konstanz+node+dannan.disy.inf.uni-konstanz.de</urn>
+      </node>
+      <node id="n10717">
+        <hostname>chronos.disy.inf.uni-konstanz.de</hostname>
+        <urn>urn:publicid:IDN+plc:konstanz+node+chronos.disy.inf.uni-konstanz.de</urn>
+      </node>
+    </site>
+    <site id="ualg">
+      <name>Universidade do Algarve</name>
+      <node id="n10667">
+        <hostname>planetlab1.fct.ualg.pt</hostname>
+        <urn>urn:publicid:IDN+plc:ualg+node+planetlab1.fct.ualg.pt</urn>
+      </node>
+      <node id="n10668">
+        <hostname>planetlab2.fct.ualg.pt</hostname>
+        <urn>urn:publicid:IDN+plc:ualg+node+planetlab2.fct.ualg.pt</urn>
+      </node>
+    </site>
+    <site id="waseda">
+      <name>Waseda University</name>
+      <node id="n13215">
+        <hostname>planetlab4.goto.info.waseda.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:waseda+node+planetlab4.goto.info.waseda.ac.jp</urn>
+      </node>
+      <node id="n13286">
+        <hostname>planetlab5.goto.info.waseda.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:waseda+node+planetlab5.goto.info.waseda.ac.jp</urn>
+      </node>
+      <node id="n13360">
+        <hostname>planetlab6.goto.info.waseda.ac.jp</hostname>
+        <urn>urn:publicid:IDN+plc:waseda+node+planetlab6.goto.info.waseda.ac.jp</urn>
+      </node>
+    </site>
+    <site id="uh">
+      <name>University of Houston</name>
+      <node id="n10679">
+        <hostname>planetlab-1.cs.uh.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uh+node+planetlab-1.cs.uh.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10680">
+        <hostname>planetlab-2.cs.uh.edu</hostname>
+        <urn>urn:publicid:IDN+plc:uh+node+planetlab-2.cs.uh.edu</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="asu">
+      <name>Arizona State University</name>
+      <node id="n10710">
+        <hostname>planetlab2.eas.asu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:asu+node+planetlab2.eas.asu.edu</urn>
+      </node>
+      <node id="n10711">
+        <hostname>planetlab1.eas.asu.edu</hostname>
+        <urn>urn:publicid:IDN+plc:asu+node+planetlab1.eas.asu.edu</urn>
+      </node>
+    </site>
+    <site id="ulj">
+      <name>University of Ljubljana</name>
+      <node id="n10681">
+        <hostname>planetlab1.fri.uni-lj.si</hostname>
+        <urn>urn:publicid:IDN+plc:ulj+node+planetlab1.fri.uni-lj.si</urn>
+      </node>
+      <node id="n10682">
+        <hostname>planetlab2.fri.uni-lj.si</hostname>
+        <urn>urn:publicid:IDN+plc:ulj+node+planetlab2.fri.uni-lj.si</urn>
+      </node>
+    </site>
+    <site id="citadel">
+      <name>The Citadel</name>
+      <node id="n10725">
+        <hostname>planetlab1.citadel.edu</hostname>
+        <urn>urn:publicid:IDN+plc:citadel+node+planetlab1.citadel.edu</urn>
+      </node>
+      <node id="n10726">
+        <hostname>planetlab2.citadel.edu</hostname>
+        <urn>urn:publicid:IDN+plc:citadel+node+planetlab2.citadel.edu</urn>
+      </node>
+    </site>
+    <site id="budapest">
+      <name>BME</name>
+      <node id="n10707">
+        <hostname>planetlab1.tmit.bme.hu</hostname>
+        <urn>urn:publicid:IDN+plc:budapest+node+planetlab1.tmit.bme.hu</urn>
+      </node>
+      <node id="n10718">
+        <hostname>planetlab2.tmit.bme.hu</hostname>
+        <urn>urn:publicid:IDN+plc:budapest+node+planetlab2.tmit.bme.hu</urn>
+      </node>
+    </site>
+    <site id="poznan">
+      <name>Poznan Supercomputing</name>
+      <node id="n10705">
+        <hostname>planetlab-1.man.poznan.pl</hostname>
+        <urn>urn:publicid:IDN+plc:poznan+node+planetlab-1.man.poznan.pl</urn>
+      </node>
+      <node id="n10706">
+        <hostname>planetlab-2.man.poznan.pl</hostname>
+        <urn>urn:publicid:IDN+plc:poznan+node+planetlab-2.man.poznan.pl</urn>
+      </node>
+    </site>
+    <site id="lums">
+      <name>Lahore University of Management Pakistan</name>
+      <node id="n10823">
+        <hostname>planetlab01.lums.edu.pk</hostname>
+        <urn>urn:publicid:IDN+plc:lums+node+planetlab01.lums.edu.pk</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+      <node id="n10824">
+        <hostname>planetlab02.lums.edu.pk</hostname>
+        <urn>urn:publicid:IDN+plc:lums+node+planetlab02.lums.edu.pk</urn>
+        <bw_limit units="kbps">500</bw_limit>
+      </node>
+    </site>
+    <site id="unavarra">
+      <name>Universidad Publica de Navarra</name>
+      <node id="n10714">
+        <hostname>planetlab1.tlm.unavarra.es</hostname>
+        <urn>urn:publicid:IDN+plc:unavarra+node+planetlab1.tlm.unavarra.es</urn>
+      </node>
+      <node id="n10715">
+        <hostname>planetlab2.tlm.unavarra.es</hostname>
+        <urn>urn:publicid:IDN+plc:unavarra+node+planetlab2.tlm.unavarra.es</urn>
+      </node>
+    </site>
+    <site id="ethzcs">
+      <name>ETH Zuerich - CS</name>
+      <node id="n10695">
+        <hostname>planetlab1.inf.ethz.ch</hostname>
+        <urn>urn:publicid:IDN+plc:ethzcs+node+planetlab1.inf.ethz.ch</urn>
+      </node>
+      <node id="n10697">
+        <hostname>planetlab2.inf.ethz.ch</hostname>
+        <urn>urn:publicid:IDN+plc:ethzcs+node+planetlab2.inf.ethz.ch</urn>
+      </node>
+      <node id="n10736">
+        <hostname>planetlab3.inf.ethz.ch</hostname>
+        <urn>urn:publicid:IDN+plc:ethzcs+node+planetlab3.inf.ethz.ch</urn>
+      </node>
+      <node id="n10737">
+        <hostname>planetlab4.inf.ethz.ch</hostname>
+        <urn>urn:publicid:IDN+plc:ethzcs+node+planetlab4.inf.ethz.ch</urn>
+      </node>
+    </site>
+    <site id="snummlab">
+      <name>Seoul National University - MMLAB</name>
+      <node id="n10766">
+        <hostname>pl1snu.koren21.net</hostname>
+        <urn>urn:publicid:IDN+plc:snummlab+node+pl1snu.koren21.net</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+      <node id="n13504">
+        <hostname>pl2snu.koren21.net</hostname>
+        <urn>urn:publicid:IDN+plc:snummlab+node+pl2snu.koren21.net</urn>
+        <bw_limit units="kbps">1000000</bw_limit>
+      </node>
+    </site>
+    <site id="vt">
+      <name>Virginia Tech</name>
+      <node id="n11372">
+        <hostname>planetlab-01.vt.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:vt+node+planetlab-01.vt.nodes.planet-lab.org</urn>
+      </node>
+      <node id="n11373">
+        <hostname>planetlab-02.vt.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:vt+node+planetlab-02.vt.nodes.planet-lab.org</urn>
+      </node>
+      <node id="n13507">
+        <hostname>planetlab-03.vt.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:vt+node+planetlab-03.vt.nodes.planet-lab.org</urn>
+      </node>
+      <node id="n13508">
+        <hostname>planetlab-04.vt.nodes.planet-lab.org</hostname>
+        <urn>urn:publicid:IDN+plc:vt+node+planetlab-04.vt.nodes.planet-lab.org</urn>
+      </node>
+    </site>
+    <site id="fing">
+      <name>Facultad de Ingenieria - Univ. de la Republica</name>
+      <node id="n10744">
+        <hostname>planetlab-1.fing.edu.uy</hostname>
+        <urn>urn:publicid:IDN+plc:fing+node+planetlab-1.fing.edu.uy</urn>
+      </node>
+      <node id="n10745">
+        <hostname>planetlab-2.fing.edu.uy</hostname>
+        <urn>urn:publicid:IDN+plc:fing+node+planetlab-2.fing.edu.uy</urn>
+      </node>
+    </site>
+    <site id="hawh">
+      <name>HAW Hamburg</name>
+      <node id="n10732">
+        <hostname>merkur.planetlab.haw-hamburg.de</hostname>
+        <urn>urn:publicid:IDN+plc:hawh+node+merkur.planetlab.haw-hamburg.de</urn>
+      </node>
+      <node id="n10733">
+        <hostname>mars.planetlab.haw-hamburg.de</hostname>
+        <urn>urn:publicid:IDN+plc:hawh+node+mars.planetlab.haw-hamburg.de</urn>
+      </node>
+    </site>
+    <site id="miet">
+      <name>TU MIET</name>
+      <node id="n10783">
+        <hostname>mercury.silicon-valley.ru</hostname>
+        <urn>urn:publicid:IDN+plc:miet+node+mercury.silicon-valley.ru</urn>
+      </node>
+      <node id="n10784">
+        <hostname>venus.silicon-valley.ru</hostname>
+        <urn>urn:publicid:IDN+plc:miet+node+venus.silicon-valley.ru</urn>
+      </node>
+    </site>
+    <site id="plcoloclarasanti">
+      <name>PL Colo - CLARA Santiago</name>
+      <node id="n10755">
+        <hostname>planetlab1-santiago.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclarasanti+node+planetlab1-santiago.lan.redclara.net</urn>
+      </node>
+      <node id="n10756">
+        <hostname>planetlab2-santiago.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclarasanti+node+planetlab2-santiago.lan.redclara.net</urn>
+      </node>
+    </site>
+    <site id="plcoloclarasaopa">
+      <name>PL Colo - CLARA Sao Paulo</name>
+      <node id="n10757">
+        <hostname>planetlab1-saopaulo.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclarasaopa+node+planetlab1-saopaulo.lan.redclara.net</urn>
+      </node>
+      <node id="n10758">
+        <hostname>planetlab2-saopaulo.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclarasaopa+node+planetlab2-saopaulo.lan.redclara.net</urn>
+      </node>
+    </site>
+    <site id="plcoloclarabueno">
+      <name>PL Colo - CLARA Buenos Aires</name>
+      <node id="n10759">
+        <hostname>planetlab1-buenosaires.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclarabueno+node+planetlab1-buenosaires.lan.redclara.net</urn>
+      </node>
+      <node id="n10760">
+        <hostname>planetlab2-buenosaires.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclarabueno+node+planetlab2-buenosaires.lan.redclara.net</urn>
+      </node>
+    </site>
+    <site id="plcoloclaratijua">
+      <name>PL Colo - CLARA Tijuana</name>
+      <node id="n10763">
+        <hostname>planetlab1-tijuana.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclaratijua+node+planetlab1-tijuana.lan.redclara.net</urn>
+      </node>
+      <node id="n10764">
+        <hostname>planetlab2-tijuana.lan.redclara.net</hostname>
+        <urn>urn:publicid:IDN+plc:plcoloclaratijua+node+planetlab2-tijuana.lan.redclara.net</urn>
+      </node>
+    </site>
+    <site id="cwi">
+      <name>CWI</name>
+      <node id="n10804">
+        <hostname>146-179.surfsnel.dsl.internl.net</hostname>
+        <urn>urn:publicid:IDN+plc:cwi+node+146-179.surfsnel.dsl.internl.net</urn>
+        <bw_limit units="kbps">100000</bw_limit>
+      </node>
+      <node id="n10805">
+        <hostname>147-179.surfsnel.dsl.internl.net</hostname>
+        <urn>urn:publicid:IDN+plc:cwi+node+147-179.surfsnel.dsl.internl.net</urn>
+      </node>
+    </site>
+    <site id="sinpmsu">
+      <name>Space Monitoring Data Center SINP MSU</name>
+      <node id="n10792">
+        <hostname>plab-1.sinp.msu.ru</hostname>
+        <urn>urn:publicid:IDN+plc:sinpmsu+node+plab-1.sinp.msu.ru</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+      <node id="n10793">
+        <hostname>plab-2.sinp.msu.ru</hostname>
+        <urn>urn:publicid:IDN+plc:sinpmsu+node+plab-2.sinp.msu.ru</urn>
+        <bw_limit units="kbps">1000</bw_limit>
+      </node>
+    </site>
+    <site id="kiae">
+      <name>RRC Kurchatovskiy Instutute</name>
+      <node id="n10818">
+        <hostname>pl1.grid.kiae.ru</hostname>
+        <urn>urn:publicid:IDN+plc:kiae+node+pl1.grid.kiae.ru</urn>
+      </node>
+      <node id="n10819">
+        <hostname>pl2.grid.kiae.ru</hostname>
+        <urn>urn:publicid:IDN+plc:kiae+node+pl2.grid.kiae.ru</urn>
+      </node>
+    </site>
+    <site id="netmode">
+      <name>NETMODE Lab of NTUA</name>
+      <node id="n10794">
+        <hostname>vicky.planetlab.ntua.gr</hostname>
+        <urn>urn:publicid:IDN+plc:netmode+node+vicky.planetlab.ntua.gr</urn>
+      </node>
+      <node id="n10795">
+        <hostname>stella.planetlab.ntua.gr</hostname>
+        <urn>urn:publicid:IDN+plc:netmode+node+stella.planetlab.ntua.gr</urn>
+      </node>
+    </site>
+  </network>
+</RSpec>
