@@ -30,7 +30,7 @@ bins = [
     'sfa/client/sfiAddAttribute.py',
     'sfa/client/sfiDeleteAttribute.py',
     'sfatables/sfatables',
-    'keyconvert/keyconvert.py'
+    'keyconvert/keyconvert.py',
     'flashpolicy/sfa_flashpolicy.py',
     ]
 
