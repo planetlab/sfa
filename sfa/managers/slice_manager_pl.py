@@ -29,14 +29,20 @@ from sfa.util.version import version_core
 from sfa.managers.aggregate_manager_pl import slice_status
 
 def GetVersion(api):
+    # peers explicitly in aggregates.xml
     peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.aggregates.items() 
                    if peername != api.hrn])
     xrn=Xrn (api.hrn)
-    return version_core({'interface':'slicemgr',
-                         'hrn' : xrn.get_hrn(),
-                         'urn' : xrn.get_urn(),
-                         'peers': peers,
-                         })
+    sm_version=version_core({'interface':'slicemgr',
+                             'hrn' : xrn.get_hrn(),
+                             'urn' : xrn.get_urn(),
+                             'peers': peers,
+                             })
+    # local aggregate if present needs to have localhost resolved
+    if api.hrn in api.aggregates:
+        local_am_url=api.aggregates[api.hrn]._ServerProxy__host
+        sm_version['peers'][api.hrn]=local_am_url.replace('localhost',sm_version['hostname'])
+    return sm_version
 
 def create_slice(api, xrn, creds, rspec, users):
     hrn, type = urn_to_hrn(xrn)
