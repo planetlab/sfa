@@ -4,3 +4,7 @@ build/*
 TAGS
 *~
 /sfa/util/version.py
+*.version
+*.png
+*.svg
+*.out
