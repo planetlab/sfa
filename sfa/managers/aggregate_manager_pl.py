@@ -24,8 +24,11 @@ from sfa.util.version import version_core
 from sfa.util.sfatime import utcparse
 
 def GetVersion(api):
+    xrn=Xrn(api.hrn)
     return version_core({'interface':'aggregate',
-                         'testbed':'myplc'})
+                         'testbed':'myplc',
+                         'hrn':xrn.get_hrn(),
+                         })
 
 def __get_registry_objects(slice_xrn, creds, users):
     """

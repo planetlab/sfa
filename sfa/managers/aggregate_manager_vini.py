@@ -4,7 +4,7 @@ import traceback
 import sys
 
 from types import StringTypes
-from sfa.util.xrn import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn, Xrn
 from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.rspec import *
 from sfa.util.specdict import *
@@ -29,8 +29,11 @@ start_slice, stop_slice, renew_slice, reset_slice, get_slices, get_ticket, slice
 
 
 def GetVersion(api):
+    xrn=Xrn(api.hrn)
     return version_core({'interface':'aggregate',
-                         'testbed':'myplc.vini'})
+                         'testbed':'myplc.vini',
+                         'hrn':xrn.get_hrn(),
+                         })
 
 def delete_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)
