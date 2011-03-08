@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 14
+%define taglevel 16
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -197,6 +197,14 @@ fi
 
 
 %changelog
+* Tue Mar 08 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-16
+- Fix build problem
+- First version of SFA scanner
+
+* Mon Mar 07 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-15
+- Add support for Flash clients using flashpolicy
+- Fix problems with tag handling in RSpec
+
 * Wed Mar 02 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-14
 - Modifications to the Eucalyptus Aggregate Manager
 - Fixes for VINI RSpec
@@ -294,6 +302,14 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Tue Mar 08 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-16
+- Fix build problem
+- First version of SFA scanner
+
+* Mon Mar 07 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-15
+- Add support for Flash clients using flashpolicy
+- Fix problems with tag handling in RSpec
+
 * Wed Mar 02 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-14
 - Modifications to the Eucalyptus Aggregate Manager
 - Fixes for VINI RSpec

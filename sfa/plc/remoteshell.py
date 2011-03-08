@@ -6,9 +6,6 @@
 # PLC.Shell.Shell(). It's meant to be a drop in replacement for running
 # SFA on a different machine than PLC.
 
-### $Id$
-### $URL$
-
 import xmlrpclib
 
 class RemoteShell:
