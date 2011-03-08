@@ -122,7 +122,9 @@ class SfaScan:
             for interface in to_scan:
                 # performing xmlrpc call
                 version=interface.get_version()
-                if 'sfa' in version: 
+                # 'sfa' is expected if the call succeeded at all
+                # 'peers' is needed as well as AMs typically don't have peers
+                if 'sfa' in version and 'peers' in version: 
                     # proceed with neighbours
                     for (next_name,next_url) in version['peers'].items():
                         next_interface=Interface(next_url)
