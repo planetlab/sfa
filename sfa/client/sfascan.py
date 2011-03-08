@@ -34,7 +34,8 @@ class Interface:
         except:
             import traceback
             traceback.print_exc()
-            self.hostname="undefined"
+            self.hostname="unknown"
+            self.ip='0.0.0.0'
             self.port="???"
             self.probed=True
             self._version={}
@@ -42,6 +43,7 @@ class Interface:
     def url(self):
         return "http://%s:%s/"%(self.hostname,self.port)
 
+    # this is used as a key for creating graph nodes and to avoid duplicates
     def uid (self):
         return "%s:%s"%(self.ip,self.port)
 
@@ -63,24 +65,26 @@ class Interface:
             sfa_logger().info('issuing get version at %s'%url)
             server=xmlrpcprotocol.get_server(url, key_file, cert_file, options)
             self._version=server.GetVersion()
-            sfa_logger().info("get_version at %s returned %r"%(url,self._version))
         except:
-            sfa_logger().info("get_version at %s failed"%(url))
             self._version={}
         self.probed=True
         return self._version
 
-    abbrevs = {"registry": "REG", "slicemgr":"SM", "aggregate":"AM"}
+    # default is for when we can't determine the type of the service
+    # typically the server is down, or we can't authenticate, or it's too old code
     shapes = {"registry": "diamond", "slicemgr":"ellipse", "aggregate":"box", 'default':'plaintext'}
 
-    def get_name(self):
+    def get_label(self):
         version=self.get_version()
         if 'hrn' not in version: return self.url()
         hrn=version['hrn']
-        interface=version['interface']
-        abbrev=Interface.abbrevs.get(interface,"XXX")
-        result="%s %s"%(hrn,abbrev)
-        if 'code_tag' in version: result += " %s"%version['code_tag']
+        result=hrn
+        if 'code_tag' in version: 
+            result += " %s"%version['code_tag']
+        if 'testbed' in version:
+            # could not get so-called HTML-like labels to work
+            #"<TABLE><TR><TD>%s</TD></TR><TR><TD>%s</TD></TR></TABLE>"%(result,version['testbed'])
+            result += " (%s)"%version['testbed']
         return result
 
     def get_shape(self):
@@ -112,7 +116,6 @@ class SfaScan:
         # add entry points right away using the interface uid's as a key
         to_scan=interfaces
         for i in interfaces: 
-            sfa_logger().info("adding initial node %s"%i.uid())
             graph.add_node(i.uid())
             node2interface[graph.get_node(i.uid())]=i
         scanned=[]
@@ -145,8 +148,9 @@ class SfaScan:
             for node in graph.nodes():
                 interface=node2interface.get(node,None)
                 if interface:
-                    node.attr['label']=interface.get_name()
+                    node.attr['label']=interface.get_label()
                     node.attr['shape']=interface.get_shape()
+                    node.attr['href']=interface.url()
                 else:
                     sfa_logger().info("MISSED interface with node %s"%node)
     
