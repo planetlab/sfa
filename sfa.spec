@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 16
+%define taglevel 17
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -197,6 +197,12 @@ fi
 
 
 %changelog
+* Wed Mar 09 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-17
+- fix packaging (apparently broken in 1.0-16)
+- first working version of sfascan
+- tweaks in GetVersion for exposing hrn(AM) and full set of aggregates(SM)
+- deprecated the sfa_geni_aggregate config category
+
 * Tue Mar 08 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-16
 - Fix build problem
 - First version of SFA scanner
@@ -302,6 +308,12 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Wed Mar 09 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-17
+- fix packaging (apparently broken in 1.0-16)
+- first working version of sfascan
+- tweaks in GetVersion for exposing hrn(AM) and full set of aggregates(SM)
+- deprecated the sfa_geni_aggregate config category
+
 * Tue Mar 08 2011 Andy Bavier <acb@cs.princeton.edu> - sfa-1.0-16
 - Fix build problem
 - First version of SFA scanner
