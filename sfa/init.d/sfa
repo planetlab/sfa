@@ -75,7 +75,7 @@ start() {
         action "SFA SliceMgr" daemon /usr/bin/sfa-server.py -s -d $OPTIONS
     fi
 
-    if [ "$SFA_FLASHPOLICY_ENABLED" -eq 1 ]; then
+    if [ "$SFA_FLASHPOLICY_ENABLED" ]; then
         action "Flash Policy Server" daemon /usr/bin/sfa_flashpolicy.py --file="$SFA_FLASHPOLICY_CONFIG_FILE" --port=$SFA_FLASHPOLICY_PORT -d
     fi
 
