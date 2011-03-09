@@ -164,7 +164,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files flashpolicy
 %{_bindir}/sfa_flashpolicy.py
-/etc/sfa/flashpolicy_config.xml
+/etc/sfa/sfa_flashpolicy_config.xml
 
 %files tests
 %{_datadir}/sfa/tests
