@@ -13,16 +13,16 @@ from sfa.client.sfi import Sfi
 from sfa.util.sfalogging import sfa_logger,sfa_logger_goes_to_console
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 
-def url_to_hostname_port (url):
+def url_hostname_port (url):
     if url.find("://")<0:
         url="http://"+url
     # 1(netloc) returns the hostname+port part
     parts=urlparse(url)[1].split(":")
     # just a hostname
     if len(parts)==1:
-        return (parts[0],'80')
+        return (url,parts[0],'80')
     else:
-        return (parts[0],parts[1])
+        return (url,parts[0],parts[1])
 
 ###
 class Interface:
@@ -30,7 +30,7 @@ class Interface:
     def __init__ (self,url):
         self._url=url
         try:
-            (self.hostname,self.port)=url_to_hostname_port(url)
+            (self._url,self.hostname,self.port)=url_hostname_port(url)
             self.ip=socket.gethostbyname(self.hostname)
             self.probed=False
         except:
