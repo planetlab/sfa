@@ -72,30 +72,51 @@ class Interface:
         self.probed=True
         return self._version
 
+    @staticmethod
+    def multi_lines_label(*lines):
+        return '<<TABLE BORDER="0" CELLBORDER="0"><TR><TD>' + \
+            '</TD></TR><TR><TD>'.join(lines) + \
+            '</TD></TR></TABLE>>'
+
     # default is for when we can't determine the type of the service
     # typically the server is down, or we can't authenticate, or it's too old code
     shapes = {"registry": "diamond", "slicemgr":"ellipse", "aggregate":"box", 'default':'plaintext'}
+    abbrevs = {"registry": "REG", "slicemgr":"SA", "aggregate":"AM", 'default':'[unknown]>'}
 
-    def get_label(self):
+    # return a dictionary that translates into the node's attr
+    def get_layout (self):
+        layout={}
+        ### retrieve cached GetVersion
         version=self.get_version()
-        if 'hrn' not in version: return self.url()
-        hrn=version['hrn']
-        result=hrn
-        if 'code_tag' in version: 
-            result += " %s"%version['code_tag']
-        if 'testbed' in version:
-            # could not get so-called HTML-like labels to work
-            #"<TABLE><TR><TD>%s</TD></TR><TR><TD>%s</TD></TR></TABLE>"%(result,version['testbed'])
-            result += " (%s)"%version['testbed']
-        return result
-
-    def get_shape(self):
-        default=Interface.shapes['default']
-        try:
-            version=self.get_version()
-            return Interface.shapes.get(version['interface'],default)
-        except:
-            return default
+        # set the href; xxx would make sense to try and 'guess' the web URL, not the API's one...
+        layout['href']=self.url()
+        ### set html-style label
+        ### see http://www.graphviz.org/doc/info/shapes.html#html
+        # if empty the service is unreachable
+        if not version:
+            label="offline"
+        else:
+            label=''
+            try: abbrev=Interface.abbrevs[version['interface']]
+            except: abbrev=['default']
+            label += abbrev
+            if 'hrn' in version: label += " %s"%version['hrn']
+            else:                label += "[no hrn]"
+            if 'code_tag' in version: 
+                label += " %s"%version['code_tag']
+            if 'testbed' in version:
+                label += " (%s)"%version['testbed']
+        layout['label']=Interface.multi_lines_label(self.url(),label)
+        ### set shape
+        try: shape=Interface.shapes[version['interface']]
+        except: shape=Interface.shapes['default']
+        layout['shape']=shape
+        ### fill color to outline wrongly configured bodies
+        print 'Version for %s'%self.url(),version
+        if 'sfa' not in version:
+            layout['style']='filled'
+            layout['fillcolor']='gray'
+        return layout
 
 class SfaScan:
 
@@ -150,11 +171,10 @@ class SfaScan:
             for node in graph.nodes():
                 interface=node2interface.get(node,None)
                 if interface:
-                    node.attr['label']=interface.get_label()
-                    node.attr['shape']=interface.get_shape()
-                    node.attr['href']=interface.url()
+                    for (k,v) in interface.get_layout().items():
+                        node.attr[k]=v
                 else:
-                    sfa_logger().info("MISSED interface with node %s"%node)
+                    sfa_logger().error("MISSED interface with node %s"%node)
     
 
 default_outfiles=['sfa.png','sfa.svg','sfa.dot']
