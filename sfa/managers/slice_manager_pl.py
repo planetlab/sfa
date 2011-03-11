@@ -28,9 +28,18 @@ from sfa.util.version import version_core
 # calling aggregate implementation
 from sfa.managers.aggregate_manager_pl import slice_status
 
+# we have specialized xmlrpclib.ServerProxy to remember the input url
+# OTOH it's not clear if we're only dealing with XMLRPCServerProxy instances
+def get_serverproxy_url (server):
+    try:
+        return server.url
+    except:
+        sfa_logger().warning("GetVersion, falling back to xmlrpclib.ServerProxy internals")
+        return server._ServerProxy__host + server._ServerProxy__handler 
+
 def GetVersion(api):
     # peers explicitly in aggregates.xml
-    peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.aggregates.items() 
+    peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.items() 
                    if peername != api.hrn])
     xrn=Xrn (api.hrn)
     sm_version=version_core({'interface':'slicemgr',
@@ -40,7 +49,7 @@ def GetVersion(api):
                              })
     # local aggregate if present needs to have localhost resolved
     if api.hrn in api.aggregates:
-        local_am_url=api.aggregates[api.hrn]._ServerProxy__host
+        local_am_url=get_serverproxy_url(api.aggregates[api.hrn])
         sm_version['peers'][api.hrn]=local_am_url.replace('localhost',sm_version['hostname'])
     return sm_version
 

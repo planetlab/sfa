@@ -53,6 +53,8 @@ class XMLRPCTransport(xmlrpclib.Transport):
 
 class XMLRPCServerProxy(xmlrpclib.ServerProxy):
     def __init__(self, url, transport, allow_none=True, options=None):
+        # remember url for GetVersion
+        self.url=url
         verbose = False
         if options and options.debug:
             verbose = True
