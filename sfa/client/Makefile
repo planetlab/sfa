@@ -7,6 +7,7 @@ BUNDLES += http://planet-lab.org:12345/@auto-plc-reg
 BUNDLES += http://planet-lab.org:12347/@auto-plc-sa
 BUNDLES += http://planet-lab.kr:12345/@auto-ppk-reg 
 BUNDLES += http://planet-lab.kr:12347/@auto-ppk-sa
+BUNDLES += http://www.emulab.net:443/protogeni/xmlrpc/am/@auto-emulab-am
 BUNDLES += http://geni-myvini.umkc.gpeni.net:12345/@auto-gpeni-reg
 BUNDLES += http://geni-myvini.umkc.gpeni.net:12347/@auto-gpeni-sa
 BUNDLES += http://198.248.241.100:12345/@auto-glc-reg
@@ -24,7 +25,7 @@ EXTENSIONS := png
 
 define bundle_scan_target
 $(word 2,$(subst @, ,$(1))):
-	./sfascan.py -e $(word 1,$(subst @, ,$(1))) $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1))).$(extension)) >& $(word 2,$(subst @, ,$(1))).out
+	./sfascan.py $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1))).$(extension)) $(word 1,$(subst @, ,$(1))) >& $(word 2,$(subst @, ,$(1))).out
 .PHONY: $(word 2,$(subst @, ,$(1)))
 endef
 
