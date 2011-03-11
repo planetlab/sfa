@@ -1,6 +1,6 @@
 # recompute the SFA graphs from different locations
 
-BUNDLES += http://planet-lab.eu:12346/@auto-ple-am
+#BUNDLES += http://planet-lab.eu:12346/@auto-ple-am
 BUNDLES += http://planet-lab.eu:12345/@auto-ple-reg 
 BUNDLES += http://planet-lab.eu:12347/@auto-ple-sa
 BUNDLES += http://planet-lab.org:12345/@auto-plc-reg 
