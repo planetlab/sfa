@@ -2,7 +2,8 @@
 
 import sys
 import socket
-import re
+import traceback
+from urlparse import urlparse
 
 import pygraphviz
 
@@ -12,16 +13,16 @@ from sfa.client.sfi import Sfi
 from sfa.util.sfalogging import sfa_logger,sfa_logger_goes_to_console
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 
-m_url_with_proto=re.compile("\w+://(?P<hostname>[\w\-\.]+):(?P<port>[0-9]+).*")
-m_url_without_proto=re.compile("(?P<hostname>[\w\-\.]+):(?P<port>[0-9]+).*")
 def url_to_hostname_port (url):
-    match=m_url_with_proto.match(url)
-    if match:
-        return (match.group('hostname'),match.group('port'))
-    match=m_url_without_proto.match(url)
-    if match:
-        return (match.group('hostname'),match.group('port'))
-    return ('undefined','???')
+    if url.find("://")<0:
+        url="http://"+url
+    # 1(netloc) returns the hostname+port part
+    parts=urlparse(url)[1].split(":")
+    # just a hostname
+    if len(parts)==1:
+        return (parts[0],'80')
+    else:
+        return (parts[0],parts[1])
 
 ###
 class Interface:
@@ -33,16 +34,15 @@ class Interface:
             self.ip=socket.gethostbyname(self.hostname)
             self.probed=False
         except:
-            import traceback
-            traceback.print_exc()
+#            traceback.print_exc()
             self.hostname="unknown"
             self.ip='0.0.0.0'
             self.port="???"
+            # don't really try it
             self.probed=True
             self._version={}
 
     def url(self):
-#        return "http://%s:%s/"%(self.hostname,self.port)
         return self._url
 
     # this is used as a key for creating graph nodes and to avoid duplicates
@@ -63,25 +63,28 @@ class Interface:
             client.read_config()
             key_file = client.get_key_file()
             cert_file = client.get_cert_file(key_file)
-            url="http://%s:%s/"%(self.hostname,self.port)
+            url=self.url()
             sfa_logger().info('issuing get version at %s'%url)
             server=xmlrpcprotocol.get_server(url, key_file, cert_file, options)
             self._version=server.GetVersion()
         except:
+#            traceback.print_exc()
             self._version={}
         self.probed=True
         return self._version
 
     @staticmethod
     def multi_lines_label(*lines):
-        return '<<TABLE BORDER="0" CELLBORDER="0"><TR><TD>' + \
+        result='<<TABLE BORDER="0" CELLBORDER="0"><TR><TD>' + \
             '</TD></TR><TR><TD>'.join(lines) + \
             '</TD></TR></TABLE>>'
+#        print 'multilines=',result
+        return result
 
     # default is for when we can't determine the type of the service
     # typically the server is down, or we can't authenticate, or it's too old code
     shapes = {"registry": "diamond", "slicemgr":"ellipse", "aggregate":"box", 'default':'plaintext'}
-    abbrevs = {"registry": "REG", "slicemgr":"SA", "aggregate":"AM", 'default':'[unknown]>'}
+    abbrevs = {"registry": "REG", "slicemgr":"SA", "aggregate":"AM", 'default':'[unknown interface]'}
 
     # return a dictionary that translates into the node's attr
     def get_layout (self):
@@ -98,7 +101,7 @@ class Interface:
         else:
             label=''
             try: abbrev=Interface.abbrevs[version['interface']]
-            except: abbrev=['default']
+            except: abbrev=Interface.abbrevs['default']
             label += abbrev
             if 'hrn' in version: label += " %s"%version['hrn']
             else:                label += "[no hrn]"
@@ -112,8 +115,7 @@ class Interface:
         except: shape=Interface.shapes['default']
         layout['shape']=shape
         ### fill color to outline wrongly configured bodies
-        print 'Version for %s'%self.url(),version
-        if 'sfa' not in version:
+        if 'geni_api' not in version and 'sfa' not in version:
             layout['style']='filled'
             layout['fillcolor']='gray'
         return layout
