@@ -1,14 +1,7 @@
-### $Id$
-### $URL$
-
-
 from sfa.util.faults import *
 from sfa.util.server import SfaServer
 from sfa.util.xrn import hrn_to_urn
 from sfa.server.interface import Interfaces
-import sfa.util.xmlrpcprotocol as xmlrpcprotocol
-import sfa.util.soapprotocol as soapprotocol
-
 
 class Aggregate(SfaServer):
 
@@ -31,7 +24,8 @@ class Aggregates(Interfaces):
  
     def __init__(self, api, conf_file = "/etc/sfa/aggregates.xml"):
         Interfaces.__init__(self, api, conf_file)
-        # set up a connection to the local registry
+        # set up a connection to the local aggregate
+        # xxx fixme ? - should not we do this only when SFA_AGGREGATE_ENABLED ?
         address = self.api.config.SFA_AGGREGATE_HOST
         port = self.api.config.SFA_AGGREGATE_PORT
         url = 'http://%(address)s:%(port)s' % locals()

@@ -1,7 +1,3 @@
-#
-### $Id: interface.py 17583 2010-04-06 15:01:08Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/server/interface.py $
-#
 
 from sfa.util.faults import *
 from sfa.util.storage import *
