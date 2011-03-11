@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 18
+%define taglevel 19
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -197,6 +197,11 @@ fi
 
 
 %changelog
+* Fri Mar 11 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-19
+- GetVersion should now report full URLs with path
+- scansfa has nicer output and new syntax (entry URLs as args and not options)
+- dos2unix'ed flash policy pill
+
 * Wed Mar 09 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-18
 - fix packaging again for f8
 
@@ -311,6 +316,11 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Fri Mar 11 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-19
+- GetVersion should now report full URLs with path
+- scansfa has nicer output and new syntax (entry URLs as args and not options)
+- dos2unix'ed flash policy pill
+
 * Wed Mar 09 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-18
 - fix packaging again for f8
 
