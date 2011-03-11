@@ -27,6 +27,7 @@ def url_to_hostname_port (url):
 class Interface:
 
     def __init__ (self,url):
+        self._url=url
         try:
             (self.hostname,self.port)=url_to_hostname_port(url)
             self.ip=socket.gethostbyname(self.hostname)
@@ -41,7 +42,8 @@ class Interface:
             self._version={}
 
     def url(self):
-        return "http://%s:%s/"%(self.hostname,self.port)
+#        return "http://%s:%s/"%(self.hostname,self.port)
+        return self._url
 
     # this is used as a key for creating graph nodes and to avoid duplicates
     def uid (self):
@@ -155,26 +157,22 @@ class SfaScan:
                     sfa_logger().info("MISSED interface with node %s"%node)
     
 
-default_entry_points=["http://www.planet-lab.eu:12345/"]
-default_outfiles=['sfa.png']
+default_outfiles=['sfa.png','sfa.svg','sfa.dot']
 
 def main():
     sfa_logger_goes_to_console()
-    parser=OptionParser()
-    parser.add_option("-e","--entry",action='append',dest='entry_points',default=[],
-                      help="Specify entry points - defaults are %r"%default_entry_points)
+    usage="%prog [options] url-entry-point(s)"
+    parser=OptionParser(usage=usage)
     parser.add_option("-o","--output",action='append',dest='outfiles',default=[],
-                      help="Output filenames - defaults are %r"%default_outfiles)
+                      help="output filenames (cumulative) - defaults are %r"%default_outfiles)
     (options,args)=parser.parse_args()
-    if args:
+    if not args:
         parser.print_help()
         sys.exit(1)
-    if not options.entry_points:
-        options.entry_points=default_entry_points
     if not options.outfiles:
         options.outfiles=default_outfiles
     scanner=SfaScan()
-    entries = [ Interface(entry) for entry in options.entry_points ]
+    entries = [ Interface(entry) for entry in args ]
     g=scanner.graph(entries)
     sfa_logger().info("creating layout")
     g.layout(prog='dot')
