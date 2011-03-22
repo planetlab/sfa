@@ -75,7 +75,7 @@ Summary: SFA support for flash clients
 Group: Applications/System
 Requires: sfa
 
-%Package tests
+%package tests
 Summary: unit tests suite for SFA
 Group: Applications/System
 Requires: sfa
