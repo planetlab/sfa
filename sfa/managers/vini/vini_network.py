@@ -160,13 +160,13 @@ class ViniSlice(Slice):
                 key = self.network.free_egre_key()
             except:
                 raise InvalidRSpec("ran out of EGRE keys!")
-            tag = self.update_tag('egre_key', key, None, 10)
+            tag = self.update_tag('egre_key', key, None, 'admin')
         return
             
     def turn_on_netns(self):
         tag = self.get_tag('netns')
         if (not tag) or (tag.value != '1'):
-            tag = self.update_tag('netns', '1', None, 10)
+            tag = self.update_tag('netns', '1', None, 'admin')
         return
    
     def turn_off_netns(self):
@@ -185,9 +185,9 @@ class ViniSlice(Slice):
                     break
             else:
                 newcaps = "CAP_NET_ADMIN," + tag.value
-            self.update_tag('capabilities', newcaps, None, 10)
+            self.update_tag('capabilities', newcaps, None, 'admin')
         else:
-            tag = self.add_tag('capabilities', 'CAP_NET_ADMIN', None, 10)
+            tag = self.add_tag('capabilities', 'CAP_NET_ADMIN', None, 'admin')
         return
     
     def remove_cap_net_admin(self):
@@ -200,7 +200,7 @@ class ViniSlice(Slice):
                     newcaps.append(cap)
             if newcaps:
                 value = ','.join(newcaps)
-                self.update_tag('capabilities', value, None, 10)
+                self.update_tag('capabilities', value, None, 'admin')
             else:
                 tag.delete()
         return
@@ -371,7 +371,7 @@ class ViniNetwork(Network):
     def updateSliceTags(self):
         slice = self.slice
 
-        tag = slice.update_tag('vini_topo', 'manual', None, 10)
+        tag = slice.update_tag('vini_topo', 'manual', None, 'admin')
         slice.assign_egre_key()
         slice.turn_on_netns()
         slice.add_cap_net_admin()
@@ -382,7 +382,7 @@ class ViniNetwork(Network):
                 linkdesc.append(node.get_topo_rspec(link))
             if linkdesc:
                 topo_str = "%s" % linkdesc
-                tag = slice.update_tag('topo_rspec', topo_str, node, 10)
+                tag = slice.update_tag('topo_rspec', topo_str, node, 'admin')
 
         # Expire the un-updated topo_rspec tags
         for tag in self.getSliceTags():
