@@ -338,8 +338,11 @@ class SfaAPI(BaseAPI):
                         break
             # fill in key info
             if record['type'] == 'user':
-                pubkeys = [keys[key_id]['key'] for key_id in record['key_ids'] if key_id in keys] 
-                record['keys'] = pubkeys
+                if 'key_ids' not in record:
+                    self.logger.info("user record has no 'key_ids' - need to import from myplc ?")
+                else:
+                    pubkeys = [keys[key_id]['key'] for key_id in record['key_ids'] if key_id in keys] 
+                    record['keys'] = pubkeys
 
         # fill in record hrns
         records = self.fill_record_hrns(records)   
