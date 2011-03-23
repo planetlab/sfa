@@ -2,12 +2,10 @@
 #
 # sfa   Wraps PLCAPI into the SFA compliant API
 #
-# chkconfig: 2345 5 99
+# hopefully right after plc
+# chkconfig: 2345 61 39
 #
 # description:   Wraps PLCAPI into the SFA compliant API
-#
-# $Id$
-# $URL$
 #
 
 # Source config
