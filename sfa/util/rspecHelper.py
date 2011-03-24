@@ -88,11 +88,14 @@ class RSpec:
                 return name.getparent()
         return None
         
+    # Thierry : I need this to return all nodes in all networks
     def get_node_list(self, network=None):
-        if network == None:
+        if network == None and self.network:
             network = self.network
-        result = self.rspec.xpath("./network[@name='%s']/site/node/hostname/text()" % network)
-        return result
+        if network != None:
+            return self.rspec.xpath("./network[@name='%s']/site/node/hostname/text()" % network)
+        else:
+            return self.rspec.xpath("./network/site/node/hostname/text()")
 
     def get_network_list(self):
         return self.rspec.xpath("./network[@name]/@name")
