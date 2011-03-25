@@ -79,16 +79,20 @@ class RSpec:
         if len(networks) == 1:
             self.network = networks[0]
 
+    # Thierry : need this to locate hostname even if several networks
     def get_node_element(self, hostname, network=None):
-        if network == None:
+        if network == None and self.network:
             network = self.network
-        names = self.rspec.iterfind("./network[@name='%s']/site/node/hostname" % network)
+        if network != None:
+            names = self.rspec.iterfind("./network[@name='%s']/site/node/hostname" % network)
+        else:
+            names = self.rspec.iterfind("./network/site/node/hostname")
         for name in names:
             if name.text == hostname:
                 return name.getparent()
         return None
         
-    # Thierry : I need this to return all nodes in all networks
+    # Thierry : need this to return all nodes in all networks
     def get_node_list(self, network=None):
         if network == None and self.network:
             network = self.network
