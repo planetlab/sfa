@@ -140,7 +140,7 @@ def slice_status(api, slice_xrn, creds):
             res['geni_status'] = 'ready'
         else:
             res['geni_status'] = 'failed'
-            top_level_staus = failed 
+            top_level_staus = 'failed' 
             
         res['geni_error'] = ''
 
