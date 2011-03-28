@@ -349,6 +349,7 @@ class Network:
         try:
             val = self.sites[id]
         except:
+            self.api.logger.error("Invalid RSpec: site ID %s not found" % id )
             raise InvalidRSpec("site ID %s not found" % id)
         return val
     
@@ -568,8 +569,14 @@ class Network:
         """
         tmp = []
         for node in api.plshell.GetNodes(api.plauth, {'peer_id': None}):
-            t = node['node_id'], Node(self, node)
-            tmp.append(t)
+            try:
+                nodeObj = Node(self, node)
+                if nodeObj.site != None:
+                    t = node['node_id'], nodeObj
+                    tmp.append(t)
+            except:
+                self.api.logger.error("Failed to add node %s (%s) to RSpec" % (node['hostname'], node['node_id']))
+                 
         return dict(tmp)
 
     def get_ifaces(self, api):
