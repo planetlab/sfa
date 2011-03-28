@@ -568,10 +568,8 @@ class Network:
         tmp = []
         for node in api.plshell.GetNodes(api.plauth, {'peer_id': None}):
             try:
-                nodeObj = Node(self, node)
-                if nodeObj.site != None:
-                    t = node['node_id'], nodeObj
-                    tmp.append(t)
+                t = node['node_id'], Node(self, node)
+                tmp.append(t)
             except:
                 self.api.logger.error("Failed to add node %s (%s) to RSpec" % (node['hostname'], node['node_id']))
                  
