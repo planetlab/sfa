@@ -16,11 +16,15 @@ import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 def url_hostname_port (url):
     if url.find("://")<0:
         url="http://"+url
+    parsed_url=urlparse(url)
+    # 0(scheme) returns protocol
+    default_port='80'
+    if parsed_url[0]=='https': default_port='443'
     # 1(netloc) returns the hostname+port part
-    parts=urlparse(url)[1].split(":")
+    parts=parsed_url[1].split(":")
     # just a hostname
     if len(parts)==1:
-        return (url,parts[0],'80')
+        return (url,parts[0],default_port)
     else:
         return (url,parts[0],parts[1])
 
@@ -123,11 +127,14 @@ class Interface:
 class SfaScan:
 
     # provide the entry points (a list of interfaces)
-    def __init__ (self):
-        pass
+    def __init__ (self, left_to_right=False, verbose=False):
+        self.verbose=verbose
+        self.left_to_right=left_to_right
 
     def graph (self,entry_points):
         graph=pygraphviz.AGraph(directed=True)
+        if self.left_to_right: 
+            graph.graph_attr['rankdir']='LR'
         self.scan(entry_points,graph)
         return graph
     
@@ -150,9 +157,21 @@ class SfaScan:
             for interface in to_scan:
                 # performing xmlrpc call
                 version=interface.get_version()
-                # 'sfa' is expected if the call succeeded at all
+                if self.verbose:
+                    sfa_logger().info("GetVersion at interface %s"%interface.url())
+                    if not version:
+                        sfa_logger().info("<EMPTY GetVersion(); offline or cannot authenticate>")
+                    else: 
+                        for (k,v) in version.iteritems(): 
+                            if not isinstance(v,dict):
+                                sfa_logger().info("\r\t%s:%s"%(k,v))
+                            else:
+                                sfa_logger().info(k)
+                                for (k1,v1) in v.iteritems():
+                                    sfa_logger().info("\r\t\t%s:%s"%(k1,v1))
+                # 'geni_api' is expected if the call succeeded at all
                 # 'peers' is needed as well as AMs typically don't have peers
-                if 'sfa' in version and 'peers' in version: 
+                if 'geni_api' in version and 'peers' in version: 
                     # proceed with neighbours
                     for (next_name,next_url) in version['peers'].items():
                         next_interface=Interface(next_url)
@@ -187,13 +206,17 @@ def main():
     parser=OptionParser(usage=usage)
     parser.add_option("-o","--output",action='append',dest='outfiles',default=[],
                       help="output filenames (cumulative) - defaults are %r"%default_outfiles)
+    parser.add_option("-l","--left-to-right",action="store_true",dest="left_to_right",default=False,
+                      help="instead of top-to-bottom")
+    parser.add_option("-v","--verbose",action='store_true',dest='verbose',default=False,
+                      help="verbose")
     (options,args)=parser.parse_args()
     if not args:
         parser.print_help()
         sys.exit(1)
     if not options.outfiles:
         options.outfiles=default_outfiles
-    scanner=SfaScan()
+    scanner=SfaScan(left_to_right=options.left_to_right, verbose=options.verbose)
     entries = [ Interface(entry) for entry in args ]
     g=scanner.graph(entries)
     sfa_logger().info("creating layout")
