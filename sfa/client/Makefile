@@ -87,6 +87,10 @@ clean:
 	rm -f auto-*.{out,version}
 	$(foreach extension,$(EXTENSIONS),rm -rf auto-*.$(extension);)
 
+PUBEXTENSIONS=png
+publish:
+	$(foreach extension,$(PUBEXTENSIONS),rsync -av auto-*.$(extension) tparment@srv-planete.inria.fr:/proj/planete/www/Thierry.Parmentelat/sfascan/ ;)
+
 #################### convenience, for debugging only
 # make +foo : prints the value of $(foo)
 # make ++foo : idem but verbose, i.e. foo=$(foo)
