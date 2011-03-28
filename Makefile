@@ -114,7 +114,8 @@ SSHURL:=root@$(PLC):/
 SSHCOMMAND:=ssh root@$(PLC)
 endif
 
-LOCAL_RSYNC_EXCLUDES	:= --exclude '*.pyc' 
+LOCAL_RSYNC_EXCLUDES	+= --exclude '*.pyc' 
+LOCAL_RSYNC_EXCLUDES	+= --exclude '*.png' --exclude '*.svg' --exclude '*.out'
 RSYNC_EXCLUDES		:= --exclude .svn --exclude .git --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
 RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) --no-owner $(RSYNC_EXCLUDES)
