@@ -54,7 +54,7 @@ class PlXrn (Xrn):
     def pl_slicename (self):
         self._normalize()
         leaf = self.leaf
-        leaf = re.sub('[^a-zA-Z0-9]', '', leaf)
+        leaf = re.sub('[^a-zA-Z0-9_]', '', leaf)
         return self.pl_login_base() + '_' + leaf
 
     #def hrn_to_pl_authname(hrn):
