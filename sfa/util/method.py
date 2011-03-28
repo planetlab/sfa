@@ -3,9 +3,6 @@
 #
 #
 
-### $Id$
-### $URL$
-
 import os, time
 from types import *
 from types import StringTypes
@@ -19,8 +16,7 @@ from sfa.util.faults import *
 from sfa.util.parameter import Parameter, Mixed, python_type, xmlrpc_type
 from sfa.trust.auth import Auth
 
-# we inherit object because we use new-style classes for legacy methods
-class Method (object):
+class Method:
     """
     Base class for all SfaAPI functions. At a minimum, all SfaAPI
     functions must define:
@@ -48,10 +44,8 @@ class Method (object):
     def call(self, *args):
         """
         Method body for all SfaAPI functions. Must override.
-
         """
-
-        return True
+        return None
 
     def __init__(self, api):
         self.name = self.__class__.__name__
@@ -76,16 +70,14 @@ class Method (object):
             if not self.api.interface or self.api.interface not in self.interfaces:
                 raise SfaInvalidAPIMethod(methodname, self.api.interface) 
 
-            # legacy code cannot be type-checked, due to the way Method.args() works
-            if not hasattr(self,"skip_typecheck"):
-                (min_args, max_args, defaults) = self.args()
-	        		
-                # Check that the right number of arguments were passed in
-                if len(args) < len(min_args) or len(args) > len(max_args):
-                    raise SfaInvalidArgumentCount(len(args), len(min_args), len(max_args))
+            (min_args, max_args, defaults) = self.args()
+	    		
+            # Check that the right number of arguments were passed in
+            if len(args) < len(min_args) or len(args) > len(max_args):
+                raise SfaInvalidArgumentCount(len(args), len(min_args), len(max_args))
 
-                for name, value, expected in zip(max_args, args, self.accepts):
-                    self.type_check(name, value, expected, args)
+            for name, value, expected in zip(max_args, args, self.accepts):
+                self.type_check(name, value, expected, args)
 
             result = self.call(*args, **kwds)
             runtime = time.time() - start
