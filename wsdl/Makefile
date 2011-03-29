@@ -1,8 +1,11 @@
 # attempt to update at build-time
 
-WSDLS = sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl 
+INTERFACES=sfa registry slice-manager aggregate
 
-all: $(WSDLS)
+WSDLS = $(foreach interface,$(INTERFACES),$(interface).wsdl)
+HTMLS = $(foreach interface,$(INTERFACES),$(interface).html)
+
+all: $(WSDLS) $(HTMLS)
 
 # temporary: turn off wsdl generation as it is failing
 #TEMPORARY_OFF = yes
@@ -39,11 +42,18 @@ $(DESTDIR)$(INSTALL_PATH)/%: $(DESTDIR)$(INSTALL_PATH) %
 	install -c -m 0755 $(wsdl) $@
 
 #################### clean
-clean:
+clean::
 	rm -f *wsdl
 
 install-clean:
 	rm -f $(INSTALLED)
 
 .PHONY: all clean install install-clean
+
+#################### generate html document
+%.html: %.wsdl wsdl2html.xsl
+	xsltproc $(XSLTFLAGS) wsdl2html.xsl $*.wsdl > $@ || rm $@
+
+clean::
+	rm -f *.html
 
