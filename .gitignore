@@ -4,9 +4,9 @@ build/*
 TAGS
 *~
 /sfa/util/version.py
-wsdl/*.xml
 wsdl/*.wsdl
-wsdl/*.html
+wsdl/*.xml
+wsdl/[ars]*.html
 sfa/client/*.version
 *.png
 *.svg
