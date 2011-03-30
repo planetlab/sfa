@@ -14,16 +14,16 @@ ifdef TEMPORARY_OFF
 registry.wsdl slice-manager.wsdl aggregate.wsdl sfa.wsdl:
 	touch $@
 else
-registry.wsdl:
+registry.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --registry > $@
 
-slice-manager.wsdl:
+slice-manager.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --slice-manager > $@
 
-aggregate.wsdl:
+aggregate.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --aggregate > $@
 
-sfa.wsdl:
+sfa.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --registry --slice-manager --aggregate > $@
 endif
 
