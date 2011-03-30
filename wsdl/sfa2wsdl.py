@@ -42,6 +42,10 @@ class WSDLGen:
         self.interface_options = interface_options
 
     def interface_name (self):
+         if self.interface_options.aggregate and \
+                  self.interface_options.slicemgr and \
+                  self.interface_options.registry:
+              return "complete"
          if self.interface_options.aggregate: return "aggregate"
          elif self.interface_options.slicemgr: return "slicemgr"
          elif self.interface_options.registry: return "registry"
