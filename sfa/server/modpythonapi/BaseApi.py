@@ -165,7 +165,7 @@ class BaseApi:
             else:
                 raise e
 
-        self.logger.debug("OP:" + str(method) + " from " + str(source))
+        self.logger.debug("BaseApi.handle OP:" + str(method) + " from " + str(source))
 
         try:
             result = self.call(source, method, *args)
@@ -198,6 +198,3 @@ class BaseApi:
 
     def noop(self, value):
         return value
-
-
-
