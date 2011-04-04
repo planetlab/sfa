@@ -26,16 +26,14 @@
 # Credentials are signed XML files that assign a subject gid privileges to an object gid
 ##
 
-### $Id$
-### $URL$
-
 import os
 import datetime
 from tempfile import mkstemp
-from xml.dom.minidom import Document, parseString
-from dateutil.parser import parse
-from lxml import etree
+import dateutil.parser
 from StringIO import StringIO 
+from xml.dom.minidom import Document, parseString
+from lxml import etree
+
 from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger
 from sfa.trust.certificate import Keypair
@@ -585,7 +583,7 @@ class Credential(object):
         
 
         self.set_refid(cred.getAttribute("xml:id"))
-        self.set_expiration(parse(getTextNode(cred, "expires")))
+        self.set_expiration(dateutil.parser.parse(getTextNode(cred, "expires")))
         self.gidCaller = GID(string=getTextNode(cred, "owner_gid"))
         self.gidObject = GID(string=getTextNode(cred, "target_gid"))   
 
