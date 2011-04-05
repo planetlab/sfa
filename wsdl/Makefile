@@ -43,7 +43,7 @@ $(DESTDIR)$(INSTALL_PATH)/%: $(DESTDIR)$(INSTALL_PATH) %
 
 #################### clean
 clean::
-	rm -f *wsdl
+	rm -f $(WSDLS)
 
 install-clean:
 	rm -f $(INSTALLED)
@@ -55,5 +55,5 @@ install-clean:
 	xsltproc $(XSLTFLAGS) wsdl2html.xsl $*.wsdl > $@ || rm $@
 
 clean::
-	rm -f *.html
+	rm -f $(HTMLS)
 
