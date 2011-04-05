@@ -1,11 +1,7 @@
-### $Id$
-### $URL$
 #
 # implements support for SFA records stored in db tables
 #
 # TODO: Use existing PLC database methods? or keep this separate?
-
-import pgdb
 
 from sfa.util.PostgreSQL import *
 from sfa.trust.gid import *
