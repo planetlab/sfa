@@ -1,12 +1,13 @@
-
-from sfa.util.faults import *
-from sfa.util.storage import *
-from sfa.util.xrn import get_authority, hrn_to_urn
-from sfa.trust.gid import GID
-from sfa.util.record import SfaRecord
 import traceback
+
+from sfa.util.sfalogging import sfa_logger
+from sfa.util.faults import *
+from sfa.util.storage import XmlStorage
+from sfa.util.xrn import get_authority, hrn_to_urn
+from sfa.util.record import SfaRecord
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.util.soapprotocol as soapprotocol
+from sfa.trust.gid import GID
 
 # GeniLight client support is optional
 try:
@@ -26,7 +27,7 @@ class Interfaces(dict):
 
     1) Makes sure a record exist in the local registry for the each 
        fedeated peer   
-    2) Attepts to fetch and install trusted gids   
+    2) Attempts to fetch and install trusted gids   
     3) Provides connections (xmlrpc or soap) to federated peers
     """
 
@@ -188,9 +189,8 @@ class Interfaces(dict):
         connections = {}
         required_fields = self.default_fields.keys()
         for interface in self.interfaces.values():
-            # make sure the required fields are present and not null
-            
             url = interface['url']
+#            sfa_logger().debug("Interfaces.get_connections - looping on neighbour %s"%url)
             # check which client we should use
             # sfa.util.xmlrpcprotocol is default
             client_type = 'xmlrpcprotocol'
