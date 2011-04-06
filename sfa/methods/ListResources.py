@@ -19,11 +19,12 @@ class ListResources(Method):
     accepts = [
         Mixed(Parameter(str, "Credential string"), 
               Parameter(type([str]), "List of credentials")),
-        Parameter(dict, "Options")
+        Parameter(dict, "Options"),
+        Parameter(str, "call_id"),
         ]
     returns = Parameter(str, "List of resources")
 
-    def call(self, creds, options):
+    def call(self, creds, options, call_id=""):
         self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
         
         # get slice's hrn from options    
@@ -39,7 +40,7 @@ class ListResources(Method):
             origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
         # get manager for this interface    
         manager = self.api.get_interface_manager()
-        rspec = manager.get_rspec(self.api, creds, options)
+        rspec = manager.get_rspec(self.api, creds, options, call_id)
 
         # filter rspec through sfatables 
         if self.api.interface in ['aggregate']:

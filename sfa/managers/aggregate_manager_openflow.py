@@ -14,6 +14,7 @@ from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.util.config import Config
 from sfa.plc.nodes import *
+from sfa.util.callids import Callids
 
 # Message IDs for all the SFA light calls
 # This will be used by the aggrMgr controller
@@ -132,6 +133,7 @@ def create_slice(cred, xrn, rspec):
         print "IO error"
     return 0
 
+# Thierry : this would need to handle call_id like the other AMs but is outdated...
 def get_rspec(cred, xrn=None):
     hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received get_rspec call"

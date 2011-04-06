@@ -21,6 +21,7 @@ from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 from sfa.managers.aggregate_manager_pl import __get_registry_objects, __get_hostnames
 from sfa.util.version import version_core
+from sfa.util.callids import Callids
 
 # VINI aggregate is almost identical to PLC aggregate for many operations, 
 # so lets just import the methods form the PLC manager
@@ -88,7 +89,8 @@ def create_slice(api, xrn, creds, xml, users):
 
     return True
 
-def get_rspec(api, creds, options):
+def get_rspec(api, creds, options,call_id):
+    if not Callids().should_handle_call_id(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
@@ -115,8 +117,8 @@ def get_rspec(api, creds, options):
 def main():
     api = SfaAPI()
     """
-    #rspec = get_rspec(api, None, None)
-    rspec = get_rspec(api, "plc.princeton.iias", None)
+    #rspec = get_rspec(api, None, None,)
+    rspec = get_rspec(api, "plc.princeton.iias", None, 'vini_test')
     print rspec
     """
     f = open(sys.argv[1])

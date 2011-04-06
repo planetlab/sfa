@@ -383,9 +383,9 @@ def get_ticket(api, xrn, creds, rspec, users):
 def main():
     api = SfaAPI()
     """
-    rspec = get_rspec(api, "plc.princeton.sapan", None)
-    #rspec = get_rspec(api, "plc.princeton.coblitz", None)
-    #rspec = get_rspec(api, "plc.pl.sirius", None)
+    rspec = get_rspec(api, "plc.princeton.sapan", None, 'pl_test_sapan')
+    #rspec = get_rspec(api, "plc.princeton.coblitz", None, 'pl_test_coblitz')
+    #rspec = get_rspec(api, "plc.pl.sirius", None, 'pl_test_sirius')
     print rspec
     """
     f = open(sys.argv[1])
