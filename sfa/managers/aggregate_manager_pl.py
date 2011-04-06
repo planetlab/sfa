@@ -22,6 +22,7 @@ from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 from sfa.util.version import version_core
 from sfa.util.sfatime import utcparse
+from sfa.util.callids import Callids
 
 def GetVersion(api):
     xrn=Xrn(api.hrn)
@@ -290,15 +291,19 @@ def get_slices(api, creds):
 
     return slice_urns
     
-def get_rspec(api, creds, options):
+# xxx Thierry : caching at the aggregate level sounds wrong...
+caching=True
+def get_rspec(api, creds, options,call_id):
+    if not Callids().should_handle_call_id(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
-    hrn, type = urn_to_hrn(xrn)
+    (hrn, type) = urn_to_hrn(xrn)
 
     # look in cache first
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         rspec = api.cache.get('nodes')
         if rspec:
+            api.logger.info("aggregate.get_rspec: returning cached value for hrn %s"%hrn)
             return rspec 
 
     network = Network(api)
@@ -309,7 +314,7 @@ def get_rspec(api, creds, options):
     rspec = network.toxml()
 
     # cache the result
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         api.cache.add('nodes', rspec)
 
     return rspec

@@ -23,6 +23,7 @@ from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
 import sfa.plc.peers as peers
 from sfa.util.version import version_core
+from sfa.util.callids import Callids
 
 # XX FIX ME:  should merge result from multiple aggregates instead of 
 # calling aggregate implementation
@@ -320,12 +321,19 @@ def get_slices(api, creds):
         api.cache.add('slices', slices)
 
     return slices
- 
-def get_rspec(api, creds, options):
-    
+
+
+# Thierry : caching at the slicemgr level makes sense to some extent
+caching=True
+def get_rspec(api, creds, options, call_id):
+
+    if not Callids().should_handle_call_id(call_id): 
+        api.logger.info("%d received get_rspec with known call_id %s"%(api.interface,call_id))
+        return ""
+
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
-    hrn, type = urn_to_hrn(xrn)
+    (hrn, type) = urn_to_hrn(xrn)
 
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
@@ -336,12 +344,10 @@ def get_rspec(api, creds, options):
             origin_hrn = Credential(string=creds).get_gid_caller().get_hrn()
     
     # look in cache first 
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         rspec =  api.cache.get('nodes')
         if rspec:
             return rspec
-
-    hrn, type = urn_to_hrn(xrn)
 
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'listnodes', hrn)[0]
@@ -361,14 +367,14 @@ def get_rspec(api, creds, options):
         server = api.aggregates[aggregate]
         my_opts = copy(options)
         my_opts['geni_compressed'] = False
-        threads.run(server.ListResources, credential, my_opts)
+        threads.run(server.ListResources, credential, my_opts, call_id)
         #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
     results = threads.get_results()
     merged_rspec = merge_rspecs(results)
 
     # cache the result
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         api.cache.add('nodes', merged_rspec)
  
     return merged_rspec

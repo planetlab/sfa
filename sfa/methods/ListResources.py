@@ -28,7 +28,7 @@ class ListResources(Method):
         
         # get slice's hrn from options    
         xrn = options.get('geni_slice_urn', '')
-        hrn, _ = urn_to_hrn(xrn)
+        (hrn, _) = urn_to_hrn(xrn)
 
         # Find the valid credentials
         valid_creds = self.api.auth.checkCredentials(creds, 'listnodes', hrn)
@@ -46,6 +46,7 @@ class ListResources(Method):
             chain_name = 'OUTGOING'
         elif self.api.interface in ['slicemgr']: 
             chain_name = 'FORWARD-OUTGOING'
+        self.api.logger.debug("ListResources: sfatables on chain %s"%chain_name)
         filtered_rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec) 
  
         if options.has_key('geni_compressed') and options['geni_compressed'] == True:

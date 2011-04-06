@@ -118,6 +118,8 @@ def load_record_from_file(filename):
     return record
 
 
+import uuid
+def unique_call_id(): return uuid.uuid4().urn
 
 class Sfi:
     
@@ -818,7 +820,7 @@ class Sfi:
         if opts.delegate:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
             creds.append(delegated_cred) 
-        result = server.ListResources(creds, call_options)
+        result = server.ListResources(creds, call_options,unique_call_id())
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)

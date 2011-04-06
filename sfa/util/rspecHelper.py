@@ -36,6 +36,8 @@ def merge_rspecs(rspecs):
     # the resulting tree
     rspec = None
     for input_rspec in rspecs:
+        # ignore empty strings as returned with used call_ids
+        if not input_rspec: continue
         try:
             tree = etree.parse(StringIO(input_rspec))
         except etree.XMLSyntaxError:
