@@ -1,5 +1,9 @@
 import libxml2
-import libxslt
+# allow to run sfa2wsdl if this is missing (for mac)
+import sys
+try:import libxslt
+except: print >>sys.stderr, "WARNING, could not import libxslt"
+
 from sfatables.globals import *
 
 class XMLRule:

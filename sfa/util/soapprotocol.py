@@ -1,8 +1,7 @@
 # SOAP-specific code for SFA Client
 
-import pdb
-from ZSI.client import Binding
 from httplib import HTTPSConnection
+from ZSI.client import Binding
 
 def xmlrpc_like_callable (soap_callable, *x):
     soap_result = soap_callable(*x)
