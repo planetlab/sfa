@@ -79,12 +79,13 @@ class Method:
             for name, value, expected in zip(max_args, args, self.accepts):
                 self.type_check(name, value, expected, args)
 
+            if self.api.config.SFA_API_DEBUG:
+                sfa_logger().debug("method.__call__ calling method %s"%methodname)
             result = self.call(*args, **kwds)
-            runtime = time.time() - start
 
+            runtime = time.time() - start
             if self.api.config.SFA_API_DEBUG or hasattr(self, 'message'):
-                msg=getattr(self,'message',"method %s completed in %02f s"%(methodname,runtime))
-                sfa_logger().debug(msg)
+                sfa_logger().debug("method.__call__ %s completed in %02f s (%s)"%(methodname,runtime,getattr(self,'message',"[no-msg]")))
 
             return result
 

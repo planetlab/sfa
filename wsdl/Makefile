@@ -57,3 +57,11 @@ install-clean:
 clean::
 	rm -f $(HTMLS)
 
+
+backup:
+	$(foreach wsdl,$(WSDLS), cp $(wsdl) $(wsdl).bak;)
+	$(foreach html,$(HTMLS), cp $(html) $(html).bak;)
+
+diff:
+	$(foreach wsdl,$(WSDLS), diff $(wsdl) $(wsdl).bak;)
+	$(foreach html,$(HTMLS), diff $(html) $(html).bak;)

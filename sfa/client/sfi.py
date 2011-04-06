@@ -23,7 +23,6 @@ from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import SfaRecord, UserRecord, SliceRecord, NodeRecord, AuthorityRecord
 from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn
-from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.version import version_core
@@ -717,7 +716,7 @@ class Sfi:
         elif record['type'] in ["slice"]:
             try:
                 cred = self.get_slice_cred(record.get_name()).save_to_string(save_parents=True)
-            except ServerException, e:
+            except xmlrpcprotocol.ServerException, e:
                # XXX smbaker -- once we have better error return codes, update this
                # to do something better than a string compare
                if "Permission error" in e.args[0]:
