@@ -17,7 +17,7 @@ from sfa.managers.aggregate_manager_pl import slice_status
 
 # The GENI GetVersion call
 def GetVersion(api):
-    peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.registries.items() 
+    peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.registries.iteritems() 
                    if peername != api.hrn])
     xrn=Xrn(api.hrn)
     return version_core({'interface':'registry',

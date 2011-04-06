@@ -173,7 +173,7 @@ class SfaScan:
                 # 'peers' is needed as well as AMs typically don't have peers
                 if 'geni_api' in version and 'peers' in version: 
                     # proceed with neighbours
-                    for (next_name,next_url) in version['peers'].items():
+                    for (next_name,next_url) in version['peers'].iteritems():
                         next_interface=Interface(next_url)
                         # locate or create node in graph
                         try:
@@ -192,7 +192,7 @@ class SfaScan:
             for node in graph.nodes():
                 interface=node2interface.get(node,None)
                 if interface:
-                    for (k,v) in interface.get_layout().items():
+                    for (k,v) in interface.get_layout().iteritems():
                         node.attr[k]=v
                 else:
                     sfa_logger().error("MISSED interface with node %s"%node)

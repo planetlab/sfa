@@ -781,7 +781,7 @@ class Sfi:
             else:
                 server = self.get_server_from_opts(opts)
             version=server.GetVersion()
-        for (k,v) in version.items():
+        for (k,v) in version.iteritems():
             print "%-20s: %s"%(k,v)
 
     # list instantiated slices

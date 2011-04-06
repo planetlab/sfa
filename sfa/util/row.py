@@ -28,7 +28,7 @@ class Row(dict):
         #        raise SfaInvalidArgument, field + " must be specified and cannot be unset in class %s"%self.__class__.__name__
 
         # Validate values before committing
-        for key, value in self.iteritems():
+        for (key, value) in self.iteritems():
             if value is not None and hasattr(self, 'validate_' + key):
                 validate = getattr(self, 'validate_' + key)
                 self[key] = validate(value)

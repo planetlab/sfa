@@ -32,7 +32,7 @@ def print_dict(rdict, options, counter=1):
     
     if not isinstance(rdict, dict):
         raise "%s not a dict" % rdict 
-    for (key, value) in rdict.items():
+    for (key, value) in rdict.iteritems():
         if isinstance(value, StringTypes):
             if (attributes and key in attributes) or not attributes:
                 print tab * counter + "%s: %s" % (key, value)

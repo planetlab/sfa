@@ -129,7 +129,7 @@ def profile(logger):
             result = callable(*args, **kwds)
             end = time.time()
             args = map(str, args)
-            args += ["%s = %s" % (name, str(value)) for (name, value) in kwds.items()]
+            args += ["%s = %s" % (name, str(value)) for (name, value) in kwds.iteritems()]
             # should probably use debug, but then debug is not always enabled
             logger.info("PROFILED %s (%s): %.02f s" % (callable.__name__, ", ".join(args), end - start))
             return result

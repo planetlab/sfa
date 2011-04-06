@@ -39,7 +39,7 @@ def get_serverproxy_url (server):
 
 def GetVersion(api):
     # peers explicitly in aggregates.xml
-    peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.items() 
+    peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.iteritems() 
                    if peername != api.hrn])
     xrn=Xrn (api.hrn)
     sm_version=version_core({'interface':'slicemgr',
@@ -140,7 +140,7 @@ def get_ticket(api, xrn, creds, rspec, users):
     if not credential:
         credential = api.getCredential() 
     threads = ThreadManager()
-    for aggregate, aggregate_rspec in aggregate_rspecs.items():
+    for (aggregate, aggregate_rspec) in aggregate_rspecs.iteritems():
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
         if caller_hrn == aggregate and aggregate != api.hrn:

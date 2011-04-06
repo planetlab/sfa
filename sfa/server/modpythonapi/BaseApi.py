@@ -83,7 +83,7 @@ def xmlrpclib_dump(self, value, write):
         f = self.dispatch[type(value)]
     except KeyError:
         # Try for an isinstance() match
-        for Type, f in self.dispatch.iteritems():
+        for (Type, f) in self.dispatch.iteritems():
             if isinstance(value, Type):
                 f(*args)
                 return
