@@ -1,4 +1,5 @@
 import traceback
+import os.path
 
 from sfa.util.sfalogging import sfa_logger
 from sfa.util.faults import *
