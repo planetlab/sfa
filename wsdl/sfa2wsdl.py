@@ -63,24 +63,24 @@ class WSDLGen:
                 argname = inbrack
         return argname
 
-    def fold_complex_type_names(self,acc, arg):
-        name = arg.doc
-        if (type(acc)==list):
-            acc.append(name)
-        else:
-            p_i_b = acc.doc
-            acc = [p_i_b,name]
-        return acc
-
-    def fold_complex_type(self,acc, arg):
-        name = self.name_complex_type(arg)
-        self.complex_types[arg]=name
-        if (type(acc)==list):
-            acc.append(name)
-        else:
-            p_i_b = self.name_complex_type(acc)
-            acc = [p_i_b,name]
-        return acc
+#    def fold_complex_type_names(self,acc, arg):
+#        name = arg.doc
+#        if (type(acc)==list):
+#            acc.append(name)
+#        else:
+#            p_i_b = acc.doc
+#            acc = [p_i_b,name]
+#        return acc
+#
+#    def fold_complex_type(self,acc, arg):
+#        name = self.name_complex_type(arg)
+#        self.complex_types[arg]=name
+#        if (type(acc)==list):
+#            acc.append(name)
+#        else:
+#            p_i_b = self.name_complex_type(acc)
+#            acc = [p_i_b,name]
+#        return acc
 
     def name_complex_type(self,arg):
 
@@ -88,21 +88,23 @@ class WSDLGen:
 
         #pdb.set_trace()
         if (isinstance(arg, Mixed)):
-            inner_types = reduce(self.fold_complex_type, arg)
-            inner_names = reduce(self.fold_complex_type_names, arg)
+#            inner_types = reduce(self.fold_complex_type, arg)
+#            inner_names = reduce(self.fold_complex_type_names, arg)
+            inner_types = [ self.name_complex_type(x) for x in arg ]
+            inner_names = [ x.doc for x in arg ]
             if (inner_types[-1]=="none"):
                 inner_types=inner_types[:-1]
                 min_args = 0
             else:
                 min_args = 1
         
-            self.num_types=self.num_types+1
+            self.num_types += 1
             type_name = "Type%d"%self.num_types
             complex_type = types_section.appendChild(self.types.createElement("xsd:complexType"))
             complex_type.setAttribute("name", type_name)
 
             choice = complex_type.appendChild(self.types.createElement("xsd:choice"))
-            for n,t in zip(inner_names,inner_types):
+            for (n,t) in zip(inner_names,inner_types):
                 element = choice.appendChild(self.types.createElement("element"))
                 n = self.filter_argname(n)
                 element.setAttribute("name", n)
@@ -111,7 +113,7 @@ class WSDLGen:
             return "xsdl:%s"%type_name
         elif (isinstance(arg, Parameter)):
             return (self.name_simple_type(arg.type))
-        elif type(arg) == ListType or type(arg) == TupleType:
+        elif type(arg) in ( ListType , TupleType ):
             inner_type = self.name_complex_type(arg[0]) 
             self.num_types=self.num_types+1
             type_name = "Type%d"%self.num_types
