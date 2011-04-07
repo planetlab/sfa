@@ -11,15 +11,17 @@ memory-only for now - thread-safe
 implemented as a (singleton) hash 'callid'->timestamp
 """
 
+debug=False
+
 class _call_ids_impl (dict):
 
     _instance = None
     # 5 minutes sounds amply enough
     purge_timeout=5*60
     # when trying to get a lock
-    retries=8
+    retries=10
     # in ms
-    wait_ms=200
+    wait_ms=100
 
     def __init__(self): 
         self._lock=threading.Lock()
@@ -31,10 +33,10 @@ class _call_ids_impl (dict):
         if not call_id: return True
         has_lock=False
         for attempt in range(_call_ids_impl.retries):
-            sfa_logger().debug("Waiting for lock (%d)"%attempt)
+            if debug: sfa_logger().debug("Waiting for lock (%d)"%attempt)
             if self._lock.acquire(False): 
                 has_lock=True
-                sfa_logger().debug("got lock (%d)"%attempt)
+                if debug: sfa_logger().debug("got lock (%d)"%attempt)
                 break
             time.sleep(float(_call_ids_impl.wait_ms)/1000)
         # in the unlikely event where we can't get the lock
@@ -49,7 +51,7 @@ class _call_ids_impl (dict):
         self[call_id]=time.time()
         self._purge()
         self._lock.release()
-        sfa_logger().debug("released lock")
+        if debug: sfa_logger().debug("released lock")
         return True
         
     def _purge(self):
@@ -58,10 +60,11 @@ class _call_ids_impl (dict):
         for (k,v) in self.iteritems():
             if (now-v) >= _call_ids_impl.purge_timeout: o_keys.append(k)
         for k in o_keys: 
-            sfa_logger().debug("Purging call_id %r (%s)"%(k,time.strftime("%H:%M:%S",time.localtime(self[k]))))
+            if debug: sfa_logger().debug("Purging call_id %r (%s)"%(k,time.strftime("%H:%M:%S",time.localtime(self[k]))))
             del self[k]
-        sfa_logger().debug("AFTER PURGE")
-        for (k,v) in self.iteritems(): sfa_logger().debug("%s -> %s"%(k,time.strftime("%H:%M:%S",time.localtime(v))))
+        if debug:
+            sfa_logger().debug("AFTER PURGE")
+            for (k,v) in self.iteritems(): sfa_logger().debug("%s -> %s"%(k,time.strftime("%H:%M:%S",time.localtime(v))))
         
 def Callids ():
     if not _call_ids_impl._instance:
