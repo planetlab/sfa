@@ -54,7 +54,10 @@ def GetVersion(api):
         sm_version['peers'][api.hrn]=local_am_url.replace('localhost',sm_version['hostname'])
     return sm_version
 
-def create_slice(api, xrn, creds, rspec, users):
+def create_slice(api, xrn, creds, rspec, users, call_id):
+
+    if Callids().already_handled(call_id): return ""
+
     hrn, type = urn_to_hrn(xrn)
 
     # Validate the RSpec against PlanetLab's schema --disabled for now
@@ -93,7 +96,7 @@ def create_slice(api, xrn, creds, rspec, users):
             
         # Just send entire RSpec to each aggregate
         server = api.aggregates[aggregate]
-        threads.run(server.CreateSliver, xrn, credential, rspec, users)
+        threads.run(server.CreateSliver, xrn, credential, rspec, users, call_id)
             
     results = threads.get_results() 
     merged_rspec = merge_rspecs(results)
@@ -384,7 +387,7 @@ def main():
     r = RSpec()
     r.parseFile(sys.argv[1])
     rspec = r.toDict()
-    create_slice(None,'plc.princeton.tmacktestslice',rspec)
+    create_slice(None,'plc.princeton.tmacktestslice',rspec,'create-slice-tmacktestslice')
 
 if __name__ == "__main__":
     main()

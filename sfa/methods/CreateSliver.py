@@ -23,11 +23,12 @@ class CreateSliver(Method):
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
         Parameter(str, "RSpec"),
-        Parameter(type([]), "List of user information")
+        Parameter(type([]), "List of user information"),
+        Parameter(str, "call_id"),
         ]
     returns = Parameter(str, "Allocated RSpec")
 
-    def call(self, slice_xrn, creds, rspec, users):
+    def call(self, slice_xrn, creds, rspec, users, call_id=""):
         hrn, type = urn_to_hrn(slice_xrn)
 
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
@@ -43,7 +44,10 @@ class CreateSliver(Method):
             chain_name = 'INCOMING'
         elif self.api.interface in ['slicemgr']:
             chain_name = 'FORWARD-INCOMING'
+        self.api.logger.debug("CreateSliver: sfatables on chain %s"%chain_name)
         rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec)
-        allocated = manager.create_slice(self.api, slice_xrn, creds, rspec, users)
-
-        return rspec 
+        # the aggregate's create_slice returns false if call_id was already handled
+        if manager.create_slice(self.api, slice_xrn, creds, rspec, users, call_id):
+            return rspec 
+        else:
+            return ""

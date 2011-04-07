@@ -271,7 +271,9 @@ def get_rspec(api, creds, options, call_id):
     return (ret_rspec)
 
 
-def create_slice(api, xrn, creds, rspec_xml, users):
+def create_slice(api, xrn, creds, rspec_xml, users, call_id):
+    if Callids().already_handled(call_id): return False
+
     global topology
     hrn = urn_to_hrn(xrn)[0]
     topology = get_interface_map()
@@ -336,7 +338,7 @@ def main():
     r = RSpec()
     rspec_xml = open(sys.argv[1]).read()
     #get_rspec(None,'foo')
-    create_slice(None, "plc.princeton.sap0", rspec_xml)
+    create_slice(None, "plc.princeton.sap0", rspec_xml, 'call-id-sap0')
     
 if __name__ == "__main__":
     main()

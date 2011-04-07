@@ -47,10 +47,12 @@ def delete_slice(api, xrn, creds):
     api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
     return 1
 
-def create_slice(api, xrn, creds, xml, users):
+def create_slice(api, xrn, creds, xml, users, call_id):
     """
     Verify HRN and initialize the slice record in PLC if necessary.
     """
+
+    if Callids().already_handled(call_id): return False
 
     hrn, type = urn_to_hrn(xrn)
     peer = None
@@ -124,7 +126,7 @@ def main():
     f = open(sys.argv[1])
     xml = f.read()
     f.close()
-    create_slice(api, "plc.princeton.iias", xml)
+    create_slice(api, "plc.princeton.iias", xml, 'call-id-iias')
 
 if __name__ == "__main__":
     main()

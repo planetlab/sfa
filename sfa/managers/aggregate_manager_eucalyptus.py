@@ -490,7 +490,9 @@ def get_rspec(api, creds, options, call_id):
 """
 Hook called via 'sfi.py create'
 """
-def create_slice(api, xrn, creds, xml, users):
+def create_slice(api, xrn, creds, xml, users, call_id):
+    if Callids().already_handled(call_id): return False
+
     global cloud
     hrn = urn_to_hrn(xrn)[0]
 
@@ -569,7 +571,7 @@ def main():
     #theRSpec = None
     #with open(sys.argv[1]) as xml:
     #    theRSpec = xml.read()
-    #create_slice(None, 'planetcloud.pc.test', theRSpec)
+    #create_slice(None, 'planetcloud.pc.test', theRSpec, 'call-id-cloudtest')
 
     #rspec = get_rspec('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy', 'test_euca')
     #print rspec

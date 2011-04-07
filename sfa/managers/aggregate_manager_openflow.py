@@ -111,7 +111,9 @@ def reset_slices(cred, xrn):
     if DEBUG: print "Received reset_slices call"
     return msg_aggrMgr(SFA_RESET_SLICES)
 
-def create_slice(cred, xrn, rspec):
+def create_slice(cred, xrn, rspec, call_id):
+    if Callids().already_handled(call_id): return False
+
     hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received create_slice call"
     slice_id = generate_slide_id(cred, hrn)
@@ -169,7 +171,7 @@ def main():
     r = RSpec()
     r.parseFile(sys.argv[1])
     rspec = r.toDict()
-    create_slice(None,'plc',rspec)
+    create_slice(None,'plc',rspec,'call-id-plc')
     
 if __name__ == "__main__":
     main()

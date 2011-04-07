@@ -154,11 +154,12 @@ def slice_status(api, slice_xrn, creds):
     # XX remove me
     return result
 
-def create_slice(api, slice_xrn, creds, rspec, users):
+def create_slice(api, slice_xrn, creds, rspec, users, call_id):
     """
     Create the sliver[s] (slice) at this aggregate.    
     Verify HRN and initialize the slice record in PLC if necessary.
     """
+    if Callids().already_handled(call_id): return False
 
     reg_objects = __get_registry_objects(slice_xrn, creds, users)
 
@@ -392,7 +393,7 @@ def main():
     f = open(sys.argv[1])
     xml = f.read()
     f.close()
-    create_slice(api, "plc.princeton.sapan", xml)
+    create_slice(api, "plc.princeton.sapan", xml, 'create_slice_sapan')
 
 if __name__ == "__main__":
     main()
