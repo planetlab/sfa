@@ -169,11 +169,11 @@ def create_slice(api, slice_xrn, creds, rspec, users):
     sfa_peer = slices.get_sfa_peer(hrn)
     registry = api.registries[api.hrn]
     credential = api.getCredential()
-    site_id, remote_site_id = slices.verify_site(registry, credential, hrn, 
-                                                 peer, sfa_peer, reg_objects)
+    (site_id, remote_site_id) = slices.verify_site(registry, credential, hrn, 
+                                                   peer, sfa_peer, reg_objects)
 
     slice_record = slices.verify_slice(registry, credential, hrn, site_id, 
-                                remote_site_id, peer, sfa_peer, reg_objects)
+                                       remote_site_id, peer, sfa_peer, reg_objects)
      
     network = Network(api)
 
