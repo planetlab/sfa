@@ -80,12 +80,13 @@ class Method:
                 self.type_check(name, value, expected, args)
 
             if self.api.config.SFA_API_DEBUG:
-                sfa_logger().debug("method.__call__ calling method %s"%methodname)
+                sfa_logger().debug("method.__call__ [%s] : BEG %s"%(self.api.interface,methodname))
             result = self.call(*args, **kwds)
 
             runtime = time.time() - start
             if self.api.config.SFA_API_DEBUG or hasattr(self, 'message'):
-                sfa_logger().debug("method.__call__ %s completed in %02f s (%s)"%(methodname,runtime,getattr(self,'message',"[no-msg]")))
+                sfa_logger().debug("method.__call__ [%s] : END %s in %02f s (%s)"%\
+                                       (self.api.interface,methodname,runtime,getattr(self,'message',"[no-msg]")))
 
             return result
 
