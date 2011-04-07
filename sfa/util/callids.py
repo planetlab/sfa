@@ -28,9 +28,9 @@ class _call_ids_impl (dict):
 
     # the only primitive
     # return True if the callid is unknown, False otherwise
-    def should_handle_call_id (self,call_id):
+    def already_handled (self,call_id):
         # if not provided in the call...
-        if not call_id: return True
+        if not call_id: return False
         has_lock=False
         for attempt in range(_call_ids_impl.retries):
             if debug: sfa_logger().debug("Waiting for lock (%d)"%attempt)
@@ -42,17 +42,17 @@ class _call_ids_impl (dict):
         # in the unlikely event where we can't get the lock
         if not has_lock:
             sfa_logger().warning("_call_ids_impl.should_handle_call_id: could not acquire lock")
-            return True
+            return False
         # we're good to go
         if self.has_key(call_id):
             self._purge()
             self._lock.release()
-            return False
+            return True
         self[call_id]=time.time()
         self._purge()
         self._lock.release()
         if debug: sfa_logger().debug("released lock")
-        return True
+        return False
         
     def _purge(self):
         now=time.time()

@@ -325,9 +325,10 @@ def get_slices(api, creds):
 
 # Thierry : caching at the slicemgr level makes sense to some extent
 caching=True
+#caching=False
 def get_rspec(api, creds, options, call_id):
 
-    if not Callids().should_handle_call_id(call_id): 
+    if Callids().already_handled(call_id): 
         api.logger.info("%d received get_rspec with known call_id %s"%(api.interface,call_id))
         return ""
 

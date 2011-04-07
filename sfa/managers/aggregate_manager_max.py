@@ -255,7 +255,7 @@ def create_slice_max_aggregate(api, hrn, nodes):
 
 
 def get_rspec(api, creds, options, call_id):
-    if not Callids().should_handle_call_id(call_id): return ""
+    if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
