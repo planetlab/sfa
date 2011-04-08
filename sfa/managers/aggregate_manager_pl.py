@@ -154,7 +154,7 @@ def slice_status(api, slice_xrn, creds):
     # XX remove me
     return result
 
-def create_slice(api, slice_xrn, creds, rspec, users, call_id):
+def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
     """
     Create the sliver[s] (slice) at this aggregate.    
     Verify HRN and initialize the slice record in PLC if necessary.
@@ -336,7 +336,7 @@ def get_ticket(api, xrn, creds, rspec, users):
     credential = api.getCredential()
     records = registry.Resolve(xrn, credential)
 
-    # similar to create_slice, we must verify that the required records exist
+    # similar to CreateSliver, we must verify that the required records exist
     # at this aggregate before we can issue a ticket
     site_id, remote_site_id = slices.verify_site(registry, credential, slice_hrn,
                                                  peer, sfa_peer, reg_objects)
@@ -393,7 +393,7 @@ def main():
     f = open(sys.argv[1])
     xml = f.read()
     f.close()
-    create_slice(api, "plc.princeton.sapan", xml, 'create_slice_sapan')
+    CreateSliver(api, "plc.princeton.sapan", xml, 'CreateSliver_sapan')
 
 if __name__ == "__main__":
     main()

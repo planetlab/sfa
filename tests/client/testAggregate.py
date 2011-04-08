@@ -26,7 +26,7 @@ pprint(tmack_components)
 
 print "adding %(slicehrn)s back to its original nodes" % locals()
 a.list_resources(cred, slicehrn)
-a.create_slice(cred, slicehrn, components)
+a.CreateSliver(cred, slicehrn, components)
 a.list_resources(cred, slicehrn)
 
  

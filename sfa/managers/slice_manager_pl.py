@@ -54,7 +54,7 @@ def GetVersion(api):
         sm_version['peers'][api.hrn]=local_am_url.replace('localhost',sm_version['hostname'])
     return sm_version
 
-def create_slice(api, xrn, creds, rspec, users, call_id):
+def CreateSliver(api, xrn, creds, rspec, users, call_id):
 
     if Callids().already_handled(call_id): return ""
 
@@ -387,7 +387,7 @@ def main():
     r = RSpec()
     r.parseFile(sys.argv[1])
     rspec = r.toDict()
-    create_slice(None,'plc.princeton.tmacktestslice',rspec,'create-slice-tmacktestslice')
+    CreateSliver(None,'plc.princeton.tmacktestslice',rspec,'create-slice-tmacktestslice')
 
 if __name__ == "__main__":
     main()

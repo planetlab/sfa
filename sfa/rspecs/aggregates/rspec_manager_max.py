@@ -261,7 +261,7 @@ def ListResources(api, hrn):
     return (ret_rspec)
 
 
-def create_slice(api, hrn, rspec_xml):
+def CreateSliver(api, hrn, rspec_xml):
     global topology
     topology = get_interface_map()
 
@@ -325,7 +325,7 @@ def main():
     r = RSpec()
     rspec_xml = open(sys.argv[1]).read()
     #ListResources(None,'foo')
-    create_slice(None, "plc.princeton.sap0", rspec_xml)
+    CreateSliver(None, "plc.princeton.sap0", rspec_xml)
     
 if __name__ == "__main__":
     main()

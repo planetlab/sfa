@@ -105,8 +105,8 @@ def reset_slices(cred, hrn):
     if DEBUG: print "Received reset_slices call"
     return msg_aggrMgr(SFA_RESET_SLICES)
 
-def create_slice(cred, hrn, rspec):
-    if DEBUG: print "Received create_slice call"
+def CreateSliver(cred, hrn, rspec):
+    if DEBUG: print "Received CreateSliver call"
     slice_id = generate_slide_id(cred, hrn)
 
     msg = struct.pack('> B%ds%ds' % (len(slice_id)+1, len(rspec)), SFA_CREATE_SLICE, slice_id, rspec)
@@ -160,7 +160,7 @@ def main():
     r = RSpec()
     r.parseFile(sys.argv[1])
     rspec = r.toDict()
-    create_slice(None,'plc',rspec)
+    CreateSliver(None,'plc',rspec)
     
 if __name__ == "__main__":
     main()

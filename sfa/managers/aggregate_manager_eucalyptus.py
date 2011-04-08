@@ -490,7 +490,7 @@ def ListResources(api, creds, options, call_id):
 """
 Hook called via 'sfi.py create'
 """
-def create_slice(api, xrn, creds, xml, users, call_id):
+def CreateSliver(api, xrn, creds, xml, users, call_id):
     if Callids().already_handled(call_id): return False
 
     global cloud
@@ -571,7 +571,7 @@ def main():
     #theRSpec = None
     #with open(sys.argv[1]) as xml:
     #    theRSpec = xml.read()
-    #create_slice(None, 'planetcloud.pc.test', theRSpec, 'call-id-cloudtest')
+    #CreateSliver(None, 'planetcloud.pc.test', theRSpec, 'call-id-cloudtest')
 
     #rspec = ListResources('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy', 'test_euca')
     #print rspec

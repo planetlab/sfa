@@ -199,7 +199,7 @@ class AggregateTest(BasicTestCase):
         # get availabel resources   
         rspec = self.aggregate.get_resources(self.credential)
         slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
-        self.aggregate.create_slice(slice_credential, self.slice['hrn'], rspec)
+        self.aggregate.CreateSliver(slice_credential, self.slice['hrn'], rspec)
 
     def testDeleteSlice(self):
         slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
@@ -251,7 +251,7 @@ class ComponentTest(BasicTestCase):
 def test_names(testcase):
     return [name for name in dir(testcase) if name.startswith('test')]
 
-def create_slice(client):
+def CreateSliver(client):
     # register a slice that will be used for some test
     authority = get_authority(client.hrn)
     auth_cred = client.get_credential(authority, 'authority')
@@ -296,7 +296,7 @@ if __name__ == '__main__':
     # create the test slice if necessary
     if options.all or options.slicemgr or options.aggregate \
        or options.component:
-        test_slice = create_slice(client)
+        test_slice = CreateSliver(client)
 
     if options.registry or options.all:
         for name in test_names(RegistryTest):
