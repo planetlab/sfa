@@ -843,7 +843,7 @@ class Sfi:
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
         server = self.get_server_from_opts(opts)
-        result =  server.CreateSliver(slice_urn, creds, rspec, [])
+        result =  server.CreateSliver(slice_urn, creds, rspec, [], unique_call_id())
         print result
         return result
 

@@ -1,7 +1,6 @@
 from sfa.util.faults import *
 from sfa.util.method import Method
 from sfa.util.parameter import Parameter, Mixed
-import sys
 from sfa.methods.CreateSliver import CreateSliver
 
 class UpdateSliver(CreateSliver):
@@ -22,13 +21,14 @@ class UpdateSliver(CreateSliver):
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
         Parameter(str, "RSpec"),
-        Parameter(type([]), "List of user information")
+        Parameter(type([]), "List of user information"),
+        Parameter(str, "call_id"),
         ]
     returns = Parameter(str, "Allocated RSpec")
 
 
 
-    def call(self, slice_xrn, creds, rspec, users):
+    def call(self, slice_xrn, creds, rspec, users, call_id=""):
 
-        return CreateSliver.call(self, slice_xrn, creds, rspec, users)
+        return CreateSliver.call(self, slice_xrn, creds, rspec, users, call_id)
     
