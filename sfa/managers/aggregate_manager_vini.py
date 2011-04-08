@@ -91,7 +91,7 @@ def create_slice(api, xrn, creds, xml, users, call_id):
 
     return True
 
-def get_rspec(api, creds, options,call_id):
+def ListResources(api, creds, options,call_id):
     if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
@@ -119,8 +119,8 @@ def get_rspec(api, creds, options,call_id):
 def main():
     api = SfaAPI()
     """
-    #rspec = get_rspec(api, None, None,)
-    rspec = get_rspec(api, "plc.princeton.iias", None, 'vini_test')
+    #rspec = ListResources(api, None, None,)
+    rspec = ListResources(api, "plc.princeton.iias", None, 'vini_test')
     print rspec
     """
     f = open(sys.argv[1])

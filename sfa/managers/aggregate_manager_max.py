@@ -254,7 +254,7 @@ def create_slice_max_aggregate(api, hrn, nodes):
     return 1
 
 
-def get_rspec(api, creds, options, call_id):
+def ListResources(api, creds, options, call_id):
     if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
@@ -337,7 +337,7 @@ def main():
     t = get_interface_map()
     r = RSpec()
     rspec_xml = open(sys.argv[1]).read()
-    #get_rspec(None,'foo')
+    #ListResources(None,'foo')
     create_slice(None, "plc.princeton.sap0", rspec_xml, 'call-id-sap0')
     
 if __name__ == "__main__":

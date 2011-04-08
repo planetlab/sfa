@@ -248,7 +248,7 @@ def create_slice_max_aggregate(api, hrn, nodes):
     return 1
 
 
-def get_rspec(api, hrn):
+def ListResources(api, hrn):
     # Eg. config line:
     # plc.princeton.sapan vlan23,vlan45
 
@@ -324,7 +324,7 @@ def main():
     t = get_interface_map()
     r = RSpec()
     rspec_xml = open(sys.argv[1]).read()
-    #get_rspec(None,'foo')
+    #ListResources(None,'foo')
     create_slice(None, "plc.princeton.sap0", rspec_xml)
     
 if __name__ == "__main__":

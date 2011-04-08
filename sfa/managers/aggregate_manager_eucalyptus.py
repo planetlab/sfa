@@ -394,7 +394,7 @@ class ZoneResultParser(object):
 
         return clusterList
 
-def get_rspec(api, creds, options, call_id): 
+def ListResources(api, creds, options, call_id): 
     if Callids().already_handled(call_id): return ""
     global cloud
     # get slice's hrn from options
@@ -573,7 +573,7 @@ def main():
     #    theRSpec = xml.read()
     #create_slice(None, 'planetcloud.pc.test', theRSpec, 'call-id-cloudtest')
 
-    #rspec = get_rspec('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy', 'test_euca')
+    #rspec = ListResources('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy', 'test_euca')
     #print rspec
     print getKeysForSlice('gc.gc.test1')
 

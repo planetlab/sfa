@@ -136,9 +136,9 @@ def create_slice(cred, xrn, rspec, call_id):
     return 0
 
 # Thierry : this would need to handle call_id like the other AMs but is outdated...
-def get_rspec(cred, xrn=None):
+def ListResources(cred, xrn=None):
     hrn = urn_to_hrn(xrn)[0]
-    if DEBUG: print "Received get_rspec call"
+    if DEBUG: print "Received ListResources call"
     slice_id = generate_slide_id(cred, hrn)
 
     msg = struct.pack('> B%ds' % len(slice_id), SFA_GET_RESOURCES, slice_id)

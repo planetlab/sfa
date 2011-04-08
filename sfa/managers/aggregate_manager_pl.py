@@ -295,7 +295,7 @@ def get_slices(api, creds):
 # xxx Thierry : caching at the aggregate level sounds wrong...
 caching=True
 #caching=False
-def get_rspec(api, creds, options,call_id):
+def ListResources(api, creds, options,call_id):
     if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
@@ -305,7 +305,7 @@ def get_rspec(api, creds, options,call_id):
     if caching and api.cache and not xrn:
         rspec = api.cache.get('nodes')
         if rspec:
-            api.logger.info("aggregate.get_rspec: returning cached value for hrn %s"%hrn)
+            api.logger.info("aggregate.ListResources: returning cached value for hrn %s"%hrn)
             return rspec 
 
     network = Network(api)
@@ -385,9 +385,9 @@ def get_ticket(api, xrn, creds, rspec, users):
 def main():
     api = SfaAPI()
     """
-    rspec = get_rspec(api, "plc.princeton.sapan", None, 'pl_test_sapan')
-    #rspec = get_rspec(api, "plc.princeton.coblitz", None, 'pl_test_coblitz')
-    #rspec = get_rspec(api, "plc.pl.sirius", None, 'pl_test_sirius')
+    rspec = ListResources(api, "plc.princeton.sapan", None, 'pl_test_sapan')
+    #rspec = ListResources(api, "plc.princeton.coblitz", None, 'pl_test_coblitz')
+    #rspec = ListResources(api, "plc.pl.sirius", None, 'pl_test_sirius')
     print rspec
     """
     f = open(sys.argv[1])

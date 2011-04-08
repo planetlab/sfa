@@ -126,8 +126,8 @@ def create_slice(cred, hrn, rspec):
         print "IO error"
     return 0
 
-def get_rspec(cred, hrn=None):
-    if DEBUG: print "Received get_rspec call"
+def ListResources(cred, hrn=None):
+    if DEBUG: print "Received ListResources call"
     slice_id = generate_slide_id(cred, hrn)
 
     msg = struct.pack('> B%ds' % len(slice_id), SFA_GET_RESOURCES, slice_id)
