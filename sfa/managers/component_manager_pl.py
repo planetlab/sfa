@@ -36,7 +36,7 @@ def stop_slice(api, xrn, creds):
     slicename = PlXrn(xrn, type='slice').pl_slicename()
     api.nodemanager.Stop(slicename)
 
-def delete_slice(api, xrn, creds):
+def DeleteSliver(api, xrn, creds, call_id):
     slicename = PlXrn(xrn, type='slice').pl_slicename()
     api.nodemanager.Destroy(slicename)
 

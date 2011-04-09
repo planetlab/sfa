@@ -910,7 +910,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         server = self.get_server_from_opts(opts)
-        return server.DeleteSliver(slice_urn, creds)
+        return server.DeleteSliver(slice_urn, creds, unique_call_id())
     
     # start named slice
     def start(self, opts, args):

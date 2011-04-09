@@ -254,8 +254,9 @@ def reset_slice(api, xrn):
     # XX not implemented at this interface
     return 1
 
-def delete_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
+def DeleteSliver(api, xrn, creds, call_id):
+    if Callids().already_handled(call_id): return ""
+    (hrn, type) = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
     if not slices:

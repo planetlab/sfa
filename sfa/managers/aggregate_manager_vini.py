@@ -36,8 +36,9 @@ def GetVersion(api):
                          'hrn':xrn.get_hrn(),
                          })
 
-def delete_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
+def DeleteSliver(api, xrn, creds, call_id):
+    if Callids().already_handled(call_id): return ""
+    (hrn, type) = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
     if not slices:

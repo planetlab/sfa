@@ -203,9 +203,9 @@ def get_ticket(api, xrn, creds, rspec, users):
     return ticket.save_to_string(save_parents=True)
 
 
-def delete_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
-
+def DeleteSliver(api, xrn, creds, call_id):
+    if Callids().already_handled(call_id): return ""
+    (hrn, type) = urn_to_hrn(xrn)
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'deletesliver', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -221,7 +221,7 @@ def delete_slice(api, xrn, creds):
         if caller_hrn == aggregate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
-        threads.run(server.DeleteSliver, xrn, credential)
+        threads.run(server.DeleteSliver, xrn, credential, call_id)
     threads.get_results()
     return 1
 

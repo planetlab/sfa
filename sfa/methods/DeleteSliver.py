@@ -1,6 +1,3 @@
-### $Id: stop_slice.py 17732 2010-04-19 21:10:45Z tmack $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/stop_slice.py $
-
 from sfa.util.faults import *
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
@@ -23,11 +20,12 @@ class DeleteSliver(Method):
         Parameter(str, "Human readable name of slice to delete (hrn or urn)"),
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
+        Parameter(str, "call_id"),
         ]
 
     returns = Parameter(int, "1 if successful")
     
-    def call(self, xrn, creds):
+    def call(self, xrn, creds, call_id=""):
         hrn, type = urn_to_hrn(xrn)
         valid_creds = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)
 
@@ -36,6 +34,6 @@ class DeleteSliver(Method):
         self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
 
         manager = self.api.get_interface_manager() 
-        manager.delete_slice(self.api, xrn, creds)
+        manager.DeleteSliver(self.api, xrn, creds, call_id)
  
         return 1 

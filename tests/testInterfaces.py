@@ -203,7 +203,7 @@ class AggregateTest(BasicTestCase):
 
     def testDeleteSlice(self):
         slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
-        self.aggregate.delete_slice(slice_credential, self.slice['hrn'])
+        self.aggregate.DeleteSliver(slice_credential, self.slice['hrn'],"call-id-delete-slice")
 
     def testGetTicket(self):
         slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
@@ -234,7 +234,7 @@ class ComponentTest(BasicTestCase):
         self.cm.stop_slice(self.slice_cred, self.slice['hrn'])
 
     def testDeleteSlice(self):
-        self.cm.delete_slice(self.slice_cred, self.slice['hrn'])
+        self.cm.DeleteSliver(self.slice_cred, self.slice['hrn'],"call-id-delete-slice-cm")
 
     def testRestartSlice(self):
         self.cm.restart_slice(self.slice_cred, self.slice['hrn'])
@@ -260,7 +260,7 @@ def CreateSliver(client):
     client.registry.register(auth_cred, slice_record)
     return  slice_record
  
-def delete_slice(cleint, slice):
+def DeleteSliver(client, slice):
     authority = get_authority(client.hrn)
     auth_cred = client.get_credential(authority, 'authority')
     if slice:
@@ -318,4 +318,4 @@ if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     # remove teset slice
-    delete_slice(client, test_slice)
+    DeleteSliver(client, test_slice)

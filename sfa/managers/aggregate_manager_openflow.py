@@ -101,9 +101,10 @@ def stop_slice(cred, xrn):
     if DEBUG: print "Received stop_slice call"
     return msg_aggrMgr(SFA_STOP_SLICE)
 
-def delete_slice(cred, xrn):
+def DeleteSliver(cred, xrn, call_id):
+    if Callids().already_handled(call_id): return ""
     hrn = urn_to_hrn(xrn)[0]
-    if DEBUG: print "Received delete_slice call"
+    if DEBUG: print "Received DeleteSliver call"
     return msg_aggrMgr(SFA_DELETE_SLICE)
 
 def reset_slices(cred, xrn):
