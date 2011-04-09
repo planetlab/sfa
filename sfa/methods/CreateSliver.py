@@ -46,8 +46,5 @@ class CreateSliver(Method):
             chain_name = 'FORWARD-INCOMING'
         self.api.logger.debug("CreateSliver: sfatables on chain %s"%chain_name)
         rspec = run_sfatables(chain_name, hrn, origin_hrn, rspec)
-        # the aggregate's CreateSliver returns false if call_id was already handled
-        if manager.CreateSliver(self.api, slice_xrn, creds, rspec, users, call_id):
-            return rspec 
-        else:
-            return ""
+
+        return manager.CreateSliver(self.api, slice_xrn, creds, rspec, users, call_id)

@@ -272,7 +272,7 @@ def ListResources(api, creds, options, call_id):
 
 
 def CreateSliver(api, xrn, creds, rspec_xml, users, call_id):
-    if Callids().already_handled(call_id): return False
+    if Callids().already_handled(call_id): return ""
 
     global topology
     hrn = urn_to_hrn(xrn)[0]
@@ -320,7 +320,9 @@ def CreateSliver(api, xrn, creds, rspec_xml, users, call_id):
 
     unlock_state_file()
 
-    return True
+    # xxx - should return altered rspec 
+    # with enough data for the client to understand what's happened
+    return rspec_xml
 
 def rspec_to_allocations(rspec):
     ifs = []

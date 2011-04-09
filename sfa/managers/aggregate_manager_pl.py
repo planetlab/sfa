@@ -159,11 +159,11 @@ def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
     Create the sliver[s] (slice) at this aggregate.    
     Verify HRN and initialize the slice record in PLC if necessary.
     """
-    if Callids().already_handled(call_id): return False
+    if Callids().already_handled(call_id): return ""
 
     reg_objects = __get_registry_objects(slice_xrn, creds, users)
 
-    hrn, type = urn_to_hrn(slice_xrn)
+    (hrn, type) = urn_to_hrn(slice_xrn)
     peer = None
     slices = Slices(api)
     peer = slices.get_peer(hrn)
@@ -205,9 +205,8 @@ def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                          slice.peer_id)
 
-    # print network.toxml()
-
-    return True
+    # xxx - check this holds enough data for the client to understand what's happened
+    return network.toxml()
 
 
 def renew_slice(api, xrn, creds, expiration_time):

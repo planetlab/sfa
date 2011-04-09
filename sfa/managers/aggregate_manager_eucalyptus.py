@@ -491,7 +491,7 @@ def ListResources(api, creds, options, call_id):
 Hook called via 'sfi.py create'
 """
 def CreateSliver(api, xrn, creds, xml, users, call_id):
-    if Callids().already_handled(call_id): return False
+    if Callids().already_handled(call_id): return ""
 
     global cloud
     hrn = urn_to_hrn(xrn)[0]
@@ -499,7 +499,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     conn = getEucaConnection()
     if not conn:
         print >>sys.stderr, 'Error: Cannot create a connection to Eucalyptus'
-        return False
+        return ""
 
     # Validate RSpec
     schemaXML = ET.parse(EUCALYPTUS_RSPEC_SCHEMA)
@@ -563,7 +563,9 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
                                     inst_type = instType)
             eucaInst.reserveInstance(conn, pubKeys)
 
-    return True
+    # xxx - should return altered rspec 
+    # with enough data for the client to understand what's happened
+    return xml
 
 def main():
     init_server()

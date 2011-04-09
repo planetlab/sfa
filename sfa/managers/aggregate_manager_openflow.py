@@ -111,8 +111,9 @@ def reset_slices(cred, xrn):
     if DEBUG: print "Received reset_slices call"
     return msg_aggrMgr(SFA_RESET_SLICES)
 
+### Thierry: xxx this should ahve api as a first arg - probably outdated 
 def CreateSliver(cred, xrn, rspec, call_id):
-    if Callids().already_handled(call_id): return False
+    if Callids().already_handled(call_id): return ""
 
     hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received CreateSliver call"
@@ -128,14 +129,14 @@ def CreateSliver(cred, xrn, rspec, call_id):
         aggrMgr_sock.close()
 
         if DEBUG: print "----------------"
-        return 1
+        return rspec
     except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
-    return 0
+    return ""
 
-# Thierry : this would need to handle call_id like the other AMs but is outdated...
+# Thierry : xxx this would need to handle call_id like the other AMs but is outdated...
 def ListResources(cred, xrn=None):
     hrn = urn_to_hrn(xrn)[0]
     if DEBUG: print "Received ListResources call"

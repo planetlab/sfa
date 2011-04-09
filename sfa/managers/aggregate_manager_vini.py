@@ -52,7 +52,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     Verify HRN and initialize the slice record in PLC if necessary.
     """
 
-    if Callids().already_handled(call_id): return False
+    if Callids().already_handled(call_id): return ""
 
     hrn, type = urn_to_hrn(xrn)
     peer = None
@@ -87,9 +87,8 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     api.plshell.DeleteSliceFromNodes(api.plauth, slice.name, deleted_nodes)
     network.updateSliceTags()
 
-    # print network.toxml()
-
-    return True
+    # xxx - check this holds enough data for the client to understand what's happened
+    return network.toxml()
 
 def ListResources(api, creds, options,call_id):
     if Callids().already_handled(call_id): return ""
