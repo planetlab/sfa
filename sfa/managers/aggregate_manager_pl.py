@@ -95,8 +95,10 @@ def __get_hostnames(nodes):
         hostnames.append(node.hostname)
     return hostnames
 
-def slice_status(api, slice_xrn, creds):
-    hrn, type = urn_to_hrn(slice_xrn)
+def SliverStatus(api, slice_xrn, creds, call_id):
+    if Callids().already_handled(call_id): return {}
+
+    (hrn, type) = urn_to_hrn(slice_xrn)
     # find out where this slice is currently running
     api.logger.info(hrn)
     slicename = hrn_to_pl_slicename(hrn)
@@ -106,19 +108,12 @@ def slice_status(api, slice_xrn, creds):
         raise Exception("Slice %s not found (used %s as slicename internally)" % slice_xrn, slicename)
     slice = slices[0]
     
-    nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'],
-                                    ['hostname', 'site_id', 'boot_state', 'last_contact'])
+    # report about the local nodes only
+    nodes = api.plshell.GetNodes(api.plauth, {'node_id':slice['node_ids'],'peer_id':None},
+                                 ['hostname', 'site_id', 'boot_state', 'last_contact'])
     site_ids = [node['site_id'] for node in nodes]
     sites = api.plshell.GetSites(api.plauth, site_ids, ['site_id', 'login_base'])
-    sites_dict = {}
-    for site in sites:
-        sites_dict[site['site_id']] = site['login_base']
-
-    # XX remove me
-    #api.logger.info(slice_xrn)
-    #api.logger.info(slice)
-    #api.logger.info(nodes)
-    # XX remove me
+    sites_dict = dict ( [ (site['site_id'],site['login_base'] ) for site in sites ] )
 
     result = {}
     top_level_status = 'unknown'
@@ -134,7 +129,7 @@ def slice_status(api, slice_xrn, creds):
         res['pl_hostname'] = node['hostname']
         res['pl_boot_state'] = node['boot_state']
         res['pl_last_contact'] = node['last_contact']
-        if not node['last_contact'] is None:
+        if node['last_contact'] is not None:
             res['pl_last_contact'] = datetime.datetime.fromtimestamp(node['last_contact']).ctime()
         res['geni_urn'] = hostname_to_urn(api.hrn, sites_dict[node['site_id']], node['hostname'])
         if node['boot_state'] == 'boot':

@@ -21,7 +21,7 @@ def init_server():
         sfa_component_setup.get_credential(force=True)
         sfa_component_setup.get_trusted_certs()
 
-def slice_status(api, slice_xrn, creds):
+def SliverStatus(api, slice_xrn, creds):
     result = {}
     result['geni_urn'] = slice_xrn
     result['geni_status'] = 'unknown'

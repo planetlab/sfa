@@ -25,10 +25,6 @@ import sfa.plc.peers as peers
 from sfa.util.version import version_core
 from sfa.util.callids import Callids
 
-# XX FIX ME:  should merge result from multiple aggregates instead of 
-# calling aggregate implementation
-from sfa.managers.aggregate_manager_pl import slice_status
-
 # we have specialized xmlrpclib.ServerProxy to remember the input url
 # OTOH it's not clear if we're only dealing with XMLRPCServerProxy instances
 def get_serverproxy_url (server):
@@ -383,6 +379,46 @@ def ListResources(api, creds, options, call_id):
         api.cache.add('nodes', merged_rspec)
  
     return merged_rspec
+
+# first draft at a merging SliverStatus
+def SliverStatus(api, slice_xrn, creds, call_id):
+    if Callids().already_handled(call_id): return {}
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
+    threads = ThreadManager()
+    for aggregate in api.aggregates:
+        server = api.aggregates[aggregate]
+        threads.run (server.SliverStatus, slice_xrn, credential, call_id)
+    results = threads.get_results()
+
+    # get rid of any void result - e.g. when call_id was hit where by convention we return {}
+    results = [ result in results if result and result['geni_resources']]
+
+    # do not try to combine if there's no result
+    if not results : return {}
+
+    # otherwise let's merge stuff
+    overall = {}
+
+    # mmh, it is expected that all results carry the same urn
+    overall['geni_urn'] = results[0]['geni_urn']
+
+    # consolidate geni_status - simple model using max on a total order
+    states = [ 'ready', 'configuring', 'failed', 'unknown' ]
+    # hash name to index
+    shash = dict ( zip ( states, range(len(states)) ) )
+    def combine_status (x,y):
+        return shash [ max (shash(x),shash(y)) ]
+    overall['geni_status'] = reduce (combine_status, [ result['geni_status'] for result in results], 'ready' )
+
+    # {'ready':0,'configuring':1,'failed':2,'unknown':3}
+    # append all geni_resources
+    overall['geni_resources'] = \
+        reduce (lambda x,y: x+y, [ result['geni_resources'] for result in results] , [])
+
+    return overall
 
 def main():
     r = RSpec()

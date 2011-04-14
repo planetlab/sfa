@@ -13,7 +13,8 @@ from sfa.trust.credential import Credential
 from sfa.trust.certificate import Certificate, Keypair
 from sfa.trust.gid import create_uuid
 from sfa.util.version import version_core
-from sfa.managers.aggregate_manager_pl import slice_status
+# Thierry - turning this off, it's a slice interface not a registry one ?!?
+#from sfa.managers.aggregate_manager_pl import SliverStatus
 
 # The GENI GetVersion call
 def GetVersion(api):

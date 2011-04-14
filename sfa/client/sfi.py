@@ -970,7 +970,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         server = self.get_server_from_opts(opts)
-        print server.SliverStatus(slice_urn, creds)
+        print server.SliverStatus(slice_urn, creds, unique_call_id())
 
 
     def shutdown(self, opts, args):
