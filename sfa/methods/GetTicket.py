@@ -37,7 +37,7 @@ class GetTicket(Method):
         Parameter(type([]), "List of user information")  
         ]
 
-    returns = Parameter(str, "String represeneation of a ticket object")
+    returns = Parameter(str, "String representation of a ticket object")
     
     def call(self, xrn, creds, rspec, users):
         hrn, type = urn_to_hrn(xrn)
@@ -50,7 +50,7 @@ class GetTicket(Method):
 
         manager = self.api.get_interface_manager()
 
-        # flter rspec through sfatables
+        # filter rspec through sfatables
         if self.api.interface in ['aggregate']:
             chain_name = 'OUTGOING'
         elif self.api.interface in ['slicemgr']:

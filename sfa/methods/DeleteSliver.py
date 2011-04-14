@@ -26,7 +26,7 @@ class DeleteSliver(Method):
     returns = Parameter(int, "1 if successful")
     
     def call(self, xrn, creds, call_id=""):
-        hrn, type = urn_to_hrn(xrn)
+        (hrn, type) = urn_to_hrn(xrn)
         valid_creds = self.api.auth.checkCredentials(creds, 'deletesliver', hrn)
 
         #log the call
