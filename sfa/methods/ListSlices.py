@@ -17,17 +17,17 @@ class ListSlices(Method):
     accepts = [
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
+        Parameter(str, "call_id"),
         ]
 
     returns = Parameter(list, "List of slice names")
     
-    def call(self, creds):
-        valid_creds = self.api.auth.checkCredentials(creds, 'listslices')
-
+    def call(self, creds, call_id=""):
         #log the call
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
         self.api.logger.info("interface: %s\tcaller-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, self.name))
 
+        valid_creds = self.api.auth.checkCredentials(creds, 'listslices')
         manager = self.api.get_interface_manager() 
-        return manager.get_slices(self.api, creds)
+        return manager.ListSlices(self.api, creds, call_id)
  

@@ -11,8 +11,8 @@ def DeleteSliver(api, slicename, call_id):
 def reset_slice(api, slicename):
     return 
  
-def get_slices(api):
-    return 
+def ListSlices(api):
+    return []
 
 def reboot():
     return

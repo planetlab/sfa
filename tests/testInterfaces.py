@@ -184,7 +184,7 @@ class AggregateTest(BasicTestCase):
         BasicTestCase.setUp(self)
         
     def testGetSlices(self):
-        self.aggregate.get_slices(self.credential)
+        self.aggregate.ListSlices(self.credential)
 
     def testGetResources(self):
         # available resources
@@ -240,7 +240,7 @@ class ComponentTest(BasicTestCase):
         self.cm.restart_slice(self.slice_cred, self.slice['hrn'])
 
     def testGetSlices(self):
-        self.cm.get_slices(self.slice_cred, self.slice['hrn'])
+        self.cm.ListSlices(self.slice_cred, self.slice['hrn'])
 
     def testRedeemTicket(self):
         rspec = self.aggregate.get_resources(self.credential)

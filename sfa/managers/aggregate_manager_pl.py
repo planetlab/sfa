@@ -278,9 +278,13 @@ def DeleteSliver(api, xrn, creds, call_id):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
-def get_slices(api, creds):
+# xxx Thierry : caching at the aggregate level sounds wrong...
+caching=True
+#caching=False
+def ListSlices(api, creds, call_id):
+    if Callids().already_handled(call_id): return []
     # look in cache first
-    if api.cache:
+    if caching and api.cache:
         slices = api.cache.get('slices')
         if slices:
             return slices
@@ -291,14 +295,11 @@ def get_slices(api, creds):
     slice_urns = [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slice_hrns]
 
     # cache the result
-    if api.cache:
+    if caching and api.cache:
         api.cache.add('slices', slice_urns) 
 
     return slice_urns
     
-# xxx Thierry : caching at the aggregate level sounds wrong...
-caching=True
-#caching=False
 def ListResources(api, creds, options,call_id):
     if Callids().already_handled(call_id): return ""
     # get slice's hrn from options

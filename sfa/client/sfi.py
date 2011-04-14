@@ -796,7 +796,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(user_cred, get_authority(self.authority))
             creds.append(delegated_cred)  
         server = self.get_server_from_opts(opts)
-        results = server.ListSlices(creds)
+        results = server.ListSlices(creds, unique_call_id())
         display_list(results)
         return
     

@@ -46,7 +46,8 @@ def reset_slice(api, xrn):
         raise SliverDoesNotExist(slicename)
     api.nodemanager.ReCreate(slicename)
  
-def get_slices(api):
+# xxx outdated - this should accept a credential & call_id
+def ListSlices(api):
     # this returns a tuple, the data we want is at index 1 
     xids = api.nodemanager.GetXIDs()
     # unfortunately the data we want is given to us as 

@@ -288,10 +288,15 @@ def status(api, xrn, creds):
     """
     return 1
 
-def get_slices(api, creds):
+# Thierry : caching at the slicemgr level makes sense to some extent
+caching=True
+#caching=False
+def ListSlices(api, creds, call_id):
+
+    if Callids().already_handled(call_id): return []
 
     # look in cache first
-    if api.cache:
+    if caching and api.cache:
         slices = api.cache.get('slices')
         if slices:
             return slices    
@@ -312,7 +317,7 @@ def get_slices(api, creds):
         if caller_hrn == aggregate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
-        threads.run(server.ListSlices, credential)
+        threads.run(server.ListSlices, credential, call_id)
 
     # combime results
     results = threads.get_results()
@@ -321,20 +326,15 @@ def get_slices(api, creds):
         slices.extend(result)
     
     # cache the result
-    if api.cache:
+    if caching and api.cache:
         api.cache.add('slices', slices)
 
     return slices
 
 
-# Thierry : caching at the slicemgr level makes sense to some extent
-caching=True
-#caching=False
 def ListResources(api, creds, options, call_id):
 
-    if Callids().already_handled(call_id): 
-        api.logger.info("%d received ListResources with known call_id %s"%(api.interface,call_id))
-        return ""
+    if Callids().already_handled(call_id): return ""
 
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
