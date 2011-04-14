@@ -102,9 +102,10 @@ def CreateSliver(api, xrn, creds, rspec, users, call_id):
     merged_rspec = merge_rspecs(results)
     return merged_rspec
 
-def renew_slice(api, xrn, creds, expiration_time):
-    hrn, type = urn_to_hrn(xrn)
+def RenewSliver(api, xrn, creds, expiration_time, call_id):
+    if Callids().already_handled(call_id): return True
 
+    (hrn, type) = urn_to_hrn(xrn)
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'renewsliver', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -121,9 +122,9 @@ def renew_slice(api, xrn, creds, expiration_time):
             continue
 
         server = api.aggregates[aggregate]
-        threads.run(server.RenewSliver, xrn, [credential], expiration_time)
-    threads.get_results()
-    return 1
+        threads.run(server.RenewSliver, xrn, [credential], expiration_time, call_id)
+    # 'and' the results
+    return reduce (lambda x,y: x and y, threads.get_results() , True)
 
 def get_ticket(api, xrn, creds, rspec, users):
     slice_hrn, type = urn_to_hrn(xrn)

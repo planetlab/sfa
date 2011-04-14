@@ -209,8 +209,9 @@ def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
     return network.toxml()
 
 
-def renew_slice(api, xrn, creds, expiration_time):
-    hrn, type = urn_to_hrn(xrn)
+def RenewSliver(api, xrn, creds, expiration_time, call_id):
+    if Callids().already_handled(call_id): return True
+    (hrn, type) = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -218,8 +219,11 @@ def renew_slice(api, xrn, creds, expiration_time):
     slice = slices[0]
     requested_time = utcparse(expiration_time)
     record = {'expires': int(time.mktime(requested_time.timetuple()))}
-    api.plshell.UpdateSlice(api.plauth, slice['slice_id'], record)
-    return 1         
+    try:
+        api.plshell.UpdateSlice(api.plauth, slice['slice_id'], record)
+        return True
+    except:
+        return False
 
 def start_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)

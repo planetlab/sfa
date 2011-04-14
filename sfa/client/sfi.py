@@ -958,7 +958,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         time = args[1]
-        return server.RenewSliver(slice_urn, creds, time)
+        return server.RenewSliver(slice_urn, creds, time, unique_call_id())
 
 
     def status(self, opts, args):

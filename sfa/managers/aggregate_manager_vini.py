@@ -26,7 +26,7 @@ from sfa.util.callids import Callids
 # VINI aggregate is almost identical to PLC aggregate for many operations, 
 # so lets just import the methods form the PLC manager
 from sfa.managers.aggregate_manager_pl import (
-start_slice, stop_slice, renew_slice, reset_slice, get_slices, get_ticket, slice_status)
+start_slice, stop_slice, RenewSliver, reset_slice, get_slices, get_ticket, slice_status)
 
 
 def GetVersion(api):
