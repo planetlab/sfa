@@ -25,9 +25,9 @@ class RenewSliver(Method):
 
     def call(self, slice_xrn, creds, expiration_time, call_id=""):
 
-        self.api.logger.info("interface: %s\ttarget-hrn: %s\tcaller-creds: %s\tmethod-name: %s"%(self.api.interface, hrn, creds, self.name))
-
         (hrn, type) = urn_to_hrn(slice_xrn)
+
+        self.api.logger.info("interface: %s\ttarget-hrn: %s\tcaller-creds: %s\tmethod-name: %s"%(self.api.interface, hrn, creds, self.name))
 
         # Find the valid credentials
         valid_creds = self.api.auth.checkCredentials(creds, 'renewsliver', hrn)
