@@ -394,7 +394,7 @@ def SliverStatus(api, slice_xrn, creds, call_id):
     results = threads.get_results()
 
     # get rid of any void result - e.g. when call_id was hit where by convention we return {}
-    results = [ result in results if result and result['geni_resources']]
+    results = [ result for result in results if result and result['geni_resources']]
 
     # do not try to combine if there's no result
     if not results : return {}
