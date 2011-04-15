@@ -18,6 +18,7 @@ from sfa.server.registry import Registries
 from sfa.trust.credential import Credential
 from sfa.plc.api import SfaAPI
 from sfa.util.plxrn import hrn_to_pl_slicename, slicename_to_hrn
+from sfa.util.callids import Callids
 
 ##
 # The data structure used to represent a cloud.
@@ -393,7 +394,8 @@ class ZoneResultParser(object):
 
         return clusterList
 
-def get_rspec(api, creds, options): 
+def ListResources(api, creds, options, call_id): 
+    if Callids().already_handled(call_id): return ""
     global cloud
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
@@ -488,14 +490,16 @@ def get_rspec(api, creds, options):
 """
 Hook called via 'sfi.py create'
 """
-def create_slice(api, xrn, creds, xml, users):
+def CreateSliver(api, xrn, creds, xml, users, call_id):
+    if Callids().already_handled(call_id): return ""
+
     global cloud
     hrn = urn_to_hrn(xrn)[0]
 
     conn = getEucaConnection()
     if not conn:
         print >>sys.stderr, 'Error: Cannot create a connection to Eucalyptus'
-        return False
+        return ""
 
     # Validate RSpec
     schemaXML = ET.parse(EUCALYPTUS_RSPEC_SCHEMA)
@@ -559,7 +563,9 @@ def create_slice(api, xrn, creds, xml, users):
                                     inst_type = instType)
             eucaInst.reserveInstance(conn, pubKeys)
 
-    return True
+    # xxx - should return altered rspec 
+    # with enough data for the client to understand what's happened
+    return xml
 
 def main():
     init_server()
@@ -567,9 +573,9 @@ def main():
     #theRSpec = None
     #with open(sys.argv[1]) as xml:
     #    theRSpec = xml.read()
-    #create_slice(None, 'planetcloud.pc.test', theRSpec)
+    #CreateSliver(None, 'planetcloud.pc.test', theRSpec, 'call-id-cloudtest')
 
-    #rspec = get_rspec('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy')
+    #rspec = ListResources('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy', 'test_euca')
     #print rspec
     print getKeysForSlice('gc.gc.test1')
 

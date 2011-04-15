@@ -184,7 +184,7 @@ class AggregateTest(BasicTestCase):
         BasicTestCase.setUp(self)
         
     def testGetSlices(self):
-        self.aggregate.get_slices(self.credential)
+        self.aggregate.ListSlices(self.credential)
 
     def testGetResources(self):
         # available resources
@@ -199,11 +199,11 @@ class AggregateTest(BasicTestCase):
         # get availabel resources   
         rspec = self.aggregate.get_resources(self.credential)
         slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
-        self.aggregate.create_slice(slice_credential, self.slice['hrn'], rspec)
+        self.aggregate.CreateSliver(slice_credential, self.slice['hrn'], rspec)
 
     def testDeleteSlice(self):
         slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
-        self.aggregate.delete_slice(slice_credential, self.slice['hrn'])
+        self.aggregate.DeleteSliver(slice_credential, self.slice['hrn'],"call-id-delete-slice")
 
     def testGetTicket(self):
         slice_credential = self.client.get_credential(self.slice['hrn'], 'slice')
@@ -234,13 +234,13 @@ class ComponentTest(BasicTestCase):
         self.cm.stop_slice(self.slice_cred, self.slice['hrn'])
 
     def testDeleteSlice(self):
-        self.cm.delete_slice(self.slice_cred, self.slice['hrn'])
+        self.cm.DeleteSliver(self.slice_cred, self.slice['hrn'],"call-id-delete-slice-cm")
 
     def testRestartSlice(self):
         self.cm.restart_slice(self.slice_cred, self.slice['hrn'])
 
     def testGetSlices(self):
-        self.cm.get_slices(self.slice_cred, self.slice['hrn'])
+        self.cm.ListSlices(self.slice_cred, self.slice['hrn'])
 
     def testRedeemTicket(self):
         rspec = self.aggregate.get_resources(self.credential)
@@ -251,7 +251,7 @@ class ComponentTest(BasicTestCase):
 def test_names(testcase):
     return [name for name in dir(testcase) if name.startswith('test')]
 
-def create_slice(client):
+def CreateSliver(client):
     # register a slice that will be used for some test
     authority = get_authority(client.hrn)
     auth_cred = client.get_credential(authority, 'authority')
@@ -260,7 +260,7 @@ def create_slice(client):
     client.registry.register(auth_cred, slice_record)
     return  slice_record
  
-def delete_slice(cleint, slice):
+def DeleteSliver(client, slice):
     authority = get_authority(client.hrn)
     auth_cred = client.get_credential(authority, 'authority')
     if slice:
@@ -296,7 +296,7 @@ if __name__ == '__main__':
     # create the test slice if necessary
     if options.all or options.slicemgr or options.aggregate \
        or options.component:
-        test_slice = create_slice(client)
+        test_slice = CreateSliver(client)
 
     if options.registry or options.all:
         for name in test_names(RegistryTest):
@@ -318,4 +318,4 @@ if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     # remove teset slice
-    delete_slice(client, test_slice)
+    DeleteSliver(client, test_slice)

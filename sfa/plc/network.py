@@ -1,13 +1,15 @@
 from __future__ import with_statement
+import sys
 import re
 import socket
+from StringIO import StringIO
+from lxml import etree
+from xmlbuilder import XMLBuilder
+
+from sfa.util.faults import *
+#from sfa.util.sfalogging import sfa_logger
 from sfa.util.xrn import get_authority
 from sfa.util.plxrn import hrn_to_pl_slicename, hostname_to_urn
-from sfa.util.faults import *
-from xmlbuilder import XMLBuilder
-from lxml import etree
-import sys
-from StringIO import StringIO
 
 class Sliver:
     def __init__(self, node):
@@ -347,6 +349,7 @@ class Network:
         try:
             val = self.sites[id]
         except:
+            self.api.logger.error("Invalid RSpec: site ID %s not found" % id )
             raise InvalidRSpec("site ID %s not found" % id)
         return val
     
@@ -566,8 +569,12 @@ class Network:
         """
         tmp = []
         for node in api.plshell.GetNodes(api.plauth, {'peer_id': None}):
-            t = node['node_id'], Node(self, node)
-            tmp.append(t)
+            try:
+                t = node['node_id'], Node(self, node)
+                tmp.append(t)
+            except:
+                self.api.logger.error("Failed to add node %s (%s) to RSpec" % (node['hostname'], node['node_id']))
+                 
         return dict(tmp)
 
     def get_ifaces(self, api):

@@ -2,9 +2,6 @@
 # implements SFA tickets
 #
 
-### $Id$
-### $URL$
-
 import xmlrpclib
 
 from sfa.trust.certificate import Certificate

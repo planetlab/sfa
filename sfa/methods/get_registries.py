@@ -1,5 +1,3 @@
-### $Id: get_slices.py 14387 2009-07-08 18:19:11Z faiyaza $
-### $URL: https://svn.planet-lab.org/svn/sfa/trunk/sfa/methods/get_registries.py $
 from types import StringTypes
 from sfa.util.faults import *
 from sfa.util.xrn import urn_to_hrn

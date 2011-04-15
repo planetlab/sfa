@@ -1,11 +1,7 @@
-### $Id$
-### $URL$
 #
 # implements support for SFA records stored in db tables
 #
 # TODO: Use existing PLC database methods? or keep this separate?
-
-import pgdb
 
 from sfa.util.PostgreSQL import *
 from sfa.trust.gid import *
@@ -39,7 +35,7 @@ class SfaTable(list):
     def db_fields(self, obj=None):
         
         db_fields = self.db.fields(self.SFA_TABLE_PREFIX)
-        return dict( [ (key,value) for (key, value) in obj.items() \
+        return dict( [ (key,value) for (key, value) in obj.iteritems() \
                         if key in db_fields and
                         self.is_writable(key, value, SfaRecord.fields)] )      
 
@@ -102,7 +98,7 @@ class SfaTable(list):
     def insert(self, record):
         db_fields = self.db_fields(record)
         keys = db_fields.keys()
-        values = [self.db.param(key, value) for (key, value) in db_fields.items()]
+        values = [self.db.param(key, value) for (key, value) in db_fields.iteritems()]
         query_str = "INSERT INTO " + self.tablename + \
                        "(" + ",".join(keys) + ") " + \
                        "VALUES(" + ",".join(values) + ")"
@@ -121,7 +117,7 @@ class SfaTable(list):
     def update(self, record):
         db_fields = self.db_fields(record)
         keys = db_fields.keys()
-        values = [self.db.param(key, value) for (key, value) in db_fields.items()]
+        values = [self.db.param(key, value) for (key, value) in db_fields.iteritems()]
         columns = ["%s = %s" % (key, value) for (key, value) in zip(keys, values)]
         query_str = "UPDATE %s SET %s WHERE record_id = %s" % \
                     (self.tablename, ", ".join(columns), record['record_id'])

@@ -1,14 +1,11 @@
-### $Id$
-### $URL$
-
 import sys
 import pprint
 import os
+from StringIO import StringIO
+from types import StringTypes, ListType
 import httplib
 from xml.dom import minidom
-from types import StringTypes, ListType
 from lxml import etree
-from StringIO import StringIO
 
 from sfa.util.sfalogging import sfa_logger
 

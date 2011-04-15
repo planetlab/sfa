@@ -3,9 +3,10 @@
 import sys
 import os
 import pdb
+from optparse import OptionParser
+
 import libxml2
 
-from optparse import OptionParser
 from sfatables import commands
 from sfatables.globals import *
 from sfatables.commands.List import *

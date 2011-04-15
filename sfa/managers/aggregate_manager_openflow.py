@@ -14,6 +14,7 @@ from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.util.config import Config
 from sfa.plc.nodes import *
+from sfa.util.callids import Callids
 
 # Message IDs for all the SFA light calls
 # This will be used by the aggrMgr controller
@@ -100,9 +101,10 @@ def stop_slice(cred, xrn):
     if DEBUG: print "Received stop_slice call"
     return msg_aggrMgr(SFA_STOP_SLICE)
 
-def delete_slice(cred, xrn):
+def DeleteSliver(cred, xrn, call_id):
+    if Callids().already_handled(call_id): return ""
     hrn = urn_to_hrn(xrn)[0]
-    if DEBUG: print "Received delete_slice call"
+    if DEBUG: print "Received DeleteSliver call"
     return msg_aggrMgr(SFA_DELETE_SLICE)
 
 def reset_slices(cred, xrn):
@@ -110,9 +112,12 @@ def reset_slices(cred, xrn):
     if DEBUG: print "Received reset_slices call"
     return msg_aggrMgr(SFA_RESET_SLICES)
 
-def create_slice(cred, xrn, rspec):
+### Thierry: xxx this should ahve api as a first arg - probably outdated 
+def CreateSliver(cred, xrn, rspec, call_id):
+    if Callids().already_handled(call_id): return ""
+
     hrn = urn_to_hrn(xrn)[0]
-    if DEBUG: print "Received create_slice call"
+    if DEBUG: print "Received CreateSliver call"
     slice_id = generate_slide_id(cred, hrn)
 
     msg = struct.pack('> B%ds%ds' % (len(slice_id)+1, len(rspec)), SFA_CREATE_SLICE, slice_id, rspec)
@@ -125,16 +130,17 @@ def create_slice(cred, xrn, rspec):
         aggrMgr_sock.close()
 
         if DEBUG: print "----------------"
-        return 1
+        return rspec
     except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
-    return 0
+    return ""
 
-def get_rspec(cred, xrn=None):
+# Thierry : xxx this would need to handle call_id like the other AMs but is outdated...
+def ListResources(cred, xrn=None):
     hrn = urn_to_hrn(xrn)[0]
-    if DEBUG: print "Received get_rspec call"
+    if DEBUG: print "Received ListResources call"
     slice_id = generate_slide_id(cred, hrn)
 
     msg = struct.pack('> B%ds' % len(slice_id), SFA_GET_RESOURCES, slice_id)
@@ -167,7 +173,7 @@ def main():
     r = RSpec()
     r.parseFile(sys.argv[1])
     rspec = r.toDict()
-    create_slice(None,'plc',rspec)
+    CreateSliver(None,'plc',rspec,'call-id-plc')
     
 if __name__ == "__main__":
     main()

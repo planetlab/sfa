@@ -2,7 +2,8 @@
 
 import sys
 import socket
-import re
+import traceback
+from urlparse import urlparse
 
 import pygraphviz
 
@@ -12,16 +13,20 @@ from sfa.client.sfi import Sfi
 from sfa.util.sfalogging import sfa_logger,sfa_logger_goes_to_console
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 
-m_url_with_proto=re.compile("\w+://(?P<hostname>[\w\-\.]+):(?P<port>[0-9]+).*")
-m_url_without_proto=re.compile("(?P<hostname>[\w\-\.]+):(?P<port>[0-9]+).*")
-def url_to_hostname_port (url):
-    match=m_url_with_proto.match(url)
-    if match:
-        return (match.group('hostname'),match.group('port'))
-    match=m_url_without_proto.match(url)
-    if match:
-        return (match.group('hostname'),match.group('port'))
-    return ('undefined','???')
+def url_hostname_port (url):
+    if url.find("://")<0:
+        url="http://"+url
+    parsed_url=urlparse(url)
+    # 0(scheme) returns protocol
+    default_port='80'
+    if parsed_url[0]=='https': default_port='443'
+    # 1(netloc) returns the hostname+port part
+    parts=parsed_url[1].split(":")
+    # just a hostname
+    if len(parts)==1:
+        return (url,parts[0],default_port)
+    else:
+        return (url,parts[0],parts[1])
 
 ###
 class Interface:
@@ -29,20 +34,19 @@ class Interface:
     def __init__ (self,url):
         self._url=url
         try:
-            (self.hostname,self.port)=url_to_hostname_port(url)
+            (self._url,self.hostname,self.port)=url_hostname_port(url)
             self.ip=socket.gethostbyname(self.hostname)
             self.probed=False
         except:
-            import traceback
-            traceback.print_exc()
+#            traceback.print_exc()
             self.hostname="unknown"
             self.ip='0.0.0.0'
             self.port="???"
+            # don't really try it
             self.probed=True
             self._version={}
 
     def url(self):
-#        return "http://%s:%s/"%(self.hostname,self.port)
         return self._url
 
     # this is used as a key for creating graph nodes and to avoid duplicates
@@ -63,25 +67,28 @@ class Interface:
             client.read_config()
             key_file = client.get_key_file()
             cert_file = client.get_cert_file(key_file)
-            url="http://%s:%s/"%(self.hostname,self.port)
+            url=self.url()
             sfa_logger().info('issuing get version at %s'%url)
             server=xmlrpcprotocol.get_server(url, key_file, cert_file, options)
             self._version=server.GetVersion()
         except:
+#            traceback.print_exc()
             self._version={}
         self.probed=True
         return self._version
 
     @staticmethod
     def multi_lines_label(*lines):
-        return '<<TABLE BORDER="0" CELLBORDER="0"><TR><TD>' + \
+        result='<<TABLE BORDER="0" CELLBORDER="0"><TR><TD>' + \
             '</TD></TR><TR><TD>'.join(lines) + \
             '</TD></TR></TABLE>>'
+#        print 'multilines=',result
+        return result
 
     # default is for when we can't determine the type of the service
     # typically the server is down, or we can't authenticate, or it's too old code
     shapes = {"registry": "diamond", "slicemgr":"ellipse", "aggregate":"box", 'default':'plaintext'}
-    abbrevs = {"registry": "REG", "slicemgr":"SA", "aggregate":"AM", 'default':'[unknown]>'}
+    abbrevs = {"registry": "REG", "slicemgr":"SA", "aggregate":"AM", 'default':'[unknown interface]'}
 
     # return a dictionary that translates into the node's attr
     def get_layout (self):
@@ -98,7 +105,7 @@ class Interface:
         else:
             label=''
             try: abbrev=Interface.abbrevs[version['interface']]
-            except: abbrev=['default']
+            except: abbrev=Interface.abbrevs['default']
             label += abbrev
             if 'hrn' in version: label += " %s"%version['hrn']
             else:                label += "[no hrn]"
@@ -112,8 +119,7 @@ class Interface:
         except: shape=Interface.shapes['default']
         layout['shape']=shape
         ### fill color to outline wrongly configured bodies
-        print 'Version for %s'%self.url(),version
-        if 'sfa' not in version:
+        if 'geni_api' not in version and 'sfa' not in version:
             layout['style']='filled'
             layout['fillcolor']='gray'
         return layout
@@ -121,11 +127,14 @@ class Interface:
 class SfaScan:
 
     # provide the entry points (a list of interfaces)
-    def __init__ (self):
-        pass
+    def __init__ (self, left_to_right=False, verbose=False):
+        self.verbose=verbose
+        self.left_to_right=left_to_right
 
     def graph (self,entry_points):
         graph=pygraphviz.AGraph(directed=True)
+        if self.left_to_right: 
+            graph.graph_attr['rankdir']='LR'
         self.scan(entry_points,graph)
         return graph
     
@@ -148,11 +157,23 @@ class SfaScan:
             for interface in to_scan:
                 # performing xmlrpc call
                 version=interface.get_version()
-                # 'sfa' is expected if the call succeeded at all
+                if self.verbose:
+                    sfa_logger().info("GetVersion at interface %s"%interface.url())
+                    if not version:
+                        sfa_logger().info("<EMPTY GetVersion(); offline or cannot authenticate>")
+                    else: 
+                        for (k,v) in version.iteritems(): 
+                            if not isinstance(v,dict):
+                                sfa_logger().info("\r\t%s:%s"%(k,v))
+                            else:
+                                sfa_logger().info(k)
+                                for (k1,v1) in v.iteritems():
+                                    sfa_logger().info("\r\t\t%s:%s"%(k1,v1))
+                # 'geni_api' is expected if the call succeeded at all
                 # 'peers' is needed as well as AMs typically don't have peers
-                if 'sfa' in version and 'peers' in version: 
+                if 'geni_api' in version and 'peers' in version: 
                     # proceed with neighbours
-                    for (next_name,next_url) in version['peers'].items():
+                    for (next_name,next_url) in version['peers'].iteritems():
                         next_interface=Interface(next_url)
                         # locate or create node in graph
                         try:
@@ -171,7 +192,7 @@ class SfaScan:
             for node in graph.nodes():
                 interface=node2interface.get(node,None)
                 if interface:
-                    for (k,v) in interface.get_layout().items():
+                    for (k,v) in interface.get_layout().iteritems():
                         node.attr[k]=v
                 else:
                     sfa_logger().error("MISSED interface with node %s"%node)
@@ -185,13 +206,17 @@ def main():
     parser=OptionParser(usage=usage)
     parser.add_option("-o","--output",action='append',dest='outfiles',default=[],
                       help="output filenames (cumulative) - defaults are %r"%default_outfiles)
+    parser.add_option("-l","--left-to-right",action="store_true",dest="left_to_right",default=False,
+                      help="instead of top-to-bottom")
+    parser.add_option("-v","--verbose",action='store_true',dest='verbose',default=False,
+                      help="verbose")
     (options,args)=parser.parse_args()
     if not args:
         parser.print_help()
         sys.exit(1)
     if not options.outfiles:
         options.outfiles=default_outfiles
-    scanner=SfaScan()
+    scanner=SfaScan(left_to_right=options.left_to_right, verbose=options.verbose)
     entries = [ Interface(entry) for entry in args ]
     g=scanner.graph(entries)
     sfa_logger().info("creating layout")

@@ -12,7 +12,8 @@ class RSA_pub_fix(RSA.RSA_pub):
     def save_key_bio(self, bio, *args, **kw):
         return self.save_pub_key_bio(bio)
 
-def rsa_new_pub_key((e, n)):
+def rsa_new_pub_key(couple):
+    (e,n)=couple
     rsa = m2.rsa_new()
     m2.rsa_set_e(rsa, e)
     m2.rsa_set_n(rsa, n)
@@ -102,7 +103,7 @@ def convert(fin, fout):
         dsa.save_pub_key(fout)
         # FIXME: This is wrong.
         # M2Crypto doesn't allow us to set the public key parameter
-        raise(Exception, "DSA keys are not supported yet: M2Crypto doesn't allow us to set the public key parameter")
+        raise Exception("DSA keys are not supported yet: M2Crypto doesn't allow us to set the public key parameter")
 
 
 if __name__ == "__main__":

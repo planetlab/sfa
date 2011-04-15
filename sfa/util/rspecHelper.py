@@ -36,6 +36,8 @@ def merge_rspecs(rspecs):
     # the resulting tree
     rspec = None
     for input_rspec in rspecs:
+        # ignore empty strings as returned with used call_ids
+        if not input_rspec: continue
         try:
             tree = etree.parse(StringIO(input_rspec))
         except etree.XMLSyntaxError:
@@ -79,20 +81,27 @@ class RSpec:
         if len(networks) == 1:
             self.network = networks[0]
 
+    # Thierry : need this to locate hostname even if several networks
     def get_node_element(self, hostname, network=None):
-        if network == None:
+        if network == None and self.network:
             network = self.network
-        names = self.rspec.iterfind("./network[@name='%s']/site/node/hostname" % network)
+        if network != None:
+            names = self.rspec.iterfind("./network[@name='%s']/site/node/hostname" % network)
+        else:
+            names = self.rspec.iterfind("./network/site/node/hostname")
         for name in names:
             if name.text == hostname:
                 return name.getparent()
         return None
         
+    # Thierry : need this to return all nodes in all networks
     def get_node_list(self, network=None):
-        if network == None:
+        if network == None and self.network:
             network = self.network
-        result = self.rspec.xpath("./network[@name='%s']/site/node/hostname/text()" % network)
-        return result
+        if network != None:
+            return self.rspec.xpath("./network[@name='%s']/site/node/hostname/text()" % network)
+        else:
+            return self.rspec.xpath("./network/site/node/hostname/text()")
 
     def get_network_list(self):
         return self.rspec.xpath("./network[@name]/@name")

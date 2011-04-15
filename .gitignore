@@ -4,7 +4,14 @@ build/*
 TAGS
 *~
 /sfa/util/version.py
-*.version
+wsdl/*.wsdl
+wsdl/*.xml
+wsdl/[ars]*.html
+sfa/client/*.version
 *.png
 *.svg
 *.out
+*.pdf
+*.pkey
+*.cert
+*.cred

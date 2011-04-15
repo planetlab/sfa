@@ -23,10 +23,7 @@ from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
 import sfa.plc.peers as peers
 from sfa.util.version import version_core
-
-# XX FIX ME:  should merge result from multiple aggregates instead of 
-# calling aggregate implementation
-from sfa.managers.aggregate_manager_pl import slice_status
+from sfa.util.callids import Callids
 
 # we have specialized xmlrpclib.ServerProxy to remember the input url
 # OTOH it's not clear if we're only dealing with XMLRPCServerProxy instances
@@ -39,7 +36,7 @@ def get_serverproxy_url (server):
 
 def GetVersion(api):
     # peers explicitly in aggregates.xml
-    peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.items() 
+    peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.iteritems() 
                    if peername != api.hrn])
     xrn=Xrn (api.hrn)
     sm_version=version_core({'interface':'slicemgr',
@@ -53,7 +50,10 @@ def GetVersion(api):
         sm_version['peers'][api.hrn]=local_am_url.replace('localhost',sm_version['hostname'])
     return sm_version
 
-def create_slice(api, xrn, creds, rspec, users):
+def CreateSliver(api, xrn, creds, rspec, users, call_id):
+
+    if Callids().already_handled(call_id): return ""
+
     hrn, type = urn_to_hrn(xrn)
 
     # Validate the RSpec against PlanetLab's schema --disabled for now
@@ -92,15 +92,16 @@ def create_slice(api, xrn, creds, rspec, users):
             
         # Just send entire RSpec to each aggregate
         server = api.aggregates[aggregate]
-        threads.run(server.CreateSliver, xrn, credential, rspec, users)
+        threads.run(server.CreateSliver, xrn, credential, rspec, users, call_id)
             
     results = threads.get_results() 
     merged_rspec = merge_rspecs(results)
     return merged_rspec
 
-def renew_slice(api, xrn, creds, expiration_time):
-    hrn, type = urn_to_hrn(xrn)
+def RenewSliver(api, xrn, creds, expiration_time, call_id):
+    if Callids().already_handled(call_id): return True
 
+    (hrn, type) = urn_to_hrn(xrn)
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'renewsliver', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -117,9 +118,9 @@ def renew_slice(api, xrn, creds, expiration_time):
             continue
 
         server = api.aggregates[aggregate]
-        threads.run(server.RenewSliver, xrn, [credential], expiration_time)
-    threads.get_results()
-    return 1
+        threads.run(server.RenewSliver, xrn, [credential], expiration_time, call_id)
+    # 'and' the results
+    return reduce (lambda x,y: x and y, threads.get_results() , True)
 
 def get_ticket(api, xrn, creds, rspec, users):
     slice_hrn, type = urn_to_hrn(xrn)
@@ -140,7 +141,7 @@ def get_ticket(api, xrn, creds, rspec, users):
     if not credential:
         credential = api.getCredential() 
     threads = ThreadManager()
-    for aggregate, aggregate_rspec in aggregate_rspecs.items():
+    for (aggregate, aggregate_rspec) in aggregate_rspecs.iteritems():
         # prevent infinite loop. Dont send request back to caller
         # unless the caller is the aggregate's SM
         if caller_hrn == aggregate and aggregate != api.hrn:
@@ -199,9 +200,9 @@ def get_ticket(api, xrn, creds, rspec, users):
     return ticket.save_to_string(save_parents=True)
 
 
-def delete_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
-
+def DeleteSliver(api, xrn, creds, call_id):
+    if Callids().already_handled(call_id): return ""
+    (hrn, type) = urn_to_hrn(xrn)
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'deletesliver', hrn)[0]
     caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
@@ -217,7 +218,7 @@ def delete_slice(api, xrn, creds):
         if caller_hrn == aggregate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
-        threads.run(server.DeleteSliver, xrn, credential)
+        threads.run(server.DeleteSliver, xrn, credential, call_id)
     threads.get_results()
     return 1
 
@@ -283,10 +284,15 @@ def status(api, xrn, creds):
     """
     return 1
 
-def get_slices(api, creds):
+# Thierry : caching at the slicemgr level makes sense to some extent
+caching=True
+#caching=False
+def ListSlices(api, creds, call_id):
+
+    if Callids().already_handled(call_id): return []
 
     # look in cache first
-    if api.cache:
+    if caching and api.cache:
         slices = api.cache.get('slices')
         if slices:
             return slices    
@@ -307,7 +313,7 @@ def get_slices(api, creds):
         if caller_hrn == aggregate and aggregate != api.hrn:
             continue
         server = api.aggregates[aggregate]
-        threads.run(server.ListSlices, credential)
+        threads.run(server.ListSlices, credential, call_id)
 
     # combime results
     results = threads.get_results()
@@ -316,16 +322,19 @@ def get_slices(api, creds):
         slices.extend(result)
     
     # cache the result
-    if api.cache:
+    if caching and api.cache:
         api.cache.add('slices', slices)
 
     return slices
- 
-def get_rspec(api, creds, options):
-    
+
+
+def ListResources(api, creds, options, call_id):
+
+    if Callids().already_handled(call_id): return ""
+
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
-    hrn, type = urn_to_hrn(xrn)
+    (hrn, type) = urn_to_hrn(xrn)
 
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
@@ -336,12 +345,10 @@ def get_rspec(api, creds, options):
             origin_hrn = Credential(string=creds).get_gid_caller().get_hrn()
     
     # look in cache first 
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         rspec =  api.cache.get('nodes')
         if rspec:
             return rspec
-
-    hrn, type = urn_to_hrn(xrn)
 
     # get the callers hrn
     valid_cred = api.auth.checkCredentials(creds, 'listnodes', hrn)[0]
@@ -361,23 +368,63 @@ def get_rspec(api, creds, options):
         server = api.aggregates[aggregate]
         my_opts = copy(options)
         my_opts['geni_compressed'] = False
-        threads.run(server.ListResources, credential, my_opts)
+        threads.run(server.ListResources, credential, my_opts, call_id)
         #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
     results = threads.get_results()
     merged_rspec = merge_rspecs(results)
 
     # cache the result
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         api.cache.add('nodes', merged_rspec)
  
     return merged_rspec
+
+# first draft at a merging SliverStatus
+def SliverStatus(api, slice_xrn, creds, call_id):
+    if Callids().already_handled(call_id): return {}
+    # attempt to use delegated credential first
+    credential = api.getDelegatedCredential(creds)
+    if not credential:
+        credential = api.getCredential()
+    threads = ThreadManager()
+    for aggregate in api.aggregates:
+        server = api.aggregates[aggregate]
+        threads.run (server.SliverStatus, slice_xrn, credential, call_id)
+    results = threads.get_results()
+
+    # get rid of any void result - e.g. when call_id was hit where by convention we return {}
+    results = [ result for result in results if result and result['geni_resources']]
+
+    # do not try to combine if there's no result
+    if not results : return {}
+
+    # otherwise let's merge stuff
+    overall = {}
+
+    # mmh, it is expected that all results carry the same urn
+    overall['geni_urn'] = results[0]['geni_urn']
+
+    # consolidate geni_status - simple model using max on a total order
+    states = [ 'ready', 'configuring', 'failed', 'unknown' ]
+    # hash name to index
+    shash = dict ( zip ( states, range(len(states)) ) )
+    def combine_status (x,y):
+        return shash [ max (shash(x),shash(y)) ]
+    overall['geni_status'] = reduce (combine_status, [ result['geni_status'] for result in results], 'ready' )
+
+    # {'ready':0,'configuring':1,'failed':2,'unknown':3}
+    # append all geni_resources
+    overall['geni_resources'] = \
+        reduce (lambda x,y: x+y, [ result['geni_resources'] for result in results] , [])
+
+    return overall
 
 def main():
     r = RSpec()
     r.parseFile(sys.argv[1])
     rspec = r.toDict()
-    create_slice(None,'plc.princeton.tmacktestslice',rspec)
+    CreateSliver(None,'plc.princeton.tmacktestslice',rspec,'create-slice-tmacktestslice')
 
 if __name__ == "__main__":
     main()

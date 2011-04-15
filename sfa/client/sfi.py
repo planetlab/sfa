@@ -23,7 +23,6 @@ from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import SfaRecord, UserRecord, SliceRecord, NodeRecord, AuthorityRecord
 from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn
-from sfa.util.xmlrpcprotocol import ServerException
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.version import version_core
@@ -118,6 +117,8 @@ def load_record_from_file(filename):
     return record
 
 
+import uuid
+def unique_call_id(): return uuid.uuid4().urn
 
 class Sfi:
     
@@ -715,7 +716,7 @@ class Sfi:
         elif record['type'] in ["slice"]:
             try:
                 cred = self.get_slice_cred(record.get_name()).save_to_string(save_parents=True)
-            except ServerException, e:
+            except xmlrpcprotocol.ServerException, e:
                # XXX smbaker -- once we have better error return codes, update this
                # to do something better than a string compare
                if "Permission error" in e.args[0]:
@@ -781,7 +782,7 @@ class Sfi:
             else:
                 server = self.get_server_from_opts(opts)
             version=server.GetVersion()
-        for (k,v) in version.items():
+        for (k,v) in version.iteritems():
             print "%-20s: %s"%(k,v)
 
     # list instantiated slices
@@ -795,7 +796,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(user_cred, get_authority(self.authority))
             creds.append(delegated_cred)  
         server = self.get_server_from_opts(opts)
-        results = server.ListSlices(creds)
+        results = server.ListSlices(creds, unique_call_id())
         display_list(results)
         return
     
@@ -818,7 +819,7 @@ class Sfi:
         if opts.delegate:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
             creds.append(delegated_cred) 
-        result = server.ListResources(creds, call_options)
+        result = server.ListResources(creds, call_options,unique_call_id())
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)
@@ -842,7 +843,7 @@ class Sfi:
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
         server = self.get_server_from_opts(opts)
-        result =  server.CreateSliver(slice_urn, creds, rspec, [])
+        result =  server.CreateSliver(slice_urn, creds, rspec, [], unique_call_id())
         print result
         return result
 
@@ -909,7 +910,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         server = self.get_server_from_opts(opts)
-        return server.DeleteSliver(slice_urn, creds)
+        return server.DeleteSliver(slice_urn, creds, unique_call_id())
     
     # start named slice
     def start(self, opts, args):
@@ -957,7 +958,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         time = args[1]
-        return server.RenewSliver(slice_urn, creds, time)
+        return server.RenewSliver(slice_urn, creds, time, unique_call_id())
 
 
     def status(self, opts, args):
@@ -969,7 +970,7 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         server = self.get_server_from_opts(opts)
-        print server.SliverStatus(slice_urn, creds)
+        print server.SliverStatus(slice_urn, creds, unique_call_id())
 
 
     def shutdown(self, opts, args):

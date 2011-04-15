@@ -2,12 +2,10 @@
 #
 # sfa   Wraps PLCAPI into the SFA compliant API
 #
-# chkconfig: 2345 5 99
+# hopefully right after plc
+# chkconfig: 2345 61 39
 #
 # description:   Wraps PLCAPI into the SFA compliant API
-#
-# $Id$
-# $URL$
 #
 
 # Source config
@@ -63,19 +61,19 @@ start() {
     
     reload
 
-    if [ "$SFA_REGISTRY_ENABLED" ]; then
+    if [ "$SFA_REGISTRY_ENABLED" -eq 1 ]; then
         action $"SFA Registry" daemon /usr/bin/sfa-server.py -r -d $OPTIONS
     fi
 
-    if [ "$SFA_AGGREGATE_ENABLED" ]; then
+    if [ "$SFA_AGGREGATE_ENABLED" -eq 1 ]; then
         action $"SFA Aggregate" daemon /usr/bin/sfa-server.py -a -d $OPTIONS
     fi
         
-    if [ "$SFA_SM_ENABLED" ]; then
+    if [ "$SFA_SM_ENABLED" -eq 1 ]; then
         action "SFA SliceMgr" daemon /usr/bin/sfa-server.py -s -d $OPTIONS
     fi
 
-    if [ "$SFA_FLASHPOLICY_ENABLED" ]; then
+    if [ "$SFA_FLASHPOLICY_ENABLED" -eq 1 ]; then
         action "Flash Policy Server" daemon /usr/bin/sfa_flashpolicy.py --file="$SFA_FLASHPOLICY_CONFIG_FILE" --port=$SFA_FLASHPOLICY_PORT -d
     fi
 

@@ -22,11 +22,11 @@ tmack_components = a.list_resources(cred, slicehrn)
 pprint(tmack_components)
 
 #print "removing %(slicehrn)s from all nodes" % locals()
-#a.delete_slice(cred, slicehrn)
+#a.DeleteSliver(cred, slicehrn)
 
 print "adding %(slicehrn)s back to its original nodes" % locals()
 a.list_resources(cred, slicehrn)
-a.create_slice(cred, slicehrn, components)
+a.CreateSliver(cred, slicehrn, components)
 a.list_resources(cred, slicehrn)
 
  

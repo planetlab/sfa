@@ -21,11 +21,12 @@ from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 from sfa.managers.aggregate_manager_pl import __get_registry_objects, __get_hostnames
 from sfa.util.version import version_core
+from sfa.util.callids import Callids
 
 # VINI aggregate is almost identical to PLC aggregate for many operations, 
 # so lets just import the methods form the PLC manager
 from sfa.managers.aggregate_manager_pl import (
-start_slice, stop_slice, renew_slice, reset_slice, get_slices, get_ticket, slice_status)
+start_slice, stop_slice, RenewSliver, reset_slice, ListSlices, get_ticket, SliverStatus)
 
 
 def GetVersion(api):
@@ -35,8 +36,9 @@ def GetVersion(api):
                          'hrn':xrn.get_hrn(),
                          })
 
-def delete_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
+def DeleteSliver(api, xrn, creds, call_id):
+    if Callids().already_handled(call_id): return ""
+    (hrn, type) = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
     if not slices:
@@ -46,10 +48,12 @@ def delete_slice(api, xrn, creds):
     api.plshell.DeleteSliceFromNodes(api.plauth, slicename, slice['node_ids'])
     return 1
 
-def create_slice(api, xrn, creds, xml, users):
+def CreateSliver(api, xrn, creds, xml, users, call_id):
     """
     Verify HRN and initialize the slice record in PLC if necessary.
     """
+
+    if Callids().already_handled(call_id): return ""
 
     hrn, type = urn_to_hrn(xrn)
     peer = None
@@ -84,11 +88,11 @@ def create_slice(api, xrn, creds, xml, users):
     api.plshell.DeleteSliceFromNodes(api.plauth, slice.name, deleted_nodes)
     network.updateSliceTags()
 
-    # print network.toxml()
+    # xxx - check this holds enough data for the client to understand what's happened
+    return network.toxml()
 
-    return True
-
-def get_rspec(api, creds, options):
+def ListResources(api, creds, options,call_id):
+    if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
@@ -115,14 +119,14 @@ def get_rspec(api, creds, options):
 def main():
     api = SfaAPI()
     """
-    #rspec = get_rspec(api, None, None)
-    rspec = get_rspec(api, "plc.princeton.iias", None)
+    #rspec = ListResources(api, None, None,)
+    rspec = ListResources(api, "plc.princeton.iias", None, 'vini_test')
     print rspec
     """
     f = open(sys.argv[1])
     xml = f.read()
     f.close()
-    create_slice(api, "plc.princeton.iias", xml)
+    CreateSliver(api, "plc.princeton.iias", xml, 'call-id-iias')
 
 if __name__ == "__main__":
     main()

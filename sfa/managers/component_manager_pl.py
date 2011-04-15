@@ -21,7 +21,7 @@ def init_server():
         sfa_component_setup.get_credential(force=True)
         sfa_component_setup.get_trusted_certs()
 
-def slice_status(api, slice_xrn, creds):
+def SliverStatus(api, slice_xrn, creds):
     result = {}
     result['geni_urn'] = slice_xrn
     result['geni_status'] = 'unknown'
@@ -36,7 +36,7 @@ def stop_slice(api, xrn, creds):
     slicename = PlXrn(xrn, type='slice').pl_slicename()
     api.nodemanager.Stop(slicename)
 
-def delete_slice(api, xrn, creds):
+def DeleteSliver(api, xrn, creds, call_id):
     slicename = PlXrn(xrn, type='slice').pl_slicename()
     api.nodemanager.Destroy(slicename)
 
@@ -46,7 +46,8 @@ def reset_slice(api, xrn):
         raise SliverDoesNotExist(slicename)
     api.nodemanager.ReCreate(slicename)
  
-def get_slices(api):
+# xxx outdated - this should accept a credential & call_id
+def ListSlices(api):
     # this returns a tuple, the data we want is at index 1 
     xids = api.nodemanager.GetXIDs()
     # unfortunately the data we want is given to us as 

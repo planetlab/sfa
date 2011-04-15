@@ -15,17 +15,18 @@ class SliverStatus(Method):
         Parameter(str, "Slice URN"),
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
+        Parameter(str, "call_id"),
         ]
     returns = Parameter(dict, "Status details")
 
-    def call(self, slice_xrn, creds):
+    def call(self, slice_xrn, creds, call_id=""):
         hrn, type = urn_to_hrn(slice_xrn)
         valid_creds = self.api.auth.checkCredentials(creds, 'sliverstatus', hrn)
 
         self.api.logger.info("interface: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, hrn, self.name))
     
         manager = self.api.get_interface_manager()
-        status = manager.slice_status(self.api, hrn, valid_creds)
+        status = manager.SliverStatus(self.api, hrn, valid_creds, call_id)
 
         return status
     

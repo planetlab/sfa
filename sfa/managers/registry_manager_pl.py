@@ -13,11 +13,12 @@ from sfa.trust.credential import Credential
 from sfa.trust.certificate import Certificate, Keypair
 from sfa.trust.gid import create_uuid
 from sfa.util.version import version_core
-from sfa.managers.aggregate_manager_pl import slice_status
+# Thierry - turning this off, it's a slice interface not a registry one ?!?
+#from sfa.managers.aggregate_manager_pl import SliverStatus
 
 # The GENI GetVersion call
 def GetVersion(api):
-    peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.registries.items() 
+    peers =dict ([ (peername,v._ServerProxy__host) for (peername,v) in api.registries.iteritems() 
                    if peername != api.hrn])
     xrn=Xrn(api.hrn)
     return version_core({'interface':'registry',
@@ -87,14 +88,14 @@ def get_credential(api, xrn, type, is_self=False):
 
 def resolve(api, xrns, type=None, full=True):
 
-    # load all know registry names into a prefix tree and attempt to find
+    # load all known registry names into a prefix tree and attempt to find
     # the longest matching prefix
     if not isinstance(xrns, types.ListType):
         if not type:
             type = Xrn(xrns).get_type()
         xrns = [xrns]
     hrns = [urn_to_hrn(xrn)[0] for xrn in xrns] 
-    # create a dict whre key is an registry hrn and its value is a
+    # create a dict where key is a registry hrn and its value is a
     # hrns at that registry (determined by the known prefix tree).  
     xrn_dict = {}
     registries = api.registries

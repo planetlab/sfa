@@ -5,14 +5,14 @@ def start_slice(api, slicename):
 def stop_slice(api, slicename):
     return
 
-def delete_slice(api, slicename):
+def DeleteSliver(api, slicename, call_id):
     return
 
 def reset_slice(api, slicename):
     return 
  
-def get_slices(api):
-    return 
+def ListSlices(api):
+    return []
 
 def reboot():
     return

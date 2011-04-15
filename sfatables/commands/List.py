@@ -1,6 +1,5 @@
 import os, time
 import libxml2
-import pdb
 
 from sfatables.globals import *
 from sfatables.pretty import Pretty

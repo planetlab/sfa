@@ -41,6 +41,17 @@ class WSDLGen:
     def __init__(self, interface_options):
         self.interface_options = interface_options
 
+    def interface_name (self):
+         if self.interface_options.aggregate and \
+                  self.interface_options.slicemgr and \
+                  self.interface_options.registry:
+              return "complete"
+         if self.interface_options.aggregate: return "aggregate"
+         elif self.interface_options.slicemgr: return "slicemgr"
+         elif self.interface_options.registry: return "registry"
+         elif self.interface_options.component: return "component"
+         else: return "unknown"
+
     def filter_argname(self,argname):
         if (not self.interface_options.lite or (argname!="cred")):
             if (argname.find('(') != -1):
@@ -52,24 +63,24 @@ class WSDLGen:
                 argname = inbrack
         return argname
 
-    def fold_complex_type_names(self,acc, arg):
-        name = arg.doc
-        if (type(acc)==list):
-            acc.append(name)
-        else:
-            p_i_b = acc.doc
-            acc = [p_i_b,name]
-        return acc
-
-    def fold_complex_type(self,acc, arg):
-        name = self.name_complex_type(arg)
-        self.complex_types[arg]=name
-        if (type(acc)==list):
-            acc.append(name)
-        else:
-            p_i_b = self.name_complex_type(acc)
-            acc = [p_i_b,name]
-        return acc
+#    def fold_complex_type_names(self,acc, arg):
+#        name = arg.doc
+#        if (type(acc)==list):
+#            acc.append(name)
+#        else:
+#            p_i_b = acc.doc
+#            acc = [p_i_b,name]
+#        return acc
+#
+#    def fold_complex_type(self,acc, arg):
+#        name = self.name_complex_type(arg)
+#        self.complex_types[arg]=name
+#        if (type(acc)==list):
+#            acc.append(name)
+#        else:
+#            p_i_b = self.name_complex_type(acc)
+#            acc = [p_i_b,name]
+#        return acc
 
     def name_complex_type(self,arg):
 
@@ -77,21 +88,23 @@ class WSDLGen:
 
         #pdb.set_trace()
         if (isinstance(arg, Mixed)):
-            inner_types = reduce(self.fold_complex_type, arg)
-            inner_names = reduce(self.fold_complex_type_names, arg)
+#            inner_types = reduce(self.fold_complex_type, arg)
+#            inner_names = reduce(self.fold_complex_type_names, arg)
+            inner_types = [ self.name_complex_type(x) for x in arg ]
+            inner_names = [ x.doc for x in arg ]
             if (inner_types[-1]=="none"):
                 inner_types=inner_types[:-1]
                 min_args = 0
             else:
                 min_args = 1
         
-            self.num_types=self.num_types+1
+            self.num_types += 1
             type_name = "Type%d"%self.num_types
             complex_type = types_section.appendChild(self.types.createElement("xsd:complexType"))
             complex_type.setAttribute("name", type_name)
 
             choice = complex_type.appendChild(self.types.createElement("xsd:choice"))
-            for n,t in zip(inner_names,inner_types):
+            for (n,t) in zip(inner_names,inner_types):
                 element = choice.appendChild(self.types.createElement("element"))
                 n = self.filter_argname(n)
                 element.setAttribute("name", n)
@@ -100,7 +113,7 @@ class WSDLGen:
             return "xsdl:%s"%type_name
         elif (isinstance(arg, Parameter)):
             return (self.name_simple_type(arg.type))
-        elif type(arg) == ListType or type(arg) == TupleType:
+        elif type(arg) in ( ListType , TupleType ):
             inner_type = self.name_complex_type(arg[0]) 
             self.num_types=self.num_types+1
             type_name = "Type%d"%self.num_types
@@ -172,7 +185,7 @@ class WSDLGen:
             #print
 
             
-            in_el = self.wsdl.firstChild.appendChild(self.wsdl.createElement("message"))
+            in_el = self.wsdl.lastChild.appendChild(self.wsdl.createElement("message"))
             in_el.setAttribute("name", method + "_in")
 
             for service_name in function.interfaces:
@@ -194,7 +207,7 @@ class WSDLGen:
                     
             # Return type            
             return_type = function.returns
-            out_el = self.wsdl.firstChild.appendChild(self.wsdl.createElement("message"))
+            out_el = self.wsdl.lastChild.appendChild(self.wsdl.createElement("message"))
             out_el.setAttribute("name", method + "_out")
             ret_part = out_el.appendChild(self.wsdl.createElement("part"))
             ret_part.setAttribute("name", "Result")
@@ -202,7 +215,7 @@ class WSDLGen:
 
             # Port connecting arguments with return type
 
-            port_el = self.wsdl.firstChild.appendChild(self.wsdl.createElement("portType"))
+            port_el = self.wsdl.lastChild.appendChild(self.wsdl.createElement("portType"))
             port_el.setAttribute("name", method + "_port")
             
             op_el = port_el.appendChild(self.wsdl.createElement("operation"))
@@ -218,7 +231,7 @@ class WSDLGen:
 
             # Bindings
 
-            bind_el = self.wsdl.firstChild.appendChild(self.wsdl.createElement("binding"))
+            bind_el = self.wsdl.lastChild.appendChild(self.wsdl.createElement("binding"))
             bind_el.setAttribute("name", method + "_binding")
             bind_el.setAttribute("type", "tns:" + method + "_port")
             
@@ -250,7 +263,7 @@ class WSDLGen:
     def add_wsdl_services(self):
         for service in self.services.keys():
             if (getattr(self.interface_options,service)):
-                service_el = self.wsdl.firstChild.appendChild(self.wsdl.createElement("service"))
+                service_el = self.wsdl.lastChild.appendChild(self.wsdl.createElement("service"))
                 service_el.setAttribute("name", service)
 
                 for method in self.services[service]:
@@ -265,43 +278,45 @@ class WSDLGen:
 
     def compute_wsdl_definitions(self):
         wsdl_text_header = """
+            <?xml-stylesheet type="text/xsl" href="wsdl2html.xsl"?>
             <wsdl:definitions
-            name="sfa_autogenerated"
-            targetNamespace="%s/2009/07/sfa.wsdl"
+            name="myplc-sfa-%s"
+            targetNamespace="%s/sfa.wsdl"
             xmlns="http://schemas.xmlsoap.org/wsdl/"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:xsdl="%s/2009/07/schema"
-            xmlns:tns="%s/2009/07/sfa.wsdl"
+            xmlns:xsdl="%s/schema"
+            xmlns:tns="%s/sfa.wsdl"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"/>
-            """ % (globals.plc_ns,globals.plc_ns,globals.plc_ns)
+            """ % (self.interface_name(),globals.plc_ns,globals.plc_ns,globals.plc_ns)
             
         self.wsdl = xml.dom.minidom.parseString(wsdl_text_header)
         
 
     def compute_wsdl_definitions_and_types(self):
         wsdl_text_header = """
+        <?xml-stylesheet type="text/xsl" href="wsdl2html.xsl"?>
         <wsdl:definitions
-            name="sfa_autogenerated"
-            targetNamespace="%s/2009/07/sfa.wsdl"
+            name="myplc-sfa-%s"
+            targetNamespace="%s/sfa.wsdl"
             xmlns="http://schemas.xmlsoap.org/wsdl/"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:xsdl="%s/2009/07/schema"
-            xmlns:tns="%s/2009/07/sfa.wsdl"
+            xmlns:xsdl="%s/schema"
+            xmlns:tns="%s/sfa.wsdl"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
             <types>
-                <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="%s/2009/07/schema"/>
+                <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="%s/schema"/>
             </types>
-        </wsdl:definitions> """ % (globals.plc_ns, globals.plc_ns, globals.plc_ns, globals.plc_ns)
+        </wsdl:definitions> """ % (self.interface_name(),globals.plc_ns, globals.plc_ns, globals.plc_ns, globals.plc_ns)
         self.types = xml.dom.minidom.parseString(wsdl_text_header)
         
 
     def add_wsdl_types(self):
         wsdl_types = self.wsdl.importNode(self.types.getElementsByTagName("types")[0], True)
-        self.wsdl.firstChild.appendChild(wsdl_types)
+        self.wsdl.lastChild.appendChild(wsdl_types)
 
     def generate_wsdl(self):
         self.compute_wsdl_definitions_and_types()

@@ -22,6 +22,7 @@ from sfa.plc.api import SfaAPI
 from sfa.plc.slices import *
 from sfa.util.version import version_core
 from sfa.util.sfatime import utcparse
+from sfa.util.callids import Callids
 
 def GetVersion(api):
     xrn=Xrn(api.hrn)
@@ -94,8 +95,10 @@ def __get_hostnames(nodes):
         hostnames.append(node.hostname)
     return hostnames
 
-def slice_status(api, slice_xrn, creds):
-    hrn, type = urn_to_hrn(slice_xrn)
+def SliverStatus(api, slice_xrn, creds, call_id):
+    if Callids().already_handled(call_id): return {}
+
+    (hrn, type) = urn_to_hrn(slice_xrn)
     # find out where this slice is currently running
     api.logger.info(hrn)
     slicename = hrn_to_pl_slicename(hrn)
@@ -105,19 +108,12 @@ def slice_status(api, slice_xrn, creds):
         raise Exception("Slice %s not found (used %s as slicename internally)" % slice_xrn, slicename)
     slice = slices[0]
     
-    nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'],
-                                    ['hostname', 'site_id', 'boot_state', 'last_contact'])
+    # report about the local nodes only
+    nodes = api.plshell.GetNodes(api.plauth, {'node_id':slice['node_ids'],'peer_id':None},
+                                 ['hostname', 'site_id', 'boot_state', 'last_contact'])
     site_ids = [node['site_id'] for node in nodes]
     sites = api.plshell.GetSites(api.plauth, site_ids, ['site_id', 'login_base'])
-    sites_dict = {}
-    for site in sites:
-        sites_dict[site['site_id']] = site['login_base']
-
-    # XX remove me
-    #api.logger.info(slice_xrn)
-    #api.logger.info(slice)
-    #api.logger.info(nodes)
-    # XX remove me
+    sites_dict = dict ( [ (site['site_id'],site['login_base'] ) for site in sites ] )
 
     result = {}
     top_level_status = 'unknown'
@@ -133,14 +129,14 @@ def slice_status(api, slice_xrn, creds):
         res['pl_hostname'] = node['hostname']
         res['pl_boot_state'] = node['boot_state']
         res['pl_last_contact'] = node['last_contact']
-        if not node['last_contact'] is None:
+        if node['last_contact'] is not None:
             res['pl_last_contact'] = datetime.datetime.fromtimestamp(node['last_contact']).ctime()
         res['geni_urn'] = hostname_to_urn(api.hrn, sites_dict[node['site_id']], node['hostname'])
         if node['boot_state'] == 'boot':
             res['geni_status'] = 'ready'
         else:
             res['geni_status'] = 'failed'
-            top_level_staus = failed 
+            top_level_staus = 'failed' 
             
         res['geni_error'] = ''
 
@@ -153,26 +149,27 @@ def slice_status(api, slice_xrn, creds):
     # XX remove me
     return result
 
-def create_slice(api, slice_xrn, creds, rspec, users):
+def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
     """
     Create the sliver[s] (slice) at this aggregate.    
     Verify HRN and initialize the slice record in PLC if necessary.
     """
+    if Callids().already_handled(call_id): return ""
 
     reg_objects = __get_registry_objects(slice_xrn, creds, users)
 
-    hrn, type = urn_to_hrn(slice_xrn)
+    (hrn, type) = urn_to_hrn(slice_xrn)
     peer = None
     slices = Slices(api)
     peer = slices.get_peer(hrn)
     sfa_peer = slices.get_sfa_peer(hrn)
     registry = api.registries[api.hrn]
     credential = api.getCredential()
-    site_id, remote_site_id = slices.verify_site(registry, credential, hrn, 
-                                                 peer, sfa_peer, reg_objects)
+    (site_id, remote_site_id) = slices.verify_site(registry, credential, hrn, 
+                                                   peer, sfa_peer, reg_objects)
 
     slice_record = slices.verify_slice(registry, credential, hrn, site_id, 
-                                remote_site_id, peer, sfa_peer, reg_objects)
+                                       remote_site_id, peer, sfa_peer, reg_objects)
      
     network = Network(api)
 
@@ -203,13 +200,13 @@ def create_slice(api, slice_xrn, creds, rspec, users):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                          slice.peer_id)
 
-    # print network.toxml()
+    # xxx - check this holds enough data for the client to understand what's happened
+    return network.toxml()
 
-    return True
 
-
-def renew_slice(api, xrn, creds, expiration_time):
-    hrn, type = urn_to_hrn(xrn)
+def RenewSliver(api, xrn, creds, expiration_time, call_id):
+    if Callids().already_handled(call_id): return True
+    (hrn, type) = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename}, ['slice_id'])
     if not slices:
@@ -217,8 +214,11 @@ def renew_slice(api, xrn, creds, expiration_time):
     slice = slices[0]
     requested_time = utcparse(expiration_time)
     record = {'expires': int(time.mktime(requested_time.timetuple()))}
-    api.plshell.UpdateSlice(api.plauth, slice['slice_id'], record)
-    return 1         
+    try:
+        api.plshell.UpdateSlice(api.plauth, slice['slice_id'], record)
+        return True
+    except:
+        return False
 
 def start_slice(api, xrn, creds):
     hrn, type = urn_to_hrn(xrn)
@@ -253,8 +253,9 @@ def reset_slice(api, xrn):
     # XX not implemented at this interface
     return 1
 
-def delete_slice(api, xrn, creds):
-    hrn, type = urn_to_hrn(xrn)
+def DeleteSliver(api, xrn, creds, call_id):
+    if Callids().already_handled(call_id): return ""
+    (hrn, type) = urn_to_hrn(xrn)
     slicename = hrn_to_pl_slicename(hrn)
     slices = api.plshell.GetSlices(api.plauth, {'name': slicename})
     if not slices:
@@ -272,9 +273,13 @@ def delete_slice(api, xrn, creds):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, slice['peer_slice_id'])
     return 1
 
-def get_slices(api, creds):
+# xxx Thierry : caching at the aggregate level sounds wrong...
+caching=True
+#caching=False
+def ListSlices(api, creds, call_id):
+    if Callids().already_handled(call_id): return []
     # look in cache first
-    if api.cache:
+    if caching and api.cache:
         slices = api.cache.get('slices')
         if slices:
             return slices
@@ -285,20 +290,22 @@ def get_slices(api, creds):
     slice_urns = [hrn_to_urn(slice_hrn, 'slice') for slice_hrn in slice_hrns]
 
     # cache the result
-    if api.cache:
+    if caching and api.cache:
         api.cache.add('slices', slice_urns) 
 
     return slice_urns
     
-def get_rspec(api, creds, options):
+def ListResources(api, creds, options,call_id):
+    if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
-    hrn, type = urn_to_hrn(xrn)
+    (hrn, type) = urn_to_hrn(xrn)
 
     # look in cache first
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         rspec = api.cache.get('nodes')
         if rspec:
+            api.logger.info("aggregate.ListResources: returning cached value for hrn %s"%hrn)
             return rspec 
 
     network = Network(api)
@@ -309,7 +316,7 @@ def get_rspec(api, creds, options):
     rspec = network.toxml()
 
     # cache the result
-    if api.cache and not xrn:
+    if caching and api.cache and not xrn:
         api.cache.add('nodes', rspec)
 
     return rspec
@@ -329,7 +336,7 @@ def get_ticket(api, xrn, creds, rspec, users):
     credential = api.getCredential()
     records = registry.Resolve(xrn, credential)
 
-    # similar to create_slice, we must verify that the required records exist
+    # similar to CreateSliver, we must verify that the required records exist
     # at this aggregate before we can issue a ticket
     site_id, remote_site_id = slices.verify_site(registry, credential, slice_hrn,
                                                  peer, sfa_peer, reg_objects)
@@ -378,15 +385,15 @@ def get_ticket(api, xrn, creds, rspec, users):
 def main():
     api = SfaAPI()
     """
-    rspec = get_rspec(api, "plc.princeton.sapan", None)
-    #rspec = get_rspec(api, "plc.princeton.coblitz", None)
-    #rspec = get_rspec(api, "plc.pl.sirius", None)
+    rspec = ListResources(api, "plc.princeton.sapan", None, 'pl_test_sapan')
+    #rspec = ListResources(api, "plc.princeton.coblitz", None, 'pl_test_coblitz')
+    #rspec = ListResources(api, "plc.pl.sirius", None, 'pl_test_sirius')
     print rspec
     """
     f = open(sys.argv[1])
     xml = f.read()
     f.close()
-    create_slice(api, "plc.princeton.sapan", xml)
+    CreateSliver(api, "plc.princeton.sapan", xml, 'CreateSliver_sapan')
 
 if __name__ == "__main__":
     main()

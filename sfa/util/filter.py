@@ -1,5 +1,3 @@
-# $Id$
-# $URL$
 from types import StringTypes
 try:
     set
@@ -8,7 +6,8 @@ except NameError:
     set = Set
 
 import time
-import pgdb
+try: import pgdb
+except: pass
  
 from sfa.util.faults import *
 from sfa.util.parameter import Parameter, Mixed, python_type

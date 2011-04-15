@@ -4,18 +4,22 @@
 #
 #
 
+import re
+import traceback
+import commands
+from pprint import pformat
+from types import StringTypes, NoneType
+
 import psycopg2
 import psycopg2.extensions
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 # UNICODEARRAY not exported yet
 psycopg2.extensions.register_type(psycopg2._psycopg.UNICODEARRAY)
 
-import pgdb
-from types import StringTypes, NoneType
-import traceback
-import commands
-import re
-from pprint import pformat
+# allow to run sfa2wsdl if this is missing (for mac)
+import sys
+try: import pgdb
+except: print >> sys.stderr, "WARNING, could not import pgdb"
 
 from sfa.util.faults import *
 from sfa.util.sfalogging import sfa_logger

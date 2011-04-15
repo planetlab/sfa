@@ -1,8 +1,11 @@
 # attempt to update at build-time
 
-WSDLS = sfa.wsdl registry.wsdl slice-manager.wsdl aggregate.wsdl 
+INTERFACES=sfa registry slice-manager aggregate
 
-all: $(WSDLS)
+WSDLS = $(foreach interface,$(INTERFACES),$(interface).wsdl)
+HTMLS = $(foreach interface,$(INTERFACES),$(interface).html)
+
+all: $(WSDLS) $(HTMLS)
 
 # temporary: turn off wsdl generation as it is failing
 #TEMPORARY_OFF = yes
@@ -11,16 +14,16 @@ ifdef TEMPORARY_OFF
 registry.wsdl slice-manager.wsdl aggregate.wsdl sfa.wsdl:
 	touch $@
 else
-registry.wsdl:
+registry.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --registry > $@
 
-slice-manager.wsdl:
+slice-manager.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --slice-manager > $@
 
-aggregate.wsdl:
+aggregate.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --aggregate > $@
 
-sfa.wsdl:
+sfa.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --registry --slice-manager --aggregate > $@
 endif
 
@@ -39,11 +42,26 @@ $(DESTDIR)$(INSTALL_PATH)/%: $(DESTDIR)$(INSTALL_PATH) %
 	install -c -m 0755 $(wsdl) $@
 
 #################### clean
-clean:
-	rm -f *wsdl
+clean::
+	rm -f $(WSDLS)
 
 install-clean:
 	rm -f $(INSTALLED)
 
 .PHONY: all clean install install-clean
 
+#################### generate html document
+%.html: %.wsdl wsdl2html.xsl
+	xsltproc $(XSLTFLAGS) wsdl2html.xsl $*.wsdl > $@ || rm $@
+
+clean::
+	rm -f $(HTMLS)
+
+
+backup:
+	$(foreach wsdl,$(WSDLS), cp $(wsdl) $(wsdl).bak;)
+	$(foreach html,$(HTMLS), cp $(html) $(html).bak;)
+
+diff:
+	$(foreach wsdl,$(WSDLS), diff $(wsdl) $(wsdl).bak;)
+	$(foreach html,$(HTMLS), diff $(html) $(html).bak;)

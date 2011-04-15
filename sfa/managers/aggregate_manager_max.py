@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
-from sfa.util.rspec import RSpec
 import sys
 import pdb
+import xml.dom.minidom
+
+from sfa.util.rspec import RSpec
 from sfa.util.xrn import urn_to_hrn, hrn_to_urn, get_authority
 from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.plxrn import hrn_to_pl_slicename
@@ -14,8 +16,8 @@ from sfa.util.policy import Policy
 from sfa.server.aggregate import Aggregates
 from sfa.server.registry import Registries
 from sfa.util.faults import *
+from sfa.util.callids import Callids
 
-import xml.dom.minidom
 
 SFA_MAX_CONF_FILE = '/etc/sfa/max_allocations'
 SFA_MAX_DEFAULT_RSPEC = '/etc/sfa/max_physical.xml'
@@ -252,7 +254,8 @@ def create_slice_max_aggregate(api, hrn, nodes):
     return 1
 
 
-def get_rspec(api, creds, options):
+def ListResources(api, creds, options, call_id):
+    if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
@@ -268,7 +271,9 @@ def get_rspec(api, creds, options):
     return (ret_rspec)
 
 
-def create_slice(api, xrn, creds, rspec_xml, users):
+def CreateSliver(api, xrn, creds, rspec_xml, users, call_id):
+    if Callids().already_handled(call_id): return ""
+
     global topology
     hrn = urn_to_hrn(xrn)[0]
     topology = get_interface_map()
@@ -315,7 +320,9 @@ def create_slice(api, xrn, creds, rspec_xml, users):
 
     unlock_state_file()
 
-    return True
+    # xxx - should return altered rspec 
+    # with enough data for the client to understand what's happened
+    return rspec_xml
 
 def rspec_to_allocations(rspec):
     ifs = []
@@ -332,8 +339,8 @@ def main():
     t = get_interface_map()
     r = RSpec()
     rspec_xml = open(sys.argv[1]).read()
-    #get_rspec(None,'foo')
-    create_slice(None, "plc.princeton.sap0", rspec_xml)
+    #ListResources(None,'foo')
+    CreateSliver(None, "plc.princeton.sap0", rspec_xml, 'call-id-sap0')
     
 if __name__ == "__main__":
     main()
