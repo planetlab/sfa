@@ -5,32 +5,6 @@ from xmlbuilder import XMLBuilder
 from StringIO import StringIO
 from sfa.util.xrn import *
 
-xslt='''<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-<xsl:output method="xml" indent="no"/>
-
-<xsl:template match="/|comment()|processing-instruction()">
-    <xsl:copy>
-      <xsl:apply-templates/>
-    </xsl:copy>
-</xsl:template>
-
-<xsl:template match="*">
-    <xsl:element name="{local-name()}">
-      <xsl:apply-templates select="@*|node()"/>
-    </xsl:element>
-</xsl:template>
-
-<xsl:template match="@*">
-    <xsl:attribute name="{local-name()}">
-      <xsl:value-of select="."/>
-    </xsl:attribute>
-</xsl:template>
-</xsl:stylesheet>
-'''
-
-xslt_doc=etree.parse(StringIO(xslt))
-transform=etree.XSLT(xslt_doc)
-
 class PGRSpec:
     xml_tree = None
     namespaces = {'rspecv2':'http://www.protogeni.net/resources/rspec/0.2'}
@@ -99,6 +73,4 @@ class PGRSpec:
         return header + etree.tostring(xml, pretty_print=True)
 
 if __name__ == '__main__':
-   rspec = 'protogeni.rspec' 
-   PGRSpec = PGRSpec(rspec)
-   print PGRSpec.to_sfa_rspec()  
+   pass  
