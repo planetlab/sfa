@@ -1,7 +1,5 @@
 #!/usr/bin/python 
-from __future__ import with_statement
 from lxml import etree
-from xmlbuilder import XMLBuilder
 from StringIO import StringIO
 from sfa.util.xrn import *
 from sfa.rspecs.pg_rspec import PGRSpec 
@@ -66,7 +64,7 @@ class PGRSpecConverter:
         
     @staticmethod
     def to_sfa_rspec(rspec):
-        pg_rspec = PGRSpec(rspec)
+        pg_rspec = PGRSpec(rspec=rspec)
         header = '<?xml version="1.0"?>\n'
         xml = etree.Element("RSpec", type="SFA") 
         PGRSpecConverter.to_sfa_network(pg_rspec, xml) 
