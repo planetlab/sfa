@@ -1,76 +1,67 @@
 #!/usr/bin/python 
-from __future__ import with_statement
 from lxml import etree
-from xmlbuilder import XMLBuilder
 from StringIO import StringIO
+from sfa.rspecs.rspec import RSpec 
 from sfa.util.xrn import *
+from sfa.util.plxrn import hostname_to_urn
+from sfa.util.config import Config  
 
-class PGRSpec:
-    xml_tree = None
-    namespaces = {'rspecv2':'http://www.protogeni.net/resources/rspec/0.2'}
-  
+class PGRSpec(RSpec):
+    xml = None
+    header = '<?xml version="1.0"?>\n'
+    namespaces = {'rspecv2':'http://www.protogeni.net/resources/rspec/0.2',
+                  'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+                 }
+    schemas =  {'xsi': 'http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd'
+            }
 
-    def __init__(self, rspec="", namespaces={}):
-        try:
-            self.xml_tree = etree.parse(rspec)
-            if namespaces:
-               self.namespaces = namespaces   
- 
-        except IOError:
-            # 'rspec' file doesnt exist. 'rspec' is proably an xml string
-            try: 
-                self.xml_tree = etree.parse(StringIO(rspec))
-            except:
-                raise IOError("Must specify a xml file or xml string. Received: " + rspec )
+    def create(self, type="advertisement"):
+        RSpec.create(self)
+        for namespace in self.namespaces:
+            xmlns = "xmlns"
+            if namespace not in 'rspecv2':
+                xmlns = xmlns + ":" + namespace
+            self.xml.set(xmlns, self.namespaces[namespace])
+        for schema in self.schemas:
+            self.xml.set(schema+":schemaLocation", self.schemas[schema])
 
     def get_network(self):
         network = None 
-        root = self.xml_tree.getroot()
-        nodes = root.xpath("//rspecv2:node[@component_manager_uuid][1]", self.namespaces)
+        nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', self.namespaces)
         if nodes:
             network  = nodes[0].get('component_manager_uuid')
         return network
 
     def get_nodes(self, nodes_with_slivers=False):
-        root = self.xml_tree.getroot()
-        nodes = root.xpath("//rspecv2:node", self.namespaces)
+        nodes = self.xml.xpath('//rspecv2:node', self.namespaces)
         return nodes
 
-
-    def to_sfa_node(self, site, node, i=0):
-        cm_urn = node.get('component_manager_uuid')
-        c_name = node.get('component_name')
-        c_urn = node.get('component_uuid')
-        c_hrn, _ = urn_to_hrn(c_urn)
-        node_tag = etree.SubElement(site, "node")
-        node_tag.set("component_manager_uuid", cm_urn)
-        node_tag.set("component_name", c_name)
-        node_tag.set("component_uuid", c_urn)
-        hostname_tag = etree.SubElement(node_tag, "hostname").text = c_hrn
-        urn_tag = etree.SubElement(node_tag, "urn").text = c_hrn
-        for child in node.getchildren():
-            node_tag.append(transform(child).getroot())      
-
-
-    def to_sfa_network(self, xml): 
-        network_urn = self.get_network()
-        network,  _ = urn_to_hrn(network_urn)
-        nodes = self.get_nodes()
-        network_tag = etree.SubElement(xml, "network")
-        network_tag.set("name", network)
-        network_tag.set("id", network)
-        site_tag = etree.SubElement(network_tag, "Site")
-        site_tag.set("id", network)
-        name = etree.SubElement(site_tag, "name").text = network
-        i = 0
+    def add_nodes(self, nodes, check_for_dupes=False):
+        if not isinstance(nodes, list):
+            nodes = [nodes]
         for node in nodes:
-            self.to_sfa_node(site_tag, node, i)
-        
-    def to_sfa_rspec(self):
-        header = '<?xml version="1.0"?>\n'
-        xml = etree.Element("RSpec", type="SFA") 
-        self.to_sfa_network(xml) 
-        return header + etree.tostring(xml, pretty_print=True)
+            urn = ""
+            if check_for_dupes and \
+              self.xml.xpath('//rspecv2:node[@component_uuid="%s"]' % urn, self.namespaces):
+                # node already exists
+                continue
+                
+            node_tag = etree.SubElement(self.xml, 'node')
+            node_type_tag = etree.SubElement(node_tag, 'node_type', type_name='pcvm', type_slots='100')
+            available_tag = etree.SubElement(node_tag, 'available').text = 'true'
+            exclusive_tag = etree.SubElement(node_tag, 'exclusive').text = 'false'
+            location_tag = etree.SubElement(node_tag, 'location')
+            interface_tag = etree.SubElement(node_tag, 'interface')
+            
+
+    def add_slivers(self, slivers, check_for_dupes=False): 
+        pass
+
+    def add_links(self, links, check_for_dupes=False):
+        pass
+
 
 if __name__ == '__main__':
-   pass  
+    rspec = PGRSpec()
+    rspec.add_nodes([1])
+    print rspec
