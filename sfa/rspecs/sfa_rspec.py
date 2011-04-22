@@ -12,9 +12,9 @@ class SfaRSpec(RSpec):
     header = '<?xml version="1.0"?>\n'
     namespaces = {}
 
-    ########
+    ###################
     # Parser
-    ########
+    ###################
     def get_network_elements(self):
         return self.xml.xpath('//network', self.namespaces)
 
@@ -150,36 +150,111 @@ class SfaRSpec(RSpec):
     def query_vlinks(self, endpoints, network=None):
         return get_vlink(endpoints,network)
 
-    #########
+    ##################
     # Builder
-    ########
+    ##################
 
-    def add_nodes(self, nodes, check_for_dupes=False):
+    def add_nodes(self, nodes, network = None, no_dupes=False):
         if not isinstance(nodes, list):
             nodes = [nodes]
         for node in nodes:
-            urn = ""
             if check_for_dupes and \
-              self.xml.xpath('//rspecv2:node[@component_uuid="%s"]' % urn, self.namespaces):
+              self.get_node_element(node['hostname']):
                 # node already exists
                 continue
                 
             node_tag = etree.SubElement(self.xml, 'node')
-            node_type_tag = etree.SubElement(node_tag, 'node_type', type_name='pcvm', type_slots='100')
-            available_tag = etree.SubElement(node_tag, 'available').text = 'true'
-            exclusive_tag = etree.SubElement(node_tag, 'exclusive').text = 'false'
-            location_tag = etree.SubElement(node_tag, 'location')
-            interface_tag = etree.SubElement(node_tag, 'interface')
+            if network:
+                node_tag.set('component_manager_uuid', network)         
+            if 'urn' in node:
+                node_tag.set('compinent_uuid', node['urn']) 
+            if 'site_urn' in node:
+                node_tag.set('site_uuid', node['site_urn'])
+            if 'node_id' in node: 
+                node_tag.set('node_id', 'n'+str(node['node_id']))
+            if 'hostname' in node:
+                hostname_tag = etree.SubElement(node_tag, 'hostname').text = node['hostname']
+            if 'bw_unallocated' in node:
+               pass
+            if 'bw_limit' in node:
+                pass      
             
 
-    def add_slivers(self, slivers, check_for_dupes=False): 
-        pass
+    def add_slivers(self, hostnames, network=None, no_dupes=False):
+        if not isinstance(hostnames, list):
+            hostnames = [hostnames]
 
-    def add_links(self, links, check_for_dupes=False):
-        pass
+        nodes_with_slivers = self.get_nodes_with_slivers(network)
+        for hostname in hostnames:
+            if hostname in nodes_with_slivers:
+                continue
+            node = self.get_node_element(hostname, network)
+            etree.SubElement(node, 'sliver')
 
+    def remove_slivers(self, hostnames, network=None, no_dupes=False):
+        if not isinstance(hostnames, list):
+            hostnames = [hostnames]
+        for hostname in hostnames:
+            node = self.get_node_element(hostname, network)
+            sliver = node.find('sliver')
+            if sliver:    
+                node.remove(sliver)                 
+
+    
+    
+    def add_default_sliver_attribute(self, name, value, network=None):
+        if network:
+            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
+        else:
+            defaults = self.xml.xpath("//sliver_defaults" % network)
+        if defaults is None:
+            defaults = etree.Element("sliver_defaults")
+            network = self.xml.xpath("//network[@name='%s']" % network)
+            network.insert(0, defaults)
+        self.add_attribute(defaults, name, value)
+
+    def add_sliver_attribute(self, hostname, name, value, network=None):
+        node = self.get_node_element(hostname, network)
+        sliver = node.find("sliver")
+        self.add_attribute(sliver, name, value)
+
+    def remove_default_sliver_attribute(self, name, value, network=None):
+        if network:
+            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
+        else:
+            defaults = self.xml.xpath("//sliver_defaults" % network)
+        self.remove_attribute(defaults, name, value)
+
+    def remove_sliver_attribute(self, hostname, name, value, network=None):
+        node = self.get_node_element(hostname, network)
+        sliver = node.find("sliver")
+        self.remove_attribute(sliver, name, value)
+
+    def add_vlink(self, fromhost, tohost, kbps, network=None):
+        fromnode = self.get_node_element(fromhost, network)
+        tonode = self.get_node_element(tohost, network)
+        links = self.get_link(fromnode, tonode, network)
+
+        for link in links:
+            vlink = etree.SubElement(link, "vlink")
+            fromid = fromnode.get("id")
+            toid = tonode.get("id")
+            vlink.set("endpoints", "%s %s" % (fromid, toid))
+            self.add_attribute(vlink, "kbps", kbps)
+
+
+    def remove_vlink(self, endpoints, network=None):
+        vlinks = self.query_vlinks(endpoints, network)
+        for vlink in vlinks:
+            vlink.getparent().remove(vlink)
 
 if __name__ == '__main__':
     rspec = SfaRSpec()
-    rspec.add_nodes([1])
+    nodes = [
+    {'hostname': 'node1.planet-lab.org',
+     'site_urn': 'urn:publicid:IDN+plc+authority+cm',
+      'node_id': 1,
+    }
+    ]
+    rspec.add_nodes(nodes)
     print rspec
