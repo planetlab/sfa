@@ -1,7 +1,9 @@
 #! /usr/bin/env python
 
 import sys
-from sfa.util.rspecHelper import RSpec, Commands
+#from sfa.util.rspecHelper import RSpec, Commands
+from sfa.client.sfi_commands import Commands
+from sfa.rspecs.rspec_parser import parse_rspec 
 
 command = Commands(usage="%prog [options]",
                    description="List all nodes in the RSpec. " + 
@@ -9,9 +11,15 @@ command = Commands(usage="%prog [options]",
                    "possible to create a slice.")
 command.prep()
 
-nodes = command.rspec.get_node_list()
-for node in nodes:
-    print node
+if command.opts.infile:
+    rspec = parse_rspec(command.opts.infile)
+    nodes = rspec.get_nodes()
+    if command.opts.outfile:
+        sys.stdout = open(command.opts.outfile, 'w')
+    
+    for node in nodes:
+        print node
+
 
 
     
