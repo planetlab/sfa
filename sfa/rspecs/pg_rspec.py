@@ -33,9 +33,25 @@ class PGRSpec(RSpec):
             network  = nodes[0].get('component_manager_uuid')
         return network
 
-    def get_nodes(self, nodes_with_slivers=False):
+    def get_networks(self):
+        networks = self.xml.xpath('//rspecv2:node[@component_manager_uuid]/@component_manager_uuid')
+        return set(networks)
+
+    def get_node_elements(self):
         nodes = self.xml.xpath('//rspecv2:node', self.namespaces)
         return nodes
+
+    def get_nodes(self, network=None):
+        return self.xml.xpath('//rspecv2:node[@component_uuid]/@component_uuid', self.namespaces) 
+
+    def get_nodes_with_slivers(self, network=None):
+        if network:
+            return self.xml.xpath('//node[@component_manager_uuid="%s"][sliver_type]/@component_uuid' % network, self.namespaces)
+        else:
+            return self.xml.xpath('//node[sliver_type]/@component_uuid' % network, self.namespaces)
+
+    def get_nodes_without_slivers(self, network=None):
+        pass
 
     def add_nodes(self, nodes, check_for_dupes=False):
         if not isinstance(nodes, list):
