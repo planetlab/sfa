@@ -170,7 +170,7 @@ class SfaRSpec(RSpec):
             if 'network' in node:
                 network = node['network']
                 network_tags = self.xml.xpath('//network[@name="%s"]' % network, self.namespaces)
-                if not network_tag:
+                if not network_tags:
                     network_tag = etree.SubElement(self.xml, 'network', name=network)
                 else:
                     network_tag = network_tags[0]
@@ -267,7 +267,17 @@ if __name__ == '__main__':
      'hostname': 'node1.planet-lab.org',
      'site_urn': 'urn:publicid:IDN+plc+authority+cm',
       'node_id': 1,
-    }
+    },
+    {'network': 'plc',
+     'hostname': 'node2.planet-lab.org',
+     'site_urn': 'urn:publicid:IDN+plc+authority+cm',
+      'node_id': 1,
+    },
+    {'network': 'ple',
+     'hostname': 'node1.planet-lab.eu',
+     'site_urn': 'urn:publicid:IDN+plc+authority+cm',
+      'node_id': 1,
+    },
     ]
     rspec.add_nodes(nodes)
     print rspec
