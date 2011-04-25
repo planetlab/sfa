@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from sfa.util.xrn import *
 from sfa.util.plxrn import hostname_to_urn
 from sfa.util.config import Config  
-from sfa.util.faults import SfaNotImplemented
+from sfa.util.faults import SfaNotImplemented, InvalidRSpec
 
 class RSpec:
     xml = None
@@ -30,18 +30,19 @@ class RSpec:
                                  generated=generated_ts)
     
     def parse_rspec(self, rspec, namespaces={}):
+        parser = etree.XMLParser(remove_blank_text=True)
         try:
-            tree = etree.parse(rspec)
-            self.xml = tree.getroot()  
-            if namespaces:
-               self.namespaces = namespaces
+            tree = etree.parse(rspec, parser)
         except IOError:
             # 'rspec' file doesnt exist. 'rspec' is proably an xml string
             try:
-                tree = etree.parse(StringIO(rspec))
-                self.xml = tree.getroot()  
+                tree = etree.parse(StringIO(rspec), parser)
             except:
-                raise IOError('Must specify a xml file or xml string. Received: ' + rspec )
+                raise InvalidRSpec('Must specify a xml file or xml string. Received: ' + rspec )
+
+        self.xml = tree.getroot()  
+        if namespaces:
+           self.namespaces = namespaces
 
     def get_network(self):
         raise SfaNotImplemented()
@@ -58,13 +59,29 @@ class RSpec:
     def add_links(self, links, check_for_dupes=False):
         raise SfaNotImplemented()
 
+    def add_attribute(self, elem, name, value):
+        opt = etree.SubElement(elem, name)
+        opt.text = value
+
+    def remove_attribute(self, elem, name, value):
+        if elem is not None:
+            opts = elem.iterfind(name)
+            if opts is not None:
+                for opt in opts:
+                    if opt.text == value:
+                        elem.remove(opt)
+
     def __str__(self):
         return self.toxml()
 
     def toxml(self):
         return self.header + etree.tostring(self.xml, pretty_print=True)  
         
-
+    def save(self, filename):
+        f = open(filename, 'w')
+        f.write(self.toxml())
+        f.close()
+ 
 if __name__ == '__main__':
     rspec = RSpec()
     print rspec
