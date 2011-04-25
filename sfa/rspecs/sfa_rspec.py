@@ -154,18 +154,30 @@ class SfaRSpec(RSpec):
     # Builder
     ##################
 
+    def add_network(self, network):
+        network_tag = etree.SubElement(self.xml, 'network', id=network)     
+
     def add_nodes(self, nodes, network = None, no_dupes=False):
         if not isinstance(nodes, list):
             nodes = [nodes]
         for node in nodes:
-            if check_for_dupes and \
+            if no_dupes and \
               self.get_node_element(node['hostname']):
                 # node already exists
                 continue
-                
-            node_tag = etree.SubElement(self.xml, 'node')
-            if network:
-                node_tag.set('component_manager_uuid', network)         
+
+            network_tag = self.xml
+            if 'network' in node:
+                network = node['network']
+                network_tags = self.xml.xpath('//network[@name="%s"]' % network, self.namespaces)
+                if not network_tag:
+                    network_tag = etree.SubElement(self.xml, 'network', name=network)
+                else:
+                    network_tag = network_tags[0]
+                     
+            node_tag = etree.SubElement(network_tag, 'node')
+            if 'network' in node:
+                node_tag.set('component_manager_uuid', network)
             if 'urn' in node:
                 node_tag.set('compinent_uuid', node['urn']) 
             if 'site_urn' in node:
@@ -251,7 +263,8 @@ class SfaRSpec(RSpec):
 if __name__ == '__main__':
     rspec = SfaRSpec()
     nodes = [
-    {'hostname': 'node1.planet-lab.org',
+    {'network': 'plc',
+     'hostname': 'node1.planet-lab.org',
      'site_urn': 'urn:publicid:IDN+plc+authority+cm',
       'node_id': 1,
     }
