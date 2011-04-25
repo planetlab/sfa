@@ -12,11 +12,11 @@ def parse_rspec(in_rspec):
     if rspec.xml.xpath('//network'):
         #out_rspec = SfaRSpec(in_rspec)
         out_rspec = SfaRSpec()
-        out_rspec.xml = rspec
+        out_rspec.xml = rspec.xml
     else:
         #out_rspec = PGRSpec(in_rspec)
         out_rspec = PGRSpec()
-        out_rspec.xml = rspec
+        out_rspec.xml = rspec.xml
     return out_rspec
 
 
