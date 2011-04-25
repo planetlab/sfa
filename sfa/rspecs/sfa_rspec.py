@@ -211,8 +211,6 @@ class SfaRSpec(RSpec):
             sliver = node.find('sliver')
             if sliver:    
                 node.remove(sliver)                 
-
-    
     
     def add_default_sliver_attribute(self, name, value, network=None):
         if network:
@@ -259,6 +257,24 @@ class SfaRSpec(RSpec):
         vlinks = self.query_vlinks(endpoints, network)
         for vlink in vlinks:
             vlink.getparent().remove(vlink)
+
+
+    def merge(self, in_rspec):
+        """
+        Merge contents for specified rspec with current rspec 
+        """
+
+        # just copy over all networks
+        current_networks = self.get_networks()
+        rspec = SfaRSpec(rspec=in_rspec)
+        networks = rspec.get_network_elements()
+        for network in networks:
+            current_network = network.get('name')
+            if not current_network in current_networks:
+                self.xml.append(network)
+                current_networks.append(current_network)
+        
+         
 
 if __name__ == '__main__':
     rspec = SfaRSpec()
