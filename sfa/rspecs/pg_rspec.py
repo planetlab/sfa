@@ -14,7 +14,7 @@ class PGRSpec(RSpec):
                  }
     schemas =  {'xsi': 'http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd'
             }
-    type = 'pg'
+    format = 'pg'
 
     def create(self, type="advertisement"):
         RSpec.create(self)

@@ -26,10 +26,10 @@ if __name__ == '__main__':
     
     print "Parsing SFA RSpec:", 
     rspec = parse_rspec('nodes.rspec')
-    print rspec.type
+    print rspec.format
     rspec = parse_rspec('protogeni.rspec')
     print "Parsing ProtoGENI RSpec:", 
-    print rspec.type
+    print rspec.format
     
     
 
