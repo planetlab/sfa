@@ -209,7 +209,7 @@ class SfaRSpec(RSpec):
         for hostname in hostnames:
             node = self.get_node_element(hostname, network)
             sliver = node.find('sliver')
-            if sliver:    
+            if sliver != None:
                 node.remove(sliver)                 
     
     def add_default_sliver_attribute(self, name, value, network=None):
