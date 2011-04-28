@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
 import sys
-from sfa.util.rspecHelper import RSpec, Commands
+from sfa.client.sfi_commands import Commands
+from sfa.rspecs.rspec_parser import parse_rspec
 
 command = Commands(usage="%prog [options] [node1 node2...]",
                    description="Delete sliver attributes from the RSpec. " +
@@ -15,20 +16,29 @@ command.add_nodefile_option()
 command.add_attribute_options()
 command.prep()
 
-attrs = command.get_attribute_dict()
-for name in attrs:
-    print >> sys.stderr, name, attrs[name]
-    for value in attrs[name]:
-        if not command.nodes:
-            try:
-                command.rspec.remove_default_sliver_attribute(name, value)
-            except:
-                print >> sys.stderr, "FAILED: on all nodes: %s=%s" % (name, value)
+if command.opts.infile:
+    attrs = command.get_attribute_dict()
+    rspec = parse_rspec(command.opts.infile)
+    nodes = []
+    if command.opts.nodefile:
+        f = open(command.opts.nodefile, "r")
+        nodes = f.read().split()
+        f.close()
+
+
+    for name in attrs:
+        print >> sys.stderr, name, attrs[name]
+        for value in attrs[name]:
+            if not nodes:
+                try:
+                    rspec.remove_default_sliver_attribute(name, value)
+                except:
+                    print >> sys.stderr, "FAILED: on all nodes: %s=%s" % (name, value)
             else:
-                for node in command.nodes:
+                for node in nodes:
                     try:
-                        command.rspec.remove_sliver_attribute(node, name, value)
+                        rspec.remove_sliver_attribute(node, name, value)
                     except:
                         print >> sys.stderr, "FAILED: on node %s: %s=%s" % (node, name, value)
 
-print command.rspec
+    print rspec.toxml()
