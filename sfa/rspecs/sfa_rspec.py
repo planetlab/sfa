@@ -32,11 +32,11 @@ class SfaRSpec(RSpec):
         return None
  
     def get_node_elements(self):
-        return self.xml.xpath('//node', self.namespaces)
+        return self.xml.xpath('//node')
 
     def get_nodes(self, network=None):
         if network == None:
-            nodes = self.xml.xpath('//node/hostname/text()', self.namespaces)
+            nodes = self.xml.xpath('//node/hostname/text()')
         else:
             nodes = self.xml.xpath('//network[@name="%s"]//node/hostname/text()' % network, self.namespaces)
         return nodes
