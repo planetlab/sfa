@@ -1,30 +1,19 @@
-SM
-  * connect SM to ProtoGeni Aggregates
-SFACE
-  * attribute management
-  * aggregate manager checks role of user managing attributes
+Registry
+- Verify that sub authority certificates still work
 
-Unit Tests
-  * fix tests in tests/ directory
- 
-Build/Tags
-  * test rpm build/install
+SM
+- Slice Manager methods should return real result instead of  just 1 (Renew
+  Sliver, etc) 
+
+- connect SM to ProtoGeni Aggregates
 
 Stop invalid users
   * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
 
-NM Plugin
-  * install the slice and node gid when the slice is created (create NM plugin to execute sfa_component_setup.py ?) 
-  * test
- 
 Component manager
   * install trusted certs when interface starts (component_manager_pl.init_server())
   * Redeem ticket - RedeemTicket/AdminTicket not working. Why?
   ** This may be replaced by sfa + credentials  
-
-Registry
-* fix legacy credential support
-* move db tables into db with less overhead (tokyocabinet?)
 
 GUI/Auth Service
   * develop a simple service where users auth using username/passord and 
@@ -32,19 +21,5 @@ GUI/Auth Service
   * service manages users key/cert,creds
   * gui requires user's cred (depends on Auth Service above)
       
-- Protogeni
-* agree on standard set of privs
-* on permission error, return priv needed to make call
-* cache slice resource states (if aggregate goes down, how do we know what
-  slices were on it and recreate them? do we make some sort of transaction log)
-
-Questions
-=========
-- SM/Aggregate
-* should the rspec contain only the resources a slice is using or all resources availa and mark what the slice is using.
-
--  Initscripts on sfa / geniwrapper
-* should sfa have native initscript support or should we piggyback off of myplc?
-* should this be in the rspec
 
 
