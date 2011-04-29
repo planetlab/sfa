@@ -16,10 +16,10 @@ class SfaRSpec(RSpec):
     # Parser
     ###################
     def get_network_elements(self):
-        return self.xml.xpath('//network', self.namespaces)
+        return self.xml.xpath('//network')
 
     def get_networks(self):
-        return self.xml.xpath('//network[@name]/@name', self.namespaces)
+        return self.xml.xpath('//network[@name]/@name')
 
     def get_node_element(self, hostname, network=None):
         if network:
