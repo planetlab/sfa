@@ -38,22 +38,22 @@ class SfaRSpec(RSpec):
         if network == None:
             nodes = self.xml.xpath('//node/hostname/text()')
         else:
-            nodes = self.xml.xpath('//network[@name="%s"]//node/hostname/text()' % network, self.namespaces)
+            nodes = self.xml.xpath('//network[@name="%s"]//node/hostname/text()' % network)
         return nodes
 
     def get_nodes_with_slivers(self, network = None):
         if network:
-            return self.xml.xpath('//network[@name="%s"]//node[sliver]/hostname/text()' % network, self.namespaces)   
+            return self.xml.xpath('//network[@name="%s"]//node[sliver]/hostname/text()' % network)   
         else:
-            return self.xml.xpath('//node[sliver]/hostname/text()', self.namespaces)
+            return self.xml.xpath('//node[sliver]/hostname/text()')
 
     def get_nodes_without_slivers(self, network=None): 
         xpath_nodes_without_slivers = '//node[not(sliver)]/hostname/text()'
         xpath_nodes_without_slivers_in_network = '//network[@name="%s"]//node[not(sliver)]/hostname/text()' 
         if network:
-            return self.xml.xpath('//network[@name="%s"]//node[not(sliver)]/hostname/text()' % network, self.namespaces)
+            return self.xml.xpath('//network[@name="%s"]//node[not(sliver)]/hostname/text()' % network)
         else:
-            return self.xml.xpath('//node[not(sliver)]/hostname/text()', self.namespaces)      
+            return self.xml.xpath('//node[not(sliver)]/hostname/text()')      
 
 
     def attributes_list(self, elem):
@@ -67,9 +67,9 @@ class SfaRSpec(RSpec):
 
     def get_default_sliver_attributes(self, network=None):
         if network:
-            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network, self.namespaces)        
+            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)        
         else:
-            defaults = self.xml.xpath("//network/sliver_defaults" % network, self.namespaces)
+            defaults = self.xml.xpath("//network/sliver_defaults" % network)
         return self.attributes_list(defaults)
 
     def get_sliver_attributes(self, hostname, network=None):
@@ -80,14 +80,14 @@ class SfaRSpec(RSpec):
     def get_site_nodes(self, siteid, network=None):
         if network:
             nodes = self.xml.xpath('//network[@name="%s"]/site[@id="%s"]/node/hostname/text()' % \
-                                    (network, siteid), self.namespaces)
+                                    (network, siteid))
         else:
-            nodes = self.xml.xpath('//site[@id="%s"]/node/hostname/text()' % siteid, self.namespaces)
+            nodes = self.xml.xpath('//site[@id="%s"]/node/hostname/text()' % siteid)
         return nodes
         
     def get_links(self, network=None):
         if network: 
-            links = self.xml.xpath('//network[@name="%s"]/link' % network, self.namespaces)
+            links = self.xml.xpath('//network[@name="%s"]/link' % network)
         else:
             links = self.xml.xpath('//link')    
         linklist = []
@@ -120,9 +120,9 @@ class SfaRSpec(RSpec):
     def get_vlinks(self, network=None):
         vlinklist = []
         if network: 
-            vlinks = self.xml.xpath("//network[@name='%s']//vlink" % network, self.namespaces)
+            vlinks = self.xml.xpath("//network[@name='%s']//vlink" % network)
         else:
-            vlinks = self.xml.xpath("//vlink", self.namespaces) 
+            vlinks = self.xml.xpath("//vlink") 
         for vlink in vlinks:
             endpoints = vlink.get("endpoints")
             (end1, end2) = endpoints.split()
