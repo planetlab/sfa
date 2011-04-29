@@ -44,21 +44,6 @@ class RSpec:
         if namespaces:
            self.namespaces = namespaces
 
-    def get_network(self):
-        raise SfaNotImplemented()
-
-    def get_nodes(self, nodes_with_slivers=False):
-        raise SfaNotImplemented()
-        
-    def add_nodes(self, nodes, check_for_dupes=False):
-        raise SfaNotImplemented()
-
-    def add_slivers(self, slivers, check_for_dupes=False): 
-        raise SfaNotImplemented()
-            
-    def add_links(self, links, check_for_dupes=False):
-        raise SfaNotImplemented()
-
     def add_attribute(self, elem, name, value):
         opt = etree.SubElement(elem, name)
         opt.text = value
