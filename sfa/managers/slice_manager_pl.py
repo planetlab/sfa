@@ -15,6 +15,7 @@ from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
 from sfa.util.record import SfaRecord
+from sfa.rspecs.sfa_rspec import SfaRSpec
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.sfaticket import *
@@ -94,9 +95,11 @@ def CreateSliver(api, xrn, creds, rspec, users, call_id):
         server = api.aggregates[aggregate]
         threads.run(server.CreateSliver, xrn, credential, rspec, users, call_id)
             
-    results = threads.get_results() 
-    merged_rspec = merge_rspecs(results)
-    return merged_rspec
+    results = threads.get_results()
+    rspec = SfaRSpec()
+    for result in results:
+        rspec.merge(result)     
+    return rspec
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
     if Callids().already_handled(call_id): return True
@@ -372,13 +375,15 @@ def ListResources(api, creds, options, call_id):
         #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
     results = threads.get_results()
-    merged_rspec = merge_rspecs(results)
+    rspec = SfaRSpec()
+    for result in results:
+        rspec.merge(result)
 
     # cache the result
     if caching and api.cache and not xrn:
-        api.cache.add('nodes', merged_rspec)
+        api.cache.add('nodes', rspec)
  
-    return merged_rspec
+    return rspec.toxml()
 
 # first draft at a merging SliverStatus
 def SliverStatus(api, slice_xrn, creds, call_id):
