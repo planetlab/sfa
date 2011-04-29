@@ -19,6 +19,7 @@ from sfa.trust.credential import Credential
 import sfa.plc.peers as peers
 from sfa.plc.network import *
 from sfa.plc.api import SfaAPI
+from sfa.plc.aggregate import Aggregate
 from sfa.plc.slices import *
 from sfa.util.version import version_core
 from sfa.util.sfatime import utcparse
@@ -29,6 +30,9 @@ def GetVersion(api):
     return version_core({'interface':'aggregate',
                          'testbed':'myplc',
                          'hrn':xrn.get_hrn(),
+                         'input_rspec' : ['PG 2', 'SFA 1'],
+                         'output_rspec' : ["SFA 1"],
+                         'ad_rspec' : ["PG 2", "SFA 1"],
                          })
 
 def __get_registry_objects(slice_xrn, creds, users):
@@ -301,23 +305,34 @@ def ListResources(api, creds, options,call_id):
     xrn = options.get('geni_slice_urn', '')
     (hrn, type) = urn_to_hrn(xrn)
 
+    # get the rspec's return format from options
+    try:
+        format_raw = options.get('rspec_version', 'SFA 1')
+        format_split = format_raw.split(' ')
+        format, version = format_split[0].lower(), format_split[1]
+    except:
+        # invalid format. Just continue
+        format, version = 'sfa', '1'
+    format_template = "rsepc_%s_%s"
+
     # look in cache first
     if caching and api.cache and not xrn:
-        rspec = api.cache.get('nodes')
+        rspec = api.cache.get(format_template % (format, version))
         if rspec:
             api.logger.info("aggregate.ListResources: returning cached value for hrn %s"%hrn)
             return rspec 
 
-    network = Network(api)
-    if (hrn):
-        if network.get_slice(api, hrn):
-            network.addSlice()
+    aggregate = Aggregate(api)
 
-    rspec = network.toxml()
-
+    if xrn:
+        # get this rspec for the specified slice 
+        rspec =  aggregate.get_rspec(slice_xrn=hrn, format=format)
+    else:
+        # generate rspec in both pg and sfa formats
+        rspec = aggregate.get_rspec(format=format)
     # cache the result
-    if caching and api.cache and not xrn:
-        api.cache.add('nodes', rspec)
+    if caching and api.cache:
+        api.cache.add(format_template % (format, version), rspec)
 
     return rspec
 
