@@ -22,6 +22,7 @@ from sfa.plc.api import SfaAPI
 from sfa.plc.aggregate import Aggregate
 from sfa.plc.slices import *
 from sfa.util.version import version_core
+from sfa.rspecs.rspec_version import RSpecVersion 
 from sfa.util.sfatime import utcparse
 from sfa.util.callids import Callids
 
@@ -306,18 +307,12 @@ def ListResources(api, creds, options,call_id):
     (hrn, type) = urn_to_hrn(xrn)
 
     # get the rspec's return format from options
-    try:
-        format_raw = options.get('rspec_version', 'SFA 1')
-        format_split = format_raw.split(' ')
-        format, version = format_split[0].lower(), format_split[1]
-    except:
-        # invalid format. Just continue
-        format, version = 'sfa', '1'
-    format_template = "rsepc_%s_%s"
-
+    rspec_version = RSpecVersion(options.get('rspec_version', 'SFA 1'))
+    version_string = "rspec_%s_%s" % (rspec_version.format, rspec_version.version)
+    
     # look in cache first
     if caching and api.cache and not xrn:
-        rspec = api.cache.get(format_template % (format, version))
+        rspec = api.cache.get(version_string)
         if rspec:
             api.logger.info("aggregate.ListResources: returning cached value for hrn %s"%hrn)
             return rspec 
@@ -326,13 +321,13 @@ def ListResources(api, creds, options,call_id):
 
     if xrn:
         # get this rspec for the specified slice 
-        rspec =  aggregate.get_rspec(slice_xrn=hrn, format=format)
+        rspec =  aggregate.get_rspec(slice_xrn=hrn, version=rspec_version)
     else:
         # generate rspec in both pg and sfa formats
-        rspec = aggregate.get_rspec(format=format)
+        rspec = aggregate.get_rspec(version=rspec_version)
     # cache the result
     if caching and api.cache:
-        api.cache.add(format_template % (format, version), rspec)
+        api.cache.add(version_string, rspec)
 
     return rspec
 

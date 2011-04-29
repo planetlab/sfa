@@ -61,12 +61,16 @@ class Aggregate:
 
         self.prepared = True  
 
-    def get_rspec(self, slice_xrn=None, format='sfa'):
+    def get_rspec(self, slice_xrn=None, version = None):
         self.prepare()
         rspec = None
-        if format == ['pg']:
-            rspec = PGRSpec()
-        else:
+        if version:
+            format = version.format
+            if format == 'pg':
+                rspec = PGRSpec()
+            else:
+                rspec = SfaRSpec()
+        else: 
             rspec = SfaRSpec()
 
         rspec.add_nodes(self.nodes.values())

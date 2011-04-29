@@ -6,25 +6,20 @@ from sfa.util.xrn import *
 from sfa.util.plxrn import hostname_to_urn
 from sfa.util.config import Config  
 
+
 class PGRSpec(RSpec):
-    xml = None
     header = '<?xml version="1.0"?>\n'
+    template = """
+<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/0.2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd">\n
+</rspec>
+"""
     namespaces = {'rspecv2':'http://www.protogeni.net/resources/rspec/0.2',
                   'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
                  }
     schemas =  {'xsi': 'http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd'
             }
     format = 'pg'
-
-    def create(self, type="advertisement"):
-        RSpec.create(self)
-        for namespace in self.namespaces:
-            xmlns = "xmlns"
-            if namespace not in 'rspecv2':
-                xmlns = xmlns + ":" + namespace
-            self.xml.set(xmlns, self.namespaces[namespace])
-        for schema in self.schemas:
-            self.xml.set(schema+":schemaLocation", self.schemas[schema])
+    xml = None
 
     def get_network(self):
         network = None 
@@ -72,6 +67,9 @@ class PGRSpec(RSpec):
             
 
     def add_slivers(self, slivers, check_for_dupes=False): 
+        pass
+
+    def add_interfaces(self, interfaces, check_for_dupes=False):
         pass
 
     def add_links(self, links, check_for_dupes=False):

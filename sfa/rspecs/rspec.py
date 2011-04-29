@@ -8,10 +8,14 @@ from sfa.util.config import Config
 from sfa.util.faults import SfaNotImplemented, InvalidRSpec
 
 class RSpec:
-    xml = None
     header = '<?xml version="1.0"?>\n'
+    template = """
+<RSpec>\n 
+</RSpec>
+"""
     namespaces = {}
     config = Config()
+    xml = None
   
     def __init__(self, rspec="", namespaces={}):
         if rspec:
@@ -24,10 +28,10 @@ class RSpec:
         date_format = '%Y-%m-%dT%H:%M:%SZ'
         now = datetime.utcnow()
         generated_ts = now.strftime(date_format)
-        expires_ts = (now + timedelta(minutes=30)).strftime(date_format) 
-        self.xml = etree.Element("rspec", type = type, 
-                                 valid_until=expires_ts,   
-                                 generated=generated_ts)
+        expires_ts = (now + timedelta(hours=1)).strftime(date_format) 
+        self.parse_rspec(self.template, self.namespaces)
+        self.xml.set('valid_until', expires_ts)
+        self.xml.set('generated', generated_ts)
     
     def parse_rspec(self, rspec, namespaces={}):
         parser = etree.XMLParser(remove_blank_text=True)

@@ -204,6 +204,8 @@ class Sfi:
                             default="all")
         # display formats
         if command in ("resources"):
+            parser.add_option("-r", "--rspec-version", dest="rspec_version", default="sfa 1",
+                              help="schema type and version of resulting RSpec")
             parser.add_option("-f", "--format", dest="format", type="choice",
                              help="display format ([xml]|dns|ip)", default="xml",
                              choices=("xml", "dns", "ip"))
@@ -818,8 +820,11 @@ class Sfi:
         creds = [cred]
         if opts.delegate:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
-            creds.append(delegated_cred) 
+            creds.append(delegated_cred)
+        if opts.rspec_version:
+            call_options['rspec_version'] = opts.rspec_version 
         result = server.ListResources(creds, call_options,unique_call_id())
+        #result = server.ListResources(creds, call_options)
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)

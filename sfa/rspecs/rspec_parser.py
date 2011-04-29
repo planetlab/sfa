@@ -3,7 +3,7 @@ from sfa.rspecs.sfa_rspec import SfaRSpec
 from sfa.rspecs.pg_rspec import PGRSpec
 from sfa.rspecs.rspec import RSpec
 from lxml import etree 
-
+from 
 
 def parse_rspec(in_rspec):
     rspec = RSpec(rspec=in_rspec)
@@ -19,8 +19,6 @@ def parse_rspec(in_rspec):
         out_rspec = PGRSpec()
         out_rspec.xml = rspec.xml
     return out_rspec
-
-
 
 if __name__ == '__main__':
     

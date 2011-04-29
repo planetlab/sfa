@@ -24,6 +24,7 @@ from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
 import sfa.plc.peers as peers
 from sfa.util.version import version_core
+from sfa.rspecs.rspec_version import RSpecVersion
 from sfa.util.callids import Callids
 
 # we have specialized xmlrpclib.ServerProxy to remember the input url
@@ -339,6 +340,10 @@ def ListResources(api, creds, options, call_id):
     xrn = options.get('geni_slice_urn', '')
     (hrn, type) = urn_to_hrn(xrn)
 
+    # get the rspec's return format from options
+    rspec_version = RSpecVersion(options.get('rspec_version', 'SFA 1'))
+    version_string = "rspec_%s_%s" % (rspec_version.format, rspec_version.version)
+
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
     if not origin_hrn:
@@ -349,7 +354,7 @@ def ListResources(api, creds, options, call_id):
     
     # look in cache first 
     if caching and api.cache and not xrn:
-        rspec =  api.cache.get('nodes')
+        rspec =  api.cache.get(version_string)
         if rspec:
             return rspec
 
@@ -381,7 +386,7 @@ def ListResources(api, creds, options, call_id):
 
     # cache the result
     if caching and api.cache and not xrn:
-        api.cache.add('nodes', rspec)
+        api.cache.add(version_string, rspec)
  
     return rspec.toxml()
 
