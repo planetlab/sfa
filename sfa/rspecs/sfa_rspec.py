@@ -169,7 +169,7 @@ class SfaRSpec(RSpec):
             network_tag = self.xml
             if 'network' in node:
                 network = node['network']
-                network_tags = self.xml.xpath('//network[@name="%s"]' % network, self.namespaces)
+                network_tags = self.xml.xpath('//network[@name="%s"]' % network)
                 if not network_tags:
                     network_tag = etree.SubElement(self.xml, 'network', name=network)
                 else:
@@ -177,21 +177,26 @@ class SfaRSpec(RSpec):
                      
             node_tag = etree.SubElement(network_tag, 'node')
             if 'network' in node:
-                node_tag.set('component_manager_uuid', network)
+                node_tag.set('component_manager_id', network)
             if 'urn' in node:
-                node_tag.set('compinent_uuid', node['urn']) 
+                node_tag.set('component_id', node['urn']) 
             if 'site_urn' in node:
-                node_tag.set('site_uuid', node['site_urn'])
+                node_tag.set('site_id', node['site_urn'])
             if 'node_id' in node: 
                 node_tag.set('node_id', 'n'+str(node['node_id']))
             if 'hostname' in node:
                 hostname_tag = etree.SubElement(node_tag, 'hostname').text = node['hostname']
-            if 'bw_unallocated' in node:
-               pass
-            if 'bw_limit' in node:
-                pass      
-            
+            for interface in node['interfaces']:
+                if 'bwlimit' in node:
+                    bwlimit = etree.SubElement(node_tag, 'bwlimit', units='kbps').tet = str(interface['bwlimit']/1000)      
+        
 
+    def add_interfaces(self, interfaces):
+        pass     
+
+    def add_links(self, links):
+        pass
+    
     def add_slivers(self, hostnames, network=None, no_dupes=False):
         if not isinstance(hostnames, list):
             hostnames = [hostnames]
