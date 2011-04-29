@@ -49,9 +49,15 @@ class Aggregate:
             self.prepare_links(force)
             self.prepare_tagtypes(force)
             # add site/interface info to nodes
-            for node in self.nodes:
+            for node_id in self.nodes:
+                node = self.nodes[node_id]
                 site = self.sites[node['site_id']]
                 interfaces = [self.interfaces[interface_id] for interface_id in node['interface_ids']]
+                node['network'] = self.api.hrn
+                node['urn'] = hostname_to_urn(self.api.hrn, site['login_base'], node['hostname'])
+                node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority') 
+                node['site'] = site
+                node['interfaces'] = interfaces
 
         self.prepared = True  
 
@@ -63,9 +69,9 @@ class Aggregate:
         else:
             rspec = SfaRSpec()
 
-        rspec.add_nodes(self.nodes)
-        rspec.add_interfaces(self.interfaces) 
-        rspec.add_links(self.links)
+        rspec.add_nodes(self.nodes.values())
+        rspec.add_interfaces(self.interfaces.values()) 
+        rspec.add_links(self.links.values())
 
         if slice_xrn:
             slice_hrn, _ = urn_to_hrn(slice_xrn)
@@ -74,4 +80,6 @@ class Aggregate:
             if slices:
                 slice = slices[0]   
                 hostnames = [self.nodes[node_id]['hostname'] for node_id in slice['node_ids']]
-                rspec.add_slivers(hostnames)          
+                rspec.add_slivers(hostnames)
+
+        return rspec.toxml()          
