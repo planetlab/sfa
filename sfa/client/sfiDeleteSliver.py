@@ -19,10 +19,10 @@ if command.opts.infile:
         nodes = f.read().split()
         f.close()
        
-        try:
-            rspec.remove_slivers(nodes)
-        except:
-            print >> sys.stderr, "FAILED: %s"  
+    try:
+        rspec.remove_slivers(nodes)
+    except:
+        print >> sys.stderr, "FAILED: %s"  
 
     print rspec.toxml()
     
