@@ -496,7 +496,7 @@ class Sfi:
        if (os.path.isfile(file)):
           return file
        else:
-          self.logger.critical("No such rspec file"%rspec)
+          self.logger.critical("No such rspec file %s"%rspec)
           sys.exit(1)
     
     def get_record_file(self, record):
