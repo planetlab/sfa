@@ -56,8 +56,8 @@ class PGRSpec(RSpec):
                 continue
                 
             node_tag = etree.SubElement(self.xml, 'node')
-            if 'network' in node:
-                node_tag.set('component_manager_id', node['network'])
+            if 'network_urn' in node:
+                node_tag.set('component_manager_id', node['network_urn'])
             if 'urn' in node:
                 node_tag.set('component_id', node['urn'])
             if 'hostname' in node:

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import _SfaLogger
 
 
 DEFAULT_FORMAT='sfa'
@@ -13,7 +13,7 @@ class RSpecVersion:
     extensions = []
 
     def __init__(self, version_string):
-        self.logger = sfa_logger() 
+        self.logger = _SfaLogger('/var/log/sfa.log') 
         self.parse_version_string(version_string)
 
     def parse_version_string(self, version_string):

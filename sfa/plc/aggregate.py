@@ -55,6 +55,7 @@ class Aggregate:
                 interfaces = [self.interfaces[interface_id] for interface_id in node['interface_ids']]
                 tags = [self.node_tags[tag_id] for tag_id in node['node_tag_ids']]
                 node['network'] = self.api.hrn
+                node['network_urn'] = hrn_to_urn(self.api.hrn, 'authority+sa')
                 node['urn'] = hostname_to_urn(self.api.hrn, site['login_base'], node['hostname'])
                 node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority') 
                 node['site'] = site
