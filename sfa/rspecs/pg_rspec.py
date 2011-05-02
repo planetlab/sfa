@@ -26,7 +26,7 @@ class PGRSpec(RSpec):
         return network
 
     def get_networks(self):
-        networks = self.xml.xpath('//rspecv2:node[@component_manager_uuid]/@component_manager_uuid')
+        networks = self.xml.xpath('//rspecv2:node[@component_manager_uuid]/@component_manager_uuid', namespaces=self.namespaces)
         return set(networks)
 
     def get_node_elements(self):
@@ -38,9 +38,9 @@ class PGRSpec(RSpec):
 
     def get_nodes_with_slivers(self, network=None):
         if network:
-            return self.xml.xpath('//node[@component_manager_uuid="%s"][sliver_type]/@component_name' % network, namespaces=self.namespaces)
+            return self.xml.xpath('//rspecv2:node[@component_manager_id="%s"][sliver_type]/@component_name' % network, namespaces=self.namespaces)
         else:
-            return self.xml.xpath('//node[sliver_type]/@component_name', namespaces=self.namespaces)
+            return self.xml.xpath('//rspecv2:node[rspecv2:sliver_type]/@component_name', namespaces=self.namespaces)
 
     def get_nodes_without_slivers(self, network=None):
         pass
@@ -82,7 +82,7 @@ class PGRSpec(RSpec):
         for hostname in hostnames:
             if hostname in nodes_with_slivers:
                 continue
-            nodes = self.xml.xpath('//node[@component_name="%s"]' % hostname, namespaces=self.namespaces)
+            nodes = self.xml.xpath('//rspecv2:node[@component_name="%s"]' % hostname, namespaces=self.namespaces)
             if nodes:
                 node = nodes[0]
                 node.set('client_id', hostname)
