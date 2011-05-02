@@ -322,8 +322,9 @@ def ListResources(api, creds, options,call_id):
     else:
         # generate rspec in both pg and sfa formats
         rspec = aggregate.get_rspec(version=rspec_version)
+
     # cache the result
-    if caching and api.cache:
+    if caching and api.cache and not xrn:
         api.cache.add(version_string, rspec)
 
     return rspec
