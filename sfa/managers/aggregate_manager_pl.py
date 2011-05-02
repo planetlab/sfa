@@ -22,7 +22,8 @@ from sfa.plc.api import SfaAPI
 from sfa.plc.aggregate import Aggregate
 from sfa.plc.slices import *
 from sfa.util.version import version_core
-from sfa.rspecs.rspec_version import RSpecVersion 
+from sfa.rspecs.rspec_version import RSpecVersion
+from sfa.rspecs.rspec_parser import parse_rspec 
 from sfa.util.sfatime import utcparse
 from sfa.util.callids import Callids
 
@@ -193,7 +194,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
             api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
 
         api.plshell.AddSliceToNodes(api.plauth, slice['name'], added_nodes) 
-        api.plshell.DeleteSliceFromNodes(api.plauth, slice['slice'], deleted_nodes)
+        api.plshell.DeleteSliceFromNodes(api.plauth, slice['name'], deleted_nodes)
 
         # TODO: update slice tags
         #network.updateSliceTags()
