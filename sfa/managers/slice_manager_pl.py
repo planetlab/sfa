@@ -15,7 +15,10 @@ from sfa.util.rspec import *
 from sfa.util.specdict import *
 from sfa.util.faults import *
 from sfa.util.record import SfaRecord
+from sfa.rspecs.pg_rspec import PGRSpec
 from sfa.rspecs.sfa_rspec import SfaRSpec
+from sfa.rspecs.pg_rspec_converter import PGRSpecConverter
+from sfa.rspecs.rspec_parser import parse_rspec    
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.sfaticket import *
@@ -380,13 +383,23 @@ def ListResources(api, creds, options, call_id):
         #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
     results = threads.get_results()
+    #results.append(open('/root/protogeni.rspec', 'r').read())
     rspec = SfaRSpec()
     for result in results:
-        rspec.merge(result)
+        try:
+            tmp_rspec = parse_rspec(result)
+            if isinstance(tmp_rspec, SfaRSpec):
+                rspec.merge(result)
+            elif isinstance(tmp_rspec, PGRSpec):
+                rspec.merge(PGRSpecConverter.to_sfa_rspec(result))
+            else:
+                api.logger.info("SM.ListResources: invalid aggregate rspec")                        
+        except:
+            api.logger.info("SM.ListResources: Failed to merge aggregate rspec")
 
     # cache the result
     if caching and api.cache and not xrn:
-        api.cache.add(version_string, rspec)
+        api.cache.add(version_string, rspec.toxml())
  
     return rspec.toxml()
 

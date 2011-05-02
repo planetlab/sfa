@@ -23,7 +23,7 @@ class PGRSpec(RSpec):
 
     def get_network(self):
         network = None 
-        nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', self.namespaces)
+        nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', namespaces=self.namespaces)
         if nodes:
             network  = nodes[0].get('component_manager_uuid')
         return network
@@ -33,17 +33,17 @@ class PGRSpec(RSpec):
         return set(networks)
 
     def get_node_elements(self):
-        nodes = self.xml.xpath('//rspecv2:node', self.namespaces)
+        nodes = self.xml.xpath('//rspecv2:node', namespaces=self.namespaces)
         return nodes
 
     def get_nodes(self, network=None):
-        return self.xml.xpath('//rspecv2:node[@component_uuid]/@component_uuid', self.namespaces) 
+        return self.xml.xpath('//rspecv2:node[@component_uuid]/@component_uuid', namespaces=self.namespaces) 
 
     def get_nodes_with_slivers(self, network=None):
         if network:
-            return self.xml.xpath('//node[@component_manager_uuid="%s"][sliver_type]/@component_uuid' % network, self.namespaces)
+            return self.xml.xpath('//node[@component_manager_uuid="%s"][sliver_type]/@component_uuid' % network, namespaces=self.namespaces)
         else:
-            return self.xml.xpath('//node[sliver_type]/@component_uuid' % network, self.namespaces)
+            return self.xml.xpath('//node[sliver_type]/@component_uuid' % network, namespaces=self.namespaces)
 
     def get_nodes_without_slivers(self, network=None):
         pass
@@ -54,16 +54,27 @@ class PGRSpec(RSpec):
         for node in nodes:
             urn = ""
             if check_for_dupes and \
-              self.xml.xpath('//rspecv2:node[@component_uuid="%s"]' % urn, self.namespaces):
+              self.xml.xpath('//rspecv2:node[@component_uuid="%s"]' % urn, namespaces=self.namespaces):
                 # node already exists
                 continue
                 
             node_tag = etree.SubElement(self.xml, 'node')
+            if 'network' in node:
+                node_tag.set('component_manager_id', network)
+            if 'urn' in node:
+                node_tag.set('component_id', node['urn'])
+            if 'hostname' in node:
+                node_tag.set('name', node['hostname'])
             node_type_tag = etree.SubElement(node_tag, 'node_type', type_name='pcvm', type_slots='100')
             available_tag = etree.SubElement(node_tag, 'available').text = 'true'
             exclusive_tag = etree.SubElement(node_tag, 'exclusive').text = 'false'
-            location_tag = etree.SubElement(node_tag, 'location')
-            interface_tag = etree.SubElement(node_tag, 'interface')
+            location_tag = etree.SubElement(node_tag, 'location', location="US")
+            if 'site' in node:
+                if 'longitude' in node['site']:
+                    location_tag.set('longitude', site['longitude'])
+                if 'latitude' in node['site']:
+                    location_tag.set('latitude', site['latitude'])
+            #if 'interfaces' in node:
             
 
     def add_slivers(self, slivers, check_for_dupes=False): 

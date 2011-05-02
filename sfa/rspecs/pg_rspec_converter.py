@@ -34,16 +34,12 @@ class PGRSpecConverter:
 
     @staticmethod
     def to_sfa_node(site, node, i=0):
-        cm_urn = node.get('component_manager_uuid')
-        c_name = node.get('component_name')
-        c_urn = node.get('component_uuid')
-        c_hrn, _ = urn_to_hrn(c_urn)
+        urn = node.get('component_uuid')
+        hrn, _ = urn_to_hrn(urn)
+        hostname = Xrn.urn_split(urn)[-1]
         node_tag = etree.SubElement(site, "node")
-        node_tag.set("component_manager_uuid", cm_urn)
-        node_tag.set("component_name", c_name)
-        node_tag.set("component_uuid", c_urn)
-        hostname_tag = etree.SubElement(node_tag, "hostname").text = c_hrn
-        urn_tag = etree.SubElement(node_tag, "urn").text = c_hrn
+        hostname_tag = etree.SubElement(node_tag, "hostname").text = hostname
+        urn_tag = etree.SubElement(node_tag, "urn").text = urn
         for child in node.getchildren():
             node_tag.append(transform(child).getroot())      
 
@@ -51,16 +47,13 @@ class PGRSpecConverter:
     def to_sfa_network(pg_rspec, xml): 
         network_urn = pg_rspec.get_network()
         network,  _ = urn_to_hrn(network_urn)
-        nodes = pg_rspec.get_nodes()
+        nodes = pg_rspec.get_node_elements()
         network_tag = etree.SubElement(xml, "network")
         network_tag.set("name", network)
         network_tag.set("id", network)
-        site_tag = etree.SubElement(network_tag, "Site")
-        site_tag.set("id", network)
-        name = etree.SubElement(site_tag, "name").text = network
         i = 0
         for node in nodes:
-           PGRSpecConverter.to_sfa_node(site_tag, node, i)
+           PGRSpecConverter.to_sfa_node(network_tag, node, i)
         
     @staticmethod
     def to_sfa_rspec(rspec):
