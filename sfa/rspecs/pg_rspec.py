@@ -60,7 +60,7 @@ class PGRSpec(RSpec):
                 
             node_tag = etree.SubElement(self.xml, 'node')
             if 'network' in node:
-                node_tag.set('component_manager_id', network)
+                node_tag.set('component_manager_id', node['network'])
             if 'urn' in node:
                 node_tag.set('component_id', node['urn'])
             if 'hostname' in node:
@@ -71,9 +71,9 @@ class PGRSpec(RSpec):
             location_tag = etree.SubElement(node_tag, 'location', location="US")
             if 'site' in node:
                 if 'longitude' in node['site']:
-                    location_tag.set('longitude', site['longitude'])
+                    location_tag.set('longitude', node['site']['longitude'])
                 if 'latitude' in node['site']:
-                    location_tag.set('latitude', site['latitude'])
+                    location_tag.set('latitude', node['site']['latitude'])
             #if 'interfaces' in node:
             
 
