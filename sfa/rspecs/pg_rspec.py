@@ -34,7 +34,7 @@ class PGRSpec(RSpec):
         return nodes
 
     def get_nodes(self, network=None):
-        return self.xml.xpath('//rspecv2:node[@component_uuid]/@component_uuid', namespaces=self.namespaces) 
+        return self.xml.xpath('//rspecv2:node[@component_name]/@component_name', namespaces=self.namespaces) 
 
     def get_nodes_with_slivers(self, network=None):
         if network:
