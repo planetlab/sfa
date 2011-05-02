@@ -38,9 +38,9 @@ class PGRSpec(RSpec):
 
     def get_nodes_with_slivers(self, network=None):
         if network:
-            return self.xml.xpath('//node[@component_manager_uuid="%s"][sliver_type]/@component_uuid' % network, namespaces=self.namespaces)
+            return self.xml.xpath('//node[@component_manager_uuid="%s"][sliver_type]/@component_name' % network, namespaces=self.namespaces)
         else:
-            return self.xml.xpath('//node[sliver_type]/@component_uuid' % network, namespaces=self.namespaces)
+            return self.xml.xpath('//node[sliver_type]/@component_name', namespaces=self.namespaces)
 
     def get_nodes_without_slivers(self, network=None):
         pass
@@ -61,7 +61,7 @@ class PGRSpec(RSpec):
             if 'urn' in node:
                 node_tag.set('component_id', node['urn'])
             if 'hostname' in node:
-                node_tag.set('name', node['hostname'])
+                node_tag.set('component_name', node['hostname'])
             node_type_tag = etree.SubElement(node_tag, 'node_type', type_name='pcvm', type_slots='100')
             available_tag = etree.SubElement(node_tag, 'available').text = 'true'
             exclusive_tag = etree.SubElement(node_tag, 'exclusive').text = 'false'
@@ -74,8 +74,19 @@ class PGRSpec(RSpec):
             #if 'interfaces' in node:
             
 
-    def add_slivers(self, slivers, check_for_dupes=False): 
-        pass
+    def add_slivers(self, hostnames, check_for_dupes=False): 
+        if not isinstance(hostnames, list):
+            hostnames = [hostnames]
+
+        nodes_with_slivers = self.get_nodes_with_slivers()
+        for hostname in hostnames:
+            if hostname in nodes_with_slivers:
+                continue
+            nodes = self.xml.xpath('//node[@component_name="%s"]' % hostname, namespaces=self.namespaces)
+            if nodes:
+                node = nodes[0]
+                node.set('client_id', hostname)
+                etree.SubElement(node, 'sliver_type', name='planetlab-vnode')
 
     def add_interfaces(self, interfaces, check_for_dupes=False):
         pass
