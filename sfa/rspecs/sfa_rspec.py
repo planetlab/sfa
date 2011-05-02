@@ -186,11 +186,14 @@ class SfaRSpec(RSpec):
                 node_tag.set('node_id', 'n'+str(node['node_id']))
             if 'hostname' in node:
                 hostname_tag = etree.SubElement(node_tag, 'hostname').text = node['hostname']
-            for interface in node['interfaces']:
-                if 'bwlimit' in node:
-                    bwlimit = etree.SubElement(node_tag, 'bwlimit', units='kbps').tet = str(interface['bwlimit']/1000)      
-        
-
+            if 'interfaces' in node:
+                for interface in node['interfaces']:
+                    if 'bwlimit' in interface:
+                        bwlimit = etree.SubElement(node_tag, 'bwlimit', units='kbps').tet = str(interface['bwlimit']/1000)
+            if 'tags' in node:
+                for tag in node['tags']:
+                   if tag['tagname'] in ['fcdistro', 'arch']:
+                        tag_element = etree.SubElement(node_tag, tag['tagname'], value=tag['value'])           
     def add_interfaces(self, interfaces):
         pass     
 
