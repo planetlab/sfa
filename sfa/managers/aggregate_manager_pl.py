@@ -154,7 +154,7 @@ def SliverStatus(api, slice_xrn, creds, call_id):
     # XX remove me
     return result
 
-def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
+def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     """
     Create the sliver[s] (slice) at this aggregate.    
     Verify HRN and initialize the slice record in PLC if necessary.
@@ -165,6 +165,7 @@ def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
 
     (hrn, type) = urn_to_hrn(slice_xrn)
     peer = None
+    aggregate = Aggregate(api)
     slices = Slices(api)
     peer = slices.get_peer(hrn)
     sfa_peer = slices.get_sfa_peer(hrn)
@@ -173,40 +174,36 @@ def CreateSliver(api, slice_xrn, creds, rspec, users, call_id):
     (site_id, remote_site_id) = slices.verify_site(registry, credential, hrn, 
                                                    peer, sfa_peer, reg_objects)
 
-    slice_record = slices.verify_slice(registry, credential, hrn, site_id, 
+    slice = slices.verify_slice(registry, credential, hrn, site_id, 
                                        remote_site_id, peer, sfa_peer, reg_objects)
      
-    network = Network(api)
-
-    slice = network.get_slice(api, hrn)
-    slice.peer_id = slice_record['peer_slice_id']
-    current = __get_hostnames(slice.get_nodes())
-    
-    network.addRSpec(rspec, api.config.SFA_AGGREGATE_RSPEC_SCHEMA)
-    request = __get_hostnames(network.nodesWithSlivers())
-    
+    nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'], ['hostname'])
+    current_slivers = [node['hostname'] for node in nodes] 
+    rspec = parse_rspec(rspec_string)
+    requested_slivers = rspec.get_nodes_with_slivers()
+     
     # remove nodes not in rspec
-    deleted_nodes = list(set(current).difference(request))
+    deleted_nodes = list(set(current_slivers).difference(requested_slivers))
 
     # add nodes from rspec
-    added_nodes = list(set(request).difference(current))
+    added_nodes = list(set(requested_slivers).difference(current_slivers))
 
     try:
         if peer:
-            api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice.id, peer)
+            api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
 
-        api.plshell.AddSliceToNodes(api.plauth, slice.name, added_nodes) 
-        api.plshell.DeleteSliceFromNodes(api.plauth, slice.name, deleted_nodes)
+        api.plshell.AddSliceToNodes(api.plauth, slice['name'], added_nodes) 
+        api.plshell.DeleteSliceFromNodes(api.plauth, slice['slice'], deleted_nodes)
 
-        network.updateSliceTags()
+        # TODO: update slice tags
+        #network.updateSliceTags()
 
     finally:
         if peer:
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                          slice.peer_id)
 
-    # xxx - check this holds enough data for the client to understand what's happened
-    return network.toxml()
+    return aggregate.get_rspec(slice_xrn=slice_xrn)
 
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
