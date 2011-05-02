@@ -12,9 +12,9 @@ class RSpecVersion:
     namespace = None
     extensions = []
 
-    def __init__(self, version_raw):
+    def __init__(self, version_string):
         self.logger = sfa_logger() 
-        self.parse_version(version_raw)
+        self.parse_version_string(version_string)
 
     def parse_version_string(self, version_string):
         # version_raw is currently a string but will 
