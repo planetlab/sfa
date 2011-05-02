@@ -9,10 +9,7 @@ from sfa.util.faults import SfaNotImplemented, InvalidRSpec
 
 class RSpec:
     header = '<?xml version="1.0"?>\n'
-    template = """
-<RSpec>\n 
-</RSpec>
-"""
+    template = """<RSpec></RSpec>"""
     namespaces = {}
     config = Config()
     xml = None
