@@ -60,6 +60,17 @@ class RSpec:
                     if opt.text == value:
                         elem.remove(opt)
 
+
+    def validate(self, schema):
+        relaxng_doc = etree.parse(schema)
+        relaxng = etree.RelaxNG(relaxng_doc)
+        if not relaxng(self.xml):
+            error = relaxng.error_log.last_error
+            message = "%s (line %s)" % (error.message, error.line)
+            raise InvalidRSpec(message)
+        return True
+        
+
     def __str__(self):
         return self.toxml()
 
