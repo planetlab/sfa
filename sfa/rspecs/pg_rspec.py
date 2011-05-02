@@ -9,10 +9,7 @@ from sfa.util.config import Config
 
 class PGRSpec(RSpec):
     header = '<?xml version="1.0"?>\n'
-    template = """
-<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/0.2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd">\n
-</rspec>
-"""
+    template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/0.2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd"></rspec>"""
     namespaces = {'rspecv2':'http://www.protogeni.net/resources/rspec/0.2',
                   'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
                  }
