@@ -71,9 +71,9 @@ class PGRSpec(RSpec):
             location_tag = etree.SubElement(node_tag, 'location', location="US")
             if 'site' in node:
                 if 'longitude' in node['site']:
-                    location_tag.set('longitude', node['site']['longitude'])
+                    location_tag.set('longitude', str(node['site']['longitude']))
                 if 'latitude' in node['site']:
-                    location_tag.set('latitude', node['site']['latitude'])
+                    location_tag.set('latitude', str(node['site']['latitude']))
             #if 'interfaces' in node:
             
 
