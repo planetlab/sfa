@@ -82,7 +82,7 @@ class PGRSpec(RSpec):
         for hostname in hostnames:
             if hostname in nodes_with_slivers:
                 continue
-            nodes = self.xml.xpath('//rspecv2:node[@component_name="%s"]' % hostname, namespaces=self.namespaces)
+            nodes = self.xml.xpath('//rspecv2:node[@component_name="%s"] | //node[@component_name="%s"]' % (hostname, hostname), namespaces=self.namespaces)
             if nodes:
                 node = nodes[0]
                 node.set('client_id', hostname)
