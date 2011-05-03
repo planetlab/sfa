@@ -2,12 +2,10 @@
 from sfa.util.sfalogging import _SfaLogger
 
 
-DEFAULT_FORMAT='sfa'
-DEFAULT_VERSION_NUMBER=1
 class RSpecVersion:
 
-    format = None
-    version = None
+    format = 'sfa'
+    version = '1'
     schema = None
     namespace = None
     extensions = []
@@ -19,21 +17,15 @@ class RSpecVersion:
     def parse_version_string(self, version_string):
         # version_raw is currently a string but will 
         # eventually be a struct.
-        try:
-            format_split = version_string.split(' ')
-            format, version = format_split[0].lower(), format_split[1]
-        except:
-            self.logger.info("RSpecVersion: invalid rspec version string: %s , using default" \
-                        % version_string)
-            # invalid format. Just continue
-            format, version = DEFAULT_FORMAT, DEFAULT_VERSION_NUMBER
-
-        self.format = format
-        self.version = version 
+        format_split = version_string.split(' ')
+        try: self.format = format_split[0].lower()  
+        except: pass
+        try: self.version = format_split[1]
+        except: pass
     
 
     def parse_version_struct(self, version_struct):
         try:
             pass
         except:
-            format, version = DEFAULT_FORMAT, DEFAULT_VERSION_NUMBER
+            pass
