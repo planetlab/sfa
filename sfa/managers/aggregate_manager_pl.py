@@ -203,7 +203,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                          slice.peer_id)
 
-    return aggregate.get_rspec(slice_xrn=slice_xrn)
+    return aggregate.get_rspec(slice_xrn=slice_xrn, version=RSpecVersion("pg"))
 
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
