@@ -103,7 +103,7 @@ def CreateSliver(api, xrn, creds, rspec, users, call_id):
     rspec = SfaRSpec()
     for result in results:
         rspec.merge(result)     
-    return rspec
+    return rspec.toxml()
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
     if Callids().already_handled(call_id): return True
