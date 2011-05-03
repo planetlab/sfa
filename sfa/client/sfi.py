@@ -798,7 +798,8 @@ class Sfi:
             delegated_cred = self.delegate_cred(user_cred, get_authority(self.authority))
             creds.append(delegated_cred)  
         server = self.get_server_from_opts(opts)
-        results = server.ListSlices(creds, unique_call_id())
+        #results = server.ListSlices(creds, unique_call_id())
+        results = server.ListSlices(creds)
         display_list(results)
         return
     
@@ -823,8 +824,8 @@ class Sfi:
             creds.append(delegated_cred)
         if opts.rspec_version:
             call_options['rspec_version'] = opts.rspec_version 
-        result = server.ListResources(creds, call_options,unique_call_id())
-        #result = server.ListResources(creds, call_options)
+        #result = server.ListResources(creds, call_options,unique_call_id())
+        result = server.ListResources(creds, call_options)
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)

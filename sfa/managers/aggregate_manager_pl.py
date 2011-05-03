@@ -181,8 +181,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'], ['hostname'])
     current_slivers = [node['hostname'] for node in nodes] 
     rspec = parse_rspec(rspec_string)
-    requested_slivers = rspec.get_nodes_with_slivers()
-     
+    requested_slivers = [str(host) for host in rspec.get_nodes_with_slivers()]
     # remove nodes not in rspec
     deleted_nodes = list(set(current_slivers).difference(requested_slivers))
 
