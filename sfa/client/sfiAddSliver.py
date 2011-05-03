@@ -30,5 +30,5 @@ nodes = file(command.opts.nodefile).read().split()
 try:
     rspec.add_slivers(nodes)
 except:
-    print >> sys.stderr, "FAILED: %s" % node
+    print >> sys.stderr, "FAILED: %s" % nodes
 print >>outfile, rspec.toxml()
