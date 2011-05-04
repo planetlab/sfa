@@ -474,6 +474,10 @@ class Network:
             if not relaxng(tree):
                 error = relaxng.error_log.last_error
                 message = "%s (line %s)" % (error.message, error.line)
+                self.api.logger.error("failed to validate rspec %r"%message)
+                self.api.logger.debug("---------- XML input BEG")
+                self.api.logger.debug(xml)
+                self.api.logger.debug("---------- XML input END")
                 raise InvalidRSpec(message)
 
         self.rspec = rspec
