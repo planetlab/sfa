@@ -31,4 +31,6 @@ try:
     rspec.add_slivers(nodes)
 except:
     print >> sys.stderr, "FAILED: %s" % nodes
+    sys.exit(1)
 print >>outfile, rspec.toxml()
+sys.exit(0)
