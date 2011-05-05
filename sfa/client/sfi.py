@@ -227,6 +227,10 @@ class Sfi:
                             help="delegate slice credential", metavar="HRN", default=None)
         
         if command in ("version"):
+            parser.add_option("-a", "--aggregate", dest="aggregate",
+                             default=None, help="aggregate host")
+            parser.add_option("-p", "--port", dest="port",
+                             default=AGGREGATE_PORT, help="aggregate port")
             parser.add_option("-R","--registry-version",
                               action="store_true", dest="version_registry", default=False,
                               help="probe registry version instead of slicemgr")
@@ -824,8 +828,7 @@ class Sfi:
             creds.append(delegated_cred)
         if opts.rspec_version:
             call_options['rspec_version'] = opts.rspec_version 
-        #result = server.ListResources(creds, call_options,unique_call_id())
-        result = server.ListResources(creds, call_options)
+        result = server.ListResources(creds, call_options,unique_call_id())
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)
@@ -848,8 +851,17 @@ class Sfi:
             creds.append(delegated_cred)
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
+
+        # TODO: need to determine if this request is going to a ProtoGENI aggregate. If so
+        # we need to obtain the keys for all users in the slice  
+        # e.g. 
+        # users = [
+        #  { urn: urn:publicid:IDN+emulab.net+user+alice
+        #    keys: [<ssh key A>, <ssh key B>] 
+        #  }]
+        users = []
         server = self.get_server_from_opts(opts)
-        result =  server.CreateSliver(slice_urn, creds, rspec, [], unique_call_id())
+        result =  server.CreateSliver(slice_urn, creds, rspec, users, unique_call_id())
         print result
         return result
 
