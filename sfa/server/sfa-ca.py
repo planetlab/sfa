@@ -43,6 +43,8 @@ def main():
                       help="gid file to import into the registry")
     parser.add_option("-e", "--export", dest="export", 
                       help="name of gid to export from registry")
+    parser.add_option("-t", "--type", dest="type",
+                      help="record type", default=None)
     parser.add_option("-o", "--outfile", dest="outfile",
                       help="where to write the exprted gid") 
     parser.add_option("-v", "--verbose", dest="verbose", default=False, 
@@ -139,10 +141,13 @@ def export_gid(options):
     from sfa.util.table import SfaTable
     # lookup the record for the specified hrn 
     hrn = options.export
-
-    # check sfa table first    
+    type = options.type
+    # check sfa table first
+    filter = {'hrn': hrn}
+    if type:
+        filter['type'] = type                    
     table = SfaTable()
-    records = table.find({'hrn': hrn, type: 'authority'})
+    records = table.find(filter)
     if not records:
         # check the authorities hierarchy 
         hierarchy = Hierarchy()
