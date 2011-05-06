@@ -340,7 +340,7 @@ class Sfi:
        self.key = Keypair(filename=key_file) 
        self.key_file = key_file
        self.cert_file = cert_file
-       self.cert = Certificate(filename=cert_file) 
+       self.cert = GID(filename=cert_file) 
        # Establish connection to server(s)
        self.logger.info("Contacting Registry at: %s"%self.reg_url)
        self.registry = xmlrpcprotocol.get_server(self.reg_url, key_file, cert_file, self.options)  
@@ -374,27 +374,36 @@ class Sfi:
     
     def get_cert_file(self, key_file):
     
-        file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cert")
-        if (os.path.isfile(file)):
-            # use existing cert if it exists                     
-            return file
-        else:
-            try:
-                # attempt to use gid as the cert.  
-                gid = self._get_gid()
-                self.logger.info("Writing certificate to %s"%file)
-                gid.save_to_file(file) 
-            except:
-                # generate self signed certificate
-                k = Keypair(filename=key_file)
-                cert = Certificate(subject=self.user)
-                cert.set_pubkey(k)
-                cert.set_issuer(k, self.user)
-                cert.sign()
-                self.logger.info("Writing self-signed certificate to %s"%file)
-                cert.save_to_file(file)
-            
-            return file
+        cert_file = os.path.join(self.options.sfi_dir, self.user.replace(self.authority + '.', '') + ".cert")
+        if (os.path.isfile(cert_file)):
+            # we'd perfer to use Registry issued certs instead of self signed certs. 
+            # if this is a Registry cert (GID) then we are done 
+            gid = GID(filename=cert_file)
+            if gid.get_urn():
+                return cert_file
+
+        # generate self signed certificate
+        k = Keypair(filename=key_file)
+        cert = Certificate(subject=self.user)
+        cert.set_pubkey(k)
+        cert.set_issuer(k, self.user)
+        cert.sign()
+        self.logger.info("Writing self-signed certificate to %s"%cert_file)
+        cert.save_to_file(cert_file)
+        # try to get registry issued cert
+        try:
+            self.logger.info("Getting Registry issued cert")
+            self.read_config()
+            # *hack.  need to set registyr before _get_gid() is called 
+            self.registry = xmlrpcprotocol.get_server(self.reg_url, key_file, cert_file, self.options)
+            gid = self._get_gid(type='user')
+            self.registry = None 
+            self.logger.info("Writing certificate to %s"%cert_file)
+            gid.save_to_file(cert_file)
+        except:
+            self.logger.info("Failed to download Registry issued cert")
+ 
+        return cert_file
 
     def get_cached_gid(self, file):
         """
@@ -417,7 +426,7 @@ class Sfi:
         self.logger.debug("Sfi.get_gid-> %s",gid.save_to_string(save_parents=True))
         return gid
 
-    def _get_gid(self, hrn=None):
+    def _get_gid(self, hrn=None, type=None):
         """
         git_gid helper. Retrive the gid from the registry and save it to file.
         """
@@ -430,7 +439,12 @@ class Sfi:
         if not gid:
             user_cred = self.get_user_cred()
             records = self.registry.Resolve(hrn, user_cred.save_to_string(save_parents=True))
-            if not records:
+            record = None
+            if type:
+                for rec in records:
+                   if type == record['type']:
+                        record = rec 
+            if not record:
                 raise RecordNotFound(args[0])
             gid = GID(string=records[0]['gid'])
             self.logger.info("Writing gid to %s"%gidfile)
