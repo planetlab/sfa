@@ -866,15 +866,28 @@ class Sfi:
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
 
-        # TODO: need to determine if this request is going to a ProtoGENI aggregate. If so
-        # we need to obtain the keys for all users in the slice  
-        # e.g. 
         # users = [
         #  { urn: urn:publicid:IDN+emulab.net+user+alice
         #    keys: [<ssh key A>, <ssh key B>] 
         #  }]
         users = []
         server = self.get_server_from_opts(opts)
+        version = server.GetVersion()
+        if 'sfa' not in version:
+            # need to pass along user keys if this request is going to a ProtoGENI aggregate 
+            # ProtoGeni Aggregaes will only install the keys of the user that is issuing the
+            # request.  all slice keys
+            user = {'urn': user_cred.get_gid_caller().get_urn(),
+                    'keys': []}
+            slice_record = self.registry.Resolve(slice_urn, creds)
+            if slice_record and 'researchers' in slice_record:
+                user_hrns = slice_record['researchers']
+                user_urns = [hrn_to_urn(hrn, 'user') for hrn in user_hrns] 
+                user_records = self.registry.Resolve(user_urns, creds)
+                for user_record in user_records:
+                    if 'keys' in user_record:
+                        user['keys'].extend(user_record['keys'])
+            users.append(user)             
         result =  server.CreateSliver(slice_urn, creds, rspec, users, unique_call_id())
         print result
         return result
