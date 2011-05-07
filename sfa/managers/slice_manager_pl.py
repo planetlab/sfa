@@ -17,7 +17,7 @@ from sfa.util.faults import *
 from sfa.util.record import SfaRecord
 from sfa.rspecs.pg_rspec import PGRSpec
 from sfa.rspecs.sfa_rspec import SfaRSpec
-from sfa.rspecs.pg_rspec_converter import PGRSpecConverter
+from sfa.rspecs.rspec_converter import RSpecConverter
 from sfa.rspecs.rspec_parser import parse_rspec    
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
@@ -55,39 +55,38 @@ def GetVersion(api):
         sm_version['peers'][api.hrn]=local_am_url.replace('localhost',sm_version['hostname'])
     return sm_version
 
-def CreateSliver(api, xrn, creds, rspec, users, call_id):
+def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
+
+    def _CreateSliver(server, xrn, credentail, rspec, users, call_id):
+            # get aggregate version
+            version = server.GetVersion()
+            if 'sfa' in version:
+                # just send the whole rspec to SFA AM/SM 
+                server.CreateSliver(xrn, credential, rspec, users, call_id)
+            elif 'geni_api' in version:
+                pass  
+                # convert to pg rspec
+                
 
     if Callids().already_handled(call_id): return ""
-
-    hrn, type = urn_to_hrn(xrn)
 
     # Validate the RSpec against PlanetLab's schema --disabled for now
     # The schema used here needs to aggregate the PL and VINI schemas
     # schema = "/var/www/html/schemas/pl.rng"
+    rspec = parse_rspec(rspec_str)
     schema = None
     if schema:
-        try:
-            tree = etree.parse(StringIO(rspec))
-        except etree.XMLSyntaxError:
-            message = str(sys.exc_info()[1])
-            raise InvalidRSpec(message)
-
-        relaxng_doc = etree.parse(schema)
-        relaxng = etree.RelaxNG(relaxng_doc)
-        
-        if not relaxng(tree):
-            error = relaxng.error_log.last_error
-            message = "%s (line %s)" % (error.message, error.line)
-            raise InvalidRSpec(message)
-
-    # get the callers hrn
-    valid_cred = api.auth.checkCredentials(creds, 'createsliver', hrn)[0]
-    caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
+        rspec.validate(schema)
 
     # attempt to use delegated credential first
     credential = api.getDelegatedCredential(creds)
-    if not credential:     
+    if not credential:
         credential = api.getCredential()
+
+    # get the callers hrn
+    hrn, type = urn_to_hrn(xrn)
+    valid_cred = api.auth.checkCredentials(creds, 'createsliver', hrn)[0]
+    caller_hrn = Credential(string=valid_cred).get_gid_caller().get_hrn()
     threads = ThreadManager()
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
@@ -97,7 +96,7 @@ def CreateSliver(api, xrn, creds, rspec, users, call_id):
             
         # Just send entire RSpec to each aggregate
         server = api.aggregates[aggregate]
-        threads.run(server.CreateSliver, xrn, credential, rspec, users, call_id)
+        threads.run(_CreateSliver, server, xrn, credential, rspec.toxml(), users, call_id)
             
     results = threads.get_results()
     rspec = SfaRSpec()
@@ -347,15 +346,7 @@ def ListResources(api, creds, options, call_id):
     rspec_version = RSpecVersion(options.get('rspec_version', 'SFA 1'))
     version_string = "rspec_%s_%s" % (rspec_version.format, rspec_version.version)
 
-    # get hrn of the original caller
-    origin_hrn = options.get('origin_hrn', None)
-    if not origin_hrn:
-        if isinstance(creds, list):
-            origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
-        else:
-            origin_hrn = Credential(string=creds).get_gid_caller().get_hrn()
-    
-    # look in cache first 
+    # look in cache first
     if caching and api.cache and not xrn:
         rspec =  api.cache.get(version_string)
         if rspec:
@@ -380,7 +371,6 @@ def ListResources(api, creds, options, call_id):
         my_opts = copy(options)
         my_opts['geni_compressed'] = False
         threads.run(server.ListResources, credential, my_opts, call_id)
-        #threads.run(server.get_resources, cred, xrn, origin_hrn)
                     
     results = threads.get_results()
     #results.append(open('/root/protogeni.rspec', 'r').read())
@@ -391,7 +381,7 @@ def ListResources(api, creds, options, call_id):
             if isinstance(tmp_rspec, SfaRSpec):
                 rspec.merge(result)
             elif isinstance(tmp_rspec, PGRSpec):
-                rspec.merge(PGRSpecConverter.to_sfa_rspec(result))
+                rspec.merge(RSpecConverter.to_sfa_rspec(result))
             else:
                 api.logger.info("SM.ListResources: invalid aggregate rspec")                        
         except:

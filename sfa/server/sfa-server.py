@@ -136,35 +136,29 @@ def init_server(options, config):
     """
     Execute the init method defined in the manager file 
     """
-    manager_base = 'sfa.managers'
-    if options.registry:
-        mgr_type = config.SFA_REGISTRY_TYPE
-        manager_module = manager_base + ".registry_manager_%s" % mgr_type
-        try: manager = __import__(manager_module, fromlist=[manager_base])
-        except: manager = None
-        if manager and hasattr(manager, 'init_server'): 
-            manager.init_server()    
-    if options.am:
-        mgr_type = config.SFA_AGGREGATE_TYPE
-        manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
-        try: manager = __import__(manager_module, fromlist=[manager_base])
-        except: manager = None
-        if manager and hasattr(manager, 'init_server'):
-            manager.init_server()    
-    if options.sm:
-        mgr_type = config.SFA_SM_TYPE
-        manager_module = manager_base + ".slice_manager_%s" % mgr_type
-        try: manager = __import__(manager_module, fromlist=[manager_base])
-        except: manager = None
-        if manager and hasattr(manager, 'init_server'):
-            manager.init_server()    
-    if options.cm:
-        mgr_type = config.SFA_CM_TYPE
-        manager_module = manager_base + ".component_manager_%s" % mgr_type
+    def init_manager(manager_module, manager_base):
         try: manager = __import__(manager_module, fromlist=[manager_base])
         except: manager = None
         if manager and hasattr(manager, 'init_server'):
             manager.init_server()
+    
+    manager_base = 'sfa.managers'
+    if options.registry:
+        mgr_type = config.SFA_REGISTRY_TYPE
+        manager_module = manager_base + ".registry_manager_%s" % mgr_type
+        init_manager(manager_module, manager_base)    
+    if options.am:
+        mgr_type = config.SFA_AGGREGATE_TYPE
+        manager_module = manager_base + ".aggregate_manager_%s" % mgr_type
+        init_manager(manager_module, manager_base)    
+    if options.sm:
+        mgr_type = config.SFA_SM_TYPE
+        manager_module = manager_base + ".slice_manager_%s" % mgr_type
+        init_manager(manager_module, manager_base)    
+    if options.cm:
+        mgr_type = config.SFA_CM_TYPE
+        manager_module = manager_base + ".component_manager_%s" % mgr_type
+        init_manager(manager_module, manager_base)    
 
 def sync_interfaces(server_key_file, server_cert_file):
     """
@@ -212,7 +206,6 @@ def main():
         r = Registry("", config.SFA_REGISTRY_PORT, server_key_file, server_cert_file)
         r.start()
 
-    # start aggregate manager
     if (options.am):
         from sfa.server.aggregate import Aggregate
         a = Aggregate("", config.SFA_AGGREGATE_PORT, server_key_file, server_cert_file)
