@@ -20,9 +20,10 @@ if command.opts.infile:
         f.close()
        
     try:
-        rspec.remove_slivers(nodes)
+        slivers = [{'hostname': node} for node in nodes]
+        rspec.remove_slivers(slivers)
     except:
-        print >> sys.stderr, "FAILED: %s"  
+        print >> sys.stderr, "FAILED: %s" % nodes 
 
     print rspec.toxml()
     

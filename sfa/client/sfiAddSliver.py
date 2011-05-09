@@ -28,7 +28,8 @@ else:
 rspec = parse_rspec(infile)
 nodes = file(command.opts.nodefile).read().split()
 try:
-    rspec.add_slivers(nodes)
+    slivers = [{'hostname': node} for node in nodes]
+    rspec.add_slivers(slivers)
 except:
     print >> sys.stderr, "FAILED: %s" % nodes
     sys.exit(1)
