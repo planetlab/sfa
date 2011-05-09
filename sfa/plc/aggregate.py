@@ -81,12 +81,26 @@ class Aggregate:
         rspec.add_links(self.links.values())
 
         if slice_xrn:
+            # get slice details
             slice_hrn, _ = urn_to_hrn(slice_xrn)
             slice_name = hrn_to_pl_slicename(slice_hrn)
             slices = self.api.plshell.GetSlices(self.api.plauth, slice_name)
             if slices:
-                slice = slices[0]   
-                hostnames = [self.nodes[node_id]['hostname'] for node_id in slice['node_ids']]
-                rspec.add_slivers(hostnames)
+                slice = slices[0]
+                slivers = []
+                tags = self.api.plshell.GetSliceTags(self.api.plauth, slice['slice_tag_ids'])
+                for node_id in slice['node_ids']:
+                    sliver = {}
+                    sliver['hostname'] = self.nodes[node_id]['hostname']
+                    sliver['tags'] = []
+                    for tag in tags:
+                        # if tag isn't bound to a node then it applies to all slivers
+                        if not tag['node_id']:
+                            sliver['tags'].append(tag)
+                        else:
+                            tag_host = self.nodes[tag['node_id']]['hostname']
+                            if tag_host == sliver['hostname']:
+                                sliver.tags.append(tag)
+                rspec.add_slivers(slivers)
 
         return rspec.toxml()          

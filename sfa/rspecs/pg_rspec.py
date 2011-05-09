@@ -73,12 +73,13 @@ class PGRSpec(RSpec):
             #if 'interfaces' in node:
             
 
-    def add_slivers(self, hostnames, check_for_dupes=False): 
-        if not isinstance(hostnames, list):
-            hostnames = [hostnames]
+    def add_slivers(self, slivers, check_for_dupes=False): 
+        if not isinstance(slivers, list):
+            slivers = [slivers]
 
         nodes_with_slivers = self.get_nodes_with_slivers()
-        for hostname in hostnames:
+        for sliver in slivers:
+            hostname = sliver['hostname']
             if hostname in nodes_with_slivers:
                 continue
             nodes = self.xml.xpath('//rspecv2:node[@component_name="%s"] | //node[@component_name="%s"]' % (hostname, hostname), namespaces=self.namespaces)

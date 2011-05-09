@@ -316,12 +316,7 @@ def ListResources(api, creds, options,call_id):
 
     aggregate = Aggregate(api)
 
-    if xrn:
-        # get this rspec for the specified slice 
-        rspec =  aggregate.get_rspec(slice_xrn=hrn, version=rspec_version)
-    else:
-        # generate rspec in both pg and sfa formats
-        rspec = aggregate.get_rspec(version=rspec_version)
+    rspec =  aggregate.get_rspec(slice_xrn=xrn, version=rspec_version)
 
     # cache the result
     if caching and api.cache and not xrn:

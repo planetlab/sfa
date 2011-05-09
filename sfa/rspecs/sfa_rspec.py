@@ -189,7 +189,7 @@ class SfaRSpec(RSpec):
             if 'interfaces' in node:
                 for interface in node['interfaces']:
                     if 'bwlimit' in interface and interface['bwlimit']:
-                        bwlimit = etree.SubElement(node_tag, 'bwlimit', units='kbps').tet = str(interface['bwlimit']/1000)
+                        bwlimit = etree.SubElement(node_tag, 'bw_limit', units='kbps').tet = str(interface['bwlimit']/1000)
             if 'tags' in node:
                 for tag in node['tags']:
                    # expose this hard wired list of tags, plus the ones that are marked 'sfa' in their category 
@@ -202,25 +202,28 @@ class SfaRSpec(RSpec):
     def add_links(self, links):
         pass
     
-    def add_slivers(self, hostnames, network=None, no_dupes=False):
-        if not isinstance(hostnames, list):
-            hostnames = [hostnames]
+    def add_slivers(self, slivers, network=None, no_dupes=False):
+        if not isinstance(slivers, list):
+            slivers = [slivers]
 
         nodes_with_slivers = self.get_nodes_with_slivers(network)
-        for hostname in hostnames:
-            if hostname in nodes_with_slivers:
+        for sliver in slivers:
+            if sliver['hostname'] in nodes_with_slivers:
                 continue
-            node = self.get_node_element(hostname, network)
-            etree.SubElement(node, 'sliver')
+            node_elem = self.get_node_element(sliver['hostname'], network)
+            sliver_elem = etree.SubElement(node_elem, 'sliver')
+            if 'tags' in sliver:
+                for tag in sliver['tags']:
+                    etree.SubElement(sliver_elem, tag['name'], value=tag['value']
 
-    def remove_slivers(self, hostnames, network=None, no_dupes=False):
-        if not isinstance(hostnames, list):
-            hostnames = [hostnames]
-        for hostname in hostnames:
-            node = self.get_node_element(hostname, network)
-            sliver = node.find('sliver')
-            if sliver != None:
-                node.remove(sliver)                 
+    def remove_slivers(self, slivers, network=None, no_dupes=False):
+        if not isinstance(slivers, list):
+            slivers = [slivers]
+        for sliver in slivers:
+            node_elem = self.get_node_element(sliver['hostname'], network)
+            sliver_elem = node.find('sliver')
+            if sliver_elem != None:
+                node_elem.remove(sliver)                 
     
     def add_default_sliver_attribute(self, name, value, network=None):
         if network:
