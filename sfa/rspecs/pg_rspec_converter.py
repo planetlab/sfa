@@ -3,6 +3,7 @@ from lxml import etree
 from StringIO import StringIO
 from sfa.util.xrn import *
 from sfa.rspecs.pg_rspec import PGRSpec 
+from sfa.rspecs.sfa_rspec import SfaRSpec
 
 xslt='''<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="xml" indent="no"/>
@@ -33,36 +34,32 @@ transform=etree.XSLT(xslt_doc)
 class PGRSpecConverter:
 
     @staticmethod
-    def to_sfa_node(site, node, i=0):
-        urn = node.get('component_uuid')
-        hrn, _ = urn_to_hrn(urn)
-        hostname = Xrn.urn_split(urn)[-1]
-        node_tag = etree.SubElement(site, "node")
-        hostname_tag = etree.SubElement(node_tag, "hostname").text = hostname
-        urn_tag = etree.SubElement(node_tag, "urn").text = urn
-        for child in node.getchildren():
-            node_tag.append(transform(child).getroot())      
-
-    @staticmethod
-    def to_sfa_network(pg_rspec, xml): 
-        network_urn = pg_rspec.get_network()
-        network,  _ = urn_to_hrn(network_urn)
-        nodes = pg_rspec.get_node_elements()
-        network_tag = etree.SubElement(xml, "network")
-        network_tag.set("name", network)
-        network_tag.set("id", network)
-        i = 0
-        for node in nodes:
-           PGRSpecConverter.to_sfa_node(network_tag, node, i)
-        
-    @staticmethod
     def to_sfa_rspec(rspec):
         pg_rspec = PGRSpec(rspec=rspec)
-        header = '<?xml version="1.0"?>\n'
-        xml = etree.Element("RSpec", type="SFA") 
-        PGRSpecConverter.to_sfa_network(pg_rspec, xml) 
-        return header + etree.tostring(xml, pretty_print=True)
+        sfa_rspec = SfaRSpec()
 
+        # get network
+        network_urn = pg_rspec.get_network()
+        network,  _ = urn_to_hrn(network_urn)
+        network_element = sfa_rspec.add_element('network', {'name': network, 'id': network})
+        
+        # get nodes
+        pg_nodes_elements = pg_rspec.get_node_elements()
+        i = 1
+        for pg_node_element in pg_nodes_elements:
+            urn = pg_node_element.get('component_uuid')
+            hostname = Xrn.urn_split(urn)[-1]
+            node_element = sfa_rspec.add_element('node', {'id': 'n'+str(i)}, parent=network_element)
+            hostname_element = sfa_rspec.add_element('hostname', parent=node_element, text=hostname) 
+            urn_element = sfa_rspec.add_element('urn', parent=node_element, text=urn)
+            for child in pg_node_element.getchildren():
+                node_element.append(transform(child).getroot())
+            i = i+1
+            break 
+ 
+        return sfa_rspec.toxml()
+         
 if __name__ == '__main__':
-   rspec = 'protogeni.rspec' 
-   print PGRSpecConverter.to_sfa_rspec(rspec)  
+    import sys
+    if len(sys.argv) > 1:        
+        print PGRSpecConverter.to_sfa_rspec(sys.argv[1])  
