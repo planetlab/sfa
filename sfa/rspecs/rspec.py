@@ -21,6 +21,9 @@ class RSpec:
             self.create()
 
     def create(self, type="advertisement"):
+        """
+        Create root element
+        """
         # eg. 2011-03-23T19:53:28Z 
         date_format = '%Y-%m-%dT%H:%M:%SZ'
         now = datetime.utcnow()
@@ -31,6 +34,9 @@ class RSpec:
         self.xml.set('generated', generated_ts)
     
     def parse_rspec(self, rspec, namespaces={}):
+        """
+        parse rspec into etree
+        """
         parser = etree.XMLParser(remove_blank_text=True)
         try:
             tree = etree.parse(rspec, parser)
@@ -46,10 +52,32 @@ class RSpec:
            self.namespaces = namespaces
 
     def add_attribute(self, elem, name, value):
+        """
+        Add attribute to specified etree element    
+        """
         opt = etree.SubElement(elem, name)
         opt.text = value
 
+    def add_element(self, name, attrs={}, parent=None, text=""):
+        """
+        Generic wrapper around etree.SubElement(). Adds an element to 
+        specified parent node. Adds element to root node is parent is 
+        not specified. 
+        """
+        if parent == None:
+            parent = self.xml
+        element = etree.SubElement(parent, name)
+        if text:
+            element.text = text
+        if isinstance(attrs, dict):
+            for attr in attrs:
+                element.set(attr, attrs[attr])  
+        return element
+
     def remove_attribute(self, elem, name, value):
+        """
+        Removes an attribute from an element
+        """
         if elem is not None:
             opts = elem.iterfind(name)
             if opts is not None:
@@ -59,6 +87,10 @@ class RSpec:
 
 
     def validate(self, schema):
+        """
+        Validate against rng schema
+        """
+        
         relaxng_doc = etree.parse(schema)
         relaxng = etree.RelaxNG(relaxng_doc)
         if not relaxng(self.xml):
