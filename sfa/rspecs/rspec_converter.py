@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from sfa.rspecs.pg_rspec_converter import PGRSpecConverter
-from sfa.rspecs.sfa_rspec_converter import SFARSpecConverter
+from sfa.rspecs.sfa_rspec_converter import SfaRSpecConverter
 from sfa.rspecs.rspec_parser import parse_rspec
 
 
@@ -23,7 +23,7 @@ class RSpecConverter:
         if rspec.format == 'pg':
             return in_rspec
         elif rspec.format == 'sfa':
-            return SFARSpecConverter.to_pg_rspec(in_rspec)
+            return SfaRSpecConverter.to_pg_rspec(in_rspec)
         else:
             return in_rspec 
 
