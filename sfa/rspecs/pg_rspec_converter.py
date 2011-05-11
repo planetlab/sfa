@@ -35,7 +35,10 @@ class PGRSpecConverter:
 
     @staticmethod
     def to_sfa_rspec(rspec):
-        pg_rspec = PGRSpec(rspec=rspec)
+        if isinstance(rspec, PGRSpec):
+            pg_rspec = rspec
+        else:        
+            pg_rspec = PGRSpec(rspec=rspec)
         sfa_rspec = SfaRSpec()
 
         # get network
