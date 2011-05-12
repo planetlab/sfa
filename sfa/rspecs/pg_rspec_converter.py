@@ -55,10 +55,11 @@ class PGRSpecConverter:
             node_element = sfa_rspec.add_element('node', {'id': 'n'+str(i)}, parent=network_element)
             hostname_element = sfa_rspec.add_element('hostname', parent=node_element, text=hostname) 
             urn_element = sfa_rspec.add_element('urn', parent=node_element, text=urn)
+
+            # TODO: convert sliver element
             for child in pg_node_element.getchildren():
                 node_element.append(transform(child).getroot())
             i = i+1
-            break 
  
         return sfa_rspec.toxml()
          
