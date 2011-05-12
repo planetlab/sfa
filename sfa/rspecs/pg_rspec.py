@@ -15,6 +15,7 @@ class PGRSpec(RSpec):
     schemas =  {'xsi': 'http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd'
             }
     format = 'pg'
+    format = 'protogeni'
     xml = None
 
     def get_network(self):

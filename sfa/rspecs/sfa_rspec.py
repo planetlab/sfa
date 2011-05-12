@@ -12,6 +12,7 @@ class SfaRSpec(RSpec):
     header = '<?xml version="1.0"?>\n'
     namespaces = {}
     format = 'sfa'
+    type = 'sfa'
     ###################
     # Parser
     ###################

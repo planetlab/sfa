@@ -19,6 +19,8 @@ from sfa.rspecs.pg_rspec import PGRSpec
 from sfa.rspecs.sfa_rspec import SfaRSpec
 from sfa.rspecs.rspec_converter import RSpecConverter
 from sfa.rspecs.rspec_parser import parse_rspec    
+from sfa.rspecs.rspec_version import RSpecVersion
+from sfa.rspecs.pl_rspec_version import supported_rspecs
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.sfaticket import *
@@ -27,8 +29,6 @@ from sfa.util.threadmanager import ThreadManager
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol     
 import sfa.plc.peers as peers
 from sfa.util.version import version_core
-from sfa.rspecs.rspec_version import RSpecVersion
-from sfa.rspecs.pl_rspec_version import supported_rspecs
 from sfa.util.callids import Callids
 
 # we have specialized xmlrpclib.ServerProxy to remember the input url
@@ -60,14 +60,15 @@ def GetVersion(api):
 def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
 
     def _CreateSliver(server, xrn, credentail, rspec, users, call_id):
+            # should check the cache first
             # get aggregate version
             version = server.GetVersion()
-            if 'sfa' in version:
-                # just send the whole rspec to SFA AM/SM 
-                server.CreateSliver(xrn, credential, rspec, users, call_id)
-            elif 'geni_api' in version:
-                pass  
-                # convert to pg rspec
+            if 'sfa' not in version and 'geni_api' in version:
+                # sfa aggregtes support both sfa and pg rspecs, no need to convert
+                # if aggregate supports sfa rspecs. othewise convert to pg rspec
+                rspec = RSpecConverter.to_pg_rspec(rspec)
+
+            return server.CreateSliver(xrn, credential, rspec, users, call_id)
                 
 
     if Callids().already_handled(call_id): return ""

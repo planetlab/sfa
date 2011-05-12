@@ -3,6 +3,7 @@ from sfa.util.xrn import *
 from sfa.util.plxrn import *
 from sfa.rspecs.sfa_rspec import SfaRSpec
 from sfa.rspecs.pg_rspec  import PGRSpec
+from sfa.rspecs.rspec_version import RSpecVersion
 
 class Aggregate:
 
@@ -67,14 +68,12 @@ class Aggregate:
     def get_rspec(self, slice_xrn=None, version = None):
         self.prepare()
         rspec = None
-        if version:
-            if version['type'].lower() == 'protogeni':
-                rspec = PGRSpec()
-            elif version['type'].lower() == 'sfa':
-                rspec = SfaRSpec()
-            else:
-                rspec = SfaRSpec()
-        else: 
+        rspec_version = RSpecVersion(version)
+        if rspec_version['type'].lower() == 'protogeni':
+            rspec = PGRSpec()
+        elif rspec_version['type'].lower() == 'sfa':
+            rspec = SfaRSpec()
+        else:
             rspec = SfaRSpec()
 
         rspec.add_nodes(self.nodes.values())

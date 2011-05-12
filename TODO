@@ -1,11 +1,11 @@
+RSpecs
+- RSpecConverter should convert sliver tags
+- SM should cache result of Aggregte GetVersion call when CreateSliver is executed
+- CreateSlivers should update SliverTags/attributes 
+
 Registry
 - Verify that sub authority certificates still work
 
-SM
-- Slice Manager methods should return real result instead of  just 1 (Renew
-  Sliver, etc) 
-
-- connect SM to ProtoGeni Aggregates
 
 Stop invalid users
   * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list

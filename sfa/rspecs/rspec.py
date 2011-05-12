@@ -13,6 +13,7 @@ class RSpec:
     namespaces = {}
     config = Config()
     xml = None
+    type = None
   
     def __init__(self, rspec="", namespaces={}):
         if rspec:
