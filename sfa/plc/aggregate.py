@@ -93,6 +93,7 @@ class Aggregate:
                     sliver = {}
                     sliver['hostname'] = self.nodes[node_id]['hostname']
                     sliver['tags'] = []
+                    slivers.append(sliver)
                     for tag in tags:
                         # if tag isn't bound to a node then it applies to all slivers
                         if not tag['node_id']:
