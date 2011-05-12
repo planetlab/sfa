@@ -1,31 +1,42 @@
 #!/usr/bin/python
 from sfa.util.sfalogging import _SfaLogger
+from sfa.rspecs.pl_rspec_version import default_rspec_version 
 
+class RSpecVersion(dict):
 
-class RSpecVersion:
+    fields = {'type': None,
+              'version': None,
+              'schema': None,
+              'namespace': None,
+              'extensions': []
+        }
+    def __init__(self, version={}):
+        
+        self.logger = _SfaLogger('/var/log/sfa.log')
+        dict.__init__(self, self.fields)
 
-    format = 'sfa'
-    version = '1'
-    schema = None
-    namespace = None
-    extensions = []
+        if not version:
+            self.update(default_rspec_version)          
+        elif isinstance(version, dict):
+            self.update(version)
+        elif isinstance(version, basestring):
+            version_parts = version.split(' ')
+            num_parts = len(version_parts)
+            self['type'] = version_parts[0]
+            if num_parts > 1:
+                self['version'] = version_parts[1]
+        else:
+            logger.info("Unable to parse rspec version, using default")
 
-    def __init__(self, version_string):
-        self.logger = _SfaLogger('/var/log/sfa.log') 
-        self.parse_version_string(version_string)
+    def get_version_name(self):
+        return "%s %s" % (str(self['type']), str(self['version']))
 
-    def parse_version_string(self, version_string):
-        # version_raw is currently a string but will 
-        # eventually be a struct.
-        format_split = version_string.split(' ')
-        try: self.format = format_split[0].lower()  
-        except: pass
-        try: self.version = format_split[1]
-        except: pass
-    
+if __name__ == '__main__':
 
-    def parse_version_struct(self, version_struct):
-        try:
-            pass
-        except:
-            pass
+    from sfa.rspecs.pl_rspec_version import ad_rspec_versions
+    for version in [RSpecVersion(), 
+                    RSpecVersion("SFA"), 
+                    RSpecVersion("SFA 1"),
+                    RSpecVersion(ad_rspec_versions[0])]: 
+        print version.get_version_name() + ": " + str(version)
+

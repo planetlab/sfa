@@ -28,6 +28,7 @@ import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 import sfa.plc.peers as peers
 from sfa.util.version import version_core
 from sfa.rspecs.rspec_version import RSpecVersion
+from sfa.rspecs.pl_rspec_version import supported_rspecs
 from sfa.util.callids import Callids
 
 # we have specialized xmlrpclib.ServerProxy to remember the input url
@@ -44,11 +45,12 @@ def GetVersion(api):
     peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.iteritems() 
                    if peername != api.hrn])
     xrn=Xrn (api.hrn)
-    sm_version=version_core({'interface':'slicemgr',
-                             'hrn' : xrn.get_hrn(),
-                             'urn' : xrn.get_urn(),
-                             'peers': peers,
-                             })
+    version_more = {'interface':'slicemgr',
+                    'hrn' : xrn.get_hrn(),
+                    'urn' : xrn.get_urn(),
+                    'peers': peers,}
+    version_more.update(supported_rspecs)     
+    sm_version=version_core(version_more)
     # local aggregate if present needs to have localhost resolved
     if api.hrn in api.aggregates:
         local_am_url=get_serverproxy_url(api.aggregates[api.hrn])
@@ -344,7 +346,7 @@ def ListResources(api, creds, options, call_id):
 
     # get the rspec's return format from options
     rspec_version = RSpecVersion(options.get('rspec_version', 'SFA 1'))
-    version_string = "rspec_%s_%s" % (rspec_version.format, rspec_version.version)
+    version_string = "rspec_%s" % (rspec_version.get_version_name())
 
     # look in cache first
     if caching and api.cache and not xrn:

@@ -68,9 +68,10 @@ class Aggregate:
         self.prepare()
         rspec = None
         if version:
-            format = version.format
-            if format == 'pg':
+            if version['type'].lower() == 'protogeni':
                 rspec = PGRSpec()
+            elif version['type'].lower() == 'sfa':
+                rspec = SfaRSpec()
             else:
                 rspec = SfaRSpec()
         else: 

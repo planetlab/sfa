@@ -204,7 +204,7 @@ class Sfi:
                             default="all")
         # display formats
         if command in ("resources"):
-            parser.add_option("-r", "--rspec-version", dest="rspec_version", default="sfa 1",
+            parser.add_option("-r", "--rspec-version", dest="rspec_version", default="SFA 1",
                               help="schema type and version of resulting RSpec")
             parser.add_option("-f", "--format", dest="format", type="choice",
                              help="display format ([xml]|dns|ip)", default="xml",

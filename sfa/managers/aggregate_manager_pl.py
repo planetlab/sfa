@@ -23,19 +23,18 @@ from sfa.plc.aggregate import Aggregate
 from sfa.plc.slices import *
 from sfa.util.version import version_core
 from sfa.rspecs.rspec_version import RSpecVersion
+from sfa.rspecs.pl_rspec_version import supported_rspecs 
 from sfa.rspecs.rspec_parser import parse_rspec 
 from sfa.util.sfatime import utcparse
 from sfa.util.callids import Callids
 
 def GetVersion(api):
     xrn=Xrn(api.hrn)
-    return version_core({'interface':'aggregate',
-                         'testbed':'myplc',
-                         'hrn':xrn.get_hrn(),
-                         'input_rspec' : ['PG 2', 'SFA 1'],
-                         'output_rspec' : ["SFA 1"],
-                         'ad_rspec' : ["PG 2", "SFA 1"],
-                         })
+    version_more = {'interface':'aggregate',
+                    'testbed':'myplc',
+                    'hrn':xrn.get_hrn()}
+    version_more.update(supported_rspecs)
+    return version_core(version_more)
 
 def __get_registry_objects(slice_xrn, creds, users):
     """
@@ -203,7 +202,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                          slice.peer_id)
 
-    return aggregate.get_rspec(slice_xrn=slice_xrn, version=RSpecVersion("pg"))
+    return aggregate.get_rspec(slice_xrn=slice_xrn, version=RSpecVersion("protogeni"))
 
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
@@ -305,7 +304,7 @@ def ListResources(api, creds, options,call_id):
 
     # get the rspec's return format from options
     rspec_version = RSpecVersion(options.get('rspec_version', 'SFA 1'))
-    version_string = "rspec_%s_%s" % (rspec_version.format, rspec_version.version)
+    version_string = "rspec_%s" % (rspec_version.get_version_name())
     
     # look in cache first
     if caching and api.cache and not xrn:

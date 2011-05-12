@@ -2,7 +2,7 @@
 version_tag="@VERSIONTAG@"
 scm_url="@SCMURL@"
 import socket
-
+ 
 def version_core (more={}):
     core = { 'geni_api':1,
              'sfa' : 1,
