@@ -49,7 +49,6 @@ class PGRSpecConverter:
         # get nodes
         pg_nodes_elements = pg_rspec.get_node_elements()
         nodes_with_slivers = pg_rspec.get_nodes_with_slivers()
-        print "nodes with slivers", nodes_with_slivers
         i = 1
         for pg_node_element in pg_nodes_elements:
             node_element = sfa_rspec.add_element('node', {'id': 'n'+str(i)}, parent=network_element)
