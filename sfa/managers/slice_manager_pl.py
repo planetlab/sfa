@@ -59,11 +59,20 @@ def GetVersion(api):
 
 def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
 
-    def _CreateSliver(server, xrn, credentail, rspec, users, call_id):
-            # should check the cache first
-            # get aggregate version
-            version = server.GetVersion()
-            if 'sfa' not in version and 'geni_api' in version:
+    def _CreateSliver(aggregate, xrn, credential, rspec, users, call_id):
+            # Need to call GetVersion at an aggregate to determine the supported 
+            # rspec type/format beofre calling CreateSliver at an Aggregate. 
+            # The Aggregate's verion info is cached 
+            server = api.aggregates[aggregate]
+            # get cached aggregate version
+            aggregate_version_key = 'version_'+ aggregate
+            aggregate_version = api.cache.get(aggregate_version_key)
+            if not aggregate_version:
+                # get current aggregate version anc cache it for 24 hours
+                aggregate_version = server.GetVersion()
+                api.cache.add(aggregate_version_key, aggregate_version, 60 * 60 * 24)
+                
+            if 'sfa' not in aggregate_version and 'geni_api' in aggregate_version:
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. othewise convert to pg rspec
                 rspec = RSpecConverter.to_pg_rspec(rspec)
@@ -98,8 +107,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
             continue
             
         # Just send entire RSpec to each aggregate
-        server = api.aggregates[aggregate]
-        threads.run(_CreateSliver, server, xrn, credential, rspec.toxml(), users, call_id)
+        threads.run(_CreateSliver, aggregate, xrn, credential, rspec.toxml(), users, call_id)
             
     results = threads.get_results()
     rspec = SfaRSpec()

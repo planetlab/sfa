@@ -1,6 +1,4 @@
 RSpecs
-- RSpecConverter should convert sliver tags
-- SM should cache result of Aggregte GetVersion call when CreateSliver is executed
 - CreateSlivers should update SliverTags/attributes 
 
 Registry
