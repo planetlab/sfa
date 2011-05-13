@@ -48,15 +48,23 @@ class PGRSpecConverter:
         
         # get nodes
         pg_nodes_elements = pg_rspec.get_node_elements()
+        nodes_with_slivers = pg_rspec.get_nodes_with_slivers()
+        print "nodes with slivers", nodes_with_slivers
         i = 1
         for pg_node_element in pg_nodes_elements:
-            urn = pg_node_element.get('component_uuid')
-            hostname = Xrn.urn_split(urn)[-1]
             node_element = sfa_rspec.add_element('node', {'id': 'n'+str(i)}, parent=network_element)
-            hostname_element = sfa_rspec.add_element('hostname', parent=node_element, text=hostname) 
+            urn = pg_node_element.xpath('@component_uuid | @component_id')
+            if urn:
+                urn = urn[0]
+                hostname = Xrn.urn_split(urn)[-1]
+                hostname_element = sfa_rspec.add_element('hostname', parent=node_element, text=hostname)
+                if hostname in nodes_with_slivers:
+                    sfa_rspec.add_element('sliver', parent=node_element)
+                     
             urn_element = sfa_rspec.add_element('urn', parent=node_element, text=urn)
 
-            # TODO: convert sliver element
+
+            # just copy over remaining child elements  
             for child in pg_node_element.getchildren():
                 node_element.append(transform(child).getroot())
             i = i+1
