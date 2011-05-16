@@ -5,9 +5,6 @@ Registry
 - Verify that sub authority certificates still work
 
 
-Stop invalid users
-  * a recently disabled/deleted user may still have a valid cred. Keep a list of valid/invalid users on the aggregate and check callers against this list
-
 Component manager
   * install trusted certs when interface starts (component_manager_pl.init_server())
   * Redeem ticket - RedeemTicket/AdminTicket not working. Why?
