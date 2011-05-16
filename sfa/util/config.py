@@ -98,6 +98,12 @@ class Config:
         else:
             return "pl"
 
+    def get_interface_hrn(self):
+        if (hasattr(self,'SFA_INTERFACE_HRN')):
+            return self.SFA_INTERFACE_HRN
+        else:
+            return "plc"
+
     def get_plc_dbinfo(self):
         return {
             'dbname' : self.SFA_PLC_DB_NAME,
@@ -106,6 +112,18 @@ class Config:
             'user' : self.SFA_PLC_DB_USER,
             'password' : self.SFA_PLC_DB_PASSWORD
             }
+
+    # TODO: find a better place to put this method
+    def get_max_aggrMgr_info(self):
+        am_apiclient_path = '/usr/local/MAXGENI_AM_APIClient'
+        if (hasattr(self,'MAXGENI_AM_APICLIENT_PATH')):
+            am_client_path = self.MAXGENI_AM_APICLIENT_PATH
+
+        am_url = 'https://geni.dragon.maxgigapop.net:8443/axis2/services/AggregateGENI'
+        if (hasattr(self,'MAXGENI_AM_URL')):
+            am_url = self.MAXGENI_AM_URL
+
+        return (am_apiclient_path,am_url)
 
     ##
     # SFA uses a PLCAPI connection to perform operations on the registry,

@@ -99,7 +99,8 @@ class SfaAPI(BaseAPI):
         self.credential = None
         # Initialize the PLC shell only if SFA wraps a myPLC
         rspec_type = self.config.get_aggregate_type()
-        if (rspec_type == 'pl' or rspec_type == 'vini' or rspec_type == 'eucalyptus'):
+        if (rspec_type == 'pl' or rspec_type == 'vini' or \
+            rspec_type == 'eucalyptus' or rspec_type == 'max'):
             self.plshell = self.getPLCShell()
             self.plshell_version = "4.3"
 
