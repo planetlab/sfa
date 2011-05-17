@@ -4,15 +4,21 @@ from StringIO import StringIO
 from sfa.rspecs.rspec import RSpec 
 from sfa.util.xrn import *
 from sfa.util.plxrn import hostname_to_urn
-from sfa.util.config import Config  
+from sfa.util.config import Config
+from sfa.rspecs.rspec_version import RSpecVersion  
 
+
+_version = { 'type': 'SFA', 
+             'version': '1' 
+}
+
+sfa_rspec_version = RSpecVersion(_sfa_rspec_version)
 
 class SfaRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
-    namespaces = {}
-    format = 'sfa'
-    type = 'sfa'
+    version = sfa_rspec_version
+
     ###################
     # Parser
     ###################
@@ -193,7 +199,7 @@ class SfaRSpec(RSpec):
             if 'interfaces' in node:
                 for interface in node['interfaces']:
                     if 'bwlimit' in interface and interface['bwlimit']:
-                        bwlimit = etree.SubElement(node_tag, 'bw_limit', units='kbps').tet = str(interface['bwlimit']/1000)
+                        bwlimit = etree.SubElement(node_tag, 'bw_limit', units='kbps').text = str(interface['bwlimit']/1000)
             if 'tags' in node:
                 for tag in node['tags']:
                    # expose this hard wired list of tags, plus the ones that are marked 'sfa' in their category 
