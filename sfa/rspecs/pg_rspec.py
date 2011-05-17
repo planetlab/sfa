@@ -4,19 +4,26 @@ from StringIO import StringIO
 from sfa.rspecs.rspec import RSpec 
 from sfa.util.xrn import *
 from sfa.util.plxrn import hostname_to_urn
-from sfa.util.config import Config  
+from sfa.util.config import Config 
+from sfa.rspecs.rspec_version import RSpecVersion 
+
+_version = {'type':  'protogeni',
+            'version': '2',
+            'schema': 'http://www.protogeni.net/resources/rspec/2/request.xsd',
+            'namespace': 'http://www.protogeni.net/resources/rspec/2',
+            'extenstions':  [
+                'http://www.protogeni.net/resources/rspec/ext/gre-tunnel/1',
+                'http://www.protogeni.net/resources/rspec/ext/other-ext/3'
+            ]
+}
+pg_rspec_version = RSpecVersion(_version)
 
 class PGRSpec(RSpec):
+    xml = None
     header = '<?xml version="1.0"?>\n'
     template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/0.2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd"></rspec>"""
-    namespaces = {'rspecv2':'http://www.protogeni.net/resources/rspec/0.2',
-                  'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
-                 }
-    schemas =  {'xsi': 'http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd'
-            }
-    format = 'pg'
-    format = 'protogeni'
-    xml = None
+    version = pg_rspec_version
+    namespaces = {'rspecv2': version['namespace']}
 
     def get_network(self):
         network = None 

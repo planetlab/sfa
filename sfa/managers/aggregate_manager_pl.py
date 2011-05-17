@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import datetime
 import time
 import traceback
@@ -23,17 +25,23 @@ from sfa.plc.aggregate import Aggregate
 from sfa.plc.slices import *
 from sfa.util.version import version_core
 from sfa.rspecs.rspec_version import RSpecVersion
-from sfa.rspecs.pl_rspec_version import supported_rspecs 
+from sfa.rspecs.sfa_rspec import sfa_rspec_version
+from sfa.rspecs.pg_rspec import pg_rspec_version
 from sfa.rspecs.rspec_parser import parse_rspec 
 from sfa.util.sfatime import utcparse
 from sfa.util.callids import Callids
 
 def GetVersion(api):
     xrn=Xrn(api.hrn)
+
+    supported_rspecs = [dict(pg_rspec_version), dict(sfa_rspec_version)]
     version_more = {'interface':'aggregate',
                     'testbed':'myplc',
-                    'hrn':xrn.get_hrn()}
-    version_more.update(supported_rspecs)
+                    'hrn':xrn.get_hrn(),
+                    'request_rspec_versions': supported_rspecs,
+                    'ad_rspec_versions': supported_rspecs,
+                    'default_ad_rspec': dict(sfa_rspec_version)
+                    }
     return version_core(version_more)
 
 def __get_registry_objects(slice_xrn, creds, users):
@@ -202,7 +210,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                          slice.peer_id)
 
-    return aggregate.get_rspec(slice_xrn=slice_xrn, version=rspec.type)
+    return aggregate.get_rspec(slice_xrn=slice_xrn, version=rspec.version)
 
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
@@ -303,7 +311,7 @@ def ListResources(api, creds, options,call_id):
     (hrn, type) = urn_to_hrn(xrn)
 
     # get the rspec's return format from options
-    rspec_version = RSpecVersion(options.get('rspec_version', 'SFA 1'))
+    rspec_version = RSpecVersion(options.get('rspec_version'))
     version_string = "rspec_%s" % (rspec_version.get_version_name())
     
     # look in cache first

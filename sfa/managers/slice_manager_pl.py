@@ -20,7 +20,8 @@ from sfa.rspecs.sfa_rspec import SfaRSpec
 from sfa.rspecs.rspec_converter import RSpecConverter
 from sfa.rspecs.rspec_parser import parse_rspec    
 from sfa.rspecs.rspec_version import RSpecVersion
-from sfa.rspecs.pl_rspec_version import supported_rspecs
+from sfa.rspecs.sfa_rspec import sfa_rspec_version
+from sfa.rspecs.pg_rspec import pg_rspec_version    
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.sfaticket import *
@@ -45,11 +46,15 @@ def GetVersion(api):
     peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.iteritems() 
                    if peername != api.hrn])
     xrn=Xrn (api.hrn)
+    supported_rspecs = [dict(pg_rspec_version), dict(sfa_rspec_version)]
     version_more = {'interface':'slicemgr',
                     'hrn' : xrn.get_hrn(),
                     'urn' : xrn.get_urn(),
-                    'peers': peers,}
-    version_more.update(supported_rspecs)     
+                    'peers': peers,
+                    'request_rspec_versions': supported_rspecs,
+                    'ad_rspec_versions': supported_rspecs,
+                    'default_ad_rspec': dict(sfa_rspec_version)
+                    }
     sm_version=version_core(version_more)
     # local aggregate if present needs to have localhost resolved
     if api.hrn in api.aggregates:
@@ -354,7 +359,8 @@ def ListResources(api, creds, options, call_id):
     (hrn, type) = urn_to_hrn(xrn)
 
     # get the rspec's return format from options
-    rspec_version = RSpecVersion(options.get('rspec_version', 'SFA 1'))
+    rspec_version = RSpecVersion(options.get('rspec_version'))
+    print dict(rspec_version)
     version_string = "rspec_%s" % (rspec_version.get_version_name())
 
     # look in cache first

@@ -841,8 +841,10 @@ class Sfi:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
             creds.append(delegated_cred)
         if opts.rspec_version:
-            call_options['rspec_version'] = opts.rspec_version 
+            #call_options['rspec_version'] = opts.rspec_version 
+            call_options['rspec_version'] = {'type': opts.rspec_version, 'version': "2"} 
         result = server.ListResources(creds, call_options,unique_call_id())
+        #result = server.ListResources(creds, call_options)
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)
@@ -875,8 +877,9 @@ class Sfi:
         version = server.GetVersion()
         if 'sfa' not in version:
             # need to pass along user keys if this request is going to a ProtoGENI aggregate 
-            # ProtoGeni Aggregaes will only install the keys of the user that is issuing the
-            # request.  all slice keys
+            # ProtoGeni Aggregates will only install the keys of the user that is issuing the
+            # request. So we will only pass in one user that contains the keys for all
+            # users of the slice 
             user = {'urn': user_cred.get_gid_caller().get_urn(),
                     'keys': []}
             slice_record = self.registry.Resolve(slice_urn, creds)

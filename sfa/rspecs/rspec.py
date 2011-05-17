@@ -14,6 +14,7 @@ class RSpec:
     config = Config()
     xml = None
     type = None
+    version = None     
   
     def __init__(self, rspec="", namespaces={}):
         if rspec:

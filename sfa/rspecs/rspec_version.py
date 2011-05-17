@@ -1,6 +1,5 @@
 #!/usr/bin/python
 from sfa.util.sfalogging import _SfaLogger
-from sfa.rspecs.pl_rspec_version import default_rspec_version 
 
 class RSpecVersion(dict):
 
@@ -16,7 +15,8 @@ class RSpecVersion(dict):
         dict.__init__(self, self.fields)
 
         if not version:
-            self.update(default_rspec_version)          
+            from sfa.rspecs.sfa_rspec import sfa_rspec_version
+            self.update(sfa_rspec_version)          
         elif isinstance(version, dict):
             self.update(version)
         elif isinstance(version, basestring):

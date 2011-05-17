@@ -1,20 +1,11 @@
+from sfa.rspecs.sfa_rspec import sfa_rspec_version
+from sfa.rspecs.pg_rspec import pg_rspec_version
+
 
 ad_rspec_versions = [
-     { 'type':  'ProtoGENI',
-       'version': '2',
-       'schema': 'http://www.protogeni.net/resources/rspec/2/request.xsd',
-       'namespace': 'http://www.protogeni.net/resources/rspec/2',
-       'extenstions':  [
-         'http://www.protogeni.net/resources/rspec/ext/gre-tunnel/1',
-         'http://www.protogeni.net/resources/rspec/ext/other-ext/3']
-    },
-    { 'type': 'SFA',
-      'version': '1',
-      'schema': [],
-      'namespace': [],
-      'extensions': []
-    }
-]
+    pg_rspec_vesion,
+    sfa_rspec_version
+    ]
 
 request_rspec_versions = ad_rspec_versions
 
