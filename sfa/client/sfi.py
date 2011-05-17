@@ -841,10 +841,8 @@ class Sfi:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
             creds.append(delegated_cred)
         if opts.rspec_version:
-            #call_options['rspec_version'] = opts.rspec_version 
-            call_options['rspec_version'] = {'type': opts.rspec_version, 'version': "2"} 
+            call_options['rspec_version'] = opts.rspec_version 
         result = server.ListResources(creds, call_options,unique_call_id())
-        #result = server.ListResources(creds, call_options)
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)
