@@ -391,17 +391,15 @@ def ListResources(api, creds, options, call_id):
     results = threads.get_results()
     #results.append(open('/root/protogeni.rspec', 'r').read())
     rspec_version = RSpecVersion(my_opts.get('rspec_version'))
-    if rspec_version['type'].lower() == 'protogeni':
+    if rspec_version['type'] == pg_rspec_version['type']:
         rspec = PGRSpec()
     else:
         rspec = SfaRSpec()
 
     for result in results:
-        print "RESULT"
         try:
             rspec.merge(result)
         except:
-            raise
             api.logger.info("SM.ListResources: Failed to merge aggregate rspec")
 
     # cache the result

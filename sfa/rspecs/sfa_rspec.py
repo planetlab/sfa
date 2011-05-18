@@ -8,7 +8,7 @@ from sfa.util.config import Config
 from sfa.rspecs.rspec_version import RSpecVersion  
 
 
-_version = { 'type': 'sfa', 
+_version = { 'type': 'SFA', 
              'version': '1' 
 }
 
