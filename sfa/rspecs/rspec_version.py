@@ -7,7 +7,7 @@ class RSpecVersion(dict):
               'version': None,
               'schema': None,
               'namespace': None,
-              'extenstions': []
+              'extensions': []
         }
     def __init__(self, version={}):
         

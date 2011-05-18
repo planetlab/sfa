@@ -7,11 +7,11 @@ from sfa.util.plxrn import hostname_to_urn
 from sfa.util.config import Config 
 from sfa.rspecs.rspec_version import RSpecVersion 
 
-_version = {'type':  'ProtoGeni',
+_version = {'type':  'ProtoGENI',
             'version': '2',
             'schema': 'http://www.protogeni.net/resources/rspec/2/request.xsd',
             'namespace': 'http://www.protogeni.net/resources/rspec/2',
-            'extenstions':  [
+            'extensions':  [
                 'http://www.protogeni.net/resources/rspec/ext/gre-tunnel/1',
                 'http://www.protogeni.net/resources/rspec/ext/other-ext/3'
             ]
