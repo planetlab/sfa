@@ -10,9 +10,9 @@ class RSpecConverter:
     @staticmethod
     def to_sfa_rspec(in_rspec):
         rspec = parse_rspec(in_rspec)
-        if rspec.version['type'] == 'sfa': 
+        if rspec.version['type'].lower() == 'sfa': 
           return in_rspec
-        elif rspec.version['type'] == 'protogeni':
+        elif rspec.version['type'].lower() == 'protogeni':
             return PGRSpecConverter.to_sfa_rspec(in_rspec)
         else:
              return in_rspec 
@@ -20,9 +20,9 @@ class RSpecConverter:
     @staticmethod 
     def to_pg_rspec(in_rspec):
         rspec = parse_rspec(in_rspec)
-        if rspec.version['type'] == 'protogeni': 
+        if rspec.version['type'].lower() == 'protogeni': 
             return in_rspec
-        elif rspec.version['type'] == 'sfa':
+        elif rspec.version['type'].lower() == 'sfa':
             return SfaRSpecConverter.to_pg_rspec(in_rspec)
         else:
             return in_rspec 

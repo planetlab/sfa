@@ -7,7 +7,7 @@ from sfa.util.plxrn import hostname_to_urn
 from sfa.util.config import Config 
 from sfa.rspecs.rspec_version import RSpecVersion 
 
-_version = {'type':  'protogeni',
+_version = {'type':  'ProtoGeni',
             'version': '2',
             'schema': 'http://www.protogeni.net/resources/rspec/2/request.xsd',
             'namespace': 'http://www.protogeni.net/resources/rspec/2',
