@@ -10,11 +10,11 @@ from sfa.util.faults import SfaNotImplemented, InvalidRSpec
 class RSpec:
     header = '<?xml version="1.0"?>\n'
     template = """<RSpec></RSpec>"""
-    namespaces = {}
     config = Config()
     xml = None
     type = None
-    version = None     
+    version = None
+    namespaces = None    
   
     def __init__(self, rspec="", namespaces={}):
         if rspec:
@@ -87,6 +87,8 @@ class RSpec:
                     if opt.text == value:
                         elem.remove(opt)
 
+    def merge(self, in_rspec):
+        pass
 
     def validate(self, schema):
         """

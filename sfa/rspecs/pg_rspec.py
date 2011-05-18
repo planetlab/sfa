@@ -103,6 +103,19 @@ class PGRSpec(RSpec):
         pass
 
 
+    def merge(self, in_rspec):
+        """
+        Merge contents for specified rspec with current rspec
+        """
+        
+        # just copy over all the child elements under the root element
+        tree = etree.parse(StringIO(in_rspec))
+        root = tree.getroot()
+        for child in root.getchildren():
+            self.xml.append(child)
+                  
+    
+
 if __name__ == '__main__':
     rspec = PGRSpec()
     rspec.add_nodes([1])
