@@ -65,12 +65,12 @@ class Aggregate:
 
         self.prepared = True  
 
-    def get_rspec(self, slice_xrn=None, version = None):
+    def get_rspec(self, slice_xrn=None, version = None, type=None):
         self.prepare()
         rspec = None
         rspec_version = RSpecVersion(version)
         if rspec_version['type'].lower() == 'protogeni':
-            rspec = PGRSpec()
+            rspec = PGRSpec(type=type)
         elif rspec_version['type'].lower() == 'sfa':
             rspec = SfaRSpec()
         else:

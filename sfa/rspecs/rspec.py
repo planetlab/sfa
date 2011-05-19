@@ -16,13 +16,14 @@ class RSpec:
     version = None
     namespaces = None    
   
-    def __init__(self, rspec="", namespaces={}):
+    def __init__(self, rspec="", namespaces={}, type=None):
+        self.type = type
         if rspec:
             self.parse_rspec(rspec, namespaces)
         else:
             self.create()
 
-    def create(self, type="advertisement"):
+    def create(self):
         """
         Create root element
         """
@@ -34,6 +35,8 @@ class RSpec:
         self.parse_rspec(self.template, self.namespaces)
         self.xml.set('valid_until', expires_ts)
         self.xml.set('generated', generated_ts)
+        if self.type:
+            self.xml.set('type', self.type)
     
     def parse_rspec(self, rspec, namespaces={}):
         """

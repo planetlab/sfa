@@ -323,7 +323,7 @@ def ListResources(api, creds, options,call_id):
 
     aggregate = Aggregate(api)
 
-    rspec =  aggregate.get_rspec(slice_xrn=xrn, version=rspec_version)
+    rspec =  aggregate.get_rspec(slice_xrn=xrn, version=rspec_version, type='advertisement')
 
     # cache the result
     if caching and api.cache and not xrn:
