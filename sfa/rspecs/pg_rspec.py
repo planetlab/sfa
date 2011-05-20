@@ -38,8 +38,11 @@ class PGRSpec(RSpec):
         self.type = type
         if not type or type == 'advertisement':
             self.version = pg_rspec_ad_version
+            rspec_type = 'ad'
         else:
             self.version = pg_rspec_request_version  
+            rspec_type == 'request'
+        self.template = self.template % locals()
 
         if not namespaces:
             self.namespaces = {'rspecv2': self.version['namespace']}
@@ -50,13 +53,6 @@ class PGRSpec(RSpec):
             self.parse_rspec(rspec, self.namespaces)
         else: 
             self.create()
-
-    def __get_template(self):
-        if self.type == 'adversisement':
-            rspec_type = 'ad'
-        else:
-            rspec_type == 'request'
-        return self.tempate % locals() 
 
     def create(self):
         RSpec.create(self)

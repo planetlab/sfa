@@ -25,9 +25,6 @@ class RSpec:
         else:
             self.create()
 
-    def __get_template(self):
-        return self.template
-
     def create(self):
         """
         Create root element
@@ -37,7 +34,7 @@ class RSpec:
         now = datetime.utcnow()
         generated_ts = now.strftime(date_format)
         expires_ts = (now + timedelta(hours=1)).strftime(date_format) 
-        self.parse_rspec(self.__get_template(), self.namespaces)
+        self.parse_rspec(self.template, self.namespaces)
         self.xml.set('valid_until', expires_ts)
         self.xml.set('generated', generated_ts)
     
@@ -47,7 +44,6 @@ class RSpec:
         """
         parser = etree.XMLParser(remove_blank_text=True)
         try:
-            print rspec
             tree = etree.parse(rspec, parser)
         except IOError:
             # 'rspec' file doesnt exist. 'rspec' is proably an xml string

@@ -316,10 +316,8 @@ def ListResources(api, creds, options,call_id):
 
     #panos adding the info option to the caching key (can be improved)
     if options.get('info'):
-	version_string = version_string + "_"+options.get('info')
+	version_string = version_string + "_"+options.get('info', 'default')
 
-    print "[aggregate] version string = ",version_string
-    
     # look in cache first
     if caching and api.cache and not xrn:
         rspec = api.cache.get(version_string)
