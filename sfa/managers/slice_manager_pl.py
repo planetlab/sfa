@@ -392,7 +392,7 @@ def ListResources(api, creds, options, call_id):
     results = threads.get_results()
     #results.append(open('/root/protogeni.rspec', 'r').read())
     rspec_version = RSpecVersion(my_opts.get('rspec_version'))
-    if rspec_version['type'] == pg_rspec_version['type']:
+    if rspec_version['type'] == pg_rspec_ad_version['type']:
         rspec = PGRSpec()
     else:
         rspec = SfaRSpec()
