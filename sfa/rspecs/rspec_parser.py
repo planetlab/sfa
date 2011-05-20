@@ -15,6 +15,7 @@ def parse_rspec(in_rspec):
         out_rspec.xml = rspec.xml
     else:
         #out_rspec = PGRSpec(in_rspec)
+        # TODO: determine if this is an ad or request
         out_rspec = PGRSpec()
         out_rspec.xml = rspec.xml
     return out_rspec

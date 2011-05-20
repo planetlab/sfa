@@ -14,10 +14,12 @@ class RSpec:
     xml = None
     type = None
     version = None
-    namespaces = None    
+    namespaces = None
+    user_options = {}
   
-    def __init__(self, rspec="", namespaces={}, type=None):
+    def __init__(self, rspec="", namespaces={}, type=None, user_options={}:
         self.type = type
+        self.user_options = user_options
         if rspec:
             self.parse_rspec(rspec, namespaces)
         else:

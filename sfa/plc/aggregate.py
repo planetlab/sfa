@@ -19,9 +19,7 @@ class Aggregate:
 
     def __init__(self, api, user_options={}):
         self.api = api
-	#panos 
-	self.user_options = user_options
-	print "[aggregate] options = ",self.user_options
+        self.user_options = user_options
 
     def prepare_sites(self, force=False):
         if not self.sites or force:  
@@ -70,17 +68,17 @@ class Aggregate:
 
         self.prepared = True  
 
-    def get_rspec(self, slice_xrn=None, version = None):
+    def get_rspec(self, slice_xrn=None, version = None, type=None):
         self.prepare()
         rspec = None
         rspec_version = RSpecVersion(version)
         if rspec_version['type'].lower() == 'protogeni':
-            rspec = PGRSpec()
+            rspec = PGRSpec(type=type)
 	    #panos pass user options to SfaRSpec
         elif rspec_version['type'].lower() == 'sfa':
-            rspec = SfaRSpec("",{},self.user_options)
+            rspec = SfaRSpec(type=type, user_options=self.user_options)
         else:
-            rspec = SfaRSpec("",{},self.user_options)
+            rspec = SfaRSpec(type=type, user_options=self.user_options)
 
 
         rspec.add_nodes(self.nodes.values())
