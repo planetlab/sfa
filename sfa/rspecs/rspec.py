@@ -17,7 +17,7 @@ class RSpec:
     namespaces = None
     user_options = {}
   
-    def __init__(self, rspec="", namespaces={}, type=None, user_options={}:
+    def __init__(self, rspec="", namespaces={}, type=None, user_options={}):
         self.type = type
         self.user_options = user_options
         if rspec:
