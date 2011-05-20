@@ -41,7 +41,9 @@ class PGRSpec(RSpec):
             rspec_type = 'ad'
         else:
             self.version = pg_rspec_request_version  
-            rspec_type == 'request'
+            rspec_type == type
+             
+        
         self.template = self.template % locals()
 
         if not namespaces:
