@@ -49,10 +49,10 @@ class PGRSpec(RSpec):
             self.create()
 
     def __get_template(self):
-        if self.type = 'adversisement':
+        if self.type == 'adversisement':
             rspec_type = 'ad'
         else:
-            rspec_type = 'request'
+            rspec_type == 'request'
         return self.tempate % locals() 
 
     def create():
