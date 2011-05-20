@@ -33,18 +33,21 @@ class PGRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
     template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd"></rspec>"""
-    version = pg_rspec_version
-    namespaces = {'rspecv2': version['namespace']}
 
     def __init__(self, rspec="", namespaces={}, type=None):
         self.type = type
         if not type or type == 'advertisement':
-            version = pg_rspec_ad_version
+            self.version = pg_rspec_ad_version
         else:
-            version = pg_rspec_request_version  
-       
+            self.version = pg_rspec_request_version  
+
+        if not namespaces:
+            self.namespaces = {'rspecv2': self.version['namespace']}
+        else:
+            self.namespaces = namespaces 
+
         if rspec:
-            self.parse_rspec(rspec, namespaces)
+            self.parse_rspec(rspec, self.namespaces)
         else: 
             self.create()
 

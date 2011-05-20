@@ -26,20 +26,20 @@ from sfa.plc.slices import *
 from sfa.util.version import version_core
 from sfa.rspecs.rspec_version import RSpecVersion
 from sfa.rspecs.sfa_rspec import sfa_rspec_version
-from sfa.rspecs.pg_rspec import pg_rspec_version
+from sfa.rspecs.pg_rspec import pg_rspec_ad_version, pg_rspec_request_version
 from sfa.rspecs.rspec_parser import parse_rspec 
 from sfa.util.sfatime import utcparse
 from sfa.util.callids import Callids
 
 def GetVersion(api):
     xrn=Xrn(api.hrn)
-
-    supported_rspecs = [dict(pg_rspec_version), dict(sfa_rspec_version)]
+    request_rspec_versions = [dict(pg_rspec_request_version), dict(sfa_rspec_version)]
+    ad_rspec_versions = [dict(pg_rspec_ad_version), dict(sfa_rspec_version)]
     version_more = {'interface':'aggregate',
                     'testbed':'myplc',
                     'hrn':xrn.get_hrn(),
-                    'request_rspec_versions': supported_rspecs,
-                    'ad_rspec_versions': supported_rspecs,
+                    'request_rspec_versions': request_rspec_versions,
+                    'ad_rspec_versions': ad_rspec_versions,
                     'default_ad_rspec': dict(sfa_rspec_version)
                     }
     return version_core(version_more)
@@ -210,7 +210,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
             api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
                                          slice.peer_id)
 
-    return aggregate.get_rspec(slice_xrn=slice_xrn, version=rspec.version)
+    return aggregate.get_rspec(slice_xrn=slice_xrn, version=rspec.version, type='advertisement')
 
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
@@ -283,8 +283,8 @@ def DeleteSliver(api, xrn, creds, call_id):
     return 1
 
 # xxx Thierry : caching at the aggregate level sounds wrong...
-caching=True
-#caching=False
+#caching=True
+caching=False
 def ListSlices(api, creds, call_id):
     if Callids().already_handled(call_id): return []
     # look in cache first
@@ -313,6 +313,12 @@ def ListResources(api, creds, options,call_id):
     # get the rspec's return format from options
     rspec_version = RSpecVersion(options.get('rspec_version'))
     version_string = "rspec_%s" % (rspec_version.get_version_name())
+
+    #panos adding the info option to the caching key (can be improved)
+    if options.get('info'):
+	version_string = version_string + "_"+options.get('info')
+
+    print "[aggregate] version string = ",version_string
     
     # look in cache first
     if caching and api.cache and not xrn:
@@ -321,9 +327,12 @@ def ListResources(api, creds, options,call_id):
             api.logger.info("aggregate.ListResources: returning cached value for hrn %s"%hrn)
             return rspec 
 
-    aggregate = Aggregate(api)
+    #aggregate = Aggregate(api)
+    #panos: passing user-defined options
+    #print "manager options = ",options
+    aggregate = Aggregate(api, options)
 
-    rspec =  aggregate.get_rspec(slice_xrn=xrn, version=rspec_version, type='advertisement')
+    rspec =  aggregate.get_rspec(slice_xrn=xrn, version=rspec_version)
 
     # cache the result
     if caching and api.cache and not xrn:

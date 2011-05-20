@@ -21,7 +21,7 @@ from sfa.rspecs.rspec_converter import RSpecConverter
 from sfa.rspecs.rspec_parser import parse_rspec    
 from sfa.rspecs.rspec_version import RSpecVersion
 from sfa.rspecs.sfa_rspec import sfa_rspec_version
-from sfa.rspecs.pg_rspec import pg_rspec_version    
+from sfa.rspecs.pg_rspec import pg_rspec_ad_version, pg_rspec_request_version   
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
 from sfa.util.sfaticket import *
@@ -46,13 +46,14 @@ def GetVersion(api):
     peers =dict ([ (peername,get_serverproxy_url(v)) for (peername,v) in api.aggregates.iteritems() 
                    if peername != api.hrn])
     xrn=Xrn (api.hrn)
-    supported_rspecs = [dict(pg_rspec_version), dict(sfa_rspec_version)]
+    request_rspec_versions = [dict(pg_rspec_request_version), dict(sfa_rspec_version)]
+    ad_rspec_versions = [dict(pg_rspec_ad_version), dict(sfa_rspec_version)]
     version_more = {'interface':'slicemgr',
                     'hrn' : xrn.get_hrn(),
                     'urn' : xrn.get_urn(),
                     'peers': peers,
-                    'request_rspec_versions': supported_rspecs,
-                    'ad_rspec_versions': supported_rspecs,
+                    'request_rspec_versions': request_rspec_versions,
+                    'ad_rspec_versions': ad_rspec_versions,
                     'default_ad_rspec': dict(sfa_rspec_version)
                     }
     sm_version=version_core(version_more)
