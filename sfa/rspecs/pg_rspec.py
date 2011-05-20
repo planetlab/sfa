@@ -7,7 +7,7 @@ from sfa.util.plxrn import hostname_to_urn
 from sfa.util.config import Config 
 from sfa.rspecs.rspec_version import RSpecVersion 
 
-_version = {'type':  'ProtoGENI',
+_ad_version = {'type':  'ProtoGENI',
             'version': '2',
             'schema': 'http://www.protogeni.net/resources/rspec/2/ad.xsd',
             'namespace': 'http://www.protogeni.net/resources/rspec/2',
@@ -16,15 +16,50 @@ _version = {'type':  'ProtoGENI',
                 'http://www.protogeni.net/resources/rspec/ext/other-ext/3'
             ]
 }
-pg_rspec_version = RSpecVersion(_version)
+
+_request_version = {'type':  'ProtoGENI',
+            'version': '2',
+            'schema': 'http://www.protogeni.net/resources/rspec/2/request.xsd',
+            'namespace': 'http://www.protogeni.net/resources/rspec/2',
+            'extensions':  [
+                'http://www.protogeni.net/resources/rspec/ext/gre-tunnel/1',
+                'http://www.protogeni.net/resources/rspec/ext/other-ext/3'
+            ]
+}
+pg_rspec_ad_version = RSpecVersion(_ad_version)
+pg_rspec_request_version = RSpecVersion(_request_version)
 
 class PGRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
-    template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd"></rspec>"""
+    template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd"></rspec>"""
     version = pg_rspec_version
     namespaces = {'rspecv2': version['namespace']}
 
+    def __init__(self, rspec="", namespaces={}, type=None):
+        self.type = type
+        if not type or type == 'advertisement':
+            version = pg_rspec_ad_version
+        else:
+            version = pg_rspec_request_version  
+       
+        if rspec:
+            self.parse_rspec(rspec, namespaces)
+        else: 
+            self.create()
+
+    def __get_template(self):
+        if self.type = 'adversisement':
+            rspec_type = 'ad'
+        else:
+            rspec_type = 'request'
+        return self.tempate % locals() 
+
+    def create():
+        RSpec.create(self)
+        if self.type:
+            self.xml.set('type', self.type) 
+        
     def get_network(self):
         network = None 
         nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', namespaces=self.namespaces)
