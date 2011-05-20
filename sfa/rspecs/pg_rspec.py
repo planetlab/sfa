@@ -9,7 +9,7 @@ from sfa.rspecs.rspec_version import RSpecVersion
 
 _version = {'type':  'ProtoGENI',
             'version': '2',
-            'schema': 'http://www.protogeni.net/resources/rspec/2/request.xsd',
+            'schema': 'http://www.protogeni.net/resources/rspec/2/ad.xsd',
             'namespace': 'http://www.protogeni.net/resources/rspec/2',
             'extensions':  [
                 'http://www.protogeni.net/resources/rspec/ext/gre-tunnel/1',
@@ -21,7 +21,7 @@ pg_rspec_version = RSpecVersion(_version)
 class PGRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
-    template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/0.2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd"></rspec>"""
+    template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd"></rspec>"""
     version = pg_rspec_version
     namespaces = {'rspecv2': version['namespace']}
 
