@@ -409,7 +409,8 @@ def rspec_to_allocations(rspec):
         # Bad RSpec
         pass
     return ifs
-        (ret, output) = call_am_apiclient("GetResourceTopology", ['all', slice_id,], 5)
+    # xxx - fixme
+    (ret, output) = call_am_apiclient("GetResourceTopology", ['all', slice_id,], 5)
     # parse output into rspec XML
     if output.find("No resouce found") > 0:
         rspec = "<RSpec type=\"SFA\"> <Fault>No resource found</Fault> </RSpec>"
