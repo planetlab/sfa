@@ -58,7 +58,7 @@ class PGRSpec(RSpec):
             rspec_type == 'request'
         return self.tempate % locals() 
 
-    def create():
+    def create(self):
         RSpec.create(self)
         if self.type:
             self.xml.set('type', self.type) 
