@@ -25,6 +25,7 @@ class SfaRSpecConverter:
             for sfa_node_element in sfa_node_elements:
                 # create node element
                 node_attrs = {}
+                node_attrs['exclusive'] = 'false'
                 node_attrs['component_manager_id'] = network
                 if sfa_node_element.find('hostname') != None:
                     node_attrs['component_name'] = sfa_node_element.find('hostname').text
@@ -33,12 +34,10 @@ class SfaRSpecConverter:
                 node_element = pg_rspec.add_element('node', node_attrs)
 
                 # create node_type element
-                node_type_attrs = {'type_name': 'pcvm', 'type_slots': '100'}    
-                node_type_element = pg_rspec.add_element('node_type', node_type_attrs, parent=node_element)
+                for hw_type in ['plab-pc', 'pc']:
+                    hdware_type_element = pg_rspec.add_element('hardware_type', {'name': hw_type}, parent=node_element)
                 # create available element
-                pg_rspec.add_element('available', parent=node_element, text='true')
-                # create exclusive element
-                pg_rspec.add_element('exclusive', parent=node_element, text='false')
+                pg_rspec.add_element('available', {'now': 'true'}, parent=node_element)
                 # create locaiton element
                 # We don't actually associate nodes with a country. 
                 # Set country to "unknown" until we figure out how to make
