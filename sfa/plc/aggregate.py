@@ -68,13 +68,16 @@ class Aggregate:
 
         self.prepared = True  
 
-    def get_rspec(self, slice_xrn=None, version = None, type=None):
+    def get_rspec(self, slice_xrn=None, version = None):
         self.prepare()
         rspec = None
         rspec_version = RSpecVersion(version)
+        if slice_xrn:
+            type = 'manifest'
+        else:
+            type = 'advertisement' 
         if rspec_version['type'].lower() == 'protogeni':
             rspec = PGRSpec(type=type)
-	    #panos pass user options to SfaRSpec
         elif rspec_version['type'].lower() == 'sfa':
             rspec = SfaRSpec(type=type, user_options=self.user_options)
         else:
@@ -86,7 +89,9 @@ class Aggregate:
         rspec.add_links(self.links.values())
 
         if slice_xrn:
-            # get slice details
+            # If slicename is specified then resulting rspec is a manifest. 
+            # Add sliver details to rspec and remove 'advertisement' elements
+            rspec.remove_element('available')
             slice_hrn, _ = urn_to_hrn(slice_xrn)
             slice_name = hrn_to_pl_slicename(slice_hrn)
             slices = self.api.plshell.GetSlices(self.api.plauth, slice_name)
@@ -107,6 +112,6 @@ class Aggregate:
                             tag_host = self.nodes[tag['node_id']]['hostname']
                             if tag_host == sliver['hostname']:
                                 sliver.tags.append(tag)
-                rspec.add_slivers(slivers)
+                rspec.add_slivers(slivers, sliver_urn=slice_xrn)
 
         return rspec.toxml()          
