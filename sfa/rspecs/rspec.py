@@ -35,7 +35,7 @@ class RSpec:
         generated_ts = now.strftime(date_format)
         expires_ts = (now + timedelta(hours=1)).strftime(date_format) 
         self.parse_rspec(self.template, self.namespaces)
-        self.xml.set('valid_until', expires_ts)
+        self.xml.set('expires', expires_ts)
         self.xml.set('generated', generated_ts)
     
     def parse_rspec(self, rspec, namespaces={}):

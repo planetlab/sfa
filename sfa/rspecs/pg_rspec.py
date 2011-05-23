@@ -98,17 +98,18 @@ class PGRSpec(RSpec):
                 # node already exists
                 continue
                 
-            node_tag = etree.SubElement(self.xml, 'node')
+            node_tag = etree.SubElement(self.xml, 'node', exclusive='false')
             if 'network_urn' in node:
                 node_tag.set('component_manager_id', node['network_urn'])
             if 'urn' in node:
                 node_tag.set('component_id', node['urn'])
             if 'hostname' in node:
                 node_tag.set('component_name', node['hostname'])
-            node_type_tag = etree.SubElement(node_tag, 'node_type', type_name='pcvm', type_slots='100')
-            available_tag = etree.SubElement(node_tag, 'available').text = 'true'
-            exclusive_tag = etree.SubElement(node_tag, 'exclusive').text = 'false'
-            location_tag = etree.SubElement(node_tag, 'location', location="US")
+            # TODO: should replace plab-pc with pc model 
+            node_type_tag = etree.SubElement(node_tag, 'hardware_type', type_name='plab-pc')
+            node_type_tag = etree.SubElement(node_tag, 'hardware_type', type_name='pc')
+            available_tag = etree.SubElement(node_tag, 'available', now='true')
+            location_tag = etree.SubElement(node_tag, 'country', location="us")
             if 'site' in node:
                 if 'longitude' in node['site']:
                     location_tag.set('longitude', str(node['site']['longitude']))
@@ -130,7 +131,7 @@ class PGRSpec(RSpec):
             if nodes:
                 node = nodes[0]
                 node.set('client_id', hostname)
-                etree.SubElement(node, 'sliver_type', name='planetlab-vnode')
+                etree.SubElement(node, 'sliver_type', name='plab-vnode')
 
     def add_interfaces(self, interfaces, check_for_dupes=False):
         pass

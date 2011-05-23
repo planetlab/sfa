@@ -61,7 +61,7 @@ class Aggregate:
                 node['network'] = self.api.hrn
                 node['network_urn'] = hrn_to_urn(self.api.hrn, 'authority+sa')
                 node['urn'] = hostname_to_urn(self.api.hrn, site['login_base'], node['hostname'])
-                node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority') 
+                node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority+am') 
                 node['site'] = site
                 node['interfaces'] = interfaces
                 node['tags'] = tags
