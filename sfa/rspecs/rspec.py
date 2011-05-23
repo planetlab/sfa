@@ -99,7 +99,7 @@ class RSpec:
             root_node = self.xml
 
         elements = root_node.xpath('//rspecv2:%s | //%s' % (element_name, element_name), \
-                                                            self.namespaces)
+                                                            namespaces=self.namespaces)
         for element in elements:
             parent = element.getparent()
             parent.remove(element)

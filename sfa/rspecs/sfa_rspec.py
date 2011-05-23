@@ -218,7 +218,7 @@ class SfaRSpec(RSpec):
     def add_links(self, links):
         pass
     
-    def add_slivers(self, slivers, network=None, no_dupes=False):
+    def add_slivers(self, slivers, network=None, sliver_urn=None, no_dupes=False):
         if not isinstance(slivers, list):
             slivers = [slivers]
 

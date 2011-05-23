@@ -120,7 +120,7 @@ class PGRSpec(RSpec):
             #if 'interfaces' in node:
             
 
-    def add_slivers(self, slivers, check_for_dupes=False): 
+    def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
         if not isinstance(slivers, list):
             slivers = [slivers]
 
@@ -133,12 +133,14 @@ class PGRSpec(RSpec):
             if nodes:
                 node = nodes[0]
                 node.set('client_id', hostname)
+                if sliver_urn:
+                    node.set('sliver_id', sliver_urn)
                 etree.SubElement(node, 'sliver_type', name='plab-vnode')
 
-    def add_interfaces(self, interfaces, check_for_dupes=False):
+    def add_interfaces(self, interfaces, no_dupes=False):
         pass
 
-    def add_links(self, links, check_for_dupes=False):
+    def add_links(self, links, no_dupes=False):
         pass
 
 
