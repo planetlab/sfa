@@ -4,7 +4,8 @@ from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.rspec import RSpec
 from sfa.util.sfalogging import sfa_logger
 from sfa.util.config import Config
-from sfa.managers.aggregate_manager_pl import GetVersion
+from sfa.managers.aggregate_manager_pl import GetVersion, __get_registry_objects
+from sfa.plc.slices import Slices
 import os
 import time
 
@@ -67,12 +68,24 @@ def get_xml_by_tag(text, tag):
         xml = text[indx1:indx2+len(tag)+2]
     return xml
 
+def prepare_slice(api, xrn, users):
+    reg_objects = __get_registry_objects(slice_xrn, creds, users)
+    (hrn, type) = urn_to_hrn(slice_xrn)
+    slices = Slices(api)
+    peer = slices.get_peer(hrn)
+    sfa_peer = slices.get_sfa_peer(hrn)
+    registry = api.registries[api.hrn]
+    credential = api.getCredential()
+    (site_id, remote_site_id) = slices.verify_site(registry, credential, hrn, peer, sfa_peer, reg_objects)
+    slices.verify_slice(registry, credential, hrn, site_id, remote_site_id, peer, sfa_peer, reg_objects)
+
 def create_slice(api, xrn, cred, rspec, users):
     indx1 = rspec.find("<RSpec")
     indx2 = rspec.find("</RSpec>")
     if indx1 > -1 and indx2 > indx1:
         rspec = rspec[indx1+len("<RSpec type=\"SFA\">"):indx2-1]
     rspec_path = save_rspec_to_file(rspec)
+    prepare_slice(api, xrn, users)
     (ret, output) = call_am_apiclient("CreateSliceNetworkClient", [rspec_path,], 3)
     # parse output ?
     rspec = "<RSpec type=\"SFA\"> Done! </RSpec>"
