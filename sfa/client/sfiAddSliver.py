@@ -28,6 +28,9 @@ else:
 rspec = parse_rspec(infile)
 nodes = file(command.opts.nodefile).read().split()
 try:
+    if rspec.version['type'].lower() == 'protogeni':
+        rspec.xml.set('type', 'request')
+        rspec.remove_element('available')    
     slivers = [{'hostname': node} for node in nodes]
     rspec.add_slivers(slivers)
 except:
