@@ -90,6 +90,21 @@ class RSpec:
                     if opt.text == value:
                         elem.remove(opt)
 
+    def remove_element(self, element_name, root_node = None):
+        """
+        Removes all occurences of an element from the tree. Start at 
+        specified root_node if specified, otherwise start at tree's root.   
+        """
+        if not root_node:
+            root_node = self.xml
+
+        elements = root_node.xpath('//rspecv2:%s | //%s' % (element_name, element_name), \
+                                                            self.namespaces)
+        for element in elements:
+            parent = element.getparent()
+            parent.remove(element)
+         
+
     def merge(self, in_rspec):
         pass
 
