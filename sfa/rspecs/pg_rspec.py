@@ -35,16 +35,18 @@ class PGRSpec(RSpec):
     template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd"></rspec>"""
 
     def __init__(self, rspec="", namespaces={}, type=None):
+        if not type:
+            type = 'advertisement'
         self.type = type
-        if not type or type == 'advertisement':
+
+        if type == 'advertisement':
             self.version = pg_rspec_ad_version
             rspec_type = 'ad'
         else:
-            self.version = pg_rspec_request_version  
-            rspec_type == type
-             
+            self.version = pg_rspec_request_version
+            rspec_type = type
         
-        self.template = self.template % locals()
+        self.template = self.template % {'rspec_type': rspec_type}
 
         if not namespaces:
             self.namespaces = {'rspecv2': self.version['namespace']}
@@ -106,10 +108,10 @@ class PGRSpec(RSpec):
             if 'hostname' in node:
                 node_tag.set('component_name', node['hostname'])
             # TODO: should replace plab-pc with pc model 
-            node_type_tag = etree.SubElement(node_tag, 'hardware_type', type_name='plab-pc')
-            node_type_tag = etree.SubElement(node_tag, 'hardware_type', type_name='pc')
+            node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='plab-pc')
+            node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='pc')
             available_tag = etree.SubElement(node_tag, 'available', now='true')
-            location_tag = etree.SubElement(node_tag, 'country', location="us")
+            location_tag = etree.SubElement(node_tag, 'location', country="us")
             if 'site' in node:
                 if 'longitude' in node['site']:
                     location_tag.set('longitude', str(node['site']['longitude']))
