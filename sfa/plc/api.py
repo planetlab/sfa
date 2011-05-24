@@ -386,7 +386,6 @@ class SfaAPI(BaseAPI):
        
         # convert ids to hrns
         for record in records:
-             
             # get all relevant data
             type = record['type']
             pointer = record['pointer']
@@ -420,7 +419,7 @@ class SfaAPI(BaseAPI):
                                if site_id in sites]
                 site_hrns = [".".join([auth_hrn, lbase]) for lbase in login_bases]
                 record['sites'] = site_hrns
-
+            
         return records   
 
     def fill_record_sfa_info(self, records):
@@ -484,20 +483,21 @@ class SfaAPI(BaseAPI):
             type = record['type']
             if (type == "slice"):
                 # all slice users are researchers
+                record['geni_urn'] = hrn_to_urn(record['hrn'], 'slice')
                 record['PI'] = []
                 record['researcher'] = []
-                for person_id in record['person_ids']:
+                for person_id in record.get('person_ids', []):
                     hrns = [person['hrn'] for person in persons[person_id]]
                     record['researcher'].extend(hrns)                
 
                 # pis at the slice's site
-                pl_pis = site_pis[record['site_id']]
-                pi_ids = [pi['person_id'] for pi in pl_pis]
-                for person_id in pi_ids:
-                    hrns = [person['hrn'] for person in persons[person_id]]
-                    record['PI'].extend(hrns)
-                record['geni_urn'] = hrn_to_urn(record['hrn'], 'slice')
-                record['geni_creator'] = record['PI'] 
+                if 'site_id' in record and record['site_id'] in site_pis:
+                    pl_pis = site_pis[record['site_id']]
+                    pi_ids = [pi['person_id'] for pi in pl_pis]
+                    for person_id in pi_ids:
+                        hrns = [person['hrn'] for person in persons[person_id]]
+                        record['PI'].extend(hrns)
+                        record['geni_creator'] = record['PI'] 
                 
             elif (type == "authority"):
                 record['PI'] = []

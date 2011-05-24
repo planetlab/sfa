@@ -14,10 +14,12 @@ class RSpec:
     xml = None
     type = None
     version = None
-    namespaces = None    
+    namespaces = None
+    user_options = {}
   
-    def __init__(self, rspec="", namespaces={}, type=None):
+    def __init__(self, rspec="", namespaces={}, type=None, user_options={}):
         self.type = type
+        self.user_options = user_options
         if rspec:
             self.parse_rspec(rspec, namespaces)
         else:
@@ -33,10 +35,8 @@ class RSpec:
         generated_ts = now.strftime(date_format)
         expires_ts = (now + timedelta(hours=1)).strftime(date_format) 
         self.parse_rspec(self.template, self.namespaces)
-        self.xml.set('valid_until', expires_ts)
+        self.xml.set('expires', expires_ts)
         self.xml.set('generated', generated_ts)
-        if self.type:
-            self.xml.set('type', self.type)
     
     def parse_rspec(self, rspec, namespaces={}):
         """
@@ -89,6 +89,21 @@ class RSpec:
                 for opt in opts:
                     if opt.text == value:
                         elem.remove(opt)
+
+    def remove_element(self, element_name, root_node = None):
+        """
+        Removes all occurences of an element from the tree. Start at 
+        specified root_node if specified, otherwise start at tree's root.   
+        """
+        if not root_node:
+            root_node = self.xml
+
+        elements = root_node.xpath('//rspecv2:%s | //%s' % (element_name, element_name), \
+                                                            namespaces=self.namespaces)
+        for element in elements:
+            parent = element.getparent()
+            parent.remove(element)
+         
 
     def merge(self, in_rspec):
         pass

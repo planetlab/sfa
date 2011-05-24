@@ -14,9 +14,12 @@ class Aggregate:
     links = {}
     node_tags = {}
     prepared=False
+    #panos new user options variable
+    user_options = {}
 
-    def __init__(self, api):
+    def __init__(self, api, user_options={}):
         self.api = api
+        self.user_options = user_options
 
     def prepare_sites(self, force=False):
         if not self.sites or force:  
@@ -56,32 +59,39 @@ class Aggregate:
                 interfaces = [self.interfaces[interface_id] for interface_id in node['interface_ids']]
                 tags = [self.node_tags[tag_id] for tag_id in node['node_tag_ids']]
                 node['network'] = self.api.hrn
-                node['network_urn'] = hrn_to_urn(self.api.hrn, 'authority+sa')
+                node['network_urn'] = hrn_to_urn(self.api.hrn, 'authority+am')
                 node['urn'] = hostname_to_urn(self.api.hrn, site['login_base'], node['hostname'])
-                node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority') 
+                node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority+sa') 
                 node['site'] = site
                 node['interfaces'] = interfaces
                 node['tags'] = tags
 
         self.prepared = True  
 
-    def get_rspec(self, slice_xrn=None, version = None, type=None):
+    def get_rspec(self, slice_xrn=None, version = None):
         self.prepare()
         rspec = None
         rspec_version = RSpecVersion(version)
+        if slice_xrn:
+            type = 'manifest'
+        else:
+            type = 'advertisement' 
         if rspec_version['type'].lower() == 'protogeni':
             rspec = PGRSpec(type=type)
         elif rspec_version['type'].lower() == 'sfa':
-            rspec = SfaRSpec()
+            rspec = SfaRSpec(type=type, user_options=self.user_options)
         else:
-            rspec = SfaRSpec()
+            rspec = SfaRSpec(type=type, user_options=self.user_options)
+
 
         rspec.add_nodes(self.nodes.values())
         rspec.add_interfaces(self.interfaces.values()) 
         rspec.add_links(self.links.values())
 
         if slice_xrn:
-            # get slice details
+            # If slicename is specified then resulting rspec is a manifest. 
+            # Add sliver details to rspec and remove 'advertisement' elements
+            rspec.remove_element('available')
             slice_hrn, _ = urn_to_hrn(slice_xrn)
             slice_name = hrn_to_pl_slicename(slice_hrn)
             slices = self.api.plshell.GetSlices(self.api.plauth, slice_name)
@@ -102,6 +112,6 @@ class Aggregate:
                             tag_host = self.nodes[tag['node_id']]['hostname']
                             if tag_host == sliver['hostname']:
                                 sliver.tags.append(tag)
-                rspec.add_slivers(slivers)
+                rspec.add_slivers(slivers, sliver_urn=slice_xrn)
 
         return rspec.toxml()          

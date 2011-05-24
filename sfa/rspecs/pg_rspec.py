@@ -7,7 +7,17 @@ from sfa.util.plxrn import hostname_to_urn
 from sfa.util.config import Config 
 from sfa.rspecs.rspec_version import RSpecVersion 
 
-_version = {'type':  'ProtoGENI',
+_ad_version = {'type':  'ProtoGENI',
+            'version': '2',
+            'schema': 'http://www.protogeni.net/resources/rspec/2/ad.xsd',
+            'namespace': 'http://www.protogeni.net/resources/rspec/2',
+            'extensions':  [
+                'http://www.protogeni.net/resources/rspec/ext/gre-tunnel/1',
+                'http://www.protogeni.net/resources/rspec/ext/other-ext/3'
+            ]
+}
+
+_request_version = {'type':  'ProtoGENI',
             'version': '2',
             'schema': 'http://www.protogeni.net/resources/rspec/2/request.xsd',
             'namespace': 'http://www.protogeni.net/resources/rspec/2',
@@ -16,15 +26,43 @@ _version = {'type':  'ProtoGENI',
                 'http://www.protogeni.net/resources/rspec/ext/other-ext/3'
             ]
 }
-pg_rspec_version = RSpecVersion(_version)
+pg_rspec_ad_version = RSpecVersion(_ad_version)
+pg_rspec_request_version = RSpecVersion(_request_version)
 
 class PGRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
-    template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/0.2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/0.2 http://www.protogeni.net/resources/rspec/0.2/ad.xsd"></rspec>"""
-    version = pg_rspec_version
-    namespaces = {'rspecv2': version['namespace']}
+    template = """<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd"></rspec>"""
 
+    def __init__(self, rspec="", namespaces={}, type=None):
+        if not type:
+            type = 'advertisement'
+        self.type = type
+
+        if type == 'advertisement':
+            self.version = pg_rspec_ad_version
+            rspec_type = 'ad'
+        else:
+            self.version = pg_rspec_request_version
+            rspec_type = type
+        
+        self.template = self.template % {'rspec_type': rspec_type}
+
+        if not namespaces:
+            self.namespaces = {'rspecv2': self.version['namespace']}
+        else:
+            self.namespaces = namespaces 
+
+        if rspec:
+            self.parse_rspec(rspec, self.namespaces)
+        else: 
+            self.create()
+
+    def create(self):
+        RSpec.create(self)
+        if self.type:
+            self.xml.set('type', self.type) 
+        
     def get_network(self):
         network = None 
         nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', namespaces=self.namespaces)
@@ -62,17 +100,18 @@ class PGRSpec(RSpec):
                 # node already exists
                 continue
                 
-            node_tag = etree.SubElement(self.xml, 'node')
+            node_tag = etree.SubElement(self.xml, 'node', exclusive='false')
             if 'network_urn' in node:
                 node_tag.set('component_manager_id', node['network_urn'])
             if 'urn' in node:
                 node_tag.set('component_id', node['urn'])
             if 'hostname' in node:
                 node_tag.set('component_name', node['hostname'])
-            node_type_tag = etree.SubElement(node_tag, 'node_type', type_name='pcvm', type_slots='100')
-            available_tag = etree.SubElement(node_tag, 'available').text = 'true'
-            exclusive_tag = etree.SubElement(node_tag, 'exclusive').text = 'false'
-            location_tag = etree.SubElement(node_tag, 'location', location="US")
+            # TODO: should replace plab-pc with pc model 
+            node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='plab-pc')
+            node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='pc')
+            available_tag = etree.SubElement(node_tag, 'available', now='true')
+            location_tag = etree.SubElement(node_tag, 'location', country="us")
             if 'site' in node:
                 if 'longitude' in node['site']:
                     location_tag.set('longitude', str(node['site']['longitude']))
@@ -81,7 +120,7 @@ class PGRSpec(RSpec):
             #if 'interfaces' in node:
             
 
-    def add_slivers(self, slivers, check_for_dupes=False): 
+    def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
         if not isinstance(slivers, list):
             slivers = [slivers]
 
@@ -94,12 +133,14 @@ class PGRSpec(RSpec):
             if nodes:
                 node = nodes[0]
                 node.set('client_id', hostname)
-                etree.SubElement(node, 'sliver_type', name='planetlab-vnode')
+                if sliver_urn:
+                    node.set('sliver_id', sliver_urn)
+                etree.SubElement(node, 'sliver_type', name='plab-vnode')
 
-    def add_interfaces(self, interfaces, check_for_dupes=False):
+    def add_interfaces(self, interfaces, no_dupes=False):
         pass
 
-    def add_links(self, links, check_for_dupes=False):
+    def add_links(self, links, no_dupes=False):
         pass
 
 
