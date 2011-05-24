@@ -6,19 +6,16 @@
 # TODO: investigate ways to combine this with existing PLC server?
 ##
 
-### $Id$
-### $URL$
-
 import sys
+import socket, os
 import traceback
 import threading
-import socket, os
+from Queue import Queue
 import SocketServer
 import BaseHTTPServer
 import SimpleHTTPServer
 import SimpleXMLRPCServer
 from OpenSSL import SSL
-from Queue import Queue
 
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import *
@@ -78,7 +75,7 @@ def verify_callback(conn, x509, err, depth, preverify):
     return 0
 
 ##
-# taken from the web (XXX find reference). Implents HTTPS xmlrpc request handler
+# taken from the web (XXX find reference). Implements HTTPS xmlrpc request handler
 class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
     """Secure XML-RPC request handler class.
 
@@ -173,9 +170,34 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
             return SimpleXMLRPCServer.SimpleXMLRPCDispatcher._dispatch(self, method, params)
         except:
             # can't use format_exc() as it is not available in jython yet
-            # (evein in trunk).
+            # (even in trunk).
             type, value, tb = sys.exc_info()
             raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
+
+    # override this one from the python 2.7 code
+    def shutdown_request(self, request):
+        """Called to shutdown and close an individual request."""
+        # ---------- 
+        # the std python 2.7 code just attempts a request.shutdown(socket.SHUT_WR)
+        # this works fine with regular sockets
+        # However we are dealing with an instance of OpenSSL.SSL.Connection instead
+        # This one only supports shutdown(), and in addition this does not
+        # always perform as expected
+        # ---------- std python 2.7 code
+        try:
+            #explicitly shutdown.  socket.close() merely releases
+            #the socket and waits for GC to perform the actual close.
+            request.shutdown(socket.SHUT_WR)
+        except socket.error:
+            pass #some platforms may raise ENOTCONN here
+        # ----------
+        except TypeError:
+            # we are dealing with an OpenSSL.Connection object, 
+            # try to shut it down but never mind if that fails
+            try: request.shutdown()
+            except: pass
+        # ----------
+        self.close_request(request)
 
 ## From Active State code: http://code.activestate.com/recipes/574454/
 # This is intended as a drop-in replacement for the ThreadingMixIn class in 
