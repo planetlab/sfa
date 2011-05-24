@@ -62,7 +62,12 @@ class PGRSpec(RSpec):
         RSpec.create(self)
         if self.type:
             self.xml.set('type', self.type) 
-        
+       
+    def remove_element(self, element_name, root_node=None):
+        if not element_name.startswith('rspecv2:'):
+            element_name = 'rspecv2:' + element_name
+        RSpec.remove_element(self, element_name, root_node)
+ 
     def get_network(self):
         network = None 
         nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', namespaces=self.namespaces)
