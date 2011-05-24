@@ -26,15 +26,15 @@ else:
     outfile=sys.stdout
 
 rspec = parse_rspec(infile)
+rspec.type = 'request'
 nodes = file(command.opts.nodefile).read().split()
 try:
     if rspec.version['type'].lower() == 'protogeni':
         rspec.xml.set('type', 'request')
-        rspec.remove_element('available')    
     slivers = [{'hostname': node} for node in nodes]
     rspec.add_slivers(slivers)
 except:
     print >> sys.stderr, "FAILED: %s" % nodes
     sys.exit(1)
-print >>outfile, rspec.toxml()
+print >>outfile, rspec.toxml(cleanup=True)
 sys.exit(0)

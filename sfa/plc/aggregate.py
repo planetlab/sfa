@@ -91,7 +91,6 @@ class Aggregate:
         if slice_xrn:
             # If slicename is specified then resulting rspec is a manifest. 
             # Add sliver details to rspec and remove 'advertisement' elements
-            rspec.remove_element('available')
             slice_hrn, _ = urn_to_hrn(slice_xrn)
             slice_name = hrn_to_pl_slicename(slice_hrn)
             slices = self.api.plshell.GetSlices(self.api.plauth, slice_name)
@@ -114,4 +113,4 @@ class Aggregate:
                                 sliver.tags.append(tag)
                 rspec.add_slivers(slivers, sliver_urn=slice_xrn)
 
-        return rspec.toxml()          
+        return rspec.toxml(cleanup=True)          

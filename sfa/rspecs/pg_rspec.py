@@ -63,11 +63,6 @@ class PGRSpec(RSpec):
         if self.type:
             self.xml.set('type', self.type) 
        
-    def remove_element(self, element_name, root_node=None):
-        if not element_name.startswith('rspecv2:'):
-            element_name = 'rspecv2:' + element_name
-        RSpec.remove_element(self, element_name, root_node)
- 
     def get_network(self):
         network = None 
         nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', namespaces=self.namespaces)
@@ -80,11 +75,12 @@ class PGRSpec(RSpec):
         return set(networks)
 
     def get_node_elements(self):
-        nodes = self.xml.xpath('//rspecv2:node', namespaces=self.namespaces)
+        nodes = self.xml.xpath('//rspecv2:node | //node', namespaces=self.namespaces)
         return nodes
 
     def get_nodes(self, network=None):
-        return self.xml.xpath('//rspecv2:node[@component_name]/@component_name', namespaces=self.namespaces) 
+        xpath = '//rspecv2:node[@component_name]/@component_name | //node[@component_name]/@component_name'
+        return self.xml.xpath(xpath, namespaces=self.namespaces) 
 
     def get_nodes_with_slivers(self, network=None):
         if network:
@@ -160,7 +156,24 @@ class PGRSpec(RSpec):
         for child in root.getchildren():
             self.xml.append(child)
                   
-    
+    def cleanup(self):
+        # remove unncecessary elements, attributes
+        if self.type in ['request', 'manifest']:
+            # remove nodes without slivers
+            nodes = self.get_node_elements()
+            for node in nodes:
+                delete = True
+                hostname = node.get('component_name')
+                parent = node.getparent()
+                children = node.getchildren()
+                for child in children:
+                    if child.tag.endswith('sliver_type'):
+                        delete = False
+                if delete:
+                    parent.remove(node)
+
+            # remove 'available' element from remaining node elements
+            self.remove_element('//rspecv2:available | //available')
 
 if __name__ == '__main__':
     rspec = PGRSpec()
