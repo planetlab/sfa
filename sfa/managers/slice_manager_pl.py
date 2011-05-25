@@ -390,7 +390,6 @@ def ListResources(api, creds, options, call_id):
         threads.run(server.ListResources, credential, my_opts, call_id)
                     
     results = threads.get_results()
-    #results.append(open('/root/protogeni.rspec', 'r').read())
     rspec_version = RSpecVersion(my_opts.get('rspec_version'))
     if rspec_version['type'] == pg_rspec_ad_version['type']:
         rspec = PGRSpec()

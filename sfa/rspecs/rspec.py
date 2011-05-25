@@ -129,7 +129,7 @@ class RSpec:
         """
         pass 
 
-    def __process_slivers(self, slivers):
+    def _process_slivers(self, slivers):
         """
         Creates a dict of sliver details for each sliver host
         
