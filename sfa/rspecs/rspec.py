@@ -125,13 +125,28 @@ class RSpec:
             raise InvalidRSpec(message)
         return True
         
-
     def cleanup(self):
         """
         Optional method which inheriting classes can choose to implent. 
         """
         pass 
 
+    def __process_slivers(self, slivers):
+        """
+        Creates a dict of sliver details for each sliver host
+        
+        @param slivers a single hostname, list of hostanmes or list of dicts keys on hostname,
+        Returns a list of dicts 
+        """
+        if not isinstance(slivers, list):
+            slivers = [slivers]
+        dicts = []
+        for sliver in slivers:
+            if isinstance(sliver, dict):
+                dicts.append(sliver)
+            elif isinstance(sliver, basestring):
+                dicts.append({'hostname': sliver}) 
+        return dicts
     def __str__(self):
         return self.toxml()
 

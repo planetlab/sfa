@@ -122,9 +122,7 @@ class PGRSpec(RSpec):
             
 
     def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
-        if not isinstance(slivers, list):
-            slivers = [slivers]
-
+        slivers = self.__process_slivers(slivers)
         nodes_with_slivers = self.get_nodes_with_slivers()
         for sliver in slivers:
             hostname = sliver['hostname']

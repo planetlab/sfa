@@ -223,9 +223,7 @@ class SfaRSpec(RSpec):
         pass
     
     def add_slivers(self, slivers, network=None, sliver_urn=None, no_dupes=False):
-        if not isinstance(slivers, list):
-            slivers = [slivers]
-
+        slivers = self.__process_slivers(slivers)
         nodes_with_slivers = self.get_nodes_with_slivers(network)
         for sliver in slivers:
             if sliver['hostname'] in nodes_with_slivers:
