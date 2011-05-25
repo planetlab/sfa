@@ -51,10 +51,12 @@ class RSpec:
                 tree = etree.parse(StringIO(rspec), parser)
             except:
                 raise InvalidRSpec('Must specify a xml file or xml string. Received: ' + rspec )
-
         self.xml = tree.getroot()  
         if namespaces:
            self.namespaces = namespaces
+
+    def xpath(self, xpath):
+        return this.xml.xpath(xpath, namespaces=self.namespaces)
 
     def add_attribute(self, elem, name, value):
         """
@@ -98,8 +100,10 @@ class RSpec:
         if not root_node:
             root_node = self.xml
 
-        elements = root_node.xpath('//rspecv2:%s | //%s' % (element_name, element_name), \
-                                                            namespaces=self.namespaces)
+        if not element_name.startswith('//'):
+            element_name = '//' + element_name
+
+        elements = root_node.xpath('%s ' % element_name, namespaces=self.namespaces)
         for element in elements:
             parent = element.getparent()
             parent.remove(element)
@@ -122,10 +126,18 @@ class RSpec:
         return True
         
 
+    def cleanup(self):
+        """
+        Optional method which inheriting classes can choose to implent. 
+        """
+        pass 
+
     def __str__(self):
         return self.toxml()
 
-    def toxml(self):
+    def toxml(self, cleanup=False):
+        if cleanup:
+            self.cleanup()
         return self.header + etree.tostring(self.xml, pretty_print=True)  
         
     def save(self, filename):

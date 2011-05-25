@@ -19,6 +19,10 @@ class SfaRSpec(RSpec):
     header = '<?xml version="1.0"?>\n'
     version = sfa_rspec_version
 
+    def create(self):
+        RSpec.create(self)
+        self.xml.set('type', 'SFA')
+
     ###################
     # Parser
     ###################
