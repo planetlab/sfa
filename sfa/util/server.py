@@ -175,6 +175,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
             raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
 
     # override this one from the python 2.7 code
+    # originally defined in class TCPServer
     def shutdown_request(self, request):
         """Called to shutdown and close an individual request."""
         # ---------- 
