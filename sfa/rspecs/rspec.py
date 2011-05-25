@@ -4,13 +4,11 @@ from StringIO import StringIO
 from datetime import datetime, timedelta
 from sfa.util.xrn import *
 from sfa.util.plxrn import hostname_to_urn
-from sfa.util.config import Config  
 from sfa.util.faults import SfaNotImplemented, InvalidRSpec
 
 class RSpec:
     header = '<?xml version="1.0"?>\n'
     template = """<RSpec></RSpec>"""
-    config = Config()
     xml = None
     type = None
     version = None
@@ -147,6 +145,7 @@ class RSpec:
             elif isinstance(sliver, basestring):
                 dicts.append({'hostname': sliver}) 
         return dicts
+
     def __str__(self):
         return self.toxml()
 
