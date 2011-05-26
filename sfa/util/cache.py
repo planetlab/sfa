@@ -4,6 +4,7 @@
 from __future__ import with_statement
 import time
 import threading
+import pickle
 from datetime import datetime
 
 # maximum lifetime of cached data (in seconds) 
@@ -43,6 +44,16 @@ class CacheData:
     def get_data(self):
         return self.data
 
+    def __getstate__(self):
+        d = dict(self.__dict__)
+        del d['lock']
+        return d
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.lock = threading.RLock()
+        
+
 class Cache:
 
     cache  = {}
@@ -60,3 +71,11 @@ class Cache:
         if not data or data.is_expired():
             return None 
         return data.get_data()
+
+    def save_to_file(self, filename):
+        f = open(filename, 'w')
+        pickle.dump(self.cache, f)
+
+    def load_from_file(self, filename):
+        f = open(filename, 'r')
+        self.cache = pickle.load(f)
