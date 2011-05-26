@@ -6,7 +6,6 @@ import time
 import threading
 import pickle
 from datetime import datetime
-from pprint import pprint
 
 # maximum lifetime of cached data (in seconds) 
 MAX_CACHE_TTL = 60 * 60
@@ -69,6 +68,10 @@ class Cache:
 
     cache  = {}
     lock = threading.RLock()
+
+    def __init__(self, filename=None):
+        if filename:
+            self.load_from_file(filename)
    
     def add(self, key, value, ttl = MAX_CACHE_TTL):
         with self.lock:

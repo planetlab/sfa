@@ -10,12 +10,11 @@ import traceback
 import socket
 import random
 import datetime
+import zlib
 from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
-import zlib
-
 from sfa.util.sfalogging import sfa_logger,sfa_logger_goes_to_console
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
@@ -26,6 +25,7 @@ from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.version import version_core
+from sfa.util.cache import Cache
 
 AGGREGATE_PORT=12346
 CM_PORT=12346
@@ -134,6 +134,7 @@ class Sfi:
         for opt in Sfi.required_options:
             if not hasattr(options,opt): setattr(options,opt,None)
         if not hasattr(options,'sfi_dir'): options.sfi_dir=os.path.expanduser("~/.sfi/")
+        self.sfi_dir = options.sfi_dir
         self.options = options
         self.slicemgr = None
         self.registry = None
@@ -276,7 +277,7 @@ class Sfi:
 
         return parser
         
- 
+
     def read_config(self):
        config_file = self.options.sfi_dir + os.sep + "sfi_config"
        try:
@@ -352,7 +353,48 @@ class Sfi:
        self.slicemgr = xmlrpcprotocol.get_server(self.sm_url, key_file, cert_file, self.options)
 
        return
-    
+
+    def get_cached_server_version(self, server):
+        # check local cache first
+        cache = None
+        version = None 
+        cache_file = self.sfi_dir + os.path.sep + 'sfi_cache.dat'
+        cache_key = server.url + "-version"
+        try:
+            cache = Cache(cache_file)
+        except IOError:
+            cache = Cache()
+            self.logger.info("Local cache not found at: %s" % cache_file)
+
+        if cache:
+            version = cache.get(cache_key)
+            
+        if not version: 
+            version = server.GetVersion()
+            # cache version for 24 hours
+            cache.add(cache_key, version, ttl= 60*60*24)
+
+
+        return version   
+        
+
+    def server_supports_call_id_arg(self, server):
+        """
+        Returns true if server support the optional call_id arg, false otherwise. 
+        """
+        server_version = self.get_cached_server_version(server)
+        if 'sfa' in server_version:
+            code_tag = server_version['code_tag']
+            code_tag_parts = code_tag.split("-")
+            
+            version_parts = code_tag_parts[0].split(".")
+            major, minor = version_parts[0], version_parts[1]
+            rev = code_tag_parts[1]
+            if int(major) > 1:
+                if int(minor) > 0 or int(rev) > 20:
+                    return True
+        return False                
+             
     #
     # Get various credential and spec files
     #
@@ -795,7 +837,6 @@ class Sfi:
     # ==================================================================
     # Slice-related commands
     # ==================================================================
-    
 
     def version(self, opts, args):
         if opts.version_local:
@@ -849,7 +890,12 @@ class Sfi:
         #panos add info options
         if opts.info:
             call_options['info'] = opts.info 
-        result = server.ListResources(creds, call_options,unique_call_id())
+
+        server_version = self.get_cached_server_version(server)
+        if self.server_supports_call_id_arg(server):
+            result = server.ListResources(creds, call_options,unique_call_id())
+        else:     
+            result = server.ListResources(creds, call_options)
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)
