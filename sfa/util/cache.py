@@ -6,6 +6,7 @@ import time
 import threading
 import pickle
 from datetime import datetime
+from pprint import pprint
 
 # maximum lifetime of cached data (in seconds) 
 MAX_CACHE_TTL = 60 * 60
@@ -44,6 +45,16 @@ class CacheData:
     def get_data(self):
         return self.data
 
+
+    def dump(self):
+        return self.__dict__
+
+    def __str__(self):
+        return str(self.dump())  
+        
+    def tostring(self):
+        return self.__str__()
+
     def __getstate__(self):
         d = dict(self.__dict__)
         del d['lock']
@@ -71,6 +82,18 @@ class Cache:
         if not data or data.is_expired():
             return None 
         return data.get_data()
+
+    def dump(self):
+        result = {}
+        for key in self.cache:
+            result[key] = self.cache[key].__getstate__()
+        return result
+
+    def __str__(self):
+        return str(self.dump())     
+ 
+    def tostring(self):
+        return self.__str()    
 
     def save_to_file(self, filename):
         f = open(filename, 'w')
