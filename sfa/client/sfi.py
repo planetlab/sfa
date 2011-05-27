@@ -891,11 +891,10 @@ class Sfi:
         if opts.info:
             call_options['info'] = opts.info 
 
-        server_version = self.get_cached_server_version(server)
+        call_args = [creds, call_options]
         if self.server_supports_call_id_arg(server):
-            result = server.ListResources(creds, call_options,unique_call_id())
-        else:     
-            result = server.ListResources(creds, call_options)
+            call_args.append(unique_call_id())
+        result = server.ListResources(*call_args)
         format = opts.format
         if opts.file is None:
             display_rspec(result, format)
@@ -941,8 +940,13 @@ class Sfi:
                 for user_record in user_records:
                     if 'keys' in user_record:
                         user['keys'].extend(user_record['keys'])
-            users.append(user)             
-        result =  server.CreateSliver(slice_urn, creds, rspec, users, unique_call_id())
+            users.append(user)
+
+        call_args = [slice_urn, creds, rspec, users]
+        if self.server_supports_call_id_arg(server):
+            call_args.append(unique_call_id())
+             
+        result =  server.CreateSliver(*call_args)
         print result
         return result
 
@@ -1009,8 +1013,12 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         server = self.get_server_from_opts(opts)
-        return server.DeleteSliver(slice_urn, creds, unique_call_id())
-    
+
+        call_args = [slice_urn, creds]
+        if self.server_supports_call_id_arg(server):
+            call_args.append(unique_call_id())
+        return server.DeleteSliver(*call_args) 
+  
     # start named slice
     def start(self, opts, args):
         slice_hrn = args[0]
@@ -1057,7 +1065,11 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         time = args[1]
-        return server.RenewSliver(slice_urn, creds, time, unique_call_id())
+        
+        call_args = [slice_urn, creds, time]
+        if self.server_supports_call_id_arg(server):
+            call_args.append(unique_call_id())
+        return server.RenewSliver(*call_args)
 
 
     def status(self, opts, args):
@@ -1069,7 +1081,10 @@ class Sfi:
             delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
             creds.append(delegated_cred)
         server = self.get_server_from_opts(opts)
-        print server.SliverStatus(slice_urn, creds, unique_call_id())
+        call_args = [slice_urn, creds]
+        if self.server_supports_call_id_arg(server):
+            call_args.append(unique_call_id())
+        print server.SliverStatus(*call_args)
 
 
     def shutdown(self, opts, args):
