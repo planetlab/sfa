@@ -60,7 +60,7 @@ def determine_rights(type, name):
     elif type in ["sa", "authority+sa"]:
         rl.add("authority")
         rl.add("sa")
-    elif type in ["ma", "authority+ma"]:
+    elif type in ["ma", "authority+ma", "cm", "authority+cm"]:
         rl.add("authority")
         rl.add("ma")
     elif type == "authority":
@@ -200,6 +200,7 @@ class Rights:
     # @param op_name is an operation to check, for example "listslices"
 
     def can_perform(self, op_name):
+        
         for right in self.rights:
             if right.can_perform(op_name):
                 return True
@@ -268,10 +269,10 @@ class Rights:
             rl.add("refresh")
             rl.add("resolve")
             rl.add("info")
-        elif type == "sa":
+        elif type in ["sa", "authority+sa"]:
             rl.add("authority")
             rl.add("sa")
-        elif type == "ma":
+        elif type in ["ma", "authority+ma", "cm", "authority+cm"]:
             rl.add("authority")
             rl.add("ma")
         elif type == "authority":
