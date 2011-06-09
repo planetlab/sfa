@@ -35,6 +35,7 @@
 ##
 #
 
+import functools
 import os
 import tempfile
 import base64
@@ -48,6 +49,40 @@ from M2Crypto import X509
 from sfa.util.sfalogging import sfa_logger
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.faults import *
+
+glo_passphrase_callback = None
+
+##
+# A global callback msy be implemented for requesting passphrases from the
+# user. The function will be called with three arguments:
+#
+#    keypair_obj: the keypair object that is calling the passphrase
+#    string: the string containing the private key that's being loaded
+#    x: unknown, appears to be 0, comes from pyOpenSSL and/or m2crypto
+#
+# The callback should return a string containing the passphrase.
+
+def set_passphrase_callback(callback_func):
+    global glo_passphrase_callback
+
+    glo_passphrase_callback = callback_func
+
+##
+# Sets a fixed passphrase.
+
+def set_passphrase(passphrase):
+    set_passphrase_callback( lambda k,s,x: passphrase )
+
+##
+# Check to see if a passphrase works for a particular private key string.
+# Intended to be used by passphrase callbacks for input validation.
+
+def test_passphrase(string, passphrase):
+    try:
+        crypto.load_privatekey(crypto.FILETYPE_PEM, string, (lambda x: passphrase))
+        return True
+    except:
+        return False
 
 def convert_public_key(key):
     keyconvert_path = "/usr/bin/keyconvert.py"
@@ -128,16 +163,20 @@ class Keypair:
     # Load the private key from a file. Implicity the private key includes the public key.
 
     def load_from_file(self, filename):
+        self.filename=filename
         buffer = open(filename, 'r').read()
         self.load_from_string(buffer)
-        self.filename=filename
 
     ##
     # Load the private key from a string. Implicitly the private key includes the public key.
 
     def load_from_string(self, string):
-        self.key = crypto.load_privatekey(crypto.FILETYPE_PEM, string)
-        self.m2key = M2Crypto.EVP.load_key_string(string)
+        if glo_passphrase_callback:
+            self.key = crypto.load_privatekey(crypto.FILETYPE_PEM, string, functools.partial(glo_passphrase_callback, self, string) )
+            self.m2key = M2Crypto.EVP.load_key_string(string, functools.partial(glo_passphrase_callback, self, string) )
+        else:
+            self.key = crypto.load_privatekey(crypto.FILETYPE_PEM, string)
+            self.m2key = M2Crypto.EVP.load_key_string(string)
 
     ##
     #  Load the public key from a string. No private key is loaded.
