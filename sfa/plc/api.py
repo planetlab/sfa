@@ -477,8 +477,8 @@ class SfaAPI(BaseAPI):
         # fill sfa info
         for record in records:
             # skip records with no pl info (top level authorities)
-            if record['pointer'] == -1:
-                continue 
+            #if record['pointer'] == -1:
+            #    continue 
             sfa_info = {}
             type = record['type']
             if (type == "slice"):
@@ -499,23 +499,28 @@ class SfaAPI(BaseAPI):
                         record['PI'].extend(hrns)
                         record['geni_creator'] = record['PI'] 
                 
-            elif (type == "authority"):
-                record['PI'] = []
-                record['operator'] = []
-                record['owner'] = []
-                for pointer in record['person_ids']:
-                    if pointer not in persons or pointer not in pl_persons:
-                        # this means there is not sfa or pl record for this user
-                        continue   
-                    hrns = [person['hrn'] for person in persons[pointer]] 
-                    roles = pl_persons[pointer]['roles']   
-                    if 'pi' in roles:
-                        record['PI'].extend(hrns)
-                    if 'tech' in roles:
-                        record['operator'].extend(hrns)
-                    if 'admin' in roles:
-                        record['owner'].extend(hrns)
-                    # xxx TODO: OrganizationName
+            elif (type.startswith("authority")):
+                record['url'] = None
+                if record['hrn'] in self.aggregates:
+                    record['url'] = self.aggregates[record['hrn']].url
+
+                if record['pointer'] != -1:
+                    record['PI'] = []
+                    record['operator'] = []
+                    record['owner'] = []
+                    for pointer in record.get('person_ids', []):
+                        if pointer not in persons or pointer not in pl_persons:
+                            # this means there is not sfa or pl record for this user
+                            continue   
+                        hrns = [person['hrn'] for person in persons[pointer]] 
+                        roles = pl_persons[pointer]['roles']   
+                        if 'pi' in roles:
+                            record['PI'].extend(hrns)
+                        if 'tech' in roles:
+                            record['operator'].extend(hrns)
+                        if 'admin' in roles:
+                            record['owner'].extend(hrns)
+                        # xxx TODO: OrganizationName
             elif (type == "node"):
                 sfa_info['dns'] = record.get("hostname", "")
                 # xxx TODO: URI, LatLong, IP, DNS

@@ -678,7 +678,7 @@ class Sfi:
                 record = SliceRecord(dict=record)
             elif record['type'] in ['node']:
                 record = NodeRecord(dict=record)
-            elif record['type'] in ['authority', 'ma', 'sa']:
+            elif record['type'].startswith('authority'):
                 record = AuthorityRecord(dict=record)
             else:
                 record = SfaRecord(dict=record)
@@ -686,7 +686,7 @@ class Sfi:
                 record.dump()  
             else:
                 print record.save_to_string() 
-       
+ 
         if opts.file:
             file = opts.file
             if not file.startswith(os.sep):
