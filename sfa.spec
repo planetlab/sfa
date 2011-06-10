@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 22
+%define taglevel 23
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -197,6 +197,9 @@ fi
 
 
 %changelog
+* Fri Jun 10 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-23
+- includes a change on passphrases that was intended in 1.0-22
+
 * Thu Jun 6 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-22
 - Added support for ProtoGENI RSpec v2
  
@@ -326,6 +329,9 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Fri Jun 10 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-23
+- includes a change on passphrases that was intended in 1.0-22
+
 * Wed Mar 16 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-21
 - stable sfascan
 - fix in initscript, *ENABLED tags in config now taken into account
