@@ -18,6 +18,8 @@ import SimpleXMLRPCServer
 from OpenSSL import SSL
 
 from sfa.trust.certificate import Keypair, Certificate
+from sfa.trust.trustedroot import TrustedRootList
+from sfa.util.config import Config
 from sfa.trust.credential import *
 from sfa.util.faults import *
 from sfa.plc.api import SfaAPI
@@ -151,6 +153,10 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         ctx.use_certificate_file(cert_file)
         # If you wanted to verify certs against known CAs.. this is how you would do it
         #ctx.load_verify_locations('/etc/sfa/trusted_roots/plc.gpo.gid')
+        config = Config()
+        trusted_cert_files = TrustedRootList(config.get_trustedroots_dir()).get_file_list()
+        for cert_file in trusted_cert_files:
+            ctx.load_verify_locations(cert_file)
         ctx.set_verify(SSL.VERIFY_PEER | SSL.VERIFY_FAIL_IF_NO_PEER_CERT, verify_callback)
         ctx.set_verify_depth(5)
         ctx.set_app_data(self)
