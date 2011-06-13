@@ -15,7 +15,7 @@ from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
-from sfa.util.sfalogging import sfa_logger,sfa_logger_goes_to_console
+from sfa.util.sfalogging import _SfaLogger, logging
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
 from sfa.trust.credential import Credential
@@ -141,8 +141,9 @@ class Sfi:
         self.user = None
         self.authority = None
         self.hashrequest = False
-        sfa_logger_goes_to_console()
-        self.logger=sfa_logger()
+        #sfa_logger_goes_to_console()
+        #self.logger=sfa_logger()
+        self.logger = _SfaLogger(self.sfi_dir + 'sfi.log', level = logging.INFO)
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
         cmdargs = {"list": "authority",
@@ -345,13 +346,11 @@ class Sfi:
        self.key = Keypair(filename=key_file) 
        self.key_file = key_file
        self.cert_file = cert_file
-       self.cert = GID(filename=cert_file) 
-       # Establish connection to server(s)
+       self.cert = GID(filename=cert_file)
        self.logger.info("Contacting Registry at: %s"%self.reg_url)
        self.registry = xmlrpcprotocol.get_server(self.reg_url, key_file, cert_file, self.options)  
        self.logger.info("Contacting Slice Manager at: %s"%self.sm_url)
        self.slicemgr = xmlrpcprotocol.get_server(self.sm_url, key_file, cert_file, self.options)
-
        return
 
     def get_cached_server_version(self, server):
@@ -435,10 +434,13 @@ class Sfi:
         cert.set_issuer(k, self.user)
         cert.sign()
         self.logger.info("Writing self-signed certificate to %s"%cert_file)
+        print "Writing self-signed certificate to %s"%cert_file
         cert.save_to_file(cert_file)
+        self.cert = cert
         # try to get registry issued cert
         try:
             self.logger.info("Getting Registry issued cert")
+            print "Getting Registry issued cert"
             self.read_config()
             # *hack.  need to set registyr before _get_gid() is called 
             self.registry = xmlrpcprotocol.get_server(self.reg_url, key_file, cert_file, self.options)
@@ -447,8 +449,10 @@ class Sfi:
             self.logger.info("Writing certificate to %s"%cert_file)
             gid.save_to_file(cert_file)
         except:
+            
+            print "Failed to download Registry issued cert"
             self.logger.info("Failed to download Registry issued cert")
- 
+
         return cert_file
 
     def get_cached_gid(self, file):
@@ -485,14 +489,18 @@ class Sfi:
         if not gid:
             user_cred = self.get_user_cred()
             records = self.registry.Resolve(hrn, user_cred.save_to_string(save_parents=True))
-            record = None
+            if not records:
+                raise RecordNotFound(args[0])
+            record = records[0]
             if type:
+                record=None
                 for rec in records:
-                   if type == record['type']:
+                   if type == rec['type']:
                         record = rec 
             if not record:
                 raise RecordNotFound(args[0])
-            gid = GID(string=records[0]['gid'])
+            
+            gid = GID(string=record['gid'])
             self.logger.info("Writing gid to %s"%gidfile)
             gid.save_to_file(filename=gidfile)
         return gid   
@@ -1123,7 +1131,6 @@ class Sfi:
         (cmd_opts, cmd_args) = self.cmd_parser.parse_args(args[1:])
 
         self.set_servers()
-    
         self.logger.info("Command=%s" % command)
         if command in ("resources"):
             self.logger.debug("resources cmd_opts %s" % cmd_opts.format)
