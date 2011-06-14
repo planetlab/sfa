@@ -77,14 +77,6 @@ def display(options):
     gid = GID(filename=gidfile)
     gid.dump(dump_parents=True)
 
-def sign_gid(gid, parent_key, parent_gid):
-    gid.set_issuer(parent_key, parent_gid.get_hrn())
-    gid.set_parent(parent_gid)
-    gid.set_intermediate_ca(True)
-    gid.set_pubkey(gid.get_pubkey())
-    gid.sign()
-    return gid 
-
 def sign(options):
     """
     Sign the specified gid
@@ -101,36 +93,16 @@ def sign(options):
         sys.exit(1)
     gid = GID(filename=gidfile)
 
-    # remove previous parent
-    gid = GID(string=gid.save_to_string(save_parents=False))
-
-    # load the parent private info
-    authority = options.authority    
-    # if no pkey was specified, then use the this authority's key
-    if not authority:
-        authority = default_authority 
-    
-    if not hierarchy.auth_exists(authority):
-        print "no such authority: %s" % authority    
-
-    # load the parent gid and key 
-    auth_info = hierarchy.get_auth_info(authority)
-    pkeyfile = auth_info.privkey_filename
-    parent_key = Keypair(filename=pkeyfile)
-    parent_gid = auth_info.gid_object
+    # extract pub_key and create new gid
+    pkey = gid.get_pubkey()
+    urn = gid.get_urn()
+    gid = hierarchy.create_gid(urn, create_uuid(), pkey)
 
     # get the outfile
     outfile = options.outfile
     if not outfile:
         outfile = os.path.abspath('./signed-%s.gid' % gid.get_hrn())
    
-    # check if gid already has a parent
- 
-    # sign the gid
-    if options.verbose:
-        print "Signing %s gid with parent %s" % \
-              (gid.get_hrn(), parent_gid.get_hrn())
-    gid = sign_gid(gid, parent_key, parent_gid)
     # save the signed gid
     if options.verbose:
         print "Writing signed gid %s" % outfile  
@@ -212,52 +184,8 @@ def import_gid(options):
     if options.verbose:
         print "Writing %s gid to %s" % (gid.get_hrn(), filename)
 
-    # re-sign all existing gids signed by this authority  
-    # create a dictionary of records keyed on the record's authority
-    record_dict = defaultdict(list)
-    # only get regords that belong to this authority 
-    # or any of its sub authorities   
-    child_records = table.find({'hrn': '%s*' % gid.get_hrn()})
-    if not child_records:
-        return
-  
-    for record in child_records:
-        record_dict[record['authority']].append(record) 
-
-    # start with the authority we just imported       
-    authorities = [gid.get_hrn()]
-    while authorities:
-        next_authorities = []
-        for authority in authorities:
-            # create a new signed gid for each record at this authority 
-            # and update the registry
-            auth_info = hierarchy.get_auth_info(authority)
-            records = record_dict[authority]
-            for record in records:
-                record_gid = GID(string=record['gid'])
-                parent_pkey = Keypair(filename=auth_info.privkey_filename)
-                parent_gid = GID(filename=auth_info.gid_filename)
-                if options.verbose:
-                    print "re-signing %s gid with parent %s" % \
-                           (record['hrn'], parent_gid.get_hrn())  
-                signed_gid = sign_gid(record_gid, parent_pkey, parent_gid)
-                record['gid'] = signed_gid.save_to_string(save_parents=True)
-                table.update(record)
-                
-                # if this is an authority then update the hierarchy
-                if record['type'] == 'authority':
-                    record_info = hierarchy.get_auth_info(record['hrn'])
-                    if options.verbose:
-                        print "Writing %s gid to %s" % (record['hrn'], record_info.gid_filename) 
-                    signed_gid.save_to_file(filename=record_info.gid_filename, save_parents=True)
-
-             # update list of next authorities
-            tmp_authorities = set([record['hrn'] for record in records \
-                                   if record['type'] == 'authority'])
-            next_authorities.extend(tmp_authorities)
-
-        # move on to next set of authorities
-        authorities = next_authorities     
+    # ending here
+    return
 
 if __name__ == '__main__':
     main()
