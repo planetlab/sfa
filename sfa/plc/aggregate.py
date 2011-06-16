@@ -110,7 +110,7 @@ class Aggregate:
                         else:
                             tag_host = self.nodes[tag['node_id']]['hostname']
                             if tag_host == sliver['hostname']:
-                                sliver.tags.append(tag)
+                                sliver['tags'].append(tag)
                 rspec.add_slivers(slivers, sliver_urn=slice_xrn)
 
         return rspec.toxml(cleanup=True)          

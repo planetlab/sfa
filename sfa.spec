@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 23
+%define taglevel 25
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -197,6 +197,13 @@ fi
 
 
 %changelog
+* Thu Jun 16 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-25
+- fix typo that prevented aggregates from operating properly
+
+* Tue Jun 14 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-24
+- load trusted certs into ssl context prior to handshake
+- client's logfile lives in ~/.sfi/sfi.log
+
 * Fri Jun 10 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-23
 - includes a change on passphrases that was intended in 1.0-22
 
@@ -329,6 +336,13 @@ fi
   cache and use in more general ways.     
 
 %changelog
+* Thu Jun 16 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-25
+- fix typo that prevented aggregates from operating properly
+
+* Tue Jun 14 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-24
+- load trusted certs into ssl context prior to handshake
+- client's logfile lives in ~/.sfi/sfi.log
+
 * Fri Jun 10 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-23
 - includes a change on passphrases that was intended in 1.0-22
 
