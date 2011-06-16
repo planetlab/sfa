@@ -432,19 +432,13 @@ def SliverStatus(api, slice_xrn, creds, call_id):
 
     # mmh, it is expected that all results carry the same urn
     overall['geni_urn'] = results[0]['geni_urn']
-
-    # consolidate geni_status - simple model using max on a total order
-    states = [ 'ready', 'configuring', 'failed', 'unknown' ]
-    # hash name to index
-    shash = dict ( zip ( states, range(len(states)) ) )
-    def combine_status (x,y):
-        return shash [ max (shash(x),shash(y)) ]
-    overall['geni_status'] = reduce (combine_status, [ result['geni_status'] for result in results], 'ready' )
-
-    # {'ready':0,'configuring':1,'failed':2,'unknown':3}
+    overall['pl_login'] = results[0]['pl_login']
     # append all geni_resources
     overall['geni_resources'] = \
         reduce (lambda x,y: x+y, [ result['geni_resources'] for result in results] , [])
+    overall['status'] = 'unknown'
+    if overall['geni_resources']:
+        overall['status'] = 'ready'
 
     return overall
 
