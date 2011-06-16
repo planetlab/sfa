@@ -141,8 +141,6 @@ class Sfi:
         self.user = None
         self.authority = None
         self.hashrequest = False
-        #sfa_logger_goes_to_console()
-        #self.logger=sfa_logger()
         self.logger = _SfaLogger(self.sfi_dir + 'sfi.log', level = logging.INFO)
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
@@ -434,13 +432,11 @@ class Sfi:
         cert.set_issuer(k, self.user)
         cert.sign()
         self.logger.info("Writing self-signed certificate to %s"%cert_file)
-        print "Writing self-signed certificate to %s"%cert_file
         cert.save_to_file(cert_file)
         self.cert = cert
         # try to get registry issued cert
         try:
             self.logger.info("Getting Registry issued cert")
-            print "Getting Registry issued cert"
             self.read_config()
             # *hack.  need to set registyr before _get_gid() is called 
             self.registry = xmlrpcprotocol.get_server(self.reg_url, key_file, cert_file, self.options)
@@ -449,8 +445,6 @@ class Sfi:
             self.logger.info("Writing certificate to %s"%cert_file)
             gid.save_to_file(cert_file)
         except:
-            
-            print "Failed to download Registry issued cert"
             self.logger.info("Failed to download Registry issued cert")
 
         return cert_file
@@ -485,6 +479,7 @@ class Sfi:
             hrn = self.user
  
         gidfile = os.path.join(self.options.sfi_dir, hrn + ".gid")
+        print gidfile
         gid = self.get_cached_gid(gidfile)
         if not gid:
             user_cred = self.get_user_cred()
@@ -812,6 +807,8 @@ class Sfi:
         """ 
         trusted_certs = self.registry.get_trusted_certs()
         for trusted_cert in trusted_certs:
+            gid = GID(string=trusted_cert)
+            gid.dump()
             cert = Certificate(string=trusted_cert)
             self.logger.debug('Sfi.get_trusted_certs -> %r'%cert.get_subject())
         return 
