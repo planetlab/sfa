@@ -235,13 +235,12 @@ class SfaRSpec(RSpec):
                     etree.SubElement(sliver_elem, tag['tagname'], value=tag['value'])
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
-        if not isinstance(slivers, list):
-            slivers = [slivers]
+        slivers = self._process_slivers(slivers)
         for sliver in slivers:
             node_elem = self.get_node_element(sliver['hostname'], network)
-            sliver_elem = node.find('sliver')
+            sliver_elem = node_elem.find('sliver')
             if sliver_elem != None:
-                node_elem.remove(sliver)                 
+                node_elem.remove(sliver_elem)
     
     def add_default_sliver_attribute(self, name, value, network=None):
         if network:
