@@ -54,24 +54,21 @@ class _SfaLogger:
             self.logger.setLevel(logging.DEBUG)
 
     ####################
-    def wrap(fun):
-        def wrapped(self,msg,*args,**kwds):
-            native=getattr(self.logger,fun.__name__)
-            return native(msg,*args,**kwds)
-        #wrapped.__doc__=native.__doc__
-        return wrapped
+    def info(self, msg):
+        self.logger.info(msg)
 
-    @wrap
-    def critical(): pass
-    @wrap
-    def error(): pass
-    @wrap
-    def warning(): pass
-    @wrap
-    def info(): pass
-    @wrap
-    def debug(): pass
-    
+    def debug(self, msg):
+        self.logger.debug(msg)
+        
+    def warn(self, msg):
+        self.logger.warn(msg)
+   
+    def error(self, msg):
+        self.logger.error(msg)    
+ 
+    def critical(self, msg):
+        self.logger.critical(msg)
+
     # logs an exception - use in an except statement
     def log_exc(self,message):
         self.error("%s BEG TRACEBACK"%message+"\n"+traceback.format_exc().strip("\n"))
@@ -92,25 +89,25 @@ class _SfaLogger:
 _import_logger=_SfaLogger(logfile='/var/log/sfa_import.log')
 # servers log into /var/log/sfa.log
 _server_logger=_SfaLogger(logfile='/var/log/sfa.log')
-# clients use the console
-_console_logger=_SfaLogger()
+## clients use the console
+#_console_logger=_SfaLogger()
 
 # default is to use the server-side logger
-_the_logger=_server_logger
+#_the_logger=_server_logger
 
 # clients would change the default by issuing one of these call
-def sfa_logger_goes_to_console():
-    current_module=sys.modules[globals()['__name__']]
-    current_module._the_logger=_console_logger
-
+#def sfa_logger_goes_to_console():
+#    current_module=sys.modules[globals()['__name__']]
+#    current_module._the_logger=_console_logger
+#
 # clients would change the default by issuing one of these call
-def sfa_logger_goes_to_import():
-    current_module=sys.modules[globals()['__name__']]
-    current_module._the_logger=_import_logger
+#def sfa_logger_goes_to_import():
+#    current_module=sys.modules[globals()['__name__']]
+#    current_module._the_logger=_import_logger
 
 # this is how to retrieve the 'right' logger
 def sfa_logger():
-    return _the_logger
+    return _server_logger
 
 ########################################
 import time
@@ -148,7 +145,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.debug("logger.debug again")
     
-    sfa_logger_goes_to_console()
+    #sfa_logger_goes_to_console()
     my_logger=sfa_logger()
     my_logger.info("redirected to console")
 

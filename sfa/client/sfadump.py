@@ -13,7 +13,7 @@ from sfa.trust.credential import Credential
 from sfa.trust.gid import GID
 from sfa.util.record import SfaRecord
 from sfa.util.rspec import RSpec
-from sfa.util.sfalogging import sfa_logger, sfa_logger_goes_to_console
+from sfa.util.sfalogging import sfa_logger
 
 def determine_sfa_filekind(fn):
 
@@ -100,7 +100,6 @@ def handle_input_kind (filename, options, kind):
         print "%s: unknown filekind '%s'"% (filename,kind)
 
 def main():
-    sfa_logger_goes_to_console()
     usage = """%prog file1 [ .. filen]
 display info on input files"""
     parser = OptionParser(usage=usage)

@@ -10,7 +10,7 @@ import pygraphviz
 from optparse import OptionParser
 
 from sfa.client.sfi import Sfi
-from sfa.util.sfalogging import sfa_logger,sfa_logger_goes_to_console
+from sfa.util.sfalogging import sfa_logger
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 
 def url_hostname_port (url):
@@ -201,7 +201,6 @@ class SfaScan:
 default_outfiles=['sfa.png','sfa.svg','sfa.dot']
 
 def main():
-    sfa_logger_goes_to_console()
     usage="%prog [options] url-entry-point(s)"
     parser=OptionParser(usage=usage)
     parser.add_option("-o","--output",action='append',dest='outfiles',default=[],
