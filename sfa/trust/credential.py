@@ -859,13 +859,18 @@ class Credential(object):
             result += "  gidCaller:\n"
             result += gidCaller.dump_string(8, dump_parents)
 
+        if self.get_signature():
+            print "  gidIssuer:"
+            self.get_signature().get_issuer_gid().dump(8, dump_parents)
+
         gidObject = self.get_gid_object()
         if gidObject:
             result += "  gidObject:\n"
             result += gidObject.dump_string(8, dump_parents)
 
         if self.parent and dump_parents:
-            result += "PARENT"
-            result += self.parent.dump_string(dump_parents)
+            result += "\nPARENT"
+            result += self.parent.dump(True)
+
         return result
 
