@@ -136,6 +136,9 @@ class PGRSpec(RSpec):
                     node.set('sliver_id', sliver_urn)
                 etree.SubElement(node, 'sliver_type', name='plab-vnode')
 
+    def add_default_sliver_attribute(self, name, value, network=Name):
+        pass
+
     def add_interfaces(self, interfaces, no_dupes=False):
         pass
 

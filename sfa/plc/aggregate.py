@@ -105,8 +105,9 @@ class Aggregate:
                     slivers.append(sliver)
                     for tag in tags:
                         # if tag isn't bound to a node then it applies to all slivers
+                        # and belongs in the <sliver_defaults> tag
                         if not tag['node_id']:
-                            sliver['tags'].append(tag)
+                            rspec.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
                         else:
                             tag_host = self.nodes[tag['node_id']]['hostname']
                             if tag_host == sliver['hostname']:
