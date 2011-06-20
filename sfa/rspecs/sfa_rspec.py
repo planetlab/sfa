@@ -91,6 +91,10 @@ class SfaRSpec(RSpec):
         sliver = node.find("sliver")
         return self.attributes_list(sliver)
 
+    def get_slice_attributes(self, network=None):
+        # TODO: FINISH
+        return []
+
     def get_site_nodes(self, siteid, network=None):
         if network:
             nodes = self.xml.xpath('//network[@name="%s"]/site[@id="%s"]/node/hostname/text()' % \

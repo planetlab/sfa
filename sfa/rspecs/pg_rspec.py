@@ -90,6 +90,12 @@ class PGRSpec(RSpec):
 
     def get_nodes_without_slivers(self, network=None):
         pass
+   
+    def get_slice_attributes(self, network=None):
+        pass
+
+    def get_default_sliver_attributes(self, network=None):
+        pass 
 
     def add_nodes(self, nodes, check_for_dupes=False):
         if not isinstance(nodes, list):

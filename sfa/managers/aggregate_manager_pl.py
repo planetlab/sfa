@@ -195,15 +195,18 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     # add nodes from rspec
     added_nodes = list(set(requested_slivers).difference(current_slivers))
 
+    # get sliver attributes
+    slice_attributes = rspec.get_slice_attributes()
+
     try:
         if peer:
             api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
 
         api.plshell.AddSliceToNodes(api.plauth, slice['name'], added_nodes) 
         api.plshell.DeleteSliceFromNodes(api.plauth, slice['name'], deleted_nodes)
-
-        # TODO: update slice tags
-        #network.updateSliceTags()
+        for attribute in sliver_atrributes:
+            name, value, node_id = attribute['tagname'], attribute['value'], attribute.get('node_id', None)
+            api.plshell.AddSliceTag(api.plauth, slice['name'], name, value, node_id)
 
     finally:
         if peer:
