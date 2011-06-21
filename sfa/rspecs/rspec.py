@@ -47,8 +47,8 @@ class RSpec:
             # 'rspec' file doesnt exist. 'rspec' is proably an xml string
             try:
                 tree = etree.parse(StringIO(rspec), parser)
-            except:
-                raise InvalidRSpec('Must specify a xml file or xml string. Received: ' + rspec )
+            except Exception, e:
+                raise InvalidRSpec(str(e))
         self.xml = tree.getroot()  
         if namespaces:
            self.namespaces = namespaces
