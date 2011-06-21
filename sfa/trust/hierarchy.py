@@ -15,7 +15,7 @@
 import os
 
 from sfa.util.faults import *
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential import Credential
@@ -33,7 +33,6 @@ class AuthInfo:
     gid_filename = None
     privkey_filename = None
     dbinfo_filename = None
-
     ##
     # Initialize and authority object.
     #
@@ -159,7 +158,7 @@ class Hierarchy:
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(xrn)
-        sfa_logger().debug("Hierarchy: creating authority: %s"% hrn)
+        logger.debug("Hierarchy: creating authority: %s"% hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
@@ -179,7 +178,7 @@ class Hierarchy:
                 pass
 
         if os.path.exists(privkey_filename):
-            sfa_logger().debug("using existing key %r for authority %r"%(privkey_filename,hrn))
+            logger.debug("using existing key %r for authority %r"%(privkey_filename,hrn))
             pkey = Keypair(filename = privkey_filename)
         else:
             pkey = Keypair(create = True)
@@ -205,7 +204,7 @@ class Hierarchy:
     def get_auth_info(self, xrn):
         hrn, type = urn_to_hrn(xrn)
         if not self.auth_exists(hrn):
-            sfa_logger().warning("Hierarchy: mising authority - xrn=%s, hrn=%s"%(xrn,hrn))
+            logger.warning("Hierarchy: mising authority - xrn=%s, hrn=%s"%(xrn,hrn))
             raise MissingAuthority(hrn)
 
         (directory, gid_filename, privkey_filename, dbinfo_filename) = \

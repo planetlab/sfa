@@ -28,7 +28,7 @@
 import xmlrpclib
 import uuid
 
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger 
 from sfa.trust.certificate import Certificate
 from sfa.util.xrn import hrn_to_urn, urn_to_hrn
 
@@ -80,7 +80,7 @@ class GID(Certificate):
         
         Certificate.__init__(self, create, subject, string, filename)
         if subject:
-            sfa_logger().debug("Creating GID for subject: %s" % subject)
+            logger.debug("Creating GID for subject: %s" % subject)
         if uuid:
             self.uuid = int(uuid)
         if hrn:

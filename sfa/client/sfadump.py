@@ -13,7 +13,7 @@ from sfa.trust.credential import Credential
 from sfa.trust.gid import GID
 from sfa.util.record import SfaRecord
 from sfa.util.rspec import RSpec
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 
 def determine_sfa_filekind(fn):
 
@@ -110,7 +110,7 @@ display info on input files"""
     parser.add_option("-v", "--verbose", action='count', dest='verbose', default=0)
     (options, args) = parser.parse_args()
 
-    sfa_logger().setLevelFromOptVerbose(options.verbose)
+    logger.setLevelFromOptVerbose(options.verbose)
     if len(args) <= 0:
         parser.print_help()
         sys.exit(1)

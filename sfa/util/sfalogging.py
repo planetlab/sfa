@@ -15,21 +15,21 @@ class _SfaLogger:
     def __init__ (self,logfile=None,loggername=None,level=logging.INFO):
         # default is to locate loggername from the logfile if avail.
         if not logfile:
-            loggername='console'
-            handler=logging.StreamHandler()
-            handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
-        else:
-            if not loggername:
-                loggername=os.path.basename(logfile)
-            try:
-                handler=logging.handlers.RotatingFileHandler(logfile,maxBytes=1000000, backupCount=5) 
-            except IOError:
-                # This is usually a permissions error becaue the file is
-                # owned by root, but httpd is trying to access it.
-                tmplogfile=os.getenv("TMPDIR", "/tmp") + os.path.sep + os.path.basename(logfile)
-                handler=logging.handlers.RotatingFileHandler(tmplogfile,maxBytes=1000000, backupCount=5) 
-            handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+            #loggername='console'
+            #handler=logging.StreamHandler()
+            #handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+            logfile = "/var/log/sfa.log"
 
+        if not loggername:
+            loggername=os.path.basename(logfile)
+        try:
+            handler=logging.handlers.RotatingFileHandler(logfile,maxBytes=1000000, backupCount=5) 
+        except IOError:
+            # This is usually a permissions error becaue the file is
+            # owned by root, but httpd is trying to access it.
+            tmplogfile=os.getenv("TMPDIR", "/tmp") + os.path.sep + os.path.basename(logfile)
+            handler=logging.handlers.RotatingFileHandler(tmplogfile,maxBytes=1000000, backupCount=5) 
+        handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.logger=logging.getLogger(loggername)
         self.logger.setLevel(level)
         self.logger.addHandler(handler)
@@ -84,30 +84,13 @@ class _SfaLogger:
         self.debug("%s BEG STACK"%message+"\n"+to_log)
         self.debug("%s END STACK"%message)
 
-####################
-# import-related operations go in this file
-_import_logger=_SfaLogger(logfile='/var/log/sfa_import.log')
-# servers log into /var/log/sfa.log
-_server_logger=_SfaLogger(logfile='/var/log/sfa.log')
-## clients use the console
-#_console_logger=_SfaLogger()
 
-# default is to use the server-side logger
-#_the_logger=_server_logger
-
-# clients would change the default by issuing one of these call
-#def sfa_logger_goes_to_console():
-#    current_module=sys.modules[globals()['__name__']]
-#    current_module._the_logger=_console_logger
-#
-# clients would change the default by issuing one of these call
-#def sfa_logger_goes_to_import():
-#    current_module=sys.modules[globals()['__name__']]
-#    current_module._the_logger=_import_logger
-
-# this is how to retrieve the 'right' logger
-def sfa_logger():
-    return _server_logger
+info_logger = _SfaLogger(loggername='info', level=logging.INFO)
+debug_logger = _SfaLogger(loggername='debug', level=logging.DEBUG)
+warn_logger = _SfaLogger(loggername='warning', level=logging.WARNING)
+error_logger = _SfaLogger(loggername='error', level=logging.ERROR)
+critical_logger = _SfaLogger(loggername='critical', level=logging.CRITICAL)
+logger = info_logger
 
 ########################################
 import time
@@ -145,9 +128,6 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.debug("logger.debug again")
     
-    #sfa_logger_goes_to_console()
-    my_logger=sfa_logger()
-    my_logger.info("redirected to console")
 
     @profile(my_logger)
     def sleep(seconds = 1):

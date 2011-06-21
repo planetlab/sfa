@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from sfa.util.sfalogging import _SfaLogger
+from sfa.util.sfalogging import logger
 
 class RSpecVersion(dict):
 
@@ -11,7 +11,6 @@ class RSpecVersion(dict):
         }
     def __init__(self, version={}):
         
-        self.logger = _SfaLogger('/var/log/sfa.log')
         dict.__init__(self, self.fields)
 
         if not version:

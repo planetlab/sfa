@@ -12,7 +12,7 @@ import getopt
 import sys
 import tempfile
 
-from sfa.util.sfalogging import sfa_logger_goes_to_import,sfa_logger
+from sfa.util.sfalogging import _SfaLogger
 
 from sfa.util.record import *
 from sfa.util.table import SfaTable
@@ -52,8 +52,7 @@ def _cleanup_string(str):
 class sfaImport:
 
     def __init__(self):
-       sfa_logger_goes_to_import()
-       self.logger = sfa_logger()
+       self.logger = _SfaLogger(logfile='/var/log/sfa_import.log', loggername='importlog')
        self.AuthHierarchy = Hierarchy()
        self.config = Config()
        self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))

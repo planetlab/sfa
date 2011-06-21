@@ -12,7 +12,7 @@ import xmlrpclib
 from sfa.util.faults import *
 from sfa.util.api import *
 from sfa.util.config import *
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.trust.auth import Auth
 from sfa.trust.rights import Right, Rights, determine_rights
@@ -106,7 +106,6 @@ class SfaAPI(BaseAPI):
 
         self.hrn = self.config.SFA_INTERFACE_HRN
         self.time_format = "%Y-%m-%d %H:%M:%S"
-        self.logger=sfa_logger()
 
     def getPLCShell(self):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
@@ -340,7 +339,7 @@ class SfaAPI(BaseAPI):
             # fill in key info
             if record['type'] == 'user':
                 if 'key_ids' not in record:
-                    self.logger.info("user record has no 'key_ids' - need to import from myplc ?")
+                    logger.info("user record has no 'key_ids' - need to import from myplc ?")
                 else:
                     pubkeys = [keys[key_id]['key'] for key_id in record['key_ids'] if key_id in keys] 
                     record['keys'] = pubkeys

@@ -7,7 +7,7 @@ from copy import deepcopy
 from copy import copy
 from lxml import etree
 
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 from sfa.util.rspecHelper import merge_rspecs
 from sfa.util.xrn import Xrn, urn_to_hrn, hrn_to_urn
 from sfa.util.plxrn import hrn_to_pl_slicename
@@ -62,7 +62,7 @@ def get_serverproxy_url (server):
     try:
         return server.url
     except:
-        sfa_logger().warning("GetVersion, falling back to xmlrpclib.ServerProxy internals")
+        logger.warning("GetVersion, falling back to xmlrpclib.ServerProxy internals")
         return server._ServerProxy__host + server._ServerProxy__handler 
 
 def GetVersion(api):
