@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 25
+%define taglevel 26
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -197,6 +197,10 @@ fi
 
 
 %changelog
+* Tue Jun 21 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-26
+- fixed issues with sup authority signing
+- fixed bugs in remove_slivers and SliverStatus
+
 * Thu Jun 16 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-25
 - fix typo that prevented aggregates from operating properly
 
