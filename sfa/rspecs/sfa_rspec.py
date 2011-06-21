@@ -253,7 +253,7 @@ class SfaRSpec(RSpec):
             defaults = self.xml.xpath("//sliver_defaults" % network)
         if defaults is None:
             network_tag = self.xml.xpath("//network[@name='%s']" % network)
-            defaults = self.add_element('sliver_defaults', attrs={}, network_tag)
+            defaults = self.add_element('sliver_defaults', attrs={}, parent=network_tag)
         self.add_attribute(defaults, name, value)
 
     def add_sliver_attribute(self, hostname, name, value, network=None):
