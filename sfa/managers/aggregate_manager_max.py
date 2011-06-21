@@ -2,7 +2,7 @@ from sfa.util.xrn import urn_to_hrn, hrn_to_urn, get_authority
 from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.plxrn import hrn_to_pl_slicename
 from sfa.util.rspec import RSpec
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 from sfa.util.config import Config
 from sfa.managers.aggregate_manager_pl import GetVersion, __get_registry_objects
 from sfa.plc.slices import Slices
@@ -38,7 +38,7 @@ def call_am_apiclient(client_app, params, timeout):
     (client_path, am_url) = Config().get_max_aggrMgr_info()
     sys_cmd = "cd " + client_path + "; java -classpath AggregateWS-client-api.jar:lib/* net.geni.aggregate.client.examples." + client_app + " ./repo " + am_url + " " + ' '.join(params)
     ret = shell_execute(sys_cmd, timeout)
-    sfa_logger().debug("shell_execute cmd: %s returns %s" % (sys_cmd, ret))
+    logger.debug("shell_execute cmd: %s returns %s" % (sys_cmd, ret))
 # save request RSpec xml content to a tmp file
 def save_rspec_to_file(rspec):
     path = RSPEC_TMP_FILE_PREFIX + "_" + time.strftime('%Y%m%dT%H:%M:%S', time.gmtime(time.time())) +".xml"
@@ -105,9 +105,9 @@ def get_rspec(api, cred, options):
         rspec = "<RSpec type=\"SFA\"> <Fault>No resource found</Fault> </RSpec>"
     else:
         comp_rspec = get_xml_by_tag(output, 'computeResource')
-        sfa_logger().debug("#### computeResource %s" % comp_rspec)
+        logger.debug("#### computeResource %s" % comp_rspec)
         topo_rspec = get_xml_by_tag(output, 'topology')
-        sfa_logger().debug("#### topology %s" % topo_rspec)
+        logger.debug("#### topology %s" % topo_rspec)
         rspec = "<RSpec type=\"SFA\"> <network name=\"" + Config().get_interface_hrn() + "\">";
         if comp_rspec != None:
             rspec = rspec + get_xml_by_tag(output, 'computeResource')

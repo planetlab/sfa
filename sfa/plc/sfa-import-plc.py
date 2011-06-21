@@ -28,6 +28,7 @@ from sfa.trust.trustedroot import *
 from sfa.trust.hierarchy import *
 from sfa.util.xrn import Xrn
 from sfa.plc.api import *
+from sfa.util.sfalogging import logger
 from sfa.trust.gid import create_uuid
 from sfa.plc.sfaImport import sfaImport
 
@@ -146,7 +147,7 @@ def main():
     # start importing 
     for site in sites:
         site_hrn = interface_hrn + "." + site['login_base']
-        sfa_logger().info("Importing site: %s" % site_hrn)
+        logger.info("Importing site: %s" % site_hrn)
 
         # import if hrn is not in list of existing hrns or if the hrn exists
         # but its not a site record

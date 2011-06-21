@@ -12,7 +12,7 @@ from sfa.util.config import *
 from sfa.util.xrn import get_authority
 from sfa.util.sfaticket import *
 
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 
 class Auth:
     """
@@ -36,14 +36,14 @@ class Auth:
         valid = []
         if not isinstance(creds, list):
             creds = [creds]
-        sfa_logger().debug("Auth.checkCredentials with %d creds"%len(creds))
+        logger.debug("Auth.checkCredentials with %d creds"%len(creds))
         for cred in creds:
             try:
                 self.check(cred, operation, hrn)
                 valid.append(cred)
             except:
                 cred_obj=Credential(string=cred)
-                sfa_logger().debug("failed to validate credential - dump=%s"%cred_obj.dump_string(dump_parents=True))
+                logger.debug("failed to validate credential - dump=%s"%cred_obj.dump_string(dump_parents=True))
                 error = sys.exc_info()[:2]
                 continue
             

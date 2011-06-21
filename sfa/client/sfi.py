@@ -15,7 +15,7 @@ from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
-from sfa.util.sfalogging import _SfaLogger, logging
+from sfa.util.sfalogging import info_logger
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
 from sfa.trust.credential import Credential
@@ -141,7 +141,7 @@ class Sfi:
         self.user = None
         self.authority = None
         self.hashrequest = False
-        self.logger = _SfaLogger(self.sfi_dir + 'sfi.log', level = logging.INFO)
+        self.logger = info_logger
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
         cmdargs = {"list": "authority",

@@ -1,7 +1,6 @@
 import re
 
 from sfa.util.faults import *
-from sfa.util.sfalogging import sfa_logger
 
 # for convenience and smoother translation - we should get rid of these functions eventually 
 def get_leaf(hrn): return Xrn(hrn).get_leaf()
@@ -74,7 +73,7 @@ class Xrn:
             self.hrn_to_urn()
 # happens all the time ..
 #        if not type:
-#            sfa_logger().debug("type-less Xrn's are not safe")
+#            debug_logger.debug("type-less Xrn's are not safe")
 
     def get_urn(self): return self.urn
     def get_hrn(self): return self.hrn

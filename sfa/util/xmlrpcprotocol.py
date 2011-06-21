@@ -3,8 +3,7 @@
 import httplib
 import xmlrpclib
 
-from sfa.util.sfalogging import sfa_logger
-
+from sfa.util.sfalogging import logger
 ##
 # ServerException, ExceptionUnmarshaller
 #
@@ -58,11 +57,10 @@ class XMLRPCServerProxy(xmlrpclib.ServerProxy):
         verbose = False
         if options and options.debug:
             verbose = True
-#        sfa_logger().debug ("xmlrpcprotocol.XMLRPCServerProxy.__init__ %s (with verbose=%s)"%(url,verbose))
         xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none, verbose=verbose)
 
     def __getattr__(self, attr):
-        sfa_logger().debug ("xml-rpc %s method:%s"%(self.url,attr))
+        logger.debug ("xml-rpc %s method:%s"%(self.url,attr))
         return xmlrpclib.ServerProxy.__getattr__(self, attr)
 
 

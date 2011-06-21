@@ -37,7 +37,7 @@ import traceback
 import sys
 from optparse import OptionParser
 
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 from sfa.trust.trustedroot import TrustedRootList
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
@@ -46,6 +46,7 @@ from sfa.util.config import Config
 from sfa.plc.api import SfaAPI
 from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
+
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():
@@ -83,8 +84,9 @@ def init_server_key(server_key_file, server_cert_file, config, hierarchy):
         if not os.path.exists(key_file):
             # if it doesnt exist then this is probably a fresh interface
             # with no records. Generate a random keypair for now
-            sfa_logger().debug("server's public key not found in %s" % key_file)
-            sfa_logger().debug("generating a random server key pair")
+            logger.debug("server's public key not found in %s" % key_file)
+
+            logger.debug("generating a random server key pair")
             key = Keypair(create=True)
             key.save_to_file(server_key_file)
             init_server_cert(hrn, key, server_cert_file, self_signed=True)    
@@ -113,18 +115,18 @@ def init_server_cert(hrn, key, server_cert_file, self_signed=False):
     else:
         try:
             # look for gid file
-            sfa_logger().debug("generating server cert from gid: %s"% hrn)
+            logger.debug("generating server cert from gid: %s"% hrn)
             hierarchy = Hierarchy()
             auth_info = hierarchy.get_auth_info(hrn)
             gid = GID(filename=auth_info.gid_filename)
             gid.save_to_file(filename=server_cert_file)
         except:
             # fall back to self signed cert
-            sfa_logger().debug("gid for %s not found" % hrn)
+            logger.debug("gid for %s not found" % hrn)
             init_self_signed_cert(hrn, key, server_cert_file)        
         
 def init_self_signed_cert(hrn, key, server_cert_file):
-    sfa_logger().debug("generating self signed cert")
+    logger.debug("generating self signed cert")
     # generate self signed certificate
     cert = Certificate(subject=hrn)
     cert.set_issuer(key=key, subject=hrn)
@@ -187,10 +189,9 @@ def main():
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
-    sfa_logger().setLevelFromOptVerbose(options.verbose)
 
     config = Config()
-    if config.SFA_API_DEBUG: sfa_logger().setLevelDebug()
+    if config.SFA_API_DEBUG: pass
     hierarchy = Hierarchy()
     server_key_file = os.path.join(hierarchy.basedir, "server.key")
     server_cert_file = os.path.join(hierarchy.basedir, "server.cert")
@@ -227,4 +228,4 @@ if __name__ == "__main__":
     try:
         main()
     except:
-        sfa_logger().log_exc_critical("SFA server is exiting")
+        logger.log_exc_critical("SFA server is exiting")

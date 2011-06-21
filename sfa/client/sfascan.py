@@ -10,7 +10,7 @@ import pygraphviz
 from optparse import OptionParser
 
 from sfa.client.sfi import Sfi
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 
 def url_hostname_port (url):
@@ -68,7 +68,7 @@ class Interface:
             key_file = client.get_key_file()
             cert_file = client.get_cert_file(key_file)
             url=self.url()
-            sfa_logger().info('issuing get version at %s'%url)
+            logger.info('issuing get version at %s'%url)
             server=xmlrpcprotocol.get_server(url, key_file, cert_file, options)
             self._version=server.GetVersion()
         except:
@@ -158,17 +158,17 @@ class SfaScan:
                 # performing xmlrpc call
                 version=interface.get_version()
                 if self.verbose:
-                    sfa_logger().info("GetVersion at interface %s"%interface.url())
+                    logger.info("GetVersion at interface %s"%interface.url())
                     if not version:
-                        sfa_logger().info("<EMPTY GetVersion(); offline or cannot authenticate>")
+                        logger.info("<EMPTY GetVersion(); offline or cannot authenticate>")
                     else: 
                         for (k,v) in version.iteritems(): 
                             if not isinstance(v,dict):
-                                sfa_logger().info("\r\t%s:%s"%(k,v))
+                                logger.info("\r\t%s:%s"%(k,v))
                             else:
-                                sfa_logger().info(k)
+                                logger.info(k)
                                 for (k1,v1) in v.iteritems():
-                                    sfa_logger().info("\r\t\t%s:%s"%(k1,v1))
+                                    logger.info("\r\t\t%s:%s"%(k1,v1))
                 # 'geni_api' is expected if the call succeeded at all
                 # 'peers' is needed as well as AMs typically don't have peers
                 if 'geni_api' in version and 'peers' in version: 
@@ -195,7 +195,7 @@ class SfaScan:
                     for (k,v) in interface.get_layout().iteritems():
                         node.attr[k]=v
                 else:
-                    sfa_logger().error("MISSED interface with node %s"%node)
+                    logger.error("MISSED interface with node %s"%node)
     
 
 default_outfiles=['sfa.png','sfa.svg','sfa.dot']
@@ -218,12 +218,12 @@ def main():
     scanner=SfaScan(left_to_right=options.left_to_right, verbose=options.verbose)
     entries = [ Interface(entry) for entry in args ]
     g=scanner.graph(entries)
-    sfa_logger().info("creating layout")
+    logger.info("creating layout")
     g.layout(prog='dot')
     for outfile in options.outfiles:
-        sfa_logger().info("drawing in %s"%outfile)
+        logger.info("drawing in %s"%outfile)
         g.draw(outfile)
-    sfa_logger().info("done")
+    logger.info("done")
 
 if __name__ == '__main__':
     main()

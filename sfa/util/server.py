@@ -24,7 +24,7 @@ from sfa.trust.credential import *
 from sfa.util.faults import *
 from sfa.plc.api import SfaAPI
 from sfa.util.cache import Cache 
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 
 ##
 # Verification callback for pyOpenSSL. We do our own checking of keys because
@@ -110,7 +110,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         except Exception, fault:
             # This should only happen if the module is buggy
             # internal error, report as HTTP server error
-            sfa_logger().log_exc("server.do_POST")
+            logger.log_exc("server.do_POST")
             response = self.api.prepare_response(fault)
             #self.send_response(500)
             #self.end_headers()
@@ -134,7 +134,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
 
         It it very similar to SimpleXMLRPCServer but it uses HTTPS for transporting XML data.
         """
-        sfa_logger().debug("SecureXMLRPCServer.__init__, server_address=%s, cert_file=%s"%(server_address,cert_file))
+        logger.debug("SecureXMLRPCServer.__init__, server_address=%s, cert_file=%s"%(server_address,cert_file))
         self.logRequests = logRequests
         self.interface = None
         self.key_file = key_file
@@ -171,7 +171,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
     # the client.
 
     def _dispatch(self, method, params):
-        sfa_logger().debug("SecureXMLRPCServer._dispatch, method=%s"%method)
+        logger.debug("SecureXMLRPCServer._dispatch, method=%s"%method)
         try:
             return SimpleXMLRPCServer.SimpleXMLRPCDispatcher._dispatch(self, method, params)
         except:
@@ -287,7 +287,7 @@ class SfaServer(threading.Thread):
         self.server.interface=interface
         self.trusted_cert_list = None
         self.register_functions()
-        sfa_logger().info("Starting SfaServer, interface=%s"%interface)
+        logger.info("Starting SfaServer, interface=%s"%interface)
 
     ##
     # Register functions that will be served by the XMLRPC server. This

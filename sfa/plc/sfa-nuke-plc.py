@@ -14,7 +14,7 @@ from optparse import OptionParser
 from sfa.trust.hierarchy import *
 from sfa.util.record import *
 from sfa.util.table import SfaTable
-from sfa.util.sfalogging import sfa_logger_goes_to_import,sfa_logger
+from sfa.util.sfalogging import logger
 
 def main():
    usage="%prog: trash the registry DB (the 'sfa' table in the 'planetlab5' database)"
@@ -25,8 +25,7 @@ def main():
    if args:
       parser.print_help()
       sys.exit(1)
-   sfa_logger_goes_to_import()
-   sfa_logger().info("Purging SFA records from database")
+   logger.info("Purging SFA records from database")
    table = SfaTable()
    table.sfa_records_purge()
    if options.clean_fs:
@@ -38,8 +37,8 @@ def main():
             path=dir+os.sep+file
             os.unlink(path)
             if not os.path.exists(path):
-               sfa_logger().info("Unlinked file %s"%path)
+               logger.info("Unlinked file %s"%path)
             else:
-               sfa_logger().error("Could not unlink file %s"%path)
+               logger.error("Could not unlink file %s"%path)
 if __name__ == "__main__":
    main()

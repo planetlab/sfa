@@ -46,9 +46,10 @@ from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
 
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.faults import *
+from sfa.util.sfalogging import logger
 
 glo_passphrase_callback = None
 
@@ -111,7 +112,7 @@ def convert_public_key(key):
     try:
         k.load_pubkey_from_file(ssl_fn)
     except:
-        sfa_logger().log_exc("convert_public_key caught exception")
+        logger.log_exc("convert_public_key caught exception")
         k = None
 
     # remove the temporary files
@@ -330,7 +331,6 @@ class Certificate:
         if intermediate:
             self.set_intermediate_ca(intermediate)
 
-    ##
     # Create a blank X509 certificate and store it in this object.
 
     def create(self):
@@ -564,7 +564,7 @@ class Certificate:
     # Sign the certificate using the issuer private key and issuer subject previous set with set_issuer().
 
     def sign(self):
-        sfa_logger().debug('certificate.sign')
+        logger.debug('certificate.sign')
         assert self.cert != None
         assert self.issuerSubject != None
         assert self.issuerKey != None
@@ -649,7 +649,7 @@ class Certificate:
 
         # verify expiration time
         if self.cert.has_expired():
-            sfa_logger().debug("verify_chain: NO our certificate has expired")
+            logger.debug("verify_chain: NO our certificate has expired")
             raise CertExpired(self.get_subject(), "client cert")   
         
         # if this cert is signed by a trusted_cert, then we are set
@@ -657,26 +657,26 @@ class Certificate:
             if self.is_signed_by_cert(trusted_cert):
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.cert.has_expired():
-                    sfa_logger().debug("verify_chain: YES cert %s signed by trusted cert %s"%(
+                    logger.debug("verify_chain: YES cert %s signed by trusted cert %s"%(
                             self.get_subject(), trusted_cert.get_subject()))
                     return trusted_cert
                 else:
-                    sfa_logger().debug("verify_chain: NO cert %s is signed by trusted_cert %s, but this is expired..."%(
+                    logger.debug("verify_chain: NO cert %s is signed by trusted_cert %s, but this is expired..."%(
                             self.get_subject(),trusted_cert.get_subject()))
                     raise CertExpired(self.get_subject(),"trusted_cert %s"%trusted_cert.get_subject())
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
-            sfa_logger().debug("verify_chain: NO %s has no parent and is not in trusted roots"%self.get_subject())
+            logger.debug("verify_chain: NO %s has no parent and is not in trusted roots"%self.get_subject())
             raise CertMissingParent(self.get_subject())
 
         # if it wasn't signed by the parent...
         if not self.is_signed_by_cert(self.parent):
-            sfa_logger().debug("verify_chain: NO %s is not signed by parent"%self.get_subject())
+            logger.debug("verify_chain: NO %s is not signed by parent"%self.get_subject())
             return CertNotSignedByParent(self.get_subject())
 
         # if the parent isn't verified...
-        sfa_logger().debug("verify_chain: .. %s, -> verifying parent %s"%(self.get_subject(),self.parent.get_subject()))
+        logger.debug("verify_chain: .. %s, -> verifying parent %s"%(self.get_subject(),self.parent.get_subject()))
         self.parent.verify_chain(trusted_certs)
 
         return
@@ -687,7 +687,7 @@ class Certificate:
         triples=[]
         m2x509 = X509.load_cert_string(self.save_to_string())
         nb_extensions=m2x509.get_ext_count()
-        sfa_logger().debug("X509 had %d extensions"%nb_extensions)
+        logger.debug("X509 had %d extensions"%nb_extensions)
         for i in range(nb_extensions):
             ext=m2x509.get_ext_at(i)
             triples.append( (ext.get_name(), ext.get_value(), ext.get_critical(),) )
