@@ -28,7 +28,7 @@ class Aggregate:
     
     def prepare_nodes(self, force=False):
         if not self.nodes or force:
-            for node in self.api.plshell.GetNodes(self.api.plauth):
+            for node in self.api.plshell.GetNodes(self.api.plauth, {'peer_id': None}):
                 self.nodes[node['node_id']] = node
 
     def prepare_interfaces(self, force=False):
