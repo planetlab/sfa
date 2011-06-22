@@ -37,8 +37,6 @@ cloud = {}
 #
 EUCALYPTUS_RSPEC_SCHEMA='/etc/sfa/eucalyptus.rng'
 
-# Quick hack
-sys.stderr = file('/var/log/euca_agg.log', 'a+')
 api = SfaAPI()
 
 ##
@@ -72,10 +70,11 @@ class EucaInstance(SQLObject):
     # @param pubKeys A list of public keys for the instance.
     #
     def reserveInstance(self, botoConn, pubKeys):
-        print >>sys.stderr, 'Reserving an instance: image: %s, kernel: ' \
-                            '%s, ramdisk: %s, type: %s, key: %s' % \
-                            (self.image_id, self.kernel_id, self.ramdisk_id, 
-                             self.inst_type, self.key_pair)
+        logger = logging.getLogger('EucaAggregate')
+        logger.info('Reserving an instance: image: %s, kernel: ' \
+                    '%s, ramdisk: %s, type: %s, key: %s' % \
+                    (self.image_id, self.kernel_id, self.ramdisk_id,
+                    self.inst_type, self.key_pair))
 
         # XXX The return statement is for testing. REMOVE in production
         #return
@@ -94,7 +93,7 @@ class EucaInstance(SQLObject):
         except EC2ResponseError, ec2RespErr:
             errTree = ET.fromstring(ec2RespErr.body)
             msg = errTree.find('.//Message')
-            print >>sys.stderr, msg.text
+            logger.error(msg.text)
             self.destroySelf()
 
 ##
@@ -119,7 +118,7 @@ def init_server():
     configParser = ConfigParser()
     configParser.read(['/etc/sfa/eucalyptus_aggregate.conf', 'eucalyptus_aggregate.conf'])
     if len(configParser.sections()) < 1:
-        print >>sys.stderr, 'No cloud defined in the config file'
+        logger.error('No cloud defined in the config file')
         raise Exception('Cannot find cloud definition in configuration file.')
 
     # Only read the first section.
@@ -150,7 +149,7 @@ def init_server():
     dbName = 'euca_aggregate.db'
 
     if not os.path.isdir(dbPath):
-        print >>sys.stderr, '%s not found. Creating directory ...' % dbPath
+        logger.info('%s not found. Creating directory ...' % dbPath)
         os.mkdir(dbPath)
 
     conn = connectionForURI('sqlite://%s/%s' % (dbPath, dbName))
@@ -162,7 +161,7 @@ def init_server():
     # Make sure the schema exists.
     if not os.path.exists(EUCALYPTUS_RSPEC_SCHEMA):
         err = 'Cannot location schema at %s' % EUCALYPTUS_RSPEC_SCHEMA
-        print >>sys.stderr, err
+        logger.error(err)
         raise Exception(err)
 
 ##
@@ -179,10 +178,11 @@ def getEucaConnection():
     useSSL    = False
     srvPath   = '/'
     eucaPort  = 8773
+    logger    = logging.getLogger('EucaAggregate')
 
     if not accessKey or not secretKey or not eucaURL:
-        print >>sys.stderr, 'Please set ALL of the required environment ' \
-                            'variables by sourcing the eucarc file.'
+        logger.error('Please set ALL of the required environment ' \
+                     'variables by sourcing the eucarc file.')
         return None
     
     # Split the url into parts
@@ -212,17 +212,18 @@ def getEucaConnection():
 # @return sting()
 #
 def getKeysForSlice(sliceHRN):
+    logger = logging.getLogger('EucaAggregate')
     try:
         # convert hrn to slice name
         plSliceName = hrn_to_pl_slicename(sliceHRN)
     except IndexError, e:
-        print >>sys.stderr, 'Invalid slice name (%s)' % sliceHRN
+        logger.error('Invalid slice name (%s)' % sliceHRN)
         return []
 
     # Get the slice's information
     sliceData = api.plshell.GetSlices(api.plauth, {'name':plSliceName})
     if not sliceData:
-        print >>sys.stderr, 'Cannot get any data for slice %s' % plSliceName
+        logger.warn('Cannot get any data for slice %s' % plSliceName)
         return []
 
     # It should only return a list with len = 1
@@ -231,7 +232,7 @@ def getKeysForSlice(sliceHRN):
     keys = []
     person_ids = sliceData['person_ids']
     if not person_ids: 
-        print >>sys.stderr, 'No users in slice %s' % sliceHRN
+        logger.warn('No users in slice %s' % sliceHRN)
         return []
 
     persons = api.plshell.GetPersons(api.plauth, person_ids)
@@ -361,8 +362,9 @@ class EucaRSpecBuilder(object):
     # Generates the RSpec.
     #
     def toXML(self):
+        logger = logging.getLogger('EucaAggregate')
         if not self.cloudInfo:
-            print >>sys.stderr, 'No cloud information'
+            logger.error('No cloud information')
             return ''
 
         xml = self.eucaRSpec
@@ -423,6 +425,7 @@ def ListResources(api, creds, options, call_id):
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
     hrn, type = urn_to_hrn(xrn)
+    logger = logging.getLogger('EucaAggregate')
 
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
@@ -432,7 +435,7 @@ def ListResources(api, creds, options, call_id):
     conn = getEucaConnection()
 
     if not conn:
-        print >>sys.stderr, 'Error: Cannot create a connection to Eucalyptus'
+        logger.error('Cannot create a connection to Eucalyptus')
         return 'Cannot create a connection to Eucalyptus'
 
     try:
@@ -499,7 +502,7 @@ def ListResources(api, creds, options, call_id):
     except EC2ResponseError, ec2RespErr:
         errTree = ET.fromstring(ec2RespErr.body)
         errMsgE = errTree.find('.//Message')
-        print >>sys.stderr, errMsgE.text
+        logger.error(errMsgE.text)
 
     rspec = EucaRSpecBuilder(cloud).toXML()
 
@@ -518,10 +521,11 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
 
     global cloud
     hrn = urn_to_hrn(xrn)[0]
+    logger = logging.getLogger('EucaAggregate')
 
     conn = getEucaConnection()
     if not conn:
-        print >>sys.stderr, 'Error: Cannot create a connection to Eucalyptus'
+        logger.error('Cannot create a connection to Eucalyptus')
         return ""
 
     # Validate RSpec
@@ -550,7 +554,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
             if existingInst.get('id') in pendingRmInst:
                 pendingRmInst.remove(existingInst.get('id'))
     for inst in pendingRmInst:
-        print >>sys.stderr, 'Instance %s will be terminated' % inst
+        logger.debug('Instance %s will be terminated' % inst)
         dbInst = EucaInstance.select(EucaInstance.q.instance_id == inst).getOne(None)
         # Only change the state but do not remove the entry from the DB.
         dbInst.meta.state = 'deleted'
@@ -562,8 +566,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     if requests:
         # Get all the public keys associate with slice.
         pubKeys = getKeysForSlice(s.slice_hrn)
-        print >>sys.stderr, "Passing the following keys to the instance:\n%s" % pubKeys
-        sys.stderr.flush()
+        logger.debug('Passing the following keys to the instance:\n%s' % pubKeys)
     for req in requests:
         vmTypeElement = req.getparent()
         instType = vmTypeElement.get('name')
@@ -571,7 +574,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
         
         bundleName = req.find('bundle').text
         if not cloud['imageBundles'][bundleName]:
-            print >>sys.stderr, 'Cannot find bundle %s' % bundleName
+            logger.error('Cannot find bundle %s' % bundleName)
         bundleInfo = cloud['imageBundles'][bundleName]
         instKernel  = bundleInfo['kernelID']
         instDiskImg = bundleInfo['imageID']
