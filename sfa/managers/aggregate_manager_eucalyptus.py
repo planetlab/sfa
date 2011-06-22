@@ -158,6 +158,10 @@ def init_server():
     EucaInstance.createTable(ifNotExists=True)
     IP.createTable(ifNotExists=True)
 
+    # Start the update thread to keep track of the meta data
+    # about Eucalyptus instance.
+    Thread(target=updateMeta).start()
+
     # Make sure the schema exists.
     if not os.path.exists(EUCALYPTUS_RSPEC_SCHEMA):
         err = 'Cannot location schema at %s' % EUCALYPTUS_RSPEC_SCHEMA
