@@ -42,7 +42,7 @@ def _call_id_supported(api, server):
     if not server_version:
         server_version = server.GetVersion()
         # cache version for 24 hours
-        cache.add(cache_key, server_version, ttl= 60*60*24)
+        api.cache.add(cache_key, server_version, ttl= 60*60*24)
 
     if 'sfa' in server_version:
         code_tag = server_version['code_tag']
