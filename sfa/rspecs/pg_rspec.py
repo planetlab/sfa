@@ -97,6 +97,9 @@ class PGRSpec(RSpec):
     def get_default_sliver_attributes(self, network=None):
         pass 
 
+    def add_default_sliver_attribute(self, name, value, network=None):
+        pass
+
     def add_nodes(self, nodes, check_for_dupes=False):
         if not isinstance(nodes, list):
             nodes = [nodes]
