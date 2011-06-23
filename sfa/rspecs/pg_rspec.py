@@ -3,7 +3,7 @@ from lxml import etree
 from StringIO import StringIO
 from sfa.rspecs.rspec import RSpec 
 from sfa.util.xrn import *
-from sfa.util.plxrn import hostname_to_urn
+from sfa.util.plxrn import hostname_to_urn, xrn_to_hostname
 from sfa.util.config import Config 
 from sfa.rspecs.rspec_version import RSpecVersion 
 
@@ -79,14 +79,18 @@ class PGRSpec(RSpec):
         return nodes
 
     def get_nodes(self, network=None):
-        xpath = '//rspecv2:node[@component_name]/@component_name | //node[@component_name]/@component_name'
-        return self.xml.xpath(xpath, namespaces=self.namespaces) 
+        xpath = '//rspecv2:node[@component_name]/@component_id | //node[@component_name]/@component_id'
+        nodes = self.xml.xpath(xpath, namespaces=self.namespaces)
+        nodes = [xrn_to_hostname(node) for node in nodes]
+        return nodes 
 
     def get_nodes_with_slivers(self, network=None):
         if network:
-            return self.xml.xpath('//rspecv2:node[@component_manager_id="%s"][sliver_type]/@component_name' % network, namespaces=self.namespaces)
+            nodes = self.xml.xpath('//rspecv2:node[@component_manager_id="%s"][sliver_type]/@component_id' % network, namespaces=self.namespaces)
         else:
-            return self.xml.xpath('//rspecv2:node[rspecv2:sliver_type]/@component_name', namespaces=self.namespaces)
+            nodes = self.xml.xpath('//rspecv2:node[rspecv2:sliver_type]/@component_id', namespaces=self.namespaces)
+        nodes = [xrn_to_hostname(node) for node in nodes]
+        return nodes
 
     def get_nodes_without_slivers(self, network=None):
         pass
