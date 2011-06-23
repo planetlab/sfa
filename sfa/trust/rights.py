@@ -220,6 +220,7 @@ class Rights:
             for my_right in self.rights:
                 if my_right.is_superset(child_right):
                     allowed = True
+                    break
             if not allowed:
                 return False
         return True
