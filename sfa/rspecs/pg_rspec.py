@@ -121,14 +121,15 @@ class PGRSpec(RSpec):
             node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='plab-pc')
             node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='pc')
             available_tag = etree.SubElement(node_tag, 'available', now='true')
-            location_tag = etree.SubElement(node_tag, 'location', country="us")
+    
+            # only add location tag if longitude and latitude are not null
             if 'site' in node:
-                if 'longitude' in node['site']:
-                    location_tag.set('longitude', str(node['site']['longitude']))
-                if 'latitude' in node['site']:
-                    location_tag.set('latitude', str(node['site']['latitude']))
-            #if 'interfaces' in node:
-            
+                longitude = node['site'].get('longitude', None)
+                latitude = node['site'].get('latitude', None)
+                if longitude and latitude:
+                    location_tag = etree.SubElement(node_tag, 'location', country="us", \
+                                                    longitude=longitude, latitude=latitude)
+
 
     def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
         slivers = self._process_slivers(slivers)
