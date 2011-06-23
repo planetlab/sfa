@@ -32,7 +32,16 @@ class _SfaLogger:
         handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.logger=logging.getLogger(loggername)
         self.logger.setLevel(level)
-        self.logger.addHandler(handler)
+        # check if logger already has the handler we're about to add
+        handler_exists = False
+        for l_handler in self.logger.handlers:
+            if l_handler.baseFilename == handler.baseFilename and \
+               l_handler.level == handler.level:
+                handler_exists = True 
+
+        if not handler_exists:
+            self.logger.addHandler(handler)
+            
         self.loggername=loggername
 
     def setLevel(self,level):
@@ -91,7 +100,7 @@ warn_logger = _SfaLogger(loggername='warning', level=logging.WARNING)
 error_logger = _SfaLogger(loggername='error', level=logging.ERROR)
 critical_logger = _SfaLogger(loggername='critical', level=logging.CRITICAL)
 logger = info_logger
-
+sfi_logger = _SfaLogger(logfile=os.path.expanduser("~/.sfi/")+'sfi.log',loggername='sfilog', level=logging.DEBUG)
 ########################################
 import time
 
@@ -120,21 +129,25 @@ def profile(logger):
 if __name__ == '__main__': 
     print 'testing sfalogging into logger.log'
     logger=_SfaLogger('logger.log')
+    logger2=_SfaLogger('logger.log', level=logging.DEBUG)
+    logger3=_SfaLogger('logger.log', level=logging.ERROR)
+    print logger.logger.handlers
+   
     logger.critical("logger.critical")
     logger.error("logger.error")
-    logger.warning("logger.warning")
+    logger.warn("logger.warning")
     logger.info("logger.info")
     logger.debug("logger.debug")
     logger.setLevel(logging.DEBUG)
     logger.debug("logger.debug again")
     
 
-    @profile(my_logger)
+    @profile(logger)
     def sleep(seconds = 1):
         time.sleep(seconds)
 
-    my_logger.info('console.info')
+    logger.info('console.info')
     sleep(0.5)
-    my_logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
     sleep(0.25)
 
