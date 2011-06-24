@@ -125,7 +125,9 @@ class PGRSpec(RSpec):
             node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='plab-pc')
             node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='pc')
             available_tag = etree.SubElement(node_tag, 'available', now='true')
-    
+            sliver_type_tag = etree.SubElement(node_tag, 'sliver_type', name='plab-vnode')
+            # protogeni uses the <sliver_type> tag to identify the types of
+            # vms available at the node. 
             # only add location tag if longitude and latitude are not null
             if 'site' in node:
                 longitude = node['site'].get('longitude', None)
