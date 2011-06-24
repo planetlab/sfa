@@ -138,20 +138,23 @@ class PGRSpec(RSpec):
 
 
     def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
+
+        # all nodes hould already be present in the rspec. Remove all 
+        # nodes that done have slivers
         slivers = self._process_slivers(slivers)
-        nodes_with_slivers = self.get_nodes_with_slivers()
-        for sliver in slivers:
-            hostname = sliver['hostname']
-            if hostname in nodes_with_slivers:
-                continue
-            nodes = self.xml.xpath('//rspecv2:node[@component_name="%s"] | //node[@component_name="%s"]' % (hostname, hostname), namespaces=self.namespaces)
-            if nodes:
-                node = nodes[0]
+        sliver_hosts = [sliver['hostname'] for sliver in slivers]
+        nodes = self.get_node_elements()
+        for node in nodes:
+            urn = node.get('component_id')
+            hostname = xrn_to_hostname(urn)
+            if hostname not in sliver_hosts:
+                parent = node.getparent()
+                parent.remove(node)
+            else:
                 node.set('client_id', hostname)
                 if sliver_urn:
                     node.set('sliver_id', sliver_urn)
-                etree.SubElement(node, 'sliver_type', name='plab-vnode')
-
+     
     def add_default_sliver_attribute(self, name, value, network=None):
         pass
 
@@ -176,19 +179,6 @@ class PGRSpec(RSpec):
     def cleanup(self):
         # remove unncecessary elements, attributes
         if self.type in ['request', 'manifest']:
-            # remove nodes without slivers
-            nodes = self.get_node_elements()
-            for node in nodes:
-                delete = True
-                hostname = node.get('component_name')
-                parent = node.getparent()
-                children = node.getchildren()
-                for child in children:
-                    if child.tag.endswith('sliver_type'):
-                        delete = False
-                if delete:
-                    parent.remove(node)
-
             # remove 'available' element from remaining node elements
             self.remove_element('//rspecv2:available | //available')
 
