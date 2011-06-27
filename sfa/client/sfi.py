@@ -940,7 +940,7 @@ class Sfi:
         #  }]
         users = []
         server = self.get_server_from_opts(opts)
-        version = server.GetVersion()
+        version = self.get_cached_server_version(server)
         if 'sfa' not in version:
             # need to pass along user keys if this request is going to a ProtoGENI aggregate 
             # ProtoGeni Aggregates will only install the keys of the user that is issuing the
