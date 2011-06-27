@@ -196,7 +196,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     added_nodes = list(set(requested_slivers).difference(current_slivers))
 
     # get sliver attributes
-    slice_attributes = rspec.get_slice_attributes()
+    slice_attributes = rspec.get_sliver_attributes()
 
     try:
         if peer:
