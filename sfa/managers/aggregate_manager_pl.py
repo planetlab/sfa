@@ -204,7 +204,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
 
         api.plshell.AddSliceToNodes(api.plauth, slice['name'], added_nodes) 
         api.plshell.DeleteSliceFromNodes(api.plauth, slice['name'], deleted_nodes)
-        for attribute in slice_atrributes:
+        for attribute in slice_attributes:
             name, value, node_id = attribute['tagname'], attribute['value'], attribute.get('node_id', None)
             api.plshell.AddSliceTag(api.plauth, slice['name'], name, value, node_id)
 
