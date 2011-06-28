@@ -130,8 +130,8 @@ class PGRSpec(RSpec):
             # vms available at the node. 
             # only add location tag if longitude and latitude are not null
             if 'site' in node:
-                longitude = node['site'].get('longitude', None)
-                latitude = node['site'].get('latitude', None)
+                longitude = str(node['site'].get('longitude', None))
+                latitude = str(node['site'].get('latitude', None))
                 if longitude and latitude:
                     location_tag = etree.SubElement(node_tag, 'location', country="us", \
                                                     longitude=longitude, latitude=latitude)
