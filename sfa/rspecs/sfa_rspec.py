@@ -240,7 +240,7 @@ class SfaRSpec(RSpec):
             sliver_elem = etree.SubElement(node_elem, 'sliver')
             if 'tags' in sliver:
                 for tag in sliver['tags']:
-                    etree.SubElement(sliver_elem, tag['tagname'], value=tag['value'])
+                    etree.SubElement(sliver_elem, tag['tagname']).text = value=tag['value']
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
         slivers = self._process_slivers(slivers)
