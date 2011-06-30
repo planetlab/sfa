@@ -118,7 +118,7 @@ def SliverStatus(api, slice_xrn, creds, call_id):
     
     slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids','person_ids','name','expires'])
     if len(slices) == 0:        
-        raise Exception("Slice %s not found (used %s as slicename internally)" % slice_xrn, slicename)
+        raise Exception("Slice %s not found (used %s as slicename internally)" % (slice_xrn, slicename))
     slice = slices[0]
     
     # report about the local nodes only
