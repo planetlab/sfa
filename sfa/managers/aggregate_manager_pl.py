@@ -196,7 +196,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     added_nodes = list(set(requested_slivers).difference(current_slivers))
 
     # get sliver attributes
-    slice_attributes = rspec.get_sliver_attributes()
+    slice_attributes = rspec.get_slice_attributes()
 
     try:
         if peer:
@@ -205,8 +205,13 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
         api.plshell.AddSliceToNodes(api.plauth, slice['name'], added_nodes) 
         api.plshell.DeleteSliceFromNodes(api.plauth, slice['name'], deleted_nodes)
         for attribute in slice_attributes:
-            name, value, node_id = attribute['tagname'], attribute['value'], attribute.get('node_id', None)
-            api.plshell.AddSliceTag(api.plauth, slice['name'], name, value, node_id)
+            try:
+                name, value, node_id = attribute['name'], attribute['value'], attribute.get('node_id', None)
+                api.plshell.AddSliceTag(api.plauth, slice['name'], name, value, node_id)
+            except Exception, e:
+                api.logger.warn('Unable to add sliver attribute name: %s, value: %s, node_id: %s' \
+                                % (name, value,  node_id))
+                api.logger.warn(str(e))             
 
     finally:
         if peer:
