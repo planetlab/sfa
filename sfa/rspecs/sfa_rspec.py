@@ -98,7 +98,6 @@ class SfaRSpec(RSpec):
         return self.attributes_list(sliver)
 
     def get_slice_attributes(self, network=None):
-        # TODO: FINISH
         slice_attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers(network)
         for default_attribute in self.get_default_sliver_attributes(network):
@@ -108,7 +107,7 @@ class SfaRSpec(RSpec):
             sliver_attributes = self.get_sliver_attributes(node, network)
             for sliver_attribute in sliver_attributes:
                 attribute = {'name': str(sliver_attribute[0]), 'value': str(sliver_attribute[1]), 'node_id': node}
-            slice_attributes.append(attribute)    
+                slice_attributes.append(attribute)    
         return slice_attributes
 
     def get_site_nodes(self, siteid, network=None):
