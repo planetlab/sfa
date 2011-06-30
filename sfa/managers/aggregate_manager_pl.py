@@ -196,22 +196,46 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     added_nodes = list(set(requested_slivers).difference(current_slivers))
 
     # get sliver attributes
-    slice_attributes = rspec.get_slice_attributes()
+    requested_slice_attributes = rspec.get_slice_attributes()
+    removed_slice_attributes = []
+    existing_slice_attributes = []    
+    for slice_tag in api.plshell.GetSliceTags(api.plauth, {'slice_id': slice['slice_id']}):
+        attribute_found=False
+        for requested_attribute in requested_slice_attributes:
+            if requested_attribute['name'] == slice_tag['tagname'] and \
+               requested_attribute['value'] == slice_tag['value']:
+                attribute_found=True
 
+        if not attribute_found: 
+            removed_slice_attributes.append(slice_tag)
+        else:
+            existing_slice_attributes.append(slice_tag)  
+         
+    #api.logger.debug("requested slice attributes: %s" % str(requested_slice_attributes))
+    #api.logger.debug("removed slice attributes: %s" % str(removed_slice_attributes))
+    #api.logger.debug("existing slice attributes: %s" % str(existing_slice_attributes))
     try:
         if peer:
             api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
 
         api.plshell.AddSliceToNodes(api.plauth, slice['name'], added_nodes) 
         api.plshell.DeleteSliceFromNodes(api.plauth, slice['name'], deleted_nodes)
-        for attribute in slice_attributes:
+        # remove stale attributes
+        for attribute in removed_slice_attributes:
+            try:
+                api.plshell.DeleteSliceTag(api.plauth, attribute['slice_tag_id'])
+            except Exception, e:
+                api.logger.warn('Failed to remove sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
+                                % (name, value,  node_id, str(e)))
+
+        # add requested_attributes
+        for attribute in requested_slice_attributes:
             try:
                 name, value, node_id = attribute['name'], attribute['value'], attribute.get('node_id', None)
                 api.plshell.AddSliceTag(api.plauth, slice['name'], name, value, node_id)
             except Exception, e:
-                api.logger.warn('Unable to add sliver attribute name: %s, value: %s, node_id: %s' \
-                                % (name, value,  node_id))
-                api.logger.warn(str(e))             
+                api.logger.warn('Failed to add sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
+                                % (name, value,  node_id, str(e)))
 
     finally:
         if peer:
