@@ -4,15 +4,22 @@ from sfa.rspecs.elements.node import Node
 
 class SFAv1Node(Node):
 
-    def get_node_elements(self, network=None):
+    def get_node_elements(self, network=None, hostnames=None):
         if network:
-            nodes = self.root_node.xpath('//network[@name="%s"]//node' % network)
+            query = '//network[@name="%s"]//node' % network
         else:
-            nodes = self.root_node.xpath('//node')
-        return nodes
+            query = '//node'
 
-    def get_nodes(self, network=None):
-        node_elems = self.get_node_elements(network)
+        if isinstance(hostnames, str):
+            query = query + '/hostname[text() = "%s"]' % hostnames
+        elif isinstance(hostnames, list):
+            query = query + '/hostname[contains( "%s" , text())]' \
+                    %(" ".join(hostnames))
+            
+        return self.xpath(query)
+
+    def get_nodes(self, network=None, hostnames):
+        node_elems = self.get_node_elements(network, hostnames)
         nodes = [self.get_attributes(node_elem, recursive=True) \
                  for node_elem in node_elems]
         return nodes
