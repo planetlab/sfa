@@ -97,7 +97,10 @@ def ListResources(api, creds, options, call_id):
         args = [credential, my_opts]
         if _call_id_supported(api, server):
             args.append(call_id)
-        return server.ListResources(*args)
+        try:
+            return server.ListResources(*args)
+        except Exception, e:
+            api.logger.warn("ListResources failed at %s: %s" %(server.url, str(e)))
 
     if Callids().already_handled(call_id): return ""
 
@@ -171,7 +174,10 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
             args = [xrn, credential, rspec, users]
             if _call_id_supported(api, server):
                 args.append(call_id)
-            return server.CreateSliver(*args)
+            try:
+                return server.CreateSliver(*args)
+            except Exception, e:
+                api.logger.warn("CreateSliver failed at %s: %s" %(server.url, str(e)))
 
     if Callids().already_handled(call_id): return ""
     # Validate the RSpec against PlanetLab's schema --disabled for now
