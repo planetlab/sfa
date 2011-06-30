@@ -79,7 +79,7 @@ def __get_registry_objects(slice_xrn, creds, users):
 
         slice = {}
         
-        extime = Credential(string=creds[0]).get_expiration()
+        extime = Credential(string=creds[0]).get_expiration().replace(tzinfo=None)
         # If the expiration time is > 60 days from now, set the expiration time to 60 days from now
         if extime > datetime.datetime.utcnow() + datetime.timedelta(days=60):
             extime = datetime.datetime.utcnow() + datetime.timedelta(days=60)
