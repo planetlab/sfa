@@ -59,12 +59,12 @@ class Element:
                     if opt.text == value:
                         elem.remove(opt)
 
-    def get_attributes(self, elem=None, recursive=False):
+    def get_attributes(self, elem=None, depth=None):
         if elem == None:
             elem = self.root_node
         attrs = dict(elem.attrib)
         attrs['text'] = str(elem.text).strip()
-        if recursive:
+        if depth is None or isinstance(depth, int) and depth > 0: 
             for child_elem in list(elem):
                 key = str(child_elem.tag)
                 if key not in attrs:
