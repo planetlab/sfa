@@ -93,13 +93,13 @@ class PGRSpec(RSpec):
         return nodes
 
     def get_nodes_without_slivers(self, network=None):
-        pass
+        return []
    
     def get_slice_attributes(self, network=None):
-        pass
+        return []
 
     def get_default_sliver_attributes(self, network=None):
-        pass 
+        return []
 
     def add_default_sliver_attribute(self, name, value, network=None):
         pass
@@ -130,8 +130,8 @@ class PGRSpec(RSpec):
             # vms available at the node. 
             # only add location tag if longitude and latitude are not null
             if 'site' in node:
-                longitude = node['site'].get('longitude', None))
-                latitude = node['site'].get('latitude', None))
+                longitude = node['site'].get('longitude', None)
+                latitude = node['site'].get('latitude', None)
                 if longitude and latitude:
                     location_tag = etree.SubElement(node_tag, 'location', country="us", \
                                                     longitude=str(longitude), latitude=str(latitude))
