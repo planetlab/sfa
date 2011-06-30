@@ -33,20 +33,11 @@ from sfa.util.version import version_core
 from sfa.util.callids import Callids
 
 
-def _get_cached_server_version(api, server):
-    cache_key = server.url + "-version"
-    server_version = api.cache.get(cache_key)
-    if not server_version:
-        server_version = server.GetVersion()
-        # cache version for 24 hours
-        api.cache.add(cache_key, server_version, ttl= 60*60*24)
-    return server_version
-
 def _call_id_supported(api, server):
     """
     Returns true if server support the optional call_id arg, false otherwise.
     """
-    server_version = _get_cached_server_version(api, server)
+    server_version = api.get_cached_server_version(server)
 
     if 'sfa' in server_version:
         code_tag = server_version['code_tag']
