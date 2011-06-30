@@ -227,7 +227,7 @@ class SfaRSpec(RSpec):
                 for tag in node['tags']:
                    # expose this hard wired list of tags, plus the ones that are marked 'sfa' in their category 
                    if tag['tagname'] in ['fcdistro', 'arch'] or 'sfa' in tag['category'].split('/'):
-                        tag_element = etree.SubElement(node_tag, tag['tagname'], value=tag['value'])
+                        tag_element = etree.SubElement(node_tag, tag['tagname']).text=tag['value']
 
             if 'site' in node:
                 longitude = str(node['site']['longitude'])
