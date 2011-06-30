@@ -66,8 +66,11 @@ class Element:
         attrs['text'] = str(elem.text).strip()
         if recursive:
             for child_elem in list(elem):
-                attrs[str(child_elem.tag)] = self.get_attributes(child_elem, recursive)
-             
+                key = str(child_elem.tag)
+                if key not in attrs:
+                    attrs[key] = [self.get_attributes(child_elem, recursive)]
+                else:
+                    attrs[key].append(self.get_attributes(child_elem, recursive))
         return attrs
     
     def attributes_list(self, elem):
