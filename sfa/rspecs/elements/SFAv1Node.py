@@ -18,7 +18,7 @@ class SFAv1Node(Node):
             
         return self.xpath(query)
 
-    def get_nodes(self, network=None, hostnames):
+    def get_nodes(self, network=None, hostnames=None):
         node_elems = self.get_node_elements(network, hostnames)
         nodes = [self.get_attributes(node_elem, recursive=True) \
                  for node_elem in node_elems]
