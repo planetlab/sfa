@@ -7,11 +7,13 @@ import os
 import traceback
 import string
 import xmlrpclib
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 
 from sfa.util.sfalogging import logger
 from sfa.trust.auth import Auth
 from sfa.util.config import *
 from sfa.util.faults import *
+from sfa.util.cache import Cache
 from sfa.trust.credential import *
 from sfa.trust.certificate import *
 
@@ -113,12 +115,11 @@ class ManagerWrapper:
         
 class BaseAPI:
 
-    cache = None
     protocol = None
   
     def __init__(self, config = "/etc/sfa/sfa_config.py", encoding = "utf-8", 
                  methods='sfa.methods', peer_cert = None, interface = None, 
-                 key_file = None, cert_file = None, cache = cache):
+                 key_file = None, cert_file = None, cache = None):
 
         self.encoding = encoding
         
@@ -129,7 +130,6 @@ class BaseAPI:
         # Better just be documenting the API
         if config is None:
             return
-        
         # Load configuration
         self.config = Config(config)
         self.auth = Auth(peer_cert)
@@ -140,6 +140,8 @@ class BaseAPI:
         self.cert_file = cert_file
         self.cert = Certificate(filename=self.cert_file)
         self.cache = cache
+        if self.cache is None:
+            self.cache = Cache()
         self.credential = None
         self.source = None 
         self.time_format = "%Y-%m-%d %H:%M:%S"
@@ -266,3 +268,14 @@ class BaseAPI:
                 raise result 
             
         return response
+
+    def get_cached_server_version(self, server):
+        cache_key = server.url + "-version"
+        server_version = None
+        if self.cache:
+            server_version = self.cache.get(cache_key)
+        if not server_version:
+            server_version = server.GetVersion()
+            # cache version for 24 hours
+            self.cache.add(cache_key, server_version, ttl= 60*60*24)
+        return server_version

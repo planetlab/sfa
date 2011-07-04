@@ -31,18 +31,19 @@
 
 import os
 import datetime
+from sfa.util.sfatime import utcparse
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 from lxml import etree
 from dateutil.parser import parse
 from StringIO import StringIO
-
 from sfa.util.faults import *
 from sfa.util.sfalogging import logger
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import Right, Rights
 from sfa.trust.gid import GID
+from sfa.util.xrn import urn_to_hrn
 
 # 2 weeks, in seconds 
 DEFAULT_CREDENTIAL_LIFETIME = 86400 * 14
@@ -759,7 +760,7 @@ class Credential(object):
             return True
         
         # make sure it is not expired
-        if self.get_expiration() < datetime.datetime.utcnow():
+        if utcparse(self.get_expiration()) < datetime.datetime.utcnow():
             raise CredentialNotVerifiable("Credential expired at %s" % self.expiration.isoformat())
 
         # Verify the signatures
