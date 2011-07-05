@@ -509,7 +509,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     schemaXML = ET.parse(EUCALYPTUS_RSPEC_SCHEMA)
     rspecValidator = ET.RelaxNG(schemaXML)
     rspecXML = ET.XML(xml)
-    if not rspecValidator(rspecXML):
+    if False and not rspecValidator(rspecXML):
         error = rspecValidator.error_log.last_error
         message = '%s (line %s)' % (error.message, error.line) 
         # XXX: InvalidRSpec is new. Currently, I am not working with Trunk code.
