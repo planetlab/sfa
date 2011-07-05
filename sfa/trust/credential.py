@@ -362,7 +362,7 @@ class Credential(object):
     def get_expiration(self):
         if not self.expiration:
             self.decode()
-        return self.expiration
+        return utcparse(self.expiration)
 
     ##
     # For legacy sake
@@ -760,7 +760,7 @@ class Credential(object):
             return True
         
         # make sure it is not expired
-        if utcparse(self.get_expiration()) < datetime.datetime.utcnow():
+        if self.get_expiration() < datetime.datetime.utcnow():
             raise CredentialNotVerifiable("Credential expired at %s" % self.expiration.isoformat())
 
         # Verify the signatures
