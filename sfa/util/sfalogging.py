@@ -41,7 +41,7 @@ class _SfaLogger:
 
         if not handler_exists:
             self.logger.addHandler(handler)
-            
+
         self.loggername=loggername
 
     def setLevel(self,level):
@@ -92,6 +92,12 @@ class _SfaLogger:
         to_log="".join(traceback.format_stack())
         self.debug("%s BEG STACK"%message+"\n"+to_log)
         self.debug("%s END STACK"%message)
+
+    def enable_console(self, stream=sys.stdout):
+        formatter = logging.Formatter("%(message)s")
+        handler = logging.StreamHandler(stream)
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
 
 
 info_logger = _SfaLogger(loggername='info', level=logging.INFO)
