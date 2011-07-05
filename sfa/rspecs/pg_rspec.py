@@ -98,6 +98,13 @@ class PGRSpec(RSpec):
     def get_slice_attributes(self, network=None):
         return []
 
+    def attributes_list(self, elem):
+        opts = []
+        if elem is not None:
+            for e in elem:
+                opts.append((e.tag, e.text))
+        return opts
+
     def get_default_sliver_attributes(self, network=None):
         return []
 
