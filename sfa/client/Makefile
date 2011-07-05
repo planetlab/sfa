@@ -38,7 +38,8 @@ BUNDLES-LR += http://www.planet-lab.jp:12347/@auto-plj-sa
 BUNDLES-LR += http://www.emanicslab.org:12345/@auto-elc-reg 
 BUNDLES-LR += http://www.emanicslab.org:12347/@auto-elc-sa
 
-EXTENSIONS := png svg
+#EXTENSIONS := png svg
+EXTENSIONS := png
 
 ####################
 ALL += $(foreach bundle,$(BUNDLES),$(word 2,$(subst @, ,$(bundle))))
@@ -49,7 +50,7 @@ all: $(ALL)
 ####################
 define bundle_scan_target
 $(word 2,$(subst @, ,$(1))):
-	./sfascan.py $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1))).$(extension)) $(word 1,$(subst @, ,$(1))) >& $(word 2,$(subst @, ,$(1))).out
+	./sfascan.py $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1))).$(extension)) $(word 1,$(subst @, ,$(1))) >& .$(word 2,$(subst @, ,$(1))).out
 .PHONY: $(word 2,$(subst @, ,$(1)))
 endef
 
@@ -59,7 +60,7 @@ $(foreach bundle,$(BUNDLES),$(eval $(call bundle_scan_target,$(bundle))))
 #################### same but left-to-right
 define bundle_scan_target_lr
 $(word 2,$(subst @, ,$(1)))-lr:
-	./sfascan.py -l $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1)))-lr.$(extension)) $(word 1,$(subst @, ,$(1))) >& $(word 2,$(subst @, ,$(1)))-lr.out
+	./sfascan.py -l $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1)))-lr.$(extension)) $(word 1,$(subst @, ,$(1))) >& .$(word 2,$(subst @, ,$(1)))-lr.out
 .PHONY: $(word 2,$(subst @, ,$(1)))-lr
 endef
 
