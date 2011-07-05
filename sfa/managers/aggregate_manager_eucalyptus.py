@@ -12,13 +12,16 @@ from lxml import etree as ET
 from sqlobject import *
 
 from sfa.util.faults import *
-from sfa.util.xrn import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn, Xrn
 from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.trust.credential import Credential
 from sfa.plc.api import SfaAPI
 from sfa.util.plxrn import hrn_to_pl_slicename, slicename_to_hrn
 from sfa.util.callids import Callids
+from sfa.util.sfalogging import sfa_logger
+from sfa.rspecs.sfa_rspec import sfa_rspec_version
+from sfa.util.version import version_core
 
 ##
 # The data structure used to represent a cloud.
@@ -567,6 +570,19 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     # xxx - should return altered rspec 
     # with enough data for the client to understand what's happened
     return xml
+
+def GetVersion(api):
+    xrn=Xrn(api.hrn)
+    request_rspec_versions = [dict(sfa_rspec_version)]
+    ad_rspec_versions = [dict(sfa_rspec_version)]
+    version_more = {'interface':'aggregate',
+                    'testbed':'myplc',
+                    'hrn':xrn.get_hrn(),
+                    'request_rspec_versions': request_rspec_versions,
+                    'ad_rspec_versions': ad_rspec_versions,
+                    'default_ad_rspec': dict(sfa_rspec_version)
+                    }
+    return version_core(version_more)
 
 def main():
     init_server()
