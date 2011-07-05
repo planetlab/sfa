@@ -345,7 +345,7 @@ class EucaRSpecBuilder(object):
         xml = self.eucaRSpec
         cloud = self.cloudInfo
         with xml.RSpec(type='eucalyptus'):
-            with xml.cloud(id=cloud['name']):
+            with xml.network(id=cloud['name']):
                 with xml.ipv4:
                     xml << cloud['ip']
                 #self.__keyPairsXML(cloud['keypairs'])

@@ -8,11 +8,11 @@
       <attribute name="type">
         <data type="NMTOKEN"/>
       </attribute>
-      <ref name="cloud"/>
+      <ref name="network"/>
     </element>
   </define>
-  <define name="cloud">
-    <element name="cloud">
+  <define name="network">
+    <element name="network">
       <attribute name="id">
         <data type="NMTOKEN"/>
       </attribute>
