@@ -525,7 +525,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     pendingRmInst = []
     for sliceInst in s.instances:
         pendingRmInst.append(sliceInst.instance_id)
-    existingInstGroup = rspecXML.findall('.//euca_instances')
+    existingInstGroup = rspecXML.findall("./network[@id='%s']//euca_instances"%cloud['name'])
     for instGroup in existingInstGroup:
         for existingInst in instGroup:
             if existingInst.get('id') in pendingRmInst:
@@ -537,7 +537,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     conn.terminate_instances(pendingRmInst)
 
     # Process new instance requests
-    requests = rspecXML.findall('.//request')
+    requests = rspecXML.findall("./network[@id='%s']//request"%cloud['name'])
     if requests:
         # Get all the public keys associate with slice.
         pubKeys = getKeysForSlice(s.slice_hrn)
