@@ -140,7 +140,7 @@ class sfaImport:
                 pkey = Keypair(create=True)
         else:
             # the user has no keys
-            self.logger.warning("Import: person %s does not have a PL public key"%hrn)
+            self.logger.warn("Import: person %s does not have a PL public key"%hrn)
             # if a key is unavailable, then we still need to put something in the
             # user's GID. So make one up.
             pkey = Keypair(create=True)
