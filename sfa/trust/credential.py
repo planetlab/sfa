@@ -26,19 +26,17 @@
 # Credentials are signed XML files that assign a subject gid privileges to an object gid
 ##
 
-### $Id$
-### $URL$
-
 import os
+from types import StringTypes
 import datetime
-from sfa.util.sfatime import utcparse
+from StringIO import StringIO
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 from lxml import etree
-from dateutil.parser import parse
-from StringIO import StringIO
+
 from sfa.util.faults import *
 from sfa.util.sfalogging import logger
+from sfa.util.sfatime import utcparse
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import Right, Rights
@@ -347,22 +345,26 @@ class Credential(object):
 
             
     ##
-    # Expiration: an absolute UTC time of expiration (as either an int or datetime)
+    # Expiration: an absolute UTC time of expiration (as either an int or string or datetime)
     # 
     def set_expiration(self, expiration):
         if isinstance(expiration, int):
             self.expiration = datetime.datetime.fromtimestamp(expiration)
-        else:
+        elif isinstance (expiration, datetime.datetime):
             self.expiration = expiration
-            
+        elif isinstance (expiration, StringTypes):
+            self.expiration = utcparse (expiration)
+        else:
+            logger.error ("unexpected input type in Credential.set_expiration")
 
     ##
-    # get the lifetime of the credential (in datetime format)
-
+    # get the lifetime of the credential (always in datetime format)
+    #
     def get_expiration(self):
         if not self.expiration:
             self.decode()
-        return utcparse(self.expiration)
+        # at this point self.expiration is normalized as a datetime - DON'T call utcparse again
+        return self.expiration
 
     ##
     # For legacy sake
@@ -645,7 +647,7 @@ class Credential(object):
         
 
         self.set_refid(cred.getAttribute("xml:id"))
-        self.set_expiration(parse(getTextNode(cred, "expires")))
+        self.set_expiration(utcparse(getTextNode(cred, "expires")))
         self.gidCaller = GID(string=getTextNode(cred, "owner_gid"))
         self.gidObject = GID(string=getTextNode(cred, "target_gid"))   
 
