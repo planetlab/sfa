@@ -158,7 +158,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
         try:
             # Need to call GetVersion at an aggregate to determine the supported 
             # rspec type/format beofre calling CreateSliver at an Aggregate. 
-            server_version = _get_server_version(api, server)    
+            server_version = api.get_cached_server_version(server)    
             if 'sfa' not in aggregate_version and 'geni_api' in aggregate_version:
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. otherwise convert to pg rspec
