@@ -135,7 +135,11 @@ class sfaImport:
             # to planetlab
             keys = self.shell.GetKeys(self.plc_auth, key_ids)
             key = keys[0]['key']
-            pkey = convert_public_key(key)
+            pkey = None
+            try:
+                pkey = convert_public_key(key)
+            except:
+                self.logger.warn('unable to convert public key for %s' % hrn) 
             if not pkey:
                 pkey = Keypair(create=True)
         else:
