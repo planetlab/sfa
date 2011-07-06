@@ -348,7 +348,7 @@ class Credential(object):
     # Expiration: an absolute UTC time of expiration (as either an int or string or datetime)
     # 
     def set_expiration(self, expiration):
-        if isinstance(expiration, int):
+        if isinstance(expiration, (int,float)):
             self.expiration = datetime.datetime.fromtimestamp(expiration)
         elif isinstance (expiration, datetime.datetime):
             self.expiration = expiration
