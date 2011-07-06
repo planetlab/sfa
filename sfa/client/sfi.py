@@ -144,6 +144,7 @@ class Sfi:
         self.authority = None
         self.hashrequest = False
         self.logger = sfi_logger
+        self.logger.enable_console()
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
         cmdargs = {"list": "authority",
