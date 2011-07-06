@@ -129,10 +129,6 @@ def ListResources(api, creds, options, call_id):
         if caller_hrn == aggregate and aggregate != api.hrn:
             continue
 
-        # For GENICloud
-        if aggregate == api.hrn:
-            continue
-
         # get the rspec from the aggregate
         server = api.aggregates[aggregate]
         #threads.run(server.ListResources, credentials, my_opts, call_id)
