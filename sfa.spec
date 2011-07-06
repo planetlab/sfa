@@ -193,8 +193,7 @@ if [ "$1" = 0 ] ; then
 fi
 
 %postun cm
-[ "$1" -ge "1" ] && service sfa-cm restart
-
+[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
 * Tue Jun 21 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-26

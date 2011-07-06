@@ -1,9 +1,9 @@
 start = RSpec
 RSpec = element RSpec {
     attribute type { xsd:NMTOKEN },
-    cloud
+    network
 }
-cloud = element cloud {
+network = element network {
     attribute id { xsd:NMTOKEN },
     user_info?,
     ipv4,

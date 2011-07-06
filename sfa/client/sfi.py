@@ -15,7 +15,7 @@ from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
-from sfa.util.sfalogging import info_logger
+from sfa.util.sfalogging import sfi_logger
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
 from sfa.trust.credential import Credential
@@ -26,6 +26,8 @@ import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.version import version_core
 from sfa.util.cache import Cache
+from sfa.rspecs.rspec_version import RSpecVersion
+from sfa.rspecs.pg_rspec import pg_rspec_request_version
 
 AGGREGATE_PORT=12346
 CM_PORT=12346
@@ -141,7 +143,8 @@ class Sfi:
         self.user = None
         self.authority = None
         self.hashrequest = False
-        self.logger = info_logger
+        self.logger = sfi_logger
+        self.logger.enable_console()
    
     def create_cmd_parser(self, command, additional_cmdargs=None):
         cmdargs = {"list": "authority",
@@ -370,6 +373,8 @@ class Sfi:
             version = server.GetVersion()
             # cache version for 24 hours
             cache.add(cache_key, version, ttl= 60*60*24)
+            self.logger.info("Updating cache file %s" % cache_file)
+            cache.save_to_file(cache_file)
 
 
         return version   
@@ -891,7 +896,14 @@ class Sfi:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
             creds.append(delegated_cred)
         if opts.rspec_version:
-            call_options['rspec_version'] = opts.rspec_version 
+            server_version = self.get_cached_server_version(server)
+            if 'sfa' in server_version:
+                # just request the version the client wants 
+                call_options['rspec_version'] = dict(RSpecVersion(opts.rspec_version)) 
+            else:
+                # this must be a protogeni aggregate. We should request a v2 ad rspec
+                # regardless of what the client user requested 
+                call_options['rspec_version'] = dict(pg_rspec_request_version)     
         #panos add info options
         if opts.info:
             call_options['info'] = opts.info 
@@ -929,7 +941,7 @@ class Sfi:
         #  }]
         users = []
         server = self.get_server_from_opts(opts)
-        version = server.GetVersion()
+        version = self.get_cached_server_version(server)
         if 'sfa' not in version:
             # need to pass along user keys if this request is going to a ProtoGENI aggregate 
             # ProtoGeni Aggregates will only install the keys of the user that is issuing the

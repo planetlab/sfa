@@ -37,12 +37,7 @@ def _call_id_supported(api, server):
     """
     Returns true if server support the optional call_id arg, false otherwise.
     """
-    cache_key = server.url + "-version"
-    server_version = api.cache.get(cache_key)
-    if not server_version:
-        server_version = server.GetVersion()
-        # cache version for 24 hours
-        api.cache.add(cache_key, server_version, ttl= 60*60*24)
+    server_version = api.get_cached_server_version(server)
 
     if 'sfa' in server_version:
         code_tag = server_version['code_tag']
@@ -93,7 +88,10 @@ def ListResources(api, creds, options, call_id):
         args = [credential, my_opts]
         if _call_id_supported(api, server):
             args.append(call_id)
-        return server.ListResources(*args)
+        try:
+            return server.ListResources(*args)
+        except Exception, e:
+            api.logger.warn("ListResources failed at %s: %s" %(server.url, str(e)))
 
     if Callids().already_handled(call_id): return ""
 
@@ -102,6 +100,8 @@ def ListResources(api, creds, options, call_id):
     (hrn, type) = urn_to_hrn(xrn)
     my_opts = copy(options)
     my_opts['geni_compressed'] = False
+    if 'rspec_version' in my_opts:
+        del my_opts['rspec_version']
 
     # get the rspec's return format from options
     rspec_version = RSpecVersion(options.get('rspec_version'))
@@ -121,6 +121,7 @@ def ListResources(api, creds, options, call_id):
     credential = api.getDelegatedCredential(creds)
     if not credential:
         credential = api.getCredential()
+    credentials = [credential]
     threads = ThreadManager()
     for aggregate in api.aggregates:
         # prevent infinite loop. Dont send request back to caller
@@ -129,8 +130,8 @@ def ListResources(api, creds, options, call_id):
             continue
         # get the rspec from the aggregate
         server = api.aggregates[aggregate]
-        #threads.run(server.ListResources, credential, my_opts, call_id)
-        threads.run(_ListResources, server, credential, my_opts, call_id)
+        #threads.run(server.ListResources, credentials, my_opts, call_id)
+        threads.run(_ListResources, server, credentials, my_opts, call_id)
 
     results = threads.get_results()
     rspec_version = RSpecVersion(my_opts.get('rspec_version'))
@@ -154,17 +155,23 @@ def ListResources(api, creds, options, call_id):
 def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
 
     def _CreateSliver(server, xrn, credential, rspec, users, call_id):
+        try:
             # Need to call GetVersion at an aggregate to determine the supported 
             # rspec type/format beofre calling CreateSliver at an Aggregate. 
-            server_version = _get_server_version(api, server)    
+            server_version = api.get_cached_server_version(server)    
             if 'sfa' not in aggregate_version and 'geni_api' in aggregate_version:
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
-                # if aggregate supports sfa rspecs. othewise convert to pg rspec
+                # if aggregate supports sfa rspecs. otherwise convert to pg rspec
                 rspec = RSpecConverter.to_pg_rspec(rspec)
             args = [xrn, credential, rspec, users]
             if _call_id_supported(api, server):
                 args.append(call_id)
-            return server.CreateSliver(*args)
+            try:
+                return server.CreateSliver(*args)
+            except Exception, e:
+                api.logger.warn("CreateSliver failed at %s: %s" %(server.url, str(e)))
+        except: 
+            logger.log_exc('Something wrong in _CreateSliver')
 
     if Callids().already_handled(call_id): return ""
     # Validate the RSpec against PlanetLab's schema --disabled for now
@@ -348,23 +355,6 @@ def ListSlices(api, creds, call_id):
         api.cache.add('slices', slices)
 
     return slices
-
-
-    if rspec_version['type'] == pg_rspec_ad_version['type']:
-        rspec = PGRSpec()
-    else:
-        rspec = SfaRSpec()
-    for result in results:
-        try:
-            rspec.merge(result)
-        except:
-            api.logger.info("SM.ListResources: Failed to merge aggregate rspec")
-
-    # cache the result
-    if caching and api.cache and not xrn:
-        api.cache.add(version_string, rspec.toxml())
-
-    return rspec.toxml()
 
 
 def get_ticket(api, xrn, creds, rspec, users):

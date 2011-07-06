@@ -53,14 +53,18 @@ class SfaRSpec(RSpec):
             nodes = self.xml.xpath('//node/hostname/text()')
         else:
             nodes = self.xml.xpath('//network[@name="%s"]//node/hostname/text()' % network)
+
+        nodes = [node.strip() for node in nodes]
         return nodes
 
     def get_nodes_with_slivers(self, network = None):
         if network:
-            return self.xml.xpath('//network[@name="%s"]//node[sliver]/hostname/text()' % network)   
+            nodes =  self.xml.xpath('//network[@name="%s"]//node[sliver]/hostname/text()' % network)   
         else:
-            return self.xml.xpath('//node[sliver]/hostname/text()')
+            nodes = self.xml.xpath('//node[sliver]/hostname/text()')
 
+        nodes = [node.strip() for node in nodes]
+        return nodes     
     def get_nodes_without_slivers(self, network=None): 
         xpath_nodes_without_slivers = '//node[not(sliver)]/hostname/text()'
         xpath_nodes_without_slivers_in_network = '//network[@name="%s"]//node[not(sliver)]/hostname/text()' 
@@ -83,7 +87,9 @@ class SfaRSpec(RSpec):
         if network:
             defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)        
         else:
-            defaults = self.xml.xpath("//network/sliver_defaults" % network)
+            defaults = self.xml.xpath("//sliver_defaults")
+        if isinstance(defaults, list) and defaults:
+            defaults = defaults[0]
         return self.attributes_list(defaults)
 
     def get_sliver_attributes(self, hostname, network=None):
@@ -92,8 +98,17 @@ class SfaRSpec(RSpec):
         return self.attributes_list(sliver)
 
     def get_slice_attributes(self, network=None):
-        # TODO: FINISH
-        return []
+        slice_attributes = []
+        nodes_with_slivers = self.get_nodes_with_slivers(network)
+        for default_attribute in self.get_default_sliver_attributes(network):
+            attribute = {'name': str(default_attribute[0]), 'value': str(default_attribute[1]), 'node_id': None}
+            slice_attributes.append(attribute)
+        for node in nodes_with_slivers:
+            sliver_attributes = self.get_sliver_attributes(node, network)
+            for sliver_attribute in sliver_attributes:
+                attribute = {'name': str(sliver_attribute[0]), 'value': str(sliver_attribute[1]), 'node_id': node}
+                slice_attributes.append(attribute)    
+        return slice_attributes
 
     def get_site_nodes(self, siteid, network=None):
         if network:
@@ -212,7 +227,7 @@ class SfaRSpec(RSpec):
                 for tag in node['tags']:
                    # expose this hard wired list of tags, plus the ones that are marked 'sfa' in their category 
                    if tag['tagname'] in ['fcdistro', 'arch'] or 'sfa' in tag['category'].split('/'):
-                        tag_element = etree.SubElement(node_tag, tag['tagname'], value=tag['value'])
+                        tag_element = etree.SubElement(node_tag, tag['tagname']).text=tag['value']
 
             if 'site' in node:
                 longitude = str(node['site']['longitude'])
@@ -236,7 +251,7 @@ class SfaRSpec(RSpec):
             sliver_elem = etree.SubElement(node_elem, 'sliver')
             if 'tags' in sliver:
                 for tag in sliver['tags']:
-                    etree.SubElement(sliver_elem, tag['tagname'], value=tag['value'])
+                    etree.SubElement(sliver_elem, tag['tagname']).text = value=tag['value']
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
         slivers = self._process_slivers(slivers)
@@ -251,9 +266,13 @@ class SfaRSpec(RSpec):
             defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
         else:
             defaults = self.xml.xpath("//sliver_defaults" % network)
-        if defaults is None:
+        if not defaults :
             network_tag = self.xml.xpath("//network[@name='%s']" % network)
+            if isinstance(network_tag, list):
+                network_tag = network_tag[0]
             defaults = self.add_element('sliver_defaults', attrs={}, parent=network_tag)
+        elif isinstance(defaults, list):
+            defaults = defaults[0]
         self.add_attribute(defaults, name, value)
 
     def add_sliver_attribute(self, hostname, name, value, network=None):

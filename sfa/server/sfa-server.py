@@ -35,6 +35,7 @@ component_port=12346
 import os, os.path
 import traceback
 import sys
+import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from optparse import OptionParser
 
 from sfa.util.sfalogging import logger
@@ -46,7 +47,8 @@ from sfa.util.config import Config
 from sfa.plc.api import SfaAPI
 from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
-
+from sfa.util.xrn import get_authority, hrn_to_urn
+from sfa.util.sfalogging import logger
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
 def daemon():
@@ -162,17 +164,101 @@ def init_server(options, config):
         manager_module = manager_base + ".component_manager_%s" % mgr_type
         init_manager(manager_module, manager_base)    
 
-def sync_interfaces(server_key_file, server_cert_file):
+def install_peer_certs(server_key_file, server_cert_file):
     """
     Attempt to install missing trusted gids and db records for 
     our federated interfaces
     """
+    # Attempt to get any missing peer gids
+    # There should be a gid file in /etc/sfa/trusted_roots for every
+    # peer registry found in in the registries.xml config file. If there
+    # are any missing gids, request a new one from the peer registry.
     api = SfaAPI(key_file = server_key_file, cert_file = server_cert_file)
     registries = Registries(api)
     aggregates = Aggregates(api)
-    registries.sync_interfaces()
-    aggregates.sync_interfaces()
+    interfaces = dict(registries.interfaces.items() + aggregates.interfaces.items())
+    gids_current = api.auth.trusted_cert_list
+    hrns_current = [gid.get_hrn() for gid in gids_current]
+    hrns_expected = interfaces.keys()
+    new_hrns = set(hrns_expected).difference(hrns_current)
+    #gids = self.get_peer_gids(new_hrns) + gids_current
+    peer_gids = []
+    if not new_hrns:
+        return 
 
+    trusted_certs_dir = api.config.get_trustedroots_dir()
+    for new_hrn in new_hrns:
+        if not new_hrn: continue
+        # the gid for this interface should already be installed
+        if new_hrn == api.config.SFA_INTERFACE_HRN: continue
+        try:
+            # get gid from the registry
+            url = interfaces[new_hrn]['url']
+            interface = xmlrpcprotocol.get_server(url, server_key_file, server_cert_file)
+            # skip non sfa aggregates
+            server_version = api.get_cached_server_version(interface)
+            if 'sfa' not in server_version:
+                logger.info("get_trusted_certs: skipping non sfa aggregate: %s" % new_hrn)
+                continue
+      
+            trusted_gids = interface.get_trusted_certs()
+            if trusted_gids:
+                # the gid we want should be the first one in the list,
+                # but lets make sure
+                for trusted_gid in trusted_gids:
+                    # default message
+                    message = "interface: %s\t" % (api.interface)
+                    message += "unable to install trusted gid for %s" % \
+                               (new_hrn)
+                    gid = GID(string=trusted_gids[0])
+                    peer_gids.append(gid)
+                    if gid.get_hrn() == new_hrn:
+                        gid_filename = os.path.join(trusted_certs_dir, '%s.gid' % new_hrn)
+                        gid.save_to_file(gid_filename, save_parents=True)
+                        message = "installed trusted cert for %s" % new_hrn
+                    # log the message
+                    api.logger.info(message)
+        except:
+            message = "interface: %s\tunable to install trusted gid for %s" % \
+                        (api.interface, new_hrn)
+            api.logger.log_exc(message)
+    # doesnt matter witch one
+    update_cert_records(peer_gids)
+
+def update_cert_records(gids):
+    """
+    Make sure there is a record in the registry for the specified gids. 
+    Removes old records from the db.
+    """
+    # import SfaTable here so this module can be loaded by ComponentAPI
+    from sfa.util.table import SfaTable
+    if not gids:
+        return
+    table = SfaTable()
+    # get records that actually exist in the db
+    gid_urns = [gid.get_urn() for gid in gids]
+    hrns_expected = [gid.get_hrn() for gid in gids]
+    records_found = table.find({'hrn': hrns_expected, 'pointer': -1}) 
+
+    # remove old records
+    for record in records_found:
+        if record['hrn'] not in hrns_expected and \
+            record['hrn'] != self.api.config.SFA_INTERFACE_HRN:
+            table.remove(record)
+
+    # TODO: store urn in the db so we do this in 1 query 
+    for gid in gids:
+        hrn, type = gid.get_hrn(), gid.get_type()
+        record = table.find({'hrn': hrn, 'type': type, 'pointer': -1})
+        if not record:
+            record = {
+                'hrn': hrn, 'type': type, 'pointer': -1,
+                'authority': get_authority(hrn),
+                'gid': gid.save_to_string(save_parents=True),
+            }
+            record = SfaRecord(dict=record)
+            table.insert(record)
+        
 def main():
     # Generate command line parser
     parser = OptionParser(usage="sfa-server [options]")
@@ -184,12 +270,14 @@ def main():
          help="run aggregate manager", default=False)
     parser.add_option("-c", "--component", dest="cm", action="store_true",
          help="run component server", default=False)
+    parser.add_option("-t", "--trusted-certs", dest="trusted_certs", action="store_true",
+         help="refresh trusted certs", default=False)
     parser.add_option("-v", "--verbose", action="count", dest="verbose", default=0,
          help="verbose mode - cumulative")
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
          help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
-
+    
     config = Config()
     if config.SFA_API_DEBUG: pass
     hierarchy = Hierarchy()
@@ -198,9 +286,12 @@ def main():
 
     init_server_key(server_key_file, server_cert_file, config, hierarchy)
     init_server(options, config)
-    sync_interfaces(server_key_file, server_cert_file)   
  
     if (options.daemon):  daemon()
+    
+    if options.trusted_certs:
+        install_peer_certs(server_key_file, server_cert_file)   
+    
     # start registry server
     if (options.registry):
         from sfa.server.registry import Registry

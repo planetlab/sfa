@@ -3,7 +3,7 @@ from lxml import etree
 from StringIO import StringIO
 from sfa.rspecs.rspec import RSpec 
 from sfa.util.xrn import *
-from sfa.util.plxrn import hostname_to_urn
+from sfa.util.plxrn import hostname_to_urn, xrn_to_hostname
 from sfa.util.config import Config 
 from sfa.rspecs.rspec_version import RSpecVersion 
 
@@ -79,23 +79,37 @@ class PGRSpec(RSpec):
         return nodes
 
     def get_nodes(self, network=None):
-        xpath = '//rspecv2:node[@component_name]/@component_name | //node[@component_name]/@component_name'
-        return self.xml.xpath(xpath, namespaces=self.namespaces) 
+        xpath = '//rspecv2:node[@component_name]/@component_id | //node[@component_name]/@component_id'
+        nodes = self.xml.xpath(xpath, namespaces=self.namespaces)
+        nodes = [xrn_to_hostname(node) for node in nodes]
+        return nodes 
 
     def get_nodes_with_slivers(self, network=None):
         if network:
-            return self.xml.xpath('//rspecv2:node[@component_manager_id="%s"][sliver_type]/@component_name' % network, namespaces=self.namespaces)
+            nodes = self.xml.xpath('//rspecv2:node[@component_manager_id="%s"][sliver_type]/@component_id' % network, namespaces=self.namespaces)
         else:
-            return self.xml.xpath('//rspecv2:node[rspecv2:sliver_type]/@component_name', namespaces=self.namespaces)
+            nodes = self.xml.xpath('//rspecv2:node[rspecv2:sliver_type]/@component_id', namespaces=self.namespaces)
+        nodes = [xrn_to_hostname(node) for node in nodes]
+        return nodes
 
     def get_nodes_without_slivers(self, network=None):
-        pass
+        return []
    
     def get_slice_attributes(self, network=None):
-        pass
+        return []
+
+    def attributes_list(self, elem):
+        opts = []
+        if elem is not None:
+            for e in elem:
+                opts.append((e.tag, e.text))
+        return opts
 
     def get_default_sliver_attributes(self, network=None):
-        pass 
+        return []
+
+    def add_default_sliver_attribute(self, name, value, network=None):
+        pass
 
     def add_nodes(self, nodes, check_for_dupes=False):
         if not isinstance(nodes, list):
@@ -118,30 +132,36 @@ class PGRSpec(RSpec):
             node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='plab-pc')
             node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='pc')
             available_tag = etree.SubElement(node_tag, 'available', now='true')
-            location_tag = etree.SubElement(node_tag, 'location', country="us")
+            sliver_type_tag = etree.SubElement(node_tag, 'sliver_type', name='plab-vnode')
+            # protogeni uses the <sliver_type> tag to identify the types of
+            # vms available at the node. 
+            # only add location tag if longitude and latitude are not null
             if 'site' in node:
-                if 'longitude' in node['site']:
-                    location_tag.set('longitude', str(node['site']['longitude']))
-                if 'latitude' in node['site']:
-                    location_tag.set('latitude', str(node['site']['latitude']))
-            #if 'interfaces' in node:
-            
+                longitude = node['site'].get('longitude', None)
+                latitude = node['site'].get('latitude', None)
+                if longitude and latitude:
+                    location_tag = etree.SubElement(node_tag, 'location', country="us", \
+                                                    longitude=str(longitude), latitude=str(latitude))
+
 
     def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
+
+        # all nodes hould already be present in the rspec. Remove all 
+        # nodes that done have slivers
         slivers = self._process_slivers(slivers)
-        nodes_with_slivers = self.get_nodes_with_slivers()
-        for sliver in slivers:
-            hostname = sliver['hostname']
-            if hostname in nodes_with_slivers:
-                continue
-            nodes = self.xml.xpath('//rspecv2:node[@component_name="%s"] | //node[@component_name="%s"]' % (hostname, hostname), namespaces=self.namespaces)
-            if nodes:
-                node = nodes[0]
+        sliver_hosts = [sliver['hostname'] for sliver in slivers]
+        nodes = self.get_node_elements()
+        for node in nodes:
+            urn = node.get('component_id')
+            hostname = xrn_to_hostname(urn)
+            if hostname not in sliver_hosts:
+                parent = node.getparent()
+                parent.remove(node)
+            else:
                 node.set('client_id', hostname)
                 if sliver_urn:
                     node.set('sliver_id', sliver_urn)
-                etree.SubElement(node, 'sliver_type', name='plab-vnode')
-
+     
     def add_default_sliver_attribute(self, name, value, network=None):
         pass
 
@@ -166,19 +186,6 @@ class PGRSpec(RSpec):
     def cleanup(self):
         # remove unncecessary elements, attributes
         if self.type in ['request', 'manifest']:
-            # remove nodes without slivers
-            nodes = self.get_node_elements()
-            for node in nodes:
-                delete = True
-                hostname = node.get('component_name')
-                parent = node.getparent()
-                children = node.getchildren()
-                for child in children:
-                    if child.tag.endswith('sliver_type'):
-                        delete = False
-                if delete:
-                    parent.remove(node)
-
             # remove 'available' element from remaining node elements
             self.remove_element('//rspecv2:available | //available')
 
