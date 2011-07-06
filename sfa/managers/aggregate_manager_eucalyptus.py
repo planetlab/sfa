@@ -509,7 +509,12 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     schemaXML = ET.parse(EUCALYPTUS_RSPEC_SCHEMA)
     rspecValidator = ET.RelaxNG(schemaXML)
     rspecXML = ET.XML(xml)
-    if False and not rspecValidator(rspecXML):
+    for network in rspecXML.iterfind("./network"):
+        if network.get('id') != cloud['name']:
+            # Throw away everything except my own RSpec
+            # sfa_logger().error("CreateSliver: deleting %s from rspec"%network.get('id'))
+            network.getparent().remove(network)
+    if not rspecValidator(rspecXML):
         error = rspecValidator.error_log.last_error
         message = '%s (line %s)' % (error.message, error.line) 
         # XXX: InvalidRSpec is new. Currently, I am not working with Trunk code.
@@ -525,7 +530,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     pendingRmInst = []
     for sliceInst in s.instances:
         pendingRmInst.append(sliceInst.instance_id)
-    existingInstGroup = rspecXML.findall("./network[@id='%s']//euca_instances"%cloud['name'])
+    existingInstGroup = rspecXML.findall(".//euca_instances")
     for instGroup in existingInstGroup:
         for existingInst in instGroup:
             if existingInst.get('id') in pendingRmInst:
@@ -537,7 +542,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     conn.terminate_instances(pendingRmInst)
 
     # Process new instance requests
-    requests = rspecXML.findall("./network[@id='%s']//request"%cloud['name'])
+    requests = rspecXML.findall(".//request")
     if requests:
         # Get all the public keys associate with slice.
         pubKeys = getKeysForSlice(s.slice_hrn)
