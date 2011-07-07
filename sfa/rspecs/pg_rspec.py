@@ -32,7 +32,7 @@ pg_rspec_request_version = RSpecVersion(_request_version)
 class PGRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
-    template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd"/>'
+    template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" />'
 
     def __init__(self, rspec="", namespaces={}, type=None):
         if not type:
@@ -49,7 +49,9 @@ class PGRSpec(RSpec):
         self.template = self.template % {'rspec_type': rspec_type}
 
         if not namespaces:
-            self.namespaces = {'rspecv2': self.version['namespace']}
+            self.namespaces = {'rspecv2': self.version['namespace'],
+                               'flack': 'http://www.protogeni.net/resources/rspec/ext/flack/1' }
+
         else:
             self.namespaces = namespaces 
 
@@ -179,31 +181,29 @@ class PGRSpec(RSpec):
 
         # all nodes hould already be present in the rspec. Remove all 
         # nodes that done have slivers
+        from sfa.util.sfalogging import logger
         slivers = self._process_slivers(slivers)
-        sliver_hosts = [sliver['hostname'] for sliver in slivers]
+        slivers_dict = {}
+        for sliver in slivers:
+            slivers_dict[sliver['hostname']] = sliver
         nodes = self.get_node_elements()
         for node in nodes:
             urn = node.get('component_id')
             hostname = xrn_to_hostname(urn)
-            if hostname not in sliver_hosts:
+            if hostname not in slivers_dict:
                 parent = node.getparent()
                 parent.remove(node)
             else:
+                sliver_info = slivers_dict[hostname]
                 node.set('client_id', hostname)
                 if sliver_urn:
                     node.set('sliver_id', sliver_urn)
-        from sfa.util.sfalogging import logger
-        # add sliver info
-        for sliver in slivers:
-            if 'tags' in sliver:
-                logger.info(sliver['hostname'])
-                node_elem = self.get_node_element(sliver['hostname'])
-                sliver_elem = node_elem.xpath('//rspecv2:sliver_type | //sliver_type', namespaces=self.namespaces)
-                if isinstance(sliver_elem, list) and sliver_elem:
+                sliver_elem = node.xpath('//rspecv2:sliver_type | //sliver_type', namespaces=self.namespaces)
+                if sliver_elem and isinstance(sliver_elem, list):
                     sliver_elem = sliver_elem[0]
-                    for tag in sliver['tags']:
-                        if tag['name'] == 'flack_info':
-                            etree.SubElement(sliver_elem, 'flack:info', attrib=eval(tag['value']))
+                    for tag in sliver_info['tags']:
+                        if tag['tagname'] == 'flack_info':
+                            e = etree.SubElement(sliver_elem, '{%s}info' % self.namespaces['flack'], attrib=eval(tag['value']))
                               
      
     def add_default_sliver_attribute(self, name, value, network=None):
