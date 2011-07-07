@@ -44,7 +44,7 @@ def _call_id_supported(api, server):
         code_tag_parts = code_tag.split("-")
 
         version_parts = code_tag_parts[0].split(".")
-        major, minor = version_parts[0], version_parts[1]
+        major, minor = version_parts[0:2]
         rev = code_tag_parts[1]
         if int(major) > 1:
             if int(minor) > 0 or int(rev) > 20:
@@ -160,19 +160,16 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
             # Need to call GetVersion at an aggregate to determine the supported 
             # rspec type/format beofre calling CreateSliver at an Aggregate. 
             server_version = api.get_cached_server_version(server)    
-            if 'sfa' not in aggregate_version and 'geni_api' in aggregate_version:
+            if 'sfa' not in server_version and 'geni_api' in server_version:
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. otherwise convert to pg rspec
                 rspec = RSpecConverter.to_pg_rspec(rspec)
             args = [xrn, credential, rspec, users]
             if _call_id_supported(api, server):
                 args.append(call_id)
-            try:
-                return server.CreateSliver(*args)
-            except Exception, e:
-                api.logger.warn("CreateSliver failed at %s: %s" %(server.url, str(e)))
+            return server.CreateSliver(*args)
         except: 
-            logger.log_exc('Something wrong in _CreateSliver')
+            logger.log_exc('Something wrong in _CreateSliver with URL %s'%server.url)
 
     if Callids().already_handled(call_id): return ""
     # Validate the RSpec against PlanetLab's schema --disabled for now
