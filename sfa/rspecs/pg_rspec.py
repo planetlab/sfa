@@ -75,7 +75,7 @@ class PGRSpec(RSpec):
         return set(networks)
 
     def get_node_element(self, hostname, network=None):
-        nodes = self.xml.xpath('//rspecv2:node[@component_id[contains(., "%s")]]' % hostname, namespaces=self.namespaces)
+        nodes = self.xml.xpath('//rspecv2:node[@component_id[contains(., "%s")]] | node[@component_id[contains(., "%s")]]' % (hostname, hostname), namespaces=self.namespaces)
         if isinstance(nodes,list) and nodes:
             return nodes[0]
         else:
@@ -112,7 +112,6 @@ class PGRSpec(RSpec):
     def get_slice_attributes(self, network=None):
         slice_attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers(network)
-        from sfa.util.sfalogging import logger 
         # TODO: default sliver attributes in the PG rspec?
         default_ns_prefix = self.namespaces['rspecv2']
         for node in nodes_with_slivers:
@@ -122,8 +121,7 @@ class PGRSpec(RSpec):
                 value=str(sliver_attribute[1])
                 # we currently only suppor the <initscript> and <flack> attributes 
                 if  'info' in name:
-                    value = ",".join(["%s=%s" %(a,b) for (a,b) in sliver_attribute[2].items()])
-                    attribute = {'name': 'flack_info', 'value': value, 'node_id': node}
+                    attribute = {'name': 'flack_info', 'value': str(sliver_attribute[2]), 'node_id': node}
                     slice_attributes.append(attribute) 
                 elif 'initscript' in name: 
                     attribute = {'name': 'initscript', 'value': value, 'node_id': node}
@@ -194,6 +192,19 @@ class PGRSpec(RSpec):
                 node.set('client_id', hostname)
                 if sliver_urn:
                     node.set('sliver_id', sliver_urn)
+        from sfa.util.sfalogging import logger
+        # add sliver info
+        for sliver in slivers:
+            if 'tags' in sliver:
+                logger.info(sliver['hostname'])
+                node_elem = self.get_node_element(sliver['hostname'])
+                sliver_elem = node_elem.xpath('//rspecv2:sliver_type | //sliver_type', namespaces=self.namespaces)
+                if isinstance(sliver_elem, list) and sliver_elem:
+                    sliver_elem = sliver_elem[0]
+                    for tag in sliver['tags']:
+                        if tag['name'] == 'flack_info':
+                            etree.SubElement(sliver_elem, 'flack:info', attrib=eval(tag['value']))
+                              
      
     def add_default_sliver_attribute(self, name, value, network=None):
         pass
