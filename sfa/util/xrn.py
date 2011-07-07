@@ -9,6 +9,7 @@ def urn_to_hrn(urn): xrn=Xrn(urn); return (xrn.hrn, xrn.type)
 def hrn_to_urn(hrn,type): return Xrn(hrn, type=type).urn
 
 def urn_to_sliver_id(urn, slice_id, node_id, index=0):
+    urn = urn.replace('+slice+', '+sliver+')    
     return ":".join([urn, str(slice_id), str(node_id), str(index)])
 
 class Xrn:
