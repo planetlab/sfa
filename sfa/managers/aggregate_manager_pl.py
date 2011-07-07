@@ -212,9 +212,6 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
         else:
             existing_slice_attributes.append(slice_tag)  
          
-    #api.logger.debug("requested slice attributes: %s" % str(requested_slice_attributes))
-    #api.logger.debug("removed slice attributes: %s" % str(removed_slice_attributes))
-    #api.logger.debug("existing slice attributes: %s" % str(existing_slice_attributes))
     try:
         if peer:
             api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
