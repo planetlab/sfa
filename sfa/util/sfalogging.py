@@ -80,6 +80,10 @@ class _SfaLogger:
         
     def warn(self, msg):
         self.logger.warn(msg)
+
+    # some code is using logger.warn(), some is using logger.warning()
+    def warning(self, msg):
+        self.logger.warning(msg)
    
     def error(self, msg):
         self.logger.error(msg)    
