@@ -2,7 +2,7 @@ import threading
 import traceback
 import time
 from Queue import Queue
-from sfa.util.sfa.logging import logger
+from sfa.util.sfalogging import logger
 
 def ThreadedMethod(callable, results, errors):
     """
