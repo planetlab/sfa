@@ -112,17 +112,21 @@ class PGRSpec(RSpec):
     def get_slice_attributes(self, network=None):
         slice_attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers(network)
-        
+        from sfa.util.sfalogging import logger 
         # TODO: default sliver attributes in the PG rspec?
-
+        default_ns_prefix = self.namespaces['rspecv2']
         for node in nodes_with_slivers:
             sliver_attributes = self.get_sliver_attributes(node, network)
             for sliver_attribute in sliver_attributes:
                 name=str(sliver_attribute[0]) 
                 value=str(sliver_attribute[1])
                 # we currently only suppor the <initscript> and <flack> attributes 
-                if name in ['initscript', 'info']:
-                    attribute = {'name': name, 'value': value, 'node_id': node, 'attributes': sliver_attribute[2]}
+                if  'info' in name:
+                    value = ",".join(["%s=%s" %(a,b) for (a,b) in sliver_attribute[2].items()])
+                    attribute = {'name': 'flack_info', 'value': value, 'node_id': node}
+                    slice_attributes.append(attribute) 
+                elif 'initscript' in name: 
+                    attribute = {'name': 'initscript', 'value': value, 'node_id': node}
                     slice_attributes.append(attribute) 
 
         return slice_attributes
