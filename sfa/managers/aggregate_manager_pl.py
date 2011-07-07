@@ -79,7 +79,8 @@ def __get_registry_objects(slice_xrn, creds, users):
 
         slice = {}
         
-        extime = utcparse(Credential(string=creds[0]).get_expiration())
+        # get_expiration always returns a normalized datetime - no need to utcparse
+        extime = Credential(string=creds[0]).get_expiration()
         # If the expiration time is > 60 days from now, set the expiration time to 60 days from now
         if extime > datetime.datetime.utcnow() + datetime.timedelta(days=60):
             extime = datetime.datetime.utcnow() + datetime.timedelta(days=60)
@@ -211,9 +212,6 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
         else:
             existing_slice_attributes.append(slice_tag)  
          
-    #api.logger.debug("requested slice attributes: %s" % str(requested_slice_attributes))
-    #api.logger.debug("removed slice attributes: %s" % str(removed_slice_attributes))
-    #api.logger.debug("existing slice attributes: %s" % str(existing_slice_attributes))
     try:
         if peer:
             api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)

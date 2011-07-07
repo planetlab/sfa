@@ -99,19 +99,22 @@ class Aggregate:
                 slivers = []
                 tags = self.api.plshell.GetSliceTags(self.api.plauth, slice['slice_tag_ids'])
                 for node_id in slice['node_ids']:
-                    sliver = {}
-                    sliver['hostname'] = self.nodes[node_id]['hostname']
-                    sliver['tags'] = []
-                    slivers.append(sliver)
-                    for tag in tags:
-                        # if tag isn't bound to a node then it applies to all slivers
-                        # and belongs in the <sliver_defaults> tag
-                        if not tag['node_id']:
-                            rspec.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
-                        else:
-                            tag_host = self.nodes[tag['node_id']]['hostname']
-                            if tag_host == sliver['hostname']:
-                                sliver['tags'].append(tag)
+                    try:
+                        sliver = {}
+                        sliver['hostname'] = self.nodes[node_id]['hostname']
+                        sliver['tags'] = []
+                        slivers.append(sliver)
+                        for tag in tags:
+                            # if tag isn't bound to a node then it applies to all slivers
+                            # and belongs in the <sliver_defaults> tag
+                            if not tag['node_id']:
+                                rspec.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
+                            else:
+                                tag_host = self.nodes[tag['node_id']]['hostname']
+                                if tag_host == sliver['hostname']:
+                                    sliver['tags'].append(tag)
+                    except:
+                        self.api.logger.log_exc('unable to add sliver %s to node %s' % (slice['name'], node_id)) 
                 rspec.add_slivers(slivers, sliver_urn=slice_xrn)
 
         return rspec.toxml(cleanup=True)          

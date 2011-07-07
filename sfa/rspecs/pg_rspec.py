@@ -74,7 +74,14 @@ class PGRSpec(RSpec):
         networks = self.xml.xpath('//rspecv2:node[@component_manager_uuid]/@component_manager_uuid', namespaces=self.namespaces)
         return set(networks)
 
-    def get_node_elements(self):
+    def get_node_element(self, hostname, network=None):
+        nodes = self.xml.xpath('//rspecv2:node[@component_id[contains(., "%s")]]' % hostname, namespaces=self.namespaces)
+        if isinstance(nodes,list) and nodes:
+            return nodes[0]
+        else:
+            return None
+
+    def get_node_elements(self, network=None):
         nodes = self.xml.xpath('//rspecv2:node | //node', namespaces=self.namespaces)
         return nodes
 
@@ -94,15 +101,41 @@ class PGRSpec(RSpec):
 
     def get_nodes_without_slivers(self, network=None):
         return []
+
+    def get_sliver_attributes(self, hostname, network=None):
+        node = self.get_node_element(hostname, network)
+        sliver = node.xpath('//rspecv2:sliver_type', namespaces=self.namespaces)
+        if sliver is not None and isinstance(sliver, list):
+            sliver = sliver[0]
+        return self.attributes_list(sliver)
    
     def get_slice_attributes(self, network=None):
-        return []
+        slice_attributes = []
+        nodes_with_slivers = self.get_nodes_with_slivers(network)
+        from sfa.util.sfalogging import logger 
+        # TODO: default sliver attributes in the PG rspec?
+        default_ns_prefix = self.namespaces['rspecv2']
+        for node in nodes_with_slivers:
+            sliver_attributes = self.get_sliver_attributes(node, network)
+            for sliver_attribute in sliver_attributes:
+                name=str(sliver_attribute[0]) 
+                value=str(sliver_attribute[1])
+                # we currently only suppor the <initscript> and <flack> attributes 
+                if  'info' in name:
+                    value = ",".join(["%s=%s" %(a,b) for (a,b) in sliver_attribute[2].items()])
+                    attribute = {'name': 'flack_info', 'value': value, 'node_id': node}
+                    slice_attributes.append(attribute) 
+                elif 'initscript' in name: 
+                    attribute = {'name': 'initscript', 'value': value, 'node_id': node}
+                    slice_attributes.append(attribute) 
+
+        return slice_attributes
 
     def attributes_list(self, elem):
         opts = []
         if elem is not None:
             for e in elem:
-                opts.append((e.tag, e.text))
+                opts.append((e.tag, e.text, e.attrib))
         return opts
 
     def get_default_sliver_attributes(self, network=None):
