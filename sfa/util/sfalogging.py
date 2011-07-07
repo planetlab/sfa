@@ -36,7 +36,8 @@ class _SfaLogger:
             if os.path.exists(tmplogfile) and not os.access(tmplogfile,os.W_OK):
                 loggername = loggername + "-console"
                 handler = logging.StreamHandler()
-            handler=logging.handlers.RotatingFileHandler(tmplogfile,maxBytes=1000000, backupCount=5) 
+            else:
+                handler=logging.handlers.RotatingFileHandler(tmplogfile,maxBytes=1000000, backupCount=5) 
         handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.logger=logging.getLogger(loggername)
         self.logger.setLevel(level)
