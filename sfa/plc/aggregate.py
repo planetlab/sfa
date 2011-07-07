@@ -102,6 +102,8 @@ class Aggregate:
                     try:
                         sliver = {}
                         sliver['hostname'] = self.nodes[node_id]['hostname']
+                        sliver['node_id'] = node_id
+                        sliver['slice_id'] = slice['slice_id']    
                         sliver['tags'] = []
                         slivers.append(sliver)
                         for tag in tags:

@@ -181,7 +181,6 @@ class PGRSpec(RSpec):
 
         # all nodes hould already be present in the rspec. Remove all 
         # nodes that done have slivers
-        from sfa.util.sfalogging import logger
         slivers = self._process_slivers(slivers)
         slivers_dict = {}
         for sliver in slivers:
@@ -197,7 +196,11 @@ class PGRSpec(RSpec):
                 sliver_info = slivers_dict[hostname]
                 node.set('client_id', hostname)
                 if sliver_urn:
-                    node.set('sliver_id', sliver_urn)
+                    sliver_urn = sliver_urn.replace('+slice+', '+sliver+')
+                    slice_id = sliver_info.get('slice_id', -1)
+                    node_id = sliver_info.get('node_id', -1)
+                    sliver_id = urn_to_sliver_id(sliver_urn, slice_id, node_id)
+                    node.set('sliver_id', sliver_id)
                 sliver_elem = node.xpath('//rspecv2:sliver_type | //sliver_type', namespaces=self.namespaces)
                 if sliver_elem and isinstance(sliver_elem, list):
                     sliver_elem = sliver_elem[0]
