@@ -8,6 +8,9 @@ def get_authority(hrn): return Xrn(hrn).get_authority_hrn()
 def urn_to_hrn(urn): xrn=Xrn(urn); return (xrn.hrn, xrn.type)
 def hrn_to_urn(hrn,type): return Xrn(hrn, type=type).urn
 
+def urn_to_sliver_id(urn, slice_id, node_id, index=0):
+    return ":".join([urn, slice_id, node_id, index])
+
 class Xrn:
 
     ########## basic tools on HRNs
