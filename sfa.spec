@@ -204,7 +204,7 @@ fi
 - Support aggregates that don't support the optional 'call_id' argument. 
 - Only call get_trusted_certs() at aggreage interfaces that support the call.
 - CreateSliver() now handles MyPLC slice attributes/tags.
-- Cache now supports persistance.
+- Cache now supports persistence.
 - Hide whitelisted nodes.
 
 * Tue Jun 21 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-26
