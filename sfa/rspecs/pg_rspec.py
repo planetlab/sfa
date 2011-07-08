@@ -196,7 +196,6 @@ class PGRSpec(RSpec):
                 sliver_info = slivers_dict[hostname]
                 node.set('client_id', hostname)
                 if sliver_urn:
-                    sliver_urn = sliver_urn.replace('+slice+', '+sliver+')
                     slice_id = sliver_info.get('slice_id', -1)
                     node_id = sliver_info.get('node_id', -1)
                     sliver_id = urn_to_sliver_id(sliver_urn, slice_id, node_id)
