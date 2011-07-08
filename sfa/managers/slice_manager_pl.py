@@ -207,7 +207,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
     def _RenewSliver(server, xrn, creds, expiration_time, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(server)
         args =  [xrn, creds, expiration_time, call_id]
         if _call_id_supported(api, server):
             args.append(call_id)
@@ -237,7 +237,7 @@ def RenewSliver(api, xrn, creds, expiration_time, call_id):
 
 def DeleteSliver(api, xrn, creds, call_id):
     def _DeleteSliver(server, xrn, creds, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(server)
         args =  [xrn, creds]
         if _call_id_supported(api, server):
             args.append(call_id)
@@ -268,7 +268,7 @@ def DeleteSliver(api, xrn, creds, call_id):
 # first draft at a merging SliverStatus
 def SliverStatus(api, slice_xrn, creds, call_id):
     def _SliverStatus(server, xrn, creds, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(server)
         args =  [xrn, creds]
         if _call_id_supported(api, server):
             args.append(call_id)
@@ -310,7 +310,7 @@ caching=True
 #caching=False
 def ListSlices(api, creds, call_id):
     def _ListSlices(server, creds, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(api, server)
         args =  [creds]
         if _call_id_supported(api, server):
             args.append(call_id)
