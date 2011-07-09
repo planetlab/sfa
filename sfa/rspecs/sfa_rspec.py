@@ -65,6 +65,7 @@ class SfaRSpec(RSpec):
 
         nodes = [node.strip() for node in nodes]
         return nodes     
+
     def get_nodes_without_slivers(self, network=None): 
         xpath_nodes_without_slivers = '//node[not(sliver)]/hostname/text()'
         xpath_nodes_without_slivers_in_network = '//network[@name="%s"]//node[not(sliver)]/hostname/text()' 
@@ -210,7 +211,7 @@ class SfaRSpec(RSpec):
                      
             node_tag = etree.SubElement(network_tag, 'node')
             if 'network' in node:
-                node_tag.set('component_manager_id', network)
+                node_tag.set('component_manager_id', hrn_to_urn(network, 'authority+sa'))
             if 'urn' in node:
                 node_tag.set('component_id', node['urn']) 
             if 'site_urn' in node:
