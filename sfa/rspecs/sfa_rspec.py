@@ -317,6 +317,12 @@ class SfaRSpec(RSpec):
         Merge contents for specified rspec with current rspec 
         """
 
+        from sfa.rspecs.rspec_parser import parse_rspec
+        rspec = parse_rspec(in_rspec)
+        if rspec.type.lower() == 'protogeni':
+            from sfa.rspecs.rspec_converter import RSpecConverter
+            in_rspec = RSpecConverter.to_sfa_rspec(in_rspec)
+            
         # just copy over all networks
         current_networks = self.get_networks()
         rspec = SfaRSpec(rspec=in_rspec)
@@ -326,6 +332,7 @@ class SfaRSpec(RSpec):
             if not current_network in current_networks:
                 self.xml.append(network)
                 current_networks.append(current_network)
+            
         
          
 

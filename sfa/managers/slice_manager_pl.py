@@ -84,10 +84,16 @@ def GetVersion(api):
 
 
 def ListResources(api, creds, options, call_id):
-    def _ListResources(server, credential, my_opts, call_id):
+    def _ListResources(server, credential, opts, call_id):
+        
+        my_opts = copy(opts)
         args = [credential, my_opts]
         if _call_id_supported(api, server):
             args.append(call_id)
+        version = api.get_cached_server_version(server)
+        # force ProtoGENI aggregates to give us a v2 RSpec
+        if 'sfa' not in version.keys():
+            my_opts['rspec_version'] = pg_rspec_ad_version 
         try:
             return server.ListResources(*args)
         except Exception, e:
@@ -98,13 +104,9 @@ def ListResources(api, creds, options, call_id):
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
     (hrn, type) = urn_to_hrn(xrn)
-    my_opts = copy(options)
-    if 'geni_compressed' in my_opts:
-        del(my_opts['geni_compressed'])
+    if 'geni_compressed' in options:
+        del(options['geni_compressed'])
     
-    if 'rspec_version' in my_opts:
-        del my_opts['rspec_version']
-
     # get the rspec's return format from options
     rspec_version = RSpecVersion(options.get('rspec_version'))
     version_string = "rspec_%s" % (rspec_version.get_version_name())
@@ -133,11 +135,10 @@ def ListResources(api, creds, options, call_id):
 
         # get the rspec from the aggregate
         server = api.aggregates[aggregate]
-        #threads.run(server.ListResources, credentials, my_opts, call_id)
-        threads.run(_ListResources, server, credentials, my_opts, call_id)
+        threads.run(_ListResources, server, credentials, options, call_id)
 
     results = threads.get_results()
-    rspec_version = RSpecVersion(my_opts.get('rspec_version'))
+    rspec_version = RSpecVersion(options.get('rspec_version'))
     if rspec_version['type'] == pg_rspec_ad_version['type']:
         rspec = PGRSpec()
     else:
@@ -146,7 +147,7 @@ def ListResources(api, creds, options, call_id):
         try:
             rspec.merge(result)
         except:
-            api.logger.info("SM.ListResources: Failed to merge aggregate rspec")
+            api.logger.log_exc("SM.ListResources: Failed to merge aggregate rspec")
 
     # cache the result
     if caching and api.cache and not xrn:

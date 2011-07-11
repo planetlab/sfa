@@ -52,7 +52,7 @@ class PGRSpecConverter:
         i = 1
         for pg_node_element in pg_nodes_elements:
             node_element = sfa_rspec.add_element('node', {'id': 'n'+str(i)}, parent=network_element)
-            urn = pg_node_element.xpath('@component_uuid | @component_id')
+            urn = pg_node_element.xpath('@component_id', namespaces=pg_rspec.namespaces)
             if urn:
                 urn = urn[0]
                 hostname = Xrn.urn_split(urn)[-1]

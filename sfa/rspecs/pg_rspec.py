@@ -67,13 +67,13 @@ class PGRSpec(RSpec):
        
     def get_network(self):
         network = None 
-        nodes = self.xml.xpath('//rspecv2:node[@component_manager_uuid][1]', namespaces=self.namespaces)
+        nodes = self.xml.xpath('//rspecv2:node[@component_manager_id][1]', namespaces=self.namespaces)
         if nodes:
-            network  = nodes[0].get('component_manager_uuid')
+            network  = nodes[0].get('component_manager_id')
         return network
 
     def get_networks(self):
-        networks = self.xml.xpath('//rspecv2:node[@component_manager_uuid]/@component_manager_uuid', namespaces=self.namespaces)
+        networks = self.xml.xpath('//rspecv2:node[@component_manager_id]/@component_manager_id', namespaces=self.namespaces)
         return set(networks)
 
     def get_node_element(self, hostname, network=None):
