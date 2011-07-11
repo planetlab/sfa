@@ -99,7 +99,9 @@ def ListResources(api, creds, options, call_id):
     xrn = options.get('geni_slice_urn', '')
     (hrn, type) = urn_to_hrn(xrn)
     my_opts = copy(options)
-    my_opts['geni_compressed'] = False
+    if 'geni_compressed' in my_opts:
+        del(my_opts['geni_compressed'])
+    
     if 'rspec_version' in my_opts:
         del my_opts['rspec_version']
 
