@@ -329,7 +329,7 @@ class SfaRSpec(RSpec):
         networks = rspec.get_network_elements()
         for network in networks:
             current_network = network.get('name')
-            if not current_network in current_networks:
+            if current_network and current_network not in current_networks:
                 self.xml.append(network)
                 current_networks.append(current_network)
             
