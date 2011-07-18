@@ -13,6 +13,7 @@ class Aggregate:
     interfaces = {}
     links = {}
     node_tags = {}
+    pl_initscripts = {} 
     prepared=False
     #panos new user options variable
     user_options = {}
@@ -45,6 +46,11 @@ class Aggregate:
             for node_tag in self.api.plshell.GetNodeTags(self.api.plauth):
                 self.node_tags[node_tag['node_tag_id']] = node_tag
 
+    def prepare_pl_initscripts(self, force=False):
+        if not self.pl_initscripts or force:
+            for initscript in self.api.plshell.GetInitScripts(self.api.plauth, {'enabled': True}):
+                self.pl_initscripts[initscript['initscript_id']] = initscript
+
     def prepare(self, force=False):
         if not self.prepared or force:
             self.prepare_sites(force)
@@ -52,6 +58,7 @@ class Aggregate:
             self.prepare_interfaces(force)
             self.prepare_links(force)
             self.prepare_node_tags(force)
+            self.prepare_pl_initscripts()
             # add site/interface info to nodes
             for node_id in self.nodes:
                 node = self.nodes[node_id]
@@ -95,6 +102,9 @@ class Aggregate:
         # filter out nodes with a whitelist:
         valid_nodes = [] 
         for node in self.nodes.values():
+            # only doing this becuase protogeni rspec needs
+            # to advertise available initscripts 
+            node['pl_initscripts'] = self.pl_initscripts
             if not node['slice_ids_whitelist']:
                 valid_nodes.append(node)
             elif slice and slice['slice_id'] in node['slice_ids_whitelist']:

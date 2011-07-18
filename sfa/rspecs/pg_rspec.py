@@ -106,8 +106,6 @@ class PGRSpec(RSpec):
         return []
 
     def get_sliver_attributes(self, hostname, network=None):
-        from sfa.util.sfalogging import logger
-        logger.info("node: " + hostname)
         node = self.get_node_element(hostname, network)
         sliver = node.xpath('./rspecv2:sliver_type', namespaces=self.namespaces)
         if sliver is not None and isinstance(sliver, list):
@@ -174,6 +172,11 @@ class PGRSpec(RSpec):
             node_type_tag = etree.SubElement(node_tag, 'hardware_type', name='pc')
             available_tag = etree.SubElement(node_tag, 'available', now='true')
             sliver_type_tag = etree.SubElement(node_tag, 'sliver_type', name='plab-vnode')
+            
+            pl_initscripts = node.get('pl_initscripts', {})
+            for pl_initscript in pl_initscripts.values():
+                etree.SubElement(sliver_type_tag, '{%s}initscript' % self.namespaces['planetlab'], name=pl_initscript['name'])
+
             # protogeni uses the <sliver_type> tag to identify the types of
             # vms available at the node. 
             # only add location tag if longitude and latitude are not null
@@ -208,14 +211,19 @@ class PGRSpec(RSpec):
                     node_id = sliver_info.get('node_id', -1)
                     sliver_id = urn_to_sliver_id(sliver_urn, slice_id, node_id)
                     node.set('sliver_id', sliver_id)
-                sliver_elem = node.xpath('//rspecv2:sliver_type | //sliver_type', namespaces=self.namespaces)
+
+                # remove existing sliver_type tags,it needs to be recreated
+                sliver_elem = node.xpath('./rspecv2:sliver_type | ./sliver_type', namespaces=self.namespaces)
                 if sliver_elem and isinstance(sliver_elem, list):
                     sliver_elem = sliver_elem[0]
-                    for tag in sliver_info['tags']:
-                        if tag['tagname'] == 'flack_info':
-                            e = etree.SubElement(sliver_elem, '{%s}info' % self.namespaces['flack'], attrib=eval(tag['value']))
-                        elif tag['tagname'] == 'initscript':
-                            e = etree.SubElement(sliver_elem, '{%s}initscript' % self.namespaces['planetlab'], attrib={'name': tag['value']})
+                    node.remove(sliver_elem)
+                    
+                sliver_elem = etree.SubElement(node, 'sliver_type', name='plab-vnode')
+                for tag in sliver_info['tags']:
+                    if tag['tagname'] == 'flack_info':
+                        e = etree.SubElement(sliver_elem, '{%s}info' % self.namespaces['flack'], attrib=eval(tag['value']))
+                    elif tag['tagname'] == 'initscript':
+                        e = etree.SubElement(sliver_elem, '{%s}initscript' % self.namespaces['planetlab'], attrib={'name': tag['value']})
                             
                               
      
