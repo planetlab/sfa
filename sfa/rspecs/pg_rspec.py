@@ -32,7 +32,7 @@ pg_rspec_request_version = RSpecVersion(_request_version)
 class PGRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
-    template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" />'
+    template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/ext/planetlab/1" />'
 
     def __init__(self, rspec="", namespaces={}, type=None):
         if not type:
@@ -50,7 +50,8 @@ class PGRSpec(RSpec):
 
         if not namespaces:
             self.namespaces = {'rspecv2': self.version['namespace'],
-                               'flack': 'http://www.protogeni.net/resources/rspec/ext/flack/1' }
+                               'flack': 'http://www.protogeni.net/resources/rspec/ext/flack/1',
+                               'planetlab': 'http://www.planet-lab.org/resources/ext/planetlab/1' }
 
         else:
             self.namespaces = namespaces 
@@ -105,8 +106,10 @@ class PGRSpec(RSpec):
         return []
 
     def get_sliver_attributes(self, hostname, network=None):
+        from sfa.util.sfalogging import logger
+        logger.info("node: " + hostname)
         node = self.get_node_element(hostname, network)
-        sliver = node.xpath('//rspecv2:sliver_type', namespaces=self.namespaces)
+        sliver = node.xpath('./rspecv2:sliver_type', namespaces=self.namespaces)
         if sliver is not None and isinstance(sliver, list):
             sliver = sliver[0]
         return self.attributes_list(sliver)
@@ -120,12 +123,17 @@ class PGRSpec(RSpec):
             sliver_attributes = self.get_sliver_attributes(node, network)
             for sliver_attribute in sliver_attributes:
                 name=str(sliver_attribute[0]) 
-                value=str(sliver_attribute[1])
+                text =str(sliver_attribute[1])
+                attribs = sliver_attribute[2]
                 # we currently only suppor the <initscript> and <flack> attributes 
                 if  'info' in name:
-                    attribute = {'name': 'flack_info', 'value': str(sliver_attribute[2]), 'node_id': node}
+                    attribute = {'name': 'flack_info', 'value': str(attribs), 'node_id': node}
                     slice_attributes.append(attribute) 
                 elif 'initscript' in name: 
+                    if attribs is not None and 'name' in attribs:
+                        value = attribs['name']
+                    else:
+                        value = text
                     attribute = {'name': 'initscript', 'value': value, 'node_id': node}
                     slice_attributes.append(attribute) 
 
@@ -206,6 +214,9 @@ class PGRSpec(RSpec):
                     for tag in sliver_info['tags']:
                         if tag['tagname'] == 'flack_info':
                             e = etree.SubElement(sliver_elem, '{%s}info' % self.namespaces['flack'], attrib=eval(tag['value']))
+                        elif tag['tagname'] == 'initscript':
+                            e = etree.SubElement(sliver_elem, '{%s}initscript' % self.namespaces['planetlab'], attrib={'name': tag['value']})
+                            
                               
      
     def add_default_sliver_attribute(self, name, value, network=None):
