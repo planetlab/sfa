@@ -60,7 +60,7 @@ def determine_rights(type, name):
     elif type in ["sa", "authority+sa"]:
         rl.add("authority")
         rl.add("sa")
-    elif type in ["ma", "authority+ma", "cm", "authority+cm"]:
+    elif type in ["ma", "authority+ma", "cm", "authority+cm", "sm", "authority+sm"]:
         rl.add("authority")
         rl.add("ma")
     elif type == "authority":
@@ -273,7 +273,7 @@ class Rights:
         elif type in ["sa", "authority+sa"]:
             rl.add("authority")
             rl.add("sa")
-        elif type in ["ma", "authority+ma", "cm", "authority+cm"]:
+        elif type in ["ma", "authority+ma", "cm", "authority+cm", "sm", "authority+sm"]:
             rl.add("authority")
             rl.add("ma")
         elif type == "authority":
