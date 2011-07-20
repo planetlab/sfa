@@ -239,8 +239,8 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
 
     finally:
         if peer:
-            api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
-                                         slice.peer_id)
+            api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, 
+                                         slice['peer_id'])
 
     return aggregate.get_rspec(slice_xrn=slice_xrn, version=rspec.version)
 
