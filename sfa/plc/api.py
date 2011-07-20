@@ -188,7 +188,7 @@ class SfaAPI(BaseAPI):
             auth_hrn = hrn
         auth_info = self.auth.get_auth_info(auth_hrn)
         table = self.SfaTable()
-        records = table.findObjects(hrn)
+        records = table.findObjects({'hrn': hrn, 'type': 'authority+sa'})
         if not records:
             raise RecordNotFound
         record = records[0]
