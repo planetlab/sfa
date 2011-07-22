@@ -191,35 +191,26 @@ def getEucaConnection():
 # @param sliceHRN The hunman readable name of the slice.
 # @return sting()
 #
-def getKeysForSlice(sliceHRN):
-    try:
-        # convert hrn to slice name
-        plSliceName = hrn_to_pl_slicename(sliceHRN)
-    except IndexError, e:
-        print >>sys.stderr, 'Invalid slice name (%s)' % sliceHRN
+def getKeysForSlice(api, sliceHRN):
+    cred     = api.getCredential()
+    registry = api.registries[api.hrn]
+    keys     = []
+
+    # Get the slice record
+    records = registry.Resolve(sliceHRN, cred)
+    if not records:
+        print >>sys.stderr, 'Cannot find any record for slice %s' % sliceHRN
         return []
 
-    # Get the slice's information
-    sliceData = api.plshell.GetSlices(api.plauth, {'name':plSliceName})
-    if not sliceData:
-        print >>sys.stderr, 'Cannot get any data for slice %s' % plSliceName
-        return []
+    # Find who can log into this slice
+    persons = records[0]['persons']
 
-    # It should only return a list with len = 1
-    sliceData = sliceData[0]
+    # Extract the keys from persons records
+    for p in persons:
+        sliceUser = registry.Resolve(p, cred)
+        userKeys = sliceUser[0]['keys']
+        keys += userKeys
 
-    keys = []
-    person_ids = sliceData['person_ids']
-    if not person_ids: 
-        print >>sys.stderr, 'No users in slice %s' % sliceHRN
-        return []
-
-    persons = api.plshell.GetPersons(api.plauth, person_ids)
-    for person in persons:
-        pkeys = api.plshell.GetKeys(api.plauth, person['key_ids'])
-        for key in pkeys:
-            keys.append(key['key'])
- 
     return ''.join(keys)
 
 ##
@@ -545,7 +536,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     requests = rspecXML.findall(".//request")
     if requests:
         # Get all the public keys associate with slice.
-        pubKeys = getKeysForSlice(s.slice_hrn)
+        pubKeys = getKeysForSlice(api, s.slice_hrn)
         print >>sys.stderr, "Passing the following keys to the instance:\n%s" % pubKeys
         sys.stderr.flush()
     for req in requests:
@@ -599,7 +590,11 @@ def main():
 
     #rspec = ListResources('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy', 'test_euca')
     #print rspec
-    print getKeysForSlice('gc.gc.test1')
+
+    server_key_file = '/var/lib/sfa/authorities/server.key'
+    server_cert_file = '/var/lib/sfa/authorities/server.cert'
+    api = SfaAPI(key_file = server_key_file, cert_file = server_cert_file, interface='aggregate')
+    print getKeysForSlice(api, 'gc.gc.test1')
 
 if __name__ == "__main__":
     main()
