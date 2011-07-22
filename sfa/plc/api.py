@@ -111,16 +111,20 @@ class SfaAPI(BaseAPI):
         self.plauth = {'Username': self.config.SFA_PLC_USER,
                        'AuthMethod': 'password',
                        'AuthString': self.config.SFA_PLC_PASSWORD}
-        try:
-            sys.path.append(os.path.dirname(os.path.realpath("/usr/bin/plcsh")))
-            self.plshell_type = 'direct'
-            import PLC.Shell
-            shell = PLC.Shell.Shell(globals = globals())
-        except:
-            self.plshell_type = 'xmlrpc' 
-            url = self.config.SFA_PLC_URL
-            shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
+
+        # The native shell (PLC.Shell.Shell) is more efficient than xmlrpc,
+        # but it leaves idle db connections open. use xmlrpc until we can figure
+        # out why PLC.Shell.Shell doesn't close db connection properly     
+        #try:
+        #    sys.path.append(os.path.dirname(os.path.realpath("/usr/bin/plcsh")))
+        #    self.plshell_type = 'direct'
+        #    import PLC.Shell
+        #    shell = PLC.Shell.Shell(globals = globals())
+        #except:
         
+        self.plshell_type = 'xmlrpc' 
+        url = self.config.SFA_PLC_URL
+        shell = xmlrpclib.Server(url, verbose = 0, allow_none = True)
         return shell
 
     def getCredential(self):
