@@ -25,7 +25,7 @@ from sfa.util.sfalogging import sfa_logger
 from sfa.rspecs.sfa_rspec import sfa_rspec_version
 from sfa.util.version import version_core
 
-from threading import Thread
+from multiprocessing import Process
 from time import sleep
 
 ##
@@ -116,6 +116,7 @@ def init_server():
     fileHandler = logging.FileHandler('/var/log/euca.log')
     fileHandler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logger.addHandler(fileHandler)
+    fileHandler.setLevel(logging.DEBUG)
     logger.setLevel(logging.DEBUG)
 
     configParser = ConfigParser()
@@ -159,11 +160,11 @@ def init_server():
     sqlhub.processConnection = conn
     Slice.createTable(ifNotExists=True)
     EucaInstance.createTable(ifNotExists=True)
-    IP.createTable(ifNotExists=True)
+    Meta.createTable(ifNotExists=True)
 
-    # Start the update thread to keep track of the meta data
+    # Start the update process to keep track of the meta data
     # about Eucalyptus instance.
-    Thread(target=updateMeta).start()
+    Process(target=updateMeta).start()
 
     # Make sure the schema exists.
     if not os.path.exists(EUCALYPTUS_RSPEC_SCHEMA):
@@ -601,12 +602,18 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     return xml
 
 ##
-# A thread that will update the meta data.
+# A separate process that will update the meta data.
 #
 def updateMeta():
-    logger = logging.getLogger('EucaAggregate')
+    logger = logging.getLogger('EucaMeta')
+    fileHandler = logging.FileHandler('/var/log/euca_meta.log')
+    fileHandler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(fileHandler)
+    fileHandler.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
+
     while True:
-        sleep(120)
+        sleep(30)
 
         # Get IDs of the instances that don't have IPs yet.
         dbResults = Meta.select(
@@ -614,11 +621,11 @@ def updateMeta():
                           Meta.q.state    != 'deleted')
                     )
         dbResults = list(dbResults)
-        logger.debug('[update thread] dbResults: %s' % dbResults)
+        logger.debug('[update process] dbResults: %s' % dbResults)
         instids = []
         for r in dbResults:
             instids.append(r.instance.instance_id)
-        logger.debug('[update thread] Instance Id: %s' % ', '.join(instids))
+        logger.debug('[update process] Instance Id: %s' % ', '.join(instids))
 
         # Get instance information from Eucalyptus
         conn = getEucaConnection()
@@ -630,13 +637,13 @@ def updateMeta():
         # Check the IPs
         instIPs = [ {'id':i.id, 'pri_addr':i.private_dns_name, 'pub_addr':i.public_dns_name}
                     for i in vmInstances if i.private_dns_name != '0.0.0.0' ]
-        logger.debug('[update thread] IP dict: %s' % str(instIPs))
+        logger.debug('[update process] IP dict: %s' % str(instIPs))
 
         # Update the local DB
         for ipData in instIPs:
             dbInst = EucaInstance.select(EucaInstance.q.instance_id == ipData['id']).getOne(None)
             if not dbInst:
-                logger.info('[update thread] Could not find %s in DB' % ipData['id'])
+                logger.info('[update process] Could not find %s in DB' % ipData['id'])
                 continue
             dbInst.meta.pri_addr = ipData['pri_addr']
             dbInst.meta.pub_addr = ipData['pub_addr']
