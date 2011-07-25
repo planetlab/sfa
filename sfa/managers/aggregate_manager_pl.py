@@ -8,7 +8,7 @@ import re
 from types import StringTypes
 
 from sfa.util.faults import *
-from sfa.util.xrn import get_authority, hrn_to_urn, urn_to_hrn, Xrn
+from sfa.util.xrn import get_authority, hrn_to_urn, urn_to_hrn, Xrn, urn_to_sliver_id
 from sfa.util.plxrn import slicename_to_hrn, hrn_to_pl_slicename, hostname_to_urn
 from sfa.util.rspec import *
 from sfa.util.specdict import *
@@ -117,14 +117,14 @@ def SliverStatus(api, slice_xrn, creds, call_id):
     api.logger.info(hrn)
     slicename = hrn_to_pl_slicename(hrn)
     
-    slices = api.plshell.GetSlices(api.plauth, [slicename], ['node_ids','person_ids','name','expires'])
+    slices = api.plshell.GetSlices(api.plauth, [slicename], ['slice_id', 'node_ids','person_ids','name','expires'])
     if len(slices) == 0:        
         raise Exception("Slice %s not found (used %s as slicename internally)" % (slice_xrn, slicename))
     slice = slices[0]
     
     # report about the local nodes only
     nodes = api.plshell.GetNodes(api.plauth, {'node_id':slice['node_ids'],'peer_id':None},
-                                 ['hostname', 'site_id', 'boot_state', 'last_contact'])
+                                 ['node_id', 'hostname', 'site_id', 'boot_state', 'last_contact'])
     site_ids = [node['site_id'] for node in nodes]
     sites = api.plshell.GetSites(api.plauth, site_ids, ['site_id', 'login_base'])
     sites_dict = dict ( [ (site['site_id'],site['login_base'] ) for site in sites ] )
@@ -133,7 +133,8 @@ def SliverStatus(api, slice_xrn, creds, call_id):
     top_level_status = 'unknown'
     if nodes:
         top_level_status = 'ready'
-    result['geni_urn'] = Xrn(slice_xrn, 'slice').get_urn()
+    slice_urn = Xrn(slice_xrn, 'slice').get_urn()
+    result['geni_urn'] = slice_urn
     result['pl_login'] = slice['name']
     result['pl_expires'] = datetime.datetime.fromtimestamp(slice['expires']).ctime()
     
@@ -145,7 +146,8 @@ def SliverStatus(api, slice_xrn, creds, call_id):
         res['pl_last_contact'] = node['last_contact']
         if node['last_contact'] is not None:
             res['pl_last_contact'] = datetime.datetime.fromtimestamp(node['last_contact']).ctime()
-        res['geni_urn'] = hostname_to_urn(api.hrn, sites_dict[node['site_id']], node['hostname'])
+        sliver_id = urn_to_sliver_id(slice_urn, slice['slice_id'], node['node_id']) 
+        res['geni_urn'] = sliver_id
         if node['boot_state'] == 'boot':
             res['geni_status'] = 'ready'
         else:
@@ -212,9 +214,6 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
         else:
             existing_slice_attributes.append(slice_tag)  
          
-    #api.logger.debug("requested slice attributes: %s" % str(requested_slice_attributes))
-    #api.logger.debug("removed slice attributes: %s" % str(removed_slice_attributes))
-    #api.logger.debug("existing slice attributes: %s" % str(existing_slice_attributes))
     try:
         if peer:
             api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
@@ -240,8 +239,8 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
 
     finally:
         if peer:
-            api.plshell.BindObjectToPeer(api.plauth, 'slice', slice.id, peer, 
-                                         slice.peer_id)
+            api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, 
+                                         slice['peer_id'])
 
     return aggregate.get_rspec(slice_xrn=slice_xrn, version=rspec.version)
 

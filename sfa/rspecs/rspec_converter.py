@@ -17,7 +17,7 @@ class RSpecConverter:
         elif rspec.version['type'] == pg_rspec_ad_version['type']:
             return PGRSpecConverter.to_sfa_rspec(in_rspec)
         else:
-             return in_rspec 
+            return in_rspec 
 
     @staticmethod 
     def to_pg_rspec(in_rspec):

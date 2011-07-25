@@ -65,6 +65,7 @@ class SfaRSpec(RSpec):
 
         nodes = [node.strip() for node in nodes]
         return nodes     
+
     def get_nodes_without_slivers(self, network=None): 
         xpath_nodes_without_slivers = '//node[not(sliver)]/hostname/text()'
         xpath_nodes_without_slivers_in_network = '//network[@name="%s"]//node[not(sliver)]/hostname/text()' 
@@ -210,7 +211,7 @@ class SfaRSpec(RSpec):
                      
             node_tag = etree.SubElement(network_tag, 'node')
             if 'network' in node:
-                node_tag.set('component_manager_id', network)
+                node_tag.set('component_manager_id', hrn_to_urn(network, 'authority+sa'))
             if 'urn' in node:
                 node_tag.set('component_id', node['urn']) 
             if 'site_urn' in node:
@@ -316,15 +317,22 @@ class SfaRSpec(RSpec):
         Merge contents for specified rspec with current rspec 
         """
 
+        from sfa.rspecs.rspec_parser import parse_rspec
+        rspec = parse_rspec(in_rspec)
+        if rspec.type.lower() == 'protogeni':
+            from sfa.rspecs.rspec_converter import RSpecConverter
+            in_rspec = RSpecConverter.to_sfa_rspec(in_rspec)
+            
         # just copy over all networks
         current_networks = self.get_networks()
         rspec = SfaRSpec(rspec=in_rspec)
         networks = rspec.get_network_elements()
         for network in networks:
             current_network = network.get('name')
-            if not current_network in current_networks:
+            if current_network and current_network not in current_networks:
                 self.xml.append(network)
                 current_networks.append(current_network)
+            
         
          
 

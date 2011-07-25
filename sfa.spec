@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 26
+%define taglevel 27
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -196,6 +196,17 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Fri Jul 8 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-27
+- ProtoGENI v2 RSpec updates.
+- Convert expiration timestamps with timezone info in credentials to utc.
+- Fixed redundant logging issue. 
+- Improved SliceManager and SFI client logging.
+- Support aggregates that don't support the optional 'call_id' argument. 
+- Only call get_trusted_certs() at aggreage interfaces that support the call.
+- CreateSliver() now handles MyPLC slice attributes/tags.
+- Cache now supports persistence.
+- Hide whitelisted nodes.
+
 * Tue Jun 21 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-26
 - fixed issues with sup authority signing
 - fixed bugs in remove_slivers and SliverStatus

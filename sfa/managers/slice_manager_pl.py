@@ -44,7 +44,7 @@ def _call_id_supported(api, server):
         code_tag_parts = code_tag.split("-")
 
         version_parts = code_tag_parts[0].split(".")
-        major, minor = version_parts[0], version_parts[1]
+        major, minor = version_parts[0:2]
         rev = code_tag_parts[1]
         if int(major) > 1:
             if int(minor) > 0 or int(rev) > 20:
@@ -84,10 +84,16 @@ def GetVersion(api):
 
 
 def ListResources(api, creds, options, call_id):
-    def _ListResources(server, credential, my_opts, call_id):
+    def _ListResources(server, credential, opts, call_id):
+        
+        my_opts = copy(opts)
         args = [credential, my_opts]
         if _call_id_supported(api, server):
             args.append(call_id)
+        version = api.get_cached_server_version(server)
+        # force ProtoGENI aggregates to give us a v2 RSpec
+        if 'sfa' not in version.keys():
+            my_opts['rspec_version'] = pg_rspec_ad_version 
         try:
             return server.ListResources(*args)
         except Exception, e:
@@ -98,11 +104,9 @@ def ListResources(api, creds, options, call_id):
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', '')
     (hrn, type) = urn_to_hrn(xrn)
-    my_opts = copy(options)
-    my_opts['geni_compressed'] = False
-    if 'rspec_version' in my_opts:
-        del my_opts['rspec_version']
-
+    if 'geni_compressed' in options:
+        del(options['geni_compressed'])
+    
     # get the rspec's return format from options
     rspec_version = RSpecVersion(options.get('rspec_version'))
     version_string = "rspec_%s" % (rspec_version.get_version_name())
@@ -128,13 +132,13 @@ def ListResources(api, creds, options, call_id):
         # unless the caller is the aggregate's SM
         if caller_hrn == aggregate and aggregate != api.hrn:
             continue
+
         # get the rspec from the aggregate
         server = api.aggregates[aggregate]
-        #threads.run(server.ListResources, credentials, my_opts, call_id)
-        threads.run(_ListResources, server, credentials, my_opts, call_id)
+        threads.run(_ListResources, server, credentials, options, call_id)
 
     results = threads.get_results()
-    rspec_version = RSpecVersion(my_opts.get('rspec_version'))
+    rspec_version = RSpecVersion(options.get('rspec_version'))
     if rspec_version['type'] == pg_rspec_ad_version['type']:
         rspec = PGRSpec()
     else:
@@ -143,7 +147,7 @@ def ListResources(api, creds, options, call_id):
         try:
             rspec.merge(result)
         except:
-            api.logger.info("SM.ListResources: Failed to merge aggregate rspec")
+            api.logger.log_exc("SM.ListResources: Failed to merge aggregate rspec")
 
     # cache the result
     if caching and api.cache and not xrn:
@@ -159,19 +163,16 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
             # Need to call GetVersion at an aggregate to determine the supported 
             # rspec type/format beofre calling CreateSliver at an Aggregate. 
             server_version = api.get_cached_server_version(server)    
-            if 'sfa' not in aggregate_version and 'geni_api' in aggregate_version:
+            if 'sfa' not in server_version and 'geni_api' in server_version:
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. otherwise convert to pg rspec
                 rspec = RSpecConverter.to_pg_rspec(rspec)
             args = [xrn, credential, rspec, users]
             if _call_id_supported(api, server):
                 args.append(call_id)
-            try:
-                return server.CreateSliver(*args)
-            except Exception, e:
-                api.logger.warn("CreateSliver failed at %s: %s" %(server.url, str(e)))
+            return server.CreateSliver(*args)
         except: 
-            logger.log_exc('Something wrong in _CreateSliver')
+            logger.log_exc('Something wrong in _CreateSliver with URL %s'%server.url)
 
     if Callids().already_handled(call_id): return ""
     # Validate the RSpec against PlanetLab's schema --disabled for now
@@ -209,7 +210,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
     def _RenewSliver(server, xrn, creds, expiration_time, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(server)
         args =  [xrn, creds, expiration_time, call_id]
         if _call_id_supported(api, server):
             args.append(call_id)
@@ -239,7 +240,7 @@ def RenewSliver(api, xrn, creds, expiration_time, call_id):
 
 def DeleteSliver(api, xrn, creds, call_id):
     def _DeleteSliver(server, xrn, creds, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(server)
         args =  [xrn, creds]
         if _call_id_supported(api, server):
             args.append(call_id)
@@ -270,7 +271,7 @@ def DeleteSliver(api, xrn, creds, call_id):
 # first draft at a merging SliverStatus
 def SliverStatus(api, slice_xrn, creds, call_id):
     def _SliverStatus(server, xrn, creds, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(server)
         args =  [xrn, creds]
         if _call_id_supported(api, server):
             args.append(call_id)
@@ -312,7 +313,7 @@ caching=True
 #caching=False
 def ListSlices(api, creds, call_id):
     def _ListSlices(server, creds, call_id):
-        server_version = _get_server_version(api, server)
+        server_version = api.get_cached_server_version(api, server)
         args =  [creds]
         if _call_id_supported(api, server):
             args.append(call_id)

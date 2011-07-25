@@ -28,7 +28,16 @@ class _SfaLogger:
             # This is usually a permissions error becaue the file is
             # owned by root, but httpd is trying to access it.
             tmplogfile=os.getenv("TMPDIR", "/tmp") + os.path.sep + os.path.basename(logfile)
-            handler=logging.handlers.RotatingFileHandler(tmplogfile,maxBytes=1000000, backupCount=5) 
+            # In strange uses, 2 users on same machine might use same code,
+            # meaning they would clobber each others files
+            # We could (a) rename the tmplogfile, or (b)
+            # just log to the console in that case.
+            # Here we default to the console.
+            if os.path.exists(tmplogfile) and not os.access(tmplogfile,os.W_OK):
+                loggername = loggername + "-console"
+                handler = logging.StreamHandler()
+            else:
+                handler=logging.handlers.RotatingFileHandler(tmplogfile,maxBytes=1000000, backupCount=5) 
         handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.logger=logging.getLogger(loggername)
         self.logger.setLevel(level)
@@ -71,6 +80,10 @@ class _SfaLogger:
         
     def warn(self, msg):
         self.logger.warn(msg)
+
+    # some code is using logger.warn(), some is using logger.warning()
+    def warning(self, msg):
+        self.logger.warning(msg)
    
     def error(self, msg):
         self.logger.error(msg)    

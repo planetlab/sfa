@@ -2,6 +2,7 @@ import threading
 import traceback
 import time
 from Queue import Queue
+from sfa.util.sfalogging import logger
 
 def ThreadedMethod(callable, results, errors):
     """
@@ -15,6 +16,7 @@ def ThreadedMethod(callable, results, errors):
                 try:
                     results.put(callable(*args, **kwds))
                 except Exception, e:
+                    logger.log_exc('ThreadManager: Error in thread: ')
                     errors.put(traceback.format_exc())
                     
         thread = ThreadInstance()

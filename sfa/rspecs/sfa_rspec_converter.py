@@ -45,7 +45,7 @@ class SfaRSpecConverter:
                 location = sfa_node_element.find('location')
                 if location != None:
                     location_attrs = {}      
-                    location_attrs['country'] = locatiton.get('country', 'unknown')
+                    location_attrs['country'] =  location.get('country', 'unknown')
                     location_attrs['latitude'] = location.get('latitiue', 'None')
                     location_attrs['longitude'] = location.get('longitude', 'None')
                     pg_rspec.add_element('location', location_attrs, parent=node_element)

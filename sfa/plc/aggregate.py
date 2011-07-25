@@ -13,6 +13,7 @@ class Aggregate:
     interfaces = {}
     links = {}
     node_tags = {}
+    pl_initscripts = {} 
     prepared=False
     #panos new user options variable
     user_options = {}
@@ -45,6 +46,11 @@ class Aggregate:
             for node_tag in self.api.plshell.GetNodeTags(self.api.plauth):
                 self.node_tags[node_tag['node_tag_id']] = node_tag
 
+    def prepare_pl_initscripts(self, force=False):
+        if not self.pl_initscripts or force:
+            for initscript in self.api.plshell.GetInitScripts(self.api.plauth, {'enabled': True}):
+                self.pl_initscripts[initscript['initscript_id']] = initscript
+
     def prepare(self, force=False):
         if not self.prepared or force:
             self.prepare_sites(force)
@@ -52,6 +58,7 @@ class Aggregate:
             self.prepare_interfaces(force)
             self.prepare_links(force)
             self.prepare_node_tags(force)
+            self.prepare_pl_initscripts()
             # add site/interface info to nodes
             for node_id in self.nodes:
                 node = self.nodes[node_id]
@@ -83,24 +90,40 @@ class Aggregate:
         else:
             rspec = SfaRSpec(type=type, user_options=self.user_options)
 
-
-        rspec.add_nodes(self.nodes.values())
-        rspec.add_interfaces(self.interfaces.values()) 
-        rspec.add_links(self.links.values())
-
+        # get slice details if specified
+        slice = None
         if slice_xrn:
-            # If slicename is specified then resulting rspec is a manifest. 
-            # Add sliver details to rspec and remove 'advertisement' elements
             slice_hrn, _ = urn_to_hrn(slice_xrn)
             slice_name = hrn_to_pl_slicename(slice_hrn)
             slices = self.api.plshell.GetSlices(self.api.plauth, slice_name)
             if slices:
-                slice = slices[0]
-                slivers = []
-                tags = self.api.plshell.GetSliceTags(self.api.plauth, slice['slice_tag_ids'])
-                for node_id in slice['node_ids']:
+                slice = slices[0]            
+
+        # filter out nodes with a whitelist:
+        valid_nodes = [] 
+        for node in self.nodes.values():
+            # only doing this becuase protogeni rspec needs
+            # to advertise available initscripts 
+            node['pl_initscripts'] = self.pl_initscripts
+            if not node['slice_ids_whitelist']:
+                valid_nodes.append(node)
+            elif slice and slice['slice_id'] in node['slice_ids_whitelist']:
+                valid_nodes.append(node)
+    
+        rspec.add_nodes(valid_nodes)
+        rspec.add_interfaces(self.interfaces.values()) 
+        rspec.add_links(self.links.values())
+
+        # add slivers
+        if slice_xrn and slice:
+            slivers = []
+            tags = self.api.plshell.GetSliceTags(self.api.plauth, slice['slice_tag_ids'])
+            for node_id in slice['node_ids']:
+                try:
                     sliver = {}
                     sliver['hostname'] = self.nodes[node_id]['hostname']
+                    sliver['node_id'] = node_id
+                    sliver['slice_id'] = slice['slice_id']    
                     sliver['tags'] = []
                     slivers.append(sliver)
                     for tag in tags:
@@ -112,6 +135,8 @@ class Aggregate:
                             tag_host = self.nodes[tag['node_id']]['hostname']
                             if tag_host == sliver['hostname']:
                                 sliver['tags'].append(tag)
-                rspec.add_slivers(slivers, sliver_urn=slice_xrn)
+                except:
+                    self.api.logger.log_exc('unable to add sliver %s to node %s' % (slice['name'], node_id)) 
+            rspec.add_slivers(slivers, sliver_urn=slice_xrn)
 
         return rspec.toxml(cleanup=True)          

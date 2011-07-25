@@ -39,7 +39,7 @@ from sfa.util.sfalogging import logger
 from sfa.util.sfatime import utcparse
 from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
-from sfa.trust.rights import Right, Rights
+from sfa.trust.rights import Right, Rights, determine_rights
 from sfa.trust.gid import GID
 from sfa.util.xrn import urn_to_hrn
 
@@ -662,7 +662,7 @@ class Credential(object):
                 # Convert * into the default privileges for the credential's type
                 # Each inherits the delegatability from the * above
                 _ , type = urn_to_hrn(self.gidObject.get_urn())
-                rl = rlist.determine_rights(type, self.gidObject.get_urn())
+                rl = determine_rights(type, self.gidObject.get_urn())
                 for r in rl.rights:
                     r.delegate = deleg
                     rlist.add(r)
@@ -965,6 +965,6 @@ class Credential(object):
 
         if self.parent and dump_parents:
             result += "\nPARENT"
-            result += self.parent.dump(True)
+            result += self.parent.dump_string(True)
 
         return result

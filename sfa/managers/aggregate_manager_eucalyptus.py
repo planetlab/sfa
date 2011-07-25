@@ -14,13 +14,16 @@ from lxml import etree as ET
 from sqlobject import *
 
 from sfa.util.faults import *
-from sfa.util.xrn import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn, Xrn
 from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.trust.credential import Credential
 from sfa.plc.api import SfaAPI
 from sfa.util.plxrn import hrn_to_pl_slicename, slicename_to_hrn
 from sfa.util.callids import Callids
+from sfa.util.sfalogging import sfa_logger
+from sfa.rspecs.sfa_rspec import sfa_rspec_version
+from sfa.util.version import version_core
 
 from threading import Thread
 from time import sleep
@@ -215,36 +218,27 @@ def getEucaConnection():
 # @param sliceHRN The hunman readable name of the slice.
 # @return sting()
 #
-def getKeysForSlice(sliceHRN):
-    logger = logging.getLogger('EucaAggregate')
-    try:
-        # convert hrn to slice name
-        plSliceName = hrn_to_pl_slicename(sliceHRN)
-    except IndexError, e:
-        logger.error('Invalid slice name (%s)' % sliceHRN)
+def getKeysForSlice(api, sliceHRN):
+    logger   = logging.getLogger('EucaAggregate')
+    cred     = api.getCredential()
+    registry = api.registries[api.hrn]
+    keys     = []
+
+    # Get the slice record
+    records = registry.Resolve(sliceHRN, cred)
+    if not records:
+        logging.warn('Cannot find any record for slice %s' % sliceHRN)
         return []
 
-    # Get the slice's information
-    sliceData = api.plshell.GetSlices(api.plauth, {'name':plSliceName})
-    if not sliceData:
-        logger.warn('Cannot get any data for slice %s' % plSliceName)
-        return []
+    # Find who can log into this slice
+    persons = records[0]['persons']
 
-    # It should only return a list with len = 1
-    sliceData = sliceData[0]
+    # Extract the keys from persons records
+    for p in persons:
+        sliceUser = registry.Resolve(p, cred)
+        userKeys = sliceUser[0]['keys']
+        keys += userKeys
 
-    keys = []
-    person_ids = sliceData['person_ids']
-    if not person_ids: 
-        logger.warn('No users in slice %s' % sliceHRN)
-        return []
-
-    persons = api.plshell.GetPersons(api.plauth, person_ids)
-    for person in persons:
-        pkeys = api.plshell.GetKeys(api.plauth, person['key_ids'])
-        for key in pkeys:
-            keys.append(key['key'])
- 
     return ''.join(keys)
 
 ##
@@ -434,7 +428,8 @@ def ListResources(api, creds, options, call_id):
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
     if not origin_hrn:
-        origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
+        origin_hrn = Credential(string=creds).get_gid_caller().get_hrn()
+        # origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
 
     conn = getEucaConnection()
 
@@ -536,6 +531,11 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     schemaXML = ET.parse(EUCALYPTUS_RSPEC_SCHEMA)
     rspecValidator = ET.RelaxNG(schemaXML)
     rspecXML = ET.XML(xml)
+    for network in rspecXML.iterfind("./network"):
+        if network.get('id') != cloud['name']:
+            # Throw away everything except my own RSpec
+            # sfa_logger().error("CreateSliver: deleting %s from rspec"%network.get('id'))
+            network.getparent().remove(network)
     if not rspecValidator(rspecXML):
         error = rspecValidator.error_log.last_error
         message = '%s (line %s)' % (error.message, error.line) 
@@ -552,7 +552,7 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     pendingRmInst = []
     for sliceInst in s.instances:
         pendingRmInst.append(sliceInst.instance_id)
-    existingInstGroup = rspecXML.findall('.//euca_instances')
+    existingInstGroup = rspecXML.findall(".//euca_instances")
     for instGroup in existingInstGroup:
         for existingInst in instGroup:
             if existingInst.get('id') in pendingRmInst:
@@ -566,10 +566,10 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     conn.terminate_instances(pendingRmInst)
 
     # Process new instance requests
-    requests = rspecXML.findall('.//request')
+    requests = rspecXML.findall(".//request")
     if requests:
         # Get all the public keys associate with slice.
-        pubKeys = getKeysForSlice(s.slice_hrn)
+        pubKeys = getKeysForSlice(api, s.slice_hrn)
         logger.debug('Passing the following keys to the instance:\n%s' % pubKeys)
     for req in requests:
         vmTypeElement = req.getparent()
@@ -642,6 +642,19 @@ def updateMeta():
             dbInst.meta.pub_addr = ipData['pub_addr']
             dbInst.meta.state    = 'running'
 
+def GetVersion(api):
+    xrn=Xrn(api.hrn)
+    request_rspec_versions = [dict(sfa_rspec_version)]
+    ad_rspec_versions = [dict(sfa_rspec_version)]
+    version_more = {'interface':'aggregate',
+                    'testbed':'myplc',
+                    'hrn':xrn.get_hrn(),
+                    'request_rspec_versions': request_rspec_versions,
+                    'ad_rspec_versions': ad_rspec_versions,
+                    'default_ad_rspec': dict(sfa_rspec_version)
+                    }
+    return version_core(version_more)
+
 def main():
     init_server()
 
@@ -652,7 +665,11 @@ def main():
 
     #rspec = ListResources('euca', 'planetcloud.pc.test', 'planetcloud.pc.marcoy', 'test_euca')
     #print rspec
-    print getKeysForSlice('gc.gc.test1')
+
+    server_key_file = '/var/lib/sfa/authorities/server.key'
+    server_cert_file = '/var/lib/sfa/authorities/server.cert'
+    api = SfaAPI(key_file = server_key_file, cert_file = server_cert_file, interface='aggregate')
+    print getKeysForSlice(api, 'gc.gc.test1')
 
 if __name__ == "__main__":
     main()
