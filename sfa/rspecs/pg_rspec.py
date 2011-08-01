@@ -141,7 +141,7 @@ class PGRSpec(RSpec):
         opts = []
         if elem is not None:
             for e in elem:
-                opts.append((e.tag, e.text, e.attrib))
+                opts.append((e.tag, str(e.text).strip(), e.attrib))
         return opts
 
     def get_default_sliver_attributes(self, network=None):
