@@ -193,7 +193,12 @@ class SfaRSpec(RSpec):
     ##################
 
     def add_network(self, network):
-        network_tag = etree.SubElement(self.xml, 'network', id=network)     
+        network_tags = self.xml.xpath('//network[@name="%s"]' % network)
+        if not network_tags:            
+            network_tag = etree.SubElement(self.xml, 'network', name=network)
+        else:
+            network_tag = network_tags[0]
+        return network_tag     
 
     def add_nodes(self, nodes, network = None, no_dupes=False):
         if not isinstance(nodes, list):
@@ -207,12 +212,8 @@ class SfaRSpec(RSpec):
             network_tag = self.xml
             if 'network' in node:
                 network = node['network']
-                network_tags = self.xml.xpath('//network[@name="%s"]' % network)
-                if not network_tags:
-                    network_tag = etree.SubElement(self.xml, 'network', name=network)
-                else:
-                    network_tag = network_tags[0]
-                     
+                network_tag = self.add_network(network)
+     
             node_tag = etree.SubElement(network_tag, 'node')
             if 'network' in node:
                 node_tag.set('component_manager_id', hrn_to_urn(network, 'authority+sa'))
@@ -247,6 +248,11 @@ class SfaRSpec(RSpec):
         pass
     
     def add_slivers(self, slivers, network=None, sliver_urn=None, no_dupes=False):
+        # add slice name to network tag
+        network_tags = self.xml.xpath('//network')
+        if network_tags:
+            network_tag = network_tags[0]
+            network_tag.set('slice', urn_to_hrn(sliver_urn)[0])
         slivers = self._process_slivers(slivers)
         nodes_with_slivers = self.get_nodes_with_slivers(network)
         for sliver in slivers:
