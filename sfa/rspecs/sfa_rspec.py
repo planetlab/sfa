@@ -38,7 +38,7 @@ class SfaRSpec(RSpec):
         else:
             names = self.xml.xpath('//node/hostname')
         for name in names:
-            if name.text == hostname:
+            if str(name.text).strip() == hostname:
                 return name.getparent()
         return None
  
@@ -81,7 +81,7 @@ class SfaRSpec(RSpec):
         opts = []
         if elem is not None:
             for e in elem:
-                opts.append((e.tag, e.text))
+                opts.append((e.tag, str(e.text).strip()))
         return opts
 
     def get_default_sliver_attributes(self, network=None):
@@ -94,9 +94,13 @@ class SfaRSpec(RSpec):
         return self.attributes_list(defaults)
 
     def get_sliver_attributes(self, hostname, network=None):
+        attributes = [] 
         node = self.get_node_element(hostname, network)
-        sliver = node.find("sliver")
-        return self.attributes_list(sliver)
+        #sliver = node.find("sliver")
+        slivers = node.xpath('./sliver')
+        if isinstance(slivers, list) and slivers:
+            attributes = self.attributes_list(slivers[0])
+        return attributes
 
     def get_slice_attributes(self, network=None):
         slice_attributes = []
