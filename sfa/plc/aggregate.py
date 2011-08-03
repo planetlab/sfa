@@ -118,6 +118,14 @@ class Aggregate:
         if slice_xrn and slice:
             slivers = []
             tags = self.api.plshell.GetSliceTags(self.api.plauth, slice['slice_tag_ids'])
+
+            # add default tags
+            for tag in tags:
+                # if tag isn't bound to a node then it applies to all slivers
+                # and belongs in the <sliver_defaults> tag
+                if not tag['node_id']:
+                    rspec.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
+
             for node_id in slice['node_ids']:
                 try:
                     sliver = {}
@@ -126,17 +134,13 @@ class Aggregate:
                     sliver['slice_id'] = slice['slice_id']    
                     sliver['tags'] = []
                     slivers.append(sliver)
+
+                    # add tags for this node only
                     for tag in tags:
-                        # if tag isn't bound to a node then it applies to all slivers
-                        # and belongs in the <sliver_defaults> tag
-                        if not tag['node_id']:
-                            rspec.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
-                        else:
-                            tag_host = self.nodes[tag['node_id']]['hostname']
-                            if tag_host == sliver['hostname']:
-                                sliver['tags'].append(tag)
+                        if tag['node_id'] and (tag['node_id'] == node_id):
+                            sliver['tags'].append(tag)
                 except:
-                    self.api.logger.log_exc('unable to add sliver %s to node %s' % (slice['name'], node_id)) 
+                    self.api.logger.log_exc('unable to add sliver %s to node %s' % (slice['name'], node_id))
             rspec.add_slivers(slivers, sliver_urn=slice_xrn)
 
-        return rspec.toxml(cleanup=True)          
+        return rspec.toxml(cleanup=True)
