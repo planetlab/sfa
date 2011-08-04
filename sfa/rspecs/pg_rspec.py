@@ -190,12 +190,13 @@ class PGRSpec(RSpec):
 
     def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
 
-        # all nodes hould already be present in the rspec. Remove all 
+        # all nodes hould already be present in the rspec. Remove all
         # nodes that done have slivers
         slivers = self._process_slivers(slivers)
         slivers_dict = {}
         for sliver in slivers:
             slivers_dict[sliver['hostname']] = sliver
+    
         nodes = self.get_node_elements()
         for node in nodes:
             urn = node.get('component_id')
