@@ -46,9 +46,14 @@ class XMLRPCTransport(xmlrpclib.Transport):
         # host may be a string, or a (host, x509-dict) tuple
         host, extra_headers, x509 = self.get_host_info(host)
         if need_HTTPSConnection:
-            return HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
+            conn = HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
         else:
-            return HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
+            conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
+
+        if hasattr(conn, 'set_timeout'):
+            conn.set_timeout(self.timeout)
+
+        return conn
 
     def getparser(self):
         unmarshaller = ExceptionUnmarshaller()
