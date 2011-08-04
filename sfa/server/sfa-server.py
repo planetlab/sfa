@@ -194,7 +194,7 @@ def install_peer_certs(server_key_file, server_cert_file):
         try:
             # get gid from the registry
             url = interfaces[new_hrn]['url']
-            interface = xmlrpcprotocol.get_server(url, server_key_file, server_cert_file)
+            interface = xmlrpcprotocol.get_server(url, server_key_file, server_cert_file, timeout=30)
             # skip non sfa aggregates
             server_version = api.get_cached_server_version(interface)
             if 'sfa' not in server_version:

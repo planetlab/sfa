@@ -62,6 +62,7 @@ class Interface:
             pass
         options=DummyOptions()
         options.verbose=False
+        options.timeout=30
         try:
             client=Sfi(options)
             client.read_config()
@@ -69,7 +70,7 @@ class Interface:
             cert_file = client.get_cert_file(key_file)
             url=self.url()
             logger.info('issuing get version at %s'%url)
-            server=xmlrpcprotocol.get_server(url, key_file, cert_file, options)
+            server=xmlrpcprotocol.get_server(url, key_file, cert_file, timeout=options.timeout, verbose=options.verbose)
             self._version=server.GetVersion()
         except:
 #            traceback.print_exc()

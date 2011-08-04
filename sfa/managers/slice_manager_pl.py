@@ -394,7 +394,7 @@ def get_ticket(api, xrn, creds, rspec, users):
                     continue
                 # send the request to this address 
                 url = target_aggs[0]['url']
-                server = xmlrpcprotocol.get_server(url, api.key_file, api.cert_file)
+                server = xmlrpcprotocol.get_server(url, api.key_file, api.cert_file, timeout=30)
                 # aggregate found, no need to keep looping
                 break   
         if server is None:

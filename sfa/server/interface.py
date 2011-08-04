@@ -99,6 +99,6 @@ class Interfaces(dict):
                 client_type = 'geniclientlight'
                 connections[hrn] = GeniClientLight(url, self.api.key_file, self.api.cert_file) 
             else:
-                connections[interface['hrn']] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file)
+                connections[interface['hrn']] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file, timeout=30)
 
         return connections 

@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 27
+%define taglevel 28
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -196,6 +196,16 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Thu Aug 4 2001 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-28
+- Resolved issue that caused sfa hold onto idle db connections.
+- Fix bug that caused the registry to use the wrong type of credential.
+- Support authority+sm type.
+- Fix rspec merging bugs.
+- Only load certs that have .gid extension from /etc/sfa/trusted_roots/
+- Created a 'planetlab' extension to the ProtoGENI v2 rspec for supporting 
+ planetlab hosted initscripts using the <planetlab:initscript> tag  
+- Can now handle extraneous whitespace in the rspec without failing.   
+ 
 * Fri Jul 8 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-27
 - ProtoGENI v2 RSpec updates.
 - Convert expiration timestamps with timezone info in credentials to utc.
