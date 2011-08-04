@@ -31,9 +31,11 @@ class ThreadManager:
     ThreadManager executes a callable in a thread and stores the result
     in a thread safe queue. 
     """
-    results = Queue()
-    errors = Queue()
-    threads = []
+
+    def __init__(self):
+        self.results = Queue()
+        self.errors = Queue()
+        self.threads = []
 
     def run (self, method, *args, **kwds):
         """
