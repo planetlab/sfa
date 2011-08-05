@@ -32,7 +32,7 @@ pg_rspec_request_version = RSpecVersion(_request_version)
 class PGRSpec(RSpec):
     xml = None
     header = '<?xml version="1.0"?>\n'
-    template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/ext/planetlab/1" />'
+    template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%(rspec_type)s.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" />'
 
     def __init__(self, rspec="", namespaces={}, type=None):
         if not type:
@@ -51,7 +51,7 @@ class PGRSpec(RSpec):
         if not namespaces:
             self.namespaces = {'rspecv2': self.version['namespace'],
                                'flack': 'http://www.protogeni.net/resources/rspec/ext/flack/1',
-                               'planetlab': 'http://www.planet-lab.org/resources/ext/planetlab/1' }
+                               'planetlab': 'http://www.planet-lab.org/resources/sfa/ext/planetlab/1' }
 
         else:
             self.namespaces = namespaces 
