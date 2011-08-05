@@ -423,9 +423,11 @@ class Credential(object):
 # But it's kind of odd for PL to use PG schemas that talk
 # about tickets, and the PG CM policies.
 # Note the careful addition of attributes from the parent below...
-#        signed_cred.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        signed_cred.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
 #        signed_cred.setAttribute("xsinoNamespaceSchemaLocation", "http://www.protogeni.net/resources/credential/credential.xsd")
 #        signed_cred.setAttribute("xsi:schemaLocation", "http://www.protogeni.net/resources/credential/ext/policy/1 http://www.protogeni.net/resources/credential/ext/policy/1/policy.xsd")
+        signed_cred.setAttribute("xsinoNamespaceSchemaLocation", "http://www.planet-lab.org/resources/sfa/credential.xsd")
+        signed_cred.setAttribute("xsi:schemaLocation", "http://www.planet-lab.org/resources/sfa/ext/policy/1 http://www.planet-lab.org/resources/sfa/ext/policy.xsd")
 
         doc.appendChild(signed_cred)  
         
