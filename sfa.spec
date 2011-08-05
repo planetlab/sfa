@@ -196,7 +196,7 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
-* Thu Aug 4 2001 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-28
+* Thu Aug 4 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-28
 - Resolved issue that caused sfa hold onto idle db connections.
 - Fix bug that caused the registry to use the wrong type of credential.
 - Support authority+sm type.
