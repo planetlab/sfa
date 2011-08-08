@@ -32,7 +32,13 @@ import datetime
 from StringIO import StringIO
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
-from lxml import etree
+
+HAVELXML = False
+try:
+    from lxml import etree
+    HAVELXML = True
+except:
+    pass
 
 from sfa.util.faults import *
 from sfa.util.sfalogging import logger
@@ -348,7 +354,7 @@ class Credential(object):
     # Expiration: an absolute UTC time of expiration (as either an int or string or datetime)
     # 
     def set_expiration(self, expiration):
-        if isinstance(expiration, (int,float)):
+        if isinstance(expiration, (int, float)):
             self.expiration = datetime.datetime.fromtimestamp(expiration)
         elif isinstance (expiration, datetime.datetime):
             self.expiration = expiration
@@ -357,9 +363,10 @@ class Credential(object):
         else:
             logger.error ("unexpected input type in Credential.set_expiration")
 
+
     ##
     # get the lifetime of the credential (always in datetime format)
-    #
+
     def get_expiration(self):
         if not self.expiration:
             self.decode()
@@ -419,15 +426,19 @@ class Credential(object):
         doc = Document()
         signed_cred = doc.createElement("signed-credential")
 
-# PG adds these. It would be nice to be consistent.
-# But it's kind of odd for PL to use PG schemas that talk
-# about tickets, and the PG CM policies.
-# Note the careful addition of attributes from the parent below...
+# Declare namespaces
+# Note that credential/policy.xsd are really the PG schemas
+# in a PL namespace.
+# Note that delegation of credentials between the 2 only really works
+# cause those schemas are identical.
+# Also note these PG schemas talk about PG tickets and CM policies.
         signed_cred.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-#        signed_cred.setAttribute("xsinoNamespaceSchemaLocation", "http://www.protogeni.net/resources/credential/credential.xsd")
-#        signed_cred.setAttribute("xsi:schemaLocation", "http://www.protogeni.net/resources/credential/ext/policy/1 http://www.protogeni.net/resources/credential/ext/policy/1/policy.xsd")
         signed_cred.setAttribute("xsi:noNamespaceSchemaLocation", "http://www.planet-lab.org/resources/sfa/credential.xsd")
-        signed_cred.setAttribute("xsi:schemaLocation", "http://www.planet-lab.org/resources/sfa/ext/policy/1 http://www.planet-lab.org/resources/sfa/ext/policy.xsd")
+        signed_cred.setAttribute("xsi:schemaLocation", "http://www.planet-lab.org/resources/sfa/ext/policy/1 http://www.planet-lab.org/resources/sfa/ext/policy/1/policy.xsd")
+
+# PG says for those last 2:
+#        signed_cred.setAttribute("xsi:noNamespaceSchemaLocation", "http://www.protogeni.net/resources/credential/credential.xsd")
+#        signed_cred.setAttribute("xsi:schemaLocation", "http://www.protogeni.net/resources/credential/ext/policy/1 http://www.protogeni.net/resources/credential/ext/policy/1/policy.xsd")
 
         doc.appendChild(signed_cred)  
         
@@ -463,13 +474,34 @@ class Credential(object):
             # If the root node is a signed-credential (it should be), then
             # get all its attributes and attach those to our signed_cred
             # node.
-            # Specifically, PG adds attributes for namespaces (which is reasonable),
+            # Specifically, PG and PLadd attributes for namespaces (which is reasonable),
             # and we need to include those again here or else their signature
             # no longer matches on the credential.
             # We expect three of these, but here we copy them all:
 #        signed_cred.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-#        signed_cred.setAttribute("xsinoNamespaceSchemaLocation", "http://www.protogeni.net/resources/credential/credential.xsd")
+# and from PG (PL is equivalent, as shown above):
+#        signed_cred.setAttribute("xsi:noNamespaceSchemaLocation", "http://www.protogeni.net/resources/credential/credential.xsd")
 #        signed_cred.setAttribute("xsi:schemaLocation", "http://www.protogeni.net/resources/credential/ext/policy/1 http://www.protogeni.net/resources/credential/ext/policy/1/policy.xsd")
+
+            # HOWEVER!
+            # PL now also declares these, with different URLs, so
+            # the code notices those attributes already existed with
+            # different values, and complains.
+            # This happens regularly on delegation now that PG and
+            # PL both declare the namespace with different URLs.
+            # If the content ever differs this is a problem,
+            # but for now it works - different URLs (values in the attributes)
+            # but the same actual schema, so using the PG schema
+            # on delegated-to-PL credentials works fine.
+
+            # Note: you could also not copy attributes
+            # which already exist. It appears that both PG and PL
+            # will actually validate a slicecred with a parent
+            # signed using PG namespaces and a child signed with PL
+            # namespaces over the whole thing. But I don't know
+            # if that is a bug in xmlsec1, an accident since
+            # the contents of the schemas are the same,
+            # or something else, but it seems odd. And this works.
             parentRoot = sdoc.documentElement
             if parentRoot.tagName == "signed-credential" and parentRoot.hasAttributes():
                 for attrIx in range(0, parentRoot.attributes.length):
@@ -479,9 +511,9 @@ class Credential(object):
                     # Below throws InUse exception if we forgot to clone the attribute first
                     oldAttr = signed_cred.setAttributeNode(attr.cloneNode(True))
                     if oldAttr and oldAttr.value != attr.value:
-                        msg = "Delegating cred from owner %s to %s over %s replaced attribute %s value %s with %s" % (self.parent.gidCaller.get_urn(), self.gidCaller.get_urn(), self.gidObject.get_urn(), oldAttr.name, oldAttr.value, attr.value)
-                        logger.error(msg)
-                        raise CredentialNotVerifiable("Can't encode new valid delegated credential: %s" % msg)
+                        msg = "Delegating cred from owner %s to %s over %s replaced attribute %s value '%s' with '%s'" % (self.parent.gidCaller.get_urn(), self.gidCaller.get_urn(), self.gidObject.get_urn(), oldAttr.name, oldAttr.value, attr.value)
+                        logger.warn(msg)
+                        #raise CredentialNotVerifiable("Can't encode new valid delegated credential: %s" % msg)
 
             p_cred = doc.importNode(sdoc.getElementsByTagName("credential")[0], True)
             p = doc.createElement("parent")
@@ -725,7 +757,7 @@ class Credential(object):
             self.decode()
 
         # validate against RelaxNG schema
-        if not self.legacy:
+        if HAVELXML and not self.legacy:
             if schema and os.path.exists(schema):
                 tree = etree.parse(StringIO(self.xml))
                 schema_doc = etree.parse(schema)
@@ -733,7 +765,7 @@ class Credential(object):
                 if not xmlschema.validate(tree):
                     error = xmlschema.error_log.last_error
                     message = "%s (line %s)" % (error.message, error.line)
-                    raise CredentialNotVerifiable(message)        
+                    raise CredentialNotVerifiable(message)
 
         if trusted_certs_required and trusted_certs is None:
             trusted_certs = []
@@ -848,11 +880,19 @@ class Credential(object):
             # cred signer is target, return success
             return
 
+        # root_cred_signer is not the target_gid
+        # So this is a different gid that we have not verified
+        # Did xmlsec1 verify the cert chain on this already?
+        # Regardless, it hasn't verified that the gid meets the HRN namespace
+        # requirements
+# FIXME: Uncomment once we verify this is right
+#        root_cred_signer.verify_chain(trusted_cert_objects)
+
         # See if it the signer is an authority over the domain of the target
         # Maybe should be (hrn, type) = urn_to_hrn(root_cred_signer.get_urn())
         root_cred_signer_type = root_cred_signer.get_type()
         if (root_cred_signer_type == 'authority'):
-            #sfa_logger.debug('Cred signer is an authority')
+            #logger.debug('Cred signer is an authority')
             # signer is an authority, see if target is in authority's domain
             hrn = root_cred_signer.get_hrn()
             if root_target_gid.get_hrn().startswith(hrn):
@@ -936,7 +976,7 @@ class Credential(object):
     # only informative
     def get_filename(self):
         return getattr(self,'filename',None)
- 
+
     ##
     # Dump the contents of a credential to stdout in human-readable format
     #
