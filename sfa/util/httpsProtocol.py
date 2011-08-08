@@ -4,7 +4,8 @@ import sys
 
 
 def is_python26():
-    return sys.version_info[0] == 2 and sys.version_info[1] == 6
+    return False
+    #return sys.version_info[0] == 2 and sys.version_info[1] == 6
 
 # wrapper around standartd https modules. Properly supports timeouts.  
 
