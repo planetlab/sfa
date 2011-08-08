@@ -13,7 +13,9 @@ class HTTPSConnection(httplib.HTTPSConnection):
     def __init__(self, host, port=None, key_file=None, cert_file=None,
                  strict=None, timeout = None):
         httplib.HTTPSConnection.__init__(self, host, port, key_file, cert_file, strict)
-        self.timeout = float(timeout)
+        if timeout:
+            timeout = float(timeout)
+        self.timeout = timeout
 
     def connect(self):
         """Connect to a host on a given (SSL) port."""
