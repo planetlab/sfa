@@ -48,10 +48,28 @@ class XMLRPCTransport(xmlrpclib.Transport):
         if need_HTTPSConnection:
             conn = HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
         else:
-            conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
+            try:
+                conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
+            except TypeError:
+                # some versions don't have a timeout argument
+                conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
 
         if hasattr(conn, 'set_timeout'):
             conn.set_timeout(self.timeout)
+
+        # Some logic to deal with timeouts. It appears that some (or all) versions
+        # of python don't set the timeout after the socket is created. We'll do it
+        # ourselves by forcing the connection to connect, finding the socket, and
+        # calling settimeout() on it. (tested with python 2.6)
+        if self.timeout:
+            if hasattr(conn, "_conn"):
+                # HTTPS is a wrapper around HTTPSConnection
+                real_conn = conn._conn
+            else:
+                real_conn = conn
+            conn.connect()
+            if hasattr(real_conn, "sock") and hasattr(real_conn.sock, "settimeout"):
+                real_conn.sock.settimeout(self.timeout)
 
         return conn
 
