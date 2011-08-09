@@ -36,8 +36,8 @@ Thierry Parmentelat
           <description>Flag to turn debug on.</description>
         </variable>
     
-        <variable id="slice_max_renew" type="boolean">
-          <name>Slice Max Renew</name>
+        <variable id="max_slice_renew" type="int">
+          <name>Max Slice Renew</name>
           <value>60</value>
           <description>Maximum amout of days a user can extend/renew their slices to</description>
         </variable>
