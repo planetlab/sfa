@@ -49,11 +49,8 @@ class XMLRPCTransport(xmlrpclib.Transport):
             #conn = HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
             conn = HTTPSConnection(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
         else:
-            try:
-                conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
-            except TypeError:
-                # some versions don't have a timeout argument
-                conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
+            #conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file, timeout=self.timeout) #**(x509 or {}))
+            conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file) #**(x509 or {}))
 
         if hasattr(conn, 'set_timeout'):
             conn.set_timeout(self.timeout)
