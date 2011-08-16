@@ -232,6 +232,7 @@ def update_cert_records(gids):
     """
     # import SfaTable here so this module can be loaded by ComponentAPI
     from sfa.util.table import SfaTable
+    from sfa.util.record import SfaRecord
     if not gids:
         return
     table = SfaTable()
