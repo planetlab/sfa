@@ -178,8 +178,13 @@ def create_gid(api, xrn, cert):
     # get the authority
     authority = Xrn(xrn=xrn).get_authority_hrn()
     auth_info = api.auth.get_auth_info(authority)
-    
-
+    if not cert:
+        pkey = Keypair(create=True)
+    else:
+        certificate = Certificate(string=cert)
+        pkey = certificate.get_pubkey()    
+    gid = api.auth.hierarchy.create_gid(xrn, create_uuid(), pkey) 
+    return gid.save_to_string(save_parents=True)
     
 def register(api, record):
 
