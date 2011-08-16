@@ -174,6 +174,9 @@ def list(api, xrn, origin_hrn=None):
     return records
 
 
+def create_gid(api, xrn, cert):
+    pass
+
 def register(api, record):
 
     hrn, type = record['hrn'], record['type']
@@ -288,7 +291,6 @@ def update(api, record_dict):
     type = new_record['type']
     hrn = new_record['hrn']
     urn = hrn_to_urn(hrn,type)
-    api.auth.verify_object_permission(hrn)
     table = SfaTable()
     # make sure the record exists
     records = table.findObjects({'type': type, 'hrn': hrn})
