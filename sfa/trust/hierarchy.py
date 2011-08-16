@@ -240,7 +240,7 @@ class Hierarchy:
 
         # is this a CA cert
         if hrn == self.config.SFA_INTERFACE_HRN or \
-           or not parent_hrn or 'authority' in type:
+           not parent_hrn or 'authority' in type:
             gid.set_intermediate_ca(True)
 
         # set issuer
