@@ -239,8 +239,11 @@ class Hierarchy:
         gid = GID(subject=hrn, uuid=uuid, hrn=hrn, urn=urn)
 
         # is this a CA cert
-        if hrn == self.config.SFA_INTERFACE_HRN or \
-           not parent_hrn or 'authority' in type:
+        if hrn == self.config.SFA_INTERFACE_HRN or not parent_hrn:
+            # root or sub authority  
+            gid.set_intermediate_ca(True)
+        elif type and 'authority' in type:
+            # authority type
             gid.set_intermediate_ca(True)
 
         # set issuer
