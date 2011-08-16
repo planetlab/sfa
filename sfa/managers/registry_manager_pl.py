@@ -175,8 +175,12 @@ def list(api, xrn, origin_hrn=None):
 
 
 def create_gid(api, xrn, cert):
-    pass
+    # get the authority
+    authority = Xrn(xrn=xrn).get_authority_hrn()
+    auth_info = api.auth.get_auth_info(authority)
+    
 
+    
 def register(api, record):
 
     hrn, type = record['hrn'], record['type']
@@ -195,7 +199,6 @@ def register(api, record):
     record['authority'] = get_authority(record['hrn'])
     type = record['type']
     hrn = record['hrn']
-    api.auth.verify_object_permission(hrn)
     auth_info = api.auth.get_auth_info(record['authority'])
     pub_key = None
     # make sure record has a gid
