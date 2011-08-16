@@ -33,7 +33,7 @@ class Update(Method):
         valid_creds = self.api.auth.checkCredentials(creds, "update")
         
         # verify permissions 
-        api.auth.verify_object_permission(record.get('hrn', ''))
+        api.auth.verify_object_permission(record_dict.get('hrn', ''))
     
         # log
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
