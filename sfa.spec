@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 29
+%define taglevel 31
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -196,6 +196,18 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Tue Aug 16 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-31
+- fix typo in sfa-1.0-30 tag
+
+* Tue Aug 16 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-30
+- Declare namespace and schema location in the credential.
+- Fix bug that prevetend connections from timing out.
+- Fix slice delegation.
+- Add statistics to slicemaanger listresources/createsliver rspec.
+- Added SFA_MAX_SLICE_RENEW which allows operators to configure the max ammout
+  of days a user can extend their slice expiration.
+- CA certs are only issued to objects of type authority
+   
 * Fri Aug 05 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-29
 - tag 1.0-28 was broken due to typo in the changelog
 - new class sfa/util/httpsProtocol.py that supports timeouts
