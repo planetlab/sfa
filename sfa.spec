@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 31
+%define taglevel 32
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -196,6 +196,10 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Tue Aug 16 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-32
+- fix typo in sfa-1.0-31 tag.
+- added CreateGid() Registry interface method.
+
 * Tue Aug 16 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-31
 - fix typo in sfa-1.0-30 tag
 
