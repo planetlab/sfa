@@ -32,12 +32,13 @@ class Update(Method):
         # validate the cred
         valid_creds = self.api.auth.checkCredentials(creds, "update")
         
-        # verify permissions 
-        api.auth.verify_object_permission(record_dict.get('hrn', ''))
+        # verify permissions
+        hrn = record_dict.get('hrn', '')  
+        api.auth.verify_object_permission(hrn)
     
         # log
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, None, self.name))
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrn, self.name))
        
         manager = self.api.get_interface_manager()
  
