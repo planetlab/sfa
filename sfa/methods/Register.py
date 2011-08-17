@@ -39,7 +39,7 @@ class Register(Method):
         
         # verify permissions
         hrn = record.get('hrn', '')
-        api.auth.verify_object_permission(hrn)
+        self.api.auth.verify_object_permission(hrn)
 
         #log the call
         origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
