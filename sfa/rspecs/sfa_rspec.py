@@ -223,6 +223,8 @@ class SfaRSpec(RSpec):
                 node_tag.set('site_id', node['site_urn'])
             if 'node_id' in node: 
                 node_tag.set('node_id', 'n'+str(node['node_id']))
+            if 'boot_state' in node:
+                node_tag.set('boot_state', node['boot_state']) 
             if 'hostname' in node:
                 hostname_tag = etree.SubElement(node_tag, 'hostname').text = node['hostname']
             if 'interfaces' in node:
