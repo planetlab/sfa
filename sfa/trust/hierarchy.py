@@ -229,7 +229,7 @@ class Hierarchy:
     # @param uuid the unique identifier to store in the GID
     # @param pkey the public key to store in the GID
 
-    def create_gid(self, xrn, uuid, pkey):
+    def create_gid(self, xrn, uuid, pkey, CA=False):
         hrn, type = urn_to_hrn(xrn)
         parent_hrn = get_authority(hrn)
         # Using hrn_to_urn() here to make sure the urn is in the right format
@@ -245,6 +245,10 @@ class Hierarchy:
         elif type and 'authority' in type:
             # authority type
             gid.set_intermediate_ca(True)
+        elif CA:
+            gid.set_intermediate_ca(True)
+        else:
+            gid.set_intermediate_ca(False)
 
         # set issuer
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
