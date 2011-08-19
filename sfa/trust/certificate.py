@@ -285,7 +285,7 @@ class Keypair:
         filename=self.get_filename()
         if filename: result += "Filename %s\n"%filename
         return result
-    
+
 ##
 # The certificate class implements a general purpose X509 certificate, making
 # use of the appropriate pyOpenSSL or M2Crypto abstractions. It also adds
@@ -305,22 +305,25 @@ class Certificate:
     issuerKey = None
     issuerSubject = None
     parent = None
+    isCA = None # will be a boolean once set
 
     separator="-----parent-----"
 
     ##
     # Create a certificate object.
     #
+    # @param lifeDays life of cert in days - default is 1825==5 years
     # @param create If create==True, then also create a blank X509 certificate.
     # @param subject If subject!=None, then create a blank certificate and set
     #     it's subject name.
     # @param string If string!=None, load the certficate from the string.
     # @param filename If filename!=None, load the certficiate from the file.
+    # @param isCA If !=None, set whether this cert is for a CA
 
-    def __init__(self, create=False, subject=None, string=None, filename=None, intermediate=None):
+    def __init__(self, lifeDays=1825, create=False, subject=None, string=None, filename=None, isCA=None):
         self.data = {}
         if create or subject:
-            self.create()
+            self.create(lifeDays)
         if subject:
             self.set_subject(subject)
         if string:
@@ -328,17 +331,19 @@ class Certificate:
         if filename:
             self.load_from_file(filename)
 
-        if intermediate:
-            self.set_intermediate_ca(intermediate)
+        # Set the CA bit if a value was supplied
+        if isCA != None:
+            self.set_is_ca(isCA)
 
     # Create a blank X509 certificate and store it in this object.
 
-    def create(self):
+    def create(self, lifeDays=1825):
         self.cert = crypto.X509()
+        # FIXME: Use different serial #s
         self.cert.set_serial_number(3)
-        self.cert.gmtime_adj_notBefore(0)
-        self.cert.gmtime_adj_notAfter(60*60*24*365*5) # five years
-        self.cert.set_version(2) # x509v3 so it can have extensions        
+        self.cert.gmtime_adj_notBefore(0) # 0 means now
+        self.cert.gmtime_adj_notAfter(lifeDays*60*60*24) # five years is default
+        self.cert.set_version(2) # x509v3 so it can have extensions
 
 
     ##
@@ -503,9 +508,24 @@ class Certificate:
         return pkey
 
     def set_intermediate_ca(self, val):
-        self.intermediate = val
+        return self.set_is_ca(val)
+
+    # Set whether this cert is for a CA. All signers and only signers should be CAs.
+    # The local member starts unset, letting us check that you only set it once
+    # @param val Boolean indicating whether this cert is for a CA
+    def set_is_ca(self, val):
+        if val is None:
+            return
+
+        if self.isCA != None:
+            # Can't double set properties
+            raise "Cannot set basicConstraints CA:?? more than once. Was %s, trying to set as %s" % (self.isCA, val)
+
+        self.isCA = val
         if val:
             self.add_extension('basicConstraints', 1, 'CA:TRUE')
+        else:
+            self.add_extension('basicConstraints', 1, 'CA:FALSE')
 
 
 
@@ -518,6 +538,25 @@ class Certificate:
     # @param value string containing value of the extension
 
     def add_extension(self, name, critical, value):
+        oldExtVal = None
+        try:
+            oldExtVal = self.get_extension(name)
+        except:
+            # M2Crypto LookupError when the extension isn't there (yet)
+            pass
+
+        # This code limits you from adding the extension with the same value
+        # The method comment says you shouldn't do this with the same name
+        # But actually it (m2crypto) appears to allow you to do this.
+        if oldExtVal and oldExtVal == value:
+            # don't add this extension again
+            # just do nothing as here
+            return
+        # FIXME: What if they are trying to set with a different value?
+        # Is this ever OK? Or should we raise an exception?
+#        elif oldExtVal:
+#            raise "Cannot add extension %s which had val %s with new val %s" % (name, oldExtVal, value)
+
         ext = crypto.X509Extension (name, critical, value)
         self.cert.add_extensions([ext])
 
@@ -529,7 +568,7 @@ class Certificate:
         # pyOpenSSL does not have a way to get extensions
         m2x509 = X509.load_cert_string(self.save_to_string())
         value = m2x509.get_ext(name).get_value()
-        
+
         return value
 
     ##
@@ -638,6 +677,7 @@ class Certificate:
     # child. If a parent did not sign a child, then an exception is thrown. If
     # the bottom of the recursion is reached and the certificate does not match
     # a trusted root, then an exception is thrown.
+    # Also require that parents are CAs.
     #
     # @param Trusted_certs is a list of certificates that are trusted.
     #
@@ -675,6 +715,16 @@ class Certificate:
             logger.debug("verify_chain: NO %s is not signed by parent"%self.get_subject())
             return CertNotSignedByParent(self.get_subject())
 
+        # Confirm that the parent is a CA. Only CAs can be trusted as
+        # signers.
+        # Note that trusted roots are not parents, so don't need to be
+        # CAs.
+        # Ugly - cert objects aren't parsed so we need to read the
+        # extension and hope there are no other basicConstraints
+        if not self.parent.isCA and not (self.parent.get_extension('basicConstraints') == 'CA:TRUE'):
+            logger.warn("verify_chain: cert %s's parent %s is not a CA" % (self.get_subject(), self.parent.get_subject()))
+            return CertNotSignedByParent(self.get_subject())
+
         # if the parent isn't verified...
         logger.debug("verify_chain: .. %s, -> verifying parent %s"%(self.get_subject(),self.parent.get_subject()))
         self.parent.verify_chain(trusted_certs)
@@ -698,7 +748,7 @@ class Certificate:
 
     def get_all_datas (self):
         triples=self.get_extensions()
-        for name in self.get_data_names(): 
+        for name in self.get_data_names():
             triples.append( (name,self.get_data(name),'data',) )
         return triples
 

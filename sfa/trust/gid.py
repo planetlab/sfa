@@ -81,8 +81,7 @@ class GID(Certificate):
 
     def __init__(self, create=False, subject=None, string=None, filename=None, uuid=None, hrn=None, urn=None, lifeDays=1825):
         
-        #Certificate.__init__(self, lifeDays, create, subject, string, filename)
-        Certificate.__init__(self, create, subject, string, filename)
+        Certificate.__init__(self, lifeDays, create, subject, string, filename)
         if subject:
             logger.debug("Creating GID for subject: %s" % subject)
         if uuid:
