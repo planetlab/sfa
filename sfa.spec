@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 32
+%define taglevel 33
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -196,6 +196,13 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Wed Aug 24 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-32
+- Fixed exploit that allowed an authorities to issue certs for objects that dont belong to them.
+- Fixed holes in certificate verification logic.
+- Aggregates no longer try to lookup slice and person records when processing CreateSliver requests. Clients are now required to specify this info in the 'users' argument. 
+- Added 'boot_state' as an attribute of the node element in SFA rspec.
+- Non authority certificates are marked as CA:FALSE.
+
 * Tue Aug 16 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-32
 - fix typo in sfa-1.0-31 tag.
 - added CreateGid() Registry interface method.
