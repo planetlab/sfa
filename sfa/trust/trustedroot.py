@@ -15,22 +15,12 @@ class TrustedRootList:
         gid.save_to_file(fn)
 
     def get_list(self):
-        gid_list = []
-        pattern=os.path.join(self.basedir,"*.gid")
-        gid_files = glob.glob(pattern)
-        for gid_file in gid_files:
-            # ignore non-files
-            if os.path.isfile(gid_file):
-                gid = GID(filename = gid_file)
-                gid_list.append(gid)
+        gid_list = [GID(filename=cert_file) for cert_file in self.get_file_list()]
         return gid_list
 
     def get_file_list(self):
-        gid_file_list = []
-        pattern=os.path.join(self.basedir,"*.gid")
-        gid_files = glob.glob(pattern)
-        for gid_file in gid_files:
-            # ignore non-files
-            if os.path.isfile(gid_file):
-                gid_file_list.append(gid_file)        
-        return gid_file_list
+        file_list  = []
+        for cert_file in os.listdir(self.basedir):
+            if os.path.isfile(cert_file):
+                file_list.append(os.path.join(self.basedir, cert_file)) 
+        return file_list
