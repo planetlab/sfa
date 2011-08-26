@@ -167,25 +167,33 @@ class Slices:
 
         return sfa_peer
 
-    def verify_slice_records(self, hrn, slice_record, users, peer):
-        """
-        Creates required slice, site, person and key records in the Myplc db.        
-        """
-        site = None
-        slice = None
-        persons = []
- 
-        sfa_peer = self.get_sfa_peer(hrn)
-        site = self.verify_site(hrn, slice_record, peer, sfa_peer)
-        slice = self.verify_slice(hrn, slice_record, peer, sfa_peer)        
-        persons = self.verify_persons(hrn, slice, users, peer, sfa_peer)
- 
+    def verify_slice_nodes(self, slice, requested_slivers, peer):
+        
+        nodes = self.api.plshell.GetNodes(self.api.plauth, slice['node_ids'], ['hostname'])
+        current_slivers = [node['hostname'] for node in nodes]
+
+        # remove nodes not in rspec
+        deleted_nodes = list(set(current_slivers).difference(requested_slivers))
+
+        # add nodes from rspec
+        added_nodes = list(set(requested_slivers).difference(current_slivers))        
+
+        try:
+            if peer:
+                self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'slice', slice['slice_id'], peer['shortname'])
+            self.api.plshell.AddSliceToNodes(self.api.plauth, slice['name'], added_nodes)
+            self.api.plshell.DeleteSliceFromNodes(self.api.plauth, slice['name'], deleted_nodes)
+
+        except: 
+            self.api.logger.log_exc('Failed to add/remove slice from nodes')
+
+    def handle_peer(self, site, slice, persons, peer):
         if peer:
             # bind site
             try:
                 if site:
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'site', \
-                       site['site_id'], peer['shortname'], slice_record['site_id'])
+                       site['site_id'], peer['shortname'], slice['site_id'])
             except Exception,e:
                 self.api.plshell.DeleteSite(self.api.plauth, site['site_id'])
                 raise e
@@ -194,9 +202,9 @@ class Slices:
             try:
                 if slice:
                     self.api.plshell.BindObjectToPeer(self.api.plauth, 'slice', \
-                       slice['slice_id'], peer['shortname'], slice_record['slice_id'])
+                       slice['slice_id'], peer['shortname'], slice['slice_id'])
             except Exception,e:
-                self.api.plshell.DeleteSlice(self.api.plauth,slice['slice_id'])
+                self.api.plshell.DeleteSlice(self.api.plauth, slice['slice_id'])
                 raise e 
 
             # bind persons
@@ -221,12 +229,14 @@ class Slices:
     def verify_site(self, slice_xrn, slice_record={}, peer=None, sfa_peer=None):
         (slice_hrn, type) = urn_to_hrn(slice_xrn)
         site_hrn = get_authority(slice_hrn)
-        login_base = get_leaf(site_hrn)
+        # login base can't be longer than 20 characters
+        authority_name = get_leaf(site_hrn) 
+        login_base = authority_name[:20]
         sites = self.api.plshell.GetSites(self.api.plauth, login_base)
         if not sites:
             # create new site record
-            site = {'name': 'geni.%s' % login_base,
-                    'abbreviated_name': login_base,
+            site = {'name': 'geni.%s' % authority_name,
+                    'abbreviated_name': authority_name,
                     'login_base': login_base,
                     'max_slices': 100,
                     'max_slivers': 1000,
@@ -294,10 +304,10 @@ class Slices:
         users_dict = {}
         for user in users:
             if 'email' in user:     
-                users_dict[user['email']] = user
+                users_dict[user['email'].lower()] = user
             else:
                 fake_email = hrn_to_pl_slicename(slice_hrn) + "@geni.net"
-                user['email'] = fake_email
+                user['email'] = fake_email.lower()
                 users_dict[fake_email] = user
         
         # requested slice users        
@@ -351,7 +361,7 @@ class Slices:
             self.api.plshell.UpdatePerson(self.api.plauth, person['person_id'], {'enabled': True})
             
             # add person to site
-            self.api.plshell.AddPersonToSite(self.api.plauth, added_slice_user_id, login_base)
+            self.api.plshell.AddPersonToSite(self.api.plauth, added_user_id, login_base)
 
             for key_string in added_user.get('keys', []):
                 key = {'key':key_string, 'key_type':'ssh'}
@@ -423,6 +433,67 @@ class Slices:
                     self.api.plshell.DeleteKey(self.api.plauth, existing_key_id)
                 except:
                     pass   
+
+    def verify_slice_attributes(self, slice, requested_slice_attributes):
+        # get list of attributes users ar able to manage
+        slice_attributes = self.api.plshell.GetTagTypes(self.api.plauth, {'category': '*slice*', '|roles': ['user']})
+        valid_slice_attribute_names = [attribute['tagname'] for attribute in slice_attributes]
+
+        # get sliver attributes
+        added_slice_attributes = []
+        removed_slice_attributes = []
+        ignored_slice_attribute_names = []
+        existing_slice_attributes = self.api.plshell.GetSliceTags(self.api.plauth, {'slice_id': slice['slice_id']})
+
+        # get attributes that should be removed
+        for slice_tag in existing_slice_attributes:
+            if slice_tag['tagname'] in ignored_slice_attribute_names:
+                # If a slice already has a admin only role it was probably given to them by an
+                # admin, so we should ignore it.
+                ignored_slice_attribute_names.append(slice_tag['tagname'])
+            else:
+                # If an existing slice attribute was not found in the request it should
+                # be removed
+                attribute_found=False
+                for requested_attribute in requested_slice_attributes:
+                    if requested_attribute['name'] == slice_tag['tagname'] and \
+                       requested_attribute['value'] == slice_tag['value']:
+                        attribute_found=True
+                        break
+
+            if not attribute_found:
+                removed_slice_attributes.append(slice_tag)
+        
+        # get attributes that should be added:
+        for requested_attribute in requested_slice_attributes:
+            # if the requested attribute wasn't found  we should add it
+            if requested_attribute['name'] in valid_slice_attribute_names:
+                attribute_found = False
+                for existing_attribute in existing_slice_attributes:
+                    if requested_attribute['name'] == existing_attribute['tagname'] and \
+                       requested_attribute['value'] == existing_attribute['value']:
+                        attribute_found=True
+                        break
+                if not attribute_found:
+                    added_slice_attributes.append(requested_attribute)
+
+
+        # remove stale attributes
+        for attribute in removed_slice_attributes:
+            try:
+                self.api.plshell.DeleteSliceTag(self.api.plauth, attribute['slice_tag_id'])
+            except Exception, e:
+                self.api.logger.warn('Failed to remove sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
+                                % (name, value,  node_id, str(e)))
+
+        # add requested_attributes
+        for attribute in added_slice_attributes:
+            try:
+                name, value, node_id = attribute['name'], attribute['value'], attribute.get('node_id', None)
+                self.api.plshell.AddSliceTag(self.api.plauth, slice['name'], name, value, node_id)
+            except Exception, e:
+                self.api.logger.warn('Failed to add sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
+                                % (name, value,  node_id, str(e)))
 
     def create_slice_aggregate(self, xrn, rspec):
         hrn, type = urn_to_hrn(xrn)
