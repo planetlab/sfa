@@ -154,6 +154,7 @@ class Sfi:
                   "update": "record",
                   "aggregates": "[name]",
                   "registries": "[name]",
+                  "create_gid": "[name]",
                   "get_gid": [],  
                   "get_trusted_certs": "cred",
                   "slices": "",
@@ -217,7 +218,7 @@ class Sfi:
                                 help="optional component information", default=None)
 
 
-        if command in ("resources", "show", "list"):
+        if command in ("resources", "show", "list", "create_gid"):
            parser.add_option("-o", "--output", dest="file",
                             help="output XML to file", metavar="FILE", default=None)
         
@@ -275,7 +276,7 @@ class Sfi:
         parser.add_option("-k", "--hashrequest",
                          action="store_true", dest="hashrequest", default=False,
                          help="Create a hash of the request that will be authenticated on the server")
-        parser.add_option("-t", "--timeout", dest="timeout", default=30,
+        parser.add_option("-t", "--timeout", dest="timeout", default=None,
                          help="Amout of time tom wait before timing out the request")
         parser.disable_interspersed_args()
 
@@ -645,7 +646,22 @@ class Sfi:
   
     def dispatch(self, command, cmd_opts, cmd_args):
         return getattr(self, command)(cmd_opts, cmd_args)
- 
+
+    def create_gid(self, opts, args):
+        if len(args) < 1:
+            self.print_help()
+            sys.exit(1)
+        target_hrn = args[0]
+        user_cred = self.get_user_cred().save_to_string(save_parents=True)
+        gid = self.registry.CreateGid(user_cred, target_hrn, self.cert.save_to_string())
+        if opts.file:
+            filename = opts.file
+        else:
+            filename = os.sep.join([self.sfi_dir, '%s.gid' % target_hrn])
+        self.logger.info("writing %s gid to %s" % (target_hrn, filename))
+        GID(string=gid).save_to_file(filename)
+         
+     
     # list entires in named authority registry
     def list(self, opts, args):
         if len(args)!= 1:
@@ -696,7 +712,6 @@ class Sfi:
                 record.dump()  
             else:
                 print record.save_to_string() 
- 
         if opts.file:
             file = opts.file
             if not file.startswith(os.sep):
@@ -926,6 +941,8 @@ class Sfi:
     
     # created named slice with given rspec
     def create(self, opts, args):
+        server = self.get_server_from_opts(opts)
+        server_version = self.get_cached_server_version(server)
         slice_hrn = args[0]
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         user_cred = self.get_user_cred()
@@ -937,29 +954,40 @@ class Sfi:
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
 
+        # need to pass along user keys to the aggregate.  
         # users = [
         #  { urn: urn:publicid:IDN+emulab.net+user+alice
         #    keys: [<ssh key A>, <ssh key B>] 
         #  }]
         users = []
-        server = self.get_server_from_opts(opts)
-        version = self.get_cached_server_version(server)
-        if 'sfa' not in version:
-            # need to pass along user keys if this request is going to a ProtoGENI aggregate 
+        all_keys = []
+        all_key_ids = []
+        slice_records = self.registry.Resolve(slice_urn, [user_cred.save_to_string(save_parents=True)])
+        if slice_records and 'researcher' in slice_records[0]:
+            slice_record = slice_records[0]
+            user_hrns = slice_record['researcher']
+            user_urns = [hrn_to_urn(hrn, 'user') for hrn in user_hrns]
+            user_records = self.registry.Resolve(user_urns, [user_cred.save_to_string(save_parents=True)])
+            for user_record in user_records:
+                #user = {'urn': user_cred.get_gid_caller().get_urn(),'keys': []}
+                user = {'urn': user_cred.get_gid_caller().get_urn(), #
+                        'keys': user_record['keys'],
+                        'email': user_record['email'], #  needed for MyPLC
+                        'person_id': user_record['person_id'], # needed for MyPLC
+                        'first_name': user_record['first_name'], # needed for MyPLC
+                        'last_name': user_record['last_name'], # needed for MyPLC
+                        'slice_record': slice_record, # needed for legacy refresh peer
+                        'key_ids': user_record['key_ids'] # needed for legacy refresh peer
+                } 
+                users.append(user)
+                all_keys.extend(user_record['keys'])
+                all_key_ids.extend(user_record['key_ids'])
             # ProtoGeni Aggregates will only install the keys of the user that is issuing the
-            # request. So we will only pass in one user that contains the keys for all
-            # users of the slice 
-            user = {'urn': user_cred.get_gid_caller().get_urn(),
-                    'keys': []}
-            slice_record = self.registry.Resolve(slice_urn, creds)
-            if slice_record and 'researchers' in slice_record:
-                user_hrns = slice_record['researchers']
-                user_urns = [hrn_to_urn(hrn, 'user') for hrn in user_hrns] 
-                user_records = self.registry.Resolve(user_urns, creds)
-                for user_record in user_records:
-                    if 'keys' in user_record:
-                        user['keys'].extend(user_record['keys'])
-            users.append(user)
+            # request. So we will add all to the current caller's list of keys
+            if 'sfa' not in server_version:
+                for user in users:
+                    if user['urn'] == user_cred.get_gid_caller().get_urn():
+                        user['keys'] = all_keys  
 
         call_args = [slice_urn, creds, rspec, users]
         if self.server_supports_call_id_arg(server):

@@ -229,15 +229,28 @@ class Hierarchy:
     # @param uuid the unique identifier to store in the GID
     # @param pkey the public key to store in the GID
 
-    def create_gid(self, xrn, uuid, pkey):
+    def create_gid(self, xrn, uuid, pkey, CA=False):
         hrn, type = urn_to_hrn(xrn)
+        parent_hrn = get_authority(hrn)
         # Using hrn_to_urn() here to make sure the urn is in the right format
         # If xrn was a hrn instead of a urn, then the gid's urn will be
         # of type None 
         urn = hrn_to_urn(hrn, type)
         gid = GID(subject=hrn, uuid=uuid, hrn=hrn, urn=urn)
 
-        parent_hrn = get_authority(hrn)
+        # is this a CA cert
+        if hrn == self.config.SFA_INTERFACE_HRN or not parent_hrn:
+            # root or sub authority  
+            gid.set_intermediate_ca(True)
+        elif type and 'authority' in type:
+            # authority type
+            gid.set_intermediate_ca(True)
+        elif CA:
+            gid.set_intermediate_ca(True)
+        else:
+            gid.set_intermediate_ca(False)
+
+        # set issuer
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
@@ -247,7 +260,6 @@ class Hierarchy:
             parent_auth_info = self.get_auth_info(parent_hrn)
             gid.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
             gid.set_parent(parent_auth_info.get_gid_object())
-            gid.set_intermediate_ca(True)
 
         gid.set_pubkey(pkey)
         gid.encode()

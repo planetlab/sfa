@@ -47,7 +47,7 @@ from sfa.trust.certificate import Keypair
 from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import Right, Rights, determine_rights
 from sfa.trust.gid import GID
-from sfa.util.xrn import urn_to_hrn
+from sfa.util.xrn import urn_to_hrn, hrn_authfor_hrn
 
 # 2 weeks, in seconds 
 DEFAULT_CREDENTIAL_LIFETIME = 86400 * 14
@@ -269,7 +269,16 @@ class Credential(object):
     def get_subject(self):
         if not self.gidObject:
             self.decode()
-        return self.gidObject.get_subject()   
+        return self.gidObject.get_printable_subject()
+
+    def get_summary_tostring(self):
+        if not self.gidObject:
+            self.decode()
+        obj = self.gidObject.get_printable_subject()
+        caller = self.gidCaller.get_printable_subject()
+        exp = self.get_expiration()
+        # Summarize the rights too? The issuer?
+        return "[ Grant %s rights on %s until %s ]" % (caller, obj, exp)
 
     def get_signature(self):
         if not self.signature:
@@ -672,13 +681,19 @@ class Credential(object):
 
         # Is this a signed-cred or just a cred?
         if len(signed_cred) > 0:
-            cred = signed_cred[0].getElementsByTagName("credential")[0]
+            creds = signed_cred[0].getElementsByTagName("credential")
             signatures = signed_cred[0].getElementsByTagName("signatures")
             if len(signatures) > 0:
                 sigs = signatures[0].getElementsByTagName("Signature")
         else:
-            cred = doc.getElementsByTagName("credential")[0]
+            creds = doc.getElementsByTagName("credential")
         
+        if creds is None or len(creds) == 0:
+            # malformed cred file
+            raise CredentialNotVerifiable("Malformed XML: No credential tag found")
+
+        # Just take the first cred if there are more than one
+        cred = creds[0]
 
         self.set_refid(cred.getAttribute("xml:id"))
         self.set_expiration(utcparse(getTextNode(cred, "expires")))
@@ -738,6 +753,7 @@ class Credential(object):
     # . That the issuer of the credential is the authority in the target's urn
     #    . In the case of a delegated credential, this must be true of the root
     # . That all of the gids presented in the credential are valid
+    #    . Including verifying GID chains, and includ the issuer
     # . The credential is not expired
     #
     # -- For Delegates (credentials with parents)
@@ -764,7 +780,7 @@ class Credential(object):
                 xmlschema = etree.XMLSchema(schema_doc)
                 if not xmlschema.validate(tree):
                     error = xmlschema.error_log.last_error
-                    message = "%s (line %s)" % (error.message, error.line)
+                    message = "%s: %s (line %s)" % (self.get_summary_tostring(), error.message, error.line)
                     raise CredentialNotVerifiable(message)
 
         if trusted_certs_required and trusted_certs is None:
@@ -797,7 +813,7 @@ class Credential(object):
         
         # make sure it is not expired
         if self.get_expiration() < datetime.datetime.utcnow():
-            raise CredentialNotVerifiable("Credential expired at %s" % self.expiration.isoformat())
+            raise CredentialNotVerifiable("Credential %s expired at %s" % (self.get_summary_tostring(), self.expiration.isoformat()))
 
         # Verify the signatures
         filename = self.save_to_random_tmp_file()
@@ -805,7 +821,7 @@ class Credential(object):
             cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
 
         # If caller explicitly passed in None that means skip cert chain validation.
-        # Strange and not typical
+        # - Strange and not typical
         if trusted_certs is not None:
             # Verify the gids of this cred and of its parents
             for cur_cred in self.get_credential_list():
@@ -837,15 +853,16 @@ class Credential(object):
                     mstart = mstart + 4
                     mend = verified.find('\\', mstart)
                     msg = verified[mstart:mend]
-                raise CredentialNotVerifiable("xmlsec1 error verifying cred using Signature ID %s: %s %s" % (ref, msg, verified.strip()))
+                raise CredentialNotVerifiable("xmlsec1 error verifying cred %s using Signature ID %s: %s %s" % (self.get_summary_tostring(), ref, msg, verified.strip()))
         os.remove(filename)
 
         # Verify the parents (delegation)
         if self.parent:
             self.verify_parent(self.parent)
 
-        # Make sure the issuer is the target's authority
-        self.verify_issuer()
+        # Make sure the issuer is the target's authority, and is
+        # itself a valid GID
+        self.verify_issuer(trusted_cert_objects)
         return True
 
     ##
@@ -863,39 +880,61 @@ class Credential(object):
         return list
     
     ##
-    # Make sure the credential's target gid was signed by (or is the same) the entity that signed
-    # the original credential or an authority over that namespace.
-    def verify_issuer(self):                
+    # Make sure the credential's target gid (a) was signed by or (b)
+    # is the same as the entity that signed the original credential,
+    # or (c) is an authority over the target's namespace.
+    # Also ensure that the credential issuer / signer itself has a valid
+    # GID signature chain (signed by an authority with namespace rights).
+    def verify_issuer(self, trusted_gids):
         root_cred = self.get_credential_list()[-1]
         root_target_gid = root_cred.get_gid_object()
         root_cred_signer = root_cred.get_signature().get_issuer_gid()
 
+        # Case 1:
+        # Allow non authority to sign target and cred about target.
+        #
+        # Why do we need to allow non authorities to sign?
+        # If in the target gid validation step we correctly
+        # checked that the target is only signed by an authority,
+        # then this is just a special case of case 3.
+        # This short-circuit is the common case currently -
+        # and cause GID validation doesn't check 'authority',
+        # this allows users to generate valid slice credentials.
         if root_target_gid.is_signed_by_cert(root_cred_signer):
             # cred signer matches target signer, return success
             return
 
-        root_target_gid_str = root_target_gid.save_to_string()
-        root_cred_signer_str = root_cred_signer.save_to_string()
-        if root_target_gid_str == root_cred_signer_str:
-            # cred signer is target, return success
-            return
+        # Case 2:
+        # Allow someone to sign credential about themeselves. Used?
+        # If not, remove this.
+        #root_target_gid_str = root_target_gid.save_to_string()
+        #root_cred_signer_str = root_cred_signer.save_to_string()
+        #if root_target_gid_str == root_cred_signer_str:
+        #    # cred signer is target, return success
+        #    return
+
+        # Case 3:
 
         # root_cred_signer is not the target_gid
-        # So this is a different gid that we have not verified
-        # Did xmlsec1 verify the cert chain on this already?
-        # Regardless, it hasn't verified that the gid meets the HRN namespace
-        # requirements
-# FIXME: Uncomment once we verify this is right
-#        root_cred_signer.verify_chain(trusted_cert_objects)
+        # So this is a different gid that we have not verified.
+        # xmlsec1 verified the cert chain on this already, but
+        # it hasn't verified that the gid meets the HRN namespace
+        # requirements.
+        # Below we'll ensure that it is an authority.
+        # But we haven't verified that it is _signed by_ an authority
+        # We also don't know if xmlsec1 requires that cert signers
+        # are marked as CAs.
+        root_cred_signer.verify_chain(trusted_gids)
 
-        # See if it the signer is an authority over the domain of the target
+        # See if the signer is an authority over the domain of the target.
+        # There are multiple types of authority - accept them all here
         # Maybe should be (hrn, type) = urn_to_hrn(root_cred_signer.get_urn())
         root_cred_signer_type = root_cred_signer.get_type()
-        if (root_cred_signer_type == 'authority'):
+        if (root_cred_signer_type.find('authority') == 0):
             #logger.debug('Cred signer is an authority')
             # signer is an authority, see if target is in authority's domain
-            hrn = root_cred_signer.get_hrn()
-            if root_target_gid.get_hrn().startswith(hrn):
+            signerhrn = root_cred_signer.get_hrn()
+            if hrn_authfor_hrn(signerhrn, root_target_gid.get_hrn()):
                 return
 
         # We've required that the credential be signed by an authority
@@ -920,23 +959,23 @@ class Credential(object):
         # make sure the rights given to the child are a subset of the
         # parents rights (and check delegate bits)
         if not parent_cred.get_privileges().is_superset(self.get_privileges()):
-            raise ChildRightsNotSubsetOfParent(("Parent cred ref %s rights " % self.parent.get_refid()) + 
-                self.parent.get_privileges().save_to_string() + (" not superset of delegated cred ref %s rights " % self.get_refid()) +
+            raise ChildRightsNotSubsetOfParent(("Parent cred ref %s rights " % parent_cred.get_refid()) +
+                self.parent.get_privileges().save_to_string() + (" not superset of delegated cred %s ref %s rights " % (self.get_summary_tostring(), self.get_refid())) +
                 self.get_privileges().save_to_string())
 
         # make sure my target gid is the same as the parent's
         if not parent_cred.get_gid_object().save_to_string() == \
            self.get_gid_object().save_to_string():
-            raise CredentialNotVerifiable("Target gid not equal between parent and child")
+            raise CredentialNotVerifiable("Delegated cred %s: Target gid not equal between parent and child. Parent %s" % (self.get_summary_tostring(), parent_cred.get_summary_tostring()))
 
         # make sure my expiry time is <= my parent's
         if not parent_cred.get_expiration() >= self.get_expiration():
-            raise CredentialNotVerifiable("Delegated credential expires after parent")
+            raise CredentialNotVerifiable("Delegated credential %s expires after parent %s" % (self.get_summary_tostring(), parent_cred.get_summary_tostring()))
 
         # make sure my signer is the parent's caller
         if not parent_cred.get_gid_caller().save_to_string(False) == \
            self.get_signature().get_issuer_gid().save_to_string(False):
-            raise CredentialNotVerifiable("Delegated credential not signed by parent caller")
+            raise CredentialNotVerifiable("Delegated credential %s not signed by parent %s's caller" % (self.get_summary_tostring(), parent_cred.get_summary_tostring()))
                 
         # Recurse
         if parent_cred.parent:

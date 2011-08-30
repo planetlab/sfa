@@ -114,7 +114,6 @@ def SliverStatus(api, slice_xrn, creds, call_id):
 
     (hrn, type) = urn_to_hrn(slice_xrn)
     # find out where this slice is currently running
-    api.logger.info(hrn)
     slicename = hrn_to_pl_slicename(hrn)
     
     slices = api.plshell.GetSlices(api.plauth, [slicename], ['slice_id', 'node_ids','person_ids','name','expires'])
@@ -160,9 +159,6 @@ def SliverStatus(api, slice_xrn, creds, call_id):
         
     result['geni_status'] = top_level_status
     result['geni_resources'] = resources
-    # XX remove me
-    #api.logger.info(result)
-    # XX remove me
     return result
 
 def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
@@ -172,76 +168,36 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     """
     if Callids().already_handled(call_id): return ""
 
-    reg_objects = __get_registry_objects(slice_xrn, creds, users)
-
-    (hrn, type) = urn_to_hrn(slice_xrn)
-    peer = None
     aggregate = Aggregate(api)
     slices = Slices(api)
+    (hrn, type) = urn_to_hrn(slice_xrn)
     peer = slices.get_peer(hrn)
     sfa_peer = slices.get_sfa_peer(hrn)
-    registry = api.registries[api.hrn]
-    credential = api.getCredential()
-    (site_id, remote_site_id) = slices.verify_site(registry, credential, hrn, 
-                                                   peer, sfa_peer, reg_objects)
+    slice_record=None    
+    if users:
+        slice_record = users[0].get('slice_record', {})
 
-    slice = slices.verify_slice(registry, credential, hrn, site_id, 
-                                       remote_site_id, peer, sfa_peer, reg_objects)
-     
-    nodes = api.plshell.GetNodes(api.plauth, slice['node_ids'], ['hostname'])
-    current_slivers = [node['hostname'] for node in nodes] 
+    # parse rspec
     rspec = parse_rspec(rspec_string)
+    requested_attributes = rspec.get_slice_attributes()
+    
+    # ensure site record exists
+    site = slices.verify_site(hrn, slice_record, peer, sfa_peer)
+    # ensure slice record exists
+    slice = slices.verify_slice(hrn, slice_record, peer, sfa_peer)
+    # ensure person records exists
+    persons = slices.verify_persons(hrn, slice, users, peer, sfa_peer)
+    # ensure slice attributes exists
+    slices.verify_slice_attributes(slice, requested_attributes)
+    
+    # add/remove slice from nodes
     requested_slivers = [str(host) for host in rspec.get_nodes_with_slivers()]
-    # remove nodes not in rspec
-    deleted_nodes = list(set(current_slivers).difference(requested_slivers))
+    slices.verify_slice_nodes(slice, requested_slivers, peer) 
 
-    # add nodes from rspec
-    added_nodes = list(set(requested_slivers).difference(current_slivers))
-
-    # get sliver attributes
-    requested_slice_attributes = rspec.get_slice_attributes()
-    removed_slice_attributes = []
-    existing_slice_attributes = []    
-    for slice_tag in api.plshell.GetSliceTags(api.plauth, {'slice_id': slice['slice_id']}):
-        attribute_found=False
-        for requested_attribute in requested_slice_attributes:
-            if requested_attribute['name'] == slice_tag['tagname'] and \
-               requested_attribute['value'] == slice_tag['value']:
-                attribute_found=True
-
-        if not attribute_found: 
-            removed_slice_attributes.append(slice_tag)
-        else:
-            existing_slice_attributes.append(slice_tag)  
-         
-    try:
-        if peer:
-            api.plshell.UnBindObjectFromPeer(api.plauth, 'slice', slice['slice_id'], peer)
-
-        api.plshell.AddSliceToNodes(api.plauth, slice['name'], added_nodes) 
-        api.plshell.DeleteSliceFromNodes(api.plauth, slice['name'], deleted_nodes)
-        # remove stale attributes
-        for attribute in removed_slice_attributes:
-            try:
-                api.plshell.DeleteSliceTag(api.plauth, attribute['slice_tag_id'])
-            except Exception, e:
-                api.logger.warn('Failed to remove sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
-                                % (name, value,  node_id, str(e)))
-
-        # add requested_attributes
-        for attribute in requested_slice_attributes:
-            try:
-                name, value, node_id = attribute['name'], attribute['value'], attribute.get('node_id', None)
-                api.plshell.AddSliceTag(api.plauth, slice['name'], name, value, node_id)
-            except Exception, e:
-                api.logger.warn('Failed to add sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
-                                % (name, value,  node_id, str(e)))
-
-    finally:
-        if peer:
-            api.plshell.BindObjectToPeer(api.plauth, 'slice', slice['slice_id'], peer, 
-                                         slice['peer_id'])
-
+    # hanlde MyPLC peer association.
+    # only used by plc and ple.
+    slices.handle_peer(site, slice, persons, peer)
+    
     return aggregate.get_rspec(slice_xrn=slice_xrn, version=rspec.version)
 
 
