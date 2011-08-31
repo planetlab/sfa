@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 33
+%define taglevel 35
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -196,6 +196,13 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Tue Aug 30 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-35
+- new method record.get_field for sface
+
+* Mon Aug 29 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-34
+- new option -c to sfa-nuke-plc.py
+- CreateSliver fixed for admin-only slice tags
+
 * Wed Aug 24 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-32
 - Fixed exploit that allowed an authorities to issue certs for objects that dont belong to them.
 - Fixed holes in certificate verification logic.
