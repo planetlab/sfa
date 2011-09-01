@@ -164,6 +164,15 @@ class RSpec:
             parent = element.getparent()
             parent.remove(element)
 
+    def attributes_list(self, elem):
+        # convert a list of attribute tags into list of tuples
+        # (tagnme, text_value)
+        opts = []
+        if elem is not None:
+            for e in elem:
+                opts.append((e.tag, str(e.text).strip()))
+        return opts
+
     def get_element_attributes(self, elem=None, depth=0):
         if elem == None:
             elem = self.root_node
