@@ -4,7 +4,7 @@ from StringIO import StringIO
 from datetime import datetime, timedelta
 from sfa.util.xrn import *
 from sfa.util.plxrn import hostname_to_urn
-from sfa.util.enumeration import Enum
+from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements 
 from sfa.util.faults import SfaNotImplemented, InvalidRSpec, InvalidRSpecElement
 
 
@@ -27,17 +27,6 @@ class XpathFilter:
                 xpath = ' and '.join(filter_list)
                 xpath = '[' + xpath + ']'
         return xpath
-
-# recognized top level rspec elements 
-RSpecElements = Enum('NETWORK', 'NODE', 'SLIVER', 'INTERFACE', 'LINK', 'VLINK')
-
-class RSpecElement:
-    def __init__(self, element_type, name, path):
-        if not element_type in RSpecElements:
-            raise InvalidRSpecElement(element_type)
-        self.type = element_type
-        self.name = name
-        self.path = path     
 
 class RSpec:
     header = '<?xml version="1.0"?>\n'
