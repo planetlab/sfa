@@ -189,12 +189,12 @@ class RSpec:
             attrs['child_nodes'] = list(elem)
         return attrs
 
-    def find(self, element_type, filter={}, depth=0):
+    def get(self, element_type, filter={}, depth=0):
         elements = [self.get_element_attributes(element, depth=depth) for element in \
-                    self.find_elements(element_type, filter)]
+                    self.get_elements(element_type, filter)]
         return elements
 
-    def find_elements(self, element_type, filter={}):
+    def get_elements(self, element_type, filter={}):
         """
         search for a registered element
         """
