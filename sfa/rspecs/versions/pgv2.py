@@ -1,8 +1,8 @@
 from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements
 
 class PGv2:
-    format = 'ProtoGENI'
-    type = '*'
+    type = 'ProtoGENI'
+    content_type = '*'
     version = '2'
     schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd' 
     namespaces = { 
@@ -19,9 +19,11 @@ class PGv2:
 
 class PGv2Ad(PGv2):
     schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    content_type = 'advertisement'
 
 class PGv2Manifest(PGv2):
     schema = 'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
+    content_type = 'manifest'
 
 if __name__ == '__main__':
     from sfa.rspecs.rspec import RSpec

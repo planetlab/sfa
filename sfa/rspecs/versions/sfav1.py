@@ -1,8 +1,8 @@
 from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements
 
 class SFAv1:
-    format = 'SFA'
-    type = '*'
+    type = 'SFA'
+    content_type = '*'
     version = '1'
     schema = None
     namespaces = {}
