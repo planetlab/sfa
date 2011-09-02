@@ -32,7 +32,7 @@ class VersionManager:
                     if content_type is None or content_type.lower() == version.content_type.lower():
                         retval = version
         if not retval:
-            raise Exception, "No such version format: %s version: %s type:%s "% (type, version_num, content_type)
+            raise InvalidRSpec("No such version format: %s version: %s type:%s "% (type, version_num, content_type))
         return retval
 
     def get_version(self, version):
@@ -56,11 +56,20 @@ class VersionManager:
  
         return retval
 
+    def get_version_by_schema(self, schema):
+        retval = None
+        for version in self.versions:
+            if schema == version.schema:
+                retval = version
+        if not retval:
+            raise InvalidRSpec("Unkwnown RSpec schema: %s" % schema)
+        return retval
+
 if __name__ == '__main__':
     v = VersionManager()
     print v.versions
     print v.get_version('sfa 1') 
     print v.get_version('protogeni 2') 
     print v.get_version('protogeni 2 advertisement') 
-    
+    print v.get_version_by_schema('http://www.protogeni.net/resources/rspec/2/ad.xsd') 
 
