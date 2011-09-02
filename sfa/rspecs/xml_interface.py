@@ -28,11 +28,11 @@ class XpathFilter:
 
 class XMLInterface:
  
-    def __init__(self, xml="", namespaces={}):
+    def __init__(self, xml=""):
         self.header = '<?xml version="1.0"?>\n'
         self.template = """<RSpec></RSpec>"""
         self.xml = None
-        self.namespaces = namespaces
+        self.namespaces = None
         if xml:
             self.parse_xml(xml)
         else:
@@ -42,7 +42,7 @@ class XMLInterface:
         """
         Create root element
         """
-        self.parse_rspec(self.template, self.namespaces)
+        self.parse_rspec(self.template)
     
     def parse_xml(self, xml):
         """
