@@ -4,7 +4,7 @@ class PGv2:
     type = 'ProtoGENI'
     content_type = '*'
     version = '2'
-    schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd' 
+    schema = 'http://www.protogeni.net/resources/rspec/2/*.xsd' 
     namespaces = { 
         'default' : 'http://www.protogeni.net/resources/rspec/2',
         'flack': "http://www.protogeni.net/resources/rspec/ext/flack/1",
