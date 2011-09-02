@@ -1,4 +1,5 @@
 import os
+from sfa.util.sfalogging import logger    
 
 class VersionManager:
     default_type = 'SFA'
@@ -35,7 +36,7 @@ class VersionManager:
             raise InvalidRSpec("No such version format: %s version: %s type:%s "% (type, version_num, content_type))
         return retval
 
-    def get_version(self, version):
+    def get_version(self, version=None):
         retval = None
         if isinstance(version, dict):
             retval =  self._get_version(version.get('type'), version.get('version_num'), version.get('content_type'))
