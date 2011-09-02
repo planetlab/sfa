@@ -1,4 +1,5 @@
 import os
+from sfa.util.faults import InvalidRSpec
 from sfa.util.sfalogging import logger    
 
 class VersionManager:
