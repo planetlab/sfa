@@ -63,7 +63,6 @@ class XMLInterface:
         """
         Validate against rng schema
         """
-
         relaxng_doc = etree.parse(schema)
         relaxng = etree.RelaxNG(relaxng_doc)
         if not relaxng(self.xml):
