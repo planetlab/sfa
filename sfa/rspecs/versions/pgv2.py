@@ -15,15 +15,18 @@ class PGv2:
         RSpecElement(RSpecElements.NODE, 'node', '//default:node | //node'),
         RSpecElement(RSpecElements.SLIVER, 'sliver', '//default:node/default:sliver_type | //node/sliver_type'),
     ]
+    template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/%s.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" />'      
 
 
 class PGv2Ad(PGv2):
     schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    content_type = 'advertisement'
+    content_type = 'ad'
+    template = PGv2.template % content_type
 
 class PGv2Manifest(PGv2):
     schema = 'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
     content_type = 'manifest'
+    template = PGv2.template % content_type
 
 if __name__ == '__main__':
     from sfa.rspecs.rspec import RSpec

@@ -11,7 +11,7 @@ class SFAv1:
         RSpecElement(RSpecElements.NODE, 'node', '//node'),
         RSpecElement(RSpecElements.SLIVER, 'sliver', '//node/sliver'),
     ] 
-
+    template = '<RSpec type="%s"></RSpec>' % type
 
 if __name__ == '__main__':
     from sfa.rspecs.rspec import RSpec
