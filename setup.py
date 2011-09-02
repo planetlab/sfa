@@ -45,6 +45,7 @@ package_dirs = [
     'sfa/managers',
     'sfa/rspecs',
     'sfa/rspecs/elements',
+    'sfa/rspecs/versions',
     'sfatables',
     'sfatables/commands',
     'sfatables/processors',
