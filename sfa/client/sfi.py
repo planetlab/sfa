@@ -11,10 +11,12 @@ import socket
 import random
 import datetime
 import zlib
+import codecs
 from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
+
 from sfa.util.sfalogging import sfi_logger
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
@@ -108,13 +110,17 @@ def save_record_to_file(filename, record):
     else:
         record = SfaRecord(dict=record)
     str = record.save_to_string()
-    file(filename, "w").write(str)
+    f=codecs.open(filename, encoding='utf-8',mode="w")
+    f.write(str)
+    f.close()
     return
 
 
 # load methods
 def load_record_from_file(filename):
-    str = file(filename, "r").read()
+    f=codecs.open(filename, encoding="utf-8", mode="r")
+    str = f.read()
+    f.close()
     record = SfaRecord(string=str)
     return record
 
@@ -136,6 +142,8 @@ class Sfi:
         for opt in Sfi.required_options:
             if not hasattr(options,opt): setattr(options,opt,None)
         if not hasattr(options,'sfi_dir'): options.sfi_dir=os.path.expanduser("~/.sfi/")
+        # xxx oops, this is dangerous, sounds like ww sometimes have discrepency
+        # would be safer to remove self.sfi_dir altogether
         self.sfi_dir = options.sfi_dir
         self.options = options
         self.slicemgr = None
@@ -284,7 +292,7 @@ class Sfi:
         
 
     def read_config(self):
-       config_file = self.options.sfi_dir + os.sep + "sfi_config"
+       config_file = os.path.join(self.options.sfi_dir,"sfi_config")
        try:
           config = Config (config_file)
        except:
@@ -361,7 +369,7 @@ class Sfi:
         # check local cache first
         cache = None
         version = None 
-        cache_file = self.sfi_dir + os.path.sep + 'sfi_cache.dat'
+        cache_file = os.path.join(self.options.sfi_dir,'sfi_cache.dat')
         cache_key = server.url + "-version"
         try:
             cache = Cache(cache_file)

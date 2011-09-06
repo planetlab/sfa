@@ -252,7 +252,7 @@ class RSpec:
             element = minidom.Element(tagname)
             for key in rd.keys():
                 if isinstance(rd[key], StringTypes) or isinstance(rd[key], int):
-                    element.setAttribute(key, str(rd[key]))
+                    element.setAttribute(key, unicode(rd[key]))
                 elif isinstance(rd[key], dict):
                     child = elementNode(key, rd[key])
                     element.appendChild(child)
