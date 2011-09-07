@@ -702,6 +702,7 @@ class Sfi:
         hrn = args[0]
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         records = self.registry.Resolve(hrn, user_cred)
+        print records
         records = filter_records(opts.type, records)
         if not records:
             print "No record of type", opts.type
@@ -977,6 +978,8 @@ class Sfi:
             user_urns = [hrn_to_urn(hrn, 'user') for hrn in user_hrns]
             user_records = self.registry.Resolve(user_urns, [user_cred.save_to_string(save_parents=True)])
             for user_record in user_records:
+                if user_record['type'] != 'user':
+                    continue
                 #user = {'urn': user_cred.get_gid_caller().get_urn(),'keys': []}
                 user = {'urn': user_cred.get_gid_caller().get_urn(), #
                         'keys': user_record['keys'],
@@ -1001,7 +1004,7 @@ class Sfi:
         if self.server_supports_call_id_arg(server):
             call_args.append(unique_call_id())
              
-        result =  server.CreateSliver(*call_args)
+        result = server.CreateSliver(*call_args)
         print result
         return result
 
@@ -1189,6 +1192,7 @@ class Sfi:
             self.dispatch(command, cmd_opts, cmd_args)
         except KeyError:
             self.logger.critical ("Unknown command %s"%command)
+            raise
             sys.exit(1)
     
         return
