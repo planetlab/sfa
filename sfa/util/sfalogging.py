@@ -147,26 +147,29 @@ def profile(logger):
 
 if __name__ == '__main__': 
     print 'testing sfalogging into logger.log'
-    logger=_SfaLogger('logger.log')
-    logger2=_SfaLogger('logger.log', level=logging.DEBUG)
-    logger3=_SfaLogger('logger.log', level=logging.ERROR)
-    print logger.logger.handlers
-   
-    logger.critical("logger.critical")
-    logger.error("logger.error")
-    logger.warn("logger.warning")
-    logger.info("logger.info")
-    logger.debug("logger.debug")
-    logger.setLevel(logging.DEBUG)
-    logger.debug("logger.debug again")
+    logger1=_SfaLogger('logger.log', loggername='std(info)')
+    logger2=_SfaLogger('logger.log', loggername='error', level=logging.ERROR)
+    logger3=_SfaLogger('logger.log', loggername='debug', level=logging.DEBUG)
     
+    for (logger,msg) in [ (logger1,"std(info)"),(logger2,"error"),(logger3,"debug")]:
+        
+        print "====================",msg, logger.logger.handlers
+   
+        logger.enable_console()
+        logger.critical("logger.critical")
+        logger.error("logger.error")
+        logger.warn("logger.warning")
+        logger.info("logger.info")
+        logger.debug("logger.debug")
+        logger.setLevel(logging.DEBUG)
+        logger.debug("logger.debug again")
+    
+        @profile(logger)
+        def sleep(seconds = 1):
+            time.sleep(seconds)
 
-    @profile(logger)
-    def sleep(seconds = 1):
-        time.sleep(seconds)
-
-    logger.info('console.info')
-    sleep(0.5)
-    logger.setLevel(logging.DEBUG)
-    sleep(0.25)
+        logger.info('console.info')
+        sleep(0.5)
+        logger.setLevel(logging.DEBUG)
+        sleep(0.25)
 
