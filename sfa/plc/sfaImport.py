@@ -213,23 +213,9 @@ class sfaImport:
             table.update(node_record)
 
     
-    def import_site(self, parent_hrn, site):
+    def import_site(self, hrn, site):
         shell = self.shell
         plc_auth = self.plc_auth
-        sitename = site['login_base']
-        sitename = _cleanup_string(sitename)
-        hrn = parent_hrn + "." + sitename
-        # Hardcode 'internet2' into the hrn for sites hosting
-        # internet2 nodes. This is a special operation for some vini
-        # sites only
-        if ".vini" in parent_hrn and parent_hrn.endswith('vini'):
-            if sitename.startswith("i2"):
-                #sitename = sitename.replace("ii", "")
-                hrn = ".".join([parent_hrn, "internet2", sitename])
-            elif sitename.startswith("nlr"):
-                #sitename = sitename.replace("nlr", "")
-                hrn = ".".join([parent_hrn, "internet2", sitename])
-
         urn = hrn_to_urn(hrn, 'authority')
         self.logger.info("Import: site %s"%hrn)
 
