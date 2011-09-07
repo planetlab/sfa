@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 import socket
@@ -10,7 +10,7 @@ import pygraphviz
 from optparse import OptionParser
 
 from sfa.client.sfi import Sfi
-from sfa.util.sfalogging import logger
+from sfa.util.sfalogging import logger, DEBUG
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 
 def url_hostname_port (url):
@@ -38,7 +38,6 @@ class Interface:
             self.ip=socket.gethostbyname(self.hostname)
             self.probed=False
         except:
-#            traceback.print_exc()
             self.hostname="unknown"
             self.ip='0.0.0.0'
             self.port="???"
@@ -62,7 +61,7 @@ class Interface:
             pass
         options=DummyOptions()
         options.verbose=False
-        options.timeout=30
+        options.timeout=10
         try:
             client=Sfi(options)
             client.read_config()
@@ -70,10 +69,10 @@ class Interface:
             cert_file = client.get_cert_file(key_file)
             url=self.url()
             logger.info('issuing get version at %s'%url)
+            logger.debug("GetVersion, using timeout=%d"%options.timeout)
             server=xmlrpcprotocol.get_server(url, key_file, cert_file, timeout=options.timeout, verbose=options.verbose)
             self._version=server.GetVersion()
         except:
-#            traceback.print_exc()
             self._version={}
         self.probed=True
         return self._version
@@ -83,7 +82,6 @@ class Interface:
         result='<<TABLE BORDER="0" CELLBORDER="0"><TR><TD>' + \
             '</TD></TR><TR><TD>'.join(lines) + \
             '</TD></TR></TABLE>>'
-#        print 'multilines=',result
         return result
 
     # default is for when we can't determine the type of the service
@@ -210,12 +208,18 @@ def main():
                       help="instead of top-to-bottom")
     parser.add_option("-v","--verbose",action='store_true',dest='verbose',default=False,
                       help="verbose")
+    parser.add_option("-d","--debug",action='store_true',dest='debug',default=False,
+                      help="debug")
     (options,args)=parser.parse_args()
     if not args:
         parser.print_help()
         sys.exit(1)
     if not options.outfiles:
         options.outfiles=default_outfiles
+    logger.enable_console()
+    if options.debug:
+        options.verbose=True
+        logger.setLevel(DEBUG)
     scanner=SfaScan(left_to_right=options.left_to_right, verbose=options.verbose)
     entries = [ Interface(entry) for entry in args ]
     g=scanner.graph(entries)
