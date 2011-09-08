@@ -226,7 +226,8 @@ class Sfi:
                                 help="optional component information", default=None)
 
 
-        if command in ("resources", "show", "list", "create_gid"):
+        # 'create' does return the new rspec, makes sense to save that too
+        if command in ("resources", "show", "list", "create_gid", 'create'):
            parser.add_option("-o", "--output", dest="file",
                             help="output XML to file", metavar="FILE", default=None)
         
@@ -1005,7 +1006,10 @@ class Sfi:
             call_args.append(unique_call_id())
              
         result = server.CreateSliver(*call_args)
-        print result
+        if opts.file is None:
+            print result
+        else:
+            save_rspec_to_file (result, opts.file)
         return result
 
     # get a ticket for the specified slice
