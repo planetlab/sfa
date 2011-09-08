@@ -83,7 +83,6 @@ def filter_records(type, records):
 def save_rspec_to_file(rspec, filename):
     if not filename.endswith(".rspec"):
         filename = filename + ".rspec"
-
     f = open(filename, 'w')
     f.write(rspec)
     f.close()
@@ -689,10 +688,7 @@ class Sfi:
         for record in list:
             print "%s (%s)" % (record['hrn'], record['type'])     
         if opts.file:
-            file = opts.file
-            if not file.startswith(os.sep):
-                file = os.path.join(self.options.sfi_dir, file)
-            save_records_to_file(file, list)
+            save_records_to_file(opts.file, list)
         return
     
     # show named registry record
@@ -723,10 +719,7 @@ class Sfi:
             else:
                 print record.save_to_string() 
         if opts.file:
-            file = opts.file
-            if not file.startswith(os.sep):
-                file = os.path.join(self.options.sfi_dir, file)
-            save_records_to_file(file, records)
+            save_records_to_file(opts.file, records)
         return
     
     def delegate(self, opts, args):
@@ -939,14 +932,10 @@ class Sfi:
         if self.server_supports_call_id_arg(server):
             call_args.append(unique_call_id())
         result = server.ListResources(*call_args)
-        format = opts.format
         if opts.file is None:
-            display_rspec(result, format)
+            display_rspec(result, opts.format)
         else:
-            file = opts.file
-            if not file.startswith(os.sep):
-                file = os.path.join(self.options.sfi_dir, file)
-            save_rspec_to_file(result, file)
+            save_rspec_to_file(result, opts.file)
         return
     
     # created named slice with given rspec
