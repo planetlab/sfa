@@ -29,7 +29,7 @@ from sfa.trust.hierarchy import *
 from sfa.util.xrn import Xrn
 from sfa.plc.api import *
 from sfa.trust.gid import create_uuid
-from sfa.plc.sfaImport import sfaImport
+from sfa.plc.sfaImport import sfaImport, _cleanup_string
 
 def process_options():
 
@@ -54,6 +54,16 @@ def save_keys(filename, keys):
     f = open(filename, 'w')
     f.write("keys = %s" % str(keys))
     f.close()
+
+def _get_site_hrn(interface_hrn, site):
+    # Hardcode 'internet2' into the hrn for sites hosting
+    # internet2 nodes. This is a special operation for some vini
+    # sites only
+    hrn = ".".join([interface_hrn, site['login_base']]) 
+    if ".vini" in interface_hrn and interface_hrn.endswith('vini'):
+        if site['login_base'].startswith("i2") or site['login_base'].startswith("nlr"):
+            hrn = ".".join([interface_hrn, "internet2", site['login_base']])
+    return hrn
 
 def main():
 
@@ -145,21 +155,23 @@ def main():
         slices_dict[slice['slice_id']] = slice
     # start importing 
     for site in sites:
-        site_hrn = interface_hrn + "." + site['login_base']
+        site_hrn = _get_site_hrn(interface_hrn, site)
         sfaImporter.logger.info("Importing site: %s" % site_hrn)
 
         # import if hrn is not in list of existing hrns or if the hrn exists
         # but its not a site record
         if site_hrn not in existing_hrns or \
            (site_hrn, 'authority') not in existing_records:
-            site_hrn = sfaImporter.import_site(interface_hrn, site)
+            sfaImporter.import_site(site_hrn, site)
              
         # import node records
         for node_id in site['node_ids']:
             if node_id not in nodes_dict:
                 continue 
             node = nodes_dict[node_id]
-            hrn =  hostname_to_hrn(interface_hrn, site['login_base'], node['hostname'])
+            root_auth = get_authority(site_hrn)
+            site_name = get_leaf(site_hrn)
+            hrn =  hostname_to_hrn(root_auth, site_name, node['hostname'])
             if hrn not in existing_hrns or \
                (hrn, 'node') not in existing_records:
                 sfaImporter.import_node(hrn, node)

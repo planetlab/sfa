@@ -230,7 +230,8 @@ class Slices:
         (slice_hrn, type) = urn_to_hrn(slice_xrn)
         site_hrn = get_authority(slice_hrn)
         # login base can't be longer than 20 characters
-        authority_name = get_leaf(site_hrn) 
+        slicename = hrn_to_pl_slicename(slice_hrn)
+        authority_name = slicename.split('_')[0]
         login_base = authority_name[:20]
         sites = self.api.plshell.GetSites(self.api.plauth, login_base)
         if not sites:

@@ -33,7 +33,7 @@ def hrn_to_urn(hrn,type): return Xrn(hrn, type=type).urn
 def hrn_authfor_hrn(parenthrn, hrn): return Xrn.hrn_is_auth_for_hrn(parenthrn, hrn)
 
 def urn_to_sliver_id(urn, slice_id, node_id, index=0):
-    return ":".join([urn, slice_id, node_id, index])
+    return ":".join(map(str, [urn, slice_id, node_id, index]))
 
 class Xrn:
 
