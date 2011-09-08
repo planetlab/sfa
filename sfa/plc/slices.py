@@ -306,6 +306,10 @@ class Slices:
         for user in users:
             if 'email' in user:     
                 users_dict[user['email'].lower()] = user
+            elif 'urn' in user:
+                fake_email = Xrn(user['urn']).get_leaf() + "@geni.net"
+                user['email'] = fake_email.lower()
+                users_dict[fake_email] = user
             else:
                 fake_email = hrn_to_pl_slicename(slice_hrn) + "@geni.net"
                 user['email'] = fake_email.lower()
