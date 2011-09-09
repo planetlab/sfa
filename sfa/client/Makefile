@@ -1,5 +1,7 @@
 # recompute the SFA graphs from different locations
 
+SFASCAN = ./sfascan.py -v
+
 # AMs, at least MyPLC AMs, are boring
 #BUNDLES += http://planet-lab.eu:12346/@auto-ple-am
 BUNDLES += http://planet-lab.eu:12345/@auto-ple-reg 
@@ -47,10 +49,12 @@ ALL += $(foreach bundle,$(BUNDLES-LR),$(word 2,$(subst @, ,$(bundle)))-lr)
 
 all: $(ALL)
 
+ple: auto-ple-reg auto-ple-sa-lr.out
+
 ####################
 define bundle_scan_target
 $(word 2,$(subst @, ,$(1))):
-	./sfascan.py $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1))).$(extension)) $(word 1,$(subst @, ,$(1))) >& .$(word 2,$(subst @, ,$(1))).out
+	$(SFASCAN) $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1))).$(extension)) $(word 1,$(subst @, ,$(1))) >& .$(word 2,$(subst @, ,$(1))).out
 .PHONY: $(word 2,$(subst @, ,$(1)))
 endef
 
@@ -60,7 +64,7 @@ $(foreach bundle,$(BUNDLES),$(eval $(call bundle_scan_target,$(bundle))))
 #################### same but left-to-right
 define bundle_scan_target_lr
 $(word 2,$(subst @, ,$(1)))-lr:
-	./sfascan.py -l $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1)))-lr.$(extension)) $(word 1,$(subst @, ,$(1))) >& .$(word 2,$(subst @, ,$(1)))-lr.out
+	$(SFASCAN) -l $(foreach extension,$(EXTENSIONS),-o $(word 2,$(subst @, ,$(1)))-lr.$(extension)) $(word 1,$(subst @, ,$(1))) >& .$(word 2,$(subst @, ,$(1)))-lr.out
 .PHONY: $(word 2,$(subst @, ,$(1)))-lr
 endef
 
@@ -88,9 +92,12 @@ clean:
 	rm -f auto-*.{out,version}
 	$(foreach extension,$(EXTENSIONS),rm -rf auto-*.$(extension);)
 
+DATE=$(shell date '+%Y-%m-%d')
 PUBEXTENSIONS=png
 publish:
-	$(foreach extension,$(PUBEXTENSIONS),rsync -av auto-*.$(extension) tparment@srv-planete.inria.fr:/proj/planete/www/Thierry.Parmentelat/sfascan/ ;)
+	echo $(DATE)
+	ssh tparment@srv-planete.inria.fr mkdir /proj/planete/www/Thierry.Parmentelat/sfascan/$(DATE)
+	$(foreach extension,$(PUBEXTENSIONS),rsync -av auto-*.$(extension) tparment@srv-planete.inria.fr:/proj/planete/www/Thierry.Parmentelat/sfascan/$(DATE) ;)
 
 #################### convenience, for debugging only
 # make +foo : prints the value of $(foo)
