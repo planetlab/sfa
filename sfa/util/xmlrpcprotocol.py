@@ -67,7 +67,7 @@ class XMLRPCTransport(xmlrpclib.Transport):
                 real_conn = conn
             conn.connect()
             if hasattr(real_conn, "sock") and hasattr(real_conn.sock, "settimeout"):
-                real_conn.sock.settimeout(self.timeout)
+                real_conn.sock.settimeout(float(self.timeout))
 
         return conn
 
