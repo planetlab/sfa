@@ -2,8 +2,15 @@ import os.path
 import glob
 
 from sfa.trust.gid import GID
+from sfa.util.sfalogging import logger
 
 class TrustedRoots:
+    
+    # we want to avoid reading all files in the directory
+    # this is because it's common to have backups of all kinds
+    # e.g. *~, *.hide, *-00, *.bak and the like
+    supported_extensions= [ 'gid', 'cert', 'pem' ]
+
     def __init__(self, dir):
         self.basedir = dir
         # create the directory to hold the files, if not existing
@@ -20,8 +27,17 @@ class TrustedRoots:
 
     def get_file_list(self):
         file_list  = []
-        pattern=os.path.join(self.basedir,"*.gid")
+        pattern=os.path.join(self.basedir,"*")
         for cert_file in glob.glob(pattern):
             if os.path.isfile(cert_file):
-                file_list.append(cert_file) 
+                if self.has_supported_extension(cert_file):
+                    file_list.append(cert_file) 
+                else:
+                    logger.warning("File %s ignored - supported extensions are %r"%\
+                                       (cert_file,TrustedRoots.supported_extensions))
         return file_list
+
+    def has_supported_extension (self,path):
+        (_,ext)=os.path.splitext(path)
+        ext=ext.replace('.','')
+        return ext in TrustedRoots.supported_extensions
