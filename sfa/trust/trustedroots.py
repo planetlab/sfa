@@ -3,7 +3,7 @@ import glob
 
 from sfa.trust.gid import GID
 
-class TrustedRootList:
+class TrustedRoots:
     def __init__(self, dir):
         self.basedir = dir
         # create the directory to hold the files, if not existing

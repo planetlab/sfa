@@ -5,7 +5,7 @@ import sys
 
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
-from sfa.trust.trustedroots import TrustedRootList
+from sfa.trust.trustedroots import TrustedRoots
 from sfa.util.faults import *
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
@@ -27,8 +27,8 @@ class Auth:
         self.load_trusted_certs()
 
     def load_trusted_certs(self):
-        self.trusted_cert_list = TrustedRootList(self.config.get_trustedroots_dir()).get_list()
-        self.trusted_cert_file_list = TrustedRootList(self.config.get_trustedroots_dir()).get_file_list()
+        self.trusted_cert_list = TrustedRoots(self.config.get_trustedroots_dir()).get_list()
+        self.trusted_cert_file_list = TrustedRoots(self.config.get_trustedroots_dir()).get_file_list()
 
         
         

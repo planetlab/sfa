@@ -20,7 +20,7 @@ from sfa.util.xrn import get_authority, hrn_to_urn
 from sfa.util.plxrn import email_to_hrn
 from sfa.util.config import Config
 from sfa.trust.certificate import convert_public_key, Keypair
-from sfa.trust.trustedroots import *
+from sfa.trust.trustedroots import TrustedRoots
 from sfa.trust.hierarchy import *
 from sfa.trust.gid import create_uuid
 
@@ -55,7 +55,7 @@ class sfaImport:
        self.logger = _SfaLogger(logfile='/var/log/sfa_import.log', loggername='importlog')
        self.AuthHierarchy = Hierarchy()
        self.config = Config()
-       self.TrustedRoots = TrustedRootList(Config.get_trustedroots_dir(self.config))
+       self.TrustedRoots = TrustedRoots(Config.get_trustedroots_dir(self.config))
        self.plc_auth = self.config.get_plc_auth()
        self.root_auth = self.config.SFA_REGISTRY_ROOT_AUTH
         
