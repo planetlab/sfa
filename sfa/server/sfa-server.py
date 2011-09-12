@@ -39,7 +39,7 @@ import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from optparse import OptionParser
 
 from sfa.util.sfalogging import logger
-from sfa.trust.trustedroot import TrustedRootList
+from sfa.trust.trustedroots import TrustedRootList
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
 from sfa.trust.gid import GID

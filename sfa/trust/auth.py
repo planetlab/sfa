@@ -5,7 +5,7 @@ import sys
 
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
-from sfa.trust.trustedroot import TrustedRootList
+from sfa.trust.trustedroots import TrustedRootList
 from sfa.util.faults import *
 from sfa.trust.hierarchy import Hierarchy
 from sfa.util.config import *
