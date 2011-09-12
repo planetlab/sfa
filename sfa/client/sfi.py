@@ -962,7 +962,7 @@ class Sfi:
         all_keys = []
         all_key_ids = []
         slice_records = self.registry.Resolve(slice_urn, [user_cred.save_to_string(save_parents=True)])
-        if slice_records and 'researcher' in slice_records[0]:
+        if slice_records and 'researcher' in slice_records[0] and slice_records[0]['researcher']!=[]:
             slice_record = slice_records[0]
             user_hrns = slice_record['researcher']
             user_urns = [hrn_to_urn(hrn, 'user') for hrn in user_hrns]
