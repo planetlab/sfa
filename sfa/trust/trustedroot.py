@@ -20,7 +20,8 @@ class TrustedRootList:
 
     def get_file_list(self):
         file_list  = []
-        for cert_file in os.listdir(self.basedir):
+        pattern=os.path.join(self.basedir,"*.gid")
+        for cert_file in glob.glob(pattern):
             if os.path.isfile(cert_file):
-                file_list.append(os.path.join(self.basedir, cert_file)) 
+                file_list.append(cert_file) 
         return file_list
