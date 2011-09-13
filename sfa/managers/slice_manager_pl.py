@@ -96,7 +96,7 @@ def add_slicemgr_stat(rspec, callname, aggname, elapsed, status):
         if stats_tags:
             stats_tag = stats_tags[0]
         else:
-            stats_tag = etree.SubElement(rspec.xml, "statistics", call="ListResources")
+            stats_tag = etree.SubElement(rspec.xml, "statistics", call=callname)
 
         etree.SubElement(stats_tag, "aggregate", name=str(aggname), elapsed=str(elapsed), status=str(status))
     except Exception, e:
