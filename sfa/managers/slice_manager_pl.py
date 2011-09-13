@@ -350,7 +350,7 @@ caching=True
 #caching=False
 def ListSlices(api, creds, call_id):
     def _ListSlices(server, creds, call_id):
-        server_version = api.get_cached_server_version(api, server)
+        server_version = api.get_cached_server_version(server)
         args =  [creds]
         if _call_id_supported(api, server):
             args.append(call_id)
