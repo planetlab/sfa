@@ -39,5 +39,5 @@ class TrustedRoots:
 
     def has_supported_extension (self,path):
         (_,ext)=os.path.splitext(path)
-        ext=ext.replace('.','')
+        ext=ext.replace('.','').lower()
         return ext in TrustedRoots.supported_extensions
