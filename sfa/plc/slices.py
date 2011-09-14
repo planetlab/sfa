@@ -305,16 +305,17 @@ class Slices:
         users_dict = {}
         for user in users:
             if 'email' in user:     
-                users_dict[user['email'].lower()] = user
+                user['email'] = user['email'].lower()
             elif 'urn' in user:
-                fake_email = Xrn(user['urn']).get_leaf() + "@geni.net"
-                user['email'] = fake_email.lower()
-                users_dict[fake_email] = user
+                email = Xrn(user['urn']).get_leaf() + "@geni.net"
+                email = email.lower()
+                user['email'] = email  
             else:
-                fake_email = hrn_to_pl_slicename(slice_hrn) + "@geni.net"
-                user['email'] = fake_email.lower()
-                users_dict[fake_email] = user
-        
+                email = hrn_to_pl_slicename(slice_hrn) + "@geni.net"
+                email = email.lower()
+                user['email'] = email  
+            users_dict[email] = user
+
         # requested slice users        
         requested_user_ids = users_dict.keys()
         
