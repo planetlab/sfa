@@ -4,7 +4,7 @@ import traceback
 import sys
 
 from types import StringTypes
-from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
+from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn, urn_to_hrn
 from sfa.util.plxrn import hrn_to_pl_slicename, hrn_to_pl_login_base
 from sfa.util.rspec import *
 from sfa.util.specdict import *
