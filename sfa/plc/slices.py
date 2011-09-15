@@ -305,7 +305,8 @@ class Slices:
         users_dict = {}
         for user in users:
             if 'email' in user:     
-                user['email'] = user['email'].lower()
+                email = user['email'].lower()
+                user['email'] = email
             elif 'urn' in user:
                 email = Xrn(user['urn']).get_leaf() + "@geni.net"
                 email = email.lower()
