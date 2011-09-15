@@ -1,6 +1,6 @@
 %define name sfa
 %define version 1.0
-%define taglevel 35
+%define taglevel 36
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -196,6 +196,15 @@ fi
 [ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Thu Sep 15 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-36
+- Unicode-friendliness for user names with accents/special chars.
+- Fix bug that could cause create the client to fail when calling CreateSliver for a slice that has the same hrn as a user.
+- CreaetSliver no longer fails for users that have a capital letter in their URN.
+- Fix bug in CreateSliver that generated incorrect login bases and email addresses for ProtoGENI requests. 
+- Allow files with .gid, .pem or .crt extension to be loaded into the server's list of trusted certs.
+- Fix bugs and missing imports     
+ 
+
 * Tue Aug 30 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-35
 - new method record.get_field for sface
 
