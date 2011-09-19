@@ -21,7 +21,7 @@ from sfa.trust.credential import Credential
 from sfa.plc.api import SfaAPI
 from sfa.util.plxrn import hrn_to_pl_slicename, slicename_to_hrn
 from sfa.util.callids import Callids
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 from sfa.rspecs.sfa_rspec import sfa_rspec_version
 from sfa.util.version import version_core
 
@@ -369,7 +369,7 @@ class EucaRSpecBuilder(object):
         xml = self.eucaRSpec
         cloud = self.cloudInfo
         with xml.RSpec(type='eucalyptus'):
-            with xml.network(id=cloud['name']):
+            with xml.network(name=cloud['name']):
                 with xml.ipv4:
                     xml << cloud['ip']
                 #self.__keyPairsXML(cloud['keypairs'])
@@ -429,8 +429,7 @@ def ListResources(api, creds, options, call_id):
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
     if not origin_hrn:
-        origin_hrn = Credential(string=creds).get_gid_caller().get_hrn()
-        # origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
+        origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
 
     conn = getEucaConnection()
 
