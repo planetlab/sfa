@@ -140,7 +140,7 @@ class SfaAPI(BaseAPI):
             cred = Credential(filename = cred_filename)
             # make sure cred isnt expired
             if not cred.get_expiration or \
-               datetime.datetime.today() < cred.get_expiration():    
+               datetime.datetime.utcnow() < cred.get_expiration():    
                 return cred.save_to_string(save_parents=True)
 
         # get a new credential
