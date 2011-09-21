@@ -19,9 +19,11 @@ from sfa.util.rspec import RSpec
 from sfa.server.registry import Registries
 from sfa.trust.credential import Credential
 from sfa.plc.api import SfaAPI
+from sfa.plc.aggregate import Aggregate
+from sfa.plc.slices import *
 from sfa.util.plxrn import hrn_to_pl_slicename, slicename_to_hrn
 from sfa.util.callids import Callids
-from sfa.util.sfalogging import sfa_logger
+from sfa.util.sfalogging import logger
 from sfa.rspecs.sfa_rspec import sfa_rspec_version
 from sfa.util.version import version_core
 
@@ -219,6 +221,9 @@ def getEucaConnection():
 # @param sliceHRN The hunman readable name of the slice.
 # @return sting()
 #
+# This method is no longer needed because the user keys are passed into
+# CreateSliver
+#
 def getKeysForSlice(api, sliceHRN):
     logger   = logging.getLogger('EucaAggregate')
     cred     = api.getCredential()
@@ -240,7 +245,7 @@ def getKeysForSlice(api, sliceHRN):
         userKeys = sliceUser[0]['keys']
         keys += userKeys
 
-    return ''.join(keys)
+    return '\n'.join(keys)
 
 ##
 # A class that builds the RSpec for Eucalyptus.
@@ -369,7 +374,7 @@ class EucaRSpecBuilder(object):
         xml = self.eucaRSpec
         cloud = self.cloudInfo
         with xml.RSpec(type='eucalyptus'):
-            with xml.network(id=cloud['name']):
+            with xml.network(name=cloud['name']):
                 with xml.ipv4:
                     xml << cloud['ip']
                 #self.__keyPairsXML(cloud['keypairs'])
@@ -429,8 +434,7 @@ def ListResources(api, creds, options, call_id):
     # get hrn of the original caller
     origin_hrn = options.get('origin_hrn', None)
     if not origin_hrn:
-        origin_hrn = Credential(string=creds).get_gid_caller().get_hrn()
-        # origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
+        origin_hrn = Credential(string=creds[0]).get_gid_caller().get_hrn()
 
     conn = getEucaConnection()
 
@@ -516,12 +520,21 @@ def ListResources(api, creds, options, call_id):
 """
 Hook called via 'sfi.py create'
 """
-def CreateSliver(api, xrn, creds, xml, users, call_id):
+def CreateSliver(api, slice_xrn, creds, xml, users, call_id):
     if Callids().already_handled(call_id): return ""
 
     global cloud
-    hrn = urn_to_hrn(xrn)[0]
     logger = logging.getLogger('EucaAggregate')
+    logger.debug("In CreateSliver")
+
+    aggregate = Aggregate(api)
+    slices = Slices(api)
+    (hrn, type) = urn_to_hrn(slice_xrn)
+    peer = slices.get_peer(hrn)
+    sfa_peer = slices.get_sfa_peer(hrn)
+    slice_record=None
+    if users:
+        slice_record = users[0].get('slice_record', {})
 
     conn = getEucaConnection()
     if not conn:
@@ -540,9 +553,19 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
     if not rspecValidator(rspecXML):
         error = rspecValidator.error_log.last_error
         message = '%s (line %s)' % (error.message, error.line) 
-        # XXX: InvalidRSpec is new. Currently, I am not working with Trunk code.
-        #raise InvalidRSpec(message)
-        raise Exception(message)
+        raise InvalidRSpec(message)
+
+    """
+    Create the sliver[s] (slice) at this aggregate.
+    Verify HRN and initialize the slice record in PLC if necessary.
+    """
+
+    # ensure site record exists
+    site = slices.verify_site(hrn, slice_record, peer, sfa_peer)
+    # ensure slice record exists
+    slice = slices.verify_slice(hrn, slice_record, peer, sfa_peer)
+    # ensure person records exists
+    persons = slices.verify_persons(hrn, slice, users, peer, sfa_peer)
 
     # Get the slice from db or create one.
     s = Slice.select(Slice.q.slice_hrn == hrn).getOne(None)
@@ -559,18 +582,24 @@ def CreateSliver(api, xrn, creds, xml, users, call_id):
             if existingInst.get('id') in pendingRmInst:
                 pendingRmInst.remove(existingInst.get('id'))
     for inst in pendingRmInst:
-        logger.debug('Instance %s will be terminated' % inst)
         dbInst = EucaInstance.select(EucaInstance.q.instance_id == inst).getOne(None)
-        # Only change the state but do not remove the entry from the DB.
-        dbInst.meta.state = 'deleted'
-        #dbInst.destroySelf()
-    conn.terminate_instances(pendingRmInst)
+        if dbInst.meta.state != 'deleted':
+            logger.debug('Instance %s will be terminated' % inst)
+            # Terminate instances one at a time for robustness
+            conn.terminate_instances([inst])
+            # Only change the state but do not remove the entry from the DB.
+            dbInst.meta.state = 'deleted'
+            #dbInst.destroySelf()
 
     # Process new instance requests
     requests = rspecXML.findall(".//request")
     if requests:
         # Get all the public keys associate with slice.
-        pubKeys = getKeysForSlice(api, s.slice_hrn)
+        keys = []
+        for user in users:
+            keys += user['keys']
+            logger.debug("Keys: %s" % user['keys'])
+        pubKeys = '\n'.join(keys)
         logger.debug('Passing the following keys to the instance:\n%s' % pubKeys)
     for req in requests:
         vmTypeElement = req.getparent()
