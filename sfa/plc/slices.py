@@ -378,7 +378,7 @@ class Slices:
         # Remove stale users (only if we are not appending).
         if append == False:
             for removed_user_id in removed_user_ids:
-                self.api.plshell.DeletePersonFromSlice(self.api.plauth, removed_user_id, slicename)
+                self.api.plshell.DeletePersonFromSlice(self.api.plauth, removed_user_id, slice_record['name'])
         # update_existing users
         updated_users_list = [user for user in existing_slice_users if user['email'] in \
           updated_user_ids]
