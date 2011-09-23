@@ -12,6 +12,7 @@ from sfa.util.faults import *
 from sfa.util.record import SfaRecord
 from sfa.util.policy import Policy
 from sfa.util.prefixTree import prefixTree
+from collections import defaultdict
 
 MAXINT =  2L**31-1
 
@@ -295,37 +296,73 @@ class Slices:
                 self.api.plshell.UpdateSlice(self.api.plauth, slice['slice_id'],\
                              {'expires' : slice_record['expires']})
        
-        return slice        
+        return slice
 
-    def verify_persons(self, slice_hrn, slice_record, users, peer, sfa_peer):
-        slicename = hrn_to_pl_slicename(slice_hrn)
-        login_base = hrn_to_pl_login_base(slice_hrn)
- 
-        # create a dict users keyed on the user's email
-        users_dict = {}
+    #def get_existing_persons(self, users):
+    def verify_persons(self, slice_hrn, slice_record, users, peer, sfa_peer, append=True):
+        users_by_email = {}
+        users_by_site = defaultdict(list)
+
+        users_dict = {} 
         for user in users:
-            if 'email' in user:     
-                email = user['email'].lower()
-                user['email'] = email
+            if 'append' in user and user['append'] == False:
+                append = False
+            if 'email' in user:
+                users_by_email[user['email']] = user
+                users_dict[user['email']] = user
             elif 'urn' in user:
-                email = Xrn(user['urn']).get_leaf() + "@geni.net"
-                email = email.lower()
-                user['email'] = email  
-            else:
-                email = hrn_to_pl_slicename(slice_hrn) + "@geni.net"
-                email = email.lower()
-                user['email'] = email  
-            users_dict[email] = user
+                hrn, type = urn_to_hrn(user['urn'])
+                username = get_leaf(hrn) 
+                login_base = get_leaf(get_authority(user['urn']))
+                user['username'] = username 
+                users_by_site[login_base].append(user)
+
+        existing_user_ids = []
+        if users_by_email:
+            # get existing users by email 
+            existing_users = self.api.plshell.GetPersons(self.api.plauth, \
+                {'email': users_by_email.keys()}, ['person_id', 'key_ids', 'email'])
+            existing_user_ids.extend([user['email'] for user in existing_users])
+
+        if users_by_site:
+            # get a list of user sites (based on requeste user urns
+            site_list = self.api.plshell.GetSites(self.api.plauth, users_by_site.keys(), \
+                ['site_id', 'login_base', 'person_ids'])
+            sites = {}
+            site_user_ids = []
+            
+            # get all existing users at these sites
+            for site in site_list:
+                sites[site['site_id']] = site
+                site_user_ids.extend(site['person_ids'])
+
+            existing_site_persons_list = self.api.plshell.GetPersons(self.api.plauth, \
+              site_user_ids,  ['person_id', 'key_ids', 'email', 'site_ids'])
+
+            # all requested users are either existing users or new (added) users      
+            for login_base in users_by_site:
+                requested_site_users = users_by_site[login_base]
+                for requested_user in requested_site_users:
+                    user_found = False
+                    for existing_user in existing_site_persons_list:
+                        for site_id in existing_user['site_ids']:
+                            site = sites[site_id]
+                            if login_base == site['login_base'] and \
+                               existing_user['email'].startswith(requested_user['username']):
+                                existing_user_ids.append(existing_user['email'])
+                                users_dict[existing_user['email']] = requested_user
+                                user_found = True
+                                break
+                        if user_found:
+                            break
+      
+                    if user_found == False:
+                        fake_email = requested_user['username'] + '@geni.net'
+                        users_dict[fake_email] = requested_user
+                
 
         # requested slice users        
         requested_user_ids = users_dict.keys()
-        
-        # existing users
-        existing_users_filter = {'email': requested_user_ids}
-        existing_users = self.api.plshell.GetPersons(self.api.plauth, \
-            existing_users_filter, ['person_id', 'key_ids', 'email'])
-        existing_user_ids = [user['email'] for user in existing_users]
-            
         # existing slice users
         existing_slice_users_filter = {'person_id': slice_record.get('person_ids', [])}
         existing_slice_users = self.api.plshell.GetPersons(self.api.plauth, \
@@ -338,13 +375,14 @@ class Slices:
         removed_user_ids = set(existing_slice_user_ids).difference(requested_user_ids)
         updated_user_ids = set(existing_slice_user_ids).intersection(requested_user_ids)
 
-        # remove stale users
-        for removed_user_id in removed_user_ids:
-            self.api.plshell.DeletePersonFromSlice(self.api.plauth, removed_user_id, slicename)
-
+        # Remove stale users (only if we are not appending).
+        if append == False:
+            for removed_user_id in removed_user_ids:
+                self.api.plshell.DeletePersonFromSlice(self.api.plauth, removed_user_id, slicename)
         # update_existing users
-        updated_users_list = [user for user in users if user['email'] in updated_user_ids]
-        self.verify_keys(existing_slice_users, updated_users_list, peer)
+        updated_users_list = [user for user in existing_slice_users if user['email'] in \
+          updated_user_ids]
+        self.verify_keys(existing_slice_users, updated_users_list, peer, append)
 
         added_persons = []
         # add new users
@@ -383,16 +421,14 @@ class Slices:
     
         for added_slice_user_id in added_slice_user_ids.union(added_user_ids):
             # add person to the slice 
-            self.api.plshell.AddPersonToSlice(self.api.plauth, added_slice_user_id, slicename)
-
-            
+            self.api.plshell.AddPersonToSlice(self.api.plauth, added_slice_user_id, slice_record['name'])
             # if this is a peer record then it should already be bound to a peer.
             # no need to return worry about it getting bound later 
 
         return added_persons
             
 
-    def verify_keys(self, persons, users, peer):
+    def verify_keys(self, persons, users, peer, append=True):
         # existing keys 
         key_ids = []
         for person in persons:
@@ -430,16 +466,17 @@ class Slices:
                         if peer:
                             self.api.plshell.BindObjectToPeer(self.api.plauth, 'person', person['person_id'], peer['shortname'], user['person_id'])
         
-        # remove old keys
-        removed_keys = set(existing_keys).difference(requested_keys)
-        for existing_key_id in keydict:
-            if keydict[existing_key_id] in removed_keys:
-                try:
-                    if peer:
-                        self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'key', existing_key_id, peer['shortname'])
-                    self.api.plshell.DeleteKey(self.api.plauth, existing_key_id)
-                except:
-                    pass   
+        # remove old keys (only if we are not appending)
+        if append == False: 
+            removed_keys = set(existing_keys).difference(requested_keys)
+            for existing_key_id in keydict:
+                if keydict[existing_key_id] in removed_keys:
+                    try:
+                        if peer:
+                            self.api.plshell.UnBindObjectFromPeer(self.api.plauth, 'key', existing_key_id, peer['shortname'])
+                        self.api.plshell.DeleteKey(self.api.plauth, existing_key_id)
+                    except:
+                        pass   
 
     def verify_slice_attributes(self, slice, requested_slice_attributes):
         # get list of attributes users ar able to manage
