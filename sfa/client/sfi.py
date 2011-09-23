@@ -699,7 +699,6 @@ class Sfi:
         hrn = args[0]
         user_cred = self.get_user_cred().save_to_string(save_parents=True)
         records = self.registry.Resolve(hrn, user_cred)
-        print records
         records = filter_records(opts.type, records)
         if not records:
             print "No record of type", opts.type
