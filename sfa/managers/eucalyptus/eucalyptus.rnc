@@ -6,7 +6,7 @@ RSpec = element RSpec {
     network
 }
 network = element network {
-    attribute id { xsd:NMTOKEN },
+    attribute name { xsd:NMTOKEN },
     user_info?,
     ipv4,
     bundles,
