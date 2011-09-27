@@ -21,7 +21,7 @@
   </define>
   <define name="network">
     <element name="network">
-      <attribute name="id">
+      <attribute name="name">
         <data type="NMTOKEN"/>
       </attribute>
       <optional>

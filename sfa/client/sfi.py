@@ -88,14 +88,32 @@ def save_rspec_to_file(rspec, filename):
     f.close()
     return
 
-def save_records_to_file(filename, recordList):
-    index = 0
-    for record in recordList:
-        if index > 0:
-            save_record_to_file(filename + "." + str(index), record)
-        else:
-            save_record_to_file(filename, record)
-        index = index + 1
+def save_records_to_file(filename, recordList, format="xml"):
+    if format == "xml":
+        index = 0
+        for record in recordList:
+            if index > 0:
+                save_record_to_file(filename + "." + str(index), record)
+            else:
+                save_record_to_file(filename, record)
+            index = index + 1
+    elif format == "xmllist":
+        f = open(filename, "w")
+        f.write("<recordlist>\n")
+        for record in recordList:
+            record = SfaRecord(dict=record)
+            f.write('<record hrn="' + record.get_name() + '" type="' + record.get_type() + '" />\n')
+        f.write("</recordlist>\n");
+        f.close()
+    elif format == "hrnlist":
+        f = open(filename, "w")
+        for record in recordList:
+            record = SfaRecord(dict=record)
+            f.write(record.get_name() + "\n")
+        f.close()
+    else:
+        # this should never happen
+        print "unknown output format", format
 
 def save_record_to_file(filename, record):
     if record['type'] in ['user']:
@@ -229,11 +247,15 @@ class Sfi:
         if command in ("resources", "show", "list", "create_gid", 'create'):
            parser.add_option("-o", "--output", dest="file",
                             help="output XML to file", metavar="FILE", default=None)
-        
+
         if command in ("show", "list"):
            parser.add_option("-f", "--format", dest="format", type="choice",
                              help="display format ([text]|xml)", default="text",
                              choices=("text", "xml"))
+
+           parser.add_option("-F", "--fileformat", dest="fileformat", type="choice",
+                             help="output file format ([xml]|xmllist|hrnlist)", default="xml",
+                             choices=("xml", "xmllist", "hrnlist"))
 
         if command in ("delegate"):
            parser.add_option("-u", "--user",
@@ -681,14 +703,14 @@ class Sfi:
             list = self.registry.List(hrn, user_cred)
         except IndexError:
             raise Exception, "Not enough parameters for the 'list' command"
-          
-        # filter on person, slice, site, node, etc.  
+
+        # filter on person, slice, site, node, etc.
         # THis really should be in the self.filter_records funct def comment...
         list = filter_records(opts.type, list)
         for record in list:
-            print "%s (%s)" % (record['hrn'], record['type'])     
+            print "%s (%s)" % (record['hrn'], record['type'])
         if opts.file:
-            save_records_to_file(opts.file, list)
+            save_records_to_file(opts.file, list, opts.fileformat)
         return
     
     # show named registry record
@@ -718,7 +740,7 @@ class Sfi:
             else:
                 print record.save_to_string() 
         if opts.file:
-            save_records_to_file(opts.file, records)
+            save_records_to_file(opts.file, records, opts.fileformat)
         return
     
     def delegate(self, opts, args):

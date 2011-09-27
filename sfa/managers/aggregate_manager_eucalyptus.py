@@ -546,7 +546,7 @@ def CreateSliver(api, slice_xrn, creds, xml, users, call_id):
     rspecValidator = ET.RelaxNG(schemaXML)
     rspecXML = ET.XML(xml)
     for network in rspecXML.iterfind("./network"):
-        if network.get('id') != cloud['name']:
+        if network.get('name') != cloud['name']:
             # Throw away everything except my own RSpec
             # sfa_logger().error("CreateSliver: deleting %s from rspec"%network.get('id'))
             network.getparent().remove(network)
