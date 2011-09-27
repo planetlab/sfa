@@ -105,9 +105,12 @@ class Aggregate:
             # only doing this becuase protogeni rspec needs
             # to advertise available initscripts 
             node['pl_initscripts'] = self.pl_initscripts
-            if not node['slice_ids_whitelist']:
+
+            if slice and node['node_id'] in slice['node_ids']:
                 valid_nodes.append(node)
             elif slice and slice['slice_id'] in node['slice_ids_whitelist']:
+                valid_nodes.append(node)
+            elif not slice and not node['slice_ids_whitelist']:
                 valid_nodes.append(node)
     
         rspec.add_nodes(valid_nodes)
