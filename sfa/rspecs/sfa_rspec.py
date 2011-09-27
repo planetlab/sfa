@@ -1,4 +1,5 @@
-#!/usr/bin/python 
+#!/usr/bin/python
+from copy import deepcopy
 from lxml import etree
 from StringIO import StringIO
 from sfa.rspecs.rspec import RSpec 
@@ -194,7 +195,7 @@ class SfaRSpec(RSpec):
 
     def add_network(self, network):
         network_tags = self.xml.xpath('//network[@name="%s"]' % network)
-        if not network_tags:            
+        if not network_tags:
             network_tag = etree.SubElement(self.xml, 'network', name=network)
         else:
             network_tag = network_tags[0]
@@ -241,14 +242,22 @@ class SfaRSpec(RSpec):
                 longitude = str(node['site']['longitude'])
                 latitude = str(node['site']['latitude'])
                 location = etree.SubElement(node_tag, 'location', country='unknown', \
-                                            longitude=longitude, latitude=latitude)                
+                                            longitude=longitude, latitude=latitude)
+
+    def merge_node(self, source_node_tag, network, no_dupes=False):
+        if no_dupes and self.get_node_element(node['hostname']):
+            # node already exists
+            return
+
+        network_tag = self.add_network(network)
+        network_tag.append(deepcopy(source_node_tag))
 
     def add_interfaces(self, interfaces):
-        pass     
+        pass
 
     def add_links(self, links):
         pass
-    
+
     def add_slivers(self, slivers, network=None, sliver_urn=None, no_dupes=False):
         # add slice name to network tag
         network_tags = self.xml.xpath('//network')

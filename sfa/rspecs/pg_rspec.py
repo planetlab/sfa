@@ -1,4 +1,5 @@
-#!/usr/bin/python 
+#!/usr/bin/python
+from copy import deepcopy
 from lxml import etree
 from StringIO import StringIO
 from sfa.rspecs.rspec import RSpec 
@@ -187,6 +188,9 @@ class PGRSpec(RSpec):
                     location_tag = etree.SubElement(node_tag, 'location', country="us", \
                                                     longitude=str(longitude), latitude=str(latitude))
 
+    def merge_node(self, source_node_tag):
+        # this is untested
+        self.xml.append(deepcopy(source_node_tag))
 
     def add_slivers(self, slivers, sliver_urn=None, no_dupes=False): 
 
