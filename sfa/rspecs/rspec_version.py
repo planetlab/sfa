@@ -9,6 +9,7 @@ class BaseVersion:
     naemspace = None
     extensions = {}
     elements = []
+    enabled = False
 
     def to_dict(self):
         return {

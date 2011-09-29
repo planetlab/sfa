@@ -1,7 +1,8 @@
-from sfa.rspecs.rspec_version import RSpecVersion
+from sfa.rspecs.rspec_version import BaseVersion
 from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements
 
-class SFAv1(RSpecVersion):
+class SFAv1(BaseVersion):
+    enabled = True
     type = 'SFA'
     content_type = '*'
     version = '1'
