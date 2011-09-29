@@ -114,7 +114,7 @@ def ListResources(api, creds, options, call_id):
             version = api.get_cached_server_version(server)
             # force ProtoGENI aggregates to give us a v2 RSpec
             if 'sfa' not in version.keys():
-                my_opts['rspec_version'] = pg_rspec_ad_version
+                my_opts['rspec_version'] = dict(pg_rspec_ad_version)
             rspec = server.ListResources(*args)
             return {"aggregate": aggregate, "rspec": rspec, "elapsed": time.time()-tStart, "status": "success"}
         except Exception, e:
