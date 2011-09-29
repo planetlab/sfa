@@ -4,9 +4,9 @@ class PGv2:
     type = 'ProtoGENI'
     content_type = '*'
     version = '2'
-    schema = 'http://www.protogeni.net/resources/rspec/2/*.xsd' 
-    namespaces = { 
-        'default' : 'http://www.protogeni.net/resources/rspec/2',
+    schema = 'http://www.protogeni.net/resources/rspec/2/*.xsd'
+    namespace = 'http://www.protogeni.net/resources/rspec/2' 
+    extensions = { 
         'flack': "http://www.protogeni.net/resources/rspec/ext/flack/1",
         'planetlab': "http://www.planet-lab.org/resources/sfa/ext/planetlab/1", 
     }

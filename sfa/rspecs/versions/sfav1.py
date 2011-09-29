@@ -1,11 +1,13 @@
+from sfa.rspecs.rspec_version import RSpecVersion
 from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements
 
-class SFAv1:
+class SFAv1(RSpecVersion):
     type = 'SFA'
     content_type = '*'
     version = '1'
     schema = None
-    namespaces = {}
+    namespace = None
+    extensions = {}
     elements = [
         RSpecElement(RSpecElements.NETWORK, 'network', '//network'),
         RSpecElement(RSpecElements.NODE, 'node', '//node'),
