@@ -23,8 +23,8 @@ class VersionManager:
             module = __import__(module_path, fromlist=module_path)
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
-                if hasattr(attr, 'version'):
-                    self.versions.append(attr)
+                if hasattr(attr, 'version') and hasattr(attr, 'enabled') and attr.enabled == True:
+                    self.versions.append(attr())
 
     def _get_version(self, type, version_num=None, content_type=None):
         retval = None
@@ -40,7 +40,7 @@ class VersionManager:
     def get_version(self, version=None):
         retval = None
         if isinstance(version, dict):
-            retval =  self._get_version(version.get('type'), version.get('version_num'), version.get('content_type'))
+            retval =  self._get_version(version.get('type'), version.get('version'), version.get('content_type'))
         elif isinstance(version, basestring):
             version_parts = version.split(' ')     
             num_parts = len(version_parts)

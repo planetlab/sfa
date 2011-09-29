@@ -1,6 +1,29 @@
 #!/usr/bin/python
 from sfa.util.sfalogging import logger
 
+class BaseVersion:
+    type = None
+    content_type = None
+    version = None
+    schema = None
+    naemspace = None
+    extensions = {}
+    elements = []
+    enabled = False
+
+    def to_dict(self):
+        return {
+            'type': self.type,
+            'version': self.version,
+            'schema': self.schema,
+            'namespace': self.namespace,
+            'extensions': self.extensions
+        }
+
+    def to_string(self):
+        return "%s %s" % (self.type, self.version)
+    
+
 class RSpecVersion(dict):
 
     fields = {'type': None,
