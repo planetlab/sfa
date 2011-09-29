@@ -1,7 +1,7 @@
 from __future__ import with_statement 
 
 import sys
-import os
+import os, errno
 import logging
 import datetime
 
@@ -631,6 +631,34 @@ def CreateSliver(api, slice_xrn, creds, xml, users, call_id):
     return xml
 
 ##
+# Return information on the IP addresses bound to each slice's instances
+#
+def dumpInstanceInfo():
+    logger = logging.getLogger('EucaMeta')
+    outdir = "/var/www/html/euca/"
+    outfile = outdir + "instances.txt"
+
+    try:
+        os.makedirs(outdir)
+    except OSError, e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    dbResults = Meta.select(
+        AND(Meta.q.pri_addr != None,
+            Meta.q.state    == 'running')
+        )
+    dbResults = list(dbResults)
+    f = open(outfile, "w")
+    for r in dbResults:
+        instId = r.instance.instance_id
+        ipaddr = r.pri_addr
+        hrn = r.instance.slice.slice_hrn
+        logger.debug('[dumpInstanceInfo] %s %s %s' % (instId, ipaddr, hrn))
+        f.write("%s %s %s\n" % (instId, ipaddr, hrn))
+    f.close()
+
+##
 # A separate process that will update the meta data.
 #
 def updateMeta():
@@ -677,6 +705,8 @@ def updateMeta():
             dbInst.meta.pri_addr = ipData['pri_addr']
             dbInst.meta.pub_addr = ipData['pub_addr']
             dbInst.meta.state    = 'running'
+
+        dumpInstanceInfo()
 
 def GetVersion(api):
     xrn=Xrn(api.hrn)
