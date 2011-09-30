@@ -681,6 +681,8 @@ def updateMeta():
         logger.debug('[update process] dbResults: %s' % dbResults)
         instids = []
         for r in dbResults:
+            if not r.instance:
+                continue
             instids.append(r.instance.instance_id)
         logger.debug('[update process] Instance Id: %s' % ', '.join(instids))
 
