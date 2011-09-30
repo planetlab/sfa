@@ -6,10 +6,14 @@ class BaseVersion:
     content_type = None
     version = None
     schema = None
-    naemspace = None
+    namespace = None
     extensions = {}
+    namespaces = dict(extensions.items() + [('default', namespace)])
     elements = []
     enabled = False
+
+    def __init__(self, xml=None):
+        self.xml = xml
 
     def to_dict(self):
         return {
