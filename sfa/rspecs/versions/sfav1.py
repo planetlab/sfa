@@ -1,3 +1,5 @@
+from lxml import etree
+from sfa.util.xrn import hrn_to_urn, urn_to_hrn
 from sfa.rspecs.rspec_version import BaseVersion
 from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements
 
@@ -254,9 +256,11 @@ class SFAv1(BaseVersion):
         if network_tags:
             network_tag = network_tags[0]
             network_tag.set('slice', urn_to_hrn(sliver_urn)[0])
-        slivers = self._process_slivers(slivers)
+        
         nodes_with_slivers = self.get_nodes_with_slivers(network)
         for sliver in slivers:
+            if isinstance(sliver, basestring):
+                sliver = {'hostname': sliver}
             if sliver['hostname'] in nodes_with_slivers:
                 continue
             node_elem = self.get_node_element(sliver['hostname'], network)

@@ -7,6 +7,16 @@ from sfa.rspecs.rspec_version import BaseVersion
 from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements
 
 class PGv2(BaseVersion):
+    type = 'ProtoGENI'
+    content_type = 'ad'
+    version = '2'
+    schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    namespace = 'http://www.protogeni.net/resources/rspec/2'
+    extensions = {
+        'flack': "http://www.protogeni.net/resources/rspec/ext/flack/1",
+        'planetlab': "http://www.planet-lab.org/resources/sfa/ext/planetlab/1",
+    }
+    namespaces = dict(extensions.items() + [('default', namespace)])
     elements = [
         RSpecElement(RSpecElements.NETWORK, 'network', '//default:node[@component_manager_id][1]'),
         RSpecElement(RSpecElements.NODE, 'node', '//default:node | //node'),
@@ -143,10 +153,12 @@ class PGv2(BaseVersion):
 
         # all nodes hould already be present in the rspec. Remove all
         # nodes that done have slivers
-        slivers = self._process_slivers(slivers)
         slivers_dict = {}
         for sliver in slivers:
-            slivers_dict[sliver['hostname']] = sliver
+            if isinstance(sliver, basestring):
+                slivers_dict[sliver] = {'hostname': sliver}
+            elif isinstance(sliver, dict):
+                slivers_dict[sliver['hostname']] = sliver        
 
         nodes = self.get_node_elements()
         for node in nodes:
@@ -207,41 +219,20 @@ class PGv2(BaseVersion):
 
 class PGv2Ad(PGv2):
     enabled = True
-    type = 'ProtoGENI'
     content_type = 'ad'
-    version = '2'
     schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    namespace = 'http://www.protogeni.net/resources/rspec/2'
-    extensions = {
-        'flack': "http://www.protogeni.net/resources/rspec/ext/flack/1",
-        'planetlab': "http://www.planet-lab.org/resources/sfa/ext/planetlab/1",
-    }
     template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" />'
 
 class PGv2Request(PGv2):
     enabled = True
-    type = 'ProtoGENI'
     content_type = 'request'
-    version = '2'
     schema = 'http://www.protogeni.net/resources/rspec/2/request.xsd'
-    namespace = 'http://www.protogeni.net/resources/rspec/2'
-    extensions = {
-        'flack': "http://www.protogeni.net/resources/rspec/ext/flack/1",
-        'planetlab': "http://www.planet-lab.org/resources/sfa/ext/planetlab/1",
-    }
     template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/request.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" />'
 
 class PGv2Manifest(PGv2):
     enabled = True
-    type = 'ProtoGENI'
     content_type = 'manifest'
-    version = '2'
     schema = 'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
-    namespace = 'http://www.protogeni.net/resources/rspec/2'
-    extensions = {
-        'flack': "http://www.protogeni.net/resources/rspec/ext/flack/1",
-        'planetlab': "http://www.planet-lab.org/resources/sfa/ext/planetlab/1",
-    }
     template = '<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.protogeni.net/resources/rspec/2" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/manifest.xsd" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" />'
      
 
