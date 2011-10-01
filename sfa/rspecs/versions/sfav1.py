@@ -333,16 +333,16 @@ class SFAv1(BaseVersion):
         Merge contents for specified rspec with current rspec
         """
 
-        from sfa.rspecs.rspec_parser import parse_rspec
-        rspec = parse_rspec(in_rspec)
-        if rspec.type.lower() == 'protogeni':
+        from sfa.rspecs.rspec import RSpec
+        rspec = RSpec(in_rspec)
+        if rspec.version.type.lower() == 'protogeni':
             from sfa.rspecs.rspec_converter import RSpecConverter
             in_rspec = RSpecConverter.to_sfa_rspec(in_rspec)
 
         # just copy over all networks
         current_networks = self.get_networks()
-        rspec = SfaRSpec(rspec=in_rspec)
-        networks = rspec.get_network_elements()
+        rspec = RSpec(rspec=in_rspec)
+        networks = rspec.version.get_network_elements()
         for network in networks:
             current_network = network.get('name')
             if current_network and current_network not in current_networks:
