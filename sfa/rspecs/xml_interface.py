@@ -29,8 +29,8 @@ class XpathFilter:
 class XMLInterface:
  
     def __init__(self, xml=""):
-        self.header = '<?xml version="1.0"?>\n'
-        self.template = """<RSpec></RSpec>"""
+        self.header = None 
+        self.template = None 
         self.xml = None
         self.namespaces = None
         if xml:
