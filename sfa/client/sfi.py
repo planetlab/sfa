@@ -28,8 +28,7 @@ import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.version import version_core
 from sfa.util.cache import Cache
-from sfa.rspecs.rspec_version import RSpecVersion
-from sfa.rspecs.pg_rspec import pg_rspec_request_version
+from sfa.rspecs.version_manager import VersionManager
 
 AGGREGATE_PORT=12346
 CM_PORT=12346
@@ -418,7 +417,7 @@ class Sfi:
         Returns true if server support the optional call_id arg, false otherwise. 
         """
         server_version = self.get_cached_server_version(server)
-        if 'sfa' in server_version:
+        if 'sfa' in server_version and 'code_tag' in server_version:
             code_tag = server_version['code_tag']
             code_tag_parts = code_tag.split("-")
             
@@ -937,14 +936,15 @@ class Sfi:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
             creds.append(delegated_cred)
         if opts.rspec_version:
+            version_manager = VersionManager()
             server_version = self.get_cached_server_version(server)
             if 'sfa' in server_version:
                 # just request the version the client wants 
-                call_options['rspec_version'] = dict(RSpecVersion(opts.rspec_version)) 
+                call_options['rspec_version'] = version_manager.get_version(opts.rspec_version).to_dict()
             else:
                 # this must be a protogeni aggregate. We should request a v2 ad rspec
                 # regardless of what the client user requested 
-                call_options['rspec_version'] = dict(pg_rspec_request_version)     
+                call_options['rspec_version'] = version_manager.get_version('ProtoGENI 2').to_dict()     
         #panos add info options
         if opts.info:
             call_options['info'] = opts.info 
