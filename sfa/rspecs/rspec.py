@@ -54,6 +54,7 @@ class RSpec(XMLInterface):
         if schema:
             self.version = self.version_manager.get_version_by_schema(schema)
         else:
+            #raise InvalidRSpec('unknown rspec schema: %s' % schema)
             # TODO: probably isn't safe to assume use default version here
             # should probably fault if we arent certain  
             self.version = self.version_manager.get_version()
