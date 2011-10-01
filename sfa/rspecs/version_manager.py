@@ -1,5 +1,6 @@
 import os
 from sfa.util.faults import InvalidRSpec
+from sfa.rspecs.rspec_version import BaseVersion 
 from sfa.util.sfalogging import logger    
 
 class VersionManager:
@@ -52,6 +53,8 @@ class VersionManager:
             if num_parts > 2:
                 content_type = version_parts[2]
             retval = self._get_version(type, version_num, content_type) 
+        elif isinstance(version, BaseVersion):
+            return version
         else:
             logger.info("Unable to parse rspec version, using default")
             retval = self._get_version(self.default_type, self.default_version_num)   
