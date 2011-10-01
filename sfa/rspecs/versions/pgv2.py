@@ -25,38 +25,38 @@ class PGv2(BaseVersion):
 
     def get_network(self):
         network = None
-        nodes = self.xml.xpath('//rspecv2:node[@component_manager_id][1]', namespaces=self.namespaces)
+        nodes = self.xml.xpath('//default:node[@component_manager_id][1]', namespaces=self.namespaces)
         if nodes:
             network  = nodes[0].get('component_manager_id')
         return network
 
     def get_networks(self):
-        networks = self.xml.xpath('//rspecv2:node[@component_manager_id]/@component_manager_id', namespaces=self.namespaces)
+        networks = self.xml.xpath('//default:node[@component_manager_id]/@component_manager_id', namespaces=self.namespaces)
         return set(networks)
 
     def get_node_element(self, hostname, network=None):
-        nodes = self.xml.xpath('//rspecv2:node[@component_id[contains(., "%s")]] | node[@component_id[contains(., "%s")]]' % (hostname, hostname), namespaces=self.namespaces)
+        nodes = self.xml.xpath('//default:node[@component_id[contains(., "%s")]] | node[@component_id[contains(., "%s")]]' % (hostname, hostname), namespaces=self.namespaces)
         if isinstance(nodes,list) and nodes:
             return nodes[0]
         else:
             return None
 
     def get_node_elements(self, network=None):
-        nodes = self.xml.xpath('//rspecv2:node | //node', namespaces=self.namespaces)
+        nodes = self.xml.xpath('//default:node | //node', namespaces=self.namespaces)
         return nodes
 
 
     def get_nodes(self, network=None):
-        xpath = '//rspecv2:node[@component_name]/@component_id | //node[@component_name]/@component_id'
+        xpath = '//default:node[@component_name]/@component_id | //node[@component_name]/@component_id'
         nodes = self.xml.xpath(xpath, namespaces=self.namespaces)
         nodes = [xrn_to_hostname(node) for node in nodes]
         return nodes
 
     def get_nodes_with_slivers(self, network=None):
         if network:
-            nodes = self.xml.xpath('//rspecv2:node[@component_manager_id="%s"][sliver_type]/@component_id' % network, namespaces=self.namespaces)
+            nodes = self.xml.xpath('//default:node[@component_manager_id="%s"][sliver_type]/@component_id' % network, namespaces=self.namespaces)
         else:
-            nodes = self.xml.xpath('//rspecv2:node[rspecv2:sliver_type]/@component_id', namespaces=self.namespaces)
+            nodes = self.xml.xpath('//default:node[default:sliver_type]/@component_id', namespaces=self.namespaces)
         nodes = [xrn_to_hostname(node) for node in nodes]
         return nodes
 
@@ -65,7 +65,7 @@ class PGv2(BaseVersion):
 
     def get_sliver_attributes(self, hostname, network=None):
         node = self.get_node_element(hostname, network)
-        sliver = node.xpath('./rspecv2:sliver_type', namespaces=self.namespaces)
+        sliver = node.xpath('./default:sliver_type', namespaces=self.namespaces)
         if sliver is not None and isinstance(sliver, list):
             sliver = sliver[0]
         return self.attributes_list(sliver)
@@ -74,7 +74,7 @@ class PGv2(BaseVersion):
         slice_attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers(network)
         # TODO: default sliver attributes in the PG rspec?
-        default_ns_prefix = self.namespaces['rspecv2']
+        default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers:
             sliver_attributes = self.get_sliver_attributes(node, network)
             for sliver_attribute in sliver_attributes:
@@ -114,7 +114,7 @@ class PGv2(BaseVersion):
         for node in nodes:
             urn = ""
             if check_for_dupes and \
-              self.xml.xpath('//rspecv2:node[@component_uuid="%s"]' % urn, namespaces=self.namespaces):
+              self.xml.xpath('//default:node[@component_uuid="%s"]' % urn, namespaces=self.namespaces):
                 # node already exists
                 continue
 
@@ -177,7 +177,7 @@ class PGv2(BaseVersion):
                     node.set('sliver_id', sliver_id)
 
                 # remove existing sliver_type tags,it needs to be recreated
-                sliver_elem = node.xpath('./rspecv2:sliver_type | ./sliver_type', namespaces=self.namespaces)
+                sliver_elem = node.xpath('./default:sliver_type | ./sliver_type', namespaces=self.namespaces)
                 if sliver_elem and isinstance(sliver_elem, list):
                     sliver_elem = sliver_elem[0]
                     node.remove(sliver_elem)
@@ -215,7 +215,7 @@ class PGv2(BaseVersion):
         # remove unncecessary elements, attributes
         if self.type in ['request', 'manifest']:
             # remove 'available' element from remaining node elements
-            self.remove_element('//rspecv2:available | //available')
+            self.remove_element('//default:available | //available')
 
 class PGv2Ad(PGv2):
     enabled = True
