@@ -54,9 +54,8 @@ class VersionManager:
                 content_type = version_parts[2]
             retval = self._get_version(type, version_num, content_type) 
         elif isinstance(version, BaseVersion):
-            return version
+            retval = version
         else:
-            logger.info("Unable to parse rspec version, using default")
             retval = self._get_version(self.default_type, self.default_version_num)   
  
         return retval
