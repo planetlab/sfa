@@ -2,8 +2,8 @@
 from lxml import etree
 from StringIO import StringIO
 from sfa.util.xrn import *
-from sfa.rspecs.pg_rspec import PGRSpec 
-from sfa.rspecs.sfa_rspec import SfaRSpec
+from sfa.rspecs.rspec import RSpec
+from sfa.rspecs.version_manager import VersionManager
 
 xslt='''<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="xml" indent="no"/>
@@ -35,20 +35,23 @@ class PGRSpecConverter:
 
     @staticmethod
     def to_sfa_rspec(rspec):
-        if isinstance(rspec, PGRSpec):
+        if not isinstance(rspec, RSpec):
+            pg_rspec = RSpec(rspec)
+        else:
             pg_rspec = rspec
-        else:        
-            pg_rspec = PGRSpec(rspec=rspec)
-        sfa_rspec = SfaRSpec()
+        
+        version_manager = VersionManager()
+        sfa_version = version_manager._get_version('sfa', '1')    
+        sfa_rspec = RSpec(version=sfa_version)
 
         # get network
-        network_urn = pg_rspec.get_network()
+        network_urn = pg_rspec.version.get_network()
         network,  _ = urn_to_hrn(network_urn)
         network_element = sfa_rspec.add_element('network', {'name': network, 'id': network})
         
         # get nodes
-        pg_nodes_elements = pg_rspec.get_node_elements()
-        nodes_with_slivers = pg_rspec.get_nodes_with_slivers()
+        pg_nodes_elements = pg_rspec.version.get_node_elements()
+        nodes_with_slivers = pg_rspec.version.get_nodes_with_slivers()
         i = 1
         for pg_node_element in pg_nodes_elements:
             attribs = dict(pg_node_element.attrib.items()) 

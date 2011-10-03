@@ -3,25 +3,28 @@
 from lxml import etree
 from StringIO import StringIO
 from sfa.util.xrn import *
-from sfa.rspecs.sfa_rspec import SfaRSpec
-from sfa.rspecs.pg_rspec import PGRSpec
+from sfa.rspecs.rspec import RSpec
+from sfa.rspecs.version_manager import VersionManager
 
 class SfaRSpecConverter:
 
     @staticmethod
     def to_pg_rspec(rspec):
-        if isinstance(rspec, SfaRSpec):
-            sfa_rspec = rspec
+        if not isinstance(rspec, RSpec):
+            sfa_rspec = RSpec(rspec)
         else:
-            sfa_rspec = SfaRSpec(rspec=rspec)
-        pg_rspec = PGRSpec()
-    
+            sfa_rspec = rspec
+   
+        version_manager = VersionManager()
+        pg_version = version_manager._get_version('protogeni', '2', 'request')
+        pg_rspec = RSpec(version=pg_version)
+ 
         # get networks
-        networks = sfa_rspec.get_networks()
+        networks = sfa_rspec.version.get_networks()
         
         for network in networks:
             # get nodes
-            sfa_node_elements = sfa_rspec.get_node_elements(network=network)
+            sfa_node_elements = sfa_rspec.version.get_node_elements(network=network)
             for sfa_node_element in sfa_node_elements:
                 # create node element
                 node_attrs = {}
