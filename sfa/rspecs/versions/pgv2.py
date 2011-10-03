@@ -183,13 +183,19 @@ class PGv2(BaseVersion):
                     node.remove(sliver_elem)
 
                 sliver_elem = etree.SubElement(node, 'sliver_type', name='plab-vnode')
-                for tag in sliver_info['tags']:
+                for tag in sliver_info.get('tags', []):
                     if tag['tagname'] == 'flack_info':
                         e = etree.SubElement(sliver_elem, '{%s}info' % self.namespaces['flack'], attrib=eval(tag['value']))
                     elif tag['tagname'] == 'initscript':
                         e = etree.SubElement(sliver_elem, '{%s}initscript' % self.namespaces['planetlab'], attrib={'name': tag['value']})
 
 
+    def remove_slivers(self, slivers, network=None, no_dupes=False):
+        for sliver in slivers:
+            node_elem = self.get_node_element(sliver['hostname'])
+            sliver_elem = node_elem.xpath('./default:sliver_type', self.namespaces)
+            if sliver_elem != None and sliver_elem != []:
+                node_elem.remove(sliver_elem[0])
 
     def add_default_sliver_attribute(self, name, value, network=None):
         pass
@@ -204,8 +210,10 @@ class PGv2(BaseVersion):
         """
         Merge contents for specified rspec with current rspec
         """
-
+        from sfa.rspecs.rspec import RSpec
         # just copy over all the child elements under the root element
+        if isinstance(in_rspec, RSpec):
+            in_rspec = in_rspec.toxml()
         tree = etree.parse(StringIO(in_rspec))
         root = tree.getroot()
         for child in root.getchildren():
