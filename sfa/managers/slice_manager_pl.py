@@ -76,7 +76,7 @@ def GetVersion(api):
                     'peers': peers,
                     'request_rspec_versions': request_rspec_versions,
                     'ad_rspec_versions': ad_rspec_versions,
-                    'default_ad_rspec': dict(sfa_rspec_version)
+                    'default_ad_rspec': default_rspec_version
                     }
     sm_version=version_core(version_more)
     # local aggregate if present needs to have localhost resolved
