@@ -271,7 +271,6 @@ class SFAv1(BaseVersion):
 
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
-        slivers = self._process_slivers(slivers)
         for sliver in slivers:
             node_elem = self.get_node_element(sliver['hostname'], network)
             sliver_elem = node_elem.find('sliver')
@@ -334,14 +333,17 @@ class SFAv1(BaseVersion):
         """
 
         from sfa.rspecs.rspec import RSpec
-        rspec = RSpec(in_rspec)
+        if isinstance(in_rspec, RSpec):
+            rspec = in_rspec
+        else:
+            rspec = RSpec(in_rspec)
         if rspec.version.type.lower() == 'protogeni':
             from sfa.rspecs.rspec_converter import RSpecConverter
-            in_rspec = RSpecConverter.to_sfa_rspec(in_rspec)
+            in_rspec = RSpecConverter.to_sfa_rspec(rspec.toxml())
+            rspec = RSpec(in_rspec)
 
         # just copy over all networks
         current_networks = self.get_networks()
-        rspec = RSpec(rspec=in_rspec)
         networks = rspec.version.get_network_elements()
         for network in networks:
             current_network = network.get('name')
