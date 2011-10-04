@@ -1,5 +1,3 @@
-
-
 import datetime
 import time
 import traceback
@@ -298,7 +296,7 @@ def ListSlices(api, creds, call_id):
 
     return slice_urns
     
-def ListResources(api, creds, options,call_id):
+def ListResources(api, creds, options, call_id):
     if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
     xrn = options.get('geni_slice_urn', None)

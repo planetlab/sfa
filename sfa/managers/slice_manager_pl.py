@@ -122,7 +122,7 @@ def ListResources(api, creds, options, call_id):
             rspec = server.ListResources(*args)
             return {"aggregate": aggregate, "rspec": rspec, "elapsed": time.time()-tStart, "status": "success"}
         except Exception, e:
-            api.logger.warn("ListResources failed at %s: %s" %(server.url, str(e)))
+            api.logger.log_exc("ListResources failed at %s" %(server.url))
             return {"aggregate": aggregate, "elapsed": time.time()-tStart, "status": "exception"}
 
     if Callids().already_handled(call_id): return ""
