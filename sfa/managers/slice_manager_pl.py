@@ -99,7 +99,7 @@ def add_slicemgr_stat(rspec, callname, aggname, elapsed, status):
         if stats_tags:
             stats_tag = stats_tags[0]
         else:
-            stats_tag = etree.SubElement(rspec.xml, "statistics", call=callname)
+            stats_tag = etree.SubElement(rspec.xml.root, "statistics", call=callname)
 
         etree.SubElement(stats_tag, "aggregate", name=str(aggname), elapsed=str(elapsed), status=str(status))
     except Exception, e:
@@ -165,7 +165,8 @@ def ListResources(api, creds, options, call_id):
 
     results = threads.get_results()
     rspec_version = version_manager.get_version(options.get('rspec_version'))
-    rspec = RSpec(version=rspec_version)
+    manifest_version = version_manager._get_version(rspec_version.type, rspec_version.version, 'manifest')    
+    rspec = RSpec(version=manifest_version)
     for result in results:
         add_slicemgr_stat(rspec, "ListResources", result["aggregate"], result["elapsed"], result["status"])
         if result["status"]=="success":
@@ -236,7 +237,8 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
         threads.run(_CreateSliver, aggregate, server, xrn, credential, rspec.toxml(), users, call_id)
             
     results = threads.get_results()
-    result_rspec = RSpec(version=rspec.version)
+    manifest_version = version_manager._get_version(rspec.version.type, rspec.version.format, 'manifest')
+    result_rspec = RSpec(version=manifest_version)
     for result in results:
         add_slicemgr_stat(rspec, "CreateSliver", result["aggregate"], result["elapsed"], result["status"])
         if result["status"]=="success":
