@@ -301,7 +301,7 @@ def ListSlices(api, creds, call_id):
 def ListResources(api, creds, options,call_id):
     if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
-    xrn = options.get('geni_slice_urn', '')
+    xrn = options.get('geni_slice_urn', None)
     (hrn, type) = urn_to_hrn(xrn)
 
     version_manager = VersionManager()
@@ -324,7 +324,6 @@ def ListResources(api, creds, options,call_id):
     #panos: passing user-defined options
     #print "manager options = ",options
     aggregate = Aggregate(api, options)
-
     rspec =  aggregate.get_rspec(slice_xrn=xrn, version=rspec_version)
 
     # cache the result

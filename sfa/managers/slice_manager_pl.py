@@ -165,8 +165,11 @@ def ListResources(api, creds, options, call_id):
 
     results = threads.get_results()
     rspec_version = version_manager.get_version(options.get('rspec_version'))
-    manifest_version = version_manager._get_version(rspec_version.type, rspec_version.version, 'manifest')    
-    rspec = RSpec(version=manifest_version)
+    if xrn:    
+        result_version = version_manager._get_version(rspec_version.type, rspec_version.version, 'manifest')
+    else: 
+        result_version = version_manager._get_version(rspec_version.type, rspec_version.version, 'ad')
+    rspec = RSpec(version=result_version)
     for result in results:
         add_slicemgr_stat(rspec, "ListResources", result["aggregate"], result["elapsed"], result["status"])
         if result["status"]=="success":

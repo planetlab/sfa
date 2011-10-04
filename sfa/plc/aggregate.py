@@ -5,6 +5,7 @@ from sfa.util.plxrn import *
 #from sfa.rspecs.pg_rspec  import PGRSpec
 #from sfa.rspecs.rspec_version import RSpecVersion
 from sfa.rspecs.rspec import RSpec
+from sfa.rspecs.version_manager import VersionManager
 
 class Aggregate:
 
@@ -78,7 +79,14 @@ class Aggregate:
 
     def get_rspec(self, slice_xrn=None, version = None):
         self.prepare()
-        rspec = RSpec(version=version, user_options=self.user_options)
+        version_manager = VersionManager()
+        version = version_manager.get_version(version)
+        if not slice_xrn:
+            rspec_version = version_manager._get_version(version.type, version.version, 'ad')
+        else:
+            rspec_version = version_manager._get_version(version.type, version.version, 'manifest')
+               
+        rspec = RSpec(version=rspec_version, user_options=self.user_options)
         # get slice details if specified
         slice = None
         if slice_xrn:
