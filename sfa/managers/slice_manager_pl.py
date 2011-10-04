@@ -237,7 +237,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
         threads.run(_CreateSliver, aggregate, server, xrn, credential, rspec.toxml(), users, call_id)
             
     results = threads.get_results()
-    manifest_version = version_manager._get_version(rspec.version.type, rspec.version.format, 'manifest')
+    manifest_version = version_manager._get_version(rspec.version.type, rspec.version.version, 'manifest')
     result_rspec = RSpec(version=manifest_version)
     for result in results:
         add_slicemgr_stat(rspec, "CreateSliver", result["aggregate"], result["elapsed"], result["status"])
