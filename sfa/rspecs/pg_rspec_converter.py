@@ -47,7 +47,7 @@ class PGRSpecConverter:
         # get network
         network_urn = pg_rspec.version.get_network()
         network,  _ = urn_to_hrn(network_urn)
-        network_element = sfa_rspec.add_element('network', {'name': network, 'id': network})
+        network_element = sfa_rspec.xml.add_element('network', {'name': network, 'id': network})
         
         # get nodes
         pg_nodes_elements = pg_rspec.version.get_node_elements()
@@ -57,16 +57,16 @@ class PGRSpecConverter:
             attribs = dict(pg_node_element.attrib.items()) 
             attribs['id'] = 'n'+str(i)
             
-            node_element = sfa_rspec.add_element('node', attribs, parent=network_element)
+            node_element = sfa_rspec.xml.add_element('node', attribs, parent=network_element)
             urn = pg_node_element.xpath('@component_id', namespaces=pg_rspec.namespaces)
             if urn:
                 urn = urn[0]
                 hostname = Xrn.urn_split(urn)[-1]
-                hostname_element = sfa_rspec.add_element('hostname', parent=node_element, text=hostname)
+                hostname_element = sfa_rspec.xml.add_element('hostname', parent=node_element, text=hostname)
                 if hostname in nodes_with_slivers:
-                    sfa_rspec.add_element('sliver', parent=node_element)
+                    sfa_rspec.xml.add_element('sliver', parent=node_element)
                      
-            urn_element = sfa_rspec.add_element('urn', parent=node_element, text=urn)
+            urn_element = sfa_rspec.xml.add_element('urn', parent=node_element, text=urn)
 
 
             # just copy over remaining child elements  

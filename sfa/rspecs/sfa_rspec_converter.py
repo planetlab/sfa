@@ -34,13 +34,13 @@ class SfaRSpecConverter:
                     node_attrs['component_name'] = sfa_node_element.find('hostname').text
                 if sfa_node_element.find('urn') != None:    
                     node_attrs['component_id'] = sfa_node_element.find('urn').text
-                node_element = pg_rspec.add_element('node', node_attrs)
+                node_element = pg_rspec.xml.add_element('node', node_attrs)
 
                 # create node_type element
                 for hw_type in ['plab-pc', 'pc']:
-                    hdware_type_element = pg_rspec.add_element('hardware_type', {'name': hw_type}, parent=node_element)
+                    hdware_type_element = pg_rspec.xml.add_element('hardware_type', {'name': hw_type}, parent=node_element)
                 # create available element
-                pg_rspec.add_element('available', {'now': 'true'}, parent=node_element)
+                pg_rspec.xml.add_element('available', {'now': 'true'}, parent=node_element)
                 # create locaiton element
                 # We don't actually associate nodes with a country. 
                 # Set country to "unknown" until we figure out how to make
@@ -51,11 +51,11 @@ class SfaRSpecConverter:
                     location_attrs['country'] =  location.get('country', 'unknown')
                     location_attrs['latitude'] = location.get('latitiue', 'None')
                     location_attrs['longitude'] = location.get('longitude', 'None')
-                    pg_rspec.add_element('location', location_attrs, parent=node_element)
+                    pg_rspec.xml.add_element('location', location_attrs, parent=node_element)
 
                 sliver_element = sfa_node_element.find('sliver')
                 if sliver_element != None:
-                    pg_rspec.add_element('sliver_type', {'name': 'planetlab-vnode'}, parent=node_element)
+                    pg_rspec.xml.add_element('sliver_type', {'name': 'planetlab-vnode'}, parent=node_element)
 
         return pg_rspec.toxml()
 
