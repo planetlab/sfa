@@ -223,7 +223,7 @@ class PGv2(BaseVersion):
         # remove unncecessary elements, attributes
         if self.type in ['request', 'manifest']:
             # remove 'available' element from remaining node elements
-            self.remove_element('//default:available | //available')
+            self.xml.remove_element('//default:available | //available')
 
 class PGv2Ad(PGv2):
     enabled = True

@@ -286,27 +286,27 @@ class SFAv1(BaseVersion):
             network_tag = self.xml.xpath("//network[@name='%s']" % network)
             if isinstance(network_tag, list):
                 network_tag = network_tag[0]
-            defaults = self.add_element('sliver_defaults', attrs={}, parent=network_tag)
+            defaults = self.xml.add_element('sliver_defaults', attrs={}, parent=network_tag)
         elif isinstance(defaults, list):
             defaults = defaults[0]
-        self.add_attribute(defaults, name, value)
+        self.xml.add_attribute(defaults, name, value)
 
     def add_sliver_attribute(self, hostname, name, value, network=None):
         node = self.get_node_element(hostname, network)
         sliver = node.find("sliver")
-        self.add_attribute(sliver, name, value)
+        self.xml.add_attribute(sliver, name, value)
 
     def remove_default_sliver_attribute(self, name, value, network=None):
         if network:
             defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
         else:
             defaults = self.xml.xpath("//sliver_defaults" % network)
-        self.remove_attribute(defaults, name, value)
+        self.xml.remove_attribute(defaults, name, value)
 
     def remove_sliver_attribute(self, hostname, name, value, network=None):
         node = self.get_node_element(hostname, network)
         sliver = node.find("sliver")
-        self.remove_attribute(sliver, name, value)
+        self.xml.remove_attribute(sliver, name, value)
 
     def add_vlink(self, fromhost, tohost, kbps, network=None):
         fromnode = self.get_node_element(fromhost, network)
@@ -318,7 +318,7 @@ class SFAv1(BaseVersion):
             fromid = fromnode.get("id")
             toid = tonode.get("id")
             vlink.set("endpoints", "%s %s" % (fromid, toid))
-            self.add_attribute(vlink, "kbps", kbps)
+            self.xml.add_attribute(vlink, "kbps", kbps)
 
 
     def remove_vlink(self, endpoints, network=None):
