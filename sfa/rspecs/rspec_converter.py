@@ -22,7 +22,6 @@ class RSpecConverter:
 
     @staticmethod 
     def to_pg_rspec(in_rspec):
-        rspec = parse_rspec(in_rspec)
         rspec = RSpec(in_rspec)
         version_manager = VersionManager()
         sfa_version = version_manager._get_version('sfa', '1')
