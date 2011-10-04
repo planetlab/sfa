@@ -79,18 +79,6 @@ class Aggregate:
     def get_rspec(self, slice_xrn=None, version = None):
         self.prepare()
         rspec = RSpec(version=version, user_options=self.user_options)
-        #rspec_version = RSpecVersion(version)
-        #if slice_xrn:
-        #    type = 'manifest'
-        #else:
-        #    type = 'advertisement' 
-        #if rspec_version['type'].lower() == 'protogeni':
-        #    rspec = PGRSpec(type=type)
-        #elif rspec_version['type'].lower() == 'sfa':
-        #    rspec = SfaRSpec(type=type, user_options=self.user_options)
-        #else:
-        #    rspec = SfaRSpec(type=type, user_options=self.user_options)
-
         # get slice details if specified
         slice = None
         if slice_xrn:
@@ -147,4 +135,4 @@ class Aggregate:
                     self.api.logger.log_exc('unable to add sliver %s to node %s' % (slice['name'], node_id))
             rspec.version.add_slivers(slivers, sliver_urn=slice_xrn)
 
-        return rspec.toxml(cleanup=True)
+        return rspec.toxml()
