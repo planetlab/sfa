@@ -1,19 +1,19 @@
 #!/usr/bin/python 
 from datetime import datetime, timedelta
-from sfa.rspecs.xml_interface import XMLInterface, XpathFilter
+from sfa.rspecs.xml import XML, XpathFilter
 from sfa.rspecs.version_manager import VersionManager
 from sfa.util.xrn import *
 from sfa.util.plxrn import hostname_to_urn
 from sfa.rspecs.rspec_elements import RSpecElement, RSpecElements 
 from sfa.util.faults import SfaNotImplemented, InvalidRSpec, InvalidRSpecElement
 
-class RSpec(XMLInterface):
+class RSpec:
  
     def __init__(self, rspec="", version=None, user_options={}):
         self.header = '<?xml version="1.0"?>\n'
         self.template = """<RSpec></RSpec>"""
         self.version = None
-        self.xml = None
+        self.xml = XML()
         self.version_manager = VersionManager()
         self.user_options = user_options
         self.elements = {}
@@ -39,27 +39,17 @@ class RSpec(XMLInterface):
 
 
     def parse_xml(self, xml):
-        XMLInterface.parse_xml(self, xml)
-        # determine rspec version
-        # look for schema first
-        schema = None
+        self.xml.parse_xml(xml)
         self.version = None
-        for key in self.xml.attrib.keys():
-            if key.endswith('schemaLocation'):
-                # schema location should be at the end of the list
-                schema_parts  = self.xml.attrib[key].split(' ')
-                namespace, schema  = schema_parts[0], schema_parts[1]                 
-                break
-
-        if schema:
-            self.version = self.version_manager.get_version_by_schema(schema)
+        if self.xml.schema:
+            self.version = self.version_manager.get_version_by_schema(self.xml.schema)
         else:
             #raise InvalidRSpec('unknown rspec schema: %s' % schema)
-            # TODO: probably isn't safe to assume use default version here
-            # should probably fault if we arent certain  
+            # TODO: Should start raising an exception once SFA defines a schema.
+            # for now we just use the default  
             self.version = self.version_manager.get_version()
         self.version.xml = self.xml    
-        self.namespaces = self.version.namespaces
+        self.namespaces = self.xml.namespaces
     
     def load_rspec_elements(self, rspec_elements):
         self.elements = {}
@@ -98,23 +88,9 @@ class RSpec(XMLInterface):
     def merge(self, in_rspec):
         pass
 
-    def _process_slivers(self, slivers):
-        """
-        Creates a dict of sliver details for each sliver host
-        
-        @param slivers a single hostname, list of hostanmes or list of dicts keys on hostname,
-        Returns a list of dicts 
-        """
-        if not isinstance(slivers, list):
-            slivers = [slivers]
-        dicts = []
-        for sliver in slivers:
-            if isinstance(sliver, dict):
-                dicts.append(sliver)
-            elif isinstance(sliver, basestring):
-                dicts.append({'hostname': sliver}) 
-        return dicts
-
+    def toxml(self):
+        return self.header + self.xml.toxml()
+         
 if __name__ == '__main__':
     rspec = RSpec('/tmp/resources.rspec')
     print rspec
