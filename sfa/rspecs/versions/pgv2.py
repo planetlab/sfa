@@ -118,7 +118,7 @@ class PGv2(BaseVersion):
                 # node already exists
                 continue
 
-            node_tag = etree.SubElement(self.xml, 'node', exclusive='false')
+            node_tag = etree.SubElement(self.xml.root, 'node', exclusive='false')
             if 'network_urn' in node:
                 node_tag.set('component_manager_id', node['network_urn'])
             if 'urn' in node:
@@ -147,7 +147,7 @@ class PGv2(BaseVersion):
 
     def merge_node(self, source_node_tag):
         # this is untested
-        self.xml.append(deepcopy(source_node_tag))
+        self.xml.root.append(deepcopy(source_node_tag))
 
     def add_slivers(self, slivers, sliver_urn=None, no_dupes=False):
 
@@ -217,7 +217,7 @@ class PGv2(BaseVersion):
         tree = etree.parse(StringIO(in_rspec))
         root = tree.getroot()
         for child in root.getchildren():
-            self.xml.append(child)
+            self.xml.root.append(child)
 
     def cleanup(self):
         # remove unncecessary elements, attributes

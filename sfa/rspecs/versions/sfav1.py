@@ -188,7 +188,7 @@ class SFAv1(BaseVersion):
     def add_network(self, network):
         network_tags = self.xml.xpath('//network[@name="%s"]' % network)
         if not network_tags:
-            network_tag = etree.SubElement(self.xml, 'network', name=network)
+            network_tag = etree.SubElement(self.xml.root, 'network', name=network)
         else:
             network_tag = network_tags[0]
         return network_tag
@@ -202,7 +202,7 @@ class SFAv1(BaseVersion):
                 # node already exists
                 continue
 
-            network_tag = self.xml
+            network_tag = self.xml.root
             if 'network' in node:
                 network = node['network']
                 network_tag = self.add_network(network)
@@ -348,7 +348,7 @@ class SFAv1(BaseVersion):
         for network in networks:
             current_network = network.get('name')
             if current_network and current_network not in current_networks:
-                self.xml.append(network)
+                self.xml.root.append(network)
                 current_networks.append(current_network)
 
 if __name__ == '__main__':
