@@ -257,18 +257,24 @@ class SFAv1(BaseVersion):
             network_tag = network_tags[0]
             network_tag.set('slice', urn_to_hrn(sliver_urn)[0])
         
-        nodes_with_slivers = self.get_nodes_with_slivers(network)
+        all_nodes = self.get_nodes()
+        nodes_with_slivers = [sliver['hostname'] for sliver in slivers]
+        nodes_without_slivers = set(all_nodes).difference(nodes_with_slivers)
+        
+        # add slivers
         for sliver in slivers:
-            if isinstance(sliver, basestring):
-                sliver = {'hostname': sliver}
-            if sliver['hostname'] in nodes_with_slivers:
-                continue
             node_elem = self.get_node_element(sliver['hostname'], network)
+            if not node_elem: continue
             sliver_elem = etree.SubElement(node_elem, 'sliver')
             if 'tags' in sliver:
                 for tag in sliver['tags']:
                     etree.SubElement(sliver_elem, tag['tagname']).text = value=tag['value']
-
+            
+        # remove all nodes without slivers
+        for node in nodes_without_slivers:
+            node_elem = self.get_node_element(node, network)
+            parent = node_elem.getparent()
+            parent.remove(node_elem)
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
         for sliver in slivers:
