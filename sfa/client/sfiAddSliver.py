@@ -40,5 +40,5 @@ try:
 except:
     print >> sys.stderr, "FAILED: %s" % nodes
     sys.exit(1)
-print >>outfile, manifest_rspec.toxml(cleanup=True)
+print >>outfile, manifest_rspec.toxml()
 sys.exit(0)
