@@ -198,6 +198,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. otherwise convert to pg rspec
                 rspec = RSpecConverter.to_pg_rspec(rspec, 'request')
+                raise
             args = [xrn, credential, rspec, users]
             if _call_id_supported(api, server):
                 args.append(call_id)
@@ -243,13 +244,13 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
     manifest_version = version_manager._get_version(rspec.version.type, rspec.version.version, 'manifest')
     result_rspec = RSpec(version=manifest_version)
     for result in results:
-        add_slicemgr_stat(rspec, "CreateSliver", result["aggregate"], result["elapsed"], result["status"])
+        add_slicemgr_stat(result_rspec, "CreateSliver", result["aggregate"], result["elapsed"], result["status"])
         if result["status"]=="success":
             try:
                 result_rspec.version.merge(result["rspec"])
             except:
                 api.logger.log_exc("SM.CreateSliver: Failed to merge aggregate rspec")
-    return rspec.toxml()
+    return result_rspec.toxml()
 
 def RenewSliver(api, xrn, creds, expiration_time, call_id):
     def _RenewSliver(server, xrn, creds, expiration_time, call_id):
