@@ -8,7 +8,7 @@ from sfa.rspecs.version_manager import VersionManager
 class RSpecConverter:
 
     @staticmethod
-    def to_sfa_rspec(in_rspec):
+    def to_sfa_rspec(in_rspec, content_type=None):
         rspec = RSpec(in_rspec)
         version_manager = VersionManager()
         sfa_version = version_manager._get_version('sfa', '1')
@@ -16,12 +16,12 @@ class RSpecConverter:
         if rspec.version.type.lower() == sfa_version.type.lower(): 
           return in_rspec
         elif rspec.version.type.lower() == pg_version.type.lower(): 
-            return PGRSpecConverter.to_sfa_rspec(in_rspec)
+            return PGRSpecConverter.to_sfa_rspec(in_rspec, content_type)
         else:
             return in_rspec 
 
     @staticmethod 
-    def to_pg_rspec(in_rspec):
+    def to_pg_rspec(in_rspec, content_type=None):
         rspec = RSpec(in_rspec)
         version_manager = VersionManager()
         sfa_version = version_manager._get_version('sfa', '1')
@@ -30,7 +30,7 @@ class RSpecConverter:
         if rspec.version.type.lower() == pg_version.type.lower(): 
             return in_rspec
         elif rspec.version.type.lower() == sfa_version.type.lower(): 
-            return SfaRSpecConverter.to_pg_rspec(in_rspec)
+            return SfaRSpecConverter.to_pg_rspec(in_rspec, content_type)
         else:
             return in_rspec 
 

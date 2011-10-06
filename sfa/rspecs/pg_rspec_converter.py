@@ -34,7 +34,7 @@ transform=etree.XSLT(xslt_doc)
 class PGRSpecConverter:
 
     @staticmethod
-    def to_sfa_rspec(rspec):
+    def to_sfa_rspec(rspec, content_type = None):
         if not isinstance(rspec, RSpec):
             pg_rspec = RSpec(rspec)
         else:

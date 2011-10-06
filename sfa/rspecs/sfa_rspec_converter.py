@@ -9,12 +9,17 @@ from sfa.rspecs.version_manager import VersionManager
 class SfaRSpecConverter:
 
     @staticmethod
-    def to_pg_rspec(rspec):
+    def to_pg_rspec(rspec, content_type = None):
         if not isinstance(rspec, RSpec):
             sfa_rspec = RSpec(rspec)
         else:
             sfa_rspec = rspec
-   
+  
+        if not content_type or content_type not in \
+          ['ad', 'request', 'manifest']:
+            content_type = sfa_rspec.version.content_type
+     
+ 
         version_manager = VersionManager()
         pg_version = version_manager._get_version('protogeni', '2', 'request')
         pg_rspec = RSpec(version=pg_version)
@@ -55,6 +60,11 @@ class SfaRSpecConverter:
 
                 sliver_element = sfa_node_element.find('sliver')
                 if sliver_element != None:
+                    if content_type == 'request':  
+                        # remove all child elements
+                        for child in sfa_node_element.iterchildren():
+                            sfa_node_element.remove(child)
+                    # add the sliver    
                     pg_rspec.xml.add_element('sliver_type', {'name': 'planetlab-vnode'}, parent=node_element)
 
         return pg_rspec.toxml()
