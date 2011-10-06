@@ -197,7 +197,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
             if 'sfa' not in server_version and 'geni_api' in server_version:
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. otherwise convert to pg rspec
-                rspec = RSpecConverter.to_pg_rspec(rspec)
+                rspec = RSpecConverter.to_pg_rspec(rspec, 'request')
             args = [xrn, credential, rspec, users]
             if _call_id_supported(api, server):
                 args.append(call_id)
