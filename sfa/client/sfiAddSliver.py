@@ -25,7 +25,6 @@ if command.opts.outfile:
     outfile=file(command.opts.outfile,"w")
 else:
     outfile=sys.stdout
-
 request_rspec = RSpec(infile)
 nodes = file(command.opts.nodefile).read().split()
 version_manager = VersionManager()
