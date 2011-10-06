@@ -90,6 +90,9 @@ class RSpec:
 
     def toxml(self):
         return self.header + self.xml.toxml()
+
+    def save(self, filename):
+        return self.xml.save(filename)
          
 if __name__ == '__main__':
     rspec = RSpec('/tmp/resources.rspec')
