@@ -63,7 +63,7 @@ class SfaRSpecConverter:
                     if location != None:
                         location_attrs = {}      
                         location_attrs['country'] =  location.get('country', 'unknown')
-                        location_attrs['latitude'] = location.get('latitiue', 'None')
+                        location_attrs['latitude'] = location.get('latitude', 'None')
                         location_attrs['longitude'] = location.get('longitude', 'None')
                         pg_rspec.xml.add_element('location', location_attrs, parent=node_element)
 
