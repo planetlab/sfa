@@ -122,7 +122,7 @@ def ListResources(api, creds, options, call_id):
             rspec = server.ListResources(*args)
             return {"aggregate": aggregate, "rspec": rspec, "elapsed": time.time()-tStart, "status": "success"}
         except Exception, e:
-            api.logger.warn("ListResources failed at %s: %s" %(server.url, str(e)))
+            api.logger.log_exc("ListResources failed at %s: %s" %(server.url))
             return {"aggregate": aggregate, "elapsed": time.time()-tStart, "status": "exception"}
 
     if Callids().already_handled(call_id): return ""
@@ -194,12 +194,13 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
             # Need to call GetVersion at an aggregate to determine the supported
             # rspec type/format beofre calling CreateSliver at an Aggregate.
             server_version = api.get_cached_server_version(server)
+            requested_users = users
             if 'sfa' not in server_version and 'geni_api' in server_version:
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. otherwise convert to pg rspec
                 rspec = RSpecConverter.to_pg_rspec(rspec, 'request')
-                raise
-            args = [xrn, credential, rspec, users]
+                requested_users = sfa_to_pg_users(users)
+            args = [xrn, credential, rspec, requested_users]
             if _call_id_supported(api, server):
                 args.append(call_id)
             rspec = server.CreateSliver(*args)
