@@ -1,9 +1,11 @@
 #!/usr/bin/python
 from sfa.util.xrn import *
 from sfa.util.plxrn import *
-from sfa.rspecs.sfa_rspec import SfaRSpec
-from sfa.rspecs.pg_rspec  import PGRSpec
-from sfa.rspecs.rspec_version import RSpecVersion
+#from sfa.rspecs.sfa_rspec import SfaRSpec
+#from sfa.rspecs.pg_rspec  import PGRSpec
+#from sfa.rspecs.rspec_version import RSpecVersion
+from sfa.rspecs.rspec import RSpec
+from sfa.rspecs.version_manager import VersionManager
 
 class Aggregate:
 
@@ -77,19 +79,14 @@ class Aggregate:
 
     def get_rspec(self, slice_xrn=None, version = None):
         self.prepare()
-        rspec = None
-        rspec_version = RSpecVersion(version)
-        if slice_xrn:
-            type = 'manifest'
+        version_manager = VersionManager()
+        version = version_manager.get_version(version)
+        if not slice_xrn:
+            rspec_version = version_manager._get_version(version.type, version.version, 'ad')
         else:
-            type = 'advertisement' 
-        if rspec_version['type'].lower() == 'protogeni':
-            rspec = PGRSpec(type=type)
-        elif rspec_version['type'].lower() == 'sfa':
-            rspec = SfaRSpec(type=type, user_options=self.user_options)
-        else:
-            rspec = SfaRSpec(type=type, user_options=self.user_options)
-
+            rspec_version = version_manager._get_version(version.type, version.version, 'manifest')
+               
+        rspec = RSpec(version=rspec_version, user_options=self.user_options)
         # get slice details if specified
         slice = None
         if slice_xrn:
@@ -102,7 +99,7 @@ class Aggregate:
         # filter out nodes with a whitelist:
         valid_nodes = [] 
         for node in self.nodes.values():
-            # only doing this becuase protogeni rspec needs
+            # only doing this because protogeni rspec needs
             # to advertise available initscripts 
             node['pl_initscripts'] = self.pl_initscripts
 
@@ -113,9 +110,9 @@ class Aggregate:
             elif not slice and not node['slice_ids_whitelist']:
                 valid_nodes.append(node)
     
-        rspec.add_nodes(valid_nodes)
-        rspec.add_interfaces(self.interfaces.values()) 
-        rspec.add_links(self.links.values())
+        rspec.version.add_nodes(valid_nodes)
+        rspec.version.add_interfaces(self.interfaces.values()) 
+        rspec.version.add_links(self.links.values())
 
         # add slivers
         if slice_xrn and slice:
@@ -127,7 +124,7 @@ class Aggregate:
                 # if tag isn't bound to a node then it applies to all slivers
                 # and belongs in the <sliver_defaults> tag
                 if not tag['node_id']:
-                    rspec.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
+                    rspec.version.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
 
             for node_id in slice['node_ids']:
                 try:
@@ -144,6 +141,6 @@ class Aggregate:
                             sliver['tags'].append(tag)
                 except:
                     self.api.logger.log_exc('unable to add sliver %s to node %s' % (slice['name'], node_id))
-            rspec.add_slivers(slivers, sliver_urn=slice_xrn)
+            rspec.version.add_slivers(slivers, sliver_urn=slice_xrn)
 
-        return rspec.toxml(cleanup=True)
+        return rspec.toxml()

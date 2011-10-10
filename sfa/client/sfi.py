@@ -17,20 +17,21 @@ from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
-
+from sfa.client.client_helper import pg_users_arg, sfa_users_arg, sfa_to_pg_users_arg 
 from sfa.util.sfalogging import sfi_logger
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
 from sfa.trust.credential import Credential
 from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import SfaRecord, UserRecord, SliceRecord, NodeRecord, AuthorityRecord
+from sfa.rspecs.rspec import RSpec
+from sfa.rspecs.rspec_converter import RSpecConverter
 from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.version import version_core
 from sfa.util.cache import Cache
-from sfa.rspecs.rspec_version import RSpecVersion
-from sfa.rspecs.pg_rspec import pg_rspec_request_version
+from sfa.rspecs.version_manager import VersionManager
 
 AGGREGATE_PORT=12346
 CM_PORT=12346
@@ -437,7 +438,7 @@ class Sfi:
         Returns true if server support the optional call_id arg, false otherwise. 
         """
         server_version = self.get_cached_server_version(server)
-        if 'sfa' in server_version:
+        if 'sfa' in server_version and 'code_tag' in server_version:
             code_tag = server_version['code_tag']
             code_tag_parts = code_tag.split("-")
             
@@ -956,14 +957,15 @@ class Sfi:
             delegated_cred = self.delegate_cred(cred, get_authority(self.authority))
             creds.append(delegated_cred)
         if opts.rspec_version:
+            version_manager = VersionManager()
             server_version = self.get_cached_server_version(server)
             if 'sfa' in server_version:
                 # just request the version the client wants 
-                call_options['rspec_version'] = dict(RSpecVersion(opts.rspec_version)) 
+                call_options['rspec_version'] = version_manager.get_version(opts.rspec_version).to_dict()
             else:
                 # this must be a protogeni aggregate. We should request a v2 ad rspec
                 # regardless of what the client user requested 
-                call_options['rspec_version'] = dict(pg_rspec_request_version)     
+                call_options['rspec_version'] = version_manager.get_version('ProtoGENI 2').to_dict()     
         #panos add info options
         if opts.info:
             call_options['info'] = opts.info 
@@ -999,41 +1001,24 @@ class Sfi:
         #    keys: [<ssh key A>, <ssh key B>] 
         #  }]
         users = []
-        all_keys = []
-        all_key_ids = []
         slice_records = self.registry.Resolve(slice_urn, [user_cred.save_to_string(save_parents=True)])
         if slice_records and 'researcher' in slice_records[0] and slice_records[0]['researcher']!=[]:
             slice_record = slice_records[0]
             user_hrns = slice_record['researcher']
             user_urns = [hrn_to_urn(hrn, 'user') for hrn in user_hrns]
             user_records = self.registry.Resolve(user_urns, [user_cred.save_to_string(save_parents=True)])
-            for user_record in user_records:
-                if user_record['type'] != 'user':
-                    continue
-                #user = {'urn': user_cred.get_gid_caller().get_urn(),'keys': []}
-                user = {'urn': user_cred.get_gid_caller().get_urn(), #
-                        'keys': user_record['keys'],
-                        'email': user_record['email'], #  needed for MyPLC
-                        'person_id': user_record['person_id'], # needed for MyPLC
-                        'first_name': user_record['first_name'], # needed for MyPLC
-                        'last_name': user_record['last_name'], # needed for MyPLC
-                        'slice_record': slice_record, # needed for legacy refresh peer
-                        'key_ids': user_record['key_ids'] # needed for legacy refresh peer
-                } 
-                users.append(user)
-                all_keys.extend(user_record['keys'])
-                all_key_ids.extend(user_record['key_ids'])
-            # ProtoGeni Aggregates will only install the keys of the user that is issuing the
-            # request. So we will add all to the current caller's list of keys
+            
             if 'sfa' not in server_version:
-                for user in users:
-                    if user['urn'] == user_cred.get_gid_caller().get_urn():
-                        user['keys'] = all_keys  
-
+                users = pg_users_arg(user_records)
+                rspec = RSpec(rspec)
+                rspec.filter({'component_manager_id': server_version['urn']})
+                rspec = RSpecConverter.to_pg_rspec(rspec.toxml(), content_type='request')
+            else:
+                users = sfa_users_arg(user_records, slice_record)
         call_args = [slice_urn, creds, rspec, users]
         if self.server_supports_call_id_arg(server):
             call_args.append(unique_call_id())
-             
+            
         result = server.CreateSliver(*call_args)
         if opts.file is None:
             print result

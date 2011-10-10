@@ -1,5 +1,3 @@
-
-
 import datetime
 import time
 import traceback
@@ -24,23 +22,29 @@ from sfa.plc.api import SfaAPI
 from sfa.plc.aggregate import Aggregate
 from sfa.plc.slices import *
 from sfa.util.version import version_core
-from sfa.rspecs.rspec_version import RSpecVersion
-from sfa.rspecs.sfa_rspec import sfa_rspec_version
-from sfa.rspecs.pg_rspec import pg_rspec_ad_version, pg_rspec_request_version
-from sfa.rspecs.rspec_parser import parse_rspec 
+from sfa.rspecs.version_manager import VersionManager
+from sfa.rspecs.rspec import RSpec
 from sfa.util.sfatime import utcparse
 from sfa.util.callids import Callids
 
 def GetVersion(api):
+
+    version_manager = VersionManager()
+    ad_rspec_versions = []
+    request_rspec_versions = []
+    for rspec_version in version_manager.versions:
+        if rspec_version.content_type in ['*', 'ad']:
+            ad_rspec_versions.append(rspec_version.to_dict())
+        if rspec_version.content_type in ['*', 'request']:
+            request_rspec_versions.append(rspec_version.to_dict()) 
+    default_rspec_version = version_manager.get_version("sfa 1").to_dict()
     xrn=Xrn(api.hrn)
-    request_rspec_versions = [dict(pg_rspec_request_version), dict(sfa_rspec_version)]
-    ad_rspec_versions = [dict(pg_rspec_ad_version), dict(sfa_rspec_version)]
     version_more = {'interface':'aggregate',
                     'testbed':'myplc',
                     'hrn':xrn.get_hrn(),
                     'request_rspec_versions': request_rspec_versions,
                     'ad_rspec_versions': ad_rspec_versions,
-                    'default_ad_rspec': dict(sfa_rspec_version)
+                    'default_ad_rspec': default_rspec_version
                     }
     return version_core(version_more)
 
@@ -178,8 +182,8 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
         slice_record = users[0].get('slice_record', {})
 
     # parse rspec
-    rspec = parse_rspec(rspec_string)
-    requested_attributes = rspec.get_slice_attributes()
+    rspec = RSpec(rspec_string)
+    requested_attributes = rspec.version.get_slice_attributes()
     
     # ensure site record exists
     site = slices.verify_site(hrn, slice_record, peer, sfa_peer)
@@ -191,7 +195,7 @@ def CreateSliver(api, slice_xrn, creds, rspec_string, users, call_id):
     slices.verify_slice_attributes(slice, requested_attributes)
     
     # add/remove slice from nodes
-    requested_slivers = [str(host) for host in rspec.get_nodes_with_slivers()]
+    requested_slivers = [str(host) for host in rspec.version.get_nodes_with_slivers()]
     slices.verify_slice_nodes(slice, requested_slivers, peer) 
 
     # hanlde MyPLC peer association.
@@ -292,19 +296,20 @@ def ListSlices(api, creds, call_id):
 
     return slice_urns
     
-def ListResources(api, creds, options,call_id):
+def ListResources(api, creds, options, call_id):
     if Callids().already_handled(call_id): return ""
     # get slice's hrn from options
-    xrn = options.get('geni_slice_urn', '')
+    xrn = options.get('geni_slice_urn', None)
     (hrn, type) = urn_to_hrn(xrn)
 
+    version_manager = VersionManager()
     # get the rspec's return format from options
-    rspec_version = RSpecVersion(options.get('rspec_version'))
-    version_string = "rspec_%s" % (rspec_version.get_version_name())
+    rspec_version = version_manager.get_version(options.get('rspec_version'))
+    version_string = "rspec_%s" % (rspec_version.to_string())
 
     #panos adding the info option to the caching key (can be improved)
     if options.get('info'):
-	version_string = version_string + "_"+options.get('info', 'default')
+        version_string = version_string + "_"+options.get('info', 'default')
 
     # look in cache first
     if caching and api.cache and not xrn:
@@ -317,7 +322,6 @@ def ListResources(api, creds, options,call_id):
     #panos: passing user-defined options
     #print "manager options = ",options
     aggregate = Aggregate(api, options)
-
     rspec =  aggregate.get_rspec(slice_xrn=xrn, version=rspec_version)
 
     # cache the result
