@@ -33,10 +33,10 @@ def GetVersion(api):
     ad_rspec_versions = []
     request_rspec_versions = []
     for rspec_version in version_manager.versions:
-        if rspec_version in ['*', 'ad']:
-            request_rspec_versions.append(rspec_version.to_dict())
-        if rspec_version in ['*', 'request']:
-            request_rspec_version.append(rspec_version.to_dict()) 
+        if rspec_version.content_type in ['*', 'ad']:
+            ad_rspec_versions.append(rspec_version.to_dict())
+        if rspec_version.content_type in ['*', 'request']:
+            request_rspec_versions.append(rspec_version.to_dict()) 
     default_rspec_version = version_manager.get_version("sfa 1").to_dict()
     xrn=Xrn(api.hrn)
     version_more = {'interface':'aggregate',
