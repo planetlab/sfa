@@ -86,7 +86,20 @@ class RSpec:
         return self.xpath(xpath)
 
     def merge(self, in_rspec):
-        pass
+        self.version.merge(in_rspec)
+
+    def filter(self, filter):
+        if 'component_manager_id' in filter:    
+            nodes = self.version.get_node_elements()
+            print filter
+            for node in nodes:
+                print node.attrib
+                
+                if 'component_manager_id' not in node.attrib or \
+                  node.attrib['component_manager_id'] != filter['component_manager_id']:
+                    parent = node.getparent()
+                    parent.remove(node) 
+        
 
     def toxml(self):
         return self.header + self.xml.toxml()
