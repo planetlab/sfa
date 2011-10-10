@@ -202,6 +202,7 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
                 rspec = RSpec(RSpecConverter.to_pg_rspec(rspec, 'request'))
                 filter = {'component_manager_id': server_version['urn']}
                 rspec.filter(filter)
+                rspec = rspec.toxml()
                 requested_users = sfa_to_pg_users_arg(users)
             args = [xrn, credential, rspec, requested_users]
             if _call_id_supported(api, server):
