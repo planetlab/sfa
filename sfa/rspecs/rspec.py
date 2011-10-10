@@ -91,18 +91,19 @@ class RSpec:
     def filter(self, filter):
         if 'component_manager_id' in filter:    
             nodes = self.version.get_node_elements()
-            print filter
             for node in nodes:
-                print node.attrib
-                
                 if 'component_manager_id' not in node.attrib or \
                   node.attrib['component_manager_id'] != filter['component_manager_id']:
                     parent = node.getparent()
                     parent.remove(node) 
         
 
-    def toxml(self):
-        return self.header + self.xml.toxml()
+    def toxml(self, header=True):
+        if header:
+            return self.header + self.xml.toxml()
+        else:
+            return self.xml.toxml()
+    
 
     def save(self, filename):
         return self.xml.save(filename)
