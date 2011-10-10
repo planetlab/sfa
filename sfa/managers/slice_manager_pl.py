@@ -16,6 +16,7 @@ from sfa.util.specdict import *
 from sfa.util.faults import *
 from sfa.util.record import SfaRecord
 from sfa.rspecs.rspec_converter import RSpecConverter
+from sfa.client.client_helper import sfa_to_pg_users_arg
 from sfa.rspecs.version_manager import VersionManager
 from sfa.rspecs.rspec import RSpec 
 from sfa.util.policy import Policy
@@ -199,9 +200,10 @@ def CreateSliver(api, xrn, creds, rspec_str, users, call_id):
                 # sfa aggregtes support both sfa and pg rspecs, no need to convert
                 # if aggregate supports sfa rspecs. otherwise convert to pg rspec
                 rspec = RSpec(RSpecConverter.to_pg_rspec(rspec, 'request'))
-                filter = {'component_manager_id': hrn_to_urn(xrn, 'authority+cm')}
+                filter = {'component_manager_id': server_version['urn']}
                 rspec.filter(filter)
-                requested_users = sfa_to_pg_users(users)
+                rspec = rspec.toxml()
+                requested_users = sfa_to_pg_users_arg(users)
             args = [xrn, credential, rspec, requested_users]
             if _call_id_supported(api, server):
                 args.append(call_id)
