@@ -169,25 +169,40 @@ class PGv2(BaseVersion):
                 parent.remove(node)
             else:
                 sliver_info = slivers_dict[hostname]
-                node.set('client_id', hostname)
-                if sliver_urn:
-                    slice_id = sliver_info.get('slice_id', -1)
-                    node_id = sliver_info.get('node_id', -1)
-                    sliver_id = urn_to_sliver_id(sliver_urn, slice_id, node_id)
-                    node.set('sliver_id', sliver_id)
+                sliver_type_elements = node.xpath('./sliver_type', namespaces=self.namespaces)
+                available_sliver_types = [element.attrib['name'] for element in sliver_type_elements]
+                valid_sliver_types = ['emulab-openvz', 'raw-pc']
+                requested_sliver_type = None
+                for valid_sliver_type in valid_sliver_types:
+                    if valid_sliver_type in available_sliver_type:
+                        requested_sliver_type = valid_sliver_type
 
-                # remove existing sliver_type tags,it needs to be recreated
-                sliver_elem = node.xpath('./default:sliver_type | ./sliver_type', namespaces=self.namespaces)
-                if sliver_elem and isinstance(sliver_elem, list):
-                    sliver_elem = sliver_elem[0]
-                    node.remove(sliver_elem)
+                if requested_sliver_type:
+                    # remove existing sliver_type tags,it needs to be recreated
+                    sliver_elem = node.xpath('./default:sliver_type | ./sliver_type', namespaces=self.namespaces)
+                    if sliver_elem and isinstance(sliver_elem, list):
+                        sliver_elem = sliver_elem[0]
+                        node.remove(sliver_elem)
+                    # set the client id
+                    node.set('client_id', hostname)
+                    if sliver_urn:
+                        # set the sliver id
+                        slice_id = sliver_info.get('slice_id', -1)
+                        node_id = sliver_info.get('node_id', -1)
+                        sliver_id = urn_to_sliver_id(sliver_urn, slice_id, node_id)
+                        node.set('sliver_id', sliver_id)
 
-                sliver_elem = etree.SubElement(node, 'sliver_type', name='plab-vnode')
-                for tag in sliver_info.get('tags', []):
-                    if tag['tagname'] == 'flack_info':
-                        e = etree.SubElement(sliver_elem, '{%s}info' % self.namespaces['flack'], attrib=eval(tag['value']))
-                    elif tag['tagname'] == 'initscript':
-                        e = etree.SubElement(sliver_elem, '{%s}initscript' % self.namespaces['planetlab'], attrib={'name': tag['value']})
+                    # add the sliver element
+                    sliver_elem = etree.SubElement(node, 'sliver_type', name=requested_sliver_type)
+                    for tag in sliver_info.get('tags', []):
+                        if tag['tagname'] == 'flack_info':
+                            e = etree.SubElement(sliver_elem, '{%s}info' % self.namespaces['flack'], attrib=eval(tag['value']))
+                        elif tag['tagname'] == 'initscript':
+                            e = etree.SubElement(sliver_elem, '{%s}initscript' % self.namespaces['planetlab'], attrib={'name': tag['value']})                
+                else:
+                    # node isn't usable. just remove it from the request     
+                    parent = node.getparent()
+                    parent.remove(node)
 
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
