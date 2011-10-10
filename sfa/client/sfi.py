@@ -16,7 +16,7 @@ from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
 from optparse import OptionParser
-
+from sfa.client.client_helper import pg_users_arg, sfa_users_arg, sfa_to_pg_users_arg 
 from sfa.util.sfalogging import sfi_logger
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
@@ -980,37 +980,17 @@ class Sfi:
         #    keys: [<ssh key A>, <ssh key B>] 
         #  }]
         users = []
-        all_keys = []
-        all_key_ids = []
         slice_records = self.registry.Resolve(slice_urn, [user_cred.save_to_string(save_parents=True)])
         if slice_records and 'researcher' in slice_records[0] and slice_records[0]['researcher']!=[]:
             slice_record = slice_records[0]
             user_hrns = slice_record['researcher']
             user_urns = [hrn_to_urn(hrn, 'user') for hrn in user_hrns]
             user_records = self.registry.Resolve(user_urns, [user_cred.save_to_string(save_parents=True)])
-            for user_record in user_records:
-                if user_record['type'] != 'user':
-                    continue
-                #user = {'urn': user_cred.get_gid_caller().get_urn(),'keys': []}
-                user = {'urn': user_cred.get_gid_caller().get_urn(), #
-                        'keys': user_record['keys'],
-                        'email': user_record['email'], #  needed for MyPLC
-                        'person_id': user_record['person_id'], # needed for MyPLC
-                        'first_name': user_record['first_name'], # needed for MyPLC
-                        'last_name': user_record['last_name'], # needed for MyPLC
-                        'slice_record': slice_record, # needed for legacy refresh peer
-                        'key_ids': user_record['key_ids'] # needed for legacy refresh peer
-                } 
-                users.append(user)
-                all_keys.extend(user_record['keys'])
-                all_key_ids.extend(user_record['key_ids'])
-            # ProtoGeni Aggregates will only install the keys of the user that is issuing the
-            # request. So we will add all to the current caller's list of keys
+            
             if 'sfa' not in server_version:
-                for user in users:
-                    if user['urn'] == user_cred.get_gid_caller().get_urn():
-                        user['keys'] = all_keys  
-
+                users = pg_users_arg(user_records)
+            else:
+                users = sfa_users_arg(user_records, slice_record)
         call_args = [slice_urn, creds, rspec, users]
         if self.server_supports_call_id_arg(server):
             call_args.append(unique_call_id())

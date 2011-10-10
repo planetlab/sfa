@@ -99,7 +99,7 @@ class Aggregate:
         # filter out nodes with a whitelist:
         valid_nodes = [] 
         for node in self.nodes.values():
-            # only doing this becuase protogeni rspec needs
+            # only doing this because protogeni rspec needs
             # to advertise available initscripts 
             node['pl_initscripts'] = self.pl_initscripts
 
