@@ -80,15 +80,6 @@ class SfaRSpecConverter:
                         location_attrs['longitude'] = location.get('longitude', 'None')
                         pg_rspec.xml.add_element('location', location_attrs, parent=node_element)
 
-                    sliver_element = sfa_node_element.find('sliver')
-                    if sliver_element != None:
-                        if content_type == 'request':  
-                            # remove all child elements
-                            for child in sfa_node_element.iterchildren():
-                                sfa_node_element.remove(child)
-                        # add the sliver    
-                        pg_rspec.xml.add_element('sliver_type', {'name': 'planetlab-vnode'}, parent=node_element)
-
         return pg_rspec.toxml()
 
 if __name__ == '__main__':
