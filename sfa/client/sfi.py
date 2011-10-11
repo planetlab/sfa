@@ -12,6 +12,7 @@ import random
 import datetime
 import zlib
 import codecs
+import pickle
 from lxml import etree
 from StringIO import StringIO
 from types import StringTypes, ListType
@@ -81,6 +82,17 @@ def filter_records(type, records):
 
 
 # save methods
+def save_variable_to_file(var, filename, format="text"):
+    f = open(filename, "w")
+    if format == "text":
+        f.write(str(var))
+    elif format == "pickled":
+        f.write(pickle.dumps(var))
+    else:
+        # this should never happen
+        print "unknown output format", format
+
+
 def save_rspec_to_file(rspec, filename):
     if not filename.endswith(".rspec"):
         filename = filename + ".rspec"
@@ -257,6 +269,13 @@ class Sfi:
            parser.add_option("-F", "--fileformat", dest="fileformat", type="choice",
                              help="output file format ([xml]|xmllist|hrnlist)", default="xml",
                              choices=("xml", "xmllist", "hrnlist"))
+
+        if command in ("status"):
+           parser.add_option("-o", "--output", dest="file",
+                            help="output dictionary to file", metavar="FILE", default=None)
+           parser.add_option("-F", "--fileformat", dest="fileformat", type="choice",
+                             help="output file format ([text]|pickled)", default="text",
+                             choices=("text","pickled"))
 
         if command in ("delegate"):
            parser.add_option("-u", "--user",
@@ -1141,7 +1160,10 @@ class Sfi:
         call_args = [slice_urn, creds]
         if self.server_supports_call_id_arg(server):
             call_args.append(unique_call_id())
-        print server.SliverStatus(*call_args)
+        result = server.SliverStatus(*call_args)
+        print result
+        if opts.file:
+            save_variable_to_file(result, opts.file, opts.fileformat)
 
 
     def shutdown(self, opts, args):
