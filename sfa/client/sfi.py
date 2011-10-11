@@ -537,7 +537,6 @@ class Sfi:
             hrn = self.user
  
         gidfile = os.path.join(self.options.sfi_dir, hrn + ".gid")
-        print gidfile
         gid = self.get_cached_gid(gidfile)
         if not gid:
             user_cred = self.get_user_cred()
@@ -989,9 +988,9 @@ class Sfi:
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         creds = [slice_cred]
-        if opts.delegate:
-            delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
-            creds.append(delegated_cred)
+        # always include a credential thats delegated to the callers root authority
+        delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
+        creds.append(delegated_cred)
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
 
