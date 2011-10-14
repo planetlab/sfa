@@ -70,7 +70,7 @@ def GetVersion(api):
         if rspec_version in ['*', 'request']:
             request_rspec_version.append(rspec_version.to_dict())
     default_rspec_version = version_manager.get_version("sfa 1").to_dict()
-    xrn=Xrn(api.hrn)
+    xrn=Xrn(api.hrn, 'authority+sa')
     version_more = {'interface':'slicemgr',
                     'hrn' : xrn.get_hrn(),
                     'urn' : xrn.get_urn(),
