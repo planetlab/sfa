@@ -318,7 +318,6 @@ def ListResources(api, creds, options, call_id):
             api.logger.info("aggregate.ListResources: returning cached value for hrn %s"%hrn)
             return rspec 
 
-    #aggregate = Aggregate(api)
     #panos: passing user-defined options
     #print "manager options = ",options
     aggregate = Aggregate(api, options)
