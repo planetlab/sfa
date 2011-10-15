@@ -219,11 +219,14 @@ class SFAv1(BaseVersion):
             if 'boot_state' in node:
                 node_tag.set('boot_state', node['boot_state'])
             if 'hostname' in node:
+                node_tag.set('component_name', node['hostname']) 
                 hostname_tag = etree.SubElement(node_tag, 'hostname').text = node['hostname']
             if 'interfaces' in node:
                 for interface in node['interfaces']:
                     if 'bwlimit' in interface and interface['bwlimit']:
                         bwlimit = etree.SubElement(node_tag, 'bw_limit', units='kbps').text = str(interface['bwlimit']/1000)
+            if 'bw_unallocated' in node:
+                bw_unallocated = etree.SubElement(node_tag, 'bw_unallocated', units='kbps').text = str(node['bw_unallocated']/1000) 
             if 'tags' in node:
                 for tag in node['tags']:
                    # expose this hard wired list of tags, plus the ones that are marked 'sfa' in their category
@@ -248,7 +251,16 @@ class SFAv1(BaseVersion):
         pass
 
     def add_links(self, links):
-        pass
+        for link in links:
+            network_tag = self.xml.root
+            if link.component_manager_id != None:
+                network_hrn, type = urn_to_hrn(link.component_manager_id)
+                network_tag = self.add_network(network) 
+
+            link_elem = etree.SubElement(network_tag, 'link')
+            link_elem.set('endpoints', '%s %s' % (link.endpoint1.name, link.endpoint2.name))
+            description = etree.SubElement(link_elem, 'description').text = link.description
+            bw_unallocated = etree.SubElement(link_elem, 'bw_unallocated', units='kbps').text = link.capacity  
 
     def add_slivers(self, slivers, network=None, sliver_urn=None, no_dupes=False):
         # add slice name to network tag
