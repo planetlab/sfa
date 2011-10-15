@@ -219,7 +219,26 @@ class PGv2(BaseVersion):
         pass
 
     def add_links(self, links, no_dupes=False):
-        pass
+        for link in links:
+            link_elem = etree.SubElement(self.xml.root, 'link' )
+            link_elem.set('component_name', link.component_name) 
+            link_elem.set('component_id', link.component_id)
+            cm_elem = etree.SubElement(link_elem, 'component_manager')
+            cm_elem.set('name', link.component_manager_name)
+            for endpoint in [link.endpoint1, link.enpoint2]:
+                interface_ref = etree.SubElement(link_elem, 'interface_ref', component_id=endpoint.id)
+                
+            property_attrs = {'capicity': link.capacity, 
+                              'latency': link.latency, 
+                              'packet_loss': link.packet_loss}    
+            property1 = etree.SubElement(link_elem, 'property', source_id=link.endpoint1.id, \
+              dest_id = link.endpoint2.id, capacity = link.capacity, latency=link.latency, \
+              packet_loss = link.packet_loss)
+            
+            property2 = etree.SubElement(link_elem, 'property', source_id=link.endpoint2.id, \
+              dest_id = link.endpoint1.id, capacity = link.capacity, latency=link.latency, \
+              packet_loss = link.packet_loss)
+            link_type = etree.SubElement(link_elem, 'link_type', name=link.type)
 
     def merge(self, in_rspec):
         """
