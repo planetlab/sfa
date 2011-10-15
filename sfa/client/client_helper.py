@@ -16,7 +16,7 @@ def sfa_users_arg(records, slice_record):
             continue
         user = {'urn': record['geni_urn'], #
                 'keys': record['keys'],
-                'email': record['email'], #  needed for MyPLC
+                'email': record['email'], # needed for MyPLC
                 'person_id': record['person_id'], # needed for MyPLC
                 'first_name': record['first_name'], # needed for MyPLC
                 'last_name': record['last_name'], # needed for MyPLC

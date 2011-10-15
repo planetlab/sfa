@@ -6,6 +6,7 @@ from sfa.util.plxrn import *
 #from sfa.rspecs.rspec_version import RSpecVersion
 from sfa.rspecs.rspec import RSpec
 from sfa.rspecs.version_manager import VersionManager
+from sfa.util.bw_limit import get_tc_rate
 
 class Aggregate:
 
@@ -32,6 +33,18 @@ class Aggregate:
     def prepare_nodes(self, force=False):
         if not self.nodes or force:
             for node in self.api.plshell.GetNodes(self.api.plauth, {'peer_id': None}):
+                # add site/interface info to nodes.
+                # assumes that sites, interfaces and tags have already been prepared.
+                site = self.sites[node['site_id']]
+                interfaces = [self.interfaces[interface_id] for interface_id in node['interface_ids']]
+                tags = [self.node_tags[tag_id] for tag_id in node['node_tag_ids']]
+                node['network'] = self.api.hrn
+                node['network_urn'] = hrn_to_urn(self.api.hrn, 'authority+am')
+                node['urn'] = hostname_to_urn(self.api.hrn, site['login_base'], node['hostname'])
+                node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority+sa')
+                node['site'] = site
+                node['interfaces'] = interfaces
+                node['tags'] = tags
                 self.nodes[node['node_id']] = node
 
     def prepare_interfaces(self, force=False):
@@ -56,25 +69,11 @@ class Aggregate:
     def prepare(self, force=False):
         if not self.prepared or force:
             self.prepare_sites(force)
-            self.prepare_nodes(force)
             self.prepare_interfaces(force)
-            self.prepare_links(force)
             self.prepare_node_tags(force)
+            self.prepare_nodes(force)
+            self.prepare_links(force)
             self.prepare_pl_initscripts()
-            # add site/interface info to nodes
-            for node_id in self.nodes:
-                node = self.nodes[node_id]
-                site = self.sites[node['site_id']]
-                interfaces = [self.interfaces[interface_id] for interface_id in node['interface_ids']]
-                tags = [self.node_tags[tag_id] for tag_id in node['node_tag_ids']]
-                node['network'] = self.api.hrn
-                node['network_urn'] = hrn_to_urn(self.api.hrn, 'authority+am')
-                node['urn'] = hostname_to_urn(self.api.hrn, site['login_base'], node['hostname'])
-                node['site_urn'] = hrn_to_urn(PlXrn.site_hrn(self.api.hrn, site['login_base']), 'authority+sa') 
-                node['site'] = site
-                node['interfaces'] = interfaces
-                node['tags'] = tags
-
         self.prepared = True  
 
     def get_rspec(self, slice_xrn=None, version = None):
@@ -125,7 +124,24 @@ class Aggregate:
                 # and belongs in the <sliver_defaults> tag
                 if not tag['node_id']:
                     rspec.version.add_default_sliver_attribute(tag['tagname'], tag['value'], self.api.hrn)
-
+                if tag['tagname'] == 'topo_rspec' and tag['node_id']:
+                    node = self.nodes[tag['node_id']]
+                    value = eval(tag['value'])
+                    for (id, realip, bw, lvip, rvip, vnet) in value:
+                        bps = get_tc_rate(bw)
+                        remote = self.nodes[id]
+                        site1 = self.sites[node['site_id']]
+                        site2 = self.sites[remote['site_id']]
+                        link1_name = '%s:%s' % (site1['login_base'], site2['login_base']) 
+                        link2_name = '%s:%s' % (site2['login_base'], site1['login_base']) 
+                        p_link = None
+                        if link1_name in self.links:
+                            link = self.links[link1_name] 
+                        elif link2_name in self.links:
+                            link = self.links[link2_name]
+                        v_link = Link()
+                        
+                        link.capacity = bps 
             for node_id in slice['node_ids']:
                 try:
                     sliver = {}

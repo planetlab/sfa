@@ -43,6 +43,7 @@ package_dirs = [
     'sfa/trust',
     'sfa/util', 
     'sfa/managers',
+    'sfa/managers/vini',
     'sfa/rspecs',
     'sfa/rspecs/elements',
     'sfa/rspecs/versions',
