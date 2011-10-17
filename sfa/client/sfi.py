@@ -6,18 +6,14 @@ import sys
 sys.path.append('.')
 import os, os.path
 import tempfile
-import traceback
 import socket
-import random
 import datetime
-import zlib
 import codecs
 import pickle
 from lxml import etree
 from StringIO import StringIO
-from types import StringTypes, ListType
 from optparse import OptionParser
-from sfa.client.client_helper import pg_users_arg, sfa_users_arg, sfa_to_pg_users_arg 
+from sfa.client.client_helper import pg_users_arg, sfa_users_arg
 from sfa.util.sfalogging import sfi_logger
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.gid import GID
@@ -26,7 +22,7 @@ from sfa.util.sfaticket import SfaTicket
 from sfa.util.record import SfaRecord, UserRecord, SliceRecord, NodeRecord, AuthorityRecord
 from sfa.rspecs.rspec import RSpec
 from sfa.rspecs.rspec_converter import RSpecConverter
-from sfa.util.xrn import Xrn, get_leaf, get_authority, hrn_to_urn
+from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
 from sfa.util.config import Config
 from sfa.util.version import version_core
@@ -116,7 +112,7 @@ def save_records_to_file(filename, recordList, format="xml"):
         for record in recordList:
             record = SfaRecord(dict=record)
             f.write('<record hrn="' + record.get_name() + '" type="' + record.get_type() + '" />\n')
-        f.write("</recordlist>\n");
+        f.write("</recordlist>\n")
         f.close()
     elif format == "hrnlist":
         f = open(filename, "w")
