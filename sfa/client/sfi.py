@@ -987,10 +987,10 @@ class Sfi:
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
         user_cred = self.get_user_cred()
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
-        creds = [slice_cred]
-        # always include a credential thats delegated to the callers root authority
+        # delegate the cred to the callers root authority
         delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority)+'.slicemanager')
-        creds.append(delegated_cred)
+        #delegated_cred = self.delegate_cred(slice_cred, get_authority(slice_hrn))
+        #creds.append(delegated_cred)
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
 
@@ -1012,8 +1012,10 @@ class Sfi:
                 rspec = RSpec(rspec)
                 rspec.filter({'component_manager_id': server_version['urn']})
                 rspec = RSpecConverter.to_pg_rspec(rspec.toxml(), content_type='request')
+                creds = [slice_cred]
             else:
                 users = sfa_users_arg(user_records, slice_record)
+                creds = [slice_cred, delegated_cred]
         call_args = [slice_urn, creds, rspec, users]
         if self.server_supports_call_id_arg(server):
             call_args.append(unique_call_id())
