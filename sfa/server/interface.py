@@ -16,6 +16,29 @@ except ImportError:
     GeniClientLight = None            
 
 
+
+class Interface:
+    
+    def __init__(self, hrn, addr, port, client_type='sfa'):
+        self.hrn = hrn
+        self.addr = addr
+        self.port = port
+        self.client_type = client_type
+  
+    def get_url(self):
+        address_parts = self.addr.split('/')
+        address_parts[0] = address_parts[0] + ":" + str(self.port)
+        url =  "http://%s" %  "/".join(address_parts)
+        return url
+
+    def get_server(self, key_file, cert_file, timeout=30):
+        server = None 
+        if  self.client_type ==  'geniclientlight' and GeniClientLight:
+            server = GeniClientLight(url, self.api.key_file, self.api.cert_file)
+        else:
+            server = xmlrpcprotocol.get_server(self.get_url(), key_file, cert_file, timeout) 
+ 
+        return server       
 ##
 # In is a dictionary of registry connections keyed on the registry
 # hrn
@@ -23,12 +46,7 @@ except ImportError:
 class Interfaces(dict):
     """
     Interfaces is a base class for managing information on the
-    peers we are federated with. It is responsible for the following:
-
-    1) Makes sure a record exist in the local registry for the each 
-       fedeated peer   
-    2) Attempts to fetch and install trusted gids   
-    3) Provides connections (xmlrpc or soap) to federated peers
+    peers we are federated with. Provides connections (xmlrpc or soap) to federated peers
     """
 
     # fields that must be specified in the config file
@@ -41,64 +59,24 @@ class Interfaces(dict):
     # defined by the class 
     default_dict = {}
 
-    types = ['authority']
-
-    def __init__(self, api, conf_file, type='authority'):
-        if type not in self.types:
-            raise SfaInfaildArgument('Invalid type %s: must be in %s' % (type, self.types))    
+    def __init__(self, conf_file):
         dict.__init__(self, {})
-        self.api = api
-        self.type = type  
         # load config file
         self.interface_info = XmlStorage(conf_file, self.default_dict)
         self.interface_info.load()
-        interfaces = self.interface_info.values()[0].values()[0]
-        if not isinstance(interfaces, list):
-            interfaces = [self.interfaces]
-        # set the url and urn 
-        for interface in interfaces:
+        records = self.interface_info.values()[0].values()[0]
+        if not isinstance(records, list):
+            records = [records]
+        
+        required_fields = self.default_fields.keys()
+        for record in records:
+            if not set(required_fields).issubset(record.keys()):
+                continue
             # port is appended onto the domain, before the path. Should look like:
             # http://domain:port/path
-            hrn, address, port = interface['hrn'], interface['addr'], interface['port']
-            address_parts = address.split('/')
-            address_parts[0] = address_parts[0] + ":" + str(port)
-            url =  "http://%s" %  "/".join(address_parts)
-            interface['url'] = url
-            interface['urn'] = hrn_to_urn(hrn, 'authority')
-    
-        self.interfaces = {}
-        required_fields = self.default_fields.keys()
-        for interface in interfaces:
-            valid = True
-            # skp any interface definition that has a null hrn, 
-            # address or port
-            for field in required_fields:
-                if field not in interface or not interface[field]:
-                    valid = False
-                    break
-            if valid:     
-                self.interfaces[interface['hrn']] = interface
+            hrn, address, port = record['hrn'], record['addr'], record['port']
+            interface = Interface(hrn, address, port) 
+            self[hrn] = interface
 
-
-    def get_connections(self):
-        """
-        read connection details for the trusted peer registries from file return 
-        a dictionary of connections keyed on interface hrn. 
-        """
-        connections = {}
-        required_fields = self.default_fields.keys()
-        for interface in self.interfaces.values():
-            url = interface['url']
-#            sfa_logger().debug("Interfaces.get_connections - looping on neighbour %s"%url)
-            # check which client we should use
-            # sfa.util.xmlrpcprotocol is default
-            client_type = 'xmlrpcprotocol'
-            if interface.has_key('client') and \
-               interface['client'] in ['geniclientlight'] and \
-               GeniClientLight:
-                client_type = 'geniclientlight'
-                connections[hrn] = GeniClientLight(url, self.api.key_file, self.api.cert_file) 
-            else:
-                connections[interface['hrn']] = xmlrpcprotocol.get_server(url, self.api.key_file, self.api.cert_file, timeout=30)
-
-        return connections 
+    def get_server(self, hrn, key_file, cert_file, timeout=30):
+        return self[hrn].get_server(key_file, cert_file, timeout)
