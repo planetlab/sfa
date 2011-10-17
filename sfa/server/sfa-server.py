@@ -173,12 +173,12 @@ def install_peer_certs(server_key_file, server_cert_file):
     # peer registry found in in the registries.xml config file. If there
     # are any missing gids, request a new one from the peer registry.
     api = SfaAPI(key_file = server_key_file, cert_file = server_cert_file)
-    registries = Registries(api)
-    aggregates = Aggregates(api)
-    interfaces = dict(registries.interfaces.items() + aggregates.interfaces.items())
+    registries = Registries()
+    aggregates = Aggregates()
+    interfaces = dict(registries.items() + aggregates.items())
     gids_current = api.auth.trusted_cert_list
     hrns_current = [gid.get_hrn() for gid in gids_current]
-    hrns_expected = interfaces.keys()
+    hrns_expected = set([hrn for hrn in interfaces])
     new_hrns = set(hrns_expected).difference(hrns_current)
     #gids = self.get_peer_gids(new_hrns) + gids_current
     peer_gids = []
@@ -192,8 +192,8 @@ def install_peer_certs(server_key_file, server_cert_file):
         if new_hrn == api.config.SFA_INTERFACE_HRN: continue
         try:
             # get gid from the registry
-            url = interfaces[new_hrn]['url']
-            interface = xmlrpcprotocol.get_server(url, server_key_file, server_cert_file, timeout=30)
+            url = interfaces[new_hrn].get_url()
+            interface = interfaces[new_hrn].get_server(server_key_file, server_cert_file, timeout=30)
             # skip non sfa aggregates
             server_version = api.get_cached_server_version(interface)
             if 'sfa' not in server_version:
