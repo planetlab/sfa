@@ -8,7 +8,6 @@ import traceback
 import string
 import xmlrpclib
 import sfa.util.xmlrpcprotocol as xmlrpcprotocol
-
 from sfa.util.sfalogging import logger
 from sfa.trust.auth import Auth
 from sfa.util.config import *
@@ -149,11 +148,11 @@ class BaseAPI:
  
         # load registries
         from sfa.server.registry import Registries
-        self.registries = Registries(self) 
+        self.registries = Registries() 
 
         # load aggregates
         from sfa.server.aggregate import Aggregates
-        self.aggregates = Aggregates(self)
+        self.aggregates = Aggregates()
 
 
     def get_interface_manager(self, manager_base = 'sfa.managers'):
