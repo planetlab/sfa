@@ -89,6 +89,9 @@ def main():
     if not root_auth == interface_hrn:
         sfaImporter.create_top_level_auth_records(interface_hrn)
 
+    # create s user record for the slice manager
+    sfaImporter.create_sm_client_record()
+
     # create interface records
     sfaImporter.logger.info("Import: creating interface records")
     sfaImporter.create_interface_records()
@@ -207,14 +210,17 @@ def main():
                (hrn, 'user') not in existing_records or update_record:
                 sfaImporter.import_person(site_hrn, person)
 
+    
     # remove stale records    
+    system_records = [interface_hrn, root_auth, interface_hrn + '.slicemanager']
     for (record_hrn, type) in existing_records.keys():
-        record = existing_records[(record_hrn, type)]
-        # if this is the interface name dont do anything
-        if record_hrn == interface_hrn or \
-           record_hrn == root_auth or \
-           record['peer_authority']:
+        if record_hrn in system_records:
             continue
+        
+        record = existing_records[(record_hrn, type)]
+        if record['peer_authority']:
+            continue
+
         # dont delete vini's internet2 placeholdder record
         # normally this would be deleted becuase it does not have a plc record 
         if ".vini" in interface_hrn and interface_hrn.endswith('vini') and \
