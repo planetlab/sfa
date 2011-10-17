@@ -303,7 +303,7 @@ class Auth:
     def get_authority(self, hrn):
         return get_authority(hrn)
 
-    def filter_creds_by_caller(self, creds, caller_hrn):
+    def filter_creds_by_caller(self, creds, caller_hrn_list):
         """
         Returns a list of creds who's gid caller matches the 
         specified caller hrn
@@ -311,10 +311,12 @@ class Auth:
         if not isinstance(creds, list):
             creds = [creds]
         creds = []
+        if not isinistance(caller_hrn_list, list):
+            caller_hrn_list = [caller_hrn_list]
         for cred in creds:
             try:
                 tmp_cred = Credential(string=cred)
-                if tmp_cred.get_gid_caller().get_hrn() == caller_hrn:
+                if tmp_cred.get_gid_caller().get_hrn() in [caller_hrn_list]:
                     creds.append(cred)
             except: pass
         return creds
