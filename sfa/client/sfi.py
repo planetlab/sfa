@@ -989,7 +989,7 @@ class Sfi:
         slice_cred = self.get_slice_cred(slice_hrn).save_to_string(save_parents=True)
         creds = [slice_cred]
         # always include a credential thats delegated to the callers root authority
-        delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority))
+        delegated_cred = self.delegate_cred(slice_cred, get_authority(self.authority)+'.slicemanager')
         creds.append(delegated_cred)
         rspec_file = self.get_rspec_file(args[1])
         rspec = open(rspec_file).read()
@@ -1017,7 +1017,7 @@ class Sfi:
         call_args = [slice_urn, creds, rspec, users]
         if self.server_supports_call_id_arg(server):
             call_args.append(unique_call_id())
-            
+           
         result = server.CreateSliver(*call_args)
         if opts.file is None:
             print result
